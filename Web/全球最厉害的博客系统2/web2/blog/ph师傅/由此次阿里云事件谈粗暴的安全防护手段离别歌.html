@@ -1,0 +1,378 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="/static/cactus/images/favicon.ico" rel="shortcut icon"/>
+<link href="/static/cactus/images/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>由此次阿里云事件谈粗暴的安全防护手段 | 离别歌</title>
+<link href="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/styles.css" rel="stylesheet"/>
+<link href="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/style.css" rel="stylesheet"/>
+<link href="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/jquery.min.js"></script>
+<link href="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/code.css" rel="stylesheet"/>
+<link href="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/button.css" rel="stylesheet"/>
+<link href="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/talking-about-violence-security-defense.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/talking-about-violence-security-defense.html&amp;text=%E7%94%B1%E6%AD%A4%E6%AC%A1%E9%98%BF%E9%87%8C%E4%BA%91%E4%BA%8B%E4%BB%B6%E8%B0%88%E7%B2%97%E6%9A%B4%E7%9A%84%E5%AE%89%E5%85%A8%E9%98%B2%E6%8A%A4%E6%89%8B%E6%AE%B5"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/talking-about-violence-security-defense.html&amp;title=%E7%94%B1%E6%AD%A4%E6%AC%A1%E9%98%BF%E9%87%8C%E4%BA%91%E4%BA%8B%E4%BB%B6%E8%B0%88%E7%B2%97%E6%9A%B4%E7%9A%84%E5%AE%89%E5%85%A8%E9%98%B2%E6%8A%A4%E6%89%8B%E6%AE%B5"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/talking-about-violence-security-defense.html&amp;is_video=false&amp;description=%E7%94%B1%E6%AD%A4%E6%AC%A1%E9%98%BF%E9%87%8C%E4%BA%91%E4%BA%8B%E4%BB%B6%E8%B0%88%E7%B2%97%E6%9A%B4%E7%9A%84%E5%AE%89%E5%85%A8%E9%98%B2%E6%8A%A4%E6%89%8B%E6%AE%B5"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E7%94%B1%E6%AD%A4%E6%AC%A1%E9%98%BF%E9%87%8C%E4%BA%91%E4%BA%8B%E4%BB%B6%E8%B0%88%E7%B2%97%E6%9A%B4%E7%9A%84%E5%AE%89%E5%85%A8%E9%98%B2%E6%8A%A4%E6%89%8B%E6%AE%B5&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/talking-about-violence-security-defense.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/talking-about-violence-security-defense.html&amp;title=%E7%94%B1%E6%AD%A4%E6%AC%A1%E9%98%BF%E9%87%8C%E4%BA%91%E4%BA%8B%E4%BB%B6%E8%B0%88%E7%B2%97%E6%9A%B4%E7%9A%84%E5%AE%89%E5%85%A8%E9%98%B2%E6%8A%A4%E6%89%8B%E6%AE%B5"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/talking-about-violence-security-defense.html&amp;title=%E7%94%B1%E6%AD%A4%E6%AC%A1%E9%98%BF%E9%87%8C%E4%BA%91%E4%BA%8B%E4%BB%B6%E8%B0%88%E7%B2%97%E6%9A%B4%E7%9A%84%E5%AE%89%E5%85%A8%E9%98%B2%E6%8A%A4%E6%89%8B%E6%AE%B5"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/talking-about-violence-security-defense.html&amp;title=%E7%94%B1%E6%AD%A4%E6%AC%A1%E9%98%BF%E9%87%8C%E4%BA%91%E4%BA%8B%E4%BB%B6%E8%B0%88%E7%B2%97%E6%9A%B4%E7%9A%84%E5%AE%89%E5%85%A8%E9%98%B2%E6%8A%A4%E6%89%8B%E6%AE%B5"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/talking-about-violence-security-defense.html&amp;title=%E7%94%B1%E6%AD%A4%E6%AC%A1%E9%98%BF%E9%87%8C%E4%BA%91%E4%BA%8B%E4%BB%B6%E8%B0%88%E7%B2%97%E6%9A%B4%E7%9A%84%E5%AE%89%E5%85%A8%E9%98%B2%E6%8A%A4%E6%89%8B%E6%AE%B5"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/talking-about-violence-security-defense.html&amp;name=%E7%94%B1%E6%AD%A4%E6%AC%A1%E9%98%BF%E9%87%8C%E4%BA%91%E4%BA%8B%E4%BB%B6%E8%B0%88%E7%B2%97%E6%9A%B4%E7%9A%84%E5%AE%89%E5%85%A8%E9%98%B2%E6%8A%A4%E6%89%8B%E6%AE%B5&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">由此次阿里云事件谈粗暴的安全防护手段</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年9月2日 01:17" itemprop="datePublished">
+                    2015 九月 02 01:17
+                </time>
+</div>
+<div class="article-tag">
+            阅读：6878
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/WAF">WAF</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>昨天阿里连续爆出了两个有意思的事件，一是阿里云服务器出现故障，导致误删除了大量用户文件（<a href="http://www.weibo.com/1747505067/CyvEkrxPS"><a href="http://www.weibo.com/1747505067/CyvEkrxPS">http://www.weibo.com/1747505067/CyvEkrxPS</a></a>）；二是阿里承认明年校招名额将会缩减，可能导致很多已经拿到意向书的同学拿不到offer。</p>
+<p>我不针对任何公司的对错发表评论，单论技术上的问题。</p>
+<p>阿里云故障的原因，在各方说明下我也大概了解了，是云盾升级，将用户合法的可执行文件给当做恶意文件，直接给删掉了。</p>
+<p>po主的语气和遭遇，听起来感觉挺逗的：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201509/18171441129022.png"><img alt="_阿里云_这是啥玩意啊。。。我登上服务器用____来自joyqi_-_微博.png" src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/thum-18171441129022.png"/></a></p>
+<p>这段话我看着笑了一下午，我斗胆猜一下云盾是怎么工作的：</p>
+<p>为了防止服务器被入侵，并执行恶意软件（如提权程序），拥有root权限的AliyunDun英勇地负责干掉这些可恶的恶意程序。不知道为什么，最后眼瞎把正常程序也杀掉了。不，是删掉了……</p>
+<p>直接删掉了啊尼玛！</p>
+<p>这让我想起了很久以前刚入道时候我检测过一个网站，传上去的webshell总是莫名其妙地404了。当时感觉就是被安全软件做了手脚，后来进去一看果然，我传上去的不免杀的webshell.asp全被重命名成了webshell.asp.20xx-xx-xx_xxxxxx.hws</p>
+<p>当时感觉，这样的防御手段真是很黄很暴力啊。</p>
+<p>因为当时的asp网站拿shell，无非是几个常见方法：一是数据库插马，二是配置文件插马，三是上传漏洞利用各种解析漏洞等。前两种方法，都是将一句话插入到其他正常文件里。这时候如果正常文件也被直接改名了，将导致整个网站都运行不了了（配置文件和数据库文件都是网站运行必不可少的文件呀）。</p>
+<p>还好当时检测的时候是找的上传漏洞，否则网站搞挂了就悲剧了。</p>
+<p>后来知道这个防御软件叫护卫神，好一个护卫神，真是好呵护呀。现在谷歌“护卫神 重命名”，还能找到一堆恢复误杀文件的软件：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201509/d2e71441130321.png"><img alt="护卫神_重命名_-_Google_搜索.png" src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/thum-d2e71441130321.png"/></a></p>
+<p>当然，护卫神比起这次的阿里云盾事件来说，还是小巫见大巫了。怎么说它也没把正常文件当木马删掉，只是重命名了，还有无限恢复的可能。</p>
+<p>说起粗暴，我还能想到的是很多开源应用。他们对于安全漏洞的惧怕与修复手段，如果不做代码审计或二次开发，大多数开发者你们可能根本不会想到。我见过无数应用，防御SQL注入的手段如此粗暴：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201509/bdfa1441160015.png"><img alt="Windows_7.png" src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/thum-bdfa1441160015.png"/></a></p>
+<p>上图某个版本的cmseasy源码。光看图可能体会不深，看到具体代码：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201509/27af1441160904.png"><img alt="Windows_7 3.png" src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/thum-27af1441160904.png"/></a></p>
+<p>居然在codition这种函数里直接用这么粗暴的手段处理SQL注入，任意SQL语句的key和value都不能出现select、if、sleep、from这种英语中常见的单词，那这个系统还怎么正常使用？</p>
+<p>这就是国内很多开发者对待安全漏洞的态度：惧怕、痛恨、无能。他们用最原始最粗暴的手段去处理安全问题，根本原因是他们对安全问题处理方法一无所知，不知道怎样正确地处理漏洞。</p>
+<p>这样的开发者我觉得还是趁早辞退了的好。</p>
+<p>所以，这里就不得不说到，粗暴的安全防护手段造成的问题。注重安全固然是一个优点，但我们怎样去科学地注重安全？</p>
+<p>这里涉及到几个问题：</p>
+<ol>
+<li>以安全为目的的监控是否合法？ </li>
+<li>安全权限大，还是业务权限大？</li>
+<li>发现安全问题，是告警还是自动处理？</li>
+<li>如何科学地，而非利用原始手段去解决问题？</li>
+</ol>
+<h2 id="_1"><a class="toclink" href="#_1">第一个问题，以安全为目的的监控是否合法？</a></h2>
+<p>我看到v2ex上很多朋友诟病阿里云盾的原因是，作为一个IaaS，云盾却一直驻于内存监控与干预系统。那么，云盾这个进程究竟在用户的ECS上做了些什么？</p>
+<p>据各种不靠谱小道消息，我了解到云盾在用户的机器上权限是很大的，几乎可以做任何事情，包括监视用户的文件系统、SQL语句、进程等，我不以最坏的恶意揣测任何人，单只认为云盾监视这些东西的原因是防止恶意程序。但这样的监视已经让很多用户不安了。</p>
+<p>就像美国棱镜门，NSA一直强调自己监视民众是出自反恐等目的，但并不是说有人都逆来顺受，你的监控已经触犯到人们的隐私了。</p>
+<p>那么，阿里云是否可以提供给用户取消云盾的选项？用户选择取消云盾后是否真的再也没有类似进程监控系统了？看下图：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201509/9ac11441158623.png"><img alt="我的首页_微博-随时随地发现新鲜事.png" src="https://www.leavesongs.com/content/uploadfile/201509/thum-9ac11441158623.png"/></a></p>
+<p>从售后工程师处了解到，你希望的都是不可能的，呵呵~</p>
+<h2 id="_2"><a class="toclink" href="#_2">第二个问题，安全权限大，还是业务权限大？</a></h2>
+<p>首先，权力不管在现实世界中，还是网络世界中，都是一个很可怕的东西。一旦高权限被用在不当的地方，带来将是灾难。</p>
+<p>这次的事件实际上是一个错误，并不是权限被“滥用”了。但实际造成的结果是灾难性的。犯错误不可怕，可怕的是在我犯错误的同时居然刚好有高的权限，结果造成不可挽回的损失。</p>
+<p>相信很多同学曾经都有做过rm -rf /这类的傻事，多半是笔误手癌造成的。笔误通常是无法避免的，但试想，如果你当时并不是root用户，那么很多麻烦其实都不会发生。</p>
+<p>这次云盾事件也一样，如果云盾没有删除用户文件的权限，也就不会发生这种悲剧。</p>
+<p>所以，在做不到万无一失的情况下，就不要给自己高权限。高处不胜寒，古人的话还是很有道理。</p>
+<p>那么，安全软件究竟要不要给予其高权限？</p>
+<p>我个人比较喜欢的做法是，给予WAF进程www权限（附着于web容器中），让它作为一个语言扩展或者服务中间件扩展的形式进行流量监测与过滤。</p>
+<p>当然你会说这样的方式监测效果不佳，或者说云盾担任的角色并不是WAF，而是类似windows操作系统中“杀毒软件”的角色，所以一定要拥有像windows中“ring0”的权限才行。</p>
+<p>既然你选择了linux，那就得接受linux严格的权限划分，接受它作为“服务器”的角色而不是PC机。windows下的杀毒软件在PC机上胡作非为，虽也是人人喊打，但影响再大也只是个人的。但服务器上如果也放任杀毒软件胡作非为，那将影响到整个生产环境的健壮性，服务的稳定，甚至整个企业的业务。</p>
+<p>所以我认为生产环境下，不应给安全软件过高的权限，保证业务才是王道。</p>
+<h2 id="_3"><a class="toclink" href="#_3">第三个问题，发现安全问题，是告警还是自动处理？</a></h2>
+<p>我曾经在某网内见过一个简单粗暴的安全检测脚本：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201509/003f1441161960.png"><img alt="check_php_sh.png" src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/thum-003f1441161960.png"/></a></p>
+<p>也是直接拿下关键词就报警。但这个脚本只是将具体文件、关键信息用mutt命令发送邮件到技术人员手中。</p>
+<p>这就体现出一个“告警”的概念。技术人员即使自己对自己的服务十分熟悉，也不敢直接用自动化手段处理安全问题，而是选择将问题“告诉”自己。我觉得这虽然加大了人的工作量，但在你的技术还没达到100%识别恶意脚本的情况下，人工识别仍然是最有效的办法。</p>
+<p>阿里在国内我觉得是安全最好的企业之一，但就这次的事件来看，完全不能满足自动化解决安全问题的条件。云盾在不了解用户业务的情况下，更不应该自动化处理用户的文件和数据。</p>
+<p>所以，相比于发现问题直接杀掉，还是告警用户，让用户自己处理更好。</p>
+<p>这一点上，国外的IDC厂商做的就更好，比如linode：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201509/12e11441163800.png"><img alt="阿里云升级云盾__误删用户数据，我也是醉了_-_V2EX.png" src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/thum-12e11441163800.png"/></a></p>
+<h2 id="_4"><a class="toclink" href="#_4">第四个问题，如何科学地，而非利用原始手段去解决问题？</a></h2>
+<p>这也是最难的一个问题了。包括我自己，还经常使用原始手段解决问题，我举个例子。</p>
+<p>运行wiki.leavesongs.com的wsgi服务器是gunicorn，我早期自己写了一个原始的脚本来进行重启操作：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201509/b8b31441164342.png"><img alt="1__ssh_root_vps-conoha_-p_3722__ssh_.png" src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/thum-b8b31441164342.png"/></a></p>
+<p>一个多么简单明了的脚本。</p>
+<p>结果后期出了各种错误：一出错就导致服务挂掉，还经常要运行两次才能重启服务。</p>
+<p>所以系统服务通常是不会用这类原始方法去控制的，老的linux上是sysvinit，debian8将服务管理方式从较简单的sysvinit替换到成systemd，更加体现出“科学”这个概念。</p>
+<p>新的事物总有诞生的道理，所以我也不能去抗拒它，只有科学的工作方法才能提升生产力。</p>
+<p>但科学的事物也有不可避免的问题，学习成本大，对人的要求很高。有些人对所谓的“学术派”嗤之以鼻，殊不知实际上是一种吃不到葡萄说葡萄酸的心理，说这些话的人大多是“野路子”。</p>
+<p>我也是半个野路子，所以干很多事情还是用最简单的方法，当我真正在课堂上认真学习过“软件工程”、“编译原理”之类的课程以后，再用课上学过的思想去思考你做过的很多项目，发现我的很多做法有多幼稚。</p>
+<p>现在互联网行业对人才的需求，处在一种很微妙的状态。各大企业都缺乏人才，做这块的人也很多，但实际上称得上“人才”的人不多。</p>
+<p>我觉得人才的最低标准，也得是能够用科学的方法去处理问题。而不是你会写几个app，会写个网站，套用几个第三方库开发一个软件，就是人才了。（但实际上很多互联网公司招到的人多半是这一类）</p>
+<p>这一点上我很惭愧，自己也够不到最低标准。</p>
+<p>左耳朵耗子曾经在微博上分享过一个趣事：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201509/c7591441129024.png"><img alt="左耳朵耗子的微博_微博.png" src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/thum-c7591441129024.png"/></a></p>
+<p>也是一个粗暴的安全软件造成的问题。我猜这个脚本原始到只用一行代码即可写好，一个crontab，一个ps，一个gerp。</p>
+<p>这样的脚本是否符合软件工程的设计理念，我不敢妄言。但就这样欠考虑的处理方式，我就觉得迟早会出大事。</p>
+<p>一个公司使用的原始手段越少，说明这个公司的技术水平越高。“懒人创造奇迹”的懒人不是懒得学习知识的人，而是对繁杂的现状不满而选择去改变的人，如果我们连现状是怎样，原理都没了解清楚，总想用最简单的方法解决问题，那只能背下出事后的锅了。</p>
+<p>安全越来越受到重视的同时，要科学地去面对安全，我想这个事情也是任重而道远的。阿里这种安全很强的公司都会出现这样的BUG，更别说很多企业可能安全团队是从零一下子出现的，人才、技术的良莠不齐也是正常现象，所以才会出现各式各样粗暴的安全防护手段。</p>
+<p>另外，也希望的是领导者都能清晰地明白怎样真正注重安全，不逼员工去做一些“看似使业务安全”的工作，这也是减少很多荒唐安全措施的方法。</p>
+<p>这些愿景，希望都能实现。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2474">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/695da01c05863de752ace144e99ef1de.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">G</a>
+<time datetime="2016年11月10日 11:07" itemprop="datePublished">
+                            2016 十一月 10 11:07
+                        </time>
+<a href="javascript:reply_to('2474', 'G')">回复</a>
+</p>
+<p class="comment-meta">想当年我是做了个sh脚本然后放到cron里，每分钟执行一次。脚本信息如下<br><br>#!/bin/sh<br/>killall AliYunDun<br/>killall AliYunDunUpdate<br/><br/>然后cron每分钟执行就一直会把云盾的进程干掉了 哈哈哈 简单又粗暴</br></br></p>
+</div>
+</div>
+<div class="row" id="comment-2232">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/596d96c866a847a44edb8e4a2529e4d0.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">wonderkun</a>
+<time datetime="2015年10月6日 18:54" itemprop="datePublished">
+                            2015 十月 06 18:54
+                        </time>
+<a href="javascript:reply_to('2232', 'wonderkun')">回复</a>
+</p>
+<p class="comment-meta">觉得phithon分析的还是很透彻的，前面说的又黄又暴力的防御手段，只能说明中国安全的无能</p>
+</div>
+</div>
+<div class="row" id="comment-2212">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/67c0356097c6194ea37bb16439a559f5.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.hackhp.com" target="_blank">hackhp</a>
+<time datetime="2015年9月8日 21:03" itemprop="datePublished">
+                            2015 九月 08 21:03
+                        </time>
+<a href="javascript:reply_to('2212', 'hackhp')">回复</a>
+</p>
+<p class="comment-meta">云盾，以安全的名义，监视着一切！</p>
+</div>
+</div>
+<div class="row" id="comment-2211">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">134</a>
+<time datetime="2015年9月7日 12:50" itemprop="datePublished">
+                            2015 九月 07 12:50
+                        </time>
+<a href="javascript:reply_to('2211', '134')">回复</a>
+</p>
+<p class="comment-meta">123哇哈哈</p>
+</div>
+</div>
+<div class="row" id="comment-2208">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/9d2a7aaa29104928d2cbc2a3b05f7fcb.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.gehaowu.com/" target="_blank">Haowu Ge</a>
+<time datetime="2015年9月4日 20:39" itemprop="datePublished">
+                            2015 九月 04 20:39
+                        </time>
+<a href="javascript:reply_to('2208', 'Haowu Ge')">回复</a>
+</p>
+<p class="comment-meta">细思恐极</p>
+</div>
+</div>
+<div class="row" id="comment-2207">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">楼主</a>
+<time datetime="2015年9月4日 09:39" itemprop="datePublished">
+                            2015 九月 04 09:39
+                        </time>
+<a href="javascript:reply_to('2207', '楼主')">回复</a>
+</p>
+<p class="comment-meta">楼主 那个查找select的软件是啥。可否分享 win7下的搜索不太好用</p>
+</div>
+</div>
+<div class="row" id="comment-2206">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/afb23d5e60f810f0ebf80bfbc8a489a2.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://shanyou.cnblogs.com" target="_blank">shanyou</a>
+<time datetime="2015年9月3日 15:47" itemprop="datePublished">
+                            2015 九月 03 15:47
+                        </time>
+<a href="javascript:reply_to('2206', 'shanyou')">回复</a>
+</p>
+<p class="comment-meta">转载到微信公众号opendotnet</p>
+</div>
+</div>
+<div class="row" id="comment-2203">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Jamesits</a>
+<time datetime="2015年9月2日 23:46" itemprop="datePublished">
+                            2015 九月 02 23:46
+                        </time>
+<a href="javascript:reply_to('2203', 'Jamesits')">回复</a>
+</p>
+<p class="comment-meta">文末的“ gerp”应为“grep”</p>
+</div>
+</div>
+<div class="row" id="comment-2202">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/d832f116cafcd2608947371702255c2f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://kfd.me" target="_blank">mr</a>
+<time datetime="2015年9月2日 21:10" itemprop="datePublished">
+                            2015 九月 02 21:10
+                        </time>
+<a href="javascript:reply_to('2202', 'mr')">回复</a>
+</p>
+<p class="comment-meta">安全是一个盾，但他们，却把它做成了枪。</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="cbbaf23e822d99871126f269b316b14f925f17d5"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="/captcha/image/cbbaf23e822d99871126f269b316b14f925f17d5/"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="367">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="AWf2KaPjx0uq8G3TrPfGKnw05yVwgWrh8gAyyE1yYNoP8lr8f6Jqj1y5eCoEZqgr"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./由此次阿里云事件谈粗暴的安全防护手段  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

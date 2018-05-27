@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<title>SQLMAP|阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog</title>
+<script src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/jquery.jsver=1.12.4" type="text/javascript"></script>
+<script src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/jquery-migrate.min.jsver=1.4.1" type="text/javascript"></script>
+<link href="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/rest_route=" rel="https://api.w.org/"/>
+<link href="http://www.wupco.cn/xmlrpc.php?rsd" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<link href="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/p=1451" rel="prev" title="ZCTF2017打到心态爆炸后的反思"/>
+<link href="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/p=2169" rel="next" title="NJCTF2017-Web"/>
+<link href="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/p=2087" rel="canonical"/>
+<link href="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/p=2087" rel="shortlink"/>
+<script src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/shCore.js" type="text/javascript"></script><link href=" http://www.wupco.cn/wp-content/plugins/wp-ueditor2/ueditor/third-party/SyntaxHighlighter/shCoreDefault.css" rel="stylesheet" type="text/css"/><link href="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="icon" sizes="32x32"/>
+<link href="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="icon" sizes="192x192"/>
+<link href="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="apple-touch-icon-precomposed"/>
+<meta content="http://www.wupco.cn/wp-content/uploads/2016/11/R5K8RH7ACHA7KEV8P.gif" name="msapplication-TileImage">
+<link href="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/favicon.png" rel="shortcut icon" type="image/vnd.microsoft.icon"/>
+<link href="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/style.css" rel="stylesheet" type="text/css">
+<!--[if lt IE 9]>
+<script src="//cdn.bootcss.com/html5shiv/r29/html5.min.js"></script>
+<script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+</link></meta></head>
+<body>
+<div class="container" id="main">
+<div class="pjax">
+<header id="header">
+<div class="container">
+<h1 class="logo">
+<i class="iconfont"></i><a href="http://www.wupco.cn">Wupco's Blog</a>
+</h1>
+<nav class="menu_click" id="topMenu">
+<div class="menu-menu-1-container"><ul class="menu" id="menu-menu-1"><li><a href="http://www.wupco.cn/">首页</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1174">关于我</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1448">数据备份</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1959">CTF备忘录</a></li>
+</ul></div><i class="i_1"></i>
+<i class="i_2"></i>
+</nav>
+</div>
+</header>
+<section class="blockGroup">
+<h2 class="s_title" itemprop="name headline">SQLMAP|阅读手记四{conf.dbmsHandler，conf.dumper}</h2>
+<article class="post single" itemscope="" itemtype="http://schema.org/BlogPosting">
+<blockquote><p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>sqlmap可以说是目前使用人数最多，功能最复杂的注入工具。作为一款开源工具，开发者有意的让我们自行去阅读并扩充，作为一个Web狗，阅读sqlmap源码也是有必要的，更何况从软件工程的角度，sqlmap的源码部署也是很值得学习的。</span></p>
+</blockquote>
+<h1><span style='font-family: 微软雅黑, "Microsoft YaHei";'>conf.dbmsHandle</span></h1>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>      conf.dbmsHandle作为集成所有可能的对数据库的操作的类，集成了很多个用于操作的函数，我们在第三篇里看到了整个直连数据库选项的流程，在最后一步的action()，就调用了这个类里面各个函数来执行不同的功能，现在我们就看看这个类里面函数的详情吧。</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>     首先先dir一下，看一下都有哪些函数。</span></p>
+<h1><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/25181492484611.png"/></h1>
+<p>  然后，help(conf.dbmsHandle)，跟踪一下这些函数的位置。</p>
+<pre class="brush:python;toolbar:false">Help on instance of MySQLMap in module plugins.dbms.mysql:
+
+class MySQLMap(plugins.dbms.mysql.syntax.Syntax, plugins.dbms.mysql.fingerprint.Fingerprint, plugins.dbms.mysql.enumeration.Enumeration, plugins.dbms.mysql.filesystem.Filesystem, plugins.generic.misc.Miscellaneous, plugins.dbms.mysql.takeover.Takeover)
+ |  This class defines MySQL methods
+ |
+ |  Method resolution order:
+ |      MySQLMap
+ |      plugins.dbms.mysql.syntax.Syntax
+ |      plugins.generic.syntax.Syntax
+ |      plugins.dbms.mysql.fingerprint.Fingerprint
+ |      plugins.generic.fingerprint.Fingerprint
+ |      plugins.dbms.mysql.enumeration.Enumeration
+ |      plugins.generic.enumeration.Enumeration
+ |      plugins.generic.custom.Custom
+ |      plugins.generic.databases.Databases
+ |      plugins.generic.entries.Entries
+ |      plugins.generic.search.Search
+ |      plugins.generic.users.Users
+ |      plugins.dbms.mysql.filesystem.Filesystem
+ |      plugins.generic.filesystem.Filesystem
+ |      plugins.generic.misc.Miscellaneous
+ |      plugins.dbms.mysql.takeover.Takeover
+ |      plugins.generic.takeover.Takeover
+ |      lib.takeover.abstraction.Abstraction
+ |      lib.takeover.web.Web
+ |      lib.takeover.udf.UDF
+ |      lib.takeover.xp_cmdshell.Xp_cmdshell
+ |      lib.takeover.metasploit.Metasploit
+ |      lib.takeover.icmpsh.ICMPsh
+ |      lib.takeover.registry.Registry
+ |</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'> 因为我做测试的站是一个mysql的站点，所以这里匹配到的plugins都是mysql相关的。这个文件夹下正常情况是包含了所有可测试的数据库的情况。</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/44551492484611.png"/></span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>而他们的目录结构都相同</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/83381492484611.png"/></span></p>
+<p>我们就按照Methods defined的顺序来看下。</p>
+<p>首先是/plugins/dbms/mysql/syntax.py</p>
+<pre class="brush:python;toolbar:false"> |  ----------------------------------------------------------------------
+ |  Static methods inherited from plugins.dbms.mysql.syntax.Syntax:
+ |
+ |  escape(expression, quote=True)
+ |      &gt;&gt;&gt; Syntax.escape("SELECT 'abcdefgh' FROM foobar")
+ |      'SELECT 0x6162636465666768 FROM foobar'
+ |
+ |  ----------------------------------------------------------------------</pre>
+<p>这里实现的是字符串向十六进制的转化，先用了正则过滤出' 中的内容，然后</p>
+<pre class="brush:python;toolbar:false">retVal = "0x%s" % binascii.hexlify(value)</pre>
+<p>即可</p>
+<p>然后是/plugins/dbms/mysql/fingerprint.py</p>
+<pre class="brush:python;toolbar:false"> |  ----------------------------------------------------------------------
+ |  Methods inherited from plugins.dbms.mysql.fingerprint.Fingerprint:
+ |
+ |  checkDbms(self)
+ |      References for fingerprint:
+ |
+ |      * http://dev.mysql.com/doc/refman/5.0/en/news-5-0-x.html (up to 5.0.89)
+ |      * http://dev.mysql.com/doc/refman/5.1/en/news-5-1-x.html (up to 5.1.42)
+ |      * http://dev.mysql.com/doc/refman/5.4/en/news-5-4-x.html (up to 5.4.4)
+ |      * http://dev.mysql.com/doc/refman/5.5/en/news-5-5-x.html (up to 5.5.0)
+ |      * http://dev.mysql.com/doc/refman/6.0/en/news-6-0-x.html (manual has been withdrawn)
+ |
+ |  checkDbmsOs(self, detailed=False)
+ |
+ |  getFingerprint(self)
+ |
+ |  ----------------------------------------------------------------------</pre>
+<p>主要是针对暴露出的指纹信息，判断数据库类型和系统类型。</p>
+<p>判断mysql&gt;5.0.0</p>
+<pre class="brush:python;toolbar:false"># Determine if it is MySQL &gt;= 5.0.0
+            if inject.checkBooleanExpression("ISNULL(TIMESTAMPADD(MINUTE,[RANDNUM],NULL))"):</pre>
+<p>利用TIMESTAMPADD，这个是5.0.0以上版本特有的函数</p>
+<p>判断mysql&gt;5.5.0</p>
+<pre class="brush:python;toolbar:false"> # Check if it is MySQL &gt;= 5.5.0
+                if inject.checkBooleanExpression("TO_SECONDS(950501)&gt;0"):
+                    Backend.setVersion("&gt;= 5.5.0")</pre>
+<p>5.5以上特有的函数</p>
+<p>判断mysql &gt;=5.1.1 and &lt;5.5.0</p>
+<pre class="brush:python;toolbar:false"># Check if it is MySQL &gt;= 5.1.2 and &lt; 5.5.0
+                elif inject.checkBooleanExpression("@@table_open_cache=@@table_open_cache"):
+                    if inject.checkBooleanExpression("[RANDNUM]=(SELECT [RANDNUM] FROM information_schema.GLOBAL_STATUS LIMIT 0, 1)"):
+                        Backend.setVersionList(["&gt;= 5.1.12", "&lt; 5.5.0"])
+                    elif inject.checkBooleanExpression("[RANDNUM]=(SELECT [RANDNUM] FROM information_schema.PROCESSLIST LIMIT 0, 1)"):
+                        Backend.setVersionList(["&gt;= 5.1.7", "&lt; 5.1.12"])
+                    elif inject.checkBooleanExpression("[RANDNUM]=(SELECT [RANDNUM] FROM information_schema.PARTITIONS LIMIT 0, 1)"):
+                        Backend.setVersion("= 5.1.6")
+                    elif inject.checkBooleanExpression("[RANDNUM]=(SELECT [RANDNUM] FROM information_schema.PLUGINS LIMIT 0, 1)"):
+                        Backend.setVersionList(["&gt;= 5.1.5", "&lt; 5.1.6"])
+                    else:
+                        Backend.setVersionList(["&gt;= 5.1.2", "&lt; 5.1.5"])</pre>
+<p>判断mysql &gt;=5.0.0 and &lt;5.1.2</p>
+<pre class="brush:python;toolbar:false">                # Check if it is MySQL &gt;= 5.0.0 and &lt; 5.1.2
+                elif inject.checkBooleanExpression("@@hostname=@@hostname"):
+                    Backend.setVersionList(["&gt;= 5.0.38", "&lt; 5.1.2"])
+                elif inject.checkBooleanExpression("@@character_set_filesystem=@@character_set_filesystem"):
+                    Backend.setVersionList(["&gt;= 5.0.19", "&lt; 5.0.38"])
+                elif not inject.checkBooleanExpression("[RANDNUM]=(SELECT [RANDNUM] FROM DUAL WHERE [RANDNUM1]!=[RANDNUM2])"):
+                    Backend.setVersionList(["&gt;= 5.0.11", "&lt; 5.0.19"])
+                elif inject.checkBooleanExpression("@@div_precision_increment=@@div_precision_increment"):
+                    Backend.setVersionList(["&gt;= 5.0.6", "&lt; 5.0.11"])
+                elif inject.checkBooleanExpression("@@automatic_sp_privileges=@@automatic_sp_privileges"):
+                    Backend.setVersionList(["&gt;= 5.0.3", "&lt; 5.0.6"])
+                else:
+                    Backend.setVersionList(["&gt;= 5.0.0", "&lt; 5.0.3"])</pre>
+<p>mysql&gt;=5.0.2</p>
+<pre class="brush:python;toolbar:false">            elif inject.checkBooleanExpression("DATABASE() LIKE SCHEMA()"):
+                Backend.setVersion("&gt;= 5.0.2")
+                setDbms("%s 5" % DBMS.MYSQL)
+                self.getBanner()</pre>
+<p>mysql&lt;5.0.0</p>
+<pre class="brush:python;toolbar:false">            elif inject.checkBooleanExpression("STRCMP(LOWER(CURRENT_USER()), UPPER(CURRENT_USER()))=0"):
+                Backend.setVersion("&lt; 5.0.0")
+                setDbms("%s 4" % DBMS.MYSQL)
+                self.getBanner()
+             # Check which version of MySQL &lt; 5.0.0 it is
+                if inject.checkBooleanExpression("3=(SELECT COERCIBILITY(USER()))"):
+                    Backend.setVersionList(["&gt;= 4.1.11", "&lt; 5.0.0"])
+                elif inject.checkBooleanExpression("2=(SELECT COERCIBILITY(USER()))"):
+                    Backend.setVersionList(["&gt;= 4.1.1", "&lt; 4.1.11"])
+                elif inject.checkBooleanExpression("CURRENT_USER()=CURRENT_USER()"):
+                    Backend.setVersionList(["&gt;= 4.0.6", "&lt; 4.1.1"])
+
+                    if inject.checkBooleanExpression("'utf8'=(SELECT CHARSET(CURRENT_USER()))"):
+                        Backend.setVersion("= 4.1.0")
+                    else:
+                        Backend.setVersionList(["&gt;= 4.0.6", "&lt; 4.1.0"])
+                else:
+                    Backend.setVersionList(["&gt;= 4.0.0", "&lt; 4.0.6"])
+            else:
+                Backend.setVersion("&lt; 4.0.0")
+                setDbms("%s 3" % DBMS.MYSQL)
+                self.getBanner()</pre>
+<p>至于checkDbmsOs，使用了以下的sql语句来判断OS信息。</p>
+<pre class="brush:python;toolbar:false">result = inject.checkBooleanExpression("'W'=UPPER(MID(@@version_compile_os,1,1))")</pre>
+<p>getFingerprint -&gt;格式化输出指纹信息</p>
+<p></p>
+<p>然后是对数据库进行信息获取、语句执行等操作的一个通用的处理。</p>
+<p>/plugins/generic/目录下定义着这些函数。</p>
+<pre class="brush:python;toolbar:false"> |  ----------------------------------------------------------------------
+ |  Methods inherited from plugins.generic.fingerprint.Fingerprint:
+ |
+ |  forceDbmsEnum(self)
+ |
+ |  userChooseDbmsOs(self)
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from plugins.generic.enumeration.Enumeration:
+ |
+ |  getBanner(self)
+ |
+ |  getHostname(self)
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from plugins.generic.custom.Custom:
+ |
+ |  sqlFile(self)
+ |
+ |  sqlQuery(self, query)
+ |
+ |  sqlShell(self)
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from plugins.generic.databases.Databases:
+ |
+ |  getColumns(self, onlyColNames=False, colTuple=None, bruteForce=None, dumpMode=False)
+ |
+ |  getCount(self)
+ |
+ |  getCurrentDb(self)
+ |
+ |  getDbs(self)
+ |
+ |  getSchema(self)
+ |
+ |  getTables(self, bruteForce=None)
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from plugins.generic.entries.Entries:
+ |
+ |  dumpAll(self)
+ |
+ |  dumpFoundColumn(self, dbs, foundCols, colConsider)
+ |
+ |  dumpFoundTables(self, tables)
+ |
+ |  dumpTable(self, foundData=None)
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from plugins.generic.search.Search:
+ |
+ |  search(self)
+ |
+ |  searchColumn(self)
+ |
+ |  searchDb(self)
+ |
+ |  searchTable(self)
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from plugins.generic.users.Users:
+ |
+ |  getCurrentUser(self)
+ |
+ |  getPasswordHashes(self)
+ |
+ |  getPrivileges(self, query2=False)
+ |
+ |  getRoles(self, query2=False)
+ |
+ |  getUsers(self)
+ |
+ |  isDba(self, user=None)
+ |
+ |  ----------------------------------------------------------------------</pre>
+<p>Fingerprint模块-&gt;定义了一些通用的指纹相关处理所需要的函数，基本都是用来处理异常或报错的。</p>
+<pre class="brush:python;toolbar:false">    def userChooseDbmsOs(self):
+        warnMsg = "for some reason sqlmap was unable to fingerprint "
+        warnMsg += "the back-end DBMS operating system"
+        logger.warn(warnMsg)
+
+        msg = "do you want to provide the OS? [(W)indows/(l)inux]"
+
+        while True:
+            os = readInput(msg, default="W")
+
+            if os[0].lower() == "w":
+                Backend.setOs(OS.WINDOWS)
+                break
+            elif os[0].lower() == "l":
+                Backend.setOs(OS.LINUX)
+                break
+            else:
+                warnMsg = "invalid value</pre>
+<p>Enumeration模块-&gt;定义的是通用的枚举相关处理的函数，主要是做格式化一些指纹信息。</p>
+<pre class="brush:python;toolbar:false">    def getHostname(self):
+        infoMsg = "fetching server hostname"
+        logger.info(infoMsg)
+        #调出相应数据库类型查询OS信息的语句
+        query = queries[Backend.getIdentifiedDbms()].hostname.query
+
+        if not kb.data.hostname:
+            kb.data.hostname = unArrayizeValue(inject.getValue(query, safeCharEncode=False))
+
+        return kb.data.hostname</pre>
+<p>Custom模块-&gt;执行SQL语句，执行SQL-shell，执行SQL文件操作，sqlmap在这里先对语句类型做了检测，之后才执行。</p>
+<p>Databases模块-&gt;对数据库常见的操作（包括爆破表名列名处理操作也在这里）</p>
+<p><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/88631492484611.png"/></p>
+<p>Entries模块-&gt;dump表、数据库、列</p>
+<p><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/13961492484611.png"/></p>
+<p>Search模块-&gt;查找操作</p>
+<p><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/60601492484611.png"/></p>
+<p>Users模块-&gt;对数据用户的操作</p>
+<p><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/46321492484611.png"/></p>
+<p>接下来是mysql对文件系统的操作</p>
+<pre class="brush:python;toolbar:false"> |  ----------------------------------------------------------------------
+ |  Methods inherited from plugins.dbms.mysql.filesystem.Filesystem:
+ |
+ |  nonStackedReadFile(self, rFile)
+ |
+ |  stackedReadFile(self, rFile)
+ |
+ |  stackedWriteFile(self, wFile, dFile, fileType, forceCheck=False)
+ |
+ |  unionWriteFile(self, wFile, dFile, fileType, forceCheck=False)
+ |
+ |  ----------------------------------------------------------------------</pre>
+<p>读取文件、写文件</p>
+<p>这里nonStacked和Stacked的区别在于 Stacked（堆叠查询【多语句查询】）是分块读取文件的，如下</p>
+<p><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/42461492484611.png"/></p>
+<p>原理就是先把文件loadfile同时输出到一个tmp目录下，然后再读入，读取长度后再按照1024一块的大小读取。</p>
+<p>noStacked即UNION technique，在可以使用UNION technique的情况下，就不需要使用Stacked方式读取，因为Mysql UNION 的 loadfile 读取方式与上面类似，生成tmp文件然后按块来读取。</p>
+<p><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/86481492484611.png"/></p>
+<p>接下来就是对文件处理中所用到的通用函数（common functions）</p>
+<pre class="brush:python;toolbar:false"> |  ----------------------------------------------------------------------
+ |  Methods inherited from plugins.generic.filesystem.Filesystem:
+ |
+ |  askCheckReadFile(self, localFile, remoteFile)
+ |
+ |  askCheckWrittenFile(self, localFile, remoteFile, forceCheck=False)
+ |
+ |  fileContentEncode(self, content, encoding, single, chunkSize=256)
+ |
+ |  fileEncode(self, fileName, encoding, single, chunkSize=256)
+ |      Called by MySQL and PostgreSQL plugins to write a file on the
+ |      back-end DBMS underlying file system
+ |
+ |  fileToSqlQueries(self, fcEncodedList)
+ |      Called by MySQL and PostgreSQL plugins to write a file on the
+ |      back-end DBMS underlying file system
+ |
+ |  readFile(self, remoteFiles)
+ |
+ |  writeFile(self, localFile, remoteFile, fileType=None, forceCheck=False)
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from plugins.generic.misc.Miscellaneous:
+ |
+ |  cleanup(self, onlyFileTbl=False, udfDict=None, web=False)
+ |      Cleanup file system and database from sqlmap create files, tables
+ |      and functions
+ |
+ |  createSupportTbl(self, tblName, tblField, tblType)
+ |
+ |  delRemoteFile(self, filename)
+ |
+ |  getRemoteTempPath(self)
+ |
+ |  getVersionFromBanner(self)
+ |
+ |  likeOrExact(self, what)
+ |
+ |  ----------------------------------------------------------------------</pre>
+<p></p>
+<p>askCheckReadFile/askCheckWrittenFile-&gt;询问用户是否要检查要读/被写的文件，并进行相应处理。</p>
+<p>fileContentEncode-&gt;hex或base64编码文件内容。</p>
+<p>fileEncode-&gt;读入文件并调用上面函数进行编码。</p>
+<p>fileToSqlQueries-&gt;把编码后的文件内容插入/更新到数据库。</p>
+<p>readFile/writeFile-&gt;依据当前目标注入环境来选择读/写文件的方式（stacked/nonstacked 是否可以堆叠【多语句】查询）</p>
+<hr/>
+<p>cleanup-&gt;清空sqlmap产生的临时文件、数据、表项。</p>
+<p>createSupportTbl-&gt;在目标服务器创建sqlmap所用的临时表。</p>
+<p>delRemoteFile-&gt;执行OS命令删除某某文件</p>
+<p>getRemoteTempPath-&gt;获取目标服务器的临时文件目录</p>
+<p>getVersionFromBanner-&gt;从目标数据库的banner提取出数据库版本。</p>
+<p>likeOrExact-&gt;提供给用户选择where的条件，是选择Like语句还是=。</p>
+<p><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/70711492484611.png"/></p>
+<p>接下来是跟提权/后门/系统有关的模块</p>
+<pre class="brush:python;toolbar:false"> |  ----------------------------------------------------------------------
+ |  Methods inherited from plugins.dbms.mysql.takeover.Takeover:
+ |
+ |  udfCreateFromSharedLib(self, udf, inpRet)
+ |
+ |  udfSetLocalPaths(self)
+ |
+ |  udfSetRemotePath(self)
+ |
+ |  uncPathRequest(self)
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from plugins.generic.takeover.Takeover:
+ |
+ |  osBof(self)
+ |
+ |  osCmd(self)
+ |
+ |  osPwn(self)
+ |
+ |  osShell(self)
+ |
+ |  osSmb(self)
+ |
+ |  regAdd(self)
+ |
+ |  regDel(self)
+ |
+ |  regRead(self)
+ |
+ |  ----------------------------------------------------------------------</pre>
+<p>udfCreateFromSharedLib-&gt;创建一个UDF函数</p>
+<p>udfSetLocalPaths-&gt;一个很奇葩的函数，刚开始以为是在目标机子上上传一个执行sys命令的udf库并伪装自己，结果发现是在本地写一个伪装后的udf库，可能是为了方便直接上传？</p>
+<p>udfSetRemotePath-&gt;找到目标服务器udf库的目录</p>
+<p>uncPathRequest-&gt;用load_file读取udf库</p>
+<hr/>
+<p>osBof-&gt;利用MS09-004 exploit攻击 Microsoft SQL Server 2000 or 2005</p>
+<p>osShell-&gt;执行shell，这里有两种方式：一种是利用上传php webshell来执行，一种是利用mysql多语句执行(stacked)使用udf等技术来执行。</p>
+<p>osCmd-&gt;同上的方式执行cmd命令。</p>
+<p>osPwn-&gt;漏洞利用，可以选择metasploit框架，也可以选择icmpsh弹shell</p>
+<p>osSmb-&gt;对windows的Smb攻击</p>
+<p>regAdd-&gt;添加注册表项</p>
+<p>regDel-&gt;删除注册表项</p>
+<p>regRead-&gt;读取注册表项</p>
+<hr/>
+<p>接下来终于脱离了/iib/plugin 部分，转而进入/lib/takeover 目录，研究一下takeover模块在使用时较低层的调用吧。</p>
+<pre class="brush:python;toolbar:false"> |  ----------------------------------------------------------------------
+ |  Methods inherited from lib.takeover.abstraction.Abstraction:
+ |
+ |  evalCmd(self, cmd, first=None, last=None)
+ |
+ |  execCmd(self, cmd, silent=False)
+ |
+ |  initEnv(self, mandatory=True, detailed=False, web=False, forceInit=False)
+ |
+ |  runCmd(self, cmd)
+ |
+ |  shell(self)
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from lib.takeover.web.Web:
+ |
+ |  webBackdoorRunCmd(self, cmd)
+ |
+ |  webInit(self)
+ |      This method is used to write a web backdoor (agent) on a writable
+ |      remote directory within the web server document root.
+ |
+ |  webUpload(self, destFileName, directory, stream=None, content=None, filepath=None)
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from lib.takeover.udf.UDF:
+ |
+ |  udfCheckAndOverwrite(self, udf)
+ |
+ |  udfCheckNeeded(self)
+ |
+ |  udfCreateSupportTbl(self, dataType)
+ |
+ |  udfEvalCmd(self, cmd, first=None, last=None, udfName=None)
+ |
+ |  udfExecCmd(self, cmd, silent=False, udfName=None)
+ |
+ |  udfForgeCmd(self, cmd)
+ |
+ |  udfInjectCore(self, udfDict)
+ |
+ |  udfInjectCustom(self)
+ |
+ |  udfInjectSys(self)
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from lib.takeover.xp_cmdshell.Xp_cmdshell:
+ |
+ |  xpCmdshellEvalCmd(self, cmd, first=None, last=None)
+ |
+ |  xpCmdshellExecCmd(self, cmd, silent=False)
+ |
+ |  xpCmdshellForgeCmd(self, cmd, insertIntoTable=None)
+ |
+ |  xpCmdshellInit(self)
+ |
+ |  xpCmdshellWriteFile(self, fileContent, tmpPath, randDestFile)
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from lib.takeover.metasploit.Metasploit:
+ |
+ |  bof(self)
+ |
+ |  createMsfShellcode(self, exitfunc, format, extra, encode)
+ |
+ |  pwn(self, goUdf=False)
+ |
+ |  smb(self)
+ |
+ |  uploadShellcodeexec(self, web=False)
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from lib.takeover.icmpsh.ICMPsh:
+ |
+ |  icmpPwn(self)
+ |
+ |  uploadIcmpshSlave(self, web=False)
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from lib.takeover.registry.Registry:
+ |
+ |  addRegKey(self, regKey, regValue, regType, regData)
+ |
+ |  delRegKey(self, regKey, regValue)
+ |
+ |  readRegKey(self, regKey, regValue, parse=False)</pre>
+<p></p>
+<p></p>
+<p>Abstraction模块对提权/执行os命令时使用的技术做了具体的定义，无非就是三种（后门/udf/mysql sever调用系统命令），但是没有具体给出方式，这只是逻辑上的功能执行，以及一些前置的判断和初始化。</p>
+<p><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/54081492484611.png"/></p>
+<p>Web模块是对上传后门进行执行os命令的具体底层操作，我们已经看过之前的有关文件操作的模块，这里就是调用了上面那些底层的函数进行专门的后门上传，然后返回的结果做判断，是否上传成功。</p>
+<p>（很有趣的是，sqlmap把几种常见和不常见的注入写shell的方式都收录了，比如limit后写shell）</p>
+<p><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/29901492484611.png"/></p>
+<p></p>
+<p>UDF模块就是使用udf函数来执行os命令了，但是这个就要求一次执行多条sql语句或者直连数据库，毕竟udf调用不能合并在sql注入里。这里是几种常见的执行os命令的udf库（虽然我只玩过sys_exec）</p>
+<p><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/70351492484611.png"/></p>
+<p></p>
+<p> Xp_cmdshell模块是sql sever可以执行系统命令的一个扩展（之前用这个通过直连数据库手工提过一波权，当然sqlmap中也内置了这个功能，只是当时不知道），它主要有2005和2000两个版本。</p>
+<p><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/94871492484611.png"/></p>
+<p></p>
+<p>Metasploit模块就是调用Metasploit框架进行漏洞利用ICMPsh模块是调用icmpsh进行Smb攻击，这两个都是调用第三方框架，就不用审计了。</p>
+<p>Registry模块就是对windows注册表的操作，基于的底层原理就是对文件的操作和os命令的执行。</p>
+<p><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/68831492484611.png"/></p>
+<p></p>
+<h1><span style='font-family: 微软雅黑, "Microsoft YaHei";'>conf.dumper</span></h1>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'> conf.dumper集成了sqlmap的dump功能，负责把拖到的库保存下来。</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/8931492484611.png"/></span></p>
+<p>我们看下他的位置</p>
+<pre class="brush:python;toolbar:false">Help on Dump in module lib.core.dump object:
+
+class Dump(__builtin__.object)
+ |  This class defines methods used to parse and output the results
+ |  of SQL injection actions
+ |
+ |  Methods defined here:
+ |
+ |  __init__(self)
+ |
+ |  banner(self, data)
+ |
+ |  currentDb(self, data)
+ |
+ |  currentUser(self, data)
+ |
+ |  dbColumns(self, dbColumnsDict, colConsider, dbs)
+ |
+ |  dbTableColumns(self, tableColumns, content_type=None)
+ |
+ |  dbTableValues(self, tableValues)
+ |
+ |  dbTables(self, dbTables)
+ |
+ |  dbTablesCount(self, dbTables)
+ |
+ |  dba(self, data)
+ |
+ |  dbs(self, dbs)
+ |
+ |  flush(self)
+ |
+ |  getOutputFile(self)
+ |
+ |  hostname(self, data)
+ |
+ |  lister(self, header, elements, content_type=None, sort=True)
+ |
+ |  query(self, query, queryRes)
+ |
+ |  rFile(self, fileData)
+ |
+ |  registerValue(self, registerData)
+ |
+ |  setOutputFile(self)
+ |
+ |  singleString(self, data, content_type=None)
+ |
+ |  string(self, header, data, content_type=None, sort=True)
+ |
+ |  userSettings(self, header, userSettings, subHeader, content_type=None)
+ |
+ |  users(self, users)
+ |
+ |  ----------------------------------------------------------------------
+ |  Data descriptors defined here:
+ |
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |
+ |  __weakref__
+ |      list of weak references to the object (if defined)</pre>
+<p></p>
+<p>  整个功能都集成在/lib/core/dump.py模块</p>
+<p>  既然是dumper，对文件的操作就是基本的操作了，因为要把得到的数据存储到外部文件中，例如我们dump下来的库会自动生成xlsx文件，以及log文件，甚至是html文件</p>
+<p><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/98391492484611.png"/> 这里功能性的函数，比如dbTables等，就是批量获取数据，利用上面这些基础函数格式化导出。</p>
+<p><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/blob-9.png"/></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+</article>
+<section class="ending">
+<ul class="sns">
+<li class="tencent"><a href="http://wpa.qq.com/msgrd?v=3&amp;uin=827977014&amp;site=qq&amp;menu=yes" target="_blank"><i class="iconfont"></i></a></li>
+<li class="zhihu"><a href="https://www.zhihu.com/people/wupco " target="_blank"><i class="iconfont"></i></a></li>
+</ul>
+<div class="reward">
+                打
+                <ul>
+<li><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/QQ图片20170222193616.png"/>用支付宝打我</li>
+<li><img src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/QQ图片20170222193616.png"/>用微信打我</li>
+</ul>
+</div>
+<div class="about">
+<img alt="" class="avatar avatar-80 photo" height="80" src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/cd0d984309c15bd1f668df0d0343eccds=80&amp;d=mm&amp;r=g" srcset="http://cn.gravatar.com/avatar/cd0d984309c15bd1f668df0d0343eccd?s=160&amp;d=mm&amp;r=g 2x" width="80"> <p></p>
+</img></div>
+</section>
+<!-- You can start editing here. -->
+<!-- If comments are open, but there are no comments. -->
+<div class="comment-respond" id="respond">
+<h3 class="comment-reply-title" id="reply-title">发表评论 <small><a href="/?p=2087#respond" id="cancel-comment-reply-link" rel="nofollow" style="display:none;">取消回复</a></small></h3> <form action="http://www.wupco.cn/wp-comments-post.php" class="comment-form" id="commentform" method="post">
+<p class="comment-notes"><span id="email-notes">电子邮件地址不会被公开。</span> 必填项已用<span class="required">*</span>标注</p><p class="comment-form-comment"><label for="comment">评论</label> <textarea aria-required="true" cols="45" id="comment" maxlength="65525" name="w" required="required" rows="8"></textarea><textarea cols="100%" name="comment" rows="4" style="display:none"></textarea></p><p class="comment-form-author"><label for="author">姓名 <span class="required">*</span></label> <input aria-required="true" id="author" maxlength="245" name="author" required="required" size="30" type="text" value=""/></p>
+<p class="comment-form-email"><label for="email">电子邮件 <span class="required">*</span></label> <input aria-describedby="email-notes" aria-required="true" id="email" maxlength="100" name="email" required="required" size="30" type="text" value=""/></p>
+<p class="comment-form-url"><label for="url">站点</label> <input id="url" maxlength="200" name="url" size="30" type="text" value=""/></p>
+<p class="form-submit"><input class="submit" id="submit" name="submit" type="submit" value="发表评论"/> <input id="comment_post_ID" name="comment_post_ID" type="hidden" value="2087"/>
+<input id="comment_parent" name="comment_parent" type="hidden" value="0"/>
+</p> </form>
+</div><!-- #respond -->
+</section>
+<div class="clearer"></div>
+<nav class="navigator">
+</nav>
+</div>
+</div>
+<div class="clearer"></div>
+<div class="search">
+<form action="http://www.wupco.cn" method="get">
+<input autocomplete="off" class="search_key" name="s" placeholder="Enter search keywords..." required="required" type="text" value=""/>
+<button alt="Search" type="submit">Search</button>
+</form>
+</div>
+<footer id="footer">
+<section class="links_adlink">
+<ul class="container">
+</ul>
+</section>
+友情链接:<a href="http://www.hazzel.cn">Hazzel师傅</a> <a href="http://www.yqxiaojunjie.com/">俊杰师傅</a> <a href="http://margular.github.io">sunshine</a> <a href="https://3wapp.github.io/">janes师傅</a><br/> <a href="http://www.au1ge.xyz/">au1ge</a><br/>
+© 2017 <a href="http://www.wupco.cn">Wupco's Blog</a>
+<a class="back2top"></a>
+</footer>
+<script type="text/javascript">SyntaxHighlighter.all();</script><script type="text/javascript">
+/* <![CDATA[ */
+var ajaxcomment = {"ajax_url":"http:\/\/www.wupco.cn\/wp-admin\/admin-ajax.php","order":"asc","formpostion":"top"};
+/* ]]> */
+</script>
+<script src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/app.jsver=20141010" type="text/javascript"></script>
+<script style="display:none">
+function index_overloaded(){
+
+}
+</script>
+<script src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/jquery.min.js"></script>
+<script src="./SQLMAP阅读手记四{conf.dbmsHandler，conf.dumper} – Wupco's Blog/functions.js"></script>
+<script>
+</script>
+</body>
+</html>

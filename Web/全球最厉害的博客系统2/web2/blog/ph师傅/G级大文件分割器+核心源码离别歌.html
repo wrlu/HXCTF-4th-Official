@@ -1,0 +1,370 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./G级大文件分割器 + 核心源码  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./G级大文件分割器 + 核心源码  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./G级大文件分割器 + 核心源码  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>G级大文件分割器 + 核心源码 | 离别歌</title>
+<link href="./G级大文件分割器 + 核心源码  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./G级大文件分割器 + 核心源码  离别歌/styles.css" rel="stylesheet"/>
+<link href="./G级大文件分割器 + 核心源码  离别歌/style.css" rel="stylesheet"/>
+<link href="./G级大文件分割器 + 核心源码  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./G级大文件分割器 + 核心源码  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./G级大文件分割器 + 核心源码  离别歌/jquery.min.js"></script>
+<link href="./G级大文件分割器 + 核心源码  离别歌/code.css" rel="stylesheet"/>
+<link href="./G级大文件分割器 + 核心源码  离别歌/button.css" rel="stylesheet"/>
+<link href="./G级大文件分割器 + 核心源码  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./G级大文件分割器 + 核心源码  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/C/Bigfile-divide.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/C/Bigfile-divide.html&amp;text=G%E7%BA%A7%E5%A4%A7%E6%96%87%E4%BB%B6%E5%88%86%E5%89%B2%E5%99%A8%20%2B%20%E6%A0%B8%E5%BF%83%E6%BA%90%E7%A0%81"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/C/Bigfile-divide.html&amp;title=G%E7%BA%A7%E5%A4%A7%E6%96%87%E4%BB%B6%E5%88%86%E5%89%B2%E5%99%A8%20%2B%20%E6%A0%B8%E5%BF%83%E6%BA%90%E7%A0%81"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/C/Bigfile-divide.html&amp;is_video=false&amp;description=G%E7%BA%A7%E5%A4%A7%E6%96%87%E4%BB%B6%E5%88%86%E5%89%B2%E5%99%A8%20%2B%20%E6%A0%B8%E5%BF%83%E6%BA%90%E7%A0%81"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=G%E7%BA%A7%E5%A4%A7%E6%96%87%E4%BB%B6%E5%88%86%E5%89%B2%E5%99%A8%20%2B%20%E6%A0%B8%E5%BF%83%E6%BA%90%E7%A0%81&amp;body=Check out this article: https%3A//www.leavesongs.com/C/Bigfile-divide.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/C/Bigfile-divide.html&amp;title=G%E7%BA%A7%E5%A4%A7%E6%96%87%E4%BB%B6%E5%88%86%E5%89%B2%E5%99%A8%20%2B%20%E6%A0%B8%E5%BF%83%E6%BA%90%E7%A0%81"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/C/Bigfile-divide.html&amp;title=G%E7%BA%A7%E5%A4%A7%E6%96%87%E4%BB%B6%E5%88%86%E5%89%B2%E5%99%A8%20%2B%20%E6%A0%B8%E5%BF%83%E6%BA%90%E7%A0%81"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/C/Bigfile-divide.html&amp;title=G%E7%BA%A7%E5%A4%A7%E6%96%87%E4%BB%B6%E5%88%86%E5%89%B2%E5%99%A8%20%2B%20%E6%A0%B8%E5%BF%83%E6%BA%90%E7%A0%81"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/C/Bigfile-divide.html&amp;title=G%E7%BA%A7%E5%A4%A7%E6%96%87%E4%BB%B6%E5%88%86%E5%89%B2%E5%99%A8%20%2B%20%E6%A0%B8%E5%BF%83%E6%BA%90%E7%A0%81"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/C/Bigfile-divide.html&amp;name=G%E7%BA%A7%E5%A4%A7%E6%96%87%E4%BB%B6%E5%88%86%E5%89%B2%E5%99%A8%20%2B%20%E6%A0%B8%E5%BF%83%E6%BA%90%E7%A0%81&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">G级大文件分割器 + 核心源码</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年2月2日 15:01" itemprop="datePublished">
+                    2014 二月 02 15:01
+                </time>
+</div>
+<div class="article-tag">
+            阅读：6035
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/C">C/C++</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E5%A4%A7%E6%96%87%E4%BB%B6%E5%A4%84%E7%90%86">大文件处理</a>,
+                
+                <a class="tag-link" href="/tag/%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84">内存映射</a>,
+                
+                <a class="tag-link" href="/tag/MFC">MFC</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;">你还在为下载的裤子很大而notepad++打不开而烦恼吗：</span><br style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;">
+<ignore_js_op style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"><a href="https://www.leavesongs.com/content/uploadfile/201402/4efd1391324561.jpg" id="ematt:391" target="_blank"><img alt="01.jpg" border="0" height="178" src="./G级大文件分割器 + 核心源码  离别歌/4efd1391324561.jpg" title="点击查看原图" width="328"/></a></ignore_js_op><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"></span><br style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;">
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;">你还在为网盘的单个文件大小上限而发愁吗：</span><br style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"/>
+<ignore_js_op style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"><a href="https://www.leavesongs.com/content/uploadfile/201402/3fb51391324561.jpg" id="ematt:392" target="_blank"><img alt="02.jpg" border="0" height="84" src="./G级大文件分割器 + 核心源码  离别歌/thum-3fb51391324561.jpg" title="点击查看原图" width="420"/></a></ignore_js_op><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"></span><br style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"/>
+<br style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;">“大文件分割器”到来了，用它可以轻松分割数G的大文件：</span><br style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"/>
+<ignore_js_op style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"><a href="https://www.leavesongs.com/content/uploadfile/201402/f9961391324564.jpg" id="ematt:394" target="_blank"><img alt="03.jpg" border="0" height="250" src="./G级大文件分割器 + 核心源码  离别歌/thum-f9961391324564.jpg" title="点击查看原图" width="420"/></a></ignore_js_op><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"></span><br style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"/>
+<br style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;">网上有很多文件分割器，但效果很差（因为其源码使用的原理不好），很多大型文件（尤其是GB级别的）分割以后可能出现乱码，可能分割以后再次合并时就不是原来的文件了。所以我才自己做了一款文件分割器，分享给各位基友。</span><br style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;">至于用处，某些情况下文件太大了确实带来很多麻烦——比如小明前段时间下载的“QQ信封5-10位.txt”，总大小达到了2个多G。小明想看看其中内容，却因为notepad不支持打开这么大的文件而作罢：“file is too big to be open”。用大文件分割器分割以后，就再也不存在这个问题：</span><br style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"/>
+<ignore_js_op style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"><a href="https://www.leavesongs.com/content/uploadfile/201402/2de41391324567.jpg" id="ematt:396" target="_blank"><img alt="04.jpg" border="0" height="393" src="./G级大文件分割器 + 核心源码  离别歌/thum-2de41391324567.jpg" title="点击查看原图" width="420"/></a></ignore_js_op><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"></span><br style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"/>
+<ignore_js_op style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"><a href="https://www.leavesongs.com/content/uploadfile/201402/13501391324573.jpg" id="ematt:398" target="_blank"><img alt="05.jpg" border="0" height="460" src="./G级大文件分割器 + 核心源码  离别歌/thum-13501391324573.jpg" title="点击查看原图" width="383"/></a></ignore_js_op><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"></span><br style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"/>
+<br style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"/>
+<p>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;">界面是MFC写的，关于如何处理GB级别文件，使用的是windows API，内存映射。不细说，大概流程就是：CreateFile - CreateFileMapping - MapViewOfFile - CopyMemory - UnmapViewOfFile - CloseHandle</span>
+</p>
+<p>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;">核心线程代码： </span>
+</p>
+<pre class="brush: cpp;auto-links: false;">void DevideFile(void * para)
+{
+	struct Para * pInfo = (struct Para *)para;
+	CString strFormat;
+	LPCTSTR lpFileName = pInfo-&gt;FileName;
+	HANDLE hFile;  
+	struct FILEINFO  
+	{  
+		LONGLONG llFileSize;  
+		LONG llPartSize;  
+		DWORD dwPartNum;  
+	};  
+	struct FILEINFO fi;  
+	fi.llFileSize = 0;  
+	fi.llPartSize = 0;  
+	fi.dwPartNum = 0;  
+	fi.llPartSize = pInfo-&gt;llPartSize;
+	hFile = CreateFile(lpFileName,GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,0);  
+	if(hFile == INVALID_HANDLE_VALUE)  
+	{  
+		strFormat.Format("获得文件句柄失败%d。",GetLastError());
+		pInfo-&gt;pDlg-&gt;addInfoBox(strFormat);
+		goto __EndPos;
+	}  
+
+	LARGE_INTEGER uli = {0};  
+	SYSTEM_INFO SysInfo;  
+	GetSystemInfo(&amp;SysInfo);  
+	DWORD dwGran = SysInfo.dwAllocationGranularity;  
+
+	LONGLONG qwFileOffset = 0;  
+	LONGLONG dwBlockBytes = fi.llPartSize;  
+	if(GetFileSizeEx(hFile, &amp;uli))  
+	{  
+		fi.llFileSize = uli.QuadPart;  
+		fi.dwPartNum = fi.llFileSize/dwBlockBytes;  
+		if((fi.llFileSize % dwBlockBytes) != 0)  
+		{  
+			fi.dwPartNum += 1;  
+		}  
+		strFormat.Format("文件:%s 大小为:%I64d KB",lpFileName,uli.QuadPart/1024);
+		pInfo-&gt;pDlg-&gt;addInfoBox(strFormat); 
+		strFormat.Format("分块大小:%u KB",(dwBlockBytes/1024));
+		pInfo-&gt;pDlg-&gt;addInfoBox(strFormat); 
+	}
+	else
+	{
+		strFormat.Format("没能成功获取源文件大小，请检查源文件是否存在且可读。");
+		pInfo-&gt;pDlg-&gt;addInfoBox(strFormat); 
+		goto __EndPos;
+	}
+	HANDLE hFileMap;  
+	hFileMap = CreateFileMapping(hFile,NULL,PAGE_READONLY,0,0,NULL);//超大文件时该处失败  
+	if(hFileMap == NULL)  
+	{  
+		strFormat.Format("创建文件映射对象句柄失败:%d。",GetLastError());
+		pInfo-&gt;pDlg-&gt;addInfoBox(strFormat);
+		CloseHandle(hFile);
+		goto __EndPos;
+	}  
+
+	LPSTR sTempStr = (LPSTR)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, MAXLENGTH);  
+	for(int index = 0;index&lt;fi.dwPartNum;index++)  
+	{  
+		LPVOID lpMapStartPos;  
+		if(fi.llFileSize &lt; dwBlockBytes)  
+		{  
+			dwBlockBytes = fi.llFileSize;  
+		}  
+		lpMapStartPos = MapViewOfFile(hFileMap, FILE_MAP_READ, 
+			(DWORD)(qwFileOffset &gt;&gt; 32), 
+			(DWORD)(qwFileOffset &amp; 0xFFFFFFFF), 
+			dwBlockBytes);  
+		if(lpMapStartPos == NULL)  
+		{  
+			strFormat.Format("映射目标文件到内存失败:%d。",GetLastError());
+			pInfo-&gt;pDlg-&gt;addInfoBox(strFormat);
+			CloseHandle(hFileMap);  
+			CloseHandle(hFile);  
+			goto __EndPos;
+		}  
+		qwFileOffset += dwBlockBytes;  
+		fi.llFileSize  -=  dwBlockBytes;  
+
+		sprintf(sTempStr,"%s\\%s_%d.%s", pInfo-&gt;OutPath, pInfo-&gt;NewName, index + 1, pInfo-&gt;FileExt);  
+		HANDLE hNewFile = CreateFileA(sTempStr,GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL);  
+		if(hNewFile == INVALID_HANDLE_VALUE)  
+		{  
+			strFormat.Format("获取分块文件对象句柄失败:%d。",GetLastError());
+			pInfo-&gt;pDlg-&gt;addInfoBox(strFormat);
+			UnmapViewOfFile(lpMapStartPos);  
+			CloseHandle(hFileMap);  
+			CloseHandle(hFile);  
+			goto __EndPos;
+		}  
+		HANDLE hNewFileMap;  
+		hNewFileMap = CreateFileMapping(hNewFile,NULL,PAGE_READWRITE,0,dwBlockBytes,NULL);  
+		if(hNewFile == NULL)  
+		{  
+			strFormat.Format("获取分块文件内存映射对象句柄失败:%d。",GetLastError());
+			pInfo-&gt;pDlg-&gt;addInfoBox(strFormat);
+			UnmapViewOfFile(lpMapStartPos);  
+			CloseHandle(hNewFile);  
+			CloseHandle(hFileMap);  
+			CloseHandle(hFile);  
+			goto __EndPos;
+		}  
+		LPVOID lpNewFilePos = MapViewOfFile(hNewFileMap,FILE_MAP_WRITE,0, 0, 0);  
+		if(lpNewFilePos == NULL)  
+		{  
+			strFormat.Format("映射分块文件到内存失败:%d。",GetLastError());
+			pInfo-&gt;pDlg-&gt;addInfoBox(strFormat);
+			UnmapViewOfFile(lpMapStartPos);  
+			CloseHandle(hNewFileMap);  
+			CloseHandle(hNewFile);  
+			CloseHandle(hFileMap);  
+			CloseHandle(hFile);  
+			goto __EndPos;
+		}  
+
+		CopyMemory(lpNewFilePos,lpMapStartPos,dwBlockBytes);  
+		strFormat.Format("分块文件%s成功生成。",sTempStr);
+		pInfo-&gt;pDlg-&gt;addInfoBox(strFormat);
+		UnmapViewOfFile(lpMapStartPos);  
+		UnmapViewOfFile(lpNewFilePos);  
+		CloseHandle(hNewFileMap);  
+		CloseHandle(hNewFile);  
+	}  
+	CloseHandle(hFileMap);  
+	CloseHandle(hFile);  
+	pInfo-&gt;pDlg-&gt;addInfoBox("恭喜，文件分割成功！");
+	
+__EndPos:
+	//后续处理
+	return ;
+}</pre>
+<p>
+<br/>
+</p>
+<p>
+<span style="color:#444444;font-family:'Tahoma, Microsoft Yahei, Simsun';"><span style="font-size:14px;line-height:21px;">关于内存映射技术，在此有详细说明：<a href="http://www.oschina.net/question/54100_26210" target="_blank">http://www.oschina.net/question/54100_26210</a></span></span>
+</p>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;">但程序有点问题在于，有时候可能会存在内存不足不能开始分割的问题，windows错误代码为8.</span><br style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;">但问题似乎确实跟你此时电脑的状态有关。昨晚我测试时候将5G的文件分割成500M的文件时候出现错误，但今早把8G的文件分割成500M的时候没有任何问题。我电脑内存是4G，或许也跟硬盘有关？</span><br style="word-wrap:break-word;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;"/>
+<p>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;">于是我又做了一个64位版本，问题得到了解决，没有再出现内存不足的问题。所以大家如果分割超大文件出错的话可以试试x64版本的，我都放在压缩包里了。</span>
+</p>
+<p>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;white-space:normal;background-color:#FFFFFF;">下载： <a href="http://pan.baidu.com/s/1ntK4Ckh" target="_blank">http://pan.baidu.com/s/1ntK4Ckh</a></span>
+</p>
+</br></br></div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2050">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./G级大文件分割器 + 核心源码  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">陈</a>
+<time datetime="2015年5月6日 14:56" itemprop="datePublished">
+                            2015 五月 06 14:56
+                        </time>
+<a href="javascript:reply_to('2050', '陈')">回复</a>
+</p>
+<p class="comment-meta">我有个8G的文件，按分块大小500M来分割，一开始是可以的，分到最后一个文件就老出错，错误代码时6.。怎么办？？</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2437">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./G级大文件分割器 + 核心源码  离别歌/f442ea876a325134dc7dbd96367a3552.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://blog.wangning.site" target="_blank">zzzgw</a>
+<time datetime="2016年9月11日 20:36" itemprop="datePublished">
+                            2016 九月 11 20:36
+                        </time>
+<a href="javascript:reply_to('2437', 'zzzgw')">回复</a>
+</p>
+<p class="comment-meta">@陈：你可以试试linux的split命令，分割20G的文件也毫无压力，且安全可靠，不会出错。</p>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="0401e5d133adb9578cf0b4d60426f68db933f175"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./G级大文件分割器 + 核心源码  离别歌/0401e5d133adb9578cf0b4d60426f68db933f175"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="300">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="ANNooi0uRvM1vjcbCSp5nyD6nPruiBN7878UcMcJiiGqvYAqq9TPWcFbwTUC15Ch"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./G级大文件分割器 + 核心源码  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./G级大文件分割器 + 核心源码  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

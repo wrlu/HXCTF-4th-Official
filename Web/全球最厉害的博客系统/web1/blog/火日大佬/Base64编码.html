@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<title>Base64编码</title>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="320" name="MobileOptimized"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<meta content="" name="description"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="Base64编码" name="twitter:title"/>
+<meta content="" name="twitter:description"/>
+<meta content="http://www.firesun.me" property="og:url"/>
+<meta content="article" property="og:type"/>
+<meta content="Base64编码" property="og:title"/>
+<meta content="" property="og:description"/>
+<meta content="火日小站" property="og:site_name"/>
+<meta content="Base64编码" itemprop="name"/>
+<meta content="" itemprop="description"/>
+<meta content="" name="theme-color"/>
+<link href="./Base64编码/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+<link href="./Base64编码/apple-touch-icon-precomposed.png" rel="apple-touch-icon"/>
+<link href="//fonts.googleapis.com/" rel="dns-prefetch"/>
+<link href="//fonts.googleapis.com/css?family=Noto+Serif:400,700,400italic|Open+Sans:700,400&amp;subset=latin,latin-ext" rel="stylesheet"/>
+<link href="./Base64编码/main.min.cssv=92699c119f" rel="stylesheet">
+<script src="./Base64编码/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+if (!window.jQuery) {
+	var script = document.createElement('script');
+	script.src = "/assets/js/jquery.min.js?v=92699c119f";
+	document.body.appendChild(script);
+}
+var ga_ua = 'UA-XXXXX-X';
+
+var disqus_shortname = 'firesun';
+
+var enable_pjax = true;
+// Pace Options
+// ==============
+window.paceOptions = {
+	catchupTime: 100,
+	minTime: 100,
+	elements: false,
+	restartOnRequestAfter: 500,
+	startOnPageLoad: false
+}
+// Ghostium Globals
+// ==============
+window.GHOSTIUM = {};
+GHOSTIUM.haveDisqus = typeof disqus_shortname !== 'undefined' && disqus_shortname !== 'example';
+GHOSTIUM.enablePjax = typeof enable_pjax !== 'undefined' ? enable_pjax : true;
+    </script>
+<script src="./Base64编码/head-scripts.min.jsv=92699c119f"></script>
+<link href="./Base64编码/base64" rel="canonical">
+<meta content="origin" name="referrer">
+<meta content="火日小站" property="og:site_name">
+<meta content="article" property="og:type">
+<meta content="Base64编码" property="og:title">
+<meta content="Base64可以说是最常见的编码之一，需要重点的了解。最权威的说明详见  rfc4648（Standard 'base64' encoding），以及Base64的起源 rfc2045（Base64 transfer encoding for MIME） 定义 Base64是一种基于64个可打印字符来表示二进制数据的表示方法（binary-to-text encoding） 两个重点： 编码的对象：二进制（任何输入，要先转成二进制） 用于编码的字符：64个可打印字符 why 64个？ 其实理论上来说，2个足矣（01二进制流），不过编码追求的是简单高效，所以最好的做法是直接将二进制分组，按组编码，而分组编码时少用1bit就是32个可打印字符，报文膨胀的太厉害；多1bit就需要128个，可打印字符不够用啊！所以用6bit为一个单位编码，2^6=64个 起源 Base64编码源自MIME content transfer encoding，而MIME就是多用途互联网邮件扩展（Multipurpose Internet Mail" property="og:description">
+<meta content="http://www.firesun.me/base64/" property="og:url">
+<meta content="2016-04-14T11:43:32.000Z" property="article:published_time">
+<meta content="2016-04-30T04:12:52.000Z" property="article:modified_time">
+<meta content="WEB" property="article:tag">
+<meta content="编码" property="article:tag">
+<meta content="summary" name="twitter:card">
+<meta content="Base64编码" name="twitter:title">
+<meta content="Base64可以说是最常见的编码之一，需要重点的了解。最权威的说明详见  rfc4648（Standard 'base64' encoding），以及Base64的起源 rfc2045（Base64 transfer encoding for MIME） 定义 Base64是一种基于64个可打印字符来表示二进制数据的表示方法（binary-to-text encoding） 两个重点： 编码的对象：二进制（任何输入，要先转成二进制） 用于编码的字符：64个可打印字符 why 64个？ 其实理论上来说，2个足矣（01二进制流），不过编码追求的是简单高效，所以最好的做法是直接将二进制分组，按组编码，而分组编码时少用1bit就是32个可打印字符，报文膨胀的太厉害；多1bit就需要128个，可打印字符不够用啊！所以用6bit为一个单位编码，2^6=64个 起源 Base64编码源自MIME content transfer encoding，而MIME就是多用途互联网邮件扩展（Multipurpose Internet Mail" name="twitter:description">
+<meta content="http://www.firesun.me/base64/" name="twitter:url">
+<meta content="Written by" name="twitter:label1">
+<meta content="火日攻天" name="twitter:data1">
+<meta content="Filed under" name="twitter:label2">
+<meta content="WEB, 编码" name="twitter:data2">
+<script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "Article",
+    "publisher": "火日小站",
+    "author": {
+        "@type": "Person",
+        "name": "火日攻天",
+        "image": "http://www.firesun.me/content/images/2016/04/avatar.png",
+        "url": "http://www.firesun.me/author/firesun/",
+        "sameAs": "http://www.firesun.me/"
+    },
+    "headline": "Base64编码",
+    "url": "http://www.firesun.me/base64/",
+    "datePublished": "2016-04-14T11:43:32.000Z",
+    "dateModified": "2016-04-30T04:12:52.000Z",
+    "keywords": "WEB, 编码",
+    "description": "Base64可以说是最常见的编码之一，需要重点的了解。最权威的说明详见  rfc4648（Standard &#x27;base64&#x27; encoding），以及Base64的起源 rfc2045（Base64 transfer encoding for MIME） 定义 Base64是一种基于64个可打印字符来表示二进制数据的表示方法（binary-to-text encoding） 两个重点： 编码的对象：二进制（任何输入，要先转成二进制） 用于编码的字符：64个可打印字符 why 64个？ 其实理论上来说，2个足矣（01二进制流），不过编码追求的是简单高效，所以最好的做法是直接将二进制分组，按组编码，而分组编码时少用1bit就是32个可打印字符，报文膨胀的太厉害；多1bit就需要128个，可打印字符不够用啊！所以用6bit为一个单位编码，2^6=64个 起源 Base64编码源自MIME content transfer encoding，而MIME就是多用途互联网邮件扩展（Multipurpose Internet Mail"
+}
+    </script>
+<meta content="Ghost 0.7" name="generator">
+<link href="./Base64编码/rss" rel="alternate" title="火日小站" type="application/rss+xml">
+<link href="./Base64编码/zTreeStyle.css" rel="stylesheet" type="text/css"/>
+</link></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></link></link></head>
+<body class="post-template tag-web tag-bian-ma">
+<button class="drawer-button" data-action="open-drawer" id="drawer-button"><i class="fa fa-bars"></i></button>
+<nav class="drawer" tabindex="-1">
+<div class="drawer-container">
+<!--.drawer-search(role="search")-->
+<ul class="drawer-list" role="navigation">
+<li class="drawer-list-item">
+<a data-pjax="" href="/">
+<i class="fa fa-home"></i>Home
+  </a>
+</li>
+<li class="drawer-list-item">
+<a data-pjax="" href="/tag/web">
+<i class="fa fa-rocket"></i>Web
+  </a>
+</li>
+<li class="drawer-list-item">
+<a href="http://www.firesun.me/rss/">
+<i class="fa fa-rss"></i>Subscribe to Feed
+  </a>
+</li>
+<li class="drawer-list-divider"></li>
+<li class="drawer-list-item drawer-list-title">
+  Follow me
+</li>
+<li class="drawer-list-item">
+<a href="http://twitter.com" target="_blank">
+<i class="fa fa-twitter"></i>Twitter
+  </a>
+</li>
+<li class="drawer-list-item">
+<a href="http://github.com/firesunCN" target="_blank">
+<i class="fa fa-github"></i>Github
+  </a>
+</li>
+</ul>
+</div>
+</nav>
+<div class="drawer-overlay"></div>
+<main class="container" id="container" role="main">
+<div class="surface">
+<div class="surface-container">
+<div class="content" data-pjax-container="">
+<section class="wrapper wrapper-post">
+<div class="wrapper-container">
+<article class="post post tag-web tag-bian-ma" itemscope="" itemtype="http://schema.org/BlogPosting" role="article">
+<section class="post-container">
+<header class="post-header">
+<ul class="post-meta-list">
+<li class="post-meta-item">
+<time datetime="2016-04-14" itemprop="datePublished">
+                  a year ago
+                </time>
+</li>
+<li class="post-meta-item">
+<a data-pjax="" href="/tag/web/" itemprop="articleSection">WEB</a>, 
+                    <a data-pjax="" href="/tag/bian-ma/" itemprop="keywords">编码</a>
+</li>
+<li class="post-meta-item">
+<a data-disqus-identifier="10" href="#disqus_thread">Comments</a>
+</li>
+</ul>
+<h1 class="post-title" itemprop="name headline"><a data-pjax="" href="/base64/" itemprop="url" title="Base64编码">Base64编码</a></h1>
+<!--h2 itemprop="about" class="post-subtitle"></h2-->
+</header>
+<aside class="post-side">
+<div class="post-author">
+<a class="post-author-avatar" href="http://www.firesun.me/">
+<img alt="火日攻天" src="./Base64编码/avatar.png"/>
+</a>
+<div class="post-author-info">
+<a class="post-author-name" href="http://www.firesun.me/">
+                  火日攻天
+                </a>
+<p class="post-author-bio"></p>
+</div>
+</div>
+<ul class="ztree" id="tree" style="width:100%"></ul>
+</aside>
+<div class="post-body" itemprop="articleBody">
+<p>Base64可以说是最常见的编码之一，需要重点的了解。最权威的说明详见 <br/>
+<a href="https://www.ietf.org/rfc/rfc4648.txt">rfc4648</a>（Standard 'base64' encoding），以及Base64的起源
+<a href="https://www.ietf.org/rfc/rfc2045.txt">rfc2045</a>（Base64 transfer encoding for MIME）</p>
+<h2 id="">定义</h2>
+<p>Base64是一种基于64个<strong>可打印字符</strong>来表示<strong>二进制</strong>数据的表示方法（binary-to-text encoding）</p>
+<h5 id="">两个重点：</h5>
+<ul>
+<li>编码的对象：<strong>二进制</strong>（<strong>任何输入，要先转成二进制</strong>）</li>
+<li>用于编码的字符：64个可打印字符</li>
+</ul>
+<h5 id="why64">why 64个？</h5>
+<p>其实理论上来说，2个足矣（01二进制流），不过编码追求的是简单高效，所以最好的做法是直接将二进制分组，按组编码，而分组编码时少用1bit就是32个可打印字符，报文膨胀的太厉害；多1bit就需要128个，可打印字符不够用啊！所以用6bit为一个单位编码，2^6=64个</p>
+<h2 id="">起源</h2>
+<p>Base64编码源自MIME content transfer encoding，而MIME就是多用途互联网邮件扩展（Multipurpose Internet Mail Extensions）。</p>
+<p>而诞生MIME的原因就是早期电子邮件标准并<strong>不允许在邮件消息中使用7位ASCII字符集以外的字符</strong>，直到现在电子邮件依然是基于字符的而不是二进制的，这就导致了一些非英语字符消息和二进制文件，图像，声音等非文字消息都不能在电子邮件中传输。
+<img alt="mail" src="./Base64编码/mail.png"/></p>
+<p>所以怎么解决？<strong>编码</strong>！把二进制编码成可见字符，就可以在电子邮件中传输了，接收端在解码为二进制即可。</p>
+<p>当然，MIME规定的编码方式不止Base64，还有7bit（UTF-7），quoted-printable等，只不过大部分人只了解Base64而已。</p>
+<h2 id="">编码方式</h2>
+<p>由于Base64使用小字符集编码大字符集，必然会带来报文长度的增加，而Base64一般被认为会平均增加33%的报文长度。</p>
+<p>由于Base64使用64个可打印字符编码，而2^6=64，即对二进制流而言，每6bit可以编码为64个可打印字符中的一个。在计算机系统中信息计量单位是字节（a unit of digital information ），即8bit，取个公倍数很容易得出，我们可以把3字节（24bit），拆成4个6bit，每一个6bit代表一个可打印字符，而每一个可打印字符其实占1字节（8bit），故Base64是用4个字符（字节）编码3个字符（字节）来实现编码后不出现不可打印字符，代价是报文长度增加(4-3)/3=33%</p>
+<h2 id="">编码步骤</h2>
+<ul>
+<li>首先在二进制数据后填充若干个0，按照6bit对齐</li>
+<li>将二进制数据按照6bit切分为若干段，计算每一段二进制代表的数值。如下图切分后的第一段是010011，即十进制的19
+<img alt="base64encoding" src="./Base64编码/encode.png"/></li>
+<li>查表，根据数值查找其代表的可见字符，如上图第一段的19，查表可得T，所以第一段被编码为了T，以此类推文本MAN的Base64编码为TWFu
+<img alt="base64encoding1" src="./Base64编码/encode1.png"/></li>
+<li>用等号（=）填充编码后的字符串，使得字符串按照4个字符对齐
+<img alt="base64encoding2" src="./Base64编码/encode2.png"/></li>
+</ul>
+<h5 id="">注意</h5>
+<ul>
+<li>虽然说包括了等号共有65个字符，但是等号的个数是可以推测出来的（4字符对齐），所以其实可以不传输等号。（不过有些base64的库可能不允许这种没有等号填充的输入）</li>
+<li>Base64编码后都是可见字符，但是不代表我们可以在任何地方<strong>直接传输</strong>编码后数据，比如<strong>HTTP的GET，POST，COOKIE，都要将加号、等号进行url编码</strong>后才能传输</li>
+<li>Base64编码还是很容易判断的，一长串字符串只有[A-Za-z0-9+-]，并且常常以=结尾，都是Base64标志性特点。有时候看到<strong>一长串AAAAAA</strong>也可以作为判断的依据，因为A对应的是二进制000000，而在文件中，是经常存在大段空字节的。</li>
+</ul>
+<h2 id="">换行问题</h2>
+<p>实际使用中会发现有些库在输出base64编码后的字符串时，会每隔若干个字符(76个字符)后添加一个换行符（比如Linux Shell）。这其实是rfc2045中规定的（The encoded output stream must be represented in lines of no more
+   than 76 characters each.）。这是为了照顾古老的语言和古老的程序，比如MIME面对的基本都是C编写的SMTP服务器，而他们可能一行的缓冲有限，无法在一行接收过多的数据，在解码时，根据rfc2045中的规定，解码器会自动忽略其他字符，包括换行符，所以输入是否换行并不影响解码。</p>
+<p>所以其实换行的原因与Base64没有关系，而是与MIME使用场景有关，所以在后来Base64标准（rfc4648）中并未提到需要换行，而是指出依场景而定，所以在越高级的语言，比如Python，支持无限长的输入，其编码后的输出的就是无换行的字符串。</p>
+<p>由于换行的影响，Base64实际平均增加37%的报文长度。</p>
+<h2 id="">“字符串编码”问题</h2>
+<p>在使用Base64库时，有时能看到输入参数中有一个编码的选项，其实这个和Base64并没有关系，原因是Base64编码的是二进制，如果输入是一个字符串，就必须先转换为二进制数据，而字符串转为二进制或者二进制转为字符串就涉及到字符串编码问题了，而这些输入参数指的就是字符串编码。</p>
+<p>比如同样编码字符串“火日攻天”</p>
+<ul>
+<li>GB2312：<code>u/DI1bmlzOw=</code></li>
+<li>UTF-8: <code>54Gr5pel5pS75aSp</code></li>
+</ul>
+<h2 id="">解码</h2>
+<p>解码就是编码的逆过程，一般会根据输入是否为4字符倍数判断是不是正常的输入，然后去掉等号填充，查表得出对应得二进制流，最后按照8bit对齐去除多余填充的0即可。唯一需要注意的是，根据rfc2045，输入中所有非编码字符均会被忽略，不影响解码。</p>
+<h2 id="">实现</h2>
+<p>几乎所有语言都有Base64编码的库或者函数，这里以编解码firesun字符串为例子</p>
+<h4 id="linuxshell">Linux Shell</h4>
+<ul>
+<li>编码</li>
+</ul>
+<pre><code class="language-bash">echo -n "firesun"|base64  
+</code></pre>
+<ul>
+<li>解码</li>
+</ul>
+<pre><code class="language-bash">echo "ZmlyZXN1bg=="|base64 -d  
+</code></pre>
+<p>注：参数-n表示在最后不输出换行符</p>
+<h4 id="javascript">JavaScript</h4>
+<ul>
+<li>编码</li>
+</ul>
+<pre><code class="language-javascript">btoa("firesun")  
+</code></pre>
+<ul>
+<li>解码</li>
+</ul>
+<pre><code class="language-javascript">atob("ZmlyZXN1bg==")  
+</code></pre>
+<p>注：仅支持ASCII码</p>
+<h4 id="python">Python</h4>
+<ul>
+<li>编码</li>
+</ul>
+<pre><code class="language-python">import base64  
+base64.b64encode("firesun")  
+</code></pre>
+<ul>
+<li>解码</li>
+</ul>
+<pre><code class="language-python">import base64  
+base64.b64decode("ZmlyZXN1bg==")  
+</code></pre>
+<p>注：</p>
+<ul>
+<li>base64.encode()可以用来编码文件</li>
+<li>base64.encodestring()与base64.b64encode()都可以用来编码字符串，区别是b64encode还可以指定将+/替换成别的字符串</li>
+</ul>
+<h4 id="ruby">Ruby</h4>
+<ul>
+<li>编码</li>
+</ul>
+<pre><code class="language-ruby">require "base64"  
+encoded = Base64.encode64('firesun')  
+</code></pre>
+<ul>
+<li>解码</li>
+</ul>
+<pre><code class="language-ruby">require "base64"  
+decoded = Base64.decode64('ZmlyZXN1bg==')  
+</code></pre>
+<h4 id="php">PHP</h4>
+<ul>
+<li>编码</li>
+</ul>
+<pre><code class="language-php">echo base64_encode("firesun");  
+</code></pre>
+<ul>
+<li>解码</li>
+</ul>
+<pre><code class="language-php">echo base64decode("ZmlyZXN1bg==");  
+</code></pre>
+<h4 id="android">Android</h4>
+<ul>
+<li>编码</li>
+</ul>
+<pre><code class="language-java">import android.util.Base64;  
+String encoded = Base64.encodeToString("firesun".getBytes(), Base64.DEFAULT));  
+</code></pre>
+<ul>
+<li>解码</li>
+</ul>
+<pre><code class="language-java">import android.util.Base64;  
+String decoded = new String(Base64.decode("ZmlyZXN1bg==", Base64.DEFAULT));  
+</code></pre>
+<p>注：</p>
+<ul>
+<li>getBytes()和new String()时都可以显示指定字符串编码的（详见Java8实现），否者采用默认字符串编码。</li>
+<li>Base64.DEFAULT代表的输出会换行，需要输出不换行的需要使用Base64.NO_WRAP</li>
+</ul>
+<h4 id="java8">Java8</h4>
+<ul>
+<li>编码</li>
+</ul>
+<pre><code class="language-java">import java.util.Base64;  
+String encoded = Base64.getEncoder().encodeToString("firesun".getBytes("utf-8"));  
+</code></pre>
+<ul>
+<li>解码</li>
+</ul>
+<pre><code class="language-java">import android.util.Base64;  
+String decoded = new String(Base64.getDecoder().decode("ZmlyZXN1bg=="), "utf-8");  
+</code></pre>
+<p>注：</p>
+<ul>
+<li>可以用<code>Base64.getMimeEncoder().encodeToString("firesun".getBytes("utf-8"))</code>来输出带换行的编码结果</li>
+</ul>
+<h2 id="">类似的编码方案</h2>
+<h4 id="base64url">Base64url</h4>
+<p>全称Base 64 Encoding with URL and Filename Safe Alphabet，详见<a href="https://www.ietf.org/rfc/rfc4648.txt">rfc4648</a>，适用于URL和文件名等场景，使用减号与下划线代替了+/，防止编码后出现有歧义的符号(用于padding的等号并不是必须的，所以也不会造成影响)，也就不需要二次编码即可直接使用，在一些网页中有时能够见到形如“amF2YTg_amF2YTg=”的字符串，就是很明显的Base64url，在Java8中可以使用
+<code>Base64.getUrlEncoder().encodeToString("firesun".getBytes("utf-8"))</code>来调用Base64url编码</p>
+<h4 id="base32">Base32</h4>
+<p>32个可见字符编码，原理大同小异，编码字符[A-Z2-7]，=用于填充，最大的特点是只有大写没有小写，并且有可能出现2个以上的等号填充。以Python为例：  </p>
+<pre><code class="language-python">import base64  
+base64.b32encode("firesun")  
+base64.b32decode("MZUXEZLTOVXA====")  
+</code></pre>
+<h4 id="base16">Base16</h4>
+<p>别被名字骗了，这不就是数据16进制表示么（<strong>Hexadecimal</strong>），同样以Python为例（多种写法）：</p>
+<pre><code class="language-python">import binascii  
+binascii.b2a_hex("firesun")  
+binascii.b2a_hex(u"火日攻天".encode("utf-8"))  
+u"火日攻天".encode("utf-8").encode('hex')  
+binascii.a2b_hex("6669726573756e")  
+print 'e781abe697a5e694bbe5a4a9'.decode("hex").decode("utf-8")  
+</code></pre>
+<h4 id="utf7">UTF-7</h4>
+<p>同样是MIME的编码中的一种，UTF-7是一个修改的Base64（Modified Base64）。主要是将UTF-16的数据，用Base64的方法编码为可打印的ASCII字符序列。目的是传输Unicode数据。主要的区别在于不用等号"="补余，因为该字符通常需要大量的转义。</p>
+</div>
+<footer class="post-footer">
+<div class="post-author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<a class="post-author-avatar" href="http://www.firesun.me/">
+<img alt="火日攻天" itemprop="image" src="./Base64编码/avatar.png"/>
+</a>
+<div class="post-author-info">
+<h4 class="post-footer-heading">Written By</h4>
+<a class="post-author-name" href="http://www.firesun.me/" itemprop="url">
+<span itemprop="name">火日攻天</span>
+</a>
+<p class="post-author-bio" itemprop="description"></p>
+<p class="post-author-website">
+<a href="http://www.firesun.me/" rel="nofollow">http://www.firesun.me/</a>
+</p>
+<p class="post-info">
+<b class="post-info-title">Published on</b>
+<time class="post-date">April 14, 2016</time>
+</p>
+</div>
+</div>
+<div class="post-social">
+<h4 class="post-footer-heading">Spread the word</h4>
+<a data-action="share-twitter" href="#"><i class="fa fa-fw fa-lg fa-twitter"></i></a>
+<a data-action="share-facebook" href="#"><i class="fa fa-fw fa-lg fa-facebook"></i></a>
+<a data-action="share-gplus" href="#"><i class="fa fa-fw fa-lg fa-google-plus"></i></a>
+</div>
+</footer>
+</section>
+<section class="post-comments" itemprop="comment">
+<div id="disqus_thread"></div>
+</section>
+</article>
+<footer class="footer" role="contentinfo">
+<p><small>© 2017. All Rights Reserved.</small></p>
+<p><small><a href="http://ghostium.oswaldoacauan.com/" target="_blank">Ghostium Theme</a> by <a href="http://twitter.com/oswaldoacauan" target="_blank">@oswaldoacauan</a></small></p>
+<p><small>Proudly published with <a href="http://ghost.org" target="_blank">Ghost</a></small></p>
+</footer>
+</div>
+</section>
+<script type="text/javascript">
+  if(GHOSTIUM.haveDisqus) {
+    var disqus_identifier = '10';
+
+    if(typeof DISQUS !== 'object') {
+      (function () {
+      var s = document.createElement('script'); s.async = true;
+      s.type = 'text/javascript';
+      s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+      }());
+    }
+  } else {
+    document.querySelector('.post-comments').remove();
+  }
+</script>
+</div>
+</div>
+</div>
+</main>
+<script src="./Base64编码/jquery.ztree.core-3.5.min.js" type="text/javascript"></script>
+<script src="./Base64编码/jquery.ztree_toc.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	$('#tree').ztree_toc({
+	});
+});
+</script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?a05502e657ee797b511d22bf25fae2a5";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./Base64编码/foot-scripts.min.jsv=92699c119f"></script>
+<script type="text/javascript">
+
+      if(GHOSTIUM.haveDisqus) {
+        (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+        }());
+      }
+    </script>
+</body>
+</html>

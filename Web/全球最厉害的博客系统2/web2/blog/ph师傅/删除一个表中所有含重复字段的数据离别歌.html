@@ -1,0 +1,252 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./删除一个表中所有含重复字段的数据  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./删除一个表中所有含重复字段的数据  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./删除一个表中所有含重复字段的数据  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>删除一个表中所有含重复字段的数据 | 离别歌</title>
+<link href="./删除一个表中所有含重复字段的数据  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./删除一个表中所有含重复字段的数据  离别歌/styles.css" rel="stylesheet"/>
+<link href="./删除一个表中所有含重复字段的数据  离别歌/style.css" rel="stylesheet"/>
+<link href="./删除一个表中所有含重复字段的数据  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./删除一个表中所有含重复字段的数据  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./删除一个表中所有含重复字段的数据  离别歌/jquery.min.js"></script>
+<link href="./删除一个表中所有含重复字段的数据  离别歌/code.css" rel="stylesheet"/>
+<link href="./删除一个表中所有含重复字段的数据  离别歌/button.css" rel="stylesheet"/>
+<link href="./删除一个表中所有含重复字段的数据  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./删除一个表中所有含重复字段的数据  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/SQL/DelMore.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/SQL/DelMore.html&amp;text=%E5%88%A0%E9%99%A4%E4%B8%80%E4%B8%AA%E8%A1%A8%E4%B8%AD%E6%89%80%E6%9C%89%E5%90%AB%E9%87%8D%E5%A4%8D%E5%AD%97%E6%AE%B5%E7%9A%84%E6%95%B0%E6%8D%AE"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/SQL/DelMore.html&amp;title=%E5%88%A0%E9%99%A4%E4%B8%80%E4%B8%AA%E8%A1%A8%E4%B8%AD%E6%89%80%E6%9C%89%E5%90%AB%E9%87%8D%E5%A4%8D%E5%AD%97%E6%AE%B5%E7%9A%84%E6%95%B0%E6%8D%AE"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/SQL/DelMore.html&amp;is_video=false&amp;description=%E5%88%A0%E9%99%A4%E4%B8%80%E4%B8%AA%E8%A1%A8%E4%B8%AD%E6%89%80%E6%9C%89%E5%90%AB%E9%87%8D%E5%A4%8D%E5%AD%97%E6%AE%B5%E7%9A%84%E6%95%B0%E6%8D%AE"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E5%88%A0%E9%99%A4%E4%B8%80%E4%B8%AA%E8%A1%A8%E4%B8%AD%E6%89%80%E6%9C%89%E5%90%AB%E9%87%8D%E5%A4%8D%E5%AD%97%E6%AE%B5%E7%9A%84%E6%95%B0%E6%8D%AE&amp;body=Check out this article: https%3A//www.leavesongs.com/SQL/DelMore.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/SQL/DelMore.html&amp;title=%E5%88%A0%E9%99%A4%E4%B8%80%E4%B8%AA%E8%A1%A8%E4%B8%AD%E6%89%80%E6%9C%89%E5%90%AB%E9%87%8D%E5%A4%8D%E5%AD%97%E6%AE%B5%E7%9A%84%E6%95%B0%E6%8D%AE"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/SQL/DelMore.html&amp;title=%E5%88%A0%E9%99%A4%E4%B8%80%E4%B8%AA%E8%A1%A8%E4%B8%AD%E6%89%80%E6%9C%89%E5%90%AB%E9%87%8D%E5%A4%8D%E5%AD%97%E6%AE%B5%E7%9A%84%E6%95%B0%E6%8D%AE"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/SQL/DelMore.html&amp;title=%E5%88%A0%E9%99%A4%E4%B8%80%E4%B8%AA%E8%A1%A8%E4%B8%AD%E6%89%80%E6%9C%89%E5%90%AB%E9%87%8D%E5%A4%8D%E5%AD%97%E6%AE%B5%E7%9A%84%E6%95%B0%E6%8D%AE"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/SQL/DelMore.html&amp;title=%E5%88%A0%E9%99%A4%E4%B8%80%E4%B8%AA%E8%A1%A8%E4%B8%AD%E6%89%80%E6%9C%89%E5%90%AB%E9%87%8D%E5%A4%8D%E5%AD%97%E6%AE%B5%E7%9A%84%E6%95%B0%E6%8D%AE"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/SQL/DelMore.html&amp;name=%E5%88%A0%E9%99%A4%E4%B8%80%E4%B8%AA%E8%A1%A8%E4%B8%AD%E6%89%80%E6%9C%89%E5%90%AB%E9%87%8D%E5%A4%8D%E5%AD%97%E6%AE%B5%E7%9A%84%E6%95%B0%E6%8D%AE&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">删除一个表中所有含重复字段的数据</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年5月19日 22:42" itemprop="datePublished">
+                    2013 五月 19 22:42
+                </time>
+</div>
+<div class="article-tag">
+            阅读：6885
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/SQL">SQL</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/SQL">SQL</a>,
+                
+                <a class="tag-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93">数据库</a>,
+                
+                <a class="tag-link" href="/tag/sqlite">sqlite</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>    这天写了一个管理社工库的软件，就用我最熟悉的SQLite数据库，把从各处导出的数据（账号、密码、邮箱）存到本地数据库里，以后也方便随时查找。</p>
+<p>    其中需要一个功能，有的人喜欢用一个邮箱注册很多账号，产生了一些多余的数据。我们可以通过SQL语句批量删除user_email重复的数据，只保留其user_id值最小的那一行。</p>
+<pre class="brush:sql;">DELETE FROM datebase  WHERE user_email IN (SELECT user_email FROM datebase GROUP BY user_email HAVING COUNT(user_email) &gt; 1)  AND user_id NOT IN (SELECT MIN(user_id) FROM datebase GROUP BY user_email HAVING COUNT( user_email )&gt;1);</pre> <p>    看起来很长，我们来分析一下。DELETE FROM datebase,我的表名叫datebase，这个不说了。WHERE user_email IN，我的email字段的名字叫user_email，我们主要看后面括号中的内容。括号中是一个子句：SELECT user_email FROM datebase GROUP BY user_email HAVING COUNT(user_email) &gt; 1，意思是：在datebase表中查找COUNT(user_email)大于1的行。</p>
+<p>    COUNT(x)是计算x的个数，COUNT(user_email) &gt; 1就指user_name重复的行。而结合GROUP BY使得select出来的行不再重复。所以DELETE FROM datebase WHERE user_email IN （select的返回值）就是删除所有user_name重复的行。</p>
+<p>    然后后面又跟了一个NOT IN，也就是要排除的行。和前面一句一样，只是SELECT的内容变成了MIN(user_id),也就是说我们在重复的内容里找user_id最小的那一行，最后把它排除不删。</p>
+<p>    这句话有些难以理解，但是对于熟悉了GROUP BY、COUNT的同学理解起来也不难。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2321">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./删除一个表中所有含重复字段的数据  离别歌/c56450e7043bb8b137fe956d8f90bcd4.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">月痕影</a>
+<time datetime="2016年4月14日 21:06" itemprop="datePublished">
+                            2016 四月 14 21:06
+                        </time>
+<a href="javascript:reply_to('2321', '月痕影')">回复</a>
+</p>
+<p class="comment-meta">为什么要选出user_id最小的数据并不删除呢</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2324">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./删除一个表中所有含重复字段的数据  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年4月19日 02:08" itemprop="datePublished">
+                            2016 四月 19 02:08
+                        </time>
+<a href="javascript:reply_to('2324', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@月痕影：因为要留一个啊。。。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2011">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./删除一个表中所有含重复字段的数据  离别歌/fb8c7a3b76e6c916ad99a9519e8a8fe0.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.xmten.com/" target="_blank">肉牛</a>
+<time datetime="2015年4月6日 11:31" itemprop="datePublished">
+                            2015 四月 06 11:31
+                        </time>
+<a href="javascript:reply_to('2011', '肉牛')">回复</a>
+</p>
+<p class="comment-meta">好文章，内容气贯长虹.禁止此消息：nolinkok@163.com</p>
+</div>
+</div>
+<div class="row" id="comment-1336">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./删除一个表中所有含重复字段的数据  离别歌/3138779a921420fb4cc091faffd66ba9.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.squidoo.com/best-cheap-cowboy-boots-for-wome-ladies-red-pink-bla" target="_blank">Laurie</a>
+<time datetime="2013年5月24日 05:48" itemprop="datePublished">
+                            2013 五月 24 05:48
+                        </time>
+<a href="javascript:reply_to('1336', 'Laurie')">回复</a>
+</p>
+<p class="comment-meta">感谢分享！超级赞！</p>
+</div>
+</div>
+<div class="row" id="comment-1331">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./删除一个表中所有含重复字段的数据  离别歌/31fd49e58ab8024125755b2c5024a51f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">新锦江娱乐城</a>
+<time datetime="2013年5月20日 11:05" itemprop="datePublished">
+                            2013 五月 20 11:05
+                        </time>
+<a href="javascript:reply_to('1331', '新锦江娱乐城')">回复</a>
+</p>
+<p class="comment-meta">妥~很实用，学习了！！！</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="bb1125040cd0c03c5a0ccb933c45348e3755bf56"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./删除一个表中所有含重复字段的数据  离别歌/bb1125040cd0c03c5a0ccb933c45348e3755bf56"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="255">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="WETfr4Sdc8CzTX2lBeffaHNtnbGQtuMJuYeLfy4sDVwYTCqApvJZJlPywf9YcYBT"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./删除一个表中所有含重复字段的数据  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./删除一个表中所有含重复字段的数据  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,373 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./sqlite3的C语言使用(三)  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./sqlite3的C语言使用(三)  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./sqlite3的C语言使用(三)  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>sqlite3的C语言使用(三) | 离别歌</title>
+<link href="./sqlite3的C语言使用(三)  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./sqlite3的C语言使用(三)  离别歌/styles.css" rel="stylesheet"/>
+<link href="./sqlite3的C语言使用(三)  离别歌/style.css" rel="stylesheet"/>
+<link href="./sqlite3的C语言使用(三)  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./sqlite3的C语言使用(三)  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./sqlite3的C语言使用(三)  离别歌/jquery.min.js"></script>
+<link href="./sqlite3的C语言使用(三)  离别歌/code.css" rel="stylesheet"/>
+<link href="./sqlite3的C语言使用(三)  离别歌/button.css" rel="stylesheet"/>
+<link href="./sqlite3的C语言使用(三)  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./sqlite3的C语言使用(三)  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/C/sqlite3_3.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/C/sqlite3_3.html&amp;text=sqlite3%E7%9A%84C%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%28%E4%B8%89%29"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/C/sqlite3_3.html&amp;title=sqlite3%E7%9A%84C%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%28%E4%B8%89%29"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/C/sqlite3_3.html&amp;is_video=false&amp;description=sqlite3%E7%9A%84C%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%28%E4%B8%89%29"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=sqlite3%E7%9A%84C%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%28%E4%B8%89%29&amp;body=Check out this article: https%3A//www.leavesongs.com/C/sqlite3_3.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/C/sqlite3_3.html&amp;title=sqlite3%E7%9A%84C%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%28%E4%B8%89%29"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/C/sqlite3_3.html&amp;title=sqlite3%E7%9A%84C%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%28%E4%B8%89%29"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/C/sqlite3_3.html&amp;title=sqlite3%E7%9A%84C%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%28%E4%B8%89%29"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/C/sqlite3_3.html&amp;title=sqlite3%E7%9A%84C%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%28%E4%B8%89%29"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/C/sqlite3_3.html&amp;name=sqlite3%E7%9A%84C%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%28%E4%B8%89%29&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">sqlite3的C语言使用(三)</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年3月30日 17:31" itemprop="datePublished">
+                    2013 三月 30 17:31
+                </time>
+</div>
+<div class="article-tag">
+            阅读：14634
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/C">C/C++</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93%E9%80%9F%E5%BA%A6">数据库速度</a>,
+                
+                <a class="tag-link" href="/tag/sqlite_bind">sqlite_bind</a>,
+                
+                <a class="tag-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93">数据库</a>,
+                
+                <a class="tag-link" href="/tag/sqlite">sqlite</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+<span style="font-size:14px;">    估计这是sqlite系列最后一篇，sqlite的基本功能这一篇写完了就应该差不多了，不过还有更多高级功能大家可以自己去发现。<a href="https://www.leavesongs.com/C/sqlite3_2.html" target="_blank">上一篇</a></span>
+</p>
+<p>
+<span style="font-size:14px;">    我们今天目标是写一个程序，把我们的字典文件pass.txt中的所有密码导入数据库中。我们的pass.txt中有93K多的数据行数，我们可以通过这个程序来测试sqlite的速度。</span>
+</p>
+<p>
+<a href="https://www.leavesongs.com/content/uploadfile/201303/a0171364637234.jpg" id="ematt:77" target="_blank"><img alt="点击查看原图" border="0" src="./sqlite3的C语言使用(三)  离别歌/thum-a0171364637234.jpg"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    像往常一样，先建立一个sqlite3变量db，并新建一个数据库文件xxx.db，再创建一个表pass，如下：</span>
+</p>
+<pre class="brush:cpp;">	sqlite3 * db;
+	char * errmsg;
+	int i = 0;
+	sqlite3_open("xxx.db",&amp;db);
+	int rc = sqlite3_exec(db,"CREATE TABLE IF NOT EXISTS pass(pass_id INTEGER PRIMARY KEY,pass_text VARCHAR(64) UNIQUE);",NULL,NULL,&amp;errmsg);
+	if (SQLITE_OK != rc)
+	{
+		printf("%s\n",errmsg);
+		return 0;
+	}</pre>
+<p>
+<span style="font-size:14px;">    表中就两个字段，pass_id是主键，不管有没有作用，每个表中最好有一个主键。pass_text保存密码的明文。现在我介绍一个sql语句新的用法：使用通配符创建一个sql语句，然后用sqlite3_bind来给sql绑定数据。</span>
+</p>
+<p>
+<span style="font-size:14px;">    比如我们现在可以定义一个sql语句：</span>
+</p>
+<pre class="brush:cpp;">    char sql[256] = "INSERT INTO pass(pass_text) VALUES(?);";</pre>
+<p>
+<span style="font-size:14px;">    这条语句中加入了“?”通配符，如果直接执行这个语句的话，是不会成功的。我们需要把数据绑定到这个sql语句里。这样做有什么好处呢？当我们要插入大量数据的时候，我们如果每插入每个语句都用sqlite3_prepare来准备一下sql语句的话会非常慢，所以我们用通配符先建立一个sql语句，用sqlite3_prepare来准备好。再进入循环，每次循环只需调用sqlite3_bind之类的函数给通配符赋值，再用sqlite3_step来执行即可。一个程序里面只调用一次sqlite3_prepare，大大减少了运行时间。</span>
+</p>
+<p>
+<span style="font-size:14px;">    所以我们的程序接下来可以这么写：</span>
+</p>
+<pre class="brush:cpp;">	sqlite3_stmt * stmt;
+	sqlite3_prepare(db,sql,-1,&amp;stmt,NULL);
+	char szPass[256];
+	FILE * pf = fopen("pass.txt","r");
+	int nRow = CountRow(pf);
+	//自己写一个CountRow函数计算字典所有行数
+	fseek(pf,0,SEEK_SET);
+	//将文件流指针定位到文件开头
+	sqlite3_exec(db, "begin;",NULL,NULL,NULL);
+	//开启sqlite事务，加快插入db速度(重要)
+	while (fgets(szPass,256,pf) != NULL)
+	{
+		sqlite3_bind_text(stmt,1,szPass,-1,SQLITE_STATIC);
+		rc = sqlite3_step(stmt);
+		if (SQLITE_DONE != rc)
+		{
+			printf("数据%s重复或插入出错\n",szPass);
+			printf("是否继续(1继续0退出)\n");
+			int n;
+			scanf("%d",&amp;n);
+			if (1 == n)
+			{
+				continue;
+			} 
+			else
+			{
+				break;
+			}
+		}
+		sqlite3_reset(stmt);
+		i++;
+		if (i % (nRow / 100) == 0)
+		{
+			printf("已完成%02d/%d\n",i,nRow);
+		}
+	}
+	sqlite3_exec(db,"commit;",NULL,NULL,NULL);
+	//关闭sqlite事务
+	sqlite3_finalize(stmt);
+	sqlite3_close(db);
+	fclose(pf);
+	printf("完成\n");
+	return 0;
+}</pre>
+<p>
+<span style="font-size:14px;">    大家可以看到，我们的while循环第一句是sqlite3_bind_text函数，这个函数是sqlite3_bind一组函数的其中之一，作用就是将字符串类型的数据绑定到通配符?上。比如通过fgets函数我们得到的密码是123456，则绑定之后我们的sql语句变成了"INSERT INTO pass(pass_text) VALUES('123456');"。再使用sqlite3_step执行它，就可以完成一个密码的插入工作。</span>
+</p>
+<p>
+<span style="font-size:14px;">    下面是所有sqlite3_bind函数，从函数名大概就能知道是干什么的。<a href="http://www.sqlite.org/c3ref/bind_blob.html" target="_blank">官方文档</a></span>
+</p>
+<table border="1" cellpadding="1" cellspacing="1" style="width:500px;">
+<tbody>
+<tr>
+<td>
+<pre>int sqlite3_bind_blob(sqlite3_stmt*, int, const void*, int n, void(*)(void*));
+int sqlite3_bind_double(sqlite3_stmt*, int, double);
+int sqlite3_bind_int(sqlite3_stmt*, int, int);
+int sqlite3_bind_int64(sqlite3_stmt*, int, sqlite3_int64);
+int sqlite3_bind_null(sqlite3_stmt*, int);
+int sqlite3_bind_text(sqlite3_stmt*, int, const char*, int n, void(*)(void*));
+int sqlite3_bind_text16(sqlite3_stmt*, int, const void*, int, void(*)(void*));
+int sqlite3_bind_value(sqlite3_stmt*, int, const sqlite3_value*);
+int sqlite3_bind_zeroblob(sqlite3_stmt*, int, int n);</pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>
+<span style="font-size:14px;">    我就说说我们用的sqlite3_bind_text各个参数的意思：第一个参数是stmt，sql语句的句柄；第二个参数是通配符的索引(也就是给第几个通配符绑定值)，从1开始；第三个参数是待绑定的字符串；第四个参数是字符串长度，我填-1表示“字符串从第一个字符开始到第一个\0结束”；第五个参数我填入SQLITE_STATIC，意思是“当本函数执行失败就释放通配符”。</span>
+</p>
+<p>
+<span style="font-size:14px;">    其他的sqlite3_bind与此类似，不再赘述。</span>
+</p>
+<p>
+<span style="font-size:14px;">    继续看循环体，我写的if语句的作用主要是防止有重复的密码出现(因为我的字段pass_text是unique约束，如果密码重复INSERT语句就会出错)。如果有重复密码出现，让用户决定是否继续运行程序。这个功能也可以去掉，重复密码出现虽然会出错，但也不会影响下一条语句的执行。</span>
+</p>
+<p>
+<span style="font-size:14px;">    继续看循环体，if语句后面有一个sqlite3_reset(stmt);意思是重新设置stmt，每次sqlite3_step后都要重设一次，才能再次给sql语句绑定。</span>
+</p>
+<p>
+<span style="font-size:14px;">    继续看循环体，后面又有一个if语句，作用是计算一下执行了多少语句，告诉用户。如果我们待插入的数据很多，程序运行很久，最好在每隔一段时间告诉用户执行了多少数据。这个功能去掉也可以。</span>
+</p>
+<p>
+<span style="font-size:14px;">    循环体完了就代表程序执行结束了，再使用sqlite3_finalize释放stmt句柄，sqlite3_close释放db连接，fclose关闭pass.txt文件。这些操作都是写C程序的基本素质。</span>
+</p>
+<p>
+<span style="font-size:14px;">    刚才介绍的时候我跳过了两条语句sqlite3_exec(db, "begin;",NULL,NULL,NULL);和sqlite3_exec(db, "commit;",NULL,NULL,NULL);这两条语句作用是开启/关闭事务。如果我们不运行begin;命令，sqlite会在执行每条操作的时候自动运行它，我们数据有9W多条，我们就要运行9W多次，速度慢上成百上千倍(大家可以试着把这两条语句注释掉再运行程序，插入900条数据就要2分钟)</span>
+</p>
+<p>
+<span style="font-size:14px;">    我们来看看运行结果：</span>
+</p>
+<p>
+<span style="font-size:14px;"><a href="https://www.leavesongs.com/content/uploadfile/201303/11f51364638836.jpg" id="ematt:78" target="_blank"><img alt="点击查看原图" border="0" src="./sqlite3的C语言使用(三)  离别歌/thum-11f51364638836.jpg"/></a></span>
+</p>
+<p>
+<span style="font-size:14px;">    在我的电脑上不到两秒就运行完了，得到了一个3517KB的数据库文件xxx.db。</span>
+</p>
+<p>
+<span style="font-size:14px;">    最后，来说说我对sqlite数据库的评价。我觉得sqlite数据库小巧方便，虽然功能上无法和mysql这种关系型数据库比较，但是速度却一点也不输给其他大型数据库。特别是在嵌入型的程序中，sqlite可以说是首选了吧。我会把我这次的工程文件(包括字典pass.txt和sqlite3的库文件sqlite3.dll、sqlite3.lib、sqlite3.h)在附件里打包给大家，用VS2010建的工程，主要的代码都在sqlite_bind_test.cpp中。</span>
+</p>
+<p>
+	     附件：<span class="attachment"><a href="https://www.leavesongs.com/content/uploadfile/201303/bd5e1364639027.rar" target="_blank">sqlite_bind_test.rar</a></span>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1322">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./sqlite3的C语言使用(三)  离别歌/cf4762e1d0515a1051a98afbdf2f932f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">温州期货开户</a>
+<time datetime="2013年4月10日 18:38" itemprop="datePublished">
+                            2013 四月 10 18:38
+                        </time>
+<a href="javascript:reply_to('1322', '温州期货开户')">回复</a>
+</p>
+<p class="comment-meta">很专业，学习下，支持下博主。</p>
+</div>
+</div>
+<div class="row" id="comment-1317">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./sqlite3的C语言使用(三)  离别歌/b678d16a95a97280a33ba4b5df82b62b.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.dute.me/" target="_blank">godaddy 优惠码</a>
+<time datetime="2013年4月7日 17:21" itemprop="datePublished">
+                            2013 四月 07 17:21
+                        </time>
+<a href="javascript:reply_to('1317', 'godaddy 优惠码')">回复</a>
+</p>
+<p class="comment-meta">技术派啊~~~膜拜！</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1318">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./sqlite3的C语言使用(三)  离别歌/9f767c3f96e1bf3c8adf3290c23bce2f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">落沐萧萧</a>
+<time datetime="2013年4月7日 17:52" itemprop="datePublished">
+                            2013 四月 07 17:52
+                        </time>
+<a href="javascript:reply_to('1318', '落沐萧萧')">回复</a>
+</p>
+<p class="comment-meta">@godaddy 优惠码：你的博客还挺有用！</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1319">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./sqlite3的C语言使用(三)  离别歌/b678d16a95a97280a33ba4b5df82b62b.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.dute.me/" target="_blank">独特优惠码</a>
+<time datetime="2013年4月8日 16:13" itemprop="datePublished">
+                            2013 四月 08 16:13
+                        </time>
+<a href="javascript:reply_to('1319', '独特优惠码')">回复</a>
+</p>
+<p class="comment-meta">@落沐萧萧：谢谢，你的博客也很不错，常来往~</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="877e716ba0ccdc4411bdffdba93c5b4ace60b0eb"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./sqlite3的C语言使用(三)  离别歌/877e716ba0ccdc4411bdffdba93c5b4ace60b0eb"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="244">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="eDEKYcv0hgQyCyZ4Aso5Pm9DKvnEntXRMXZgMGHfI3KXCdnjoJSPo0bITzQM6XM1"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./sqlite3的C语言使用(三)  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./sqlite3的C语言使用(三)  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

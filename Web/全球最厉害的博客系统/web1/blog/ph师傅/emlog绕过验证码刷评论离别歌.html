@@ -1,0 +1,518 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./emlog绕过验证码刷评论  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./emlog绕过验证码刷评论  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./emlog绕过验证码刷评论  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>emlog绕过验证码刷评论 | 离别歌</title>
+<link href="./emlog绕过验证码刷评论  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./emlog绕过验证码刷评论  离别歌/styles.css" rel="stylesheet"/>
+<link href="./emlog绕过验证码刷评论  离别歌/style.css" rel="stylesheet"/>
+<link href="./emlog绕过验证码刷评论  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./emlog绕过验证码刷评论  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./emlog绕过验证码刷评论  离别歌/jquery.min.js"></script>
+<link href="./emlog绕过验证码刷评论  离别歌/code.css" rel="stylesheet"/>
+<link href="./emlog绕过验证码刷评论  离别歌/button.css" rel="stylesheet"/>
+<link href="./emlog绕过验证码刷评论  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./emlog绕过验证码刷评论  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/emlog-comment-captcha-bypass.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/emlog-comment-captcha-bypass.html&amp;text=emlog%E7%BB%95%E8%BF%87%E9%AA%8C%E8%AF%81%E7%A0%81%E5%88%B7%E8%AF%84%E8%AE%BA"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/emlog-comment-captcha-bypass.html&amp;title=emlog%E7%BB%95%E8%BF%87%E9%AA%8C%E8%AF%81%E7%A0%81%E5%88%B7%E8%AF%84%E8%AE%BA"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/emlog-comment-captcha-bypass.html&amp;is_video=false&amp;description=emlog%E7%BB%95%E8%BF%87%E9%AA%8C%E8%AF%81%E7%A0%81%E5%88%B7%E8%AF%84%E8%AE%BA"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=emlog%E7%BB%95%E8%BF%87%E9%AA%8C%E8%AF%81%E7%A0%81%E5%88%B7%E8%AF%84%E8%AE%BA&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/emlog-comment-captcha-bypass.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/emlog-comment-captcha-bypass.html&amp;title=emlog%E7%BB%95%E8%BF%87%E9%AA%8C%E8%AF%81%E7%A0%81%E5%88%B7%E8%AF%84%E8%AE%BA"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/emlog-comment-captcha-bypass.html&amp;title=emlog%E7%BB%95%E8%BF%87%E9%AA%8C%E8%AF%81%E7%A0%81%E5%88%B7%E8%AF%84%E8%AE%BA"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/emlog-comment-captcha-bypass.html&amp;title=emlog%E7%BB%95%E8%BF%87%E9%AA%8C%E8%AF%81%E7%A0%81%E5%88%B7%E8%AF%84%E8%AE%BA"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/emlog-comment-captcha-bypass.html&amp;title=emlog%E7%BB%95%E8%BF%87%E9%AA%8C%E8%AF%81%E7%A0%81%E5%88%B7%E8%AF%84%E8%AE%BA"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/emlog-comment-captcha-bypass.html&amp;name=emlog%E7%BB%95%E8%BF%87%E9%AA%8C%E8%AF%81%E7%A0%81%E5%88%B7%E8%AF%84%E8%AE%BA&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">emlog绕过验证码刷评论</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年6月17日 16:34" itemprop="datePublished">
+                    2015 六月 17 16:34
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3481
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/emlog">emlog</a>,
+                
+                <a class="tag-link" href="/tag/%E9%AA%8C%E8%AF%81%E7%A0%81">验证码</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>最近博客常常被人刷评论，最狠的一次被刷了10000多广告。</p>
+<p>先看看评论验证码是怎么检查的。</p>
+<p>emlog/include/controller/comment_controller.php，先获得$imgcode：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nv">$imgcode</span> <span class="o">=</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'imgcode'</span><span class="p">])</span> <span class="o">?</span> <span class="nb">addslashes</span><span class="p">(</span><span class="nb">trim</span><span class="p">(</span><span class="nb">strtoupper</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'imgcode'</span><span class="p">])))</span> <span class="o">:</span> <span class="s1">''</span><span class="p">;</span>
+</pre></div>
+<p>检查：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="o">...</span>
+<span class="p">}</span> <span class="k">elseif</span> <span class="p">(</span><span class="nx">ISLOGIN</span> <span class="o">==</span> <span class="k">false</span> <span class="o">&amp;&amp;</span> <span class="nx">Option</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">'comment_code'</span><span class="p">)</span> <span class="o">==</span> <span class="s1">'y'</span> <span class="o">&amp;&amp;</span> <span class="nb">session_start</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="nv">$imgcode</span> <span class="o">!=</span> <span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">'code'</span><span class="p">])</span> <span class="p">{</span>
+    <span class="nx">emMsg</span><span class="p">(</span><span class="s1">'评论失败：验证码错误'</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>上述代码，几个判断依次是：</p>
+<ol>
+<li>没有登录（非管理员和作者）</li>
+<li>后台开启了评论验证码</li>
+<li>开启session</li>
+<li>将session中的code与$imgcode比较，不相等则验证码错误</li>
+</ol>
+<p>第4步明显有问题。熟悉php验证码流程的同学应该清楚，验证码生成的时候将会设置一个session，这里就是code，再和POST过来的也就是用户输入的做比较。</p>
+<p>然而如果我们并没有访问验证码生成页面，那么也就没生成session。那么$_SESSION['code']就是NULL。</p>
+<p>php中==是弱类型比较，NULL和''（空字符串）比较的结果是TRUE的。</p>
+<p>所以这里，我们的$imgcode如果输入一个空值，并且不去访问生成验证码的页面，那么这个<code>$imgcode != $_SESSION['code']</code>就不成立，就不会提示验证码错误，从而绕过了验证码检查逻辑。</p>
+<p>所以，我这里做测试。</p>
+<p>先正常留言，填写验证码，中途抓包：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201506/d1611434530236.png"><img alt="QQ20150614-1@2x.png" src="./emlog绕过验证码刷评论  离别歌/thum-d1611434530236.png"/></a> </p>
+<p>将PHPSESSID修改成随意一个值，目的是让其$_SESSION不存在。再将imgcode修改成空：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201506/b6d71434530237.png"><img alt="QQ20150614-2@2x.png" src="./emlog绕过验证码刷评论  离别歌/thum-b6d71434530237.png"/></a></p>
+<p>发送数据包，可见没有提示失败（302跳转了），说明评论成功：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201506/9d811434530239.png"><img alt="QQ20150614-3@2x.png" src="./emlog绕过验证码刷评论  离别歌/thum-9d811434530239.png"/></a></p>
+<p>载入一个字典，即可刷评论：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201506/28ab1434530241.png"><img alt="QQ20150614-4@2x.png" src="./emlog绕过验证码刷评论  离别歌/thum-28ab1434530241.png"/></a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201506/34821434530244.png"><img alt="QQ20150614-5@2x.png" src="./emlog绕过验证码刷评论  离别歌/thum-34821434530244.png"/></a></p>
+<p>修复方法是判断session是否为空：</p>
+<div class="codehilite"><pre><span></span>empty($_SESSION['code']) || $_SESSION['code'] != $imgcode
+</pre></div>
+<p>不满足这个条件即提示错误。</p>
+<p>另外的方法是和我博客一样，使用第三方验证码，简洁又方便：<a href="http://t.cn/R2TK6h9">极验</a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2400">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/867369bc95eb89c8076f2a12025e37eb.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://御坂网络.com" target="_blank">御坂网络</a>
+<time datetime="2016年7月26日 21:59" itemprop="datePublished">
+                            2016 七月 26 21:59
+                        </time>
+<a href="javascript:reply_to('2400', '御坂网络')">回复</a>
+</p>
+<p class="comment-meta">御坂网络御坂网络御坂网络御坂网络御坂网络</p>
+</div>
+</div>
+<div class="row" id="comment-2399">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/867369bc95eb89c8076f2a12025e37eb.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://御坂网络.com" target="_blank">御坂网络</a>
+<time datetime="2016年7月26日 21:36" itemprop="datePublished">
+                            2016 七月 26 21:36
+                        </time>
+<a href="javascript:reply_to('2399', '御坂网络')">回复</a>
+</p>
+<p class="comment-meta">御坂网络御坂网络御坂网络</p>
+</div>
+</div>
+<div class="row" id="comment-2398">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/867369bc95eb89c8076f2a12025e37eb.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://御坂网络.com" target="_blank">御坂网络</a>
+<time datetime="2016年7月26日 21:27" itemprop="datePublished">
+                            2016 七月 26 21:27
+                        </time>
+<a href="javascript:reply_to('2398', '御坂网络')">回复</a>
+</p>
+<p class="comment-meta">御坂网络</p>
+</div>
+</div>
+<div class="row" id="comment-2397">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/ff73f117f5f411a1aa2568948e74c86d.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.test404.com" target="_blank">test404</a>
+<time datetime="2016年7月26日 21:22" itemprop="datePublished">
+                            2016 七月 26 21:22
+                        </time>
+<a href="javascript:reply_to('2397', 'test404')">回复</a>
+</p>
+<p class="comment-meta">然而没什么卵用 www.test404.com</p>
+</div>
+</div>
+<div class="row" id="comment-2396">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/56b6addc11fc89ccffdbff8f482a0e39.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.test404.com" target="_blank">Test</a>
+<time datetime="2016年7月26日 21:03" itemprop="datePublished">
+                            2016 七月 26 21:03
+                        </time>
+<a href="javascript:reply_to('2396', 'Test')">回复</a>
+</p>
+<p class="comment-meta">楼主这个验证有点6我得好好研究...</p>
+</div>
+</div>
+<div class="row" id="comment-2395">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/56b6addc11fc89ccffdbff8f482a0e39.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.test404.com" target="_blank">Test</a>
+<time datetime="2016年7月26日 20:50" itemprop="datePublished">
+                            2016 七月 26 20:50
+                        </time>
+<a href="javascript:reply_to('2395', 'Test')">回复</a>
+</p>
+<p class="comment-meta">测试....</p>
+</div>
+</div>
+<div class="row" id="comment-2328">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/b642b4217b34b1e8d3bd915fc65c4452.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">404notfound</a>
+<time datetime="2016年5月8日 23:34" itemprop="datePublished">
+                            2016 五月 08 23:34
+                        </time>
+<a href="javascript:reply_to('2328', '404notfound')">回复</a>
+</p>
+<p class="comment-meta">p师父 为什么修改phpsessionid就能使服务端session为空？这两者有关系吗，还是eblog中生成验证码和phpsessionid有关</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2329">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年5月10日 16:00" itemprop="datePublished">
+                            2016 五月 10 16:00
+                        </time>
+<a href="javascript:reply_to('2329', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@404notfound：回去学习HTTP基础，包括SESSION是怎么认证的。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2154">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/5543900d03fb3f88852fbef3733157a5.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.test.com" target="_blank">小张</a>
+<time datetime="2015年6月21日 22:48" itemprop="datePublished">
+                            2015 六月 21 22:48
+                        </time>
+<a href="javascript:reply_to('2154', '小张')">回复</a>
+</p>
+<p class="comment-meta">你好我的站被黑了 帮忙下 我可以出费用</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2155">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年6月21日 23:01" itemprop="datePublished">
+                            2015 六月 21 23:01
+                        </time>
+<a href="javascript:reply_to('2155', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@小张：抱歉，实在没时间~</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2152">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/18a9fb1e26e2e71853896c41b95c2662.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://qiukong.com" target="_blank">c</a>
+<time datetime="2015年6月20日 11:00" itemprop="datePublished">
+                            2015 六月 20 11:00
+                        </time>
+<a href="javascript:reply_to('2152', 'c')">回复</a>
+</p>
+<p class="comment-meta">empty大法好！<br>如果不需要0之类的我都用empty糊上……</br></p>
+</div>
+</div>
+<div class="row" id="comment-2147">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/bacb85dc885e2fb67422b43e8857112f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://th1nk.info" target="_blank">Th1nk</a>
+<time datetime="2015年6月18日 23:28" itemprop="datePublished">
+                            2015 六月 18 23:28
+                        </time>
+<a href="javascript:reply_to('2147', 'Th1nk')">回复</a>
+</p>
+<p class="comment-meta">请将广告引到我的博客。开站两年没有留言了。</p>
+</div>
+</div>
+<div class="row" id="comment-2144">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/375c74e9763669741996ca3094258cf8.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.xlonewolf.net" target="_blank">lonewolf</a>
+<time datetime="2015年6月18日 05:51" itemprop="datePublished">
+                            2015 六月 18 05:51
+                        </time>
+<a href="javascript:reply_to('2144', 'lonewolf')">回复</a>
+</p>
+<p class="comment-meta">如果评论没有开启验证码这个功能呢，</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2145">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年6月18日 11:34" itemprop="datePublished">
+                            2015 六月 18 11:34
+                        </time>
+<a href="javascript:reply_to('2145', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@lonewolf：那就没事。</p>
+</div>
+</div>
+<div class="row" id="comment-2146">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/7f3a0aa00bb9edef1339fc5f84ccdccf.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.mrxn.net" target="_blank">mrxn</a>
+<time datetime="2015年6月18日 15:28" itemprop="datePublished">
+                            2015 六月 18 15:28
+                        </time>
+<a href="javascript:reply_to('2146', 'mrxn')">回复</a>
+</p>
+<p class="comment-meta">@lonewolf：我的就一直没开验证码 哈哈  我的书打勾勾</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2274">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/526abbc299c8074cc804f454d5102ab4.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.4848438.com" target="_blank">小胖</a>
+<time datetime="2015年12月30日 12:36" itemprop="datePublished">
+                            2015 十二月 30 12:36
+                        </time>
+<a href="javascript:reply_to('2274', '小胖')">回复</a>
+</p>
+<p class="comment-meta">@mrxn：牛</p>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2142">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/67c0356097c6194ea37bb16439a559f5.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.hackhp.com" target="_blank">hackhp</a>
+<time datetime="2015年6月18日 00:35" itemprop="datePublished">
+                            2015 六月 18 00:35
+                        </time>
+<a href="javascript:reply_to('2142', 'hackhp')">回复</a>
+</p>
+<p class="comment-meta">厉害，这样都能发现！我把默认的评论地址改掉以后，就没有出现垃圾评论了！</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2143">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年6月18日 00:40" itemprop="datePublished">
+                            2015 六月 18 00:40
+                        </time>
+<a href="javascript:reply_to('2143', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@hackhp：机器人应该就是只扫那些默认的，但如果特地去刷你博客的评论的话就没辙了，毕竟漏洞是存在的~</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2140">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/b2c9ede1125ff3b622834df7cb2cf417.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.neurallinker.com" target="_blank">御坂网络</a>
+<time datetime="2015年6月18日 00:32" itemprop="datePublished">
+                            2015 六月 18 00:32
+                        </time>
+<a href="javascript:reply_to('2140', '御坂网络')">回复</a>
+</p>
+<p class="comment-meta">贵站的评论验证码能防止用工具刷评论吗.<br>如果能,原理是什么.</br></p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2141">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog绕过验证码刷评论  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年6月18日 00:34" itemprop="datePublished">
+                            2015 六月 18 00:34
+                        </time>
+<a href="javascript:reply_to('2141', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@御坂网络：原理我也不知道，可以自己调试看看，是极验提供的第三方验证码服务。</p>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="b02bfca3878b146a979596598ac054821635e1cb"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="/captcha/image/b02bfca3878b146a979596598ac054821635e1cb/"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="361">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="Ps9l4kK0pHHpS011OkfFKkDbopxuFJJ8nMuRSOWfQuBOSFpgCBJpjYFgxt0Codyi"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./emlog绕过验证码刷评论  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./emlog绕过验证码刷评论  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE doctype html>
+
+<html class="theme-next mist use-motion" lang="">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<meta content="no-transform" http-equiv="Cache-Control"/>
+<meta content="no-siteapp" http-equiv="Cache-Control"/>
+<link href="./php输出缓冲与http的联系Yiruma/jquery.fancybox.cssv=2.1.5" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css"/>
+<link href="./php输出缓冲与http的联系Yiruma/font-awesome.min.cssv=4.6.2" rel="stylesheet" type="text/css">
+<link href="./php输出缓冲与http的联系Yiruma/main.cssv=5.1.1" rel="stylesheet" type="text/css"/>
+<meta content="Hexo, NexT" name="keywords"/>
+<link href="/favicon.ico?v=5.1.1" rel="shortcut icon" type="image/x-icon"/>
+<meta content="最近因为设计网站的时候需要实现一个后台处理的功能，在寻找解决方式的时候了解到了php输出缓冲的功能，让我第一次意识到http具体的传输数据都是什么流程（不会告诉你们我以前一直以为http只有一次数据传输的！），又get到一个新技能点，先记录下来，以后了解的多了再进一步补充吧" name="description"/>
+<meta name="keywords"/>
+<meta content="article" property="og:type"/>
+<meta content="php输出缓冲与http的联系" property="og:title"/>
+<meta content="https://someonesometimes.github.io/2017/06/20/php输出缓冲与http的联系/index.html" property="og:url"/>
+<meta content="Yiruma" property="og:site_name"/>
+<meta content="最近因为设计网站的时候需要实现一个后台处理的功能，在寻找解决方式的时候了解到了php输出缓冲的功能，让我第一次意识到http具体的传输数据都是什么流程（不会告诉你们我以前一直以为http只有一次数据传输的！），又get到一个新技能点，先记录下来，以后了解的多了再进一步补充吧" property="og:description"/>
+<meta content="2017-06-20T10:11:46.404Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="php输出缓冲与http的联系" name="twitter:title"/>
+<meta content="最近因为设计网站的时候需要实现一个后台处理的功能，在寻找解决方式的时候了解到了php输出缓冲的功能，让我第一次意识到http具体的传输数据都是什么流程（不会告诉你们我以前一直以为http只有一次数据传输的！），又get到一个新技能点，先记录下来，以后了解的多了再进一步补充吧" name="twitter:description"/>
+<script id="hexo.configurations" type="text/javascript">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<link href="./php输出缓冲与http的联系Yiruma/php输出缓冲与http的联系" rel="canonical"/>
+<title>php输出缓冲与http的联系 | Yiruma</title>
+</link></head>
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="">
+<div class="container sidebar-position-left page-post-detail ">
+<div class="headband"></div>
+<header class="header" id="header" itemscope="" itemtype="http://schema.org/WPHeader">
+<div class="header-inner"><div class="site-brand-wrapper">
+<div class="site-meta ">
+<div class="custom-logo-site-title">
+<a class="brand" href="/" rel="start">
+<span class="logo-line-before"><i></i></span>
+<span class="site-title">Yiruma</span>
+<span class="logo-line-after"><i></i></span>
+</a>
+</div>
+<p class="site-subtitle"></p>
+</div>
+<div class="site-nav-toggle">
+<button>
+<span class="btn-bar"></span>
+<span class="btn-bar"></span>
+<span class="btn-bar"></span>
+</button>
+</div>
+</div>
+<nav class="site-nav">
+<ul class="menu" id="menu">
+<li class="menu-item menu-item-archives">
+<a href="/archives" rel="section">
+<i class="menu-item-icon fa fa-fw fa-archive"></i> <br/>
+            
+            Archives
+          </a>
+</li>
+<li class="menu-item menu-item-about">
+<a href="/about" rel="section">
+<i class="menu-item-icon fa fa-fw fa-user"></i> <br/>
+            
+            About
+          </a>
+</li>
+<li class="menu-item menu-item-link">
+<a href="/links" rel="section">
+<i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br/>
+            
+            menu.link
+          </a>
+</li>
+</ul>
+</nav>
+</div>
+</header>
+<main class="main" id="main">
+<div class="main-inner">
+<div class="content-wrap">
+<div class="content" id="content">
+<div class="posts-expand" id="posts">
+<article class="post post-type-normal " itemscope="" itemtype="http://schema.org/Article">
+<link href="./php输出缓冲与http的联系Yiruma/php输出缓冲与http的联系" itemprop="mainEntityOfPage"/>
+<span hidden="" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<meta content="Yiruma" itemprop="name"/>
+<meta content="" itemprop="description"/>
+<meta content="/images/avatar.gif" itemprop="image"/>
+</span>
+<span hidden="" itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+<meta content="Yiruma" itemprop="name"/>
+</span>
+<header class="post-header">
+<h1 class="post-title" itemprop="name headline">php输出缓冲与http的联系</h1>
+<div class="post-meta">
+<span class="post-time">
+<span class="post-meta-item-icon">
+<i class="fa fa-calendar-o"></i>
+</span>
+<span class="post-meta-item-text">Posted on</span>
+<time datetime="2017-06-20T17:05:22+08:00" itemprop="dateCreated datePublished" title="Post created">
+                2017-06-20
+              </time>
+</span>
+</div>
+</header>
+<div class="post-body" itemprop="articleBody">
+<p>最近因为设计网站的时候需要实现一个后台处理的功能，在寻找解决方式的时候了解到了php输出缓冲的功能，让我第一次意识到http具体的传输数据都是什么流程（不会告诉你们我以前一直以为http只有一次数据传输的！），又get到一个新技能点，先记录下来，以后了解的多了再进一步补充吧<br/><a id="more"></a></p>
+<hr/>
+<h2 id="首先需要对以下函数有一定的了解"><a class="headerlink" href="#首先需要对以下函数有一定的了解" title="首先需要对以下函数有一定的了解"></a>首先需要对以下函数有一定的了解</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line">获取当前php缓冲区的内容长度</div><div class="line">*/</div><div class="line">$size = ob_get_length()</div><div class="line"> </div><div class="line">/**</div><div class="line">刷新php的输出缓冲区，也就是将当前缓冲区中的数据通过http来传输过去</div><div class="line">然后至于这两个函数分别是什么功能。。我也不太清楚，网上倒是有不少介绍，反正就是一起用，起到刷新php</div><div class="line">输出缓冲区的作用</div><div class="line">*/</div><div class="line">flush()</div><div class="line">ob_flush()</div><div class="line"></div><div class="line">/**</div><div class="line">指定一个http流程中，一共需要接收多少数据，注意如果接收者还没有接收到指定的数据长度的时候就不会关闭</div><div class="line">http链接，也就是浏览器窗口一直处于加载中的小圆圈</div><div class="line">*/</div><div class="line">header("Content-Length: xxx");</div><div class="line"></div><div class="line">/**</div><div class="line">指定一个http链接到目前接收的数据为止是否要关闭，但测试中发现，如果浏览器接受的数据没有达到指定长度</div><div class="line">的时候，就算告诉了要关闭连接，http链接依然不会中断，所以我们在接下来实现中断http功能的过程中我们就</div><div class="line">主要使用header("Content-Length: xxx");来实现，这个指定Connection状态的语句加不加随意吧</div><div class="line">*/</div><div class="line">header("Connection: close/keep-alive");</div><div class="line"></div><div class="line">/*</div><div class="line">指定脚本在失去http连接之后是否仍然要运行,也就是是否继续在后台运行。有一点要指明的是脚本不会注意到</div><div class="line">http链接已经关闭，除非尝试echo一下，才能发现无法往缓冲区输出数据了</div><div class="line">*/</div><div class="line">ignore_user_abort(true);</div><div class="line"></div><div class="line">/*</div><div class="line">用于指定脚本的运行时限，0就是不限时间，因为想要后台运行的php脚本往往需要大量的时间，如果使用默认的</div><div class="line">时间限制可能导致异常终止</div><div class="line">*/</div><div class="line">set_time_limit(0);</div></pre></td></tr></table></figure>
+<h2 id="下面开始通过测试来分析php输出与http的关系"><a class="headerlink" href="#下面开始通过测试来分析php输出与http的关系" title="下面开始通过测试来分析php输出与http的关系"></a>下面开始通过测试来分析php输出与http的关系</h2><p><strong>测试一</strong><br/><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">echo "hahaha";</div><div class="line">sleep(10);</div><div class="line">echo "hahaha";</div></pre></td></tr></table></figure></p>
+<p>结果：浏览器在等待了10s后接收到了一次数据，为”hahahahahaha”,看来php将两次数据都输出后统一进行了一次http传输<br/></p>
+<p><strong>测试二</strong><br/><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">echo "hahaha";</div><div class="line">ob_flush();</div><div class="line">flush();</div><div class="line"></div><div class="line">sleep(10s);</div><div class="line"></div><div class="line">echo "hahaha";</div></pre></td></tr></table></figure></p>
+<p>结果：浏览器很快就接收到了第一次返回的数据————“hahaha”,又等待了10S后，返回了剩下的数据”hahaha”</p>
+<p><strong>测试三</strong><br/><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">echo "hahaha";</div><div class="line">$size = ob_get_size();</div><div class="line">header(Content-Length: {$size});</div><div class="line">flush();</div><div class="line">ob_flush();</div><div class="line"></div><div class="line">echo "hahaha";</div></pre></td></tr></table></figure></p>
+<p>结果:浏览器很快就接收到了第一次返回的数据————“hahaha”,然后就停止了。原因就是我们通过指定这次传输中Content-Length的方式，让浏览器认为接收的数据已经够了，所以就终止了连接</p>
+<p><br/><br/><strong>综上所述</strong></p>
+<ul>
+<li>我们可以通过flush(); ob_flush();来php输出缓存区的内容释放，然后进行一次http传输</li>
+<li>我们还可以在这次传输中通过指定header头Content-Length的方式来使整个的http链接终止</li>
+<li>然后我们还可以通过指定ignore_user_abort(true);来使php程序在http链接终止的时候继续运行，并为其设置运行时间限制set_time_limit(0);</li>
+</ul>
+<p>以上就是实现php后台处理的思路啦</p>
+</div>
+<div>
+</div>
+<div>
+</div>
+<div>
+</div>
+<footer class="post-footer">
+<div class="post-nav">
+<div class="post-nav-next post-nav-item">
+</div>
+<span class="post-nav-divider"></span>
+<div class="post-nav-prev post-nav-item">
+<a href="/2017/06/15/python模块使用记录/" rel="prev" title="python模块使用记录">
+                python模块使用记录 <i class="fa fa-chevron-right"></i>
+</a>
+</div>
+</div>
+</footer>
+</article>
+<div class="post-spread">
+</div>
+</div>
+</div>
+<div class="comments" id="comments">
+</div>
+</div>
+<div class="sidebar-toggle">
+<div class="sidebar-toggle-line-wrap">
+<span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+<span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+<span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+</div>
+</div>
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-inner">
+<ul class="sidebar-nav motion-element">
+<li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+<li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+</ul>
+<section class="site-overview sidebar-panel">
+<div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<img alt="Yiruma" class="site-author-image" itemprop="image" src="./php输出缓冲与http的联系Yiruma/avatar.gif"/>
+<p class="site-author-name" itemprop="name">Yiruma</p>
+<p class="site-description motion-element" itemprop="description"></p>
+</div>
+<nav class="site-state motion-element">
+<div class="site-state-item site-state-posts">
+<a href="/archives">
+<span class="site-state-item-count">13</span>
+<span class="site-state-item-name">posts</span>
+</a>
+</div>
+<div class="site-state-item site-state-tags">
+<span class="site-state-item-count">1</span>
+<span class="site-state-item-name">tags</span>
+</div>
+</nav>
+<div class="links-of-author motion-element">
+</div>
+</section>
+<!--noindex-->
+<section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+<div class="post-toc">
+<div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#首先需要对以下函数有一定的了解"><span class="nav-number">1.</span> <span class="nav-text">首先需要对以下函数有一定的了解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#下面开始通过测试来分析php输出与http的关系"><span class="nav-number">2.</span> <span class="nav-text">下面开始通过测试来分析php输出与http的关系</span></a></li></ol></div>
+</div>
+</section>
+<!--/noindex-->
+</div>
+</aside>
+</div>
+</main>
+<footer class="footer" id="footer">
+<div class="footer-inner">
+<div class="copyright">
+  
+  © 
+  <span itemprop="copyrightYear">2017</span>
+<span class="with-love">
+<i class="fa fa-heart"></i>
+</span>
+<span class="author" itemprop="copyrightHolder">Yiruma</span>
+</div>
+<div class="powered-by">
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+</div>
+</footer>
+<div class="back-to-top">
+<i class="fa fa-arrow-up"></i>
+</div>
+</div>
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+<script src="./php输出缓冲与http的联系Yiruma/index.jsv=2.1.3" type="text/javascript"></script>
+<script src="./php输出缓冲与http的联系Yiruma/fastclick.min.jsv=1.0.6" type="text/javascript"></script>
+<script src="./php输出缓冲与http的联系Yiruma/jquery.lazyload.jsv=1.9.7" type="text/javascript"></script>
+<script src="./php输出缓冲与http的联系Yiruma/velocity.min.jsv=1.2.1" type="text/javascript"></script>
+<script src="./php输出缓冲与http的联系Yiruma/velocity.ui.min.jsv=1.2.1" type="text/javascript"></script>
+<script src="./php输出缓冲与http的联系Yiruma/jquery.fancybox.pack.jsv=2.1.5" type="text/javascript"></script>
+<script src="./php输出缓冲与http的联系Yiruma/utils.jsv=5.1.1" type="text/javascript"></script>
+<script src="./php输出缓冲与http的联系Yiruma/motion.jsv=5.1.1" type="text/javascript"></script>
+<script src="./php输出缓冲与http的联系Yiruma/scrollspy.jsv=5.1.1" type="text/javascript"></script>
+<script src="./php输出缓冲与http的联系Yiruma/post-details.jsv=5.1.1" type="text/javascript"></script>
+<script src="./php输出缓冲与http的联系Yiruma/bootstrap.jsv=5.1.1" type="text/javascript"></script>
+</body>
+</html>

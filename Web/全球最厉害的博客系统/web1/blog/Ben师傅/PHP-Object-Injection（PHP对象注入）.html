@@ -1,0 +1,470 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./PHP-Object-Injection（PHP对象注入）/font-awesome.min.css" rel="stylesheet"/>
+<link href="./PHP-Object-Injection（PHP对象注入）/screen.css" rel="stylesheet"/>
+<link href="./PHP-Object-Injection（PHP对象注入）/prism_okaidia.css" rel="stylesheet"/>
+<link href="./PHP-Object-Injection（PHP对象注入）/bendawang.css" rel="stylesheet"/>
+<script src="./PHP-Object-Injection（PHP对象注入）/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./PHP-Object-Injection（PHP对象注入）/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./PHP-Object-Injection（PHP对象注入）/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="phpobjectinjectionphp">PHP Object Injection（PHP对象注入）</h1>
+<p style="max-width:100%;height:auto;">文:https://vagosec.org/2013/09/wordpress-php-object-injection/</p>
+<p style="max-width:100%;height:auto;">最近做wechall的PHP遇到一个题，琢磨了好久才知道咋整，感觉wechall网站的题总是百度不到答案，真是有点蛋疼。好了进入正题。</p>
+<p style="max-width:100%;height:auto;">那道题主要是考的序列化与反序列化。</p>
+<h2 id="1">1、魔术方法</h2>
+<p style="max-width:100%;height:auto;">这里我们先简单介绍一下php中的魔术方法（这里如果对于类、对象、方法不熟的先去学学吧），即<code style="max-width:100%;height:auto;">Magic</code>方法，php类可能会包含一些特殊的函数叫magic函数，magic函数命名是以符号<code style="max-width:100%;height:auto;">__</code>开头的，比如 <code style="max-width:100%;height:auto;">__construct</code>， <code style="max-width:100%;height:auto;">__destruct</code>，<code style="max-width:100%;height:auto;">__toString</code>，<code style="max-width:100%;height:auto;">__sleep</code>，<code style="max-width:100%;height:auto;">__wakeup</code>等等。这些函数都会在某些特殊时候被自动调用。
+例如<code style="max-width:100%;height:auto;">__construct()</code>方法会在一个对象被创建时自动调用，对应的<code style="max-width:100%;height:auto;">__destruct</code>则会在一个对象被销毁时调用等等。</p>
+<h2 id="2phpserializeunserialize">2、php对象的序列化与反序列化（serialize和unserialize）</h2>
+<p style="max-width:100%;height:auto;">php允许保存一个对象方便以后重用，这个过程被称为序列化，即serialize()函数，对应的反序列化就是unserialize()。
+简单的说，序列化就是把PHP对象按照一定规则存成一个字符串，而反序列化就是把序列化之后的字符串恢复成一个PHP对象。
+这里我们简单测试一下吧：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+class test
+{
+    public $username = &amp;apos;&amp;apos;;
+    public $password = &amp;apos;&amp;apos;;
+}
+$a = new test();
+$a-&gt;username = &amp;apos;serial&amp;apos;;
+$a-&gt;password = &amp;apos;serial&amp;apos;;
+echo serialize($a);
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">输出为：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">O:4:"test":2:{s:8:"username";s:6:"serial";s:8:"password";s:6:"serial";}
+</code></pre>
+<p style="max-width:100%;height:auto;">可以看到序列化之后数据被存了下来，但是没有任何与原来类有关的东西。接下来我们再测试一下unserialize()函数，</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+class test
+{
+    public $username = &amp;apos;&amp;apos;;
+    public $password = &amp;apos;&amp;apos;;
+    public function out(){
+        echo "username: ".$this-&gt;username."&lt;br&gt;"."password: ".$this-&gt;password ;
+    }
+}
+$a =&amp;apos;O:4:"test":2:{s:8:"username";s:6:"serial";s:8:"password";s:6:"serial";}&amp;apos;;
+$tmp=unserialize($a);
+$tmp-&gt;out();
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">结果为：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">username: serial
+password: serial
+</code></pre>
+<p style="max-width:100%;height:auto;">经过unserialize()之后，我们的对象又被重建了出来。</p>
+<h2 id="3php">3、序列化、魔术方法与PHP对象注入</h2>
+<p style="max-width:100%;height:auto;">这里有两个比较特别的<code style="max-width:100%;height:auto;">Magic</code>方法，<code style="max-width:100%;height:auto;">__sleep</code> 方法会在一个对象被序列化的时候调用。 <code style="max-width:100%;height:auto;">__wakeup</code>方法会在一个对象被反序列化的时候调用。
+那么，考虑这么一个场景，如果一个攻击者的数据是通过<code style="max-width:100%;height:auto;">unserialize()</code>方法传递的，那么这样就很可能引发“php对象注入”，而很可能那些与该对象有关的<code style="max-width:100%;height:auto;">Magic</code>方法会执行一些效果，打个比方，如果该对象是一个记录临时文件的对象，当对象创建的时候，即会调用 <code style="max-width:100%;height:auto;">__construct</code>方法，此时会创建一个文件，而 <code style="max-width:100%;height:auto;">__destruct</code>则会删除创建的文件。而此时恰好我们可以构造输入通过<code style="max-width:100%;height:auto;">unserialize()</code>传递，那么我们就可以对我们的输入稍作加工就可以完成输入我们想要输入的，举个例子把：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+class test
+{
+    public $filename = &amp;apos;temp.txt&amp;apos;;
+    public function LogData($text)
+    {
+        file_put_contents($this-&gt;filename, $text, FILE_APPEND);
+    }
+    public function __destruct()
+    {
+        unlink(dirname(__FILE__) . &amp;apos;/&amp;apos; . $this-&gt;filename);
+    }
+}
+
+class user
+{
+    public $age = 0;
+    public $name = &amp;apos;&amp;apos;;
+    public function PrintData()
+    {
+        echo &amp;apos;Username:&amp;apos;.$this-&gt;name.&amp;apos;&lt;br&gt;&amp;apos;.&amp;apos;age:&amp;apos;.$this-&gt;age;
+    }
+}
+if(isset($_GET[&amp;apos;user&amp;apos;]))
+    $usr = unserialize($_GET[&amp;apos;user&amp;apos;]);
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">定义了两个类，最后有一个 “unserialize” 值是我们可以注入的。它的本意是传递user的信息，但是如果我们输入一个字符串最后能够被反序列化为test类，那么问题就关键了，因为一个test类最后会删除它的同名文件夹，如果此时我们通过如下代码构造一串字符串：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+
+$obj = new test();
+$obj-&gt;filename = &amp;apos;.htaccess&amp;apos;;
+echo serialize($obj) . &amp;apos;&lt;br /&gt;&amp;apos;;
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">这样我们将打印出来的结果传入到之前那个php中，那么最终删除的就是这个&amp;apos;.htaccess&amp;apos;文件了。因为脚本结束时 __destruct会被调用，从而触发删除。
+这就是漏洞名称的由来：变量可控并且进行了unserialize操作的地方注入序列化对象，实现代码执行或者其他坑爹的行为。
+虽然这不是一个很好的例子，不过相信还是可以理解这个概念的。
+再举一个更加直观一点的例子：
+看这个代码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+class Foo {
+    private $bar;
+    public $file;
+
+    public function __construct($fileName) {
+        $this-&gt;bar = &amp;apos;foobar&amp;apos;;
+        $this-&gt;file = $fileName;
+    }
+
+    // 很多其他的代码
+
+    public function __toString() {
+        return file_get_contents($this-&gt;file);
+    }
+}
+.......   // 很多其他的代码
+echo unserialize($_GET[&amp;apos;in&amp;apos;]);
+.......   // 很多其他的代码
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">同样的，我们可以通过下面的代码来生成payload：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+class Foo {
+    public $file;
+}
+$foo = new Foo();
+$foo-&gt;file = &amp;apos;/etc/passwd&amp;apos;;
+echo serialize($foo);
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">结果是<code style="max-width:100%;height:auto;">O:3:"Foo":1:{s:4:"file";s:11:"/etc/passwd";}</code>，接下来就简单了，只需要发送一个GET请求就可以让它输出<code style="max-width:100%;height:auto;">/etc/passwd</code>的内容了，再假想一下，如果这里把<code style="max-width:100%;height:auto;">file_get_contents</code>换成了<code style="max-width:100%;height:auto;">eval</code>，结果更加是不堪设想。</p>
+<p style="max-width:100%;height:auto;">所以PHP参考手册里也很直接的说了<code style="max-width:100%;height:auto;">one should not pass user-generated content to the unserialize() function</code>（不要把用户生成的内容传递给unserialize()函数）</p>
+<h2 id="4">4、解决办法</h2>
+<p style="max-width:100%;height:auto;">其实解决起来也是比较简单的，只要别在任何用户可控的地方使用“unserialize”就可以。另外实在要用的话可以考虑“json_decode“。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./PHP-Object-Injection（PHP对象注入）/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="phpobjectinjectionphp">PHP Object Injection（PHP对象注入）</h1>
+<p style="max-width:100%;height:auto;">文:https://vagosec.org/2013/09/wordpress-php-object-injection/</p>
+<p style="max-width:100%;height:auto;">最近做wechall的PHP遇到一个题，琢磨了好久才知道咋整，感觉wechall网站的题总是百度不到答案，真是有点蛋疼。好了进入正题。</p>
+<p style="max-width:100%;height:auto;">那道题主要是考的序列化与反序列化。</p>
+<h2 id="1">1、魔术方法</h2>
+<p style="max-width:100%;height:auto;">这里我们先简单介绍一下php中的魔术方法（这里如果对于类、对象、方法不熟的先去学学吧），即<code style="max-width:100%;height:auto;">Magic</code>方法，php类可能会包含一些特殊的函数叫magic函数，magic函数命名是以符号<code style="max-width:100%;height:auto;">__</code>开头的，比如 <code style="max-width:100%;height:auto;">__construct</code>， <code style="max-width:100%;height:auto;">__destruct</code>，<code style="max-width:100%;height:auto;">__toString</code>，<code style="max-width:100%;height:auto;">__sleep</code>，<code style="max-width:100%;height:auto;">__wakeup</code>等等。这些函数都会在某些特殊时候被自动调用。
+例如<code style="max-width:100%;height:auto;">__construct()</code>方法会在一个对象被创建时自动调用，对应的<code style="max-width:100%;height:auto;">__destruct</code>则会在一个对象被销毁时调用等等。</p>
+<h2 id="2phpserializeunserialize">2、php对象的序列化与反序列化（serialize和unserialize）</h2>
+<p style="max-width:100%;height:auto;">php允许保存一个对象方便以后重用，这个过程被称为序列化，即serialize()函数，对应的反序列化就是unserialize()。
+简单的说，序列化就是把PHP对象按照一定规则存成一个字符串，而反序列化就是把序列化之后的字符串恢复成一个PHP对象。
+这里我们简单测试一下吧：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+class test
+{
+    public $username = &amp;apos;&amp;apos;;
+    public $password = &amp;apos;&amp;apos;;
+}
+$a = new test();
+$a-&gt;username = &amp;apos;serial&amp;apos;;
+$a-&gt;password = &amp;apos;serial&amp;apos;;
+echo serialize($a);
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">输出为：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">O:4:"test":2:{s:8:"username";s:6:"serial";s:8:"password";s:6:"serial";}
+</code></pre>
+<p style="max-width:100%;height:auto;">可以看到序列化之后数据被存了下来，但是没有任何与原来类有关的东西。接下来我们再测试一下unserialize()函数，</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+class test
+{
+    public $username = &amp;apos;&amp;apos;;
+    public $password = &amp;apos;&amp;apos;;
+    public function out(){
+        echo "username: ".$this-&gt;username."&lt;br&gt;"."password: ".$this-&gt;password ;
+    }
+}
+$a =&amp;apos;O:4:"test":2:{s:8:"username";s:6:"serial";s:8:"password";s:6:"serial";}&amp;apos;;
+$tmp=unserialize($a);
+$tmp-&gt;out();
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">结果为：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">username: serial
+password: serial
+</code></pre>
+<p style="max-width:100%;height:auto;">经过unserialize()之后，我们的对象又被重建了出来。</p>
+<h2 id="3php">3、序列化、魔术方法与PHP对象注入</h2>
+<p style="max-width:100%;height:auto;">这里有两个比较特别的<code style="max-width:100%;height:auto;">Magic</code>方法，<code style="max-width:100%;height:auto;">__sleep</code> 方法会在一个对象被序列化的时候调用。 <code style="max-width:100%;height:auto;">__wakeup</code>方法会在一个对象被反序列化的时候调用。
+那么，考虑这么一个场景，如果一个攻击者的数据是通过<code style="max-width:100%;height:auto;">unserialize()</code>方法传递的，那么这样就很可能引发“php对象注入”，而很可能那些与该对象有关的<code style="max-width:100%;height:auto;">Magic</code>方法会执行一些效果，打个比方，如果该对象是一个记录临时文件的对象，当对象创建的时候，即会调用 <code style="max-width:100%;height:auto;">__construct</code>方法，此时会创建一个文件，而 <code style="max-width:100%;height:auto;">__destruct</code>则会删除创建的文件。而此时恰好我们可以构造输入通过<code style="max-width:100%;height:auto;">unserialize()</code>传递，那么我们就可以对我们的输入稍作加工就可以完成输入我们想要输入的，举个例子把：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+class test
+{
+    public $filename = &amp;apos;temp.txt&amp;apos;;
+    public function LogData($text)
+    {
+        file_put_contents($this-&gt;filename, $text, FILE_APPEND);
+    }
+    public function __destruct()
+    {
+        unlink(dirname(__FILE__) . &amp;apos;/&amp;apos; . $this-&gt;filename);
+    }
+}
+
+class user
+{
+    public $age = 0;
+    public $name = &amp;apos;&amp;apos;;
+    public function PrintData()
+    {
+        echo &amp;apos;Username:&amp;apos;.$this-&gt;name.&amp;apos;&lt;br&gt;&amp;apos;.&amp;apos;age:&amp;apos;.$this-&gt;age;
+    }
+}
+if(isset($_GET[&amp;apos;user&amp;apos;]))
+    $usr = unserialize($_GET[&amp;apos;user&amp;apos;]);
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">定义了两个类，最后有一个 “unserialize” 值是我们可以注入的。它的本意是传递user的信息，但是如果我们输入一个字符串最后能够被反序列化为test类，那么问题就关键了，因为一个test类最后会删除它的同名文件夹，如果此时我们通过如下代码构造一串字符串：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+
+$obj = new test();
+$obj-&gt;filename = &amp;apos;.htaccess&amp;apos;;
+echo serialize($obj) . &amp;apos;&lt;br /&gt;&amp;apos;;
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">这样我们将打印出来的结果传入到之前那个php中，那么最终删除的就是这个&amp;apos;.htaccess&amp;apos;文件了。因为脚本结束时 __destruct会被调用，从而触发删除。
+这就是漏洞名称的由来：变量可控并且进行了unserialize操作的地方注入序列化对象，实现代码执行或者其他坑爹的行为。
+虽然这不是一个很好的例子，不过相信还是可以理解这个概念的。
+再举一个更加直观一点的例子：
+看这个代码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+class Foo {
+    private $bar;
+    public $file;
+
+    public function __construct($fileName) {
+        $this-&gt;bar = &amp;apos;foobar&amp;apos;;
+        $this-&gt;file = $fileName;
+    }
+
+    // 很多其他的代码
+
+    public function __toString() {
+        return file_get_contents($this-&gt;file);
+    }
+}
+.......   // 很多其他的代码
+echo unserialize($_GET[&amp;apos;in&amp;apos;]);
+.......   // 很多其他的代码
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">同样的，我们可以通过下面的代码来生成payload：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+class Foo {
+    public $file;
+}
+$foo = new Foo();
+$foo-&gt;file = &amp;apos;/etc/passwd&amp;apos;;
+echo serialize($foo);
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">结果是<code style="max-width:100%;height:auto;">O:3:"Foo":1:{s:4:"file";s:11:"/etc/passwd";}</code>，接下来就简单了，只需要发送一个GET请求就可以让它输出<code style="max-width:100%;height:auto;">/etc/passwd</code>的内容了，再假想一下，如果这里把<code style="max-width:100%;height:auto;">file_get_contents</code>换成了<code style="max-width:100%;height:auto;">eval</code>，结果更加是不堪设想。</p>
+<p style="max-width:100%;height:auto;">所以PHP参考手册里也很直接的说了<code style="max-width:100%;height:auto;">one should not pass user-generated content to the unserialize() function</code>（不要把用户生成的内容传递给unserialize()函数）</p>
+<h2 id="4">4、解决办法</h2>
+<p style="max-width:100%;height:auto;">其实解决起来也是比较简单的，只要别在任何用户可控的地方使用“unserialize”就可以。另外实在要用的话可以考虑“json_decode“。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./PHP-Object-Injection（PHP对象注入）/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./PHP-Object-Injection（PHP对象注入）/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./PHP-Object-Injection（PHP对象注入）/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./PHP-Object-Injection（PHP对象注入）/prism.js"></script>
+<script src="./PHP-Object-Injection（PHP对象注入）/zooming.js"></script>
+<script src="./PHP-Object-Injection（PHP对象注入）/Bendawang.js"></script>
+
+

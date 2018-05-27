@@ -1,0 +1,575 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./gh0st源码分析与远控的编写(一)  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./gh0st源码分析与远控的编写(一)  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./gh0st源码分析与远控的编写(一)  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>gh0st源码分析与远控的编写(一) | 离别歌</title>
+<link href="./gh0st源码分析与远控的编写(一)  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(一)  离别歌/styles.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(一)  离别歌/style.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(一)  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(一)  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./gh0st源码分析与远控的编写(一)  离别歌/jquery.min.js"></script>
+<link href="./gh0st源码分析与远控的编写(一)  离别歌/code.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(一)  离别歌/button.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(一)  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(一)  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/C/gh0st_1.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/C/gh0st_1.html&amp;text=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E4%B8%80%29"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/C/gh0st_1.html&amp;title=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E4%B8%80%29"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/C/gh0st_1.html&amp;is_video=false&amp;description=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E4%B8%80%29"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E4%B8%80%29&amp;body=Check out this article: https%3A//www.leavesongs.com/C/gh0st_1.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/C/gh0st_1.html&amp;title=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E4%B8%80%29"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/C/gh0st_1.html&amp;title=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E4%B8%80%29"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/C/gh0st_1.html&amp;title=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E4%B8%80%29"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/C/gh0st_1.html&amp;title=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E4%B8%80%29"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/C/gh0st_1.html&amp;name=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E4%B8%80%29&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">gh0st源码分析与远控的编写(一)</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年6月29日 14:59" itemprop="datePublished">
+                    2013 六月 29 14:59
+                </time>
+</div>
+<div class="article-tag">
+            阅读：19811
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/C">C/C++</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/gh0st">gh0st</a>,
+                
+                <a class="tag-link" href="/tag/%E8%BF%9C%E6%8E%A7">远控</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+<span style="font-size:14px;">    再过几天期末考试了，还有好多要复习。。蛋都快碎了。最近在看老狼的gh0st内核编程，想了很久要不要写文章，最后还是觉得很有必要，原因过一会讲。</span>
+</p>
+<p>
+<span style="font-size:14px;">    先送上老狼的gh0st无加密（lxe格式）视频下载地址：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="http://phith0n.400gb.com/u/29415/3193732" target="_blank"><span style="font-size:14px;">http://phith0n.400gb.com/u/29415/3193732</span></a>
+</p>
+<p>
+<span style="font-size:14px;">    其中包含的gh0st源码(乱七八糟的被我的卡巴斯基杀过一遍，仅仅是源码)：</span><a href="http://www.400gb.com/file/23820009" target="_blank"><span style="font-size:14px;">http://www.400gb.com/file/23820009</span></a>
+</p>
+<p>
+<span style="font-size:14px;">    在写东西前我要说一下，我虽然说研究远控的源码，但我告诉你我以前包括以后从未也从不想使用远控来控制中国人的电脑。我希望你们大家也一样，仅仅只是对编程感兴趣，而不是为了违法的目的去使用代码。</span>
+</p>
+<hr/>
+<p>
+<span style="font-size:14px;">    好了，进入主题。老狼的gh0st内核编程教程，我认为是国内绝无仅有的一套比较全的远控编写的教程，它很详细，基本上就是教你重新打造一款远控，使用gh0st内核。</span>
+</p>
+<p>
+<span style="font-size:14px;">    但是为什么我还要写这一套文章，既然教程都有了。我认为这套教程有一些很致命的问题：</span>
+</p>
+<p>
+<span style="font-size:14px;">    1.不想吐槽老狼英语口语水平</span>
+</p>
+<p>
+<span style="font-size:14px;">    2.老狼在教程伊始没有系统地给大家介绍远控的概念。什么是服务端，什么是客户端之类的问题。(好像老狼在他之前其他教程里讲过，但在网上传的最多的只有这个教程，所以很多朋友看教程的时候还是一知半解</span><span style="font-size:14px;">)</span>
+</p>
+<p>
+<span style="font-size:14px;">    3.主控端代码在vs2010中编写，但被控端代码却在古老的VC6下创建。不知道老狼为什么这么做，使用VC6还得下载sdk。所以我在编写的时候，是将主控端、被控端这些工程放在VS2010下同一个解决方案中，方便代码的管理。</span>
+</p>
+<p>
+<span style="font-size:14px;">    4.老狼的代码与教程有一些错误，而且他遇到问题、解决问题的方法不太符合面向对象的思想，还有些问题的解决只是解决了表面的问题，并没有真正找到问题的根源。这也是很多软件漏洞多发的关键，一个漏洞如果不从根源上修复，可能在其他代码中存在一个新的漏洞。</span>
+</p>
+<p>
+<span style="font-size:14px;">    5.教程中很多地方(可以说大部分地方)只是复制的gh0st代码，并没有详细的讲解。<br>
+</br></span>
+</p>
+<p>
+<span style="font-size:14px;">    当然这只是我的见解，不是说我可以做的更好，只是我在学习过程中发现的问题。我的能力不可能做出这样一套完善的教程，我写文章的目的只是像一个批注，在大家观看教程的过程中给大家一点帮助。我的文章不能替代老狼的教程。</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span>
+</p>
+<p>
+<span style="font-size:14px;">    在这里，先给大家一个大局观：gh0st是什么，大概原理是什么。</span>
+</p>
+<p>
+<span style="font-size:14px;">    gh0st是一款基于C/S架构的远程管理软件(我只是就事论事，不想讨论C/S架构过时或不过时</span><span style="font-size:14px;">)。所谓远程管理，就是我在我的电脑上通过一些手段，可以操作其他电脑。什么是C/S架构，C表示Client,S表示Server,也就是客户端和服务端的意思。可以这样理解C/S，现在有两台电脑，一台是Server，一台是Client，server电脑就会开启一个端口，并一直监听这个端口中的信息。client来连接这个端口，连接成功后，两台机器就能互相发送信息了。(具体的原理建议大家去看socket通信)</span>
+</p>
+<p>
+<span style="font-size:14px;">    gh0st用的是C/S架构中的反向连接。我用主控端和被控端来称呼黑客的电脑和肉鸡的电脑。反向连接的意思就是我主控端作为server,被控端作为client,主控端监听一个固定的端口，并有一个固定的IP。然后被控端来连接这个IP的该端口，这就是所谓的上线。</span>
+</p>
+<p>
+<span style="font-size:14px;">    在实际情况中，黑客的电脑并不是都有固定的IP，我在我们寝室使用的是一个路由器，于是我的IP只是内网IP，192.168.x.x。而且，如果我换一个地方上网，IP也会变。这样我的被控端是找不到我的IP的。所以很多远控对待该问题，有两个解决方案：</span>
+</p>
+<p>
+<span style="font-size:14px;">    1.DNS上线</span>
+</p>
+<p>
+<span style="font-size:14px;">    花生壳、3322提供了免费的动态域名服务，其实就是提供了DNS服务。我们把自己的IP绑定到DNS服务器上，被控端通过对DNS的解析，找到主控端的IP，再连接。下次换地方上网了，只需要更改自己绑定到DNS上的IP即可。</span>
+</p>
+<p>
+<span style="font-size:14px;">    2.FTP(HTTP)上线</span>
+</p>
+<p>
+<span style="font-size:14px;">    我们把自己的IP写入一个文本文件1.txt，放在ftp(http</span><span style="font-size:14px;">)服务器上，比如ftp://leavesongs.com/1.txt。被控端去下载该txt,在其中找到主控端的IP。再连接。</span>
+</p>
+<p>
+<span style="font-size:14px;">    当然gh0st对他们都是支持的。</span>
+</p>
+<p>
+<span style="font-size:14px;">    再讲讲gh0st这个软件的组成。老狼给的gh0st最终编译好就是一个exe文件，点击打开后是一个主控端的样子：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201306/b26f1372493639.jpg" id="ematt:129" target="_blank"><img alt="20130510_173103.jpg" border="0" height="220" src="./gh0st源码分析与远控的编写(一)  离别歌/thum-b26f1372493639.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    在build选项卡中，填好相关信息，可以生成一个exe文件，这就是所谓的被控端。</span>
+</p>
+<p>
+<span style="font-size:14px;">    但是我们打开源码看，其实它是主要由三个部分组成，一是带界面的主控端，一个是动态链接库dll，一个是加载dll的exe。我们被控端的所有功能都是写在dll当中的。而并不是写在exe文件中。</span>
+</p>
+<p>
+<br>
+</br></p>
+<p>
+<span style="font-size:14px;">    大局观大概就是这些。再说一下gh0st核心内容。</span>
+</p>
+<p>
+<span style="font-size:14px;">    在传输数据方面，主控端使用IOCP模型，关于该模型请google。在主控端中，由CIOCPServer类实现。在被控端中，数据传输使用CClientSocket类实现。数据传输是远控的核心，所以这两个类也就成了gh0st的核心类。当然，在传输过程中，gh0st使用zlib进行压缩，减小数据包的大小。</span>
+</p>
+<p>
+<span style="font-size:14px;">    在被控端管理方面，gh0st使用了一个很好的方案。先做了一个CManager类，作为所有管理功能的基类，其他的比如系统管理类CSystenManager就继承了CManager。大大地增加了代码的重用性。</span>
+</p>
+<p>
+<span style="font-size:14px;">    在主控端方面，有这样一个回调函数</span><span style="font-size:14px;">NotifyProc，所有被控端发来的消息，都会经过此函数，在该函数中使用switch语句，处理各个消息。使得代码看起来井井有条。</span><span style="font-size:14px;"></span>
+</p>
+<p>
+<span style="font-size:14px;">    在稳定性方面，被控端宿主为svchost以系统服务启动，并有守护线程，用心跳包机制防止以外掉线。</span>
+</p>
+<p>
+<br/>
+</p>
+<p>
+<span style="font-size:14px;">    说了半天了……西安这又是一个炎热的下午。希望你能看懂我的文章，并对远控有一个更深的理解。下次我会开始写一些gh0st的源码，和老狼视频里一些难以理解的地方。再次强调，本文不能替代老狼的视频，想学习的同学务必认真地看老狼的教程，你会受益良多。</span>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2209">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/9d2a7aaa29104928d2cbc2a3b05f7fcb.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.gehaowu.com/" target="_blank">Haowu Ge</a>
+<time datetime="2015年9月4日 20:53" itemprop="datePublished">
+                            2015 九月 04 20:53
+                        </time>
+<a href="javascript:reply_to('2209', 'Haowu Ge')">回复</a>
+</p>
+<p class="comment-meta">找点啥玩玩好。。。哈哈</p>
+</div>
+</div>
+<div class="row" id="comment-1721">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">jiu</a>
+<time datetime="2014年7月13日 08:39" itemprop="datePublished">
+                            2014 七月 13 08:39
+                        </time>
+<a href="javascript:reply_to('1721', 'jiu')">回复</a>
+</p>
+<p class="comment-meta">最近也在看老狼的教程，写到dll哪里卡住了，我只想加两个功能，但是遇到很多问题，Google搜索，就将博主的网站搜索出来了。<br/><br/><br/>                                                     问题任然没有解决，希望有兴趣的朋友可以一起研究下。</p>
+</div>
+</div>
+<div class="row" id="comment-1706">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/1746d1648620f668a943afe281239dac.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">灿烂阳光</a>
+<time datetime="2014年7月5日 05:09" itemprop="datePublished">
+                            2014 七月 05 05:09
+                        </time>
+<a href="javascript:reply_to('1706', '灿烂阳光')">回复</a>
+</p>
+<p class="comment-meta">老狼的gh0st的视频我分享一下吧<br/>上部http://yun.baidu.com/s/1ntBMlEL<br/>下部http://yun.baidu.com/s/1eQGemCa</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1707">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年7月5日 05:09" itemprop="datePublished">
+                            2014 七月 05 05:09
+                        </time>
+<a href="javascript:reply_to('1707', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@灿烂阳光：感谢分享！</p>
+</div>
+</div>
+<div class="row" id="comment-1846">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">格陵兰的苦寒</a>
+<time datetime="2014年11月15日 23:27" itemprop="datePublished">
+                            2014 十一月 15 23:27
+                        </time>
+<a href="javascript:reply_to('1846', '格陵兰的苦寒')">回复</a>
+</p>
+<p class="comment-meta">@灿烂阳光：求解压密码</p>
+</div>
+</div>
+<div class="row" id="comment-2133">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">痞子</a>
+<time datetime="2015年6月14日 09:29" itemprop="datePublished">
+                            2015 六月 14 09:29
+                        </time>
+<a href="javascript:reply_to('2133', '痞子')">回复</a>
+</p>
+<p class="comment-meta">@灿烂阳光：www.hegouvip.com  这是密码</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1649">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/b10984aaadecb038dcf9d96cfcd932a4.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">小白</a>
+<time datetime="2014年5月27日 21:07" itemprop="datePublished">
+                            2014 五月 27 21:07
+                        </time>
+<a href="javascript:reply_to('1649', '小白')">回复</a>
+</p>
+<p class="comment-meta">博主网盘能再共享一下吗,网上找的都要密码。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1650">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年5月27日 21:11" itemprop="datePublished">
+                            2014 五月 27 21:11
+                        </time>
+<a href="javascript:reply_to('1650', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@小白：非常时期，城通网盘暂时没法共享了。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1656">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/b10984aaadecb038dcf9d96cfcd932a4.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">小白</a>
+<time datetime="2014年5月28日 13:47" itemprop="datePublished">
+                            2014 五月 28 13:47
+                        </time>
+<a href="javascript:reply_to('1656', '小白')">回复</a>
+</p>
+<p class="comment-meta">@phithon：好吧，现在确实对文件管理比较严，博主能告诉我你的教程有多大吗，或者是在哪下载的，我去网上找找看。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1657">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年5月28日 13:49" itemprop="datePublished">
+                            2014 五月 28 13:49
+                        </time>
+<a href="javascript:reply_to('1657', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@小白：名字叫“老狼GHOST内核编程全套无KEY第1部分.rar”，一共4部分。压缩包大小分别是222、905、785、385M。<br/>当时也是在城通下载的。</p>
+</div>
+</div>
+<div class="row" id="comment-1658">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/b10984aaadecb038dcf9d96cfcd932a4.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">小白</a>
+<time datetime="2014年5月28日 13:54" itemprop="datePublished">
+                            2014 五月 28 13:54
+                        </time>
+<a href="javascript:reply_to('1658', '小白')">回复</a>
+</p>
+<p class="comment-meta">@phithon：thanks.我去找找看。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1626">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">GPRBOY</a>
+<time datetime="2014年5月9日 15:32" itemprop="datePublished">
+                            2014 五月 09 15:32
+                        </time>
+<a href="javascript:reply_to('1626', 'GPRBOY')">回复</a>
+</p>
+<p class="comment-meta">大大的吹一牛，我要一直在线等老大把教程一直出完！！！！！！！</p>
+</div>
+</div>
+<div class="row" id="comment-1609">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/8af258ecd81c5c7471c1664af611f531.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://xn--im-5y2d.cn" target="_blank">im帥</a>
+<time datetime="2014年4月18日 23:23" itemprop="datePublished">
+                            2014 四月 18 23:23
+                        </time>
+<a href="javascript:reply_to('1609', 'im帥')">回复</a>
+</p>
+<p class="comment-meta">坐等博主更新，最喜欢看这种技术文了。虽然我是个没学过什么C++的工科工程类搬砖工。<br/><br/>另外，不支持中文域名邮箱，验证码有点变态了。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1611">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年4月18日 23:44" itemprop="datePublished">
+                            2014 四月 18 23:44
+                        </time>
+<a href="javascript:reply_to('1611', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@im帥：感谢支持~验证码再变态。。。也还是有人刷评论……</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1618">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/8af258ecd81c5c7471c1664af611f531.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://xn--im-5y2d.cn" target="_blank">im帥</a>
+<time datetime="2014年4月29日 19:35" itemprop="datePublished">
+                            2014 四月 29 19:35
+                        </time>
+<a href="javascript:reply_to('1618', 'im帥')">回复</a>
+</p>
+<p class="comment-meta">@phithon：博主网盘不分享了？正好想下载来看看呢</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1619">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年4月29日 23:24" itemprop="datePublished">
+                            2014 四月 29 23:24
+                        </time>
+<a href="javascript:reply_to('1619', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@im帥：那网盘太坑了，改天换个百度盘</p>
+</div>
+</div>
+<div class="row" id="comment-1620">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/8af258ecd81c5c7471c1664af611f531.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://xn--im-5y2d.cn" target="_blank">im帥</a>
+<time datetime="2014年4月30日 15:38" itemprop="datePublished">
+                            2014 四月 30 15:38
+                        </time>
+<a href="javascript:reply_to('1620', 'im帥')">回复</a>
+</p>
+<p class="comment-meta">@phithon：貌似问题是现在净网行动，需要重新确认分享。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1589">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">骷髅</a>
+<time datetime="2014年3月28日 09:45" itemprop="datePublished">
+                            2014 三月 28 09:45
+                        </time>
+<a href="javascript:reply_to('1589', '骷髅')">回复</a>
+</p>
+<p class="comment-meta">没有（一）的附件下载？</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1590">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(一)  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年3月28日 10:44" itemprop="datePublished">
+                            2014 三月 28 10:44
+                        </time>
+<a href="javascript:reply_to('1590', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@骷髅：一是一个大概的概论，还没真正开始写，所以没有附件。</p>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="fa723bb9596af0ced2c484f7b56886bd3bdd44a2"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./gh0st源码分析与远控的编写(一)  离别歌/fa723bb9596af0ced2c484f7b56886bd3bdd44a2"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="262">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="3ncNlizIUGSU8qWwVF5DA93yRcatJtELBHxj9MLXltMj85kLJWzn9N5D0gDBsXtV"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./gh0st源码分析与远控的编写(一)  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./gh0st源码分析与远控的编写(一)  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

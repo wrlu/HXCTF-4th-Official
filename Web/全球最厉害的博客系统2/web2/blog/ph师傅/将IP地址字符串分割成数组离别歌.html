@@ -1,0 +1,246 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./将IP地址字符串分割成数组  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./将IP地址字符串分割成数组  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./将IP地址字符串分割成数组  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>将IP地址字符串分割成数组 | 离别歌</title>
+<link href="./将IP地址字符串分割成数组  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./将IP地址字符串分割成数组  离别歌/styles.css" rel="stylesheet"/>
+<link href="./将IP地址字符串分割成数组  离别歌/style.css" rel="stylesheet"/>
+<link href="./将IP地址字符串分割成数组  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./将IP地址字符串分割成数组  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./将IP地址字符串分割成数组  离别歌/jquery.min.js"></script>
+<link href="./将IP地址字符串分割成数组  离别歌/code.css" rel="stylesheet"/>
+<link href="./将IP地址字符串分割成数组  离别歌/button.css" rel="stylesheet"/>
+<link href="./将IP地址字符串分割成数组  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./将IP地址字符串分割成数组  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/C/IPCut.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/C/IPCut.html&amp;text=%E5%B0%86IP%E5%9C%B0%E5%9D%80%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%86%E5%89%B2%E6%88%90%E6%95%B0%E7%BB%84"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/C/IPCut.html&amp;title=%E5%B0%86IP%E5%9C%B0%E5%9D%80%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%86%E5%89%B2%E6%88%90%E6%95%B0%E7%BB%84"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/C/IPCut.html&amp;is_video=false&amp;description=%E5%B0%86IP%E5%9C%B0%E5%9D%80%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%86%E5%89%B2%E6%88%90%E6%95%B0%E7%BB%84"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E5%B0%86IP%E5%9C%B0%E5%9D%80%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%86%E5%89%B2%E6%88%90%E6%95%B0%E7%BB%84&amp;body=Check out this article: https%3A//www.leavesongs.com/C/IPCut.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/C/IPCut.html&amp;title=%E5%B0%86IP%E5%9C%B0%E5%9D%80%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%86%E5%89%B2%E6%88%90%E6%95%B0%E7%BB%84"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/C/IPCut.html&amp;title=%E5%B0%86IP%E5%9C%B0%E5%9D%80%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%86%E5%89%B2%E6%88%90%E6%95%B0%E7%BB%84"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/C/IPCut.html&amp;title=%E5%B0%86IP%E5%9C%B0%E5%9D%80%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%86%E5%89%B2%E6%88%90%E6%95%B0%E7%BB%84"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/C/IPCut.html&amp;title=%E5%B0%86IP%E5%9C%B0%E5%9D%80%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%86%E5%89%B2%E6%88%90%E6%95%B0%E7%BB%84"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/C/IPCut.html&amp;name=%E5%B0%86IP%E5%9C%B0%E5%9D%80%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%88%86%E5%89%B2%E6%88%90%E6%95%B0%E7%BB%84&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">将IP地址字符串分割成数组</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年5月12日 00:54" itemprop="datePublished">
+                    2013 五月 12 00:54
+                </time>
+</div>
+<div class="article-tag">
+            阅读：10765
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/C">C/C++</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/IP%E5%9C%B0%E5%9D%80">IP地址</a>,
+                
+                <a class="tag-link" href="/tag/string">string</a>,
+                
+                <a class="tag-link" href="/tag/%E5%87%BD%E6%95%B0">函数</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p><span style="font-size:14px;">    今天心血来潮准备写一个端口扫描器。记得之前写MFC程序里面CString类有个方法可以以某一字符分割CString对象，但是C++中string似乎没有这样的方法。所以我要自己实现一个方法（函数），将输入的IP地址分割成4个数字，保存在数组中。</span></p>
+<p><span style="font-size:14px;">    函数如下：</span></p>
+<pre class="brush:cpp;">
+void GetIpString(string strIpAdd,int iIp[])
+{
+	int OppPos = 0 , nowPos = 0 , i = 0;
+	while (OppPos = strIpAdd.find_first_of('.',nowPos))
+	{
+		if (string::npos == OppPos)
+		{
+			iIp[i] = atoi(strIpAdd.substr(nowPos).c_str());
+			break;
+		}
+		iIp[i] = atoi(strIpAdd.substr(nowPos,OppPos - nowPos).c_str());
+		nowPos = OppPos + 1;
+		i++;
+	}
+	return ;
+}</pre>
+<p><span style="font-size:14px;">    传入的参数是一个保存着IP地址的string对象，第二个参数是数组。</span></p>
+<p><span style="font-size:14px;">    首先用到string中的一个方法，：find_first_of，四个重载函数：</span></p>
+<table border="1" cellpadding="1" cellspacing="1" style="width: 500px; ">
+<tbody>
+<tr>
+<td><span style="font-size:14px;"><span style="font-family: Arial, Helvetica, simsun, u5b8bu4f53; line-height: 25px; background-color: rgb(204, 206, 208); ">size_type find_first_of( const basic_string &amp;str, size_type index = 0 ); </span><br style="line-height: 25px; font-family: Arial, Helvetica, simsun, u5b8bu4f53; font-size: 14px; background-color: rgb(204, 206, 208); ">
+<span style="font-family: Arial, Helvetica, simsun, u5b8bu4f53; line-height: 25px; background-color: rgb(204, 206, 208); ">size_type find_first_of( const char *str, size_type index = 0 ); </span><br style="line-height: 25px; font-family: Arial, Helvetica, simsun, u5b8bu4f53; font-size: 14px; background-color: rgb(204, 206, 208); ">
+<span style="font-family: Arial, Helvetica, simsun, u5b8bu4f53; line-height: 25px; background-color: rgb(204, 206, 208); ">size_type find_first_of( const char *str, size_type index, size_type num ); </span><br style="line-height: 25px; font-family: Arial, Helvetica, simsun, u5b8bu4f53; font-size: 14px; background-color: rgb(204, 206, 208); "/>
+<span style="font-family: Arial, Helvetica, simsun, u5b8bu4f53; line-height: 25px; background-color: rgb(204, 206, 208); ">size_type find_first_of( char ch, size_type index = 0 ); </span></br></br></span></td>
+</tr>
+</tbody>
+</table>
+<p><span style="font-size:14px;">    我用到第四个，作用是从位置pos开始，查找第一个出现ch的位置。如果没找到则返回string::npos。</span></p>
+<p><span style="font-size:14px;">    我定义了两个记录位置的整型，OppPos和nowPos，将find_first_of的返回值赋给OppPos.这就是我们的目标位置，所以现在，从nowPos到（OppPos - 1）的子串就是我们要的第一个数字。（比如192.168.1.1执行find_first_of，得到的OppPos == 3,从0到2即是我们要的"192"）</span></p>
+<p><span style="font-size:14px;">    进入while循环体，首先一个判断句，如果OppPos == string::npos就不能再找下去了。因为当最后找不到'.'时，就是最后一个数字了。</span></p>
+<p><span style="font-size:14px;">    如果OppPos != string::npos则说明找到了'.'，则执行这一句：</span></p>
+<p><span style="font-size:14px;">   <strong> iIp[i] = atoi(strIpAdd.substr(nowPos,OppPos - nowPos).c_str());</strong></span></p>
+<p><span style="font-size:14px;">    substr这个方法作用是获得子串，获取从索引nowPos开始，向后OppPos-nowPos个位置的子串。其实就是获得从nowPos到OppPos-1位置的子串。</span></p>
+<p><span style="font-size:14px;">    大家要是弄不清逻辑，可以自己在纸上画一画，就知道这几个位置的关系了。</span></p>
+<p><span style="font-size:14px;">    获得了子串之后我又用了子串的c_str()方法。这个方法作用是将string转换成char * 类型。因为我们需要把"192"转换成数字192，需要用到atoi函数。而atoi函数的参数是char *类型(也就是C语言里的字符串)。</span></p>
+<p><span style="font-size:14px;">    我们将atoi的结果返回到数组里，也就是把192保存在了iIp[0]里，168保存在iIp[1]里……</span></p>
+<p><span style="font-size:14px;">    我们返回去看那个if语句中，当我们最后一次找不到'.'时，进入到这个if语句，但其实iIp[3]还没有赋值，所以iIp[i] = atoi(strIpAdd.substr(nowPos).c_str());是为了把最后一个数字放到iIp[3]中。你们可以看到我这次用的substr方法中只调用了一个参数，这是个重载函数，substr(nowPos)表示获得从nowPos开始到最后一个字符截止的子串。</span></p>
+<hr/>
+<p><span style="font-size:14px;">    我发现自己现在越来越罗嗦……一个破函数写了这么多。。</span></p>
+<p><span style="font-size:14px;">    再写个main函数验证一下把：</span></p>
+<pre class="brush:cpp;">
+int _tmain(int argc, _TCHAR* argv[])
+{
+	string strIP;
+	int arrIP[4];
+	cin&gt;&gt;strIP;
+	GetIpString(strIP,arrIP);
+	for (int i = 0 ; i &lt; 4 ; i++)
+	{
+		cout&lt;&lt;arrIP[i]&lt;&lt;endl;
+	}
+	return 0;
+}</pre>
+<p><span style="font-size:14px;">    结果是：</span></p>
+<p><span style="font-size:14px;">    <a href="https://www.leavesongs.com/content/uploadfile/201305/2de41368293438.jpg" target="_blank"><img alt="点击查看原图" border="0" src="./将IP地址字符串分割成数组  离别歌/thum-2de41368293438.jpg"/></a></span></p>
+<p><span style="font-size:14px;">    最后把数组输出，每行一个数。</span></p>
+<hr/>
+<p><span style="font-size:14px;">    注意要使用string类需要包含c++的字符串头文件：#include &lt;string&gt;</span></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1340">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./将IP地址字符串分割成数组  离别歌/9f767c3f96e1bf3c8adf3290c23bce2f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">落沐萧萧</a>
+<time datetime="2013年5月29日 13:11" itemprop="datePublished">
+                            2013 五月 29 13:11
+                        </time>
+<a href="javascript:reply_to('1340', '落沐萧萧')">回复</a>
+</p>
+<p class="comment-meta">@冷夜：我想用py写</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="98c472b400658600701a3d82c6c0ec5a4b52ff9d"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./将IP地址字符串分割成数组  离别歌/98c472b400658600701a3d82c6c0ec5a4b52ff9d"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="254">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="atJd3A0ZlgWmgBVuEz8OfDSytGgarBmAIN4JR4ceM3QLggjJsQCyOhUDCKJia5bK"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./将IP地址字符串分割成数组  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./将IP地址字符串分割成数组  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>LLVM Study Log | o0xmuhe's blog</title>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<meta content="0x0. 简述刚接触LLVM的时候的记录，算是笔记吧，想从代码混淆的思路学习，学习如何写Pass，以及把自己写的Pass应用到实际的程序中。学习笔记更新中…" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="LLVM Study Log" property="og:title"/>
+<meta content="http://o0xmuhe.me/2017/02/27/LLVM-Study-Log/index.html" property="og:url"/>
+<meta content="o0xmuhe's blog" property="og:site_name"/>
+<meta content="0x0. 简述刚接触LLVM的时候的记录，算是笔记吧，想从代码混淆的思路学习，学习如何写Pass，以及把自己写的Pass应用到实际的程序中。学习笔记更新中…" property="og:description"/>
+<meta content="2017-03-02T06:05:32.537Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="LLVM Study Log" name="twitter:title"/>
+<meta content="0x0. 简述刚接触LLVM的时候的记录，算是笔记吧，想从代码混淆的思路学习，学习如何写Pass，以及把自己写的Pass应用到实际的程序中。学习笔记更新中…" name="twitter:description"/>
+<link href="./LLVM Study Log  o0xmuhe's blog/atom.xml" rel="alternative" title="o0xmuhe's blog" type="application/atom+xml"/>
+<link href="./LLVM Study Log  o0xmuhe's blog/favicon.png" rel="icon"/>
+<link href="./LLVM Study Log  o0xmuhe's blog/animate.min.css" rel="stylesheet"/>
+<link href="./LLVM Study Log  o0xmuhe's blog/style.css" rel="stylesheet"/>
+<link href="./LLVM Study Log  o0xmuhe's blog/font-awesome.min.css" rel="stylesheet"/>
+<link href="./LLVM Study Log  o0xmuhe's blog/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./LLVM Study Log  o0xmuhe's blog/jquery.fancybox.css" rel="stylesheet"/>
+<!-- 加载特效 -->
+<script src="./LLVM Study Log  o0xmuhe's blog/pace.js"></script>
+<link href="./LLVM Study Log  o0xmuhe's blog/pace-theme-flash.css" rel="stylesheet">
+<script>
+      var yiliaConfig = {
+          rootUrl: '/',
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</link></head>
+<body>
+<div id="container">
+<div class="left-col">
+<div class="overlay"></div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./LLVM Study Log  o0xmuhe's blog/head.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="Hi Mate">muhe</a></h1>
+</hgroup>
+<p class="header-subtitle">一个有情怀的二进制狗</p>
+<div class="switch-btn" id="switch-btn">
+<div class="icon">
+<div class="icon-ctn">
+<div class="icon-wrap icon-house" data-idx="0">
+<div class="birdhouse"></div>
+<div class="birdhouse_holes"></div>
+</div>
+<div class="icon-wrap icon-ribbon hide" data-idx="1">
+<div class="ribbon"></div>
+</div>
+<div class="icon-wrap icon-link hide" data-idx="2">
+<div class="loopback_l"></div>
+<div class="loopback_r"></div>
+</div>
+<div class="icon-wrap icon-me hide" data-idx="3">
+<div class="user"></div>
+<div class="shoulder"></div>
+</div>
+</div>
+</div>
+<div class="tips-box hide">
+<div class="tips-arrow"></div>
+<ul class="tips-inner">
+<li>菜单</li>
+<li>标签</li>
+<li>友情链接</li>
+<li>关于我</li>
+</ul>
+</div>
+</div>
+<div class="switch-area" id="switch-area">
+<div class="switch-wrap">
+<section class="switch-part switch-part1">
+<nav class="header-menu">
+<ul>
+<li><a href="/">博客首页</a></li>
+<li><a href="/archives">所有文章</a></li>
+<li><a href="/tags">标签</a></li>
+<li><a href="/about">关于我</a></li>
+<li><a href="/Pwnable-Log">Pwnable</a></li>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fl github" href="https://github.com/o0xmuhe" target="_blank" title="github">github</a>
+<a class="fl weibo" href="http://weibo.com/2070174943/" target="_blank" title="weibo">weibo</a>
+<a class="fl twitter" href="https://twitter.com/0xmuhe" target="_blank" title="twitter">twitter</a>
+<a class="fl rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</ul>
+</nav>
+</section>
+<section class="switch-part switch-part2">
+<div class="widget tagcloud" id="js-tagcloud">
+<a href="/tags/C/" style="font-size: 10px;">C</a> <a href="/tags/CTF/" style="font-size: 10px;">CTF</a> <a href="/tags/CTF-Writeup/" style="font-size: 10px;">CTF Writeup</a> <a href="/tags/CVE-analysis/" style="font-size: 10px;">CVE analysis</a> <a href="/tags/LLVM/" style="font-size: 10px;">LLVM</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/angr/" style="font-size: 12px;">angr</a> <a href="/tags/ctf/" style="font-size: 18px;">ctf</a> <a href="/tags/ctf-writeup/" style="font-size: 20px;">ctf writeup</a> <a href="/tags/env-config/" style="font-size: 10px;">env config</a> <a href="/tags/exploit/" style="font-size: 16px;">exploit</a> <a href="/tags/fuzz/" style="font-size: 14px;">fuzz</a> <a href="/tags/gdb/" style="font-size: 10px;">gdb</a> <a href="/tags/glibc内存管理/" style="font-size: 10px;">glibc内存管理</a> <a href="/tags/life/" style="font-size: 12px;">life</a> <a href="/tags/linux-kernel/" style="font-size: 12px;">linux kernel</a> <a href="/tags/peach/" style="font-size: 10px;">peach</a> <a href="/tags/pwn/" style="font-size: 16px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/ret-2-dl-resolve/" style="font-size: 10px;">ret 2 dl-resolve</a> <a href="/tags/wargame/" style="font-size: 12px;">wargame</a> <a href="/tags/winafl/" style="font-size: 10px;">winafl</a> <a href="/tags/windows-kernel/" style="font-size: 14px;">windows kernel</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a>
+</div>
+</section>
+<section class="switch-part switch-part3">
+<div id="js-friends">
+<a class="main-nav-link switch-friends-link" href="http://syclover.sinaapp.com/" target="_blank">Syclover Team</a>
+<a class="main-nav-link switch-friends-link" href="http://www.Ox9A82.com" target="_blank">0x9A82学弟</a>
+<a class="main-nav-link switch-friends-link" href="http://k1n9.me/" target="_blank">K1n9师傅</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/iamstudy" target="_blank">L3mon</a>
+<a class="main-nav-link switch-friends-link" href="http://www.xianyusec.com" target="_blank">咸鱼</a>
+<a class="main-nav-link switch-friends-link" href="http://v1ct0r.com/" target="_blank">V1ct0r</a>
+<a class="main-nav-link switch-friends-link" href="http://godot.win" target="_blank">Godot学弟</a>
+<a class="main-nav-link switch-friends-link" href="http://hebic.me/" target="_blank">Homaebic学弟</a>
+<a class="main-nav-link switch-friends-link" href="https://iqwq.me" target="_blank">两米的sco4x0</a>
+<a class="main-nav-link switch-friends-link" href="https://zmy.im/" target="_blank">JimmyZhou</a>
+<a class="main-nav-link switch-friends-link" href="http://silic.top/" target="_blank">灭亡叔叔</a>
+<a class="main-nav-link switch-friends-link" href="https://dwx.io" target="_blank">Jason</a>
+<a class="main-nav-link switch-friends-link" href="	http://www.0aa.me/" target="_blank">Mosuan</a>
+<a class="main-nav-link switch-friends-link" href="http://whereisk0shl.top" target="_blank">k0sh1</a>
+<a class="main-nav-link switch-friends-link" href="http://winter3un.github.io" target="_blank">WinterSun</a>
+<a class="main-nav-link switch-friends-link" href="http://venenof.com" target="_blank">Venenof</a>
+<a class="main-nav-link switch-friends-link" href="http://r0p.me/" target="_blank">Icemakr</a>
+<a class="main-nav-link switch-friends-link" href="http://bestwing.me/" target="_blank">Swing</a>
+<a class="main-nav-link switch-friends-link" href="https://www.hackfun.org/" target="_blank">4ido10n</a>
+<a class="main-nav-link switch-friends-link" href="http://www.hackersb.cn/" target="_blank">王松_Striker</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/7top/" target="_blank">7top</a>
+<a class="main-nav-link switch-friends-link" href="http://www.bendawang.site" target="_blank">bendawang</a>
+<a class="main-nav-link switch-friends-link" href="http://ctfrank.org" target="_blank">CTF Rank</a>
+<a class="main-nav-link switch-friends-link" href="http://askook.me/" target="_blank">A酱</a>
+</div>
+</section>
+<section class="switch-part switch-part4">
+<div id="js-aboutme">关注二进制安全. Member of Syclover. CTFer/INTJ.</div>
+</section>
+</div>
+</div>
+</header>
+</div>
+</div>
+<div class="mid-col">
+<nav id="mobile-nav">
+<div class="overlay">
+<div class="slider-trigger"></div>
+<h1 class="header-author js-mobile-header hide"><a href="/" title="Me">muhe</a></h1>
+</div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./LLVM Study Log  o0xmuhe's blog/head.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="Me">muhe</a></h1>
+</hgroup>
+<p class="header-subtitle">一个有情怀的二进制狗</p>
+<nav class="header-menu">
+<ul>
+<li><a href="/">博客首页</a></li>
+<li><a href="/archives">所有文章</a></li>
+<li><a href="/tags">标签</a></li>
+<li><a href="/about">关于我</a></li>
+<li><a href="/Pwnable-Log">Pwnable</a></li>
+<div class="clearfix"></div>
+</ul>
+</nav>
+<nav class="header-nav">
+<div class="social">
+<a class="github" href="https://github.com/o0xmuhe" target="_blank" title="github">github</a>
+<a class="weibo" href="http://weibo.com/2070174943/" target="_blank" title="weibo">weibo</a>
+<a class="twitter" href="https://twitter.com/0xmuhe" target="_blank" title="twitter">twitter</a>
+<a class="rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</div>
+</nav>
+</header>
+</div>
+</nav>
+<div class="body-wrap"><article class="article article-type-post" id="post-LLVM-Study-Log" itemprop="blogPost" itemscope="">
+<div class="article-meta">
+<a class="article-date" href="/2017/02/27/LLVM-Study-Log/">
+<time datetime="2017-02-27T12:03:24.000Z" itemprop="datePublished">2017-02-27</time>
+</a>
+</div>
+<div class="article-inner">
+<input class="isFancy" type="hidden"/>
+<header class="article-header">
+<h1 class="article-title" itemprop="name">
+      LLVM Study Log
+    </h1>
+</header>
+<div class="article-info article-info-post">
+<div class="article-tag tagcloud">
+<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/LLVM/">LLVM</a></li></ul>
+</div>
+<div class="clearfix"></div>
+</div>
+<div class="article-entry" itemprop="articleBody">
+<h4 id="0x0-简述"><a class="headerlink" href="#0x0-简述" title="0x0. 简述"></a>0x0. 简述</h4><p>刚接触LLVM的时候的记录，算是笔记吧，想从代码混淆的思路学习，学习如何写Pass，以及把自己写的Pass应用到实际的程序中。<br/>学习笔记更新中…<br/><a id="more"></a></p>
+<h4 id="0x1-LLVM"><a class="headerlink" href="#0x1-LLVM" title="0x1. LLVM"></a>0x1. LLVM</h4><h5 id="1-1-简介"><a class="headerlink" href="#1-1-简介" title="1.1 简介"></a>1.1 简介</h5><p>LLVM是一个编译器框架，LLVM框架提供的中间表示（IR），可以作为多种语言的后端，并且根据IR可以做语言无关的优化以及<br/>生成对应各种构架（x86,amd64,arm等）的代码。</p>
+<p>主要分为三个部分：前端、Pass、后端</p>
+<ul>
+<li>前端： 获取源码，转成IR。</li>
+<li>Pass：做各种优化工作或者一些过程的变换工作。</li>
+<li>后端： 生成对应平台的机器码。</li>
+</ul>
+<figure class="highlight xl"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">S<span class="function"><span class="title">ource</span> Code ----&gt;</span> F<span class="function"><span class="title">rontend</span> ----&gt;</span> O<span class="function"><span class="title">ptimizer</span> ----&gt;</span> B<span class="function"><span class="title">ackend</span> ----&gt;</span> Machine Code</div><div class="line">                                    |</div><div class="line">                                Pass Work Here</div></pre></td></tr></table></figure>
+<p>更多细节直接看<a href="http://llvm.org" rel="external" target="_blank">官网</a></p>
+<h5 id="1-2-安装"><a class="headerlink" href="#1-2-安装" title="1.2 安装"></a>1.2 安装</h5><p>安装的话直接按照官方的文档去安装就可以了.</p>
+<p>下载源码<br/><figure class="highlight oxygene"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ cd <span class="keyword">where</span>-you-want-llvm-<span class="keyword">to</span>-live</div><div class="line">$ svn co http:<span class="comment">//llvm.org/svn/llvm-project/llvm/trunk llvm</span></div><div class="line">$ cd <span class="keyword">where</span>-you-want-llvm-<span class="keyword">to</span>-live</div></pre></td></tr></table></figure></p>
+<p>迁移出clang<br/><figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$ </span>cd llvm/tools</div><div class="line"><span class="variable">$ </span>svn co <span class="symbol">http:</span>/<span class="regexp">/llvm.org/svn</span><span class="regexp">/llvm-project/cfe</span><span class="regexp">/trunk clang</span></div></pre></td></tr></table></figure></p>
+<p>运行库<br/><figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ <span class="keyword">cd</span> where-you-want-llvm-<span class="keyword">to</span>-live</div><div class="line">$ <span class="keyword">cd</span> llvm/projects</div><div class="line">$ svn <span class="keyword">co</span> http://llvm.org/svn/llvm-project/<span class="keyword">compiler</span>-rt/trunk <span class="keyword">compiler</span>-rt</div></pre></td></tr></table></figure></p>
+<p>编译<br/><figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$ </span>mkdir build</div><div class="line"><span class="variable">$ </span>cd build</div><div class="line"><span class="variable">$ </span>cmake -<span class="symbol">DCMAKE_BUILD_TYPE:</span>String=Release ../llvm/</div><div class="line"><span class="variable">$ </span>make -j x</div></pre></td></tr></table></figure></p>
+<p>就是最后编译的时候，时间会比较久，<code>make -j x</code>，x给的大一点<br/>会编译的快一点。</p>
+<h5 id="1-3-IR"><a class="headerlink" href="#1-3-IR" title="1.3 IR"></a>1.3 IR</h5><figure class="highlight css"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">LLVM</span> <span class="selector-tag">IR</span>有三种形式，可读的文本形式(<span class="selector-class">.ll</span>)，硬盘上存储的二进制形式(<span class="selector-class">.bc</span>)，内存中的编译器检测和修改的形式。</div></pre></td></tr></table></figure>
+<p>下面编写测试代码，来看一下IR语言。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">test</span><span class="params">(<span class="keyword">int</span> a,<span class="keyword">int</span> b)</span></span>{</div><div class="line">    </div><div class="line">    <span class="keyword">return</span> a + b;</div><div class="line"></div><div class="line">}</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc,<span class="keyword">char</span> *argv[])</span></span>{</div><div class="line">    </div><div class="line">    <span class="keyword">int</span> c = <span class="number">0</span>;</div><div class="line">    c = test(<span class="number">4</span>,<span class="number">6</span>);</div><div class="line">    <span class="built_in">printf</span>(<span class="string">"I got : %d \n"</span>,c);</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;        </div><div class="line">}</div></pre></td></tr></table></figure>
+<p>编译<code>clang -emit-llvm test.cpp -S -o test.ll</code><br/>得到IR<br/><figure class="highlight mel"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line">; ModuleID = <span class="string">'test.cpp'</span></div><div class="line">source_filename = <span class="string">"test.cpp"</span></div><div class="line">target datalayout = <span class="string">"e-m:e-i64:64-f80:128-n8:16:32:64-S128"</span></div><div class="line">target triple = <span class="string">"x86_64-unknown-linux-gnu"</span></div><div class="line"></div><div class="line">@.str = private unnamed_addr constant [<span class="number">13</span> x i8] c<span class="string">"I got : %d \0A\00"</span>, <span class="keyword">align</span> <span class="number">1</span></div><div class="line"></div><div class="line">; Function Attrs: noinline nounwind uwtable</div><div class="line">define i32 @_Z4testii(i32, i32) #<span class="number">0</span> {</div><div class="line">  %3 = alloca i32, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %4 = alloca i32, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  store i32 %0, i32* %3, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  store i32 %1, i32* %4, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %5 = load i32, i32* %3, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %6 = load i32, i32* %4, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %7 = add nsw i32 %5, %6</div><div class="line">  ret i32 %7</div><div class="line">}</div><div class="line"></div><div class="line">; Function Attrs: noinline norecurse uwtable</div><div class="line">define i32 @main(i32, i8**) #<span class="number">1</span> {</div><div class="line">  %3 = alloca i32, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %4 = alloca i32, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %5 = alloca i8**, <span class="keyword">align</span> <span class="number">8</span></div><div class="line">  %6 = alloca i32, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  store i32 <span class="number">0</span>, i32* %3, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  store i32 %0, i32* %4, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  store i8** %1, i8*** %5, <span class="keyword">align</span> <span class="number">8</span></div><div class="line">  store i32 <span class="number">0</span>, i32* %6, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %7 = call i32 @_Z4testii(i32 <span class="number">4</span>, i32 <span class="number">6</span>)</div><div class="line">  store i32 %7, i32* %6, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %8 = load i32, i32* %6, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %9 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([<span class="number">13</span> x i8], [<span class="number">13</span> x i8]* @.str, i32 <span class="number">0</span>, i32 <span class="number">0</span>), i32 %8)</div><div class="line">  ret i32 <span class="number">0</span></div><div class="line">}</div><div class="line"></div><div class="line">declare i32 @printf(i8*, ...) #<span class="number">2</span></div><div class="line"></div><div class="line">attributes #<span class="number">0</span> = { noinline nounwind uwtable <span class="string">"correctly-rounded-divide-sqrt-fp-math"</span>=<span class="string">"false"</span> <span class="string">"disable-tail-calls"</span>=<span class="string">"false"</span> <span class="string">"less-precise-fpmad"</span>=<span class="string">"false"</span> <span class="string">"no-frame-pointer-elim"</span>=<span class="string">"true"</span> <span class="string">"no-frame-pointer-elim-non-leaf"</span> <span class="string">"no-infs-fp-math"</span>=<span class="string">"false"</span> <span class="string">"no-jump-tables"</span>=<span class="string">"false"</span> <span class="string">"no-nans-fp-math"</span>=<span class="string">"false"</span> <span class="string">"no-signed-zeros-fp-math"</span>=<span class="string">"false"</span> <span class="string">"no-trapping-math"</span>=<span class="string">"false"</span> <span class="string">"stack-protector-buffer-size"</span>=<span class="string">"8"</span> <span class="string">"target-cpu"</span>=<span class="string">"x86-64"</span> <span class="string">"target-features"</span>=<span class="string">"+fxsr,+mmx,+sse,+sse2,+x87"</span> <span class="string">"unsafe-fp-math"</span>=<span class="string">"false"</span> <span class="string">"use-soft-float"</span>=<span class="string">"false"</span> }</div><div class="line">attributes #<span class="number">1</span> = { noinline norecurse uwtable <span class="string">"correctly-rounded-divide-sqrt-fp-math"</span>=<span class="string">"false"</span> <span class="string">"disable-tail-calls"</span>=<span class="string">"false"</span> <span class="string">"less-precise-fpmad"</span>=<span class="string">"false"</span> <span class="string">"no-frame-pointer-elim"</span>=<span class="string">"true"</span> <span class="string">"no-frame-pointer-elim-non-leaf"</span> <span class="string">"no-infs-fp-math"</span>=<span class="string">"false"</span> <span class="string">"no-jump-tables"</span>=<span class="string">"false"</span> <span class="string">"no-nans-fp-math"</span>=<span class="string">"false"</span> <span class="string">"no-signed-zeros-fp-math"</span>=<span class="string">"false"</span> <span class="string">"no-trapping-math"</span>=<span class="string">"false"</span> <span class="string">"stack-protector-buffer-size"</span>=<span class="string">"8"</span> <span class="string">"target-cpu"</span>=<span class="string">"x86-64"</span> <span class="string">"target-features"</span>=<span class="string">"+fxsr,+mmx,+sse,+sse2,+x87"</span> <span class="string">"unsafe-fp-math"</span>=<span class="string">"false"</span> <span class="string">"use-soft-float"</span>=<span class="string">"false"</span> }</div><div class="line">attributes #<span class="number">2</span> = { <span class="string">"correctly-rounded-divide-sqrt-fp-math"</span>=<span class="string">"false"</span> <span class="string">"disable-tail-calls"</span>=<span class="string">"false"</span> <span class="string">"less-precise-fpmad"</span>=<span class="string">"false"</span> <span class="string">"no-frame-pointer-elim"</span>=<span class="string">"true"</span> <span class="string">"no-frame-pointer-elim-non-leaf"</span> <span class="string">"no-infs-fp-math"</span>=<span class="string">"false"</span> <span class="string">"no-nans-fp-math"</span>=<span class="string">"false"</span> <span class="string">"no-signed-zeros-fp-math"</span>=<span class="string">"false"</span> <span class="string">"no-trapping-math"</span>=<span class="string">"false"</span> <span class="string">"stack-protector-buffer-size"</span>=<span class="string">"8"</span> <span class="string">"target-cpu"</span>=<span class="string">"x86-64"</span> <span class="string">"target-features"</span>=<span class="string">"+fxsr,+mmx,+sse,+sse2,+x87"</span> <span class="string">"unsafe-fp-math"</span>=<span class="string">"false"</span> <span class="string">"use-soft-float"</span>=<span class="string">"false"</span> }</div><div class="line"></div><div class="line">!llvm.ident = !{!<span class="number">0</span>}</div><div class="line"></div><div class="line">!<span class="number">0</span> = !{!<span class="string">"clang version 4.0.0 (trunk 291212)"</span>}</div></pre></td></tr></table></figure></p>
+<p>感觉配合着官网的文档，很容易就可以读懂，语法也很清晰明了。<br/>比如test函数<br/><figure class="highlight lsl"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">define i32 @_Z4testii(i32, i32) #<span class="number">0</span> { <span class="comment">//@是全局标识符，%是局部标识符</span></div><div class="line">  %<span class="number">3</span> = alloca i32, align <span class="number">4</span>    <span class="comment">//局部变量声明，并分配空间，4字节对齐</span></div><div class="line">  %<span class="number">4</span> = alloca i32, align <span class="number">4</span>    </div><div class="line">  store i32 %<span class="number">0</span>, i32* %<span class="number">3</span>, align <span class="number">4</span> <span class="comment">//刚才的变量存储在 0号寄存器的位置</span></div><div class="line">  store i32 %<span class="number">1</span>, i32* %<span class="number">4</span>, align <span class="number">4</span> <span class="comment">//..............1号寄存器的位置</span></div><div class="line">  %<span class="number">5</span> = load i32, i32* %<span class="number">3</span>, align <span class="number">4</span> </div><div class="line">  %<span class="number">6</span> = load i32, i32* %<span class="number">4</span>, align <span class="number">4</span> <span class="comment">//分别载入到5号寄存器和6号寄存器的位置</span></div><div class="line">  %<span class="number">7</span> = add nsw i32 %<span class="number">5</span>, %<span class="number">6</span>    <span class="comment">//然后相加，存到7号寄存器的位置</span></div><div class="line">  ret i32 %<span class="number">7</span>    <span class="comment">//返回结果（32位整数）</span></div><div class="line">}</div></pre></td></tr></table></figure></p>
+<p>弱弱的说一句…感觉好像JAVA字节码啊</p>
+<p>更多的内容，还是<a href="http://llvm.org/docs/LangRef.html" rel="external" target="_blank">官方文档</a></p>
+<h4 id="0x2-Pass"><a class="headerlink" href="#0x2-Pass" title="0x2. Pass"></a>0x2. Pass</h4><p>Pass 的主要分类有以下几种。</p>
+<ul>
+<li><a href="http://llvm.org/docs/WritingAnLLVMPass.html#the-immutablepass-class" rel="external" target="_blank">ImmutablePass</a><br/>Immutable,字面意思一成不变，即这种pass不是普通的用来转换、分析的pass，他可以提供当前编译器配置的信息。这种pass不需要运行、也不改变状态、也不需要更新。</li>
+<li><p><a href="http://llvm.org/docs/WritingAnLLVMPass.html#the-moudlepass-class" rel="external" target="_blank">MoudlePass</a><br/>从ModulePass派生表示这个pass使用整个程序作为一个单元，不可预测的顺序引用函数体，或者添加、删除函数；这种pass对子类行为并不了解，所以无法对其做优化。</p>
+</li>
+<li><p><a href="http://llvm.org/docs/WritingAnLLVMPass.html#the-callgraphsccpass-class" rel="external" target="_blank">CallGraphSCCPass</a><br/>这种需要遍历自下而上的函数调用图。</p>
+</li>
+<li><p><a href="http://llvm.org/docs/WritingAnLLVMPass.html#the-funcationpass-class" rel="external" target="_blank">FuncationPass</a><br/>在每个函数上执行。这个pass再llvm的文档上有例子，那个hello world的例子。</p>
+</li>
+<li><p><a href="http://llvm.org/docs/WritingAnLLVMPass.html#the-looppass-class" rel="external" target="_blank">LoopPass</a><br/>这种再每个循环上执行，与函数中其他的循环无关；LoopPass使用嵌套顺序处理循环，外层最后处理。</p>
+</li>
+<li><p><a href="http://llvm.org/docs/WritingAnLLVMPass.html#the-regionpass-class" rel="external" target="_blank">RegionPass</a><br/>类似LoopPass，但是在函数执行中的每个单个条目的退出区域上执行。还是嵌套顺序处理区域，即最外部的区域最后被处理。</p>
+</li>
+<li><p><a href="http://llvm.org/docs/WritingAnLLVMPass.html#the-basicblockpass-class" rel="external" target="_blank">BasicBlockPass</a><br/>类似FunctionPass，但是必须一次限制它们对基本块的检查和修改范围，具体的限制见文档。</p>
+</li>
+<li><p><a href="http://llvm.org/docs/WritingAnLLVMPass.html#the-machinefunctionPass-class" rel="external" target="_blank">MachineFunctionPass</a><br/>LLVM代码生成器的一部分，在程序中的每个LLVM函数的依赖于机器的表示上执行。</p>
+</li>
+</ul>
+<p>根据<a href="http://www.cs.cornell.edu/~asampson/blog/llvm.html" rel="external" target="_blank">LLVM for Grad Students</a>文章的方式去动态<br/>使用pass。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"llvm/Pass.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"llvm/IR/Function.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"llvm/Support/raw_ostream.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"llvm/IR/LegacyPassManager.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"llvm/Transforms/IPO/PassManagerBuilder.h"</span></span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> llvm;</div><div class="line"></div><div class="line"><span class="keyword">namespace</span> {</div><div class="line">  <span class="keyword">struct</span> SkeletonPass : <span class="keyword">public</span> FunctionPass {</div><div class="line">    <span class="keyword">static</span> <span class="keyword">char</span> ID;</div><div class="line">    SkeletonPass() : FunctionPass(ID) {}</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">runOnFunction</span><span class="params">(Function &amp;F)</span> </span>{</div><div class="line">      errs() &lt;&lt; <span class="string">"In a function called "</span> &lt;&lt; F.getName() &lt;&lt; <span class="string">"!\n"</span>; <span class="comment">//如果是函数，输出函数名字</span></div><div class="line"></div><div class="line">      errs() &lt;&lt; <span class="string">"Function body:\n"</span>;</div><div class="line">      F.dump();                     <span class="comment">//打印函数体</span></div><div class="line"></div><div class="line">      <span class="keyword">for</span> (<span class="keyword">auto</span> &amp;B : F) {</div><div class="line">        errs() &lt;&lt; <span class="string">"Basic block:\n"</span>; <span class="comment">//是bb块就输出这行</span></div><div class="line">        B.dump();</div><div class="line"></div><div class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> &amp;I : B) {</div><div class="line">          errs() &lt;&lt; <span class="string">"Instruction: "</span>; <span class="comment">//指令的话就输出这行</span></div><div class="line">          I.dump();</div><div class="line">        }</div><div class="line">      }</div><div class="line"></div><div class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</div><div class="line">    }</div><div class="line">  };</div><div class="line">}</div><div class="line"></div><div class="line"><span class="keyword">char</span> SkeletonPass::ID = <span class="number">0</span>;</div><div class="line"><span class="comment">// Automatically enable the pass.</span></div><div class="line"><span class="comment">// http://adriansampson.net/blog/clangpass.html </span></div><div class="line"><span class="comment">// 注册Pass</span></div><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">registerSkeletonPass</span><span class="params">(<span class="keyword">const</span> PassManagerBuilder &amp;,</span></span></div><div class="line">                         legacy::PassManagerBase &amp;PM) {</div><div class="line">  PM.add(<span class="keyword">new</span> SkeletonPass());</div><div class="line">}</div><div class="line"><span class="function"><span class="keyword">static</span> RegisterStandardPasses</span></div><div class="line">  <span class="title">RegisterMyPass</span><span class="params">(PassManagerBuilder::EP_EarlyAsPossible,</span></div><div class="line">                 registerSkeletonPass);</div></pre></td></tr></table></figure>
+<p>CmakeList.txt文件<br/><figure class="highlight makefile"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">add_library(SkeletonPass MODULE</div><div class="line">    <span class="comment"># List your source files here.</span></div><div class="line">    Skeleton.cpp</div><div class="line">)</div><div class="line"></div><div class="line"><span class="comment"># Use C++11 to compile our pass (i.e., supply -std=c++11).</span></div><div class="line">target_compile_features(SkeletonPass PRIVATE cxx_range_for cxx_auto_type)</div><div class="line"></div><div class="line"><span class="comment"># LLVM is (typically) built with no C++ RTTI. We need to match that;</span></div><div class="line"><span class="comment"># otherwise, we'll get linker errors about missing RTTI data.</span></div><div class="line">set_target_properties(SkeletonPass PROPERTIES</div><div class="line">    COMPILE_FLAGS "-fno-rtti"</div><div class="line">)</div><div class="line"></div><div class="line"><span class="comment"># Get proper shared-library behavior (where symbols are not necessarily</span></div><div class="line"><span class="comment"># resolved when the shared library is linked) on OS X.</span></div><div class="line">if(APPLE)</div><div class="line">    set_target_properties(SkeletonPass PROPERTIES</div><div class="line">        LINK_FLAGS "-undefined dynamic_lookup"</div><div class="line">    )</div><div class="line">endif(APPLE)</div></pre></td></tr></table></figure></p>
+<p>编译pass<br/><figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">mkdir</span> build</div><div class="line"><span class="keyword">cd</span> build</div><div class="line">cmake ..</div><div class="line"><span class="keyword">make</span></div></pre></td></tr></table></figure></p>
+<p>然后就可以了<br/><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"># muhe @ muhe-work in ~/Code/llvm-pass-skeleton/build on git:master x [<span class="number">17</span>:<span class="number">10</span>:<span class="number">02</span>] </div><div class="line">$ make</div><div class="line">Scanning dependencies <span class="keyword">of</span> target SkeletonPass</div><div class="line">[ <span class="number">50</span><span class="comment">%] Building CXX object skeleton/CMakeFiles/SkeletonPass.dir/Skeleton.cpp.o</span></div><div class="line">[<span class="number">100</span><span class="comment">%] Linking CXX shared module libSkeletonPass.so</span></div><div class="line">[<span class="number">100</span><span class="comment">%] Built target SkeletonPass</span></div></pre></td></tr></table></figure></p>
+<p>现在编写一个程序来测试这个Pass，我们的Pass可以标识出代码块和指令。<br/><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">func</span><span class="params">()</span></span>{</div><div class="line"></div><div class="line">    <span class="built_in">printf</span>(<span class="string">"I am a func\n"</span>);</div><div class="line">}</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc,<span class="keyword">char</span>*argv[])</span></span>{</div><div class="line"></div><div class="line">    <span class="keyword">int</span> i = <span class="number">0</span>;</div><div class="line">    <span class="keyword">for</span>(;i&lt;<span class="number">10</span>;i++){</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"test time : %d\n"</span>,i);</div><div class="line">    }</div><div class="line"></div><div class="line">    func();</div><div class="line">    <span class="built_in">printf</span>(<span class="string">"Done\n"</span>);</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure></p>
+<p>现在运行这个Pass<br/><code>clang -Xclang -load -Xclang build/skeleton/libSkeletonPass.so -c test.c</code></p>
+<p>得到的结果略长，如下<br/><figure class="highlight mel"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div></pre></td><td class="code"><pre><div class="line"># muhe @ muhe-work <span class="keyword">in</span> ~/Code/llvm-pass-skeleton on git:master x [<span class="number">17</span>:<span class="number">20</span>:<span class="number">12</span>] </div><div class="line">$ clang -Xclang -load -Xclang build/skeleton/libSkeletonPass.so -c test.c    </div><div class="line">In a function called func!</div><div class="line">Function body:</div><div class="line"></div><div class="line">; Function Attrs: noinline nounwind uwtable</div><div class="line">define void @func() #<span class="number">0</span> {</div><div class="line">  %1 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([<span class="number">13</span> x i8], [<span class="number">13</span> x i8]* @.str, i32 <span class="number">0</span>, i32 <span class="number">0</span>))</div><div class="line">  ret void</div><div class="line">}</div><div class="line"></div><div class="line">Basic block:</div><div class="line"></div><div class="line">  %1 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([<span class="number">13</span> x i8], [<span class="number">13</span> x i8]* @.str, i32 <span class="number">0</span>, i32 <span class="number">0</span>))</div><div class="line">  ret void</div><div class="line"></div><div class="line">Instruction:   %1 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([<span class="number">13</span> x i8], [<span class="number">13</span> x i8]* @.str, i32 <span class="number">0</span>, i32 <span class="number">0</span>))</div><div class="line">Instruction:   ret void</div><div class="line">In a function called main!</div><div class="line">Function body:</div><div class="line"></div><div class="line">; Function Attrs: noinline nounwind uwtable</div><div class="line">define i32 @main(i32, i8**) #<span class="number">0</span> {</div><div class="line">  %3 = alloca i32, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %4 = alloca i32, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %5 = alloca i8**, <span class="keyword">align</span> <span class="number">8</span></div><div class="line">  %6 = alloca i32, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  store i32 <span class="number">0</span>, i32* %3, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  store i32 %0, i32* %4, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  store i8** %1, i8*** %5, <span class="keyword">align</span> <span class="number">8</span></div><div class="line">  store i32 <span class="number">0</span>, i32* %6, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  br label %7</div><div class="line"></div><div class="line">; &lt;label&gt;:<span class="number">7</span>:                                      ; preds = %13, %2</div><div class="line">  %8 = load i32, i32* %6, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %9 = icmp slt i32 %8, <span class="number">10</span></div><div class="line">  br i1 %9, label %10, label %16</div><div class="line"></div><div class="line">; &lt;label&gt;:<span class="number">10</span>:                                     ; preds = %7</div><div class="line">  %11 = load i32, i32* %6, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %12 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([<span class="number">16</span> x i8], [<span class="number">16</span> x i8]* @.str<span class="number">.1</span>, i32 <span class="number">0</span>, i32 <span class="number">0</span>), i32 %11)</div><div class="line">  br label %13</div><div class="line"></div><div class="line">; &lt;label&gt;:<span class="number">13</span>:                                     ; preds = %10</div><div class="line">  %14 = load i32, i32* %6, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %15 = add nsw i32 %14, <span class="number">1</span></div><div class="line">  store i32 %15, i32* %6, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  br label %7</div><div class="line"></div><div class="line">; &lt;label&gt;:<span class="number">16</span>:                                     ; preds = %7</div><div class="line">  call void @func()</div><div class="line">  %17 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([<span class="number">6</span> x i8], [<span class="number">6</span> x i8]* @.str<span class="number">.2</span>, i32 <span class="number">0</span>, i32 <span class="number">0</span>))</div><div class="line">  ret i32 <span class="number">0</span></div><div class="line">}</div><div class="line"></div><div class="line">Basic block:</div><div class="line"></div><div class="line">  %3 = alloca i32, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %4 = alloca i32, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %5 = alloca i8**, <span class="keyword">align</span> <span class="number">8</span></div><div class="line">  %6 = alloca i32, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  store i32 <span class="number">0</span>, i32* %3, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  store i32 %0, i32* %4, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  store i8** %1, i8*** %5, <span class="keyword">align</span> <span class="number">8</span></div><div class="line">  store i32 <span class="number">0</span>, i32* %6, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  br label %7</div><div class="line"></div><div class="line">Instruction:   %3 = alloca i32, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">Instruction:   %4 = alloca i32, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">Instruction:   %5 = alloca i8**, <span class="keyword">align</span> <span class="number">8</span></div><div class="line">Instruction:   %6 = alloca i32, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">Instruction:   store i32 <span class="number">0</span>, i32* %3, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">Instruction:   store i32 %0, i32* %4, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">Instruction:   store i8** %1, i8*** %5, <span class="keyword">align</span> <span class="number">8</span></div><div class="line">Instruction:   store i32 <span class="number">0</span>, i32* %6, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">Instruction:   br label %7</div><div class="line">Basic block:</div><div class="line"></div><div class="line">; &lt;label&gt;:<span class="number">7</span>:                                      ; preds = %13, %2</div><div class="line">  %8 = load i32, i32* %6, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %9 = icmp slt i32 %8, <span class="number">10</span></div><div class="line">  br i1 %9, label %10, label %16</div><div class="line"></div><div class="line">Instruction:   %8 = load i32, i32* %6, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">Instruction:   %9 = icmp slt i32 %8, <span class="number">10</span></div><div class="line">Instruction:   br i1 %9, label %10, label %16</div><div class="line">Basic block:</div><div class="line"></div><div class="line">; &lt;label&gt;:<span class="number">10</span>:                                     ; preds = %7</div><div class="line">  %11 = load i32, i32* %6, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %12 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([<span class="number">16</span> x i8], [<span class="number">16</span> x i8]* @.str<span class="number">.1</span>, i32 <span class="number">0</span>, i32 <span class="number">0</span>), i32 %11)</div><div class="line">  br label %13</div><div class="line"></div><div class="line">Instruction:   %11 = load i32, i32* %6, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">Instruction:   %12 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([<span class="number">16</span> x i8], [<span class="number">16</span> x i8]* @.str<span class="number">.1</span>, i32 <span class="number">0</span>, i32 <span class="number">0</span>), i32 %11)</div><div class="line">Instruction:   br label %13</div><div class="line">Basic block:</div><div class="line"></div><div class="line">; &lt;label&gt;:<span class="number">13</span>:                                     ; preds = %10</div><div class="line">  %14 = load i32, i32* %6, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  %15 = add nsw i32 %14, <span class="number">1</span></div><div class="line">  store i32 %15, i32* %6, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">  br label %7</div><div class="line"></div><div class="line">Instruction:   %14 = load i32, i32* %6, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">Instruction:   %15 = add nsw i32 %14, <span class="number">1</span></div><div class="line">Instruction:   store i32 %15, i32* %6, <span class="keyword">align</span> <span class="number">4</span></div><div class="line">Instruction:   br label %7</div><div class="line">Basic block:</div><div class="line"></div><div class="line">; &lt;label&gt;:<span class="number">16</span>:                                     ; preds = %7</div><div class="line">  call void @func()</div><div class="line">  %17 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([<span class="number">6</span> x i8], [<span class="number">6</span> x i8]* @.str<span class="number">.2</span>, i32 <span class="number">0</span>, i32 <span class="number">0</span>))</div><div class="line">  ret i32 <span class="number">0</span></div><div class="line"></div><div class="line">Instruction:   call void @func()</div><div class="line">Instruction:   %17 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([<span class="number">6</span> x i8], [<span class="number">6</span> x i8]* @.str<span class="number">.2</span>, i32 <span class="number">0</span>, i32 <span class="number">0</span>))</div><div class="line">Instruction:   ret i32 <span class="number">0</span></div></pre></td></tr></table></figure></p>
+<ul>
+<li>一些包含关系：<br/><code>[Module [Function [BasicBlock [Instruction]]]]</code></li>
+</ul>
+<p>他这篇文章后面例子还有使用Pass替换一些指令，如把add换成了mul，感兴趣可以跟着他的文章写一下。</p>
+<h4 id="0x3-使用LLVM来做混淆"><a class="headerlink" href="#0x3-使用LLVM来做混淆" title="0x3. 使用LLVM来做混淆"></a>0x3. 使用LLVM来做混淆</h4><p>add替换成sub指令，即<code>add a,b</code>换成了<code>sub a,-b</code><br/><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"llvm/IR/Function.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"llvm/Pass.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"llvm/Support/raw_ostream.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"llvm/IR/Intrinsics.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"llvm/IR/Instructions.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"llvm/IR/LegacyPassManager.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"llvm/Transforms/IPO/PassManagerBuilder.h"</span></span></div><div class="line"></div><div class="line"></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> llvm;</div><div class="line"></div><div class="line"><span class="keyword">namespace</span> {</div><div class="line">    <span class="keyword">struct</span> SimplePass : <span class="keyword">public</span> FunctionPass {</div><div class="line">        <span class="keyword">static</span> <span class="keyword">char</span> ID; <span class="comment">// Pass identification, replacement for typeid</span></div><div class="line">         </div><div class="line">        SimplePass() : FunctionPass(ID) {}</div><div class="line">4 </div><div class="line">        <span class="function"><span class="keyword">bool</span> <span class="title">runOnFunction</span><span class="params">(Function &amp;F)</span> override </span>{</div><div class="line">            Function *tmp = &amp;F;</div><div class="line">            <span class="comment">// 遍历函数中的所有基本块</span></div><div class="line">            <span class="keyword">for</span> (Function::iterator bb = tmp-&gt;begin(); bb != tmp-&gt;end(); ++bb) {</div><div class="line">                <span class="comment">// 遍历基本块中的每条指令</span></div><div class="line">                <span class="keyword">for</span> (BasicBlock::iterator inst = bb-&gt;begin(); inst != bb-&gt;end(); ++inst) {</div><div class="line">                    <span class="comment">// 是否是add指令</span></div><div class="line">                    <span class="keyword">if</span> (inst-&gt;isBinaryOp()) {</div><div class="line">                        <span class="keyword">if</span> (inst-&gt;getOpcode() == Instruction::Add) {</div><div class="line">                            <span class="keyword">return</span> ob_add(cast&lt;BinaryOperator&gt;(inst));</div><div class="line">                        }</div><div class="line">                    }</div><div class="line">                }</div><div class="line">            }</div><div class="line">             </div><div class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</div><div class="line">        }</div><div class="line">         </div><div class="line">        <span class="comment">// a+b === a-(-b)</span></div><div class="line">        <span class="function"><span class="keyword">bool</span> <span class="title">ob_add</span><span class="params">(BinaryOperator *bo)</span> </span>{</div><div class="line">            BinaryOperator *op = <span class="literal">NULL</span>;</div><div class="line">             </div><div class="line">            <span class="keyword">if</span> (bo-&gt;getOpcode() == Instruction::Add) {</div><div class="line">                <span class="comment">// 生成 (－b)</span></div><div class="line">                op = BinaryOperator::CreateNeg(bo-&gt;getOperand(<span class="number">1</span>), <span class="string">""</span>, bo);</div><div class="line">                <span class="comment">// 生成 a-(-b)</span></div><div class="line">                op = BinaryOperator::Create(Instruction::Sub, bo-&gt;getOperand(<span class="number">0</span>), op, <span class="string">""</span>, bo);</div><div class="line">                 </div><div class="line">                op-&gt;setHasNoSignedWrap(bo-&gt;hasNoSignedWrap());</div><div class="line">                op-&gt;setHasNoUnsignedWrap(bo-&gt;hasNoUnsignedWrap());</div><div class="line">                <span class="comment">// 替换所有出现该指令的地方</span></div><div class="line">                bo-&gt;replaceAllUsesWith(op);</div><div class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</div><div class="line">            }</div><div class="line">            </div><div class="line">        }</div><div class="line">    };</div><div class="line">}</div><div class="line"></div><div class="line"><span class="keyword">char</span> SimplePass::ID = <span class="number">0</span>;</div><div class="line"></div><div class="line"><span class="comment">// Automatically enable the pass.</span></div><div class="line"><span class="comment">// http://adriansampson.net/blog/clangpass.html</span></div><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">registerSimplePass</span><span class="params">(<span class="keyword">const</span> PassManagerBuilder &amp;,</span></span></div><div class="line">                         legacy::PassManagerBase &amp;PM) {</div><div class="line">  PM.add(<span class="keyword">new</span> SimplePass());</div><div class="line">}</div><div class="line"><span class="function"><span class="keyword">static</span> RegisterStandardPasses</span></div><div class="line">  <span class="title">RegisterMyPass</span><span class="params">(PassManagerBuilder::EP_EarlyAsPossible,</span></div><div class="line">                 registerSimplePass);</div></pre></td></tr></table></figure></p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">add_library(SimplePass MODULE</div><div class="line">    <span class="comment"># List your source files here.</span></div><div class="line">    SimplePass.cpp</div><div class="line">)</div><div class="line"></div><div class="line"><span class="comment"># Use C++11 to compile our pass (i.e., supply -std=c++11).</span></div><div class="line">target_compile_features(SimplePass PRIVATE cxx_range_for cxx_auto_type)</div><div class="line"></div><div class="line"><span class="comment"># LLVM is (typically) built with no C++ RTTI. We need to match that.</span></div><div class="line">set_target_properties(SimplePass PROPERTIES</div><div class="line">    COMPILE_FLAGS "-fno-rtti"</div><div class="line">)</div><div class="line"></div><div class="line"><span class="comment"># Get proper shared-library behavior (where symbols are not necessarily</span></div><div class="line"><span class="comment"># resolved when the shared library is linked) on OS X.</span></div><div class="line">if(APPLE)</div><div class="line">    set_target_properties(SimplePass PROPERTIES</div><div class="line">        LINK_FLAGS "-undefined dynamic_lookup"</div><div class="line">    )</div><div class="line">endif(APPLE)</div></pre></td></tr></table></figure>
+<p>我的测试代码如下<br/><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ cat example.c </div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">const</span> <span class="keyword">char</span>** argv)</span> </span>{</div><div class="line">    <span class="keyword">int</span> num;</div><div class="line">    <span class="built_in">scanf</span>(<span class="string">"%i"</span>, &amp;num);</div><div class="line">    <span class="built_in">printf</span>(<span class="string">"%i\n"</span>, num + <span class="number">2</span>);</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure></p>
+<p>先编译正常的程序<br/><code>clang example.c -o before</code></p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ <span class="built_in">file</span> <span class="keyword">before</span> </div><div class="line"><span class="keyword">before</span>: ELF <span class="number">64</span>-bit LSB executable, x86<span class="number">-64</span>, <span class="built_in">version</span> <span class="number">1</span> (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span>, <span class="keyword">for</span> GNU/Linux <span class="number">2.6</span><span class="number">.32</span>, <span class="keyword">not</span> stripped</div></pre></td></tr></table></figure>
+<p>看一下main的逻辑：<br/><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">objdump -M intel -d  before </div><div class="line"></div><div class="line">. . . </div><div class="line"></div><div class="line">0000000000400580 &lt;main&gt;:</div><div class="line">  400580:	55                   	push   rbp</div><div class="line">  400581:	48 89 e5             	mov    rbp,rsp</div><div class="line">  400584:	48 83 ec 20          	sub    rsp,0x20</div><div class="line">  400588:	48 b8 64 06 40 00 00 	movabs rax,0x400664</div><div class="line">  40058f:	00 00 00 </div><div class="line">  400592:	48 8d 4d ec          	lea    rcx,[rbp-0x14]</div><div class="line">  400596:	c7 45 fc 00 00 00 00 	mov    DWORD PTR [rbp-0x4],0x0</div><div class="line">  40059d:	89 7d f8             	mov    DWORD PTR [rbp-0x8],edi</div><div class="line">  4005a0:	48 89 75 f0          	mov    QWORD PTR [rbp-0x10],rsi</div><div class="line">  4005a4:	48 89 c7             	mov    rdi,rax</div><div class="line">  4005a7:	48 89 ce             	mov    rsi,rcx</div><div class="line">  4005aa:	b0 00                	mov    al,0x0</div><div class="line">  4005ac:	e8 af fe ff ff       	call   400460 &lt;__isoc99_scanf@plt&gt;</div><div class="line">  4005b1:	48 bf 67 06 40 00 00 	movabs rdi,0x400667</div><div class="line">  4005b8:	00 00 00 </div><div class="line">  4005bb:	8b 55 ec             	mov    edx,DWORD PTR [rbp-0x14]</div><div class="line">  4005be:	83 c2 02             	add    edx,0x2  //num + 2 语句</div><div class="line">  4005c1:	89 d6                	mov    esi,edx</div><div class="line">  4005c3:	89 45 e8             	mov    DWORD PTR [rbp-0x18],eax</div><div class="line">  4005c6:	b0 00                	mov    al,0x0</div><div class="line">  4005c8:	e8 73 fe ff ff       	call   400440 &lt;printf@plt&gt;</div><div class="line">  4005cd:	31 d2                	xor    edx,edx</div><div class="line">  4005cf:	89 45 e4             	mov    DWORD PTR [rbp-0x1c],eax</div><div class="line">  4005d2:	89 d0                	mov    eax,edx</div><div class="line">  4005d4:	48 83 c4 20          	add    rsp,0x20</div><div class="line">  4005d8:	5d                   	pop    rbp</div><div class="line">  4005d9:	c3                   	ret    </div><div class="line">  4005da:	66 0f 1f 44 00 00    	nop    WORD PTR [rax+rax*1+0x0]</div><div class="line"></div><div class="line">. . .</div></pre></td></tr></table></figure></p>
+<p>现在编译一个混淆过的</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">mkdir</span> build_1</div><div class="line"><span class="keyword">cd</span> build_1</div><div class="line">cmake ..</div><div class="line"><span class="keyword">make</span></div></pre></td></tr></table></figure>
+<p>然后<br/><code>clang -Xclang -load -Xclang build_1/simple/libSimplePass.so -c example.c</code><br/>得到<code>example.o</code>文件，这个还没链接，我们使用clang再链接一下就好了。<br/><figure class="highlight maxima"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ clang <span class="built_in">example</span>.o -o <span class="built_in">example</span> </div><div class="line">$ file <span class="built_in">example</span></div><div class="line"><span class="built_in">example</span>: ELF <span class="number">64</span>-bit LSB executable, x86-<span class="number">64</span>, version <span class="number">1</span> (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-<span class="number">64.</span>so.2, <span class="keyword">for</span> GNU/Linux <span class="number">2.6</span>.32, <span class="keyword">not</span> stripped</div></pre></td></tr></table></figure></p>
+<p>反汇编看一下main的逻辑：<br/><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">0000000000400580 &lt;main&gt;:</div><div class="line">  400580:	55                   	push   rbp</div><div class="line">  400581:	48 89 e5             	mov    rbp,rsp</div><div class="line">  400584:	48 83 ec 20          	sub    rsp,0x20</div><div class="line">  400588:	48 b8 74 06 40 00 00 	movabs rax,0x400674</div><div class="line">  40058f:	00 00 00 </div><div class="line">  400592:	48 8d 4d ec          	lea    rcx,[rbp-0x14]</div><div class="line">  400596:	c7 45 fc 00 00 00 00 	mov    DWORD PTR [rbp-0x4],0x0</div><div class="line">  40059d:	89 7d f8             	mov    DWORD PTR [rbp-0x8],edi</div><div class="line">  4005a0:	48 89 75 f0          	mov    QWORD PTR [rbp-0x10],rsi</div><div class="line">  4005a4:	48 89 c7             	mov    rdi,rax</div><div class="line">  4005a7:	48 89 ce             	mov    rsi,rcx</div><div class="line">  4005aa:	b0 00                	mov    al,0x0</div><div class="line">  4005ac:	e8 af fe ff ff       	call   400460 &lt;__isoc99_scanf@plt&gt;</div><div class="line">  4005b1:	48 bf 77 06 40 00 00 	movabs rdi,0x400677</div><div class="line">  4005b8:	00 00 00 </div><div class="line">  4005bb:	31 d2                	xor    edx,edx</div><div class="line">  4005bd:	44 8b 45 ec          	mov    r8d,DWORD PTR [rbp-0x14]</div><div class="line">  4005c1:	83 ea 02             	sub    edx,0x2</div><div class="line">  4005c4:	41 29 d0             	sub    r8d,edx //已经被替换了</div><div class="line">  4005c7:	44 89 c6             	mov    esi,r8d</div><div class="line">  4005ca:	89 45 e8             	mov    DWORD PTR [rbp-0x18],eax</div><div class="line">  4005cd:	b0 00                	mov    al,0x0</div><div class="line">  4005cf:	e8 6c fe ff ff       	call   400440 &lt;printf@plt&gt;</div><div class="line">  4005d4:	31 d2                	xor    edx,edx</div><div class="line">  4005d6:	89 45 e4             	mov    DWORD PTR [rbp-0x1c],eax</div><div class="line">  4005d9:	89 d0                	mov    eax,edx</div><div class="line">  4005db:	48 83 c4 20          	add    rsp,0x20</div><div class="line">  4005df:	5d                   	pop    rbp</div><div class="line">  4005e0:	c3                   	ret    </div><div class="line">  4005e1:	66 2e 0f 1f 84 00 00 	nop    WORD PTR cs:[rax+rax*1+0x0]</div><div class="line">  4005e8:	00 00 00 </div><div class="line">  4005eb:	0f 1f 44 00 00       	nop    DWORD PTR [rax+rax*1+0x0]</div></pre></td></tr></table></figure></p>
+<p>这个只是demo而已，几乎没什么强度。</p>
+<h4 id="0x4-参考和引用"><a class="headerlink" href="#0x4-参考和引用" title="0x4. 参考和引用"></a>0x4. 参考和引用</h4><p><a href="http://llvm.org/" rel="external" target="_blank">llvm</a><br/><a href="http://zke1ev3n.me/2016/01/18/%E5%9F%BA%E4%BA%8ELLVM%E7%9A%84%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/" rel="external" target="_blank">基于LLVM的代码混淆</a><br/><a href="http://www.cs.cornell.edu/~asampson/blog/llvm.html" rel="external" target="_blank">LLVM for Grad Students</a></p>
+</div>
+</div>
+<div class="copyright">
+<p><span>本文标题:</span><a href="/2017/02/27/LLVM-Study-Log/">LLVM Study Log</a></p>
+<p><span>文章作者:</span><a href="/" title="访问 muhe 的个人博客">muhe</a></p>
+<p><span>发布时间:</span>2017年02月27日 - 20时03分</p>
+<p><span>最后更新:</span>2017年03月02日 - 14时05分</p>
+<p>
+<span>原始链接:</span><a class="post-url" href="/2017/02/27/LLVM-Study-Log/" title="LLVM Study Log">http://o0xmuhe.me/2017/02/27/LLVM-Study-Log/</a>
+<span class="copy-path" data-clipboard-text="原文: http://o0xmuhe.me/2017/02/27/LLVM-Study-Log/　　作者: muhe" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+<script src="./LLVM Study Log  o0xmuhe's blog/clipboard.min.js"></script>
+<script> var clipboard = new Clipboard('.copy-path'); </script>
+</p>
+<p>
+<span>许可协议:</span><i class="fa fa-creative-commons"></i> <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" rel="license" target="_blank" title="中国大陆 (CC BY-NC-SA 3.0 CN)">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+</div>
+<nav id="article-nav">
+<a class="article-nav-link-wrap" href="/2017/03/04/codegate2017-angrybird/" id="article-nav-newer">
+<strong class="article-nav-caption">&lt;</strong>
+<div class="article-nav-title">
+        
+          codegate2017-angrybird
+        
+      </div>
+</a>
+<a class="article-nav-link-wrap" href="/2017/02/16/ichunqiu-CTF-2017-2/" id="article-nav-older">
+<div class="article-nav-title">ichunqiu-CTF-2017-2</div>
+<strong class="article-nav-caption">&gt;</strong>
+</a>
+</nav>
+</article>
+<div class="toc-article" id="toc">
+<strong class="toc-title">文章目录</strong>
+<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#0x0-简述"><span class="toc-number">1.</span> <span class="toc-text">0x0. 简述</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#0x1-LLVM"><span class="toc-number">2.</span> <span class="toc-text">0x1. LLVM</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-1-简介"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 简介</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#1-2-安装"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 安装</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#1-3-IR"><span class="toc-number">2.3.</span> <span class="toc-text">1.3 IR</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#0x2-Pass"><span class="toc-number">3.</span> <span class="toc-text">0x2. Pass</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#0x3-使用LLVM来做混淆"><span class="toc-number">4.</span> <span class="toc-text">0x3. 使用LLVM来做混淆</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#0x4-参考和引用"><span class="toc-number">5.</span> <span class="toc-text">0x4. 参考和引用</span></a></li></ol>
+</div>
+<input id="tocButton" title="点击按钮隐藏或者显示文章目录" type="button" value="隐藏目录"/>
+<script src="./LLVM Study Log  o0xmuhe's blog/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+        }
+    })
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+    }
+</script>
+<div class="bdsharebuttonbox">
+<a class="fx fa-weibo bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="fx fa-weixin bds_weixin" data-cmd="weixin" href="#" title="分享到微信"></a>
+<a class="fx fa-qq bds_sqq" data-cmd="sqq" href="#" title="分享到QQ好友"></a>
+<a class="fx fa-facebook-official bds_fbook" data-cmd="fbook" href="#" title="分享到Facebook"></a>
+<a class="fx fa-twitter bds_twi" data-cmd="twi" href="#" title="分享到Twitter"></a>
+<a class="fx fa-linkedin bds_linkedin" data-cmd="linkedin" href="#" title="分享到linkedin"></a>
+<a class="fx fa-files-o bds_copy" data-cmd="copy" href="#" title="分享到复制网址"></a>
+</div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+<div class="duoshuo" id="comments">
+<!-- 多说评论框 start -->
+<div class="ds-thread" data-thread-key="2017/02/27/LLVM-Study-Log/" data-title="LLVM Study Log" data-url="http://o0xmuhe.me/2017/02/27/LLVM-Study-Log/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    var duoshuoQuery = {short_name:"o0xmuhe"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = '/js/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- 多说公共JS代码 end -->
+</div>
+<div class="scroll" id="post-nav-button">
+<a href="/2017/03/04/codegate2017-angrybird/" title="上一篇: codegate2017-angrybird">
+<i class="fa fa-angle-left"></i>
+</a>
+<a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+<a href="/2017/02/16/ichunqiu-CTF-2017-2/" title="下一篇: ichunqiu-CTF-2017-2">
+<i class="fa fa-angle-right"></i>
+</a>
+</div>
+<ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/08/SSCTF-2017部分Writeup/">SSCTF-2017部分Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/22/360春秋CTF-pwn/">360春秋CTF--pwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/06/Linux-Kernel-Exploit-4-beginners/">Linux Kernel Exploit 4 beginners</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/15/NJCTF-2017部分wp/">NJCTF-2017部分wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/06/SECCON-2016-jmper/">SECCON-2016 jmper</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/04/codegate2017-angrybird/">codegate2017-angrybird</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/27/LLVM-Study-Log/">LLVM Study Log</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/16/ichunqiu-CTF-2017-2/">ichunqiu-CTF-2017-2</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/08/Adding-your-own-syscall-in-linux-kernel/">Adding your own syscall in linux kernel</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/04/Windows-Kernel-Exploit-Study-3/">Windows-Kernel-Exploit-Study(3)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/30/Linux socket进程间通信及应用/">Linux socket进程间通信及应用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/28/一点碎碎念/">一点碎碎念</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/22/Have-fun-with-Blind-ROP/">Have fun with Blind ROP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/20/Windows-Kernel-Exploit-Study-2/">Windows Kernel Exploit Study(2)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/19/Windows-Kernel-Exploit-Study-1/">Windows Kernel Exploit Study(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/24/what-DynELF-does-basically/">what DynELF does basically</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/17/fuzzing-with-peach-Just-a-toy/">fuzzing with peach(Just a toy)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/25/PlaidCTF-2016-butterfly/">PlaidCTF 2016 butterfly</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/21/Have-fun-with-glibc内存管理/">Have fun with glibc内存管理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/10/linux-下起shell失败的分析/">linux 下起shell失败的分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/07/Baiudu杯-pwn专场记录/">Baiudu杯 pwn专场记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/29/how-to-compile-WinAFL/">how to compile WinAFL</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/25/yocto-writeup/">yocto writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/HITCON-2016-Quals-SecretHolder/">HITCON-2016-Quals-SecretHolder</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/CVE-2012-4792学习/">CVE-2012-4792学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/06/一点感悟/">一点感悟</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/27/BCTF-cloud/">BCTF--cloud</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/24/一些环境配置遇到的坑-持续更新/">一些环境配置遇到的坑(持续更新)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/16/Malloc-Maleficarum-复盘/">Malloc-Maleficarum-复盘</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/26/初试winafl/">初试winafl</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/14/pwnable-kr-alloca/">pwnable.kr -- alloca</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/01/简单的尝试angr/">简单的尝试angr</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/29/第一个android-cm调试分析/">第一个android cm调试分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/29/install-gef/">install gef</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/30/cctf-pwn350/">cctf pwn350</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/15/heap-vuln-unlink/">heap vuln -- unlink</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/02/format-string-with-stack-frame/">format string with stack frame</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/16/RCTF-PWN200/">RCTF -- PWN200</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/05/dragon/">dragon</a></li></ul>
+<script src="./LLVM Study Log  o0xmuhe's blog/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+            }
+        })
+    </script>
+<script>
+</script>
+</div>
+<footer id="footer">
+<div class="outer">
+<div id="footer-info">
+<div class="footer-left">
+                © 2017 muhe
+            </div>
+<div class="footer-right">
+<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+</div>
+<div class="visit">
+<span id="busuanzi_container_site_pv" style="display:none">
+<span id="site-visit">访客数量: 
+                            <span id="busuanzi_value_site_uv"></span>
+</span>
+</span>
+<span>, </span>
+<span id="busuanzi_container_page_pv" style="display:none">
+<span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+</div>
+</div>
+</footer>
+</div>
+<script src="./LLVM Study Log  o0xmuhe's blog/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="./LLVM Study Log  o0xmuhe's blog/main.js"></script>
+<script>
+        $(document).ready(function() {
+            var backgroundnum = 24;
+            var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+<div class="scroll" id="scroll">
+<a href="#"><i class="fa fa-arrow-up"></i></a>
+<a href="#comments"><i class="fa fa-comments-o"></i></a>
+<a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+<script async="" src="./LLVM Study Log  o0xmuhe's blog/busuanzi.pure.mini.js">
+</script>
+<script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+</div>
+</body>
+</html>

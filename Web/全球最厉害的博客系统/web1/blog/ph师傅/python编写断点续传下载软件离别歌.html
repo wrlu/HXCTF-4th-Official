@@ -1,0 +1,461 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./python编写断点续传下载软件  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./python编写断点续传下载软件  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./python编写断点续传下载软件  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>python编写断点续传下载软件 | 离别歌</title>
+<link href="./python编写断点续传下载软件  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./python编写断点续传下载软件  离别歌/styles.css" rel="stylesheet"/>
+<link href="./python编写断点续传下载软件  离别歌/style.css" rel="stylesheet"/>
+<link href="./python编写断点续传下载软件  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./python编写断点续传下载软件  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./python编写断点续传下载软件  离别歌/jquery.min.js"></script>
+<link href="./python编写断点续传下载软件  离别歌/code.css" rel="stylesheet"/>
+<link href="./python编写断点续传下载软件  离别歌/button.css" rel="stylesheet"/>
+<link href="./python编写断点续传下载软件  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./python编写断点续传下载软件  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PYTHON/resume-download-from-break-point-tool-by-python.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PYTHON/resume-download-from-break-point-tool-by-python.html&amp;text=python%E7%BC%96%E5%86%99%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E4%B8%8B%E8%BD%BD%E8%BD%AF%E4%BB%B6"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PYTHON/resume-download-from-break-point-tool-by-python.html&amp;title=python%E7%BC%96%E5%86%99%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E4%B8%8B%E8%BD%BD%E8%BD%AF%E4%BB%B6"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PYTHON/resume-download-from-break-point-tool-by-python.html&amp;is_video=false&amp;description=python%E7%BC%96%E5%86%99%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E4%B8%8B%E8%BD%BD%E8%BD%AF%E4%BB%B6"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=python%E7%BC%96%E5%86%99%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E4%B8%8B%E8%BD%BD%E8%BD%AF%E4%BB%B6&amp;body=Check out this article: https%3A//www.leavesongs.com/PYTHON/resume-download-from-break-point-tool-by-python.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PYTHON/resume-download-from-break-point-tool-by-python.html&amp;title=python%E7%BC%96%E5%86%99%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E4%B8%8B%E8%BD%BD%E8%BD%AF%E4%BB%B6"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PYTHON/resume-download-from-break-point-tool-by-python.html&amp;title=python%E7%BC%96%E5%86%99%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E4%B8%8B%E8%BD%BD%E8%BD%AF%E4%BB%B6"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PYTHON/resume-download-from-break-point-tool-by-python.html&amp;title=python%E7%BC%96%E5%86%99%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E4%B8%8B%E8%BD%BD%E8%BD%AF%E4%BB%B6"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PYTHON/resume-download-from-break-point-tool-by-python.html&amp;title=python%E7%BC%96%E5%86%99%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E4%B8%8B%E8%BD%BD%E8%BD%AF%E4%BB%B6"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PYTHON/resume-download-from-break-point-tool-by-python.html&amp;name=python%E7%BC%96%E5%86%99%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E4%B8%8B%E8%BD%BD%E8%BD%AF%E4%BB%B6&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">python编写断点续传下载软件</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年2月23日 15:30" itemprop="datePublished">
+                    2015 二月 23 15:30
+                </time>
+</div>
+<div class="article-tag">
+            阅读：10474
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PYTHON">Python</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0">断点续传</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>一年一度的python小程序编写系列之——断点续传下载软件。</p>
+<h2 id="http"><a class="toclink" href="#http">一、HTTP断点续传原理</a></h2>
+<p>其实HTTP断点续传原理比较简单，在HTTP数据包中，可以增加Range头，这个头以字节为单位指定请求的范围，来下载范围内的字节流。如：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201502/0e651424700514.png"><img alt="QQ20150223-1@2x.png" src="./python编写断点续传下载软件  离别歌/thum-0e651424700514.png"/></a></p>
+<p>如上图勾下来的地方，我们发送数据包时选定请求的内容的范围，返回包即获得相应长度的内容。所以，我们在下载的时候，可以将目标文件分成很多“小块”，每次下载一小块（用Range标明小块的范围），直到把所有小块下载完。</p>
+<p>当网络中断，或出错导致下载终止时，我们只需要记录下已经下载了哪些“小块”，还没有下载哪些。下次下载的时候在Range处填写未下载的小块的范围即可，这样就能构成一个断点续传。 </p>
+<p>其实像迅雷这种多线程下载器也是同样的原理。将目标文件分成一些小块，再分配给不同线程去下载，最后整合再检查完整性即可。 </p>
+<h2 id="python"><a class="toclink" href="#python">二、Python下载文件实现方式</a></h2>
+<p>我们仍然使用之前介绍过的requests库作为HTTP请求库。 </p>
+<p>先看看这段文档：<a href="http://docs.python-requests.org/en/latest/user/advanced/#body-content-workflow"><a href="http://docs.python-requests.org/en/latest/user/advanced/#body-content-workflow">http://docs.python-requests.org/en/latest/user/advanced/#body-content-workflow</a></a>，当请求时设置steam=True的时候就不会立即关闭连接，而我们以流的形式读取body，直到所有信息读取完全或者调用Response.close关闭连接。</p>
+<p>所以，如果要下载大文件的话，就将steam设置为True，慢慢下载，而不是等整个文件下载完才返回。 </p>
+<p>stackoverflow上有同学给出了一个简单的下载demo：</p>
+<div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">download_file</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="n">local_filename</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># NOTE the stream=True parameter</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">local_filename</span><span class="p">,</span> <span class="s1">'wb'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">iter_content</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span> 
+            <span class="k">if</span> <span class="n">chunk</span><span class="p">:</span> <span class="c1"># filter out keep-alive new chunks</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">local_filename</span>
+</pre></div>
+<p>这基本上就是我们核心的下载代码了。</p>
+<h2 id="_1"><a class="toclink" href="#_1">三、断点续传结合大文件下载</a></h2>
+<p>好，我们结合这两个知识点写个小程序：支持断点续传的下载器。</p>
+<p>我们可以先考虑一下需要注意的有哪些点，或者可以添加的功能有哪些： </p>
+<ol>
+<li>用户自定义性：可以定义cookie、referer、user-agent。如某些下载站检查用户登录才允许下载等情况。 </li>
+<li>很多服务端不支持断点续传，如何判断？ </li>
+<li>怎么去表达进度条？ </li>
+<li>如何得知文件的总大小？使用HEAD请求？那么服务器不支持HEAD请求怎么办？ </li>
+<li>下载后的文件名（header中可能有filename，url中也有filename，用户还可以自己指定filename），怎么处理？还要考虑windows不允许哪些字符做文件名。</li>
+<li>如何去分块，是否加入多线程。</li>
+</ol>
+<p>其实想一下还是有很多疑虑，而且有些地方可能一时还解决不了。先大概想一下各个问题的答案：</p>
+<ol>
+<li>headers可以由用户自定义</li>
+<li>正式下载之前先HEAD请求，得到服务器status code是否是206，header中是否有Range-content等标志，判断是否支持断点续传。</li>
+<li>可以先不使用进度条，只显示当前下载大小和总大小</li>
+<li>在HEAD请求中匹配出Range-content中的文件总大小，或获得content-length大小（当不支持断点续传的时候会返回总content-length）。如果不支持HEAD请求或没有content-type就设置总大小为0.（总之不会妨碍下载即可） </li>
+<li>文件名优先级：用户自定义 &gt; header中content-disposition &gt; url中的定义，为了避免麻烦，我这里和linux下的wget一样，忽略content-disposition的定义。如果用户不指定保存的用户名的话，就以url中最后一个“/”后的内容作为用户名。</li>
+<li>为了稳定和简单，不做多线程了。如果不做多线程的话，我们分块就可以按照很小来分，如1KB，然后从头开始下载，一K一K这样往后填充。这样避免了很多麻烦。当下载中断的时候，我们只需要简单查看当前已经下载了多少字节，就可以从这个字节后一个开始继续下载。 </li>
+</ol>
+<p>解决了这些疑问，我们就开始动笔了。实际上，疑问并不是在未动笔的时候干想出来的，基本都是我写了一半突然发现的问题。</p>
+<div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">headers</span> <span class="o">=</span> <span class="p">{}):</span>
+    <span class="n">finished</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">'block'</span><span class="p">]</span>
+    <span class="n">local_filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_nonchars</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">tmp_filename</span> <span class="o">=</span> <span class="n">local_filename</span> <span class="o">+</span> <span class="s1">'.downtmp'</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">support_continue</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>  <span class="c1"># 支持断点续传</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tmp_filename</span><span class="p">,</span> <span class="s1">'rb'</span><span class="p">)</span> <span class="k">as</span> <span class="n">fin</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fin</span><span class="o">.</span><span class="n">read</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">touch</span><span class="p">(</span><span class="n">tmp_filename</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">headers</span><span class="p">[</span><span class="s1">'Range'</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"bytes=</span><span class="si">%d</span><span class="s2">-"</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">touch</span><span class="p">(</span><span class="n">tmp_filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">touch</span><span class="p">(</span><span class="n">local_filename</span><span class="p">)</span>
+
+    <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">stream</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">verify</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">headers</span> <span class="o">=</span> <span class="n">headers</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">total</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s2">"[+] Size: </span><span class="si">%d</span><span class="s2">KB"</span> <span class="o">%</span> <span class="p">(</span><span class="n">total</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s2">"[+] Size: None"</span>
+    <span class="n">start_t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">local_filename</span><span class="p">,</span> <span class="s1">'ab'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">iter_content</span><span class="p">(</span><span class="n">chunk_size</span> <span class="o">=</span> <span class="n">block</span><span class="p">):</span> 
+                <span class="k">if</span> <span class="n">chunk</span><span class="p">:</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+                    <span class="n">size</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'</span><span class="se">\b</span><span class="s1">'</span> <span class="o">*</span> <span class="mi">64</span> <span class="o">+</span> <span class="s1">'Now: </span><span class="si">%d</span><span class="s1">, Total: </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">total</span><span class="p">))</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="n">finished</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tmp_filename</span><span class="p">)</span>
+            <span class="n">spend</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_t</span><span class="p">)</span>
+            <span class="n">speed</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">size</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="n">spend</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">Download Finished!</span><span class="se">\n</span><span class="s1">Total Time: </span><span class="si">%s</span><span class="s1">s, Download Speed: </span><span class="si">%s</span><span class="s1">k/s</span><span class="se">\n</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">spend</span><span class="p">,</span> <span class="n">speed</span><span class="p">))</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+        <span class="k">except</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">traceback</span>
+            <span class="k">print</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="k">print</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">Download pause.</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">finished</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tmp_filename</span><span class="p">,</span> <span class="s1">'wb'</span><span class="p">)</span> <span class="k">as</span> <span class="n">ftmp</span><span class="p">:</span>
+                    <span class="n">ftmp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">size</span><span class="p">))</span>
+</pre></div>
+<p>这是下载的方法。首先if语句调用self.support_continue(url)判断是否支持断点续传。如果支持则从一个临时文件中读取当前已经下载了多少字节，如果不存在这个文件则会抛出错误，那么size默认=0，说明一个字节都没有下载。</p>
+<p>然后就请求url，获得下载连接，for循环下载。这个时候我们得抓住异常，一旦出现异常，不能让程序退出，而是正常将当前已下载字节size写入临时文件中。下次再次下载的时候读取这个文件，将Range设置成bytes=(size+1)-，也就是从当前字节的后一个字节开始到结束的范围。从这个范围开始下载，来实现一个断点续传。</p>
+<p>判断是否支持断点续传的方法还兼顾了一个获得目标文件大小的功能：</p>
+<div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">support_continue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">'Range'</span><span class="p">:</span> <span class="s1">'bytes=0-4'</span>
+    <span class="p">}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span> <span class="o">=</span> <span class="n">headers</span><span class="p">)</span>
+        <span class="n">crange</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">'content-range'</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">ur</span><span class="s1">'^bytes 0-4/(\d+)$'</span><span class="p">,</span> <span class="n">crange</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">'content-length'</span><span class="p">])</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="bp">False</span>
+</pre></div>
+<p>用正则匹配出大小，获得直接获取headers['content-length']，获得将其设置为0.</p>
+<p>核心代码基本上就是这些，再就是一些设置了，各位更可以去github直接看：<a href="https://github.com/phith0n/py-wget/blob/master/py-wget.py"><a href="https://github.com/phith0n/py-wget/blob/master/py-wget.py">https://github.com/phith0n/py-wget/blob/master/py-wget.py</a></a></p>
+<p>运行来获取一下emlog最新的安装包：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201502/ceca1424706866.png"><img alt="QQ20150223-2@2x.png" src="./python编写断点续传下载软件  离别歌/thum-ceca1424706866.png"/></a></p>
+<p>中间我按Contrl + C人工打断了下载进程，但之后还是继续下载，实现了“断点续传”。但在我实际测试过程中，并不是那么多请求可以断点续传的，所以我对于不支持断点续传的文件这样处理：重新下载。</p>
+<p>下载后的压缩包正常解压，也充分证明了下载的完整性：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201502/e1131424707102.png"><img alt="QQ20150223-3@2x.png" src="./python编写断点续传下载软件  离别歌/thum-e1131424707102.png"/></a></p>
+<p>做了个小动图：</p>
+<p><img alt="" src="./python编写断点续传下载软件  离别歌/example.gif"/></p>
+<p>如果你想把我的这个小脚本当一个工具来用的话，可以查看github下的说明：<a href="https://github.com/phith0n/py-wget"><a href="https://github.com/phith0n/py-wget">https://github.com/phith0n/py-wget</a></a>。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2302">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python编写断点续传下载软件  离别歌/8ec01f3eab01985b0c16795fcb3ebdb7.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">chiloy</a>
+<time datetime="2016年2月20日 22:36" itemprop="datePublished">
+                            2016 二月 20 22:36
+                        </time>
+<a href="javascript:reply_to('2302', 'chiloy')">回复</a>
+</p>
+<p class="comment-meta">能否更新支持到python3呢？谢谢</p>
+</div>
+</div>
+<div class="row" id="comment-2236">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python编写断点续传下载软件  离别歌/16167f0ff75e7d7c152027cfdbe9a630.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">wz520</a>
+<time datetime="2015年10月13日 12:04" itemprop="datePublished">
+                            2015 十月 13 12:04
+                        </time>
+<a href="javascript:reply_to('2236', 'wz520')">回复</a>
+</p>
+<p class="comment-meta">最后一个GIF，上面 Total 显示的是 583814，但是最后 ls 时显示大小为 583813 是怎么回事？这算下载完成了吗？</p>
+</div>
+</div>
+<div class="row" id="comment-2113">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python编写断点续传下载软件  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Lcy</a>
+<time datetime="2015年6月6日 12:01" itemprop="datePublished">
+                            2015 六月 06 12:01
+                        </time>
+<a href="javascript:reply_to('2113', 'Lcy')">回复</a>
+</p>
+<p class="comment-meta">6666学习了</p>
+</div>
+</div>
+<div class="row" id="comment-1961">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python编写断点续传下载软件  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">duodao</a>
+<time datetime="2015年3月12日 08:00" itemprop="datePublished">
+                            2015 三月 12 08:00
+                        </time>
+<a href="javascript:reply_to('1961', 'duodao')">回复</a>
+</p>
+<p class="comment-meta">test你好</p>
+</div>
+</div>
+<div class="row" id="comment-1950">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python编写断点续传下载软件  离别歌/97ef81e3679b2abd40a6f9795d938b59.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://localhost" target="_blank">white</a>
+<time datetime="2015年3月5日 15:16" itemprop="datePublished">
+                            2015 三月 05 15:16
+                        </time>
+<a href="javascript:reply_to('1950', 'white')">回复</a>
+</p>
+<p class="comment-meta">File "/root/webPTtools/py-wget/py-wget.py", line 117, in &lt;module&gt;<br>    wget().download(options.url, options.filename)<br>  File "/root/webPTtools/py-wget/py-wget.py", line 61, in download<br/>    r = requests.get(url, stream = True, verify = False, headers = headers)<br/>  File "/usr/lib/python2.7/dist-packages/requests/api.py", line 52, in get<br/>    return request('get', url, **kwargs)<br/>  File "/usr/lib/python2.7/dist-packages/requests/api.py", line 40, in request<br/>    return s.request(method=method, url=url, **kwargs)<br/>TypeError: request() got an unexpected keyword argument 'stream'<br/><br/>出错了参数 <br/> r = requests.get(url, stream = True, verify = False, headers = headers)</br></br></p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1951">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python编写断点续传下载软件  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年3月5日 15:55" itemprop="datePublished">
+                            2015 三月 05 15:55
+                        </time>
+<a href="javascript:reply_to('1951', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@white：检查requests库版本。0.x的话，试试prefetch = False替代stream = True</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1947">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python编写断点续传下载软件  离别歌/8ce153400aa9178668da0bca16638aad.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.tinydawn.com/" target="_blank">D.M</a>
+<time datetime="2015年3月2日 23:45" itemprop="datePublished">
+                            2015 三月 02 23:45
+                        </time>
+<a href="javascript:reply_to('1947', 'D.M')">回复</a>
+</p>
+<p class="comment-meta">叼叼的实用!Got<br/>最后的动图是怎么做的?</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1948">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python编写断点续传下载软件  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年3月3日 01:14" itemprop="datePublished">
+                            2015 三月 03 01:14
+                        </time>
+<a href="javascript:reply_to('1948', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@D.M：mac自带的quicktime player录得</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1943">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python编写断点续传下载软件  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">retanoj</a>
+<time datetime="2015年2月24日 13:20" itemprop="datePublished">
+                            2015 二月 24 13:20
+                        </time>
+<a href="javascript:reply_to('1943', 'retanoj')">回复</a>
+</p>
+<p class="comment-meta">phi神是否考虑过KeyboardInterrupt发生在 <br/>30 f.write(chunk)<br/>31 size += len(chunk)<br/>这两句之间的情况？ 这样会导致已获得的chunk写入，但size没加。下次续传，可能导致文件中间有多余的内容。<br/>我自己手动raise了一下，好像是存在这样可能的。网上搜了一下方法， 《使用Python进行稳定可靠的文件操作》里提到一种方法，可以通过 ab+模式打开文件<br/>file.seek(size)<br/>file.truncate()<br/>file.write(chunk)<br/>的方法，以size为准，来续写文件。<br/>(不知道提的对不对:p)</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1944">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python编写断点续传下载软件  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年2月24日 13:42" itemprop="datePublished">
+                            2015 二月 24 13:42
+                        </time>
+<a href="javascript:reply_to('1944', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@retanoj：考虑了，之前我网上找过python有没有类似java中“原子操作”什么的，避免某些东西执行一半中断了。也没太好的解决方法。不过正常下载，出现异常多半是网络问题，这种情况的可能性比较低。文中这个方法确实是好方法，可以借鉴~</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1942">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python编写断点续传下载软件  离别歌/dc42fa84dffaf217fe17618883b32a40.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.sh1586.com" target="_blank">上海app开发</a>
+<time datetime="2015年2月24日 00:10" itemprop="datePublished">
+                            2015 二月 24 00:10
+                        </time>
+<a href="javascript:reply_to('1942', '上海app开发')">回复</a>
+</p>
+<p class="comment-meta">看了博主的文章，真的很有收获啊</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="6b95eb81b81d18c5d9d73c4c86ee452127851071"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./python编写断点续传下载软件  离别歌/6b95eb81b81d18c5d9d73c4c86ee452127851071"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="347">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="dBWrzyWO3RmNjI9JJy1s12l5EzxYjMAmLVhXn283uEgcjnxYxPvcAGnaND062gpw"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./python编写断点续传下载软件  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./python编写断点续传下载软件  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

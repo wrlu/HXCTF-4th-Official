@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>fuzzing with peach(Just a toy) | o0xmuhe's blog</title>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<meta content="0x00: 前言之前学习过peach的使用，在willj师傅的指导下尝试去fuzz了某播放器，只是个尝试，并没有更深入去搞(本来的计划是结合winafl的)，虽然没啥产出，但是fuzz过程还算清晰。过程中实现了自动化的fuzz脚本，有完整的功能，就是效率堪忧-。-" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="fuzzing with peach(Just a toy)" property="og:title"/>
+<meta content="http://o0xmuhe.me/2016/12/17/fuzzing-with-peach-Just-a-toy/index.html" property="og:url"/>
+<meta content="o0xmuhe's blog" property="og:site_name"/>
+<meta content="0x00: 前言之前学习过peach的使用，在willj师傅的指导下尝试去fuzz了某播放器，只是个尝试，并没有更深入去搞(本来的计划是结合winafl的)，虽然没啥产出，但是fuzz过程还算清晰。过程中实现了自动化的fuzz脚本，有完整的功能，就是效率堪忧-。-" property="og:description"/>
+<meta content="2016-12-23T17:04:10.675Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="fuzzing with peach(Just a toy)" name="twitter:title"/>
+<meta content="0x00: 前言之前学习过peach的使用，在willj师傅的指导下尝试去fuzz了某播放器，只是个尝试，并没有更深入去搞(本来的计划是结合winafl的)，虽然没啥产出，但是fuzz过程还算清晰。过程中实现了自动化的fuzz脚本，有完整的功能，就是效率堪忧-。-" name="twitter:description"/>
+<link href="./fuzzing with peach(Just a toy)  o0xmuhe's blog/atom.xml" rel="alternative" title="o0xmuhe's blog" type="application/atom+xml"/>
+<link href="./fuzzing with peach(Just a toy)  o0xmuhe's blog/favicon.png" rel="icon"/>
+<link href="./fuzzing with peach(Just a toy)  o0xmuhe's blog/animate.min.css" rel="stylesheet"/>
+<link href="./fuzzing with peach(Just a toy)  o0xmuhe's blog/style.css" rel="stylesheet"/>
+<link href="./fuzzing with peach(Just a toy)  o0xmuhe's blog/font-awesome.min.css" rel="stylesheet"/>
+<link href="./fuzzing with peach(Just a toy)  o0xmuhe's blog/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./fuzzing with peach(Just a toy)  o0xmuhe's blog/jquery.fancybox.css" rel="stylesheet"/>
+<!-- 加载特效 -->
+<script src="./fuzzing with peach(Just a toy)  o0xmuhe's blog/pace.js"></script>
+<link href="./fuzzing with peach(Just a toy)  o0xmuhe's blog/pace-theme-flash.css" rel="stylesheet">
+<script>
+      var yiliaConfig = {
+          rootUrl: '/',
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</link></head>
+<body>
+<div id="container">
+<div class="left-col">
+<div class="overlay"></div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./fuzzing with peach(Just a toy)  o0xmuhe's blog/head.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="Hi Mate">muhe</a></h1>
+</hgroup>
+<p class="header-subtitle">一个有情怀的二进制狗</p>
+<div class="switch-btn" id="switch-btn">
+<div class="icon">
+<div class="icon-ctn">
+<div class="icon-wrap icon-house" data-idx="0">
+<div class="birdhouse"></div>
+<div class="birdhouse_holes"></div>
+</div>
+<div class="icon-wrap icon-ribbon hide" data-idx="1">
+<div class="ribbon"></div>
+</div>
+<div class="icon-wrap icon-link hide" data-idx="2">
+<div class="loopback_l"></div>
+<div class="loopback_r"></div>
+</div>
+<div class="icon-wrap icon-me hide" data-idx="3">
+<div class="user"></div>
+<div class="shoulder"></div>
+</div>
+</div>
+</div>
+<div class="tips-box hide">
+<div class="tips-arrow"></div>
+<ul class="tips-inner">
+<li>菜单</li>
+<li>标签</li>
+<li>友情链接</li>
+<li>关于我</li>
+</ul>
+</div>
+</div>
+<div class="switch-area" id="switch-area">
+<div class="switch-wrap">
+<section class="switch-part switch-part1">
+<nav class="header-menu">
+<ul>
+<li><a href="/">博客首页</a></li>
+<li><a href="/archives">所有文章</a></li>
+<li><a href="/tags">标签</a></li>
+<li><a href="/about">关于我</a></li>
+<li><a href="/Pwnable-Log">Pwnable</a></li>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fl github" href="https://github.com/o0xmuhe" target="_blank" title="github">github</a>
+<a class="fl weibo" href="http://weibo.com/2070174943/" target="_blank" title="weibo">weibo</a>
+<a class="fl twitter" href="https://twitter.com/0xmuhe" target="_blank" title="twitter">twitter</a>
+<a class="fl rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</ul>
+</nav>
+</section>
+<section class="switch-part switch-part2">
+<div class="widget tagcloud" id="js-tagcloud">
+<a href="/tags/C/" style="font-size: 10px;">C</a> <a href="/tags/CTF/" style="font-size: 10px;">CTF</a> <a href="/tags/CTF-Writeup/" style="font-size: 10px;">CTF Writeup</a> <a href="/tags/CVE-analysis/" style="font-size: 10px;">CVE analysis</a> <a href="/tags/LLVM/" style="font-size: 10px;">LLVM</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/angr/" style="font-size: 12px;">angr</a> <a href="/tags/ctf/" style="font-size: 18px;">ctf</a> <a href="/tags/ctf-writeup/" style="font-size: 20px;">ctf writeup</a> <a href="/tags/env-config/" style="font-size: 10px;">env config</a> <a href="/tags/exploit/" style="font-size: 16px;">exploit</a> <a href="/tags/fuzz/" style="font-size: 14px;">fuzz</a> <a href="/tags/gdb/" style="font-size: 10px;">gdb</a> <a href="/tags/glibc内存管理/" style="font-size: 10px;">glibc内存管理</a> <a href="/tags/life/" style="font-size: 12px;">life</a> <a href="/tags/linux-kernel/" style="font-size: 12px;">linux kernel</a> <a href="/tags/peach/" style="font-size: 10px;">peach</a> <a href="/tags/pwn/" style="font-size: 16px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/ret-2-dl-resolve/" style="font-size: 10px;">ret 2 dl-resolve</a> <a href="/tags/wargame/" style="font-size: 12px;">wargame</a> <a href="/tags/winafl/" style="font-size: 10px;">winafl</a> <a href="/tags/windows-kernel/" style="font-size: 14px;">windows kernel</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a>
+</div>
+</section>
+<section class="switch-part switch-part3">
+<div id="js-friends">
+<a class="main-nav-link switch-friends-link" href="http://syclover.sinaapp.com/" target="_blank">Syclover Team</a>
+<a class="main-nav-link switch-friends-link" href="http://www.Ox9A82.com" target="_blank">0x9A82学弟</a>
+<a class="main-nav-link switch-friends-link" href="http://k1n9.me/" target="_blank">K1n9师傅</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/iamstudy" target="_blank">L3mon</a>
+<a class="main-nav-link switch-friends-link" href="http://www.xianyusec.com" target="_blank">咸鱼</a>
+<a class="main-nav-link switch-friends-link" href="http://v1ct0r.com/" target="_blank">V1ct0r</a>
+<a class="main-nav-link switch-friends-link" href="http://godot.win" target="_blank">Godot学弟</a>
+<a class="main-nav-link switch-friends-link" href="http://hebic.me/" target="_blank">Homaebic学弟</a>
+<a class="main-nav-link switch-friends-link" href="https://iqwq.me" target="_blank">两米的sco4x0</a>
+<a class="main-nav-link switch-friends-link" href="https://zmy.im/" target="_blank">JimmyZhou</a>
+<a class="main-nav-link switch-friends-link" href="http://silic.top/" target="_blank">灭亡叔叔</a>
+<a class="main-nav-link switch-friends-link" href="https://dwx.io" target="_blank">Jason</a>
+<a class="main-nav-link switch-friends-link" href="	http://www.0aa.me/" target="_blank">Mosuan</a>
+<a class="main-nav-link switch-friends-link" href="http://whereisk0shl.top" target="_blank">k0sh1</a>
+<a class="main-nav-link switch-friends-link" href="http://winter3un.github.io" target="_blank">WinterSun</a>
+<a class="main-nav-link switch-friends-link" href="http://venenof.com" target="_blank">Venenof</a>
+<a class="main-nav-link switch-friends-link" href="http://r0p.me/" target="_blank">Icemakr</a>
+<a class="main-nav-link switch-friends-link" href="http://bestwing.me/" target="_blank">Swing</a>
+<a class="main-nav-link switch-friends-link" href="https://www.hackfun.org/" target="_blank">4ido10n</a>
+<a class="main-nav-link switch-friends-link" href="http://www.hackersb.cn/" target="_blank">王松_Striker</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/7top/" target="_blank">7top</a>
+<a class="main-nav-link switch-friends-link" href="http://www.bendawang.site" target="_blank">bendawang</a>
+<a class="main-nav-link switch-friends-link" href="http://ctfrank.org" target="_blank">CTF Rank</a>
+<a class="main-nav-link switch-friends-link" href="http://askook.me/" target="_blank">A酱</a>
+</div>
+</section>
+<section class="switch-part switch-part4">
+<div id="js-aboutme">关注二进制安全. Member of Syclover. CTFer/INTJ.</div>
+</section>
+</div>
+</div>
+</header>
+</div>
+</div>
+<div class="mid-col">
+<nav id="mobile-nav">
+<div class="overlay">
+<div class="slider-trigger"></div>
+<h1 class="header-author js-mobile-header hide"><a href="/" title="Me">muhe</a></h1>
+</div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./fuzzing with peach(Just a toy)  o0xmuhe's blog/head.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="Me">muhe</a></h1>
+</hgroup>
+<p class="header-subtitle">一个有情怀的二进制狗</p>
+<nav class="header-menu">
+<ul>
+<li><a href="/">博客首页</a></li>
+<li><a href="/archives">所有文章</a></li>
+<li><a href="/tags">标签</a></li>
+<li><a href="/about">关于我</a></li>
+<li><a href="/Pwnable-Log">Pwnable</a></li>
+<div class="clearfix"></div>
+</ul>
+</nav>
+<nav class="header-nav">
+<div class="social">
+<a class="github" href="https://github.com/o0xmuhe" target="_blank" title="github">github</a>
+<a class="weibo" href="http://weibo.com/2070174943/" target="_blank" title="weibo">weibo</a>
+<a class="twitter" href="https://twitter.com/0xmuhe" target="_blank" title="twitter">twitter</a>
+<a class="rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</div>
+</nav>
+</header>
+</div>
+</nav>
+<div class="body-wrap"><article class="article article-type-post" id="post-fuzzing-with-peach-Just-a-toy" itemprop="blogPost" itemscope="">
+<div class="article-meta">
+<a class="article-date" href="/2016/12/17/fuzzing-with-peach-Just-a-toy/">
+<time datetime="2016-12-17T15:38:48.000Z" itemprop="datePublished">2016-12-17</time>
+</a>
+</div>
+<div class="article-inner">
+<input class="isFancy" type="hidden"/>
+<header class="article-header">
+<h1 class="article-title" itemprop="name">
+      fuzzing with peach(Just a toy)
+    </h1>
+</header>
+<div class="article-info article-info-post">
+<div class="article-tag tagcloud">
+<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/fuzz/">fuzz</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/peach/">peach</a></li></ul>
+</div>
+<div class="clearfix"></div>
+</div>
+<div class="article-entry" itemprop="articleBody">
+<h4 id="0x00-前言"><a class="headerlink" href="#0x00-前言" title="0x00: 前言"></a>0x00: 前言</h4><p>之前学习过peach的使用，在willj师傅的指导下尝试去fuzz了某播放器，只是个尝试，并没有更深入去搞(本来的计划是结合winafl的)，虽然没啥产出，但是fuzz过程还算清晰。过程中实现了自动化的fuzz脚本，有完整的功能，就是效率堪忧-。-<br/><a id="more"></a></p>
+<h5 id="0x01-关于peach"><a class="headerlink" href="#0x01-关于peach" title="0x01: 关于peach"></a>0x01: 关于peach</h5><p><a href="http://www.peachfuzzer.com/resources/peachcommunity/" rel="external" target="_blank">peach</a>是一款优秀的文件格式fuzz工具。<br/>peach是基于模板变异工作的，而且开源，文档虽然不是那么多，但是自己多摸索、学习还是可以学会一些基本的用法的。我在看使用peach做文件fuzz相关的资料的时候，最开始看的《0day2》里作者给的例子，从编写pit file到fuzz跑起来；之后看了一份国际友人写的<a href="http://www.flinkd.org/2011/07/fuzzing-with-peach-part-1/" rel="external" target="_blank">Fuzzing with Peach – Part 1 « Flinkd!</a>，他这篇文章写的非常好，几乎涵盖了peach 90%的语法，仔细阅读，自己动手实践，会很快入门pit file的编写。</p>
+<h5 id="0x02-文件fuzz的思路"><a class="headerlink" href="#0x02-文件fuzz的思路" title="0x02: 文件fuzz的思路"></a>0x02: 文件fuzz的思路</h5><p>fuzz嘛，简单的来看就是</p>
+<ul>
+<li>构造输入</li>
+<li>传给目标程序</li>
+<li>程序状态检测(是否crash)</li>
+<li>做log</li>
+</ul>
+<p>之后根据你的log，把有用的样本拿出来在分析。<br/>我的想法也很简单，就是利用peach基于我给的一个小文件，生成很多样本，然后写自动化的脚本去fuzz，并且做好异常检测的工作。<br/>我的目标是adobe flash player sa版本，刚开始尝试就做一点简单的，选择flv文件作为fuzz的点。下面的问题就是：</p>
+<ol>
+<li>flv文件格式</li>
+<li>根据文件格式编写pit file</li>
+<li>如何加载我的fuzz.flv文件？</li>
+<li>异常检测怎么做</li>
+</ol>
+<p>下面慢慢来分析。</p>
+<ol>
+<li><p>flv文件格式<br/><code>flv</code>文件主要分为<code>header</code>和<code>body</code>两个部分。</p>
+<ol>
+<li>header部分<figure class="highlight dns"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">第<span class="number">1</span>-<span class="number">3</span>字节：文件标志，FLV的文件标志为固定的“FLV"，字节（<span class="number">0</span>x46， <span class="number">0</span>x4C，<span class="number">0</span>x56），见上面的字节序和字符序两行；</div><div class="line">第<span class="number">4</span>字节：当前文件版本，固定为<span class="number">1</span>（<span class="number">0</span>x01）</div><div class="line">第<span class="number">5</span>字节：此字节当前用到的只有第<span class="number">6</span>，<span class="number">8</span>两个bit位，分别标志当前文件是否存在音频，视频。参见上面bit序，即是第<span class="number">5</span>字节的内容；</div><div class="line">第<span class="number">6</span>-<span class="number">9</span>字节：此<span class="number">4</span>字节共同组成一个无符号<span class="number">32</span>位整数（使用大头序），表示文件从FLV Header开始到Flv Body的字节数，当前版本固定为<span class="number">9</span>（<span class="number">0x00，0x00</span>，<span class="number">0x00，0x09</span>）</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>2.body部分<br/>这部分其实就是很多的tag的组合。<br/>不过tag的种类有三种，分别是script、Audio、Video。每种tag的tag data又各不相同，详细的可以看一些文档了解。</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="code">-------------------------</span></div><div class="line">|  Previous Tag Size    |</div><div class="line">-------------------------</div><div class="line"><span class="section">|          Tag          |</span></div><div class="line">-------------------------</div><div class="line"><span class="section">|  Previous Tag Size    |</span></div><div class="line">-------------------------</div><div class="line"><span class="section">|          Tag          |</span></div><div class="line">-------------------------</div><div class="line"><span class="section">|  Previous Tag Size    |</span></div><div class="line">-------------------------</div><div class="line"><span class="section">|          Tag          |</span></div><div class="line">-------------------------</div><div class="line"><span class="section">|  Previous Tag Size    |</span></div><div class="line">-------------------------</div></pre></td></tr></table></figure>
+<p>  一些参考的文档<a href="http://blog.useasp.net/archive/2016/02/28/The-flv-video-file-format-specification-version-10-1.aspx" rel="external" target="_blank">flv文件格式详解</a>，以及是官方的flv格式相关的文档都可以。</p>
+</li>
+<li><p>根据文件格式编写pit file<br/>了解了文件格式之后就是编写pit file了，困难的地方可能就在于tag结构，因为数目不确定，而且相互之间有联系，比如某个bit为1或者0，影响着后面的某个结构的有无。<br/>我的做法是，我使用类似Switch case这样的结构，让peach自己去判断选择对应的结构，即我写三种tag，然后限定最大的出现次数，因为样本很小，几百个最多了，然后peach根据模板文件的tag的标志，找到我pit file里对应的tag的结构，然后根据pit file里的结构进行变异，然后生成新的样本。<br/>这里可以集合010 editor的二进制模板功能，可以对比你生成的样本是否正确，方便调试。</p>
+</li>
+<li><p>如何加载我的fuzz.flv文件？<br/>有了样本，下面的问题就是怎么加载样本然后播放了。flash并不直接打开flv文件，而是使用swf来加载，所以我需要用as语言来编写一个swf来加载。这时候就有又一个问题：swf要编译的，即我的文件名会写死，这时候就麻烦了。<br/>不过这个也好解决，我可以在后续的fuzz脚本中，每次单独复制一个样本到工作目录，然后重命名为swf要加载的文件的名字，然后起flash，加载swf，然后做后续的工作；完成之后，循环这个工作。这样就可以很好的解决这个问题了。</p>
+</li>
+<li><p>异常检测怎么做<br/>我觉得最简单的办法就是调试器了，如果你进程崩了，你的just in time debugger会启动，问你要不要调试，你检测进程就可以了，然后做log，杀了所有进程，继续下一轮fuzz就好了。缺点很明显，这方法贼搓，而且效率低的要死，刚开始搞嘛，凑合用咯。</p>
+</li>
+</ol>
+<h5 id="0x03-编写pit-file"><a class="headerlink" href="#0x03-编写pit-file" title="0x03: 编写pit file"></a>0x03: 编写pit file</h5><p>首先是针对flv header的部分的编写</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">DataModel</span> <span class="attr">name</span>=<span class="string">"flvHeader"</span>&gt;</span></div><div class="line">4<span class="tag">&lt;<span class="name">String</span> <span class="attr">name</span>=<span class="string">"flv_Signature"</span> <span class="attr">value</span>=<span class="string">"464C5601"</span> <span class="attr">valueType</span>=<span class="string">"hex"</span> <span class="attr">token</span>=<span class="string">"true"</span> <span class="attr">mutable</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line">    	<span class="tag">&lt;<span class="name">Flags</span> <span class="attr">name</span>=<span class="string">"HeadFlags"</span> <span class="attr">size</span>=<span class="string">"8"</span>&gt;</span></div><div class="line">        	<span class="tag">&lt;<span class="name">Flag</span> <span class="attr">name</span>=<span class="string">"dummy"</span>  <span class="attr">position</span>=<span class="string">"3"</span> <span class="attr">size</span>=<span class="string">"5"</span>/&gt;</span></div><div class="line">444<span class="tag">&lt;<span class="name">Flag</span> <span class="attr">name</span>=<span class="string">"audio"</span>  <span class="attr">position</span>=<span class="string">"2"</span> <span class="attr">size</span>=<span class="string">"1"</span>/&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">Flag</span> <span class="attr">name</span>=<span class="string">"dummy2"</span> <span class="attr">position</span>=<span class="string">"1"</span> <span class="attr">size</span>=<span class="string">"1"</span>/&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">Flag</span> <span class="attr">name</span>=<span class="string">"video"</span>  <span class="attr">position</span>=<span class="string">"0"</span> <span class="attr">size</span>=<span class="string">"1"</span>/&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">Flags</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"dataoffset"</span> <span class="attr">value</span>=<span class="string">"9"</span> <span class="attr">size</span>=<span class="string">"32"</span>/&gt;</span></div><div class="line">4<span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"zero"</span> <span class="attr">size</span>=<span class="string">"32"</span>/&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">DataModel</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>这部分是script tag部分的编写</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">Block</span> <span class="attr">name</span>=<span class="string">"script"</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"type"</span> <span class="attr">size</span>=<span class="string">"8"</span> <span class="attr">signed</span>=<span class="string">"false"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">value</span>=<span class="string">"18"</span> <span class="attr">token</span>=<span class="string">"true"</span> <span class="attr">mutable</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"datasize"</span> <span class="attr">size</span>=<span class="string">"24"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">signed</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"timestamp"</span> <span class="attr">size</span>=<span class="string">"24"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">signed</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"timestampi"</span> <span class="attr">size</span>=<span class="string">"8"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">signed</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"streamid"</span> <span class="attr">size</span>=<span class="string">"24"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">signed</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"firstbyte"</span> <span class="attr">size</span>=<span class="string">"8"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">signed</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">Blob</span> <span class="attr">name</span>=<span class="string">"data2"</span> <span class="attr">lengthType</span>=<span class="string">"calc"</span> <span class="attr">length</span>=<span class="string">"int(self.find('datasize').getInternalValue())-1"</span>/&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"lastsize"</span> <span class="attr">size</span>=<span class="string">"32"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">signed</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">Block</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>这部分是audio tag部分的编写</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">Block</span> <span class="attr">name</span>=<span class="string">"audio"</span>&gt;</span></div><div class="line">4<span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"type"</span> <span class="attr">size</span>=<span class="string">"8"</span> <span class="attr">signed</span>=<span class="string">"false"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">value</span>=<span class="string">"8"</span> <span class="attr">token</span>=<span class="string">"true"</span> <span class="attr">mutable</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line">4<span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"datasize1"</span> <span class="attr">size</span>=<span class="string">"24"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">signed</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line">4<span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"timestamp"</span> <span class="attr">size</span>=<span class="string">"24"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">signed</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line">4<span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"timestampi"</span> <span class="attr">size</span>=<span class="string">"8"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">signed</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line">4<span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"streamid"</span> <span class="attr">size</span>=<span class="string">"24"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">signed</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line">44<span class="tag">&lt;<span class="name">Flags</span> <span class="attr">name</span>=<span class="string">"Flag3"</span> <span class="attr">size</span>=<span class="string">"8"</span>&gt;</span></div><div class="line">444<span class="tag">&lt;<span class="name">Flag</span> <span class="attr">name</span>=<span class="string">"fmt"</span> <span class="attr">position</span>=<span class="string">"0"</span> <span class="attr">size</span>=<span class="string">"4"</span>/&gt;</span></div><div class="line">444<span class="tag">&lt;<span class="name">Flag</span> <span class="attr">name</span>=<span class="string">"sr"</span> <span class="attr">position</span>=<span class="string">"4"</span> <span class="attr">size</span>=<span class="string">"2"</span>/&gt;</span></div><div class="line">444<span class="tag">&lt;<span class="name">Flag</span> <span class="attr">name</span>=<span class="string">"bits"</span> <span class="attr">position</span>=<span class="string">"6"</span> <span class="attr">size</span>=<span class="string">"1"</span>/&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">Flag</span> <span class="attr">name</span>=<span class="string">"channels"</span> <span class="attr">position</span>=<span class="string">"7"</span> <span class="attr">size</span>=<span class="string">"1"</span>/&gt;</span></div><div class="line">44<span class="tag">&lt;/<span class="name">Flags</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">Block</span>&gt;</span></div><div class="line">        	<span class="tag">&lt;<span class="name">Relation</span> <span class="attr">type</span>=<span class="string">"when"</span> <span class="attr">when</span>=<span class="string">"int(self.find('Flag3.fmt').getInternalValue()) == 10"</span>/&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">Blob</span> <span class="attr">name</span>=<span class="string">"frmtype"</span> <span class="attr">length</span>=<span class="string">"1"</span>/&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">Blob</span> <span class="attr">name</span>=<span class="string">"data1"</span> <span class="attr">lengthType</span>=<span class="string">"calc"</span> <span class="attr">length</span>=<span class="string">"int(self.find('datasize1').getInternalValue())-2"</span>/&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">Block</span>&gt;</span></div><div class="line">44<span class="tag">&lt;<span class="name">Block</span>&gt;</span></div><div class="line">        	<span class="tag">&lt;<span class="name">Relation</span> <span class="attr">type</span>=<span class="string">"when"</span> <span class="attr">when</span>=<span class="string">"int(self.find('Flag3.fmt').getInternalValue()) != 10"</span>/&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">Blob</span> <span class="attr">name</span>=<span class="string">"data1"</span> <span class="attr">lengthType</span>=<span class="string">"calc"</span> <span class="attr">length</span>=<span class="string">"int(self.find('datasize1').getInternalValue())-1"</span>/&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">Block</span>&gt;</span></div><div class="line">4<span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"lastsize"</span> <span class="attr">size</span>=<span class="string">"32"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">signed</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">Block</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>这部分是video tag的部分的编写<br/><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">Block</span> <span class="attr">name</span>=<span class="string">"video"</span>&gt;</span></div><div class="line">4<span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"type"</span> <span class="attr">size</span>=<span class="string">"8"</span> <span class="attr">signed</span>=<span class="string">"false"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">value</span>=<span class="string">"9"</span> <span class="attr">token</span>=<span class="string">"true"</span> <span class="attr">mutable</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line">4<span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"datasize2"</span> <span class="attr">size</span>=<span class="string">"24"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">signed</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line">4<span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"timestamp"</span> <span class="attr">size</span>=<span class="string">"24"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">signed</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line">4<span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"timestampi"</span> <span class="attr">size</span>=<span class="string">"8"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">signed</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line">4<span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"streamid"</span> <span class="attr">size</span>=<span class="string">"24"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">signed</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line">4<span class="tag">&lt;<span class="name">Flags</span> <span class="attr">name</span>=<span class="string">"Flag2"</span> <span class="attr">size</span>=<span class="string">"8"</span>&gt;</span></div><div class="line">    	<span class="tag">&lt;<span class="name">Flag</span> <span class="attr">name</span>=<span class="string">"frmtype"</span> <span class="attr">position</span>=<span class="string">"0"</span> <span class="attr">size</span>=<span class="string">"4"</span>/&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">Flag</span> <span class="attr">name</span>=<span class="string">"codecid"</span> <span class="attr">position</span>=<span class="string">"4"</span> <span class="attr">size</span>=<span class="string">"4"</span>/&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">Flags</span>&gt;</span></div><div class="line">4<span class="tag">&lt;<span class="name">Block</span>&gt;</span></div><div class="line">    	<span class="tag">&lt;<span class="name">Relation</span> <span class="attr">type</span>=<span class="string">"when"</span> <span class="attr">when</span>=<span class="string">"int(self.find('Flag2.codecid').getInternalValue()) == 7"</span>/&gt;</span></div><div class="line">44<span class="tag">&lt;<span class="name">Blob</span> <span class="attr">name</span>=<span class="string">"pkttype"</span> <span class="attr">length</span>=<span class="string">"1"</span>/&gt;</span></div><div class="line">44<span class="tag">&lt;<span class="name">Blob</span> <span class="attr">name</span>=<span class="string">"compotime"</span> <span class="attr">length</span>=<span class="string">"3"</span>/&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">Blob</span> <span class="attr">name</span>=<span class="string">"data"</span> <span class="attr">lengthType</span>=<span class="string">"calc"</span> <span class="attr">length</span>=<span class="string">"int(self.find('datasize2').getInternalValue())-5"</span>/&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">Block</span>&gt;</span></div><div class="line">4<span class="tag">&lt;<span class="name">Block</span>&gt;</span></div><div class="line">    	<span class="tag">&lt;<span class="name">Relation</span> <span class="attr">type</span>=<span class="string">"when"</span> <span class="attr">when</span>=<span class="string">"int(self.find('Flag2.codecid').getInternalValue()) != 7"</span>/&gt;</span></div><div class="line">44<span class="tag">&lt;<span class="name">Blob</span> <span class="attr">name</span>=<span class="string">"data"</span> <span class="attr">lengthType</span>=<span class="string">"calc"</span> <span class="attr">length</span>=<span class="string">"int(self.find('datasize2').getInternalValue())-1"</span>/&gt;</span></div><div class="line">4<span class="tag">&lt;/<span class="name">Block</span>&gt;</span></div><div class="line">4<span class="tag">&lt;<span class="name">Number</span> <span class="attr">name</span>=<span class="string">"lastsize"</span> <span class="attr">size</span>=<span class="string">"32"</span> <span class="attr">endian</span>=<span class="string">"big"</span> <span class="attr">signed</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">Block</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<h5 id="0x04-swf加载样本"><a class="headerlink" href="#0x04-swf加载样本" title="0x04: swf加载样本"></a>0x04: swf加载样本</h5><p>利用as语言编写的代码，编译后得到swf文件<br/><figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">package</span></span></div><div class="line">{</div><div class="line">    <span class="meta"><span class="meta-keyword">import</span> flash.display.Sprite;</span></div><div class="line">    <span class="meta"><span class="meta-keyword">import</span> flash.net.*;</span></div><div class="line">    <span class="meta"><span class="meta-keyword">import</span> flash.media.*;</span></div><div class="line">    <span class="meta"><span class="meta-keyword">import</span> flash.utils.*;</span></div><div class="line">    <span class="meta"><span class="meta-keyword">import</span> flash.display.*</span></div><div class="line">    <span class="meta-keyword">import</span> flash.events.*;</div><div class="line">    <span class="meta"><span class="meta-keyword">import</span> flash.system.fscommand;</span></div><div class="line">    <span class="meta"><span class="meta-keyword">import</span> flash.display3D.textures.VideoTexture;</span></div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> <span class="keyword">extends</span> <span class="title">Sprite</span></span></div><div class="line">    {</div><div class="line">        <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">Main</span><span class="params">()</span>:void</span></div><div class="line">        {</div><div class="line">            <span class="keyword">var</span> video:Video;</div><div class="line">            <span class="keyword">var</span> netCon:NetConnection;</div><div class="line">            <span class="keyword">var</span> stream:NetStream;</div><div class="line"></div><div class="line">            <span class="function"><span class="keyword">function</span> <span class="title">loadVideo</span><span class="params">(url:String)</span>:Video</span></div><div class="line">            {</div><div class="line">                video = <span class="keyword">new</span> Video();</div><div class="line">                netCon = <span class="keyword">new</span> NetConnection();</div><div class="line">                netCon.connect(<span class="literal">null</span>);</div><div class="line">                stream = <span class="keyword">new</span> NetStream(netCon);</div><div class="line">                stream.play(url);</div><div class="line"></div><div class="line">                <span class="keyword">var</span> client:Object = <span class="keyword">new</span> Object();</div><div class="line">                client.onMetaData = onMetaEvent;</div><div class="line">                stream.client = client;</div><div class="line"></div><div class="line">                stream.addEventListener(NetStatusEvent.NET_STATUS, netStatus);</div><div class="line">                video.attachNetStream(stream);</div><div class="line"></div><div class="line">                <span class="keyword">return</span> video;</div><div class="line">            }</div><div class="line"></div><div class="line">            <span class="function"><span class="keyword">function</span> <span class="title">onMetaEvent</span><span class="params">(e:Object)</span>:void</span></div><div class="line">            {</div><div class="line">            }</div><div class="line">            <span class="function"><span class="keyword">function</span> <span class="title">netStatus</span><span class="params">(e:NetStatusEvent)</span>:void</span></div><div class="line">            {</div><div class="line">                video.width  = stage.stageWidth;</div><div class="line">                video.height = stage.stageHeight;</div><div class="line">            }</div><div class="line">            stage.addChild(loadVideo(<span class="string">"fuzz.flv"</span>));</div><div class="line">        }</div><div class="line">    }</div><div class="line">}</div></pre></td></tr></table></figure></p>
+<h5 id="0x05-自动化fuzz脚本"><a class="headerlink" href="#0x05-自动化fuzz脚本" title="0x05: 自动化fuzz脚本"></a>0x05: 自动化fuzz脚本</h5><p>核心部分的代码如下。<br/><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(fileID)</span>:</span></div><div class="line">    copyFile(fileID)</div><div class="line">    subprocess.Popen(runCmd)</div><div class="line">    <span class="comment">#sleep(2)</span></div><div class="line">    checkCrash()</div><div class="line">    <span class="comment">#sleep(1)</span></div><div class="line">    clean()</div></pre></td></tr></table></figure></p>
+<p>首先会拷贝一个样本文件到工作目录<br/><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">copyFile</span><span class="params">(fileID)</span>:</span></div><div class="line">    shutil.copyfile(fileDict.get(fileID),workDir+<span class="string">"fuzz.flv"</span>)</div></pre></td></tr></table></figure></p>
+<p>然后开始一轮的fuzz<br/><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">fuzzFilename = <span class="string">"fuzz.swf"</span></div><div class="line">programName = <span class="string">"flashplayer_22_sa_debug.exe"</span></div><div class="line">runCmd = programName +<span class="string">" "</span>+ fuzzFilename</div><div class="line">subprocess.Popen(runCmd)</div></pre></td></tr></table></figure></p>
+<p>然后是异常检测(贼搓的方法…TAT)<br/><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">checkCrash</span><span class="params">()</span>:</span></div><div class="line">    winDbg = <span class="string">"windbg.exe"</span></div><div class="line">    <span class="comment">#get process list</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        processList = psutil.process_iter()</div><div class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</div><div class="line">        <span class="keyword">print</span> e</div><div class="line">    <span class="keyword">for</span> p <span class="keyword">in</span> processList:</div><div class="line">        <span class="keyword">if</span>(p.name == winDbg):</div><div class="line">            <span class="keyword">print</span> <span class="string">"[#]Crash Found! Writing to log now ..."</span></div><div class="line">            log(fileID)</div><div class="line">            sleep(<span class="number">1</span>)</div><div class="line">            p.kill()</div><div class="line">        <span class="keyword">else</span>:</div><div class="line">            <span class="keyword">pass</span></div></pre></td></tr></table></figure></p>
+<p>最后就是收尾的工作了<br/><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">clean</span><span class="params">()</span>:</span></div><div class="line">    subprocess.Popen(killProgram)<span class="comment">#kill programName for next one </span></div><div class="line">    sleep(<span class="number">1</span>)</div><div class="line">    <span class="keyword">if</span>(os.path.exists(workDir+<span class="string">"fuzz.flv"</span>)):</div><div class="line">        os.remove(workDir+<span class="string">"fuzz.flv"</span>)</div></pre></td></tr></table></figure></p>
+<h5 id="0x06-结束语"><a class="headerlink" href="#0x06-结束语" title="0x06: 结束语"></a>0x06: 结束语</h5><p>我这个东西只能叫toy吧，效率低下，简单粗暴。但是过程中是学习到不少东西，之后的打算是多看一些论文，多学习一些漏洞挖掘的方法，之前尝试了结合winafl来搞，不过问题很多，有待解决…慢慢来吧。<br/>所有的东西我都丢github了，有啥错误欢迎各位师傅留言/email指导我 传送门在这里：<a href="https://github.com/o0xmuhe/filefmt_fuzz_with_peach" rel="external" target="_blank">fuzz with peach</a></p>
+<h5 id="0x07-参考"><a class="headerlink" href="#0x07-参考" title="0x07: 参考"></a>0x07: 参考</h5><p><a href="http://blog.useasp.net/archive/2016/02/28/The-flv-video-file-format-specification-version-10-1.aspx" rel="external" target="_blank">flv文件格式详解</a><br/><a href="http://www.peachfuzzer.com/resources/peachcommunity/" rel="external" target="_blank">peach 文档</a><br/><a href="http://www.flinkd.org/2011/07/fuzzing-with-peach-part-1/" rel="external" target="_blank">Fuzzing with Peach – Part 1 « Flinkd!</a></p>
+</div>
+</div>
+<div class="copyright">
+<p><span>本文标题:</span><a href="/2016/12/17/fuzzing-with-peach-Just-a-toy/">fuzzing with peach(Just a toy)</a></p>
+<p><span>文章作者:</span><a href="/" title="访问 muhe 的个人博客">muhe</a></p>
+<p><span>发布时间:</span>2016年12月17日 - 23时38分</p>
+<p><span>最后更新:</span>2016年12月24日 - 01时04分</p>
+<p>
+<span>原始链接:</span><a class="post-url" href="/2016/12/17/fuzzing-with-peach-Just-a-toy/" title="fuzzing with peach(Just a toy)">http://o0xmuhe.me/2016/12/17/fuzzing-with-peach-Just-a-toy/</a>
+<span class="copy-path" data-clipboard-text="原文: http://o0xmuhe.me/2016/12/17/fuzzing-with-peach-Just-a-toy/　　作者: muhe" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+<script src="./fuzzing with peach(Just a toy)  o0xmuhe's blog/clipboard.min.js"></script>
+<script> var clipboard = new Clipboard('.copy-path'); </script>
+</p>
+<p>
+<span>许可协议:</span><i class="fa fa-creative-commons"></i> <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" rel="license" target="_blank" title="中国大陆 (CC BY-NC-SA 3.0 CN)">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+</div>
+<nav id="article-nav">
+<a class="article-nav-link-wrap" href="/2016/12/24/what-DynELF-does-basically/" id="article-nav-newer">
+<strong class="article-nav-caption">&lt;</strong>
+<div class="article-nav-title">
+        
+          what DynELF does basically
+        
+      </div>
+</a>
+<a class="article-nav-link-wrap" href="/2016/11/25/PlaidCTF-2016-butterfly/" id="article-nav-older">
+<div class="article-nav-title">PlaidCTF 2016 butterfly</div>
+<strong class="article-nav-caption">&gt;</strong>
+</a>
+</nav>
+</article>
+<div class="toc-article" id="toc">
+<strong class="toc-title">文章目录</strong>
+<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#0x00-前言"><span class="toc-number">1.</span> <span class="toc-text">0x00: 前言</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#0x01-关于peach"><span class="toc-number">1.1.</span> <span class="toc-text">0x01: 关于peach</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#0x02-文件fuzz的思路"><span class="toc-number">1.2.</span> <span class="toc-text">0x02: 文件fuzz的思路</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#0x03-编写pit-file"><span class="toc-number">1.3.</span> <span class="toc-text">0x03: 编写pit file</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#0x04-swf加载样本"><span class="toc-number">1.4.</span> <span class="toc-text">0x04: swf加载样本</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#0x05-自动化fuzz脚本"><span class="toc-number">1.5.</span> <span class="toc-text">0x05: 自动化fuzz脚本</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#0x06-结束语"><span class="toc-number">1.6.</span> <span class="toc-text">0x06: 结束语</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#0x07-参考"><span class="toc-number">1.7.</span> <span class="toc-text">0x07: 参考</span></a></li></ol></li></ol>
+</div>
+<input id="tocButton" title="点击按钮隐藏或者显示文章目录" type="button" value="隐藏目录"/>
+<script src="./fuzzing with peach(Just a toy)  o0xmuhe's blog/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+        }
+    })
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+    }
+</script>
+<div class="bdsharebuttonbox">
+<a class="fx fa-weibo bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="fx fa-weixin bds_weixin" data-cmd="weixin" href="#" title="分享到微信"></a>
+<a class="fx fa-qq bds_sqq" data-cmd="sqq" href="#" title="分享到QQ好友"></a>
+<a class="fx fa-facebook-official bds_fbook" data-cmd="fbook" href="#" title="分享到Facebook"></a>
+<a class="fx fa-twitter bds_twi" data-cmd="twi" href="#" title="分享到Twitter"></a>
+<a class="fx fa-linkedin bds_linkedin" data-cmd="linkedin" href="#" title="分享到linkedin"></a>
+<a class="fx fa-files-o bds_copy" data-cmd="copy" href="#" title="分享到复制网址"></a>
+</div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+<div class="duoshuo" id="comments">
+<!-- 多说评论框 start -->
+<div class="ds-thread" data-thread-key="2016/12/17/fuzzing-with-peach-Just-a-toy/" data-title="fuzzing with peach(Just a toy)" data-url="http://o0xmuhe.me/2016/12/17/fuzzing-with-peach-Just-a-toy/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    var duoshuoQuery = {short_name:"o0xmuhe"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = '/js/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- 多说公共JS代码 end -->
+</div>
+<div class="scroll" id="post-nav-button">
+<a href="/2016/12/24/what-DynELF-does-basically/" title="上一篇: what DynELF does basically">
+<i class="fa fa-angle-left"></i>
+</a>
+<a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+<a href="/2016/11/25/PlaidCTF-2016-butterfly/" title="下一篇: PlaidCTF 2016 butterfly">
+<i class="fa fa-angle-right"></i>
+</a>
+</div>
+<ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/08/SSCTF-2017部分Writeup/">SSCTF-2017部分Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/22/360春秋CTF-pwn/">360春秋CTF--pwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/06/Linux-Kernel-Exploit-4-beginners/">Linux Kernel Exploit 4 beginners</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/15/NJCTF-2017部分wp/">NJCTF-2017部分wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/06/SECCON-2016-jmper/">SECCON-2016 jmper</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/04/codegate2017-angrybird/">codegate2017-angrybird</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/27/LLVM-Study-Log/">LLVM Study Log</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/16/ichunqiu-CTF-2017-2/">ichunqiu-CTF-2017-2</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/08/Adding-your-own-syscall-in-linux-kernel/">Adding your own syscall in linux kernel</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/04/Windows-Kernel-Exploit-Study-3/">Windows-Kernel-Exploit-Study(3)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/30/Linux socket进程间通信及应用/">Linux socket进程间通信及应用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/28/一点碎碎念/">一点碎碎念</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/22/Have-fun-with-Blind-ROP/">Have fun with Blind ROP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/20/Windows-Kernel-Exploit-Study-2/">Windows Kernel Exploit Study(2)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/19/Windows-Kernel-Exploit-Study-1/">Windows Kernel Exploit Study(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/24/what-DynELF-does-basically/">what DynELF does basically</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/17/fuzzing-with-peach-Just-a-toy/">fuzzing with peach(Just a toy)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/25/PlaidCTF-2016-butterfly/">PlaidCTF 2016 butterfly</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/21/Have-fun-with-glibc内存管理/">Have fun with glibc内存管理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/10/linux-下起shell失败的分析/">linux 下起shell失败的分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/07/Baiudu杯-pwn专场记录/">Baiudu杯 pwn专场记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/29/how-to-compile-WinAFL/">how to compile WinAFL</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/25/yocto-writeup/">yocto writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/HITCON-2016-Quals-SecretHolder/">HITCON-2016-Quals-SecretHolder</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/CVE-2012-4792学习/">CVE-2012-4792学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/06/一点感悟/">一点感悟</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/27/BCTF-cloud/">BCTF--cloud</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/24/一些环境配置遇到的坑-持续更新/">一些环境配置遇到的坑(持续更新)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/16/Malloc-Maleficarum-复盘/">Malloc-Maleficarum-复盘</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/26/初试winafl/">初试winafl</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/14/pwnable-kr-alloca/">pwnable.kr -- alloca</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/01/简单的尝试angr/">简单的尝试angr</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/29/第一个android-cm调试分析/">第一个android cm调试分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/29/install-gef/">install gef</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/30/cctf-pwn350/">cctf pwn350</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/15/heap-vuln-unlink/">heap vuln -- unlink</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/02/format-string-with-stack-frame/">format string with stack frame</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/16/RCTF-PWN200/">RCTF -- PWN200</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/05/dragon/">dragon</a></li></ul>
+<script src="./fuzzing with peach(Just a toy)  o0xmuhe's blog/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+            }
+        })
+    </script>
+<script>
+</script>
+</div>
+<footer id="footer">
+<div class="outer">
+<div id="footer-info">
+<div class="footer-left">
+                © 2017 muhe
+            </div>
+<div class="footer-right">
+<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+</div>
+<div class="visit">
+<span id="busuanzi_container_site_pv" style="display:none">
+<span id="site-visit">访客数量: 
+                            <span id="busuanzi_value_site_uv"></span>
+</span>
+</span>
+<span>, </span>
+<span id="busuanzi_container_page_pv" style="display:none">
+<span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+</div>
+</div>
+</footer>
+</div>
+<script src="./fuzzing with peach(Just a toy)  o0xmuhe's blog/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="./fuzzing with peach(Just a toy)  o0xmuhe's blog/main.js"></script>
+<script>
+        $(document).ready(function() {
+            var backgroundnum = 24;
+            var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+<div class="scroll" id="scroll">
+<a href="#"><i class="fa fa-arrow-up"></i></a>
+<a href="#comments"><i class="fa fa-comments-o"></i></a>
+<a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+<script async="" src="./fuzzing with peach(Just a toy)  o0xmuhe's blog/busuanzi.pure.mini.js">
+</script>
+<script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+</div>
+</body>
+</html>

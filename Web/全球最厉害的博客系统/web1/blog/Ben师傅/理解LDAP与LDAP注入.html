@@ -1,0 +1,552 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./理解LDAP与LDAP注入/font-awesome.min.css" rel="stylesheet"/>
+<link href="./理解LDAP与LDAP注入/screen.css" rel="stylesheet"/>
+<link href="./理解LDAP与LDAP注入/prism_okaidia.css" rel="stylesheet"/>
+<link href="./理解LDAP与LDAP注入/bendawang.css" rel="stylesheet"/>
+<script src="./理解LDAP与LDAP注入/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./理解LDAP与LDAP注入/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./理解LDAP与LDAP注入/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="ldapldap">理解LDAP与LDAP注入</h1>
+<h2 id="0x01ldap">0x01 LDAP简介</h2>
+<p style="max-width:100%;height:auto;">查阅了一些网上的资料，读了好久还是觉得理解起来很困难，感觉还是不够干，之后看到的一个博客<a href="http://www.chinaunix.net/old_jh/49/593660.html">http://www.chinaunix.net/old_jh/49/593660.html</a>的，觉得写的相当不错，摘录了些也说说自己的理解吧，有错误的希望大家指正。
+LDAP，轻量目录访问协议</p>
+<p style="max-width:100%;height:auto;">|dn    :一条记录的位置|
+|dc    :一条记录所属区域|
+|ou    :一条记录所属组织|
+|cn/uid:一条记录的名字/ID|</p>
+<p style="max-width:100%;height:auto;">此处我更喜欢把LDAP和 数据库类比起来，我是直接把LDAP看成是一个主要用于查询的数据库。数据库用“表”来存数据，LDAP用“树”来存数据。数据库主要是三个DB,TABLE,ROW来定位一条记录，而LDAP首先要说明是哪一棵树dc，然后是从树根到目的所经过的所有“分叉”， ou（group），最后就是目标的名字，例如UID等等。
+具体到如何定义如下：</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">dn:cn=honglv,ou=bei,ou=xi,ou=dong,dc=waibo,dc=com
+  其中树根是<strong>dc=waibo,dc=com</strong>，分叉<strong>ou=bei,ou=xi,ou=dong</strong>，目标<strong>cn=honglv</strong></p>
+<blockquote>
+<p style="max-width:100%;height:auto;">注意要把“cn=stan,ou=linux,ou=computer,dc=ourschool,dc=org”看成是一个整体，它只是属性dn的值</p>
+</blockquote>
+</blockquote>
+<p style="max-width:100%;height:auto;">具体的一条记录如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">dn:cn=stan,ou=linux,ou=computer,dc=ourschool,dc=org
+objectClass：organizationalPerson
+cn:stan
+cn:小刀
+sn:小刀
+description:a good boy
+</code></pre>
+<p style="max-width:100%;height:auto;">（保存成LDIF文件，可以导入到LDAP数据库中）</p>
+<p style="max-width:100%;height:auto;">关于安装配置LDAP，贴一个网址
+http://www.mandrakesecure.net/en/docs/ldap-auth.php</p>
+<h2 id="0x02ldap">0x02 LDAP基本语法</h2>
+<ul>
+<li><strong>=(等于)</strong>
+查找“名“属性为“John”的所有对象，可以使用：</li>
+</ul>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(givenName=John)
+</code></pre>
+<blockquote>
+<p style="max-width:100%;height:auto;">  这会返回“名”属性为“John”的所有对象。圆括号是必需的，以便强调 LDAP 语句的开始和结束。</p>
+</blockquote>
+<ul>
+<li><strong>&amp;(逻辑与)</strong>
+如果具有多个条件并且希望全部条件都得到满足，则可使用此语法。例如，如果希望查找居住在 Dallas 并且“名”为“John”的所有人员，可以使用：</li>
+</ul>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(givenName=John)(l=Dallas))
+</code></pre>
+<blockquote>
+<p style="max-width:100%;height:auto;">请注意，每个参数都被属于其自己的圆括号括起来。整个 LDAP 语句必须包括在一对主圆括号中。操作符 &amp; 表明，只有每个参数都为真，才会将此筛选条件应用到要查询的对象。</p>
+</blockquote>
+<ul>
+<li><strong>!(逻辑非)</strong>
+此操作符用来排除具有特定属性的对象。假定您需要查找“名”为“John”的对象以外的所有对象。则应使用如下语句：</li>
+</ul>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(!givenName=John)
+</code></pre>
+<blockquote>
+<p style="max-width:100%;height:auto;">此语句将查找“名”不为“John”的所有对象。请注意：! 操作符紧邻参数的前面，并且位于参数的圆括号内。由于本语句只有一个参数，因此使用圆括号将其括起以示说明</p>
+</blockquote>
+<ul>
+<li><strong>（通配符）</strong></li>
+</ul>
+<p style="max-width:100%;height:auto;">可使用通配符表示值可以等于任何值。使用它的情况可能是：您希望查找具有职务头衔的所有对象。为此，可以使用：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(title=*)
+</code></pre>
+<blockquote>
+<p style="max-width:100%;height:auto;">这会返回“title”属性包含内容的所有对象。另一个例子是：您知道某个对象的“名”属性的开头两个字母是“Jo”。那么，可以使用如下语法进行查找：</p>
+</blockquote>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(givenName=Jo*)
+</code></pre>
+<blockquote>
+<p style="max-width:100%;height:auto;">这会返回“名”以“Jo”开头的所有对象。</p>
+</blockquote>
+<h4 id="eg">高级用法eg:</h4>
+<p style="max-width:100%;height:auto;">您需要一个筛选条件，用来查找居住在 Dallas 或 Austin，并且名为“John”的所有对象。使用的语法应当是：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(givenName=John)(|(l=Dallas)(l=Austin)))
+</code></pre>
+<h2 id="0x03ldap">0x03 LDAP注入</h2>
+<p style="max-width:100%;height:auto;">LDAP注入攻击和SQL注入攻击相似，因此接下来的想法是利用用户引入的参数生成LDAP查询。一个安全的Web应用在构造和将查询发送给服务器前应该净化用户传入的参数。在有漏洞的环境中，这些参数没有得到合适的过滤，因而攻击者可以注入任意恶意代码。
+使用得最广泛的LDAP：ADAM和OpenLDAP，下面的结论将会致代码注入：</p>
+<h3 id="31">3.1 引入</h3>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(attribute=value)
+</code></pre>
+<p style="max-width:100%;height:auto;">如果过滤器用于构造查询单缺少逻辑操作符，如<strong>value)(injected_filter</strong> ，瞬间导致产生了两个过滤器，</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(attribute=value)(injected\_filter)
+</code></pre>
+<p style="max-width:100%;height:auto;">通常，在OpenLDAP实施中，第二个过滤器会被忽略，只有第一个会被执行。
+而在ADAM中，有两个过滤器的查询是不被允许的，因而这个注入毫无用处。</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(|(attribute=value)(second_filter)) or (&amp;(attribute=value)(second_filter))
+</code></pre>
+<p style="max-width:100%;height:auto;">如果第一个用于构造查询的过滤器有逻辑操作符，形如<strong>value)(injected_filter)</strong>的注入会变成如下过滤器：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(attribute=value)(injected_filter)) (second_filter)。
+</code></pre>
+<p style="max-width:100%;height:auto;">虽然过滤器语法上并不正确，OpenLDAP还是会从左到右进行处理，忽略第一个过滤器闭合后的任何字符。</p>
+<p style="max-width:100%;height:auto;">但是有的浏览器会进行检查，检查过滤器是否正确，这种情况下<strong>value)(injected_filter))(&amp;(1=0</strong>，于是就出现了下述payload</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(attribute=value)(injected_filter))(&amp;(1=0)(second_filter))
+</code></pre>
+<p style="max-width:100%;height:auto;">既然第二个过滤器会被LDAP服务器忽略，有些部分便不允许有两个过滤器的查询。这种情况下，只能构建一个特殊的注入以获得单个过滤器的LDAP查询，如<strong>value)(injected_filter</strong>得到</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(attribute=value)(injected_filter)(second_filter))
+</code></pre>
+<h3 id="32and">3.2 AND注入</h3>
+<p style="max-width:100%;height:auto;">这种情况，应用会构造由”&amp;”操作符和用户引入的的参数组成的正常查询在LDAP目录中搜索，例如：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(parameter1=value1)(parameter2=value2))
+</code></pre>
+<p style="max-width:100%;height:auto;">这里Value1和value2是在LDAP目录中搜索的值，攻击者可以注入代码，维持正确的过滤器结构但能使用查询实现他自己的目标。</p>
+<h4 id="321">3.2.1 绕过访问控制</h4>
+<p style="max-width:100%;height:auto;">一个登陆页有两个文本框用于输入用户名和密码，过滤器如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(USER=Uname)(PASSWORD=Pwd))
+</code></pre>
+<p style="max-width:100%;height:auto;">如果攻击者输入一个有效地用户名，如r00tgrok，然后再这个名字后面注入恰当的语句，password检查就会被绕过。输入<strong>Uname=slisberger)(&amp;))</strong>，得到如下</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(USER= slisberger)(&amp;)(PASSWORD=Pwd))
+</code></pre>
+<p style="max-width:100%;height:auto;">LDAP服务器只处理第一个过滤器，即仅查询(&amp;(USER=slidberger)(&amp;))得到了处理。这个查询永真,故成功绕过</p>
+<h4 id="322">3.2.2 权限提升</h4>
+<p style="max-width:100%;height:auto;">现假设下面的查询会向用户列举出所有可见的低安全等级文档：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(directory=document)(security_level=low))
+</code></pre>
+<p style="max-width:100%;height:auto;">这里第一个参数document是用户入口，low是第二个参数的值。如果攻击者想列举出所有可见的高安全等级的文档，他可以利用如下的注入：<strong>document)(security_level=*))(&amp;(directory=documents</strong>
+得到</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(directory=documents)(security_level=*))(&amp;(direcroty=documents)(security_level=low))
+</code></pre>
+<p style="max-width:100%;height:auto;">LDAP服务器仅会处理第一个过滤器而忽略第二个，因而只有下面的查询会被处理：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(directory=documents)(security_level=*))
+</code></pre>
+<p style="max-width:100%;height:auto;">结果就是，所有安全等级的可用文档都会列举给攻击者</p>
+<h3 id="33or">3.3 OR注入</h3>
+<p style="max-width:100%;height:auto;">这种情况，应用会构造由”|”操作符和用户引入的的参数组成的正常查询在LDAP目录中搜索，例如：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(|(parameter1=value1)(parameter2=value2))
+</code></pre>
+<p style="max-width:100%;height:auto;">这里Value1和value2是在LDAP目录中搜索的值，攻击者可以注入代码，维持正确的过滤器结构但能使用查询实现他自己的目标。</p>
+<p style="max-width:100%;height:auto;">具体的注入方式和AND差不太多，不予详述。</p>
+<h3 id="34ldap">3.4 LDAP盲注</h3>
+<h4 id="341and">3.4.1 AND盲注</h4>
+<p style="max-width:100%;height:auto;">假设一个Web应用想从一个LDAP目录列出所有可用的Epson打印机，错误信息不会返回，应用发送如下的过滤器：         </p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(objectClass=printer)(type=Epson*))
+</code></pre>
+<p style="max-width:100%;height:auto;">正确的过滤器为：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(objectClass=printer)(type=Epson*))
+</code></pre>
+<p style="max-width:100%;height:auto;">而当注入<strong><em>)(objectClass=</em>))(&amp;(objectClass=void</strong>时得到</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(objectClass=*)(objectClass=*))(&amp;(objectClass=void)(type=Epson*))
+</code></pre>
+<p style="max-width:100%;height:auto;">执行第一个，过滤器<code style="max-width:100%;height:auto;">objectClass=*</code>总是返回一个对象。当图标被显示时响应为真，否则为假。
+这样我们就可以猜第二个括号的objectclass字段有些什么内容了。
+LDAP盲注技术让攻击者使用基于TRUE/FALSE的技术访问所有的信息。</p>
+<h4 id="342or">3.4.2 OR盲注</h4>
+<p style="max-width:100%;height:auto;">这种情况下，用于推测想要的信息的逻辑与AND是相反的，因为使用的是OR逻辑操作符。同样不予详述。</p>
+<h4 id="343">3.4.3 盲注深入</h4>
+<p style="max-width:100%;height:auto;">攻击者可以使用字母、数字搜索提取属性的值，这个想法的关键在于将一个复杂的值转化为TRUE/FALSE列表。这个机制，通常称为booleanization，大意是二值化吧，图十二概括了该机制，可用于不同的方式。
+假设攻击者想知道department属性的值，处理如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(idprinter=HPLaserJet2100)(department=a*))(object=printer))
+(&amp;(idprinter=HPLaserJet2100)(department=f*))(object=printer))
+(&amp;(idprinter=HPLaserJet2100)(department=fa*))(object=printer))
+</code></pre>
+<p style="max-width:100%;height:auto;">如此根据返回的不同结果猜解是否正确，和MYSQL盲注类似。
+同样，攻击者可以使用字符集削减技术减少获得信息所需的请求数，为完成这一点，他使用通配符测试给定的字符在值中是否为<em>anywhere</em>：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(idprinter=HPLaserJet2100)(department=*b*))(object=printer))
+(&amp;(idprinter=HPLaserJet2100)(department=*n*))(object=printer))
+</code></pre>
+<p style="max-width:100%;height:auto;">这样子可以看department中是否有b和n，巧用可以加速猜解过程，当然一般肯定都是写脚本猜解</p>
+<h2 id="0x04ldap">0x04 防御LDAP注入</h2>
+<p style="max-width:100%;height:auto;">总而言之，我们看到圆括号、星号、逻辑操作符、关系运操作符在应用层都必须过滤。
+无论什么时候，只要可能，构造LDAP搜索过滤器的值在发送给LDAP服务器查询之前都要用应用层有效地值列表来核对。正则表达式替换掉就可以了。</p>
+<h2 id="0x05">0x05 参考</h2>
+<pre><code style="max-width:100%;height:auto;">http://drops.wooyun.org/tips/967
+http://www.chinaunix.net/old_jh/49/593660.html
+http://blog.sina.com.cn/s/blog_6151984a0100ey3z.html
+</code></pre>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./理解LDAP与LDAP注入/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="ldapldap">理解LDAP与LDAP注入</h1>
+<h2 id="0x01ldap">0x01 LDAP简介</h2>
+<p style="max-width:100%;height:auto;">查阅了一些网上的资料，读了好久还是觉得理解起来很困难，感觉还是不够干，之后看到的一个博客<a href="http://www.chinaunix.net/old_jh/49/593660.html">http://www.chinaunix.net/old_jh/49/593660.html</a>的，觉得写的相当不错，摘录了些也说说自己的理解吧，有错误的希望大家指正。
+LDAP，轻量目录访问协议</p>
+<p style="max-width:100%;height:auto;">|dn    :一条记录的位置|
+|dc    :一条记录所属区域|
+|ou    :一条记录所属组织|
+|cn/uid:一条记录的名字/ID|</p>
+<p style="max-width:100%;height:auto;">此处我更喜欢把LDAP和 数据库类比起来，我是直接把LDAP看成是一个主要用于查询的数据库。数据库用“表”来存数据，LDAP用“树”来存数据。数据库主要是三个DB,TABLE,ROW来定位一条记录，而LDAP首先要说明是哪一棵树dc，然后是从树根到目的所经过的所有“分叉”， ou（group），最后就是目标的名字，例如UID等等。
+具体到如何定义如下：</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">dn:cn=honglv,ou=bei,ou=xi,ou=dong,dc=waibo,dc=com
+  其中树根是<strong>dc=waibo,dc=com</strong>，分叉<strong>ou=bei,ou=xi,ou=dong</strong>，目标<strong>cn=honglv</strong></p>
+<blockquote>
+<p style="max-width:100%;height:auto;">注意要把“cn=stan,ou=linux,ou=computer,dc=ourschool,dc=org”看成是一个整体，它只是属性dn的值</p>
+</blockquote>
+</blockquote>
+<p style="max-width:100%;height:auto;">具体的一条记录如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">dn:cn=stan,ou=linux,ou=computer,dc=ourschool,dc=org
+objectClass：organizationalPerson
+cn:stan
+cn:小刀
+sn:小刀
+description:a good boy
+</code></pre>
+<p style="max-width:100%;height:auto;">（保存成LDIF文件，可以导入到LDAP数据库中）</p>
+<p style="max-width:100%;height:auto;">关于安装配置LDAP，贴一个网址
+http://www.mandrakesecure.net/en/docs/ldap-auth.php</p>
+<h2 id="0x02ldap">0x02 LDAP基本语法</h2>
+<ul>
+<li><strong>=(等于)</strong>
+查找“名“属性为“John”的所有对象，可以使用：</li>
+</ul>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(givenName=John)
+</code></pre>
+<blockquote>
+<p style="max-width:100%;height:auto;">  这会返回“名”属性为“John”的所有对象。圆括号是必需的，以便强调 LDAP 语句的开始和结束。</p>
+</blockquote>
+<ul>
+<li><strong>&amp;(逻辑与)</strong>
+如果具有多个条件并且希望全部条件都得到满足，则可使用此语法。例如，如果希望查找居住在 Dallas 并且“名”为“John”的所有人员，可以使用：</li>
+</ul>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(givenName=John)(l=Dallas))
+</code></pre>
+<blockquote>
+<p style="max-width:100%;height:auto;">请注意，每个参数都被属于其自己的圆括号括起来。整个 LDAP 语句必须包括在一对主圆括号中。操作符 &amp; 表明，只有每个参数都为真，才会将此筛选条件应用到要查询的对象。</p>
+</blockquote>
+<ul>
+<li><strong>!(逻辑非)</strong>
+此操作符用来排除具有特定属性的对象。假定您需要查找“名”为“John”的对象以外的所有对象。则应使用如下语句：</li>
+</ul>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(!givenName=John)
+</code></pre>
+<blockquote>
+<p style="max-width:100%;height:auto;">此语句将查找“名”不为“John”的所有对象。请注意：! 操作符紧邻参数的前面，并且位于参数的圆括号内。由于本语句只有一个参数，因此使用圆括号将其括起以示说明</p>
+</blockquote>
+<ul>
+<li><strong>（通配符）</strong></li>
+</ul>
+<p style="max-width:100%;height:auto;">可使用通配符表示值可以等于任何值。使用它的情况可能是：您希望查找具有职务头衔的所有对象。为此，可以使用：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(title=*)
+</code></pre>
+<blockquote>
+<p style="max-width:100%;height:auto;">这会返回“title”属性包含内容的所有对象。另一个例子是：您知道某个对象的“名”属性的开头两个字母是“Jo”。那么，可以使用如下语法进行查找：</p>
+</blockquote>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(givenName=Jo*)
+</code></pre>
+<blockquote>
+<p style="max-width:100%;height:auto;">这会返回“名”以“Jo”开头的所有对象。</p>
+</blockquote>
+<h4 id="eg">高级用法eg:</h4>
+<p style="max-width:100%;height:auto;">您需要一个筛选条件，用来查找居住在 Dallas 或 Austin，并且名为“John”的所有对象。使用的语法应当是：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(givenName=John)(|(l=Dallas)(l=Austin)))
+</code></pre>
+<h2 id="0x03ldap">0x03 LDAP注入</h2>
+<p style="max-width:100%;height:auto;">LDAP注入攻击和SQL注入攻击相似，因此接下来的想法是利用用户引入的参数生成LDAP查询。一个安全的Web应用在构造和将查询发送给服务器前应该净化用户传入的参数。在有漏洞的环境中，这些参数没有得到合适的过滤，因而攻击者可以注入任意恶意代码。
+使用得最广泛的LDAP：ADAM和OpenLDAP，下面的结论将会致代码注入：</p>
+<h3 id="31">3.1 引入</h3>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(attribute=value)
+</code></pre>
+<p style="max-width:100%;height:auto;">如果过滤器用于构造查询单缺少逻辑操作符，如<strong>value)(injected_filter</strong> ，瞬间导致产生了两个过滤器，</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(attribute=value)(injected\_filter)
+</code></pre>
+<p style="max-width:100%;height:auto;">通常，在OpenLDAP实施中，第二个过滤器会被忽略，只有第一个会被执行。
+而在ADAM中，有两个过滤器的查询是不被允许的，因而这个注入毫无用处。</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(|(attribute=value)(second_filter)) or (&amp;(attribute=value)(second_filter))
+</code></pre>
+<p style="max-width:100%;height:auto;">如果第一个用于构造查询的过滤器有逻辑操作符，形如<strong>value)(injected_filter)</strong>的注入会变成如下过滤器：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(attribute=value)(injected_filter)) (second_filter)。
+</code></pre>
+<p style="max-width:100%;height:auto;">虽然过滤器语法上并不正确，OpenLDAP还是会从左到右进行处理，忽略第一个过滤器闭合后的任何字符。</p>
+<p style="max-width:100%;height:auto;">但是有的浏览器会进行检查，检查过滤器是否正确，这种情况下<strong>value)(injected_filter))(&amp;(1=0</strong>，于是就出现了下述payload</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(attribute=value)(injected_filter))(&amp;(1=0)(second_filter))
+</code></pre>
+<p style="max-width:100%;height:auto;">既然第二个过滤器会被LDAP服务器忽略，有些部分便不允许有两个过滤器的查询。这种情况下，只能构建一个特殊的注入以获得单个过滤器的LDAP查询，如<strong>value)(injected_filter</strong>得到</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(attribute=value)(injected_filter)(second_filter))
+</code></pre>
+<h3 id="32and">3.2 AND注入</h3>
+<p style="max-width:100%;height:auto;">这种情况，应用会构造由”&amp;”操作符和用户引入的的参数组成的正常查询在LDAP目录中搜索，例如：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(parameter1=value1)(parameter2=value2))
+</code></pre>
+<p style="max-width:100%;height:auto;">这里Value1和value2是在LDAP目录中搜索的值，攻击者可以注入代码，维持正确的过滤器结构但能使用查询实现他自己的目标。</p>
+<h4 id="321">3.2.1 绕过访问控制</h4>
+<p style="max-width:100%;height:auto;">一个登陆页有两个文本框用于输入用户名和密码，过滤器如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(USER=Uname)(PASSWORD=Pwd))
+</code></pre>
+<p style="max-width:100%;height:auto;">如果攻击者输入一个有效地用户名，如r00tgrok，然后再这个名字后面注入恰当的语句，password检查就会被绕过。输入<strong>Uname=slisberger)(&amp;))</strong>，得到如下</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(USER= slisberger)(&amp;)(PASSWORD=Pwd))
+</code></pre>
+<p style="max-width:100%;height:auto;">LDAP服务器只处理第一个过滤器，即仅查询(&amp;(USER=slidberger)(&amp;))得到了处理。这个查询永真,故成功绕过</p>
+<h4 id="322">3.2.2 权限提升</h4>
+<p style="max-width:100%;height:auto;">现假设下面的查询会向用户列举出所有可见的低安全等级文档：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(directory=document)(security_level=low))
+</code></pre>
+<p style="max-width:100%;height:auto;">这里第一个参数document是用户入口，low是第二个参数的值。如果攻击者想列举出所有可见的高安全等级的文档，他可以利用如下的注入：<strong>document)(security_level=*))(&amp;(directory=documents</strong>
+得到</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(directory=documents)(security_level=*))(&amp;(direcroty=documents)(security_level=low))
+</code></pre>
+<p style="max-width:100%;height:auto;">LDAP服务器仅会处理第一个过滤器而忽略第二个，因而只有下面的查询会被处理：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(directory=documents)(security_level=*))
+</code></pre>
+<p style="max-width:100%;height:auto;">结果就是，所有安全等级的可用文档都会列举给攻击者</p>
+<h3 id="33or">3.3 OR注入</h3>
+<p style="max-width:100%;height:auto;">这种情况，应用会构造由”|”操作符和用户引入的的参数组成的正常查询在LDAP目录中搜索，例如：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(|(parameter1=value1)(parameter2=value2))
+</code></pre>
+<p style="max-width:100%;height:auto;">这里Value1和value2是在LDAP目录中搜索的值，攻击者可以注入代码，维持正确的过滤器结构但能使用查询实现他自己的目标。</p>
+<p style="max-width:100%;height:auto;">具体的注入方式和AND差不太多，不予详述。</p>
+<h3 id="34ldap">3.4 LDAP盲注</h3>
+<h4 id="341and">3.4.1 AND盲注</h4>
+<p style="max-width:100%;height:auto;">假设一个Web应用想从一个LDAP目录列出所有可用的Epson打印机，错误信息不会返回，应用发送如下的过滤器：         </p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(objectClass=printer)(type=Epson*))
+</code></pre>
+<p style="max-width:100%;height:auto;">正确的过滤器为：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(objectClass=printer)(type=Epson*))
+</code></pre>
+<p style="max-width:100%;height:auto;">而当注入<strong><em>)(objectClass=</em>))(&amp;(objectClass=void</strong>时得到</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(objectClass=*)(objectClass=*))(&amp;(objectClass=void)(type=Epson*))
+</code></pre>
+<p style="max-width:100%;height:auto;">执行第一个，过滤器<code style="max-width:100%;height:auto;">objectClass=*</code>总是返回一个对象。当图标被显示时响应为真，否则为假。
+这样我们就可以猜第二个括号的objectclass字段有些什么内容了。
+LDAP盲注技术让攻击者使用基于TRUE/FALSE的技术访问所有的信息。</p>
+<h4 id="342or">3.4.2 OR盲注</h4>
+<p style="max-width:100%;height:auto;">这种情况下，用于推测想要的信息的逻辑与AND是相反的，因为使用的是OR逻辑操作符。同样不予详述。</p>
+<h4 id="343">3.4.3 盲注深入</h4>
+<p style="max-width:100%;height:auto;">攻击者可以使用字母、数字搜索提取属性的值，这个想法的关键在于将一个复杂的值转化为TRUE/FALSE列表。这个机制，通常称为booleanization，大意是二值化吧，图十二概括了该机制，可用于不同的方式。
+假设攻击者想知道department属性的值，处理如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(idprinter=HPLaserJet2100)(department=a*))(object=printer))
+(&amp;(idprinter=HPLaserJet2100)(department=f*))(object=printer))
+(&amp;(idprinter=HPLaserJet2100)(department=fa*))(object=printer))
+</code></pre>
+<p style="max-width:100%;height:auto;">如此根据返回的不同结果猜解是否正确，和MYSQL盲注类似。
+同样，攻击者可以使用字符集削减技术减少获得信息所需的请求数，为完成这一点，他使用通配符测试给定的字符在值中是否为<em>anywhere</em>：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">(&amp;(idprinter=HPLaserJet2100)(department=*b*))(object=printer))
+(&amp;(idprinter=HPLaserJet2100)(department=*n*))(object=printer))
+</code></pre>
+<p style="max-width:100%;height:auto;">这样子可以看department中是否有b和n，巧用可以加速猜解过程，当然一般肯定都是写脚本猜解</p>
+<h2 id="0x04ldap">0x04 防御LDAP注入</h2>
+<p style="max-width:100%;height:auto;">总而言之，我们看到圆括号、星号、逻辑操作符、关系运操作符在应用层都必须过滤。
+无论什么时候，只要可能，构造LDAP搜索过滤器的值在发送给LDAP服务器查询之前都要用应用层有效地值列表来核对。正则表达式替换掉就可以了。</p>
+<h2 id="0x05">0x05 参考</h2>
+<pre><code style="max-width:100%;height:auto;">http://drops.wooyun.org/tips/967
+http://www.chinaunix.net/old_jh/49/593660.html
+http://blog.sina.com.cn/s/blog_6151984a0100ey3z.html
+</code></pre>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./理解LDAP与LDAP注入/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./理解LDAP与LDAP注入/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./理解LDAP与LDAP注入/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./理解LDAP与LDAP注入/prism.js"></script>
+<script src="./理解LDAP与LDAP注入/zooming.js"></script>
+<script src="./理解LDAP与LDAP注入/Bendawang.js"></script>
+
+

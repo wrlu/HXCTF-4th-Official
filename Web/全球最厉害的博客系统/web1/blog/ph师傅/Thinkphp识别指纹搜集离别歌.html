@@ -1,0 +1,227 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./Thinkphp识别指纹搜集  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./Thinkphp识别指纹搜集  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./Thinkphp识别指纹搜集  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>Thinkphp识别/指纹/搜集 | 离别歌</title>
+<link href="./Thinkphp识别指纹搜集  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Thinkphp识别指纹搜集  离别歌/styles.css" rel="stylesheet"/>
+<link href="./Thinkphp识别指纹搜集  离别歌/style.css" rel="stylesheet"/>
+<link href="./Thinkphp识别指纹搜集  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./Thinkphp识别指纹搜集  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./Thinkphp识别指纹搜集  离别歌/jquery.min.js"></script>
+<link href="./Thinkphp识别指纹搜集  离别歌/code.css" rel="stylesheet"/>
+<link href="./Thinkphp识别指纹搜集  离别歌/button.css" rel="stylesheet"/>
+<link href="./Thinkphp识别指纹搜集  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./Thinkphp识别指纹搜集  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/Help-me-about-ThinkPHP-app-finger.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/Help-me-about-ThinkPHP-app-finger.html&amp;text=Thinkphp%E8%AF%86%E5%88%AB/%E6%8C%87%E7%BA%B9/%E6%90%9C%E9%9B%86"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/Help-me-about-ThinkPHP-app-finger.html&amp;title=Thinkphp%E8%AF%86%E5%88%AB/%E6%8C%87%E7%BA%B9/%E6%90%9C%E9%9B%86"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/Help-me-about-ThinkPHP-app-finger.html&amp;is_video=false&amp;description=Thinkphp%E8%AF%86%E5%88%AB/%E6%8C%87%E7%BA%B9/%E6%90%9C%E9%9B%86"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=Thinkphp%E8%AF%86%E5%88%AB/%E6%8C%87%E7%BA%B9/%E6%90%9C%E9%9B%86&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/Help-me-about-ThinkPHP-app-finger.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/Help-me-about-ThinkPHP-app-finger.html&amp;title=Thinkphp%E8%AF%86%E5%88%AB/%E6%8C%87%E7%BA%B9/%E6%90%9C%E9%9B%86"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/Help-me-about-ThinkPHP-app-finger.html&amp;title=Thinkphp%E8%AF%86%E5%88%AB/%E6%8C%87%E7%BA%B9/%E6%90%9C%E9%9B%86"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/Help-me-about-ThinkPHP-app-finger.html&amp;title=Thinkphp%E8%AF%86%E5%88%AB/%E6%8C%87%E7%BA%B9/%E6%90%9C%E9%9B%86"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/Help-me-about-ThinkPHP-app-finger.html&amp;title=Thinkphp%E8%AF%86%E5%88%AB/%E6%8C%87%E7%BA%B9/%E6%90%9C%E9%9B%86"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/Help-me-about-ThinkPHP-app-finger.html&amp;name=Thinkphp%E8%AF%86%E5%88%AB/%E6%8C%87%E7%BA%B9/%E6%90%9C%E9%9B%86&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">Thinkphp识别/指纹/搜集</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年12月19日 00:38" itemprop="datePublished">
+                    2014 十二月 19 00:38
+                </time>
+</div>
+<div class="article-tag">
+            阅读：5318
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/thinkphp">thinkphp</a>,
+                
+                <a class="tag-link" href="/tag/web%E6%8C%87%E7%BA%B9">web指纹</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>近来创业虽然辛苦，但在写创业项目代码的时候还能发现几个0day，也是一件乐事。</p>
+<p>不过时间也仅允许我找到漏洞并提交，至于全网测试/批量真心是心有余而力不足啊。这个洞：<a href="http://wooyun.org/bugs/wooyun-2014-087731"><a href="http://wooyun.org/bugs/wooyun-2014-087731">http://wooyun.org/bugs/wooyun-2014-087731</a></a> 绝对能通杀大部分的thinkphp站，不过需要一些精细化的分析，像一些表单、搜索位置出现漏洞的可能性很大，但网上一些“XX漏洞批量”工具往往只是一些简单的爬爬谷歌、然后用exp来打。</p>
+<p>现在遇到的问题就是exp不是通用的，很多情况下需要一定黑/白盒分析才能确定。或者找到一些thinkphp二次开发的CMS进行通用exp编写，但很多商业cms我并不知道，也没时间去搜集。</p>
+<p>所以把任务交给大家了，感兴趣地可以全网搜集一些thinkphp二次开发的站点，先列出来。之后漏洞公开以后大家可以测试一下。</p>
+<p>这里提供一个指纹吧：/?c=4e5e5d7364f443e28fbf0d3ae744a59a或/4e5e5d7364f443e28fbf0d3ae744a59a等等类似。</p>
+<p>当thinkphp站点控制器名字是4e5e5d7364f443e28fbf0d3ae744a59a的时候就会显示一个logo出来：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201412/2de41418921466.jpg"><img alt="04.jpg" src="./Thinkphp识别指纹搜集  离别歌/2de41418921466.jpg"/></a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201412/13501418921467.jpg"><img alt="05.jpg" src="./Thinkphp识别指纹搜集  离别歌/13501418921467.jpg"/></a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201412/fac41418921468.jpg"><img alt="06.jpg" src="./Thinkphp识别指纹搜集  离别歌/thum-fac41418921468.jpg"/></a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201412/e4bd1418921470.jpg"><img alt="07.jpg" src="./Thinkphp识别指纹搜集  离别歌/e4bd1418921470.jpg"/></a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201412/86c31418921471.jpg"><img alt="08.jpg" src="./Thinkphp识别指纹搜集  离别歌/thum-86c31418921471.jpg"/></a></p>
+<p>不一一列举了。希望有人能做个扫描器全网扫一下，到时候能给我分享一下结果就行了。</p>
+<p>时间少的人真是伤不起，睡觉去了。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1899">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Thinkphp识别指纹搜集  离别歌/8dd57b6bcdb1cb984a32328279dfa7de.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.baidu.com" target="_blank">loser</a>
+<time datetime="2014年12月20日 03:52" itemprop="datePublished">
+                            2014 十二月 20 03:52
+                        </time>
+<a href="javascript:reply_to('1899', 'loser')">回复</a>
+</p>
+<p class="comment-meta">楼主，你能留个QQ，或者加下我QQ么，咱们细聊，详谈~！</p>
+</div>
+</div>
+<div class="row" id="comment-1897">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Thinkphp识别指纹搜集  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://stayliv3.github.io/" target="_blank">xd_xd</a>
+<time datetime="2014年12月19日 13:52" itemprop="datePublished">
+                            2014 十二月 19 13:52
+                        </time>
+<a href="javascript:reply_to('1897', 'xd_xd')">回复</a>
+</p>
+<p class="comment-meta">大牛做的啥项目啊</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1898">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Thinkphp识别指纹搜集  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年12月19日 22:07" itemprop="datePublished">
+                            2014 十二月 19 22:07
+                        </time>
+<a href="javascript:reply_to('1898', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@xd_xd：保密保密~</p>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="051e719db1e1de449b75b93ce6ea1c9aff1bd7fb"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./Thinkphp识别指纹搜集  离别歌/051e719db1e1de449b75b93ce6ea1c9aff1bd7fb"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="340">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="pgRmsxCsKyFyzS3IqO5rGL83cEte0XvsXAcSg1OHblzXzxrXe5zbfpa8lIWmJrkC"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./Thinkphp识别指纹搜集  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./Thinkphp识别指纹搜集  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

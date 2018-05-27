@@ -1,0 +1,334 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./python富文本XSS过滤器  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./python富文本XSS过滤器  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./python富文本XSS过滤器  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>python富文本XSS过滤器 | 离别歌</title>
+<link href="./python富文本XSS过滤器  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./python富文本XSS过滤器  离别歌/styles.css" rel="stylesheet"/>
+<link href="./python富文本XSS过滤器  离别歌/style.css" rel="stylesheet"/>
+<link href="./python富文本XSS过滤器  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./python富文本XSS过滤器  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./python富文本XSS过滤器  离别歌/jquery.min.js"></script>
+<link href="./python富文本XSS过滤器  离别歌/code.css" rel="stylesheet"/>
+<link href="./python富文本XSS过滤器  离别歌/button.css" rel="stylesheet"/>
+<link href="./python富文本XSS过滤器  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./python富文本XSS过滤器  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PYTHON/python-xss-filter.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PYTHON/python-xss-filter.html&amp;text=python%E5%AF%8C%E6%96%87%E6%9C%ACXSS%E8%BF%87%E6%BB%A4%E5%99%A8"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PYTHON/python-xss-filter.html&amp;title=python%E5%AF%8C%E6%96%87%E6%9C%ACXSS%E8%BF%87%E6%BB%A4%E5%99%A8"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PYTHON/python-xss-filter.html&amp;is_video=false&amp;description=python%E5%AF%8C%E6%96%87%E6%9C%ACXSS%E8%BF%87%E6%BB%A4%E5%99%A8"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=python%E5%AF%8C%E6%96%87%E6%9C%ACXSS%E8%BF%87%E6%BB%A4%E5%99%A8&amp;body=Check out this article: https%3A//www.leavesongs.com/PYTHON/python-xss-filter.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PYTHON/python-xss-filter.html&amp;title=python%E5%AF%8C%E6%96%87%E6%9C%ACXSS%E8%BF%87%E6%BB%A4%E5%99%A8"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PYTHON/python-xss-filter.html&amp;title=python%E5%AF%8C%E6%96%87%E6%9C%ACXSS%E8%BF%87%E6%BB%A4%E5%99%A8"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PYTHON/python-xss-filter.html&amp;title=python%E5%AF%8C%E6%96%87%E6%9C%ACXSS%E8%BF%87%E6%BB%A4%E5%99%A8"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PYTHON/python-xss-filter.html&amp;title=python%E5%AF%8C%E6%96%87%E6%9C%ACXSS%E8%BF%87%E6%BB%A4%E5%99%A8"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PYTHON/python-xss-filter.html&amp;name=python%E5%AF%8C%E6%96%87%E6%9C%ACXSS%E8%BF%87%E6%BB%A4%E5%99%A8&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">python富文本XSS过滤器</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年4月8日 21:37" itemprop="datePublished">
+                    2015 四月 08 21:37
+                </time>
+</div>
+<div class="article-tag">
+            阅读：6719
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PYTHON">Python</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/xss">xss</a>,
+                
+                <a class="tag-link" href="/tag/%E5%AF%8C%E6%96%87%E6%9C%AC">富文本</a>,
+                
+                <a class="tag-link" href="/tag/python">python</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>前言：那天我正在开发网站最关键的部分——XSS过滤器，女神突然来电话说：“那东西好难呀，别开发了，来我家玩吧！”。我“啪”地一下把电话挂了，想让我的网站出XSS漏洞，没门~</p>
+<p>python做web开发当今已经逐渐成为主流之一，但相关的一些第三方模块和库还没有php和node.js多。</p>
+<p>比如XSS过滤组件，PHP下有著名的“HTML Purifier”（<a href="http://htmlpurifier.org/">http://htmlpurifier.org/</a> ），还有非著名过滤组件“XssHtml”（<a href="http://phith0n.github.io/XssHtml">http://phith0n.github.io/XssHtml</a> ），当然后者是我自己开发的。</p>
+<p>python的pip下也可以安装一款名为“html-purifier”的库，但此purifier和php下的就大不相同了。这个库负责将html中，白名单以外的标签和属性过滤掉。</p>
+<p>注意，他并不是过滤XSS的，只是过滤不在白名单内的标签和属性。也就是说，类似&lt;a href="javascript:xxx"&gt;等javascript是不会被过滤的。</p>
+<p>所以我只好自己开发了一个python xss filter，用在自己以后做的python项目中。</p>
+<p>说一下具体实现原理。</p>
+<h2 id="html"><a class="toclink" href="#html">一、解析HTML</a></h2>
+<p>解析HTML，使用的是python自带的HTMLParser类。在python2中，名字叫HTMLParser，在python3中叫html.parser。</p>
+<p>使用HTMLParser，需要自己的类继承HTMLParser，并实现其中的handle_starttag、handle_startendtag、handle_endtag、handle_data等方法。</p>
+<p>如handle_starttag方法，是在进入一个标签的时候被调用的。我们就可以在实现这个方法的时候，就可以获得此时正在处理的标签tag，和所有属性attrs。</p>
+<p>我们就可以检查tag、attrs是否在白名单中，并对其中特殊的一些标签和属性做特殊处理，如下：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201504/d3381428500387.png"><img alt="QQ20150408-1@2x.png" src="./python富文本XSS过滤器  离别歌/thum-d3381428500387.png"/></a></p>
+<h2 id="_1"><a class="toclink" href="#_1">二、链接特殊处理</a></h2>
+<p>有些属性是可以用javascript伪协议来执行javascript代码的，如a的href，embed的src，所以需要对其进行特殊处理：判断是否以http|https|ftp://开头，如果不是则强制在前面加上http://</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201504/9ccd1428500389.png"><img alt="QQ20150408-2@2x.png" src="./python富文本XSS过滤器  离别歌/thum-9ccd1428500389.png"/></a></p>
+<p>通过这个方式，对抗潜在的XSS注入。</p>
+<h2 id="embed"><a class="toclink" href="#embed">三、embed特殊处理</a></h2>
+<p>embed是嵌入swf等媒体文件的标签，理论上有时候我们的富文本编辑器是允许插入flash的。但我们需要保证flash内不能执行任意javascript代码，也不能让他发出一些HTTP请求（容易造成CSRF攻击）。</p>
+<p>所以强制设置embed标签的allowscriptaccess=never，allownetworking=none： </p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201504/d9291428500392.png"><img alt="QQ20150408-3@2x.png" src="./python富文本XSS过滤器  离别歌/thum-d9291428500392.png"/></a> </p>
+<h2 id="_2"><a class="toclink" href="#_2">四、拼接标签和属性的时候，防止双引号越出，成为新标签</a></h2>
+<p>我曾经在Roundcube Webmail中找到一个XSS漏洞（CVE-2015-1433），导致原因就是因为白名单检测完毕后再拼接html标签和属性的时候没有过滤双引号，导致属性值越出，变成一个新的属性名，导致XSS。</p>
+<p>所以我这里使用self.__htmlspecialchars处理属性值，防止越出：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201504/d5141428500393.png"><img alt="QQ20150408-4@2x.png" src="./python富文本XSS过滤器  离别歌/thum-d5141428500393.png"/></a></p>
+<p>最后，这个模块使用也比较方便，最简单的demo如下：</p>
+<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">pxfilter</span>
+<span class="n">parser</span> <span class="o">=</span> <span class="n">pxfilter</span><span class="o">.</span><span class="n">XssHtml</span><span class="p">()</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="s1">'&lt;html code&gt;'</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="n">html</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">getHtml</span><span class="p">()</span>
+<span class="k">print</span> <span class="n">html</span>
+</pre></div>
+<p>再根据源码中的说明进行修改即可。github项目地址：<a href="https://github.com/phith0n/python-xss-filter"><a href="https://github.com/phith0n/python-xss-filter">https://github.com/phith0n/python-xss-filter</a></a></p>
+<p>自己用web.py搭了个demo，欢迎测试、提交issues：<a href="http://python-xss-filter.leavesongs.com/"><a href="http://python-xss-filter.leavesongs.com/">http://python-xss-filter.leavesongs.com/</a></a> ，功能上、安全上都还需要大家给些建议。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2204">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python富文本XSS过滤器  离别歌/5b3de95f68e6e207fdd764c9a902fc1b.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">mywaiting</a>
+<time datetime="2015年9月3日 01:14" itemprop="datePublished">
+                            2015 九月 03 01:14
+                        </time>
+<a href="javascript:reply_to('2204', 'mywaiting')">回复</a>
+</p>
+<p class="comment-meta">python下面的xss过滤可以使用  lxml.html.clean.Cleaner <br><br>不要费心自己折腾造轮子了</br></br></p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2205">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python富文本XSS过滤器  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年9月3日 01:47" itemprop="datePublished">
+                            2015 九月 03 01:47
+                        </time>
+<a href="javascript:reply_to('2205', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@mywaiting：这个轮子刚好后面做html采集、图片本地化的时候用到了，知道原理、流程还是比直接调用方法好得多~</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2227">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python富文本XSS过滤器  离别歌/5b3de95f68e6e207fdd764c9a902fc1b.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">mywaiting</a>
+<time datetime="2015年10月5日 22:41" itemprop="datePublished">
+                            2015 十月 05 22:41
+                        </time>
+<a href="javascript:reply_to('2227', 'mywaiting')">回复</a>
+</p>
+<p class="comment-meta">@phithon：说得也是。<br/><br/>顺便提一句，处理XSS的过滤器需要一个强大的测试，记得把测试用例写好。<br/><br/>wooyun大神的地盘，我就不好意思装逼了，匿了~</p>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2022">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python富文本XSS过滤器  离别歌/149b0ae3cefe94591e85f8bfa03065cc.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Ascii0x03</a>
+<time datetime="2015年4月15日 20:51" itemprop="datePublished">
+                            2015 四月 15 20:51
+                        </time>
+<a href="javascript:reply_to('2022', 'Ascii0x03')">回复</a>
+</p>
+<p class="comment-meta">那个测试demo是什么意思？会转码回显我所有输入的内容吗？<br/>我试了几个没有响应呀……没有回显什么内容，也没alert啥子。。。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2024">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python富文本XSS过滤器  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年4月15日 23:15" itemprop="datePublished">
+                            2015 四月 15 23:15
+                        </time>
+<a href="javascript:reply_to('2024', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@Ascii0x03：在textarea里输入内容，submit提交以后上方的输出区域输出内容。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2026">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python富文本XSS过滤器  离别歌/149b0ae3cefe94591e85f8bfa03065cc.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Ascii0x03</a>
+<time datetime="2015年4月17日 09:39" itemprop="datePublished">
+                            2015 四月 17 09:39
+                        </time>
+<a href="javascript:reply_to('2026', 'Ascii0x03')">回复</a>
+</p>
+<p class="comment-meta">@phithon：我测试了个XSS，既没有转义显示也没有脚本执行，是全部过滤了？</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2027">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python富文本XSS过滤器  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年4月17日 09:40" itemprop="datePublished">
+                            2015 四月 17 09:40
+                        </time>
+<a href="javascript:reply_to('2027', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@Ascii0x03：XSS全部过滤，不会有转义的。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2020">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python富文本XSS过滤器  离别歌/b7ce2a9050e5a33369e3d995ae70d27c.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://quan.renwuyi.com/" target="_blank">威客圈子</a>
+<time datetime="2015年4月14日 11:32" itemprop="datePublished">
+                            2015 四月 14 11:32
+                        </time>
+<a href="javascript:reply_to('2020', '威客圈子')">回复</a>
+</p>
+<p class="comment-meta">XSS过滤器真的好难的···</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="61311ae1335ee04f152fc97e165babc8e974998e"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./python富文本XSS过滤器  离别歌/61311ae1335ee04f152fc97e165babc8e974998e"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="355">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="24AS2St40oV5GlJddStrDmwT3cHWTmyUAoVoQmFjrbPuG07s19Xbc0yYcga4CQn4"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./python富文本XSS过滤器  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./python富文本XSS过滤器  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

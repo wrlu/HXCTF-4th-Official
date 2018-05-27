@@ -1,0 +1,760 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./MFC实现的Socket通信  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./MFC实现的Socket通信  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./MFC实现的Socket通信  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>MFC实现的Socket通信 | 离别歌</title>
+<link href="./MFC实现的Socket通信  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./MFC实现的Socket通信  离别歌/styles.css" rel="stylesheet"/>
+<link href="./MFC实现的Socket通信  离别歌/style.css" rel="stylesheet"/>
+<link href="./MFC实现的Socket通信  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./MFC实现的Socket通信  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./MFC实现的Socket通信  离别歌/jquery.min.js"></script>
+<link href="./MFC实现的Socket通信  离别歌/code.css" rel="stylesheet"/>
+<link href="./MFC实现的Socket通信  离别歌/button.css" rel="stylesheet"/>
+<link href="./MFC实现的Socket通信  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./MFC实现的Socket通信  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/C/MFCSocket.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/C/MFCSocket.html&amp;text=MFC%E5%AE%9E%E7%8E%B0%E7%9A%84Socket%E9%80%9A%E4%BF%A1"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/C/MFCSocket.html&amp;title=MFC%E5%AE%9E%E7%8E%B0%E7%9A%84Socket%E9%80%9A%E4%BF%A1"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/C/MFCSocket.html&amp;is_video=false&amp;description=MFC%E5%AE%9E%E7%8E%B0%E7%9A%84Socket%E9%80%9A%E4%BF%A1"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=MFC%E5%AE%9E%E7%8E%B0%E7%9A%84Socket%E9%80%9A%E4%BF%A1&amp;body=Check out this article: https%3A//www.leavesongs.com/C/MFCSocket.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/C/MFCSocket.html&amp;title=MFC%E5%AE%9E%E7%8E%B0%E7%9A%84Socket%E9%80%9A%E4%BF%A1"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/C/MFCSocket.html&amp;title=MFC%E5%AE%9E%E7%8E%B0%E7%9A%84Socket%E9%80%9A%E4%BF%A1"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/C/MFCSocket.html&amp;title=MFC%E5%AE%9E%E7%8E%B0%E7%9A%84Socket%E9%80%9A%E4%BF%A1"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/C/MFCSocket.html&amp;title=MFC%E5%AE%9E%E7%8E%B0%E7%9A%84Socket%E9%80%9A%E4%BF%A1"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/C/MFCSocket.html&amp;name=MFC%E5%AE%9E%E7%8E%B0%E7%9A%84Socket%E9%80%9A%E4%BF%A1&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">MFC实现的Socket通信</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年4月28日 23:11" itemprop="datePublished">
+                    2013 四月 28 23:11
+                </time>
+</div>
+<div class="article-tag">
+            阅读：26428
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/C">C/C++</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/socket">socket</a>,
+                
+                <a class="tag-link" href="/tag/MFC">MFC</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    过五一准备休息两天，正好有朋友要来西安，我也能在西安周边转转，毕竟在这上大学居然还没有好好逛过。所以放假之前的一个晚上我发篇文章。
+</p>
+<p>
+	    我觉得MFC的东西挺难说的，好像代码没有一个头，也没有一个尾，不知道从何讲起。所以我只说说socket的部分，当然包括服务端和客户端。
+</p>
+<p>
+	    这是服务端的样子：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201304/3fb51367165886.jpg" id="ematt:93" target="_blank"><img alt="点击查看原图" border="0" src="./MFC实现的Socket通信  离别歌/thum-3fb51367165886.jpg"/></a>
+</p>
+<p>
+	    大家先去 <strong>附</strong><strong></strong><strong>件中</strong> 把代码下下来，否则看文章是看不懂的。服务端代码，打开类视图，找到ListenThreadFunc函数。这是我们的线程函数，socket代码在该线程里执行。
+</p>
+<pre class="brush:cpp;">DWORD WINAPI ListenThreadFunc(LPVOID Lparam)
+{
+	Cxads_PCServerDlg * pServer = (Cxads_PCServerDlg *)Lparam;
+	if (INVALID_SOCKET == (pServer-&gt;m_SockListen = socket(AF_INET,SOCK_STREAM,IPPROTO_TCP)))
+	{
+		AfxMessageBox(_T("建立socket失败"));
+		return 0;
+	}
+	sockaddr_in service;
+	service.sin_family = AF_INET;
+	service.sin_addr.s_addr = htonl(INADDR_ANY);
+	service.sin_port = htons(pServer-&gt;m_ServicePort);
+	if (0 != bind(pServer-&gt;m_SockListen,(sockaddr *)&amp;service,sizeof(sockaddr_in)))
+	{
+		AfxMessageBox(_T("绑定端口失败"));
+		return 0;
+	}
+	if (0 != listen(pServer-&gt;m_SockListen,5))
+	{
+		AfxMessageBox(_T("监听端口失败"));
+		return 0;
+	}
+
+	//提示建立socket成功
+	pServer-&gt;EnableWindow(IDC_BUTTONEND,TRUE);
+//	pServer-&gt;EnableWindow(IDC_BUTTONSEND,TRUE);
+	pServer-&gt;EnableWindow(IDC_BUTTONSTART,FALSE);
+	pServer-&gt;SetRevBoxText(_T("服务启动成功,开始监听端口"));
+	//进入循环，监听端口
+	while (TRUE)
+	{
+		if (socket_Select(pServer-&gt;m_SockListen,100,TRUE))
+		{
+			sockaddr_in clientAddr;
+			int iLen = sizeof(sockaddr_in);
+			SOCKET accSock = accept(pServer-&gt;m_SockListen,(struct sockaddr *)&amp;clientAddr,&amp;iLen);
+			if (accSock == INVALID_SOCKET)
+			{
+				continue;
+			}
+			//将节点加入链中
+			CClientItem tItem;
+			tItem.m_ClientSocket = accSock;
+			tItem.m_strIp = inet_ntoa(clientAddr.sin_addr); //IP地址
+			tItem.m_pMainWnd = pServer;
+			int idx = pServer-&gt;m_ClientArray.Add(tItem); //idx是第x个连接的客户端
+			tItem.m_hThread = CreateThread(NULL,0,ClientThreadProc, //创建一个线程并挂起:CREATE_SUSPENDED
+				&amp;(pServer-&gt;m_ClientArray.GetAt(idx)),CREATE_SUSPENDED,NULL); 
+			pServer-&gt;m_ClientArray.GetAt(idx).m_hThread = tItem.m_hThread; 
+			//等把hThread加入了节点，才开始执行线程，如下
+			ResumeThread(tItem.m_hThread);
+			pServer-&gt;SetRevBoxText(tItem.m_strIp + _T("上线"));
+			Sleep(100);
+		}
+	}
+}</pre>
+<p>
+	    Cxads_PCServerDlg是我们对话框程序的类，我们传进来的参数就是这个类对象。pServer指向该对象。
+</p>
+<p>
+	    <strong>1.pServer-&gt;m_SockListen = socket(AF_INET,SOCK_STREAM,IPPROTO_TCP))</strong>
+</p>
+<p>
+	    socket函数初始化一个socket。socket是什么？socket相当于通信的一个管道，m_SockListen是一个监听的socket。我们一会就要监听这根"管道"，看是否有客户端连接。socket()中的参数像我这样写，代表这是个TCP连接。TCP连接和UDP连接的区别就是，TCP是要双方建立连接后才能通信，就想打电话；而UDP是单方面就能发送信息，就想发短信。
+</p>
+<p>
+	    <strong>2.bind(pServer-&gt;m_SockListen,(sockaddr *)&amp;service,sizeof(sockaddr_in))</strong>
+</p>
+<p>
+	    bind函数是绑定一个端口和IP地址。第一个参数是刚才新建的监听socket，第二个参数是一个sockaddr_in结构体，里面保存着IP地址和端口。因为我们这是服务端，所以保存的IP地址和端口是自己的，htonl(INADDR_ANY)就是将IP地址绑定为任意，这样你的IP可以是127.0.0.1，也可以是192.168.x.x，也可以是你的外网IP。htons(pServer-&gt;m_ServicePort)是要监听的IP，我这里是从输入框获取的，你也可以使用固定的比如htons(8260)。
+</p>
+<p>
+	  <strong>  3.listen(pServer-&gt;m_SockListen,5)</strong>
+</p>
+<p>
+	    开始监听了。5代表等待连接队伍的最大长度，一般都是5就行。
+</p>
+<p>
+	    <strong>4.</strong>
+</p>
+<p>
+	    进入while循环，大家可以看到这是个死循环。while（TRUE）永远不会退出去。while中间只有个if语句，socket_Select(pServer-&gt;m_SockListen,100,TRUE)是一个select选择模型，作用是向socket中看一眼，如果有信息则返回TRUE，如果没有信息则返回FALSE。有信息代表有客户端来连接了，于是我们进入if语句。
+</p>
+<p>
+	    <strong>5.SOCKET accSock = accept(pServer-&gt;m_SockListen,(struct sockaddr *)&amp;clientAddr,&amp;iLen);</strong>
+</p>
+<p>
+	    大家可以看到我又建了一个socket，不是刚才那个了。accept函数就返回一个socket，这个socket就是和该客户端通信的"管道"。传入的参数和bind类似，只是第二个变成得到客户端的IP与端口了。
+</p>
+<p>
+	    <strong>6.</strong>
+</p>
+<p>
+	    之后有一个将节点加入链表的过程。因为我们连接服务端的客户端不止一个，所以我们要将每一个客户端的IP、SOCKET和相关信息加入链表，以供以后使用。而且大家可以看到，我们这个while里面又新开了一个线程，这个线程的作用就是和该客户端通信。
+</p>
+<p>
+	    <strong>7.</strong>
+</p>
+<p>
+	    休息100毫秒后while循环继续执行，等待下一个客户端连接。
+</p>
+<hr/>
+<p>
+	    这就是服务端socket的代码，通信的部分我客户端里介绍，服务端和客户端基本是一样的，大家可以自己看代码比较。
+</p>
+<p>
+	    打开客户端，找到ConnectSocket方法，这是我们从socket中获取信息的一个方法。
+</p>
+<pre class="brush:cpp;">BOOL Cxads_PCClientDlg::ConnectSocket(Cxads_PCClientDlg * pClient)
+{
+	m_ClientSock = socket(AF_INET,SOCK_STREAM,IPPROTO_TCP);
+	if (NULL == m_ClientSock)
+	{
+		MessageBox(_T("创建socket失败"));
+		return FALSE;
+	}
+	sockaddr_in sa;
+	sa.sin_family = AF_INET;
+	CString strIp;
+	DWORD dPort = GetDlgItemInt(IDC_EDITPORT);
+	GetDlgItemText(IDC_IPADDRESS,strIp);
+	if (strIp == _T("0.0.0.0") || (dPort &gt;= 65535 &amp;&amp; dPort &lt; 1024) || dPort == 0)
+	{
+		MessageBox(_T("请输入正确IP地址或端口"));
+		return FALSE;
+	}
+	sa.sin_port = htons(dPort);
+	char szIpAdd[32];
+	USES_CONVERSION; //定义后才能使用T2A
+	sprintf_s(szIpAdd,32,"%s",T2A(strIp));
+	sa.sin_addr.S_un.S_addr = inet_addr(szIpAdd);
+	if (SOCKET_ERROR == connect(m_ClientSock,(sockaddr *)&amp;sa,sizeof(sa)))
+	{
+		MessageBox(_T("连接客户端错误,请检查你填写的IP和端口是否错误"));
+		return FALSE;
+	}
+
+	pClient-&gt;SetRevBoxText(_T("连接服务器成功"));
+	pClient-&gt;EnableWindow(IDC_BUTTONSTOP,TRUE);
+	pClient-&gt;EnableWindow(IDC_BUTTONCONNECT,FALSE);
+	isServerOn = TRUE;
+	OnEnChangeEditsendbox();
+
+	CString strMsg;
+	while (TRUE)
+	{
+		if (socket_Select(m_ClientSock,100,TRUE))
+		{
+			char szMsg[MAX_BUFF] = {0};
+			int iRead = recv(m_ClientSock,szMsg,MAX_BUFF,0);
+			if (iRead &gt; 0)
+			{
+				strMsg = szMsg;
+				pClient-&gt;SetRevBoxText(strIp + _T("&gt;&gt;") + strMsg);
+			} 
+			else
+			{
+				pClient-&gt;SetRevBoxText(_T("已断线，请重新连接"));
+				isServerOn = FALSE;
+				return TRUE;
+			}
+		}
+	}
+	return TRUE;
+}</pre>
+<p>
+	  <strong>  1.</strong>
+</p>
+<p>
+	    同服务端一样，调用socket()初始化socket.
+</p>
+<p>
+	    <strong>2.connect(m_ClientSock,(sockaddr *)&amp;sa,sizeof(sa))</strong>
+</p>
+<p>
+	    连接服务端。和服务端的accept函数类似，第二个参数传入sockaddr_in结构体，里面保存着服务端的IP地址和端口。如果连接成功，则返回0。
+</p>
+<p>
+	   <strong> 3.</strong>
+</p>
+<p>
+	    进入一个while循环。这个while虽然也是while(TRUE),但不是一个死循环，中间有break可以使while循环退出。while中仍然用到socket_Select()函数，作用也是向socket中看一眼，如果有信息则返回T，否则返回F。有信息代表从服务端发送来了内容。
+</p>
+<p>
+	   <strong> 4.int iRead = recv(m_ClientSock,szMsg,MAX_BUFF,0);</strong>
+</p>
+<p>
+	    recv()函数接受信息，第一个参数传入socket，第二个参数传入接受的信息保存的字符串数组，第三个传入数组长度，第四个填0即可。返回值是接受信息的字节数，如果=0说明对方不在线了。
+</p>
+<hr/>
+<p>
+	    这个方法告一段落。有人问了，那怎么发送信息呢？别急，在类视图中找到OnBnClickedButtonsend()方法。
+</p>
+<pre class="brush:cpp;">void Cxads_PCClientDlg::OnBnClickedButtonsend()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	USES_CONVERSION;
+	char szBuf[256] = {0};
+	CString strGetMsg;
+	int iWrite;
+	GetDlgItemText(IDC_EDITSENDBOX,strGetMsg);
+	strcpy_s(szBuf,T2A(strGetMsg));
+	iWrite = send(m_ClientSock,szBuf,256,0);
+	if(SOCKET_ERROR == iWrite){
+		SetRevBoxText(_T("发送错误"));
+	}
+	SetRevBoxText(_T("我自己 &gt;&gt;") + strGetMsg);
+	SetDlgItemText(IDC_EDITSENDBOX,_T(""));
+	return; 
+}</pre>
+<p>
+	    这是点击了发送按钮执行的代码。只有一个点，就是send()函数。
+</p>
+<p>
+	    <strong>iWrite = send(m_ClientSock,szBuf,256,0);</strong>
+</p>
+<p>
+	    与recv类似，发送保存在szBuf中的内容到m_ClientSock。
+</p>
+<hr/>
+<p>
+	    我只讲了这两个程序中很少的代码，跳过了一些很重要的内容:异步IO模型、多线程等，大家自己看看程序，以后我再把这些内容完整的讲一下。
+</p>
+<p>
+	    附件：<span class="attachment"><a href="https://www.leavesongs.com/content/uploadfile/201407/fafe1406353208.rar" target="_blank">MFC Socket.rar</a></span>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2279">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/315a374f0b2348f18b1122ddbf36a2cb.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">asdasd</a>
+<time datetime="2016年1月3日 21:28" itemprop="datePublished">
+                            2016 一月 03 21:28
+                        </time>
+<a href="javascript:reply_to('2279', 'asdasd')">回复</a>
+</p>
+<p class="comment-meta">为什么客户端2发送给服务器的消息客户端1也会收到。<br>初学者不知道怎么改为客户端只能和服务器进行交流</br></p>
+</div>
+</div>
+<div class="row" id="comment-2043">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/90f014d7d85664fe77944fcc6281df76.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">David</a>
+<time datetime="2015年4月29日 09:55" itemprop="datePublished">
+                            2015 四月 29 09:55
+                        </time>
+<a href="javascript:reply_to('2043', 'David')">回复</a>
+</p>
+<p class="comment-meta">附件在哪里?没看到</p>
+</div>
+</div>
+<div class="row" id="comment-1991">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/ef0f3f17c0cf9375dc277c53d978c36e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/C/MFCSocket.html" target="_blank">huazai</a>
+<time datetime="2015年3月26日 15:09" itemprop="datePublished">
+                            2015 三月 26 15:09
+                        </time>
+<a href="javascript:reply_to('1991', 'huazai')">回复</a>
+</p>
+<p class="comment-meta">我建立的基于dialog的MFC里面都没有	<br>// 创建 shell 管理器，以防对话框包含<br/>// 任何 shell 树视图控件或 shell 列表视图控件。<br/>CShellManager *pShellManager = new CShellManager;</br></p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1993">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年3月26日 17:23" itemprop="datePublished">
+                            2015 三月 26 17:23
+                        </time>
+<a href="javascript:reply_to('1993', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@huazai：那是我自己写的类，你创建的项目里肯定没有。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1990">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/ef0f3f17c0cf9375dc277c53d978c36e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/C/MFCSocket.html" target="_blank">huazai</a>
+<time datetime="2015年3月26日 14:08" itemprop="datePublished">
+                            2015 三月 26 14:08
+                        </time>
+<a href="javascript:reply_to('1990', 'huazai')">回复</a>
+</p>
+<p class="comment-meta">错误	1	error LNK1123: 转换到 COFF 期间失败: 文件无效或损坏	C:\Users\Administrator\Desktop\MFC Socket\xads_PCClient\xads_PCClient\LINK<br/>这是怎么回事啊！球快速解答。。。。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1992">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年3月26日 17:22" itemprop="datePublished">
+                            2015 三月 26 17:22
+                        </time>
+<a href="javascript:reply_to('1992', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@huazai：常见错误，自行百度。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1988">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">WGC575</a>
+<time datetime="2015年3月25日 21:02" itemprop="datePublished">
+                            2015 三月 25 21:02
+                        </time>
+<a href="javascript:reply_to('1988', 'WGC575')">回复</a>
+</p>
+<p class="comment-meta">谢谢分享，我自己再加上服务器信息的多客户端同步就可以完成作业了。</p>
+</div>
+</div>
+<div class="row" id="comment-1932">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">kiki</a>
+<time datetime="2015年2月10日 16:33" itemprop="datePublished">
+                            2015 二月 10 16:33
+                        </time>
+<a href="javascript:reply_to('1932', 'kiki')">回复</a>
+</p>
+<p class="comment-meta">学习下</p>
+</div>
+</div>
+<div class="row" id="comment-1892">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/f40c984d2c284a37062e8873826e09c8.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">hello</a>
+<time datetime="2014年12月14日 15:28" itemprop="datePublished">
+                            2014 十二月 14 15:28
+                        </time>
+<a href="javascript:reply_to('1892', 'hello')">回复</a>
+</p>
+<p class="comment-meta">不知道源码怎么下载！<br/>求一份源码、、、</p>
+</div>
+</div>
+<div class="row" id="comment-1889">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/e802c131e7be53247249525e53d647ca.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">NeoGuo</a>
+<time datetime="2014年12月13日 01:59" itemprop="datePublished">
+                            2014 十二月 13 01:59
+                        </time>
+<a href="javascript:reply_to('1889', 'NeoGuo')">回复</a>
+</p>
+<p class="comment-meta">楼主，连接用不了，麻烦发一份30858830@qq.com，谢谢</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1890">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年12月13日 23:15" itemprop="datePublished">
+                            2014 十二月 13 23:15
+                        </time>
+<a href="javascript:reply_to('1890', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@NeoGuo：在附件下载中下载。IE好像不支持，换个浏览器吧。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1880">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">helloword</a>
+<time datetime="2014年12月9日 14:51" itemprop="datePublished">
+                            2014 十二月 09 14:51
+                        </time>
+<a href="javascript:reply_to('1880', 'helloword')">回复</a>
+</p>
+<p class="comment-meta">楼主，连接用不了，麻烦发一份291415246@qq.com，谢谢</p>
+</div>
+</div>
+<div class="row" id="comment-1792">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/089c90a1f6086bdd35874241fe4359df.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">York</a>
+<time datetime="2014年10月9日 16:58" itemprop="datePublished">
+                            2014 十月 09 16:58
+                        </time>
+<a href="javascript:reply_to('1792', 'York')">回复</a>
+</p>
+<p class="comment-meta">楼主学的东西很多啊。是网络方向的吗？已经毕业了吗？</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1794">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年10月9日 21:10" itemprop="datePublished">
+                            2014 十月 09 21:10
+                        </time>
+<a href="javascript:reply_to('1794', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@York：没有，还在努力学习~</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1768">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">菜菜鸟</a>
+<time datetime="2014年9月12日 21:18" itemprop="datePublished">
+                            2014 九月 12 21:18
+                        </time>
+<a href="javascript:reply_to('1768', '菜菜鸟')">回复</a>
+</p>
+<p class="comment-meta">附件无超链接可点击，麻烦大神发一份到1678523448@qq.com，谢谢~</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1770">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年9月19日 19:00" itemprop="datePublished">
+                            2014 九月 19 19:00
+                        </time>
+<a href="javascript:reply_to('1770', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@菜菜鸟：你没仔细看。在页面中搜索“下载次数”，你会看到附件的。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1766">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/97815e66161c12cf2a2b792cdac44f2d.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">菜鸟</a>
+<time datetime="2014年9月2日 18:07" itemprop="datePublished">
+                            2014 九月 02 18:07
+                        </time>
+<a href="javascript:reply_to('1766', '菜鸟')">回复</a>
+</p>
+<p class="comment-meta">麻烦发一份到 617653649@qq.com 谢了</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1767">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年9月8日 02:03" itemprop="datePublished">
+                            2014 九月 08 02:03
+                        </time>
+<a href="javascript:reply_to('1767', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@菜鸟：现在已经可以下载了，感谢提出BUG！</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1760">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">harry</a>
+<time datetime="2014年8月22日 17:03" itemprop="datePublished">
+                            2014 八月 22 17:03
+                        </time>
+<a href="javascript:reply_to('1760', 'harry')">回复</a>
+</p>
+<p class="comment-meta">谢谢楼主分享！下载不了代码的盆友换一个浏览器试试~</p>
+</div>
+</div>
+<div class="row" id="comment-1753">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/980f27e3496cdd73da7e1171b690aa2b.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://coderwoo.com" target="_blank">Coderwoo</a>
+<time datetime="2014年8月7日 08:52" itemprop="datePublished">
+                            2014 八月 07 08:52
+                        </time>
+<a href="javascript:reply_to('1753', 'Coderwoo')">回复</a>
+</p>
+<p class="comment-meta">原来还有T2A这么好用的宏。ATL7.0中的CT2A更好用一点，不需要USE_CONVERSION了</p>
+</div>
+</div>
+<div class="row" id="comment-1744">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">新手</a>
+<time datetime="2014年7月27日 10:03" itemprop="datePublished">
+                            2014 七月 27 10:03
+                        </time>
+<a href="javascript:reply_to('1744', '新手')">回复</a>
+</p>
+<p class="comment-meta">您好！ 您这个程序是在2008 还是2010 下编译的？</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1746">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./MFC实现的Socket通信  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年7月27日 19:49" itemprop="datePublished">
+                            2014 七月 27 19:49
+                        </time>
+<a href="javascript:reply_to('1746', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@新手：2010</p>
+</div>
+</div>
+</div>
+</div>
+<nav role="navigation">
+<ul class="cd-pagination pull-left">
+<li class="button"><a href="javascript:;"></a></li>
+<li><a class="current" href="?page=1#reply-list">1</a></li>
+<li><a href="?page=2#reply-list">2</a></li>
+<li class="button"><a href="?page=2#reply-list"></a></li>
+</ul>
+</nav>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="618d78f51a90e118cab62210f8e051780e2bb628"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./MFC实现的Socket通信  离别歌/618d78f51a90e118cab62210f8e051780e2bb628"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="251">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="ylcKoHtCfWZTM87qOTpxdn1JaNsSuTUq6FxgcbFRGJTiMNvFCaThM13OjRV0dnJA"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./MFC实现的Socket通信  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./MFC实现的Socket通信  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

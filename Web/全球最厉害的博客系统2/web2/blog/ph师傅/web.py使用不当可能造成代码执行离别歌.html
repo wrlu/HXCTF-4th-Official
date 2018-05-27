@@ -1,0 +1,411 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./web.py使用不当可能造成代码执行  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./web.py使用不当可能造成代码执行  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./web.py使用不当可能造成代码执行  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>web.py使用不当可能造成代码执行 | 离别歌</title>
+<link href="./web.py使用不当可能造成代码执行  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./web.py使用不当可能造成代码执行  离别歌/styles.css" rel="stylesheet"/>
+<link href="./web.py使用不当可能造成代码执行  离别歌/style.css" rel="stylesheet"/>
+<link href="./web.py使用不当可能造成代码执行  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./web.py使用不当可能造成代码执行  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./web.py使用不当可能造成代码执行  离别歌/jquery.min.js"></script>
+<link href="./web.py使用不当可能造成代码执行  离别歌/code.css" rel="stylesheet"/>
+<link href="./web.py使用不当可能造成代码执行  离别歌/button.css" rel="stylesheet"/>
+<link href="./web.py使用不当可能造成代码执行  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./web.py使用不当可能造成代码执行  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/web-py-runcode-tip.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/web-py-runcode-tip.html&amp;text=web.py%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%BD%93%E5%8F%AF%E8%83%BD%E9%80%A0%E6%88%90%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/web-py-runcode-tip.html&amp;title=web.py%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%BD%93%E5%8F%AF%E8%83%BD%E9%80%A0%E6%88%90%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/web-py-runcode-tip.html&amp;is_video=false&amp;description=web.py%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%BD%93%E5%8F%AF%E8%83%BD%E9%80%A0%E6%88%90%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=web.py%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%BD%93%E5%8F%AF%E8%83%BD%E9%80%A0%E6%88%90%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/web-py-runcode-tip.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/web-py-runcode-tip.html&amp;title=web.py%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%BD%93%E5%8F%AF%E8%83%BD%E9%80%A0%E6%88%90%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/web-py-runcode-tip.html&amp;title=web.py%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%BD%93%E5%8F%AF%E8%83%BD%E9%80%A0%E6%88%90%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/web-py-runcode-tip.html&amp;title=web.py%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%BD%93%E5%8F%AF%E8%83%BD%E9%80%A0%E6%88%90%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/web-py-runcode-tip.html&amp;title=web.py%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%BD%93%E5%8F%AF%E8%83%BD%E9%80%A0%E6%88%90%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/web-py-runcode-tip.html&amp;name=web.py%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%BD%93%E5%8F%AF%E8%83%BD%E9%80%A0%E6%88%90%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">web.py使用不当可能造成代码执行</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年7月14日 23:43" itemprop="datePublished">
+                    2014 七月 14 23:43
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4023
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E">代码执行漏洞</a>,
+                
+                <a class="tag-link" href="/tag/web.py">web.py</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    实话说我标题党了，这只是一个小tip，不能算漏洞（因为我想swart就是这样设计的）。不过文档中似乎没有把这个说出来，我想如果有一千万分之一的概率被程序员这样写了，那的确能造成代码执行。 
+</p>
+<p>
+	    先举个简单例子吧，如下代码：
+</p>
+<pre class="brush: python;auto-links: false;">#!/usr/bin/env python
+#coding=utf-8
+__author__ = 'Phtih0n'
+import web
+
+urls = (
+	'.*', 'game'
+)
+
+class game:
+	def GET(self):
+		data = web.input()
+		return data
+
+if __name__ == "__main__":
+	app = web.application(urls, globals())
+	app.run()</pre>
+<p>
+<br>
+</br></p>
+<p>
+	    最简单的一个网站代码，运行以后访问即可看到输出的是GET过来的一个字典：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201407/11f51405353163.jpg" id="ematt:567" target="_blank"><img alt="002.jpg" border="0" height="154" src="./web.py使用不当可能造成代码执行  离别歌/11f51405353163.jpg" title="点击查看原图" width="584"/></a>
+</p>
+<p>
+	    Storage是web.py中定义的一个类，其基类是dict，也就是说其实Storage就是被封装过的一个字典。
+</p>
+<p>
+	    web.input是一个接收GET或POST参数的重要函数，我们可以为参数设置一个默认值。
+</p>
+<p>
+	    比如data = web.input(xdsec = "xdsec.org")，那么，如果访问http://localhost/?xdsec=123，则data['xdsec'] 就是 "123"，但如果访问http://localhost/不带参数，则data['xdsec']就取默认值"xdsec.org"。如下：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201407/664a1405353563.jpg" id="ematt:571" target="_blank"><img alt="005.jpg" border="0" height="189" src="./web.py使用不当可能造成代码执行  离别歌/664a1405353563.jpg" title="点击查看原图" width="428"/></a>
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201407/c0501405353560.jpg" id="ematt:570" target="_blank"><img alt="004.jpg" border="0" height="179" src="./web.py使用不当可能造成代码执行  离别歌/c0501405353560.jpg" title="点击查看原图" width="396"/></a>
+</p>
+<p>
+	    我们看到web.py的源码，它是怎么处理input函数的：
+</p>
+<pre class="brush: python;auto-links: false;">def input(*requireds, **defaults):
+    """
+    Returns a `storage` object with the GET and POST arguments. 
+    See `storify` for how `requireds` and `defaults` work.
+    """
+    _method = defaults.pop('_method', 'both')
+    out = rawinput(_method)
+    try:
+        defaults.setdefault('_unicode', True) # force unicode conversion by default.
+        return storify(out, *requireds, **defaults)
+    except KeyError:
+        raise badrequest()</pre>
+    我们看到，他调用了storify函数返回，我们再跟一下storify函数：
+<pre class="brush: python;auto-links: false;">def storify(mapping, *requireds, **defaults):
+    _unicode = defaults.pop('_unicode', False)
+
+    # if _unicode is callable object, use it convert a string to unicode.
+    to_unicode = safeunicode
+    if _unicode is not False and hasattr(_unicode, "__call__"):
+        to_unicode = _unicode
+    
+    def unicodify(s):
+        if _unicode and isinstance(s, str): return to_unicode(s)
+        else: return s
+        
+    def getvalue(x):
+        if hasattr(x, 'file') and hasattr(x, 'value'):
+            return x.value
+        elif hasattr(x, 'value'):
+            return unicodify(x.value)
+        else:
+            return unicodify(x)
+    
+    stor = Storage()
+    for key in requireds + tuple(mapping.keys()):
+        value = mapping[key]
+        if isinstance(value, list):
+            if isinstance(defaults.get(key), list):
+                value = [getvalue(x) for x in value]
+            else:
+                value = value[-1]
+        if not isinstance(defaults.get(key), dict):
+            value = getvalue(value)
+        if isinstance(defaults.get(key), list) and not isinstance(value, list):
+            value = [value]
+        setattr(stor, key, value)
+
+    for (key, value) in defaults.iteritems():
+        result = value
+        if hasattr(stor, key): 
+            result = stor[key]
+        if value == () and not isinstance(result, tuple): 
+            result = (result,)
+        setattr(stor, key, result)
+    
+    return stor</pre>
+    关键看其中这几个点：
+<p>
+<br>
+</br></p>
+<p>
+	    1._unicode = defaults.pop('_unicode', False)
+</p>
+<p>
+	        从defaults（defaults是两个星号**defaults，也就是web.input时的默认值）中取出_unicode的值。
+</p>
+<p>
+	    2.if _unicode is not False and hasattr(_unicode, "__call__"):<br/>
+        to_unicode = _unicode
+</p>
+<p>
+	        如果_unicode不是false而且含有__call__这个属性的话，就赋值给to_unicode
+</p>
+<p>
+	    3.if _unicode and isinstance(s, str): return to_unicode(s)
+</p>
+<p>
+	        如果_unicode非false而且s是一个字符串则执行to_unicode(s)
+</p>
+<p>
+	    也就是说，如果我将一个含有__call__属性的对象赋值给_unicode，就能够在这个函数中允许它。__call__是python中的“魔术变量”之一，当一个类含有__call__这个方法的时候，我们就能直接通过“类名()”的方式执行它。
+</p>
+<p>
+	    所以，如果有一个参数的名字是_unicode，默认值是exp，那就会写作web.input(_unicode=exp)，这时候就会在web.input中执行exp这个函数，造成代码执行。
+</p>
+<p>
+	    不过为什么说是特性而不是漏洞呢，因为程序员是没有理由把程序写成web.input(_unicode=exp)的，就算_unicode的值真的是"exp"的话，也会写成<span style="white-space:normal;">web.input(_unicode="exp")，因为“exp”只是一个字符串。</span>
+</p>
+<p>
+<span style="white-space:normal;">    web.py的开发者留这个参数的用意应该在于处理字符编码，当传入的参数不是unicode的情况下，能通过传入一个_unicode方法去处理这个字符串，类似于一个回调函数。<br/>
+</span>
+</p>
+<p>
+	    不过通过这个特性也能看到在python中一样可能出现安全问题，只是看你有没有心罢了。
+</p>
+<p>
+	    我们可以来做个试验，如下代码：
+</p>
+<pre class="brush: python;auto-links: false;">#!/usr/bin/env python
+#coding=utf-8
+__author__ = 'Phtih0n'
+import web
+
+urls = (
+	'.*', 'game'
+)
+
+def exp(a):
+	print "Hello, hacker"
+	return a
+
+class game:
+	def GET(self):
+		data = web.input(_unicode=exp, xdsec = 'xdsec.org')
+		return data
+
+if __name__ == "__main__":
+	app = web.application(urls, globals())
+	app.run()</pre>
+<p>
+<br/>
+</p>
+<p style="white-space:normal;">
+	    运行以后访问一下http://localhost/，我们看到控制台，可以看到，里面输出了"hello, hacker"，<span style="white-space:normal;">每访问一次localhost就会输出一个hello</span>：
+</p>
+<p style="white-space:normal;">
+	    <a href="https://www.leavesongs.com/content/uploadfile/201407/9c3c1405353288.jpg" id="ematt:568" target="_blank"><img alt="003.jpg" border="0" height="268" src="./web.py使用不当可能造成代码执行  离别歌/thum-9c3c1405353288.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p style="white-space:normal;">
+	    实际上也就是exp函数被执行了。因为我把_unicode变量的值赋为了exp。如果我们把<span style="white-space:normal;">_unicode=exp换成_unicode=sys.exit，就能执行exit函数，导致进程退出，造成拒绝服务。</span>
+</p>
+<p>
+<br/>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1797">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./web.py使用不当可能造成代码执行  离别歌/fc1ffa2e0968f9c487860f8dfc5a5e57.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://xavierskip.com" target="_blank">skip</a>
+<time datetime="2014年10月12日 23:52" itemprop="datePublished">
+                            2014 十月 12 23:52
+                        </time>
+<a href="javascript:reply_to('1797', 'skip')">回复</a>
+</p>
+<p class="comment-meta">怎么发现的?</p>
+</div>
+</div>
+<div class="row" id="comment-1763">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./web.py使用不当可能造成代码执行  离别歌/62f6976ab4c15365e973d5ad74fee8b1.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://kid.we54.com/" target="_blank">新青年摄影</a>
+<time datetime="2014年8月31日 11:09" itemprop="datePublished">
+                            2014 八月 31 11:09
+                        </time>
+<a href="javascript:reply_to('1763', '新青年摄影')">回复</a>
+</p>
+<p class="comment-meta">很好</p>
+</div>
+</div>
+<div class="row" id="comment-1762">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./web.py使用不当可能造成代码执行  离别歌/62f6976ab4c15365e973d5ad74fee8b1.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://kid.we54.com/" target="_blank">新青年摄影</a>
+<time datetime="2014年8月28日 11:23" itemprop="datePublished">
+                            2014 八月 28 11:23
+                        </time>
+<a href="javascript:reply_to('1762', '新青年摄影')">回复</a>
+</p>
+<p class="comment-meta">不错 赞</p>
+</div>
+</div>
+<div class="row" id="comment-1725">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./web.py使用不当可能造成代码执行  离别歌/1c5b170f79fcce22a57a428f512f24e0.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://shukoe.com/" target="_blank">树壳网</a>
+<time datetime="2014年7月19日 06:53" itemprop="datePublished">
+                            2014 七月 19 06:53
+                        </time>
+<a href="javascript:reply_to('1725', '树壳网')">回复</a>
+</p>
+<p class="comment-meta">贵战整体不错。赞一个！</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="92b7b018478ea0d4be22819fdcca2b1705169d87"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./web.py使用不当可能造成代码执行  离别歌/92b7b018478ea0d4be22819fdcca2b1705169d87"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="316">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="PTnCtoykSEfcF3AAD2Ak4nqnyM9hrPKJndI8hSKzjr9BFIYPrj44D1ssHQCpajzT"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./web.py使用不当可能造成代码执行  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./web.py使用不当可能造成代码执行  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

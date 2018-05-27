@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>dns/http_log - l3m0n - 博客园</title>
+<link href="./dnshttp_log - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./dnshttp_log - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./dnshttp_log - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="./dnshttp_log - l3m0n - 博客园/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./dnshttp_log - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./dnshttp_log - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./dnshttp_log - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./dnshttp_log - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./dnshttp_log - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./dnshttp_log - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./dnshttp_log - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/Get_Dns_And_Http_Log.html" id="cb_post_title_url">dns/http_log</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><p>上计算机网络课的时候并没怎么认真听啊，导致都是很懵逼的状态，记录一下。</p>
+<p>dns请求是通过udp实现,http请求是通过tcp完成<br/>
+通过这点就可以利用套接字来实现一个小小的cloudeye</p>
+<p>http_dns_log:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> socket,thread,datetime 
+query_history <span class="op">=</span> [] 
+url_history <span class="op">=</span> [] 
+<span class="kw">def</span> web_server(): 
+    web <span class="op">=</span> socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
+    web.bind((<span class="st">'0.0.0.0'</span>,<span class="dv">80</span>)) 
+    web.listen(<span class="dv">10</span>) 
+    <span class="cf">while</span> <span class="va">True</span>: 
+        <span class="cf">try</span>: 
+            conn,addr <span class="op">=</span> web.accept() 
+            data <span class="op">=</span> conn.recv(<span class="dv">4096</span>) 
+            req_line <span class="op">=</span> data.split(<span class="st">"</span><span class="ch">\r\n</span><span class="st">"</span>)[<span class="dv">0</span>] 
+            path <span class="op">=</span> req_line.split()[<span class="dv">1</span>] 
+            route_list <span class="op">=</span> path.split(<span class="st">'/'</span>) 
+            html <span class="op">=</span> <span class="st">"NO"</span> 
+            <span class="cf">if</span> <span class="bu">len</span>(route_list) <span class="op">==</span> <span class="dv">3</span>: 
+                <span class="cf">if</span> route_list[<span class="dv">1</span>] <span class="op">==</span> <span class="st">'add'</span>: 
+                    url_history.append(route_list[<span class="dv">2</span>]) 
+                <span class="cf">elif</span> route_list[<span class="dv">1</span>] <span class="op">==</span> <span class="st">'check'</span>: 
+                    <span class="cf">if</span> route_list[<span class="dv">2</span>] <span class="op">in</span> url_history: 
+                        html <span class="op">=</span> <span class="st">'YES'</span> 
+            <span class="cf">else</span>: 
+                query_str <span class="op">=</span> route_list[<span class="dv">1</span>] 
+                <span class="cf">for</span> query_raw <span class="op">in</span> query_history: 
+                    <span class="cf">if</span> query_str <span class="op">in</span> query_raw:html <span class="op">=</span> <span class="st">"YES"</span> 
+            <span class="bu">print</span> datetime.datetime.now().strftime(<span class="st">'%m-</span><span class="sc">%d</span><span class="st"> %H:%M:%S'</span>) <span class="op">+</span> <span class="st">' web query: '</span> <span class="op">+</span> path 
+            raw <span class="op">=</span> <span class="st">"HTTP/1.0 200 OK</span><span class="ch">\r\n</span><span class="st">Content-Type: application/json; charset=utf-8</span><span class="ch">\r\n</span><span class="st">Content-Length: </span><span class="sc">%d</span><span class="ch">\r\n</span><span class="st">Connection: close</span><span class="ch">\r\n\r\n</span><span class="sc">%s</span><span class="st">"</span> <span class="op">%</span>(<span class="bu">len</span>(html),html) 
+            conn.send(raw) 
+            conn.close() 
+        <span class="cf">except</span>: 
+            <span class="cf">pass</span> 
+<span class="cf">if</span> <span class="va">__name__</span><span class="op">==</span><span class="st">"__main__"</span>: 
+    dns <span class="op">=</span> socket.socket(socket.AF_INET,socket.SOCK_DGRAM) 
+    dns.bind((<span class="st">'0.0.0.0'</span>,<span class="dv">53</span>)) 
+    thread.start_new_thread(web_server,()) 
+    <span class="cf">while</span> <span class="va">True</span>: 
+        recv,addr <span class="op">=</span> dns.recvfrom(<span class="dv">1024</span>) 
+        query_history.append(recv) 
+        <span class="bu">print</span> datetime.datetime.now().strftime(<span class="st">'%m-</span><span class="sc">%d</span><span class="st"> %H:%M:%S'</span>) <span class="op">+</span> <span class="st">' Dns Query: '</span> <span class="op">+</span> recv</code></pre></div>
+<p>一般用python自带的去接收请求log</p>
+<pre><code>python -m SimpleHTTPServer 80</code></pre>
+<p>利用</p>
+<pre><code>dns:
+nslookup wolf 66.66.66.66
+http:
+curl http://66.66.66.66/add/wolf</code></pre>
+<p>判断：</p>
+<pre><code>dns: http://66.66.66.66/wolf 
+http: http://66.66.66.66/check/wolf 
+返回YES即此数据存在，也就是存在漏洞触发了验证请求操作。</code></pre>
+<p><img src="./dnshttp_log - l3m0n - 博客园/804631-20160509194519843-233421325.jpg"/></p>
+<p>本文来自：<a class="uri" href="http://zone.wooyun.org/content/27151">http://zone.wooyun.org/content/27151</a></p>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2016-05-09 19:38</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=5475136" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(5475136);return false;">收藏</a></div>
+</div>
+<script src="./dnshttp_log - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=5475136,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2016/5/9 19:38:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./dnshttp_log - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="//img.users.51.la/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./dnshttp_log - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

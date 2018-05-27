@@ -1,0 +1,363 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./[XDCTF]西电网络攻防大赛  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./[XDCTF]西电网络攻防大赛  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./[XDCTF]西电网络攻防大赛  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>[XDCTF]西电网络攻防大赛 | 离别歌</title>
+<link href="./[XDCTF]西电网络攻防大赛  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./[XDCTF]西电网络攻防大赛  离别歌/styles.css" rel="stylesheet"/>
+<link href="./[XDCTF]西电网络攻防大赛  离别歌/style.css" rel="stylesheet"/>
+<link href="./[XDCTF]西电网络攻防大赛  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./[XDCTF]西电网络攻防大赛  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./[XDCTF]西电网络攻防大赛  离别歌/jquery.min.js"></script>
+<link href="./[XDCTF]西电网络攻防大赛  离别歌/code.css" rel="stylesheet"/>
+<link href="./[XDCTF]西电网络攻防大赛  离别歌/button.css" rel="stylesheet"/>
+<link href="./[XDCTF]西电网络攻防大赛  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./[XDCTF]西电网络攻防大赛  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/THINK/xdsec-game.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/THINK/xdsec-game.html&amp;text=%5BXDCTF%5D%E8%A5%BF%E7%94%B5%E7%BD%91%E7%BB%9C%E6%94%BB%E9%98%B2%E5%A4%A7%E8%B5%9B"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/THINK/xdsec-game.html&amp;title=%5BXDCTF%5D%E8%A5%BF%E7%94%B5%E7%BD%91%E7%BB%9C%E6%94%BB%E9%98%B2%E5%A4%A7%E8%B5%9B"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/THINK/xdsec-game.html&amp;is_video=false&amp;description=%5BXDCTF%5D%E8%A5%BF%E7%94%B5%E7%BD%91%E7%BB%9C%E6%94%BB%E9%98%B2%E5%A4%A7%E8%B5%9B"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%5BXDCTF%5D%E8%A5%BF%E7%94%B5%E7%BD%91%E7%BB%9C%E6%94%BB%E9%98%B2%E5%A4%A7%E8%B5%9B&amp;body=Check out this article: https%3A//www.leavesongs.com/THINK/xdsec-game.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/THINK/xdsec-game.html&amp;title=%5BXDCTF%5D%E8%A5%BF%E7%94%B5%E7%BD%91%E7%BB%9C%E6%94%BB%E9%98%B2%E5%A4%A7%E8%B5%9B"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/THINK/xdsec-game.html&amp;title=%5BXDCTF%5D%E8%A5%BF%E7%94%B5%E7%BD%91%E7%BB%9C%E6%94%BB%E9%98%B2%E5%A4%A7%E8%B5%9B"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/THINK/xdsec-game.html&amp;title=%5BXDCTF%5D%E8%A5%BF%E7%94%B5%E7%BD%91%E7%BB%9C%E6%94%BB%E9%98%B2%E5%A4%A7%E8%B5%9B"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/THINK/xdsec-game.html&amp;title=%5BXDCTF%5D%E8%A5%BF%E7%94%B5%E7%BD%91%E7%BB%9C%E6%94%BB%E9%98%B2%E5%A4%A7%E8%B5%9B"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/THINK/xdsec-game.html&amp;name=%5BXDCTF%5D%E8%A5%BF%E7%94%B5%E7%BD%91%E7%BB%9C%E6%94%BB%E9%98%B2%E5%A4%A7%E8%B5%9B&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">[XDCTF]西电网络攻防大赛</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年9月27日 22:42" itemprop="datePublished">
+                    2013 九月 27 22:42
+                </time>
+</div>
+<div class="article-tag">
+            阅读：8225
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/THINK">心得与体会</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E4%BF%A1%E5%AE%89%E5%8D%8F%E4%BC%9A">信安协会</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+<span style="font-size:14px;">    从上个学期冷夜跟我说让我做一个竞赛网站到现在，算起来我也为它付出过整整一个夏天的努力。现在也算是它真正走到前台面对所有人的时候了，我很激动。</span>
+</p>
+<p>
+<span style="font-size:14px;">    几个月前我是完全不懂php和javascript的，现在也刚好只能算个入门级水平。但毕竟坎坎坷坷折腾出一个站来，也算值得举杯庆贺一番的。</span>
+</p>
+<p>
+<span style="font-size:14px;">    我们的比赛从今天凌晨正式开放注册，10月1号会开放答题。</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">已经有几个朋友找出一些漏洞，虽然影响不大，但我还是在此感谢。我相信在这几天特别是开放答题后会再爆一些漏洞，因为网站编写的时间跨度比较长，对于代码的理解也是慢慢才提高，甚至到现在也有些我不能理解的问题存在，所以BUG是难免的。</span>
+</p>
+<p>
+<span style="font-size:14px;">    前两天我经常吐槽，网站代码写的太乱，耦合性太差，如果当初能使用框架也许会比现在好很多。</span>
+</p>
+<p>
+<span style="font-size:14px;">    不过后来也在想框架的利与弊，暑假那段时间的ST2影响很大，也体现出框架的一些弊病。没有一个程序是完美的，框架可能存在这样那样的问题，地下黑市里不知道存在多少0day，不如我们不开源。我这才理解当初冷夜为何放弃去年thinkphp牌的旧站而要我另写一个了。</span>
+</p>
+<p>
+<span style="font-size:14px;">    在网站的设计、用户体验、安全性上，我还是希望大家能够提出更好的建议，多多包涵我们系统的BUG。有的同学在乌云上要我分享一下源码，抱歉这个肯定是不行的，至少在我们没有开发出下一套CTF前不能公开。</span>
+</p>
+<p>
+<span style="font-size:14px;">    最后做个广告，还是欢迎各位不论水平的高低，术业之专攻，都能来参与我们的西电第四届网络攻防大赛。都能够Have Fun。</span>
+</p>
+<p>
+<span style="font-size:14px;">    线上赛网址：</span><a href="https://ctf.xdsec.org" target="_blank"><span style="font-size:14px;">https://ctf.xdsec.org</span></a>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2065">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[XDCTF]西电网络攻防大赛  离别歌/f5687a77e4e84f9d953463c75061c609.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.daquan8.com" target="_blank">菠萝格格</a>
+<time datetime="2015年5月12日 20:18" itemprop="datePublished">
+                            2015 五月 12 20:18
+                        </time>
+<a href="javascript:reply_to('2065', '菠萝格格')">回复</a>
+</p>
+<p class="comment-meta">总算找到了能看得懂的 还访问不了</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2066">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[XDCTF]西电网络攻防大赛  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年5月12日 20:20" itemprop="datePublished">
+                            2015 五月 12 20:20
+                        </time>
+<a href="javascript:reply_to('2066', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@菠萝格格：https改成http就可以了。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2019">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[XDCTF]西电网络攻防大赛  离别歌/510f3eac7116915ec7495c370163f63d.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.datongseo.cn/" target="_blank">大同SEO</a>
+<time datetime="2015年4月12日 20:19" itemprop="datePublished">
+                            2015 四月 12 20:19
+                        </time>
+<a href="javascript:reply_to('2019', '大同SEO')">回复</a>
+</p>
+<p class="comment-meta">牛逼人的游戏</p>
+</div>
+</div>
+<div class="row" id="comment-1779">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[XDCTF]西电网络攻防大赛  离别歌/c8e1e5dfbddb46fad203b16f5dcdfa62.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://blog.ideafactory.pw" target="_blank">mr_lonely</a>
+<time datetime="2014年10月1日 22:20" itemprop="datePublished">
+                            2014 十月 01 22:20
+                        </time>
+<a href="javascript:reply_to('1779', 'mr_lonely')">回复</a>
+</p>
+<p class="comment-meta">一年了。你是我的目标～</p>
+</div>
+</div>
+<div class="row" id="comment-1524">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[XDCTF]西电网络攻防大赛  离别歌/7bb8e1edb208a84849ba770191edb014.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://xxxx@x.com" target="_blank">枫叔</a>
+<time datetime="2013年12月11日 15:22" itemprop="datePublished">
+                            2013 十二月 11 15:22
+                        </time>
+<a href="javascript:reply_to('1524', '枫叔')">回复</a>
+</p>
+<p class="comment-meta">网站访问不了了，还有其他网址吗</p>
+</div>
+</div>
+<div class="row" id="comment-1443">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[XDCTF]西电网络攻防大赛  离别歌/14d32b268f9e3ac42ef5e0b7d814b7a6.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.viptijian.com/0591" target="_blank">福州体检</a>
+<time datetime="2013年10月9日 12:02" itemprop="datePublished">
+                            2013 十月 09 12:02
+                        </time>
+<a href="javascript:reply_to('1443', '福州体检')">回复</a>
+</p>
+<p class="comment-meta">博主自己有兴趣，而且是一个编程高手，去参加各种比赛都毫无压力！这也是展现自己的才华，也是为自己的将来做铺垫！</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1444">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[XDCTF]西电网络攻防大赛  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2013年10月9日 12:59" itemprop="datePublished">
+                            2013 十月 09 12:59
+                        </time>
+<a href="javascript:reply_to('1444', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@福州体检：谢谢支持</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1441">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[XDCTF]西电网络攻防大赛  离别歌/61dcd0fde7e62d72fa4b3a620034c4fc.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">kuuki</a>
+<time datetime="2013年10月7日 04:23" itemprop="datePublished">
+                            2013 十月 07 04:23
+                        </time>
+<a href="javascript:reply_to('1441', 'kuuki')">回复</a>
+</p>
+<p class="comment-meta">/home/ja2936/public_html/include/controller/log_controller.php<br>侧漏啦</br></p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1442">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[XDCTF]西电网络攻防大赛  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">落沐萧萧</a>
+<time datetime="2013年10月7日 10:17" itemprop="datePublished">
+                            2013 十月 07 10:17
+                        </time>
+<a href="javascript:reply_to('1442', '落沐萧萧')">回复</a>
+</p>
+<p class="comment-meta">@kuuki：虚拟主机没办法……</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1434">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[XDCTF]西电网络攻防大赛  离别歌/61a1c0b023427738ce62f06e66f3cda0.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://x0day.me" target="_blank">DM_</a>
+<time datetime="2013年9月30日 13:10" itemprop="datePublished">
+                            2013 九月 30 13:10
+                        </time>
+<a href="javascript:reply_to('1434', 'DM_')">回复</a>
+</p>
+<p class="comment-meta">怒赞一个</p>
+</div>
+</div>
+<div class="row" id="comment-1430">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[XDCTF]西电网络攻防大赛  离别歌/fb6da9025836e3c807a4feba0ba03b6d.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.whitepig.org" target="_blank">百忠whitepig</a>
+<time datetime="2013年9月28日 12:25" itemprop="datePublished">
+                            2013 九月 28 12:25
+                        </time>
+<a href="javascript:reply_to('1430', '百忠whitepig')">回复</a>
+</p>
+<p class="comment-meta">小伙好厉害,顶一下.</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="b524fd47041ab36517a0327948d4f8297b222d00"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./[XDCTF]西电网络攻防大赛  离别歌/b524fd47041ab36517a0327948d4f8297b222d00"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="280">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="Se0oe7QMfMTBtzTVKMwNP0a4PcWEDsvLqylU2B21GzN0tehay30xoEc9YgpMmWkV"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./[XDCTF]西电网络攻防大赛  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./[XDCTF]西电网络攻防大赛  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

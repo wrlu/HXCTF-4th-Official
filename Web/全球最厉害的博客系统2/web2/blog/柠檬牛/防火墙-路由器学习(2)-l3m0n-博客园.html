@@ -1,0 +1,315 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>防火墙-路由器学习(2) - l3m0n - 博客园</title>
+<link href="./防火墙-路由器学习(2) - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./防火墙-路由器学习(2) - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./防火墙-路由器学习(2) - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="./防火墙-路由器学习(2) - l3m0n - 博客园/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./防火墙-路由器学习(2) - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./防火墙-路由器学习(2) - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./防火墙-路由器学习(2) - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./防火墙-路由器学习(2) - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./防火墙-路由器学习(2) - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./防火墙-路由器学习(2) - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./防火墙-路由器学习(2) - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/firewall_route_study_2.html" id="cb_post_title_url">防火墙-路由器学习(2)</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><p>主要是用思科路由器进行模拟学习，软件: Cisco Packet Tracer</p>
+<p>记得加上串口设备<br/>
+<img src="./防火墙-路由器学习(2) - l3m0n - 博客园/804631-20170414175757892-1584762540.png"/></p>
+<h3 id="基础环境">基础环境</h3>
+<p>基础的ip配置:</p>
+<pre><code>RouterA:Router#config t
+Router(config)#hostname RouterA
+RouterA(config)#int ethernet 0
+RouterA(config-if)#ip address 172.16.11.1 255.255.255.0
+RouterA(config-if)#no shutdown
+RouterA(config-if)#exit
+RouterA(config)#int serial 0
+RouterA(config-if)#ip address 172.16.20.1 255.255.255.0
+RouterA(config-if)#clock rate 56000
+RouterA(config-if)#no shutdown
+RouterA(config-if)#exit
+
+RouterB
+:Router#config t
+Router(config)#hostname RouterB
+RouterB(config)#int ethernet 0
+RouterB(config-if)#ip address 172.16.10.6 255.255.255.0
+RouterB(config-if)#no shutdown
+RouterB(config)#int serial 0
+RouterB(config-if)#ip address 172.16.20.2 255.255.255.0
+RouterB(config-if)#no shutdown
+RouterB(config)#int serial 1
+RouterB(config-if)#ip address 172.16.40.1 255.255.255. 0
+RouterB(config-if)#clock rate 56000
+RouterB(config-if)#no shutdown
+RouterB(config-if)#exit
+
+RouterC
+:Router#config t
+Router(config)#hostname RouterC
+RouterC(config)#int ethernet 0
+RouterC(config-if)#ip address 172.16.50.1 255.255.255.250
+RouterC(config-if)#no shutdown
+RouterC(config)#int serial 0
+RouterC(config-if)#ip address 172.16.20.2 255.255.255.250
+RRouterC(config-if)#no shutdown
+RouterC(config-if)#exit
+
+（2）配置路由器特权口令
+
+RouterA:
+RouterA#configure terminal
+RouterA(config)#enable secret twins
+（3）配置路由器console口令
+RouterA#configure terminal
+RouterA(config)#line console 0
+RouterA(config-line)#password twins
+RouterA(config-line)#login
+
+（4）配置路由器telnet口令
+
+RouterA#configure terminal
+RouterA(config)#line vty 0 4
+RouterA(config-line)#password twins
+RouterA(config-line)#login
+
+验证是否配置好
+特权下运行: show running-config</code></pre>
+<p><img src="./防火墙-路由器学习(2) - l3m0n - 博客园/804631-20170414175831642-551340958.png"/></p>
+<p><img src="./防火墙-路由器学习(2) - l3m0n - 博客园/804631-20170414175839533-160275646.png"/></p>
+<p>20段的routeA与routeB串行接通,所以可以再routeA中是ping通routeB的20段,但是ping不通routeB的40段,这是因为ip路由没有进行设置导致路由无法找到下一跳的ip,其实设置一个ip路由就好啦~</p>
+<h3 id="静态路由">静态路由</h3>
+<p>将内网其他没有直连的段添加，最后的ip是下一跳接口。<br/>
+比如现在routeA，与它直连的有11段和20段，所以表中必须要加入10、40、50段的信息，然后转到下一跳的路由ip是172.16.20.2</p>
+<p>config模式下设置</p>
+<pre><code>routeA:
+ip route 172.16.10.0 255.255.255.0 172.16.20.2
+ip route 172.16.40.0 255.255.255.0 172.16.20.2
+ip route 172.16.50.0 255.255.255.0 172.16.20.2
+
+routeB:
+ip route 172.16.11.0 255.255.255.0 172.16.20.1
+ip route 172.16.50.0 255.255.255.0 172.16.40.2
+
+routeC:
+ip route 172.16.11.0 255.255.255.0 172.16.40.1
+ip route 172.16.20.0 255.255.255.0 172.16.40.1
+ip route 172.16.10.0 255.255.255.0 172.16.40.1
+
+验证: show ip route</code></pre>
+<p><img src="./防火墙-路由器学习(2) - l3m0n - 博客园/804631-20170414175914595-1394406272.png"/></p>
+<p>默认路由:<br/>
+是在路由表中没有对应于特定目标网络的条目时使用的路有,一般在发送到internet的路由器中设置.</p>
+<pre><code>取消开始的路由设置: no ip route 172.16.11.0 255.255.255.0 172.16.40.1
+ip route 0.0.0.0 0.0.0.0 路由ip
+ip classless
+show ip route</code></pre>
+<h3 id="动态路由rip路由选择信息协议">动态路由RIP(路由选择信息)协议</h3>
+<p>它使用跳数作为度量值,最大15跳,适用于变化小的小型网络.</p>
+<pre><code>routeA(config)#no ip route 172.16.10.0 255.255.255.0 172.16.20.2
+routeA(config)#no ip route 172.16.40.0 255.255.255.0 172.16.20.2
+routeA(config)#no ip route 172.16.50.0 255.255.255.0 172.16.20.2
+routeA(config)#router rip
+//选择ripv2版本: routeA(config-router)#version 2
+routeA(config-router)#network 172.16.11.0
+routeA(config-router)#network 172.16.20.0
+
+这个network后面的网络号是直接相连的网络，与静态路由相反
+
+后面的其他路由配置大同小异.</code></pre>
+<p><img src="./防火墙-路由器学习(2) - l3m0n - 博客园/804631-20170414180048017-1638375983.png"/></p>
+<h3 id="动态路由igrp内部网关协议">动态路由IGRP(内部网关协议)</h3>
+<p>RIP有所限制，小型网络还行，复杂起来就不实用，IGRP克服了RIPV1的距离限制，模拟器有所限制，不支持此协议</p>
+<p>想要设置一个AS号，范围在1~65535</p>
+<pre><code>routeA:
+router igrp 10
+network 172.16.11.0
+network 172.16.20.0
+
+还是设置的直接相连的网络</code></pre>
+<h3 id="防火墙设置">防火墙设置</h3>
+<p>使用GNS3进行模拟<br/>
+<img src="./防火墙-路由器学习(2) - l3m0n - 博客园/804631-20170414180128767-1308251810.png"/></p>
+<p>实现内网的R1能telnet到外网到R2，但是R2不能得到R1的数据.</p>
+<p>记得进行IDLE值计算，选择带星的值(如果没有则改一些参数)，这样才是最优的一个模拟，不然很卡。</p>
+<p><img src="./防火墙-路由器学习(2) - l3m0n - 博客园/804631-20170414180146517-2028068954.png"/></p>
+<pre><code>R1路由器，设置ip，并设置静态路由到防火墙，跳数为1
+
+configure terminal
+int fastEthernet 0/0
+ip address 10.0.0.1 255.255.255.0
+no shutdown
+end
+configure terminal
+interface fastEthernet 0/0
+ip route 0.0.0.0 0.0.0.0 10.0.0.2 1
+
+防火墙:
+
+//设置进口
+configure terminal
+interface ethernet 1
+nameif inside
+ip address 10.0.0.2 255.255.255.0
+no shutdown
+//设置出口
+interface e0
+nameif outside
+ip address 192.168.0.2 255.255.255.0
+no sh
+global (outside) 1 192.168.0.10-192.168.0.245 netmask 255.255.0.0
+nat (inside) 1 0.0.0.0 0.0.0.0
+route outside 0.0.0.0 0.0.0.0 192.168.0.1 1
+exit
+
+R2路由器
+
+configure terminal
+int fastEthernet 0/0
+ip address 192.168.0.1 255.255.255.0
+no shutdown
+end
+//设置telnet密码
+configure terminal
+line vty 0 4
+password 123456
+login</code></pre>
+<p><img src="./防火墙-路由器学习(2) - l3m0n - 博客园/804631-20170414180208470-650580392.png"/></p>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2017-04-14 18:02</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=6710144" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(6710144);return false;">收藏</a></div>
+</div>
+<script src="./防火墙-路由器学习(2) - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=6710144,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2017/4/14 18:02:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./防火墙-路由器学习(2) - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="//img.users.51.la/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./防火墙-路由器学习(2) - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

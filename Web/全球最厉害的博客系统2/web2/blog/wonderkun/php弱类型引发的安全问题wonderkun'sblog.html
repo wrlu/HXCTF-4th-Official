@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<title>php弱类型引发的安全问题 | wonderkun's|blog</title>
+<link href="./php弱类型引发的安全问题  wonderkun'sblog/style.css" rel="stylesheet"/>
+<link href="./php弱类型引发的安全问题  wonderkun'sblog/style.opacity.css" rel="stylesheet"/>
+<link href="./php弱类型引发的安全问题  wonderkun'sblog/11" rel="profile">
+<link href="http://wonderkun.cc/index.html/xmlrpc.php" rel="pingback">
+<link href="" rel="shortcut icon" type="image/x-icon"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<meta content="dimpurr" name="author"/>
+<meta content="wonderkun's|blog" name="application-name"/>
+<meta charset="utf-8"/>
+<link href="./php弱类型引发的安全问题  wonderkun'sblog/index.html" rel="home"/>
+<link href="./php弱类型引发的安全问题  wonderkun'sblog/feed=rss2" rel="alternate" title="RSS 2.0" type="application/rss+xml"/>
+<link href="./php弱类型引发的安全问题  wonderkun'sblog/feed=rss" rel="alternate" title="RSS 1.0" type="application/rdf+xml"/>
+<link href="./php弱类型引发的安全问题  wonderkun'sblog/feed=atom" rel="alternate" title="ATOM 1.0" type="application/atom+xml"/>
+<!--[if lt IE 9]>
+<script src="http://wonderkun.cc/index.html/wp-content/themes/clearision/js/html5.js" type="text/javascript"></script>
+<![endif]-->
+<link href="./php弱类型引发的安全问题  wonderkun'sblog/feed=rss2&amp;p=334" rel="alternate" title="wonderkun's|blog » php弱类型引发的安全问题评论Feed" type="application/rss+xml"/>
+<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/72x72\/","ext":".png","source":{"concatemoji":"http:\/\/wonderkun.cc\/index.html\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.5.9"}};
+			!function(a,b,c){function d(a){var c,d,e,f=b.createElement("canvas"),g=f.getContext&&f.getContext("2d"),h=String.fromCharCode;if(!g||!g.fillText)return!1;switch(g.textBaseline="top",g.font="600 32px Arial",a){case"flag":return g.fillText(h(55356,56806,55356,56826),0,0),f.toDataURL().length>3e3;case"diversity":return g.fillText(h(55356,57221),0,0),c=g.getImageData(16,16,1,1).data,d=c[0]+","+c[1]+","+c[2]+","+c[3],g.fillText(h(55356,57221,55356,57343),0,0),c=g.getImageData(16,16,1,1).data,e=c[0]+","+c[1]+","+c[2]+","+c[3],d!==e;case"simple":return g.fillText(h(55357,56835),0,0),0!==g.getImageData(16,16,1,1).data[0];case"unicode8":return g.fillText(h(55356,57135),0,0),0!==g.getImageData(16,16,1,1).data[0]}return!1}function e(a){var c=b.createElement("script");c.src=a,c.type="text/javascript",b.getElementsByTagName("head")[0].appendChild(c)}var f,g,h,i;for(i=Array("simple","flag","unicode8","diversity"),c.supports={everything:!0,everythingExceptFlag:!0},h=0;h<i.length;h++)c.supports[i[h]]=d(i[h]),c.supports.everything=c.supports.everything&&c.supports[i[h]],"flag"!==i[h]&&(c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&c.supports[i[h]]);c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&!c.supports.flag,c.DOMReady=!1,c.readyCallback=function(){c.DOMReady=!0},c.supports.everything||(g=function(){c.readyCallback()},b.addEventListener?(b.addEventListener("DOMContentLoaded",g,!1),a.addEventListener("load",g,!1)):(a.attachEvent("onload",g),b.attachEvent("onreadystatechange",function(){"complete"===b.readyState&&c.readyCallback()})),f=c.source||{},f.concatemoji?e(f.concatemoji):f.wpemoji&&f.twemoji&&(e(f.twemoji),e(f.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script>
+<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+<link href="./php弱类型引发的安全问题  wonderkun'sblog/rest_route=" rel="https://api.w.org/"/>
+<link href="http://wonderkun.cc/index.html/xmlrpc.php?rsd" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./php弱类型引发的安全问题  wonderkun'sblog/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<link href="./php弱类型引发的安全问题  wonderkun'sblog/p=331" rel="prev" title="rockoa 任意文件上传"/>
+<link href="./php弱类型引发的安全问题  wonderkun'sblog/p=346" rel="next" title="python urllib 简单的使用说明"/>
+<meta content="WordPress 4.5.9" name="generator"/>
+<link href="./php弱类型引发的安全问题  wonderkun'sblog/p=334" rel="canonical"/>
+<link href="./php弱类型引发的安全问题  wonderkun'sblog/p=334" rel="shortlink"/>
+<link href="./php弱类型引发的安全问题  wonderkun'sblog/rest_route=%2Foembed%2F1.0%2Fembed&amp;url=http%3A%2F%2Fwonderkun.cc%2Findex.html%2F%3Fp%3D334" rel="alternate" type="application/json+oembed"/>
+<link href="./php弱类型引发的安全问题  wonderkun'sblog/rest_route=%2Foembed%2F1.0%2Fembed&amp;url=http%3A%2F%2Fwonderkun.cc%2Findex.html%2F%3Fp%3D334&amp;format=xml" rel="alternate" type="text/xml+oembed"/>
+<style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>
+<style id="syntaxhighlighteranchor" type="text/css"></style>
+</link></link></head>
+<body class="single single-post postid-334 single-format-standard">
+<div id="page">
+<hgroup id="ctn_header">
+<div id="title">
+<h1 id="site-title"><span><a href="http://wonderkun.cc/index.html/" rel="home" title="wonderkun's|blog">wonderkun's|blog</a></span></h1>
+<h2 id="site-description">share with you!!</h2>
+</div>
+<div id="title_r">
+<a href="http://wonderkun.cc" target="_blank" title="个人页"><button class="tr_profile"></button></a>
+<a href="http://user.qzone.qq.com/729173164" target="_blank" title="QQ"><button class="tr_qqw"></button></a>
+<a href="http://github.com/wonderkun" target="_blank" title="Github"><button class="tr_github"></button></a>
+<a href="http://wonderkun.cc/index.html/?feed=rss2" target="_blank"><button id="tr_rss"></button></a>
+<a href="http://wonderkun.cc/index.html/wp-admin/" target="_blank"><button id="tr_admin"></button></a>
+<span id="tr_clear"></span>
+<form action="http://wonderkun.cc/index.html/" id="tr_s_f" method="get">
+<input id="s" name="s" placeholder="" size="10" type="text"/>
+</form>
+</div>
+<div class="clearfix"></div>
+</hgroup>
+<div id="float">
+<a href="http://wonderkun.cc/index.html/" rel="home" title="wonderkun's|blog"><img alt="wonderkun's|blog" id="logo" src="./php弱类型引发的安全问题  wonderkun'sblog/09451H922-11.jpg" title="wonderkun's|blog"/></a>
+<nav id="nav" role="navigation">
+<div class="menu-%e4%b8%bb%e8%8f%9c%e5%8d%95-container"><ul class="menu" id="menu-%e4%b8%bb%e8%8f%9c%e5%8d%95"><li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-18" id="menu-item-18"><a href="http://wonderkun.cc/index.html/?cat=1">hack_ctf</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-19" id="menu-item-19"><a href="http://wonderkun.cc/index.html/?cat=6">linux</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-20" id="menu-item-20"><a href="http://wonderkun.cc/index.html/?cat=7">代码控</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-21" id="menu-item-21"><a href="http://wonderkun.cc/index.html/?cat=8">技术宅</a></li>
+</ul></div></nav>
+<nav id="next" role="sencond_navigation">
+<div class="menu-%e8%be%85%e5%8a%a9%e8%8f%9c%e5%8d%95-container"><ul class="menu" id="menu-%e8%be%85%e5%8a%a9%e8%8f%9c%e5%8d%95"><li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-23" id="menu-item-23"><a href="http://wonderkun.cc/index.html/?cat=9">名站推荐</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-24" id="menu-item-24"><a href="http://wonderkun.cc/index.html/?cat=10">我们的故事</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-25" id="menu-item-25"><a href="http://wonderkun.cc/index.html/?cat=11">技术共享</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-26" id="menu-item-26"><a href="http://wonderkun.cc/index.html/?cat=12">资源分享</a></li>
+</ul></div></nav>
+</div>
+<div id="ctn">
+<div id="content">
+<article class="post_ctn">
+<hgroup class="post_hctn">
+<div class="post_time">
+<div class="post_t_d">04/20</div>
+<div class="post_t_u">14:54</div>
+</div>
+<div class="post_h_l">
+<span class="post_ct"><a href="http://wonderkun.cc/index.html/?cat=7" rel="category">代码控</a></span>
+<h2 class="post_h"><a href="http://wonderkun.cc/index.html/?p=334">php弱类型引发的安全问题</a></h2>
+<div class="post_tag">
+<span class="post_c"><a class="wp-postviews">wonderkun 撰写</a></span>
+<span class="post_c"><a href="http://wonderkun.cc/index.html/?p=334#respond">无回复</a></span>
+<span class="post_c"></span>
+</div>
+</div>
+</hgroup>
+<div class="post_t"><p>1.php的===和==<br/>
+php的比较操作符有==（比较松散），===（完全等于，严格比较），在松散比较的时候，php会将他们的类型统一之后，再进行比较，会把字符转化为数字，非bool型转化为bool型，下面是一些例子</p>
+<blockquote><p>例子 名称 结果<br/>
+$a == $b 等于 TRUE，如果类型转换后 $a 等于 $b。<br/>
+$a === $b 全等 TRUE，如果 $a 等于 $b，并且它们的类型也相同。<br/>
+$a != $b 不等 TRUE，如果类型转换后 $a 不等于 $b。<br/>
+$a &lt;&gt; $b 不等 TRUE，如果类型转换后 $a 不等于 $b。<br/>
+$a !== $b 不全等 TRUE，如果 $a 不等于 $b，或者它们的类型不同。<br/>
+$a &lt; $b 小与 TRUE，如果 $a 严格小于 $b。 $a &gt; $b 大于 TRUE，如果 $a 严格大于 $b。<br/>
+$a &lt;= $b 小于等于 TRUE，如果 $a 小于或者等于 $b。 $a &gt;= $b 大于等于 TRUE，如果 $a 大于或者等于 $b。</p></blockquote>
+<p>2.安全问题：<br/>
+2.1 hash比较的缺陷：<br/>
+php在处理hash字符串的时候会用到!=,==来进行hash比较，如果hash值以0e开头，后边都是数字，再与数字比较，就会被解释成010^n还是为0，就会被判断相等，绕过登录环节。看下面的例子<br/>
+<a href="http://xiaomange.meximas.com/wp-content/uploads/2015/11/2015-11-28-105743屏幕截图.png"><img alt="2015-11-28 10:57:43屏幕截图" class="alignnone size-full wp-image-301" height="233" src="./php弱类型引发的安全问题  wonderkun'sblog/2015-11-28-105743屏幕截图.png" width="797"/></a><br/>
+当全是数字的时候，宽松的比较会执行尽力模式，如0e12345678会被解释成010^12345678,除了e不全是数字的时候就不会相等，这能从var_dump(“0e1234abc”==”0”)可以看出来。<br/>
+下面是几个非常有用的hash值</p>
+<blockquote>
+<pre class="brush: bash; title: ; notranslate" title="">
+   $ echo -n 240610708 | md5sum
+    0e462097431906509019562988736854  -
+    $ echo -n QNKCDZO | md5sum
+    0e830400451993494058024219903391  -
+    $ echo -n aabg7XSs | md5sum
+    0e087386482136013740957780965295  
+</pre>
+</blockquote>
+<p>2.2 2.2 bool 欺骗</p>
+<p>当存在json_decode和unserialize的时候，部分结构会被解释成bool类型，也会造成欺骗。json_decode示例代码</p>
+<pre class="brush: php; title: ; notranslate" title="">
+
+&amp;amp;lt;?php
+$json_str = '{"user":true,"pass":true}';  //定义一个json格式的数据   
+$data = json_decode($json_str,true);  //进行json_decode  
+
+if ($data['user'] == 'admin' &amp;amp;amp;&amp;amp;amp; $data['pass']=='secirity')  //会把字符串类型转化为bool型，进而相等  
+{ 
+print_r('logined in as bool'."n");
+
+}
+?&amp;amp;gt;
+</pre>
+<p>root@kali:~/桌面# php php.php<br/>
+logined in as bool</p>
+<p>unserialize示例代码：</p>
+<pre class="brush: php; title: ; notranslate" title="">
+&amp;amp;lt;?php
+$unserialize_str = 'a:2:{s:4:"user";b:1;s:4:"pass";b:1;}';
+$data_unserialize = unserialize($unserialize_str);
+if ($data_unserialize['user'] == 'admin' &amp;amp;amp;&amp;amp;amp; $data_unserialize['pass']=='secirity')
+{
+print_r('logined in unserialize'."n");
+}
+?&amp;amp;gt;
+</pre>
+<p>运行结果如下： root@kali:/var/www# php /root/php/hash.php<br/>
+logined in unserialize</p>
+<p>2.3 数字转换欺骗<br/>
+看代码：</p>
+<pre class="brush: php; title: ; notranslate" title="">
+&amp;amp;lt;?php
+$id = ($_GET['id']);
+if ($id == "1")
+{
+$id = (int)($id);
+#$id = intval($id);
+$qry = "SELECT * FROM `users` WHERE user_id='$id';";
+}
+
+echo $qry;
+
+?&amp;amp;gt;
+</pre>
+<p>如果我们传入 id=0.999999999999999999999999999999999999,那么我们就会绕过第一个等号的判断，因为==比较的时候会把0.9999999999999999999999999999这个浮点型转化为整型，然后等于1,但是int函数和intval函数，再转化为整数的时候，默认是转化为不大于这个数的最大整数，所以是0,这样就可能绕过判断，直接查询到管理员的信息<br/>
+运行结果：<br/>
+<a href="http://xiaomange.meximas.com/wp-content/uploads/2015/11/2015-11-28-112834屏幕截图.png"><img alt="2015-11-28 11:28:34屏幕截图" class="alignnone size-full wp-image-308" height="244" src="./php弱类型引发的安全问题  wonderkun'sblog/2015-11-28-112834屏幕截图.png" width="972"/></a></p>
+<p>再例如一下代码：</p>
+<pre class="brush: php; title: ; notranslate" title="">
+&amp;amp;lt;?php 
+//再例如这样的一个密码重置的操作  
+//
+if ($_POST['uid'] != 1) {  //判断是为了允许重置uid=1的密码 
+    $res =' SELECT * FROM user WHERE uid='.(int)$_POST['uid'];
+
+
+//do something; reset password  
+//
+echo  $res;  
+
+
+} else {
+
+
+    die("Cannot reset password of admin");
+
+} 
+</pre>
+<p>运行结果：<br/>
+<a href="http://xiaomange.meximas.com/wp-content/uploads/2015/11/2015-11-28-113611屏幕截图.png"><img alt="2015-11-28 11:36:11屏幕截图" class="alignnone size-full wp-image-310" height="261" src="./php弱类型引发的安全问题  wonderkun'sblog/2015-11-28-113611屏幕截图.png" width="761"/></a><br/>
+<a href="http://xiaomange.meximas.com/wp-content/uploads/2015/11/2015-11-28-114245屏幕截图.png"><img alt="2015-11-28 11:42:45屏幕截图" class="alignnone size-full wp-image-312" height="259" src="./php弱类型引发的安全问题  wonderkun'sblog/2015-11-28-114245屏幕截图.png" width="803"/></a><br/>
+传入uid=1.1就可以轻松的绕过第一个判断了</p>
+<p>另外intval还有个尽力模式，就是转换所有数字直到遇到非数字为止，如果采用:</p>
+<pre class="brush: php; title: ; notranslate" title="">
+&amp;amp;lt;?php
+if (intval($qq) === '123456')
+{
+$db-&amp;amp;gt;query("select * from user where qq = $qq")
+} 
+?&amp;amp;gt;
+</pre>
+<p>攻击者传入123456 union select version()进行攻击。<br/>
+2.4 PHP5.4.4 特殊情况<br/>
+这个版本的php的一个修改导致两个数字型字符溢出导致比较相等</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+$ php -r 'var_dump("61529519452809720693702583126814" == "61529519452809720000000000000000");'
+bool(true)
+</pre>
+<p>refer:http://blog.nsfocus.net/php-comparison-operators-security/<br/>
+本文链接：http://xiaomange.meximas.com/?p=295<br/>
+如果转载，请表明出处：</p>
+</div>
+<nav id="post_nav">
+<span id="p_n_l"><a href="http://wonderkun.cc/index.html/?p=331" rel="prev">← rockoa 任意文件上传</a></span>
+<span id="p_n_r"><a href="http://wonderkun.cc/index.html/?p=346" rel="next">python urllib 简单的使用说明 →</a></span>
+</nav>
+<div class="cmt" id="cmt">
+<div class="comment-respond" id="respond">
+<h3 class="comment-reply-title" id="reply-title"> <small><a href="/index.html/?p=334#respond" id="cancel-comment-reply-link" rel="nofollow" style="display:none;">撤销评论</a></small></h3> <form action="http://wonderkun.cc/index.html/wp-comments-post.php" class="comment-form" id="cmt_form" method="post">
+<p class="comment-form-comment"><textarea aria-required="true" cols="45" id="comment" name="comment" required="" rows="8"></textarea></p><div id="cmt_form_meta"><input id="author" name="author" placeholder="称呼" required="required" type="text" value=""/>
+<input id="email" name="email" placeholder="邮箱" required="required" type="email" value=""/>
+<input id="url" name="url" placeholder="站点" type="text" value=""/></div>
+<p class="form-submit"><input class="submit" id="cmt_submit" name="submit" type="submit" value="提交"/> <input id="comment_post_ID" name="comment_post_ID" type="hidden" value="334"/>
+<input id="comment_parent" name="comment_parent" type="hidden" value="0"/>
+</p><p style="display: none;"><input id="akismet_comment_nonce" name="akismet_comment_nonce" type="hidden" value="b30b6daefd"/></p><p style="display: none;"><input id="ak_js" name="ak_js" type="hidden" value="146"/></p> </form>
+</div><!-- #respond -->
+</div>
+</article>
+</div>
+</div>
+<div id="sidebar">
+<div class="widget" id="one">
+<h2>近期评论</h2><ul id="recentcomments"><li class="recentcomments"><span class="comment-author-link">wonderkun</span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-783">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link"><a class="url" href="http://aa" rel="external nofollow">wddee</a></span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-777">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link">wonderkun</span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-774">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link"><a class="url" href="http://aa" rel="external nofollow">wddee</a></span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-773">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link"><a class="url" href="http://rxefekalasu.com" rel="external nofollow">Amberly</a></span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-733">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link">wonderkun</span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-724">php的随机数的安全性分析</a>》</li></ul><h2>友情链接</h2>
+<ul class="xoxo blogroll">
+<li><a href="http://www.bendawang.site" target="_blank">Bendawang</a></li>
+<li><a href="http://www.bertramc.cn/" target="_blank">berTrAM</a></li>
+<li><a href="http://www.cnblogs.com/iamstudy/">l3m0n</a></li>
+<li><a href="http://www.ifuryst.com/" target="_blank">墨麒麟安全实验</a></li>
+<li><a href="http://xiaomange.meximas.com/" rel="me" target="_blank">老博客地址</a></li>
+</ul>
+<h2>好基友</h2>
+<ul class="xoxo blogroll">
+<li><a href="http://bear2.cn/" rel="friend colleague" target="_blank">pierre94</a></li>
+<li><a href="http://range.pw" rel="friend met colleague co-resident" target="_blank">range</a></li>
+<li><a href="http://www.yibeizifd.cc/%20%20" target="_blank">yibeizifd</a></li>
+<li><a href="http://yichin.url.ph/" rel="friend colleague" target="_blank">yichin</a></li>
+</ul>
+</div>
+<div class="widget" id="two">
+</div>
+<div class="clearfix"></div>
+</div><footer id="footer" role="contentinfo">
+<a href="http://dimpurr.com" title="Dimpurr (钉子)">Dimpurr</a>'s 
+<a href="http://blog.dimpurr.com/clearision" title="Clearision">Clearision</a><br/>
+Powered by <a href="http://wordpress.org/" title="WordPress">WordPress</a>
+<script src="./php弱类型引发的安全问题  wonderkun'sblog/script.js" type="text/javascript"></script>
+<script src="./php弱类型引发的安全问题  wonderkun'sblog/form.jsver=3.1.10" type="text/javascript"></script>
+<script src="./php弱类型引发的安全问题  wonderkun'sblog/shCore.jsver=3.0.9b" type="text/javascript"></script>
+<script src="./php弱类型引发的安全问题  wonderkun'sblog/shBrushBash.jsver=3.0.9b" type="text/javascript"></script>
+<script src="./php弱类型引发的安全问题  wonderkun'sblog/shBrushPhp.jsver=3.0.9b" type="text/javascript"></script>
+<script type="text/javascript">
+	(function(){
+		var corecss = document.createElement('link');
+		var themecss = document.createElement('link');
+		var corecssurl = "http://wonderkun.cc/index.html/wp-content/plugins/syntaxhighlighter/syntaxhighlighter3/styles/shCore.css?ver=3.0.9b";
+		if ( corecss.setAttribute ) {
+				corecss.setAttribute( "rel", "stylesheet" );
+				corecss.setAttribute( "type", "text/css" );
+				corecss.setAttribute( "href", corecssurl );
+		} else {
+				corecss.rel = "stylesheet";
+				corecss.href = corecssurl;
+		}
+		document.getElementsByTagName("head")[0].insertBefore( corecss, document.getElementById("syntaxhighlighteranchor") );
+		var themecssurl = "http://wonderkun.cc/index.html/wp-content/plugins/syntaxhighlighter/syntaxhighlighter3/styles/shThemeRDark.css?ver=3.0.9b";
+		if ( themecss.setAttribute ) {
+				themecss.setAttribute( "rel", "stylesheet" );
+				themecss.setAttribute( "type", "text/css" );
+				themecss.setAttribute( "href", themecssurl );
+		} else {
+				themecss.rel = "stylesheet";
+				themecss.href = themecssurl;
+		}
+		//document.getElementById("syntaxhighlighteranchor").appendChild(themecss);
+		document.getElementsByTagName("head")[0].insertBefore( themecss, document.getElementById("syntaxhighlighteranchor") );
+	})();
+	SyntaxHighlighter.config.strings.expandSource = '+ expand source';
+	SyntaxHighlighter.config.strings.help = '帮助';
+	SyntaxHighlighter.config.strings.alert = 'SyntaxHighlighter\n\n';
+	SyntaxHighlighter.config.strings.noBrush = '无法找到Brush：';
+	SyntaxHighlighter.config.strings.brushNotHtmlScript = 'Brush不能设置 html-script选项';
+	SyntaxHighlighter.defaults['light'] = true;
+	SyntaxHighlighter.defaults['pad-line-numbers'] = 3;
+	SyntaxHighlighter.defaults['toolbar'] = false;
+	SyntaxHighlighter.all();
+</script>
+<script src="./php弱类型引发的安全问题  wonderkun'sblog/wp-embed.min.jsver=4.5.9" type="text/javascript"></script>
+</footer>
+</div>
+</body>
+</html>

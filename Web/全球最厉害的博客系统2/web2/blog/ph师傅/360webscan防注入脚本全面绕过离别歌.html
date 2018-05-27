@@ -1,0 +1,264 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./360webscan防注入脚本全面绕过  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./360webscan防注入脚本全面绕过  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./360webscan防注入脚本全面绕过  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>360webscan防注入脚本全面绕过 | 离别歌</title>
+<link href="./360webscan防注入脚本全面绕过  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./360webscan防注入脚本全面绕过  离别歌/styles.css" rel="stylesheet"/>
+<link href="./360webscan防注入脚本全面绕过  离别歌/style.css" rel="stylesheet"/>
+<link href="./360webscan防注入脚本全面绕过  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./360webscan防注入脚本全面绕过  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./360webscan防注入脚本全面绕过  离别歌/jquery.min.js"></script>
+<link href="./360webscan防注入脚本全面绕过  离别歌/code.css" rel="stylesheet"/>
+<link href="./360webscan防注入脚本全面绕过  离别歌/button.css" rel="stylesheet"/>
+<link href="./360webscan防注入脚本全面绕过  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./360webscan防注入脚本全面绕过  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/360webscan-bypass.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/360webscan-bypass.html&amp;text=360webscan%E9%98%B2%E6%B3%A8%E5%85%A5%E8%84%9A%E6%9C%AC%E5%85%A8%E9%9D%A2%E7%BB%95%E8%BF%87"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/360webscan-bypass.html&amp;title=360webscan%E9%98%B2%E6%B3%A8%E5%85%A5%E8%84%9A%E6%9C%AC%E5%85%A8%E9%9D%A2%E7%BB%95%E8%BF%87"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/360webscan-bypass.html&amp;is_video=false&amp;description=360webscan%E9%98%B2%E6%B3%A8%E5%85%A5%E8%84%9A%E6%9C%AC%E5%85%A8%E9%9D%A2%E7%BB%95%E8%BF%87"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=360webscan%E9%98%B2%E6%B3%A8%E5%85%A5%E8%84%9A%E6%9C%AC%E5%85%A8%E9%9D%A2%E7%BB%95%E8%BF%87&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/360webscan-bypass.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/360webscan-bypass.html&amp;title=360webscan%E9%98%B2%E6%B3%A8%E5%85%A5%E8%84%9A%E6%9C%AC%E5%85%A8%E9%9D%A2%E7%BB%95%E8%BF%87"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/360webscan-bypass.html&amp;title=360webscan%E9%98%B2%E6%B3%A8%E5%85%A5%E8%84%9A%E6%9C%AC%E5%85%A8%E9%9D%A2%E7%BB%95%E8%BF%87"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/360webscan-bypass.html&amp;title=360webscan%E9%98%B2%E6%B3%A8%E5%85%A5%E8%84%9A%E6%9C%AC%E5%85%A8%E9%9D%A2%E7%BB%95%E8%BF%87"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/360webscan-bypass.html&amp;title=360webscan%E9%98%B2%E6%B3%A8%E5%85%A5%E8%84%9A%E6%9C%AC%E5%85%A8%E9%9D%A2%E7%BB%95%E8%BF%87"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/360webscan-bypass.html&amp;name=360webscan%E9%98%B2%E6%B3%A8%E5%85%A5%E8%84%9A%E6%9C%AC%E5%85%A8%E9%9D%A2%E7%BB%95%E8%BF%87&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">360webscan防注入脚本全面绕过</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年2月10日 15:46" itemprop="datePublished">
+                    2014 二月 10 15:46
+                </time>
+</div>
+<div class="article-tag">
+            阅读：6801
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/360webscan">360webscan</a>,
+                
+                <a class="tag-link" href="/tag/WAF%E7%BB%95%E8%BF%87">WAF绕过</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    昨天几个朋友聊到了某个cms里用的360webscan脚本，问我怎么绕过。其实之前一直没有研究过正则的绕过，当然这次也不是正则的绕过，但最终目的是达到了，全面绕过了360webscan对于注入与xss的防护。
+</p>
+<p>
+	    当然360忽略了，于是我也就公开了呗。反正厂商都不重视安全，我们也没必要重视了。
+</p>
+<p>
+	    使用360webscan的一大cms就是cmseasy，我们就借用cmseasy中的360webscan来说明。<br>
+    其中有一个白名单函数：
+</br></p>
+<pre class="brush: php;auto-links: false;">/**
+ *  拦截目录白名单
+ */
+function webscan_white($webscan_white_name,$webscan_white_url_t=array()) {
+  $url_path=$_SERVER['PHP_SELF'];
+  $url_var=$_SERVER['QUERY_STRING'];
+  if (preg_match("/".$webscan_white_name."/is",$url_path)==1) {
+    return false;
+  }
+  foreach ($webscan_white_url_t as $webscan_white_url) {
+	  foreach ($webscan_white_url as $key =&gt; $value) {
+		if(!empty($url_var)&amp;&amp;!empty($value)){
+		  if (stristr($url_path,$key)&amp;&amp;stristr($url_var,$value)) {
+			return false;
+		  }
+		}
+		elseif (empty($url_var)&amp;&amp;empty($value)) {
+		  if (stristr($url_path,$key)) {
+			return false;
+		  }
+		}
+
+	  }
+  }
+  return true;
+}</pre>
+    这个函数在后面的过滤中起着至关重要的作用，因为过滤的时候判断如果webscan_white返回false就不执行过滤。<br>
+<br/>
+    也就是说，我们如果能让这个函数返回false，那么就能轻松绕过360webscan的过滤。<br/>
+<br/>
+    那我们来看这个函数，这个函数第一个字段是白名单内容，我们在webscan_cache.php中可以找到：
+<pre class="brush: php;auto-links: false;">//后台白名单,后台操作将不会拦截,添加"|"隔开白名单目录下面默认是网址带 admin  /dede/ 放行
+
+$webscan_white_directory='admin|\/dede\/|\/install\/';</pre>
+    返回来看我们的这个函数：
+<pre class="brush: php;auto-links: false;">function webscan_white($webscan_white_name,$webscan_white_url_t=array()) {
+  $url_path=$_SERVER['PHP_SELF'];
+  $url_var=$_SERVER['QUERY_STRING'];
+  if (preg_match("/".$webscan_white_name."/is",$url_path)==1) {
+    return false;
+  }</pre>
+<span style="line-height:1.5;">    当$_SERVER['PHP_SELF']中能正则匹配出'admin|\/dede\/|\/install\/'的时候，就返回false，就绕过了检测。<br/>
+<br/>
+<br/>
+<br/>
+    然后再给大家说明一下$_SERVER['PHP_SELF']是什么：<br/>
+    PHP_SELF指当前的页面绝对地址，比如我们的网站：<br/>
+    https://www.leavesongs.com/hehe/index.php<br/>
+    那么PHP_SELF就是/hehe/index.php。<br/>
+    但有个小问题很多人没有注意到，当url是PATH_INFO的时候，比如<br/>
+    https://www.leavesongs.com/hehe/index.php/phithon<br/>
+    那么PHP_SELF就是/hehe/index.php/phithon<br/>
+    也就是说，其实PHP_SELF有一部分是我们可以控制的。<br/>
+<br/>
+    说到这里大家应该知道怎么绕过360webscan了吧？只要PHP_SELF中含有白名单字段即可。<br/>
+    这也可以发散到很多cms上，php_self也是可控变量，注意过滤。<br/>
+</span>
+<p>
+<br/>
+</p>
+<p>
+<span style="line-height:1.5;">    来测试一下看看，在本地搭建一个cmseasy，最新版20140118，提交一个含有敏感字符union select的查询，被360拦截了：<br/>
+</span>
+</p>
+<p>
+<span style="line-height:1.5;">    <a href="https://www.leavesongs.com/content/uploadfile/201402/4efd1392018713.jpg" id="ematt:434" target="_blank"></a><a href="https://www.leavesongs.com/content/uploadfile/201402/4efd1392101988.jpg" id="ematt:440" target="_blank"></a><a href="https://www.leavesongs.com/content/uploadfile/201402/4efd1392103905.jpg" id="ematt:446" target="_blank"><img alt="01.jpg" border="0" height="306" src="./360webscan防注入脚本全面绕过  离别歌/thum-4efd1392103905.jpg" title="点击查看原图" width="650"/></a><br/>
+</span>
+</p>
+<p>
+	    那我们修改一下path_info,其中带有白名单字段“/admin/”：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201402/3fb51392018716.jpg" id="ematt:436" target="_blank"></a><a href="https://www.leavesongs.com/content/uploadfile/201402/3fb51392101989.jpg" id="ematt:442" target="_blank"></a><a href="https://www.leavesongs.com/content/uploadfile/201402/3fb51392103968.jpg" id="ematt:448" target="_blank"><img alt="02.jpg" border="0" height="443" src="./360webscan防注入脚本全面绕过  离别歌/thum-3fb51392103968.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p>
+	    果断页面变了，绕过了拦截。不过这个时候css和js也变了（因为基地址有问题），但并不影响sql语句和xss的执行，注入什么的还是能继续的。<br/>
+    我们再随便试一个不知什么版本的cmseasy，都没有拦截：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201402/f9961392018718.jpg" id="ematt:438" target="_blank"></a><a href="https://www.leavesongs.com/content/uploadfile/201402/f9961392101991.jpg" id="ematt:444" target="_blank"></a><a href="https://www.leavesongs.com/content/uploadfile/201402/f9961392103969.jpg" id="ematt:450" target="_blank"><img alt="03.jpg" border="0" height="569" src="./360webscan防注入脚本全面绕过  离别歌/thum-f9961392103969.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p>
+<br/>
+</p>
+<p>
+<br/>
+</p>
+</br></div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="b43584e6af015708994fcf7daf8e75962b321bed"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./360webscan防注入脚本全面绕过  离别歌/b43584e6af015708994fcf7daf8e75962b321bed"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="303">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="cEzhNjpBHaBuFGJp4pv4KRJjr6ErhLLjKYUNBNBQ8XvTFl7ESGZOjvLoAa7z0fAt"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./360webscan防注入脚本全面绕过  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./360webscan防注入脚本全面绕过  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

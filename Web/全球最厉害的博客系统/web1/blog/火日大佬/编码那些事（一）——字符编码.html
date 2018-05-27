@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<title>编码那些事（一）——字符编码</title>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="320" name="MobileOptimized"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<meta content="" name="description"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="编码那些事（一）——字符编码" name="twitter:title"/>
+<meta content="" name="twitter:description"/>
+<meta content="http://www.firesun.me" property="og:url"/>
+<meta content="article" property="og:type"/>
+<meta content="编码那些事（一）——字符编码" property="og:title"/>
+<meta content="" property="og:description"/>
+<meta content="火日小站" property="og:site_name"/>
+<meta content="编码那些事（一）——字符编码" itemprop="name"/>
+<meta content="" itemprop="description"/>
+<meta content="" name="theme-color"/>
+<link href="./编码那些事（一）——字符编码/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+<link href="./编码那些事（一）——字符编码/apple-touch-icon-precomposed.png" rel="apple-touch-icon"/>
+<link href="//fonts.googleapis.com/" rel="dns-prefetch"/>
+<link href="//fonts.googleapis.com/css?family=Noto+Serif:400,700,400italic|Open+Sans:700,400&amp;subset=latin,latin-ext" rel="stylesheet"/>
+<link href="./编码那些事（一）——字符编码/main.min.cssv=92699c119f" rel="stylesheet">
+<script src="./编码那些事（一）——字符编码/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+if (!window.jQuery) {
+	var script = document.createElement('script');
+	script.src = "/assets/js/jquery.min.js?v=92699c119f";
+	document.body.appendChild(script);
+}
+var ga_ua = 'UA-XXXXX-X';
+
+var disqus_shortname = 'firesun';
+
+var enable_pjax = true;
+// Pace Options
+// ==============
+window.paceOptions = {
+	catchupTime: 100,
+	minTime: 100,
+	elements: false,
+	restartOnRequestAfter: 500,
+	startOnPageLoad: false
+}
+// Ghostium Globals
+// ==============
+window.GHOSTIUM = {};
+GHOSTIUM.haveDisqus = typeof disqus_shortname !== 'undefined' && disqus_shortname !== 'example';
+GHOSTIUM.enablePjax = typeof enable_pjax !== 'undefined' ? enable_pjax : true;
+    </script>
+<script src="./编码那些事（一）——字符编码/head-scripts.min.jsv=92699c119f"></script>
+<link href="./编码那些事（一）——字符编码/bian-ma-na-xie-shi-yi-zi-fu-bian-ma" rel="canonical">
+<meta content="origin" name="referrer">
+<meta content="火日小站" property="og:site_name">
+<meta content="article" property="og:type">
+<meta content="编码那些事（一）——字符编码" property="og:title">
+<meta content="ASCII 、GB2312、GBK、Unicode、UTF-8，相信大家对这些编码的名字都不陌生，但是说出他们究竟是啥可能就没有那么容易，其实以上编码都属于字符编码（Character encoding），所以我们第一章先来了解一下字符编码。 定义 先来看看维基的定义：字符编码、字集码是把字符集中的字符编码为指定集合中某一对象（例如：比特模式、自然数序列、8位组或者电脉冲），以便文本在计算机中存储和通过通信网络的传递。常见的例子包括将拉丁字母表编码成摩斯电码和ASCII。 这个定义太拗口了，我们用通俗的话来解释。我们的文字是一个一个的字符，但是计算机的文字是01比特（二进制），当我们想用计算机来存储我们的文字，就需要制定一套规则，通过这个规则我们可以把字符文字翻译成二进制，也可以将二进制翻译回字符文字，而这个规则就是字符编码。 显而易见，这套规则不是唯一的，但是如果有一套规则，大家都使用，这套规则就会渐渐成为标准，一旦所有人都遵守这套标准，我们数据在计算机的世界就能畅通无阻。很遗憾，到现在为止还是有各种编码存在，我们也经常面临转码的问题。不过随着互联网的发展，终于出现了一种通行的编码，RFC2277规定，互联网协议都必须支持UTF-8编码。 相关概念 在开始介绍各种编码之前，我们先捋一捋这些容易混淆的名词： 字符（character）" property="og:description">
+<meta content="http://www.firesun.me/bian-ma-na-xie-shi-yi-zi-fu-bian-ma/" property="og:url">
+<meta content="2016-05-10T02:48:49.000Z" property="article:published_time">
+<meta content="2016-10-15T14:34:18.000Z" property="article:modified_time">
+<meta content="WEB" property="article:tag">
+<meta content="encode" property="article:tag">
+<meta content="summary" name="twitter:card">
+<meta content="编码那些事（一）——字符编码" name="twitter:title">
+<meta content="ASCII 、GB2312、GBK、Unicode、UTF-8，相信大家对这些编码的名字都不陌生，但是说出他们究竟是啥可能就没有那么容易，其实以上编码都属于字符编码（Character encoding），所以我们第一章先来了解一下字符编码。 定义 先来看看维基的定义：字符编码、字集码是把字符集中的字符编码为指定集合中某一对象（例如：比特模式、自然数序列、8位组或者电脉冲），以便文本在计算机中存储和通过通信网络的传递。常见的例子包括将拉丁字母表编码成摩斯电码和ASCII。 这个定义太拗口了，我们用通俗的话来解释。我们的文字是一个一个的字符，但是计算机的文字是01比特（二进制），当我们想用计算机来存储我们的文字，就需要制定一套规则，通过这个规则我们可以把字符文字翻译成二进制，也可以将二进制翻译回字符文字，而这个规则就是字符编码。 显而易见，这套规则不是唯一的，但是如果有一套规则，大家都使用，这套规则就会渐渐成为标准，一旦所有人都遵守这套标准，我们数据在计算机的世界就能畅通无阻。很遗憾，到现在为止还是有各种编码存在，我们也经常面临转码的问题。不过随着互联网的发展，终于出现了一种通行的编码，RFC2277规定，互联网协议都必须支持UTF-8编码。 相关概念 在开始介绍各种编码之前，我们先捋一捋这些容易混淆的名词： 字符（character）" name="twitter:description">
+<meta content="http://www.firesun.me/bian-ma-na-xie-shi-yi-zi-fu-bian-ma/" name="twitter:url">
+<meta content="Written by" name="twitter:label1">
+<meta content="火日攻天" name="twitter:data1">
+<meta content="Filed under" name="twitter:label2">
+<meta content="WEB, encode" name="twitter:data2">
+<script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "Article",
+    "publisher": "火日小站",
+    "author": {
+        "@type": "Person",
+        "name": "火日攻天",
+        "image": "http://www.firesun.me/content/images/2016/04/avatar.png",
+        "url": "http://www.firesun.me/author/firesun/",
+        "sameAs": "http://www.firesun.me/"
+    },
+    "headline": "编码那些事（一）——字符编码",
+    "url": "http://www.firesun.me/bian-ma-na-xie-shi-yi-zi-fu-bian-ma/",
+    "datePublished": "2016-05-10T02:48:49.000Z",
+    "dateModified": "2016-10-15T14:34:18.000Z",
+    "keywords": "WEB, encode",
+    "description": "ASCII 、GB2312、GBK、Unicode、UTF-8，相信大家对这些编码的名字都不陌生，但是说出他们究竟是啥可能就没有那么容易，其实以上编码都属于字符编码（Character encoding），所以我们第一章先来了解一下字符编码。 定义 先来看看维基的定义：字符编码、字集码是把字符集中的字符编码为指定集合中某一对象（例如：比特模式、自然数序列、8位组或者电脉冲），以便文本在计算机中存储和通过通信网络的传递。常见的例子包括将拉丁字母表编码成摩斯电码和ASCII。 这个定义太拗口了，我们用通俗的话来解释。我们的文字是一个一个的字符，但是计算机的文字是01比特（二进制），当我们想用计算机来存储我们的文字，就需要制定一套规则，通过这个规则我们可以把字符文字翻译成二进制，也可以将二进制翻译回字符文字，而这个规则就是字符编码。 显而易见，这套规则不是唯一的，但是如果有一套规则，大家都使用，这套规则就会渐渐成为标准，一旦所有人都遵守这套标准，我们数据在计算机的世界就能畅通无阻。很遗憾，到现在为止还是有各种编码存在，我们也经常面临转码的问题。不过随着互联网的发展，终于出现了一种通行的编码，RFC2277规定，互联网协议都必须支持UTF-8编码。 相关概念 在开始介绍各种编码之前，我们先捋一捋这些容易混淆的名词： 字符（character）"
+}
+    </script>
+<meta content="Ghost 0.7" name="generator">
+<link href="./编码那些事（一）——字符编码/rss" rel="alternate" title="火日小站" type="application/rss+xml">
+<link href="./编码那些事（一）——字符编码/zTreeStyle.css" rel="stylesheet" type="text/css"/>
+</link></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></link></link></head>
+<body class="post-template tag-web tag-encode">
+<button class="drawer-button" data-action="open-drawer" id="drawer-button"><i class="fa fa-bars"></i></button>
+<nav class="drawer" tabindex="-1">
+<div class="drawer-container">
+<!--.drawer-search(role="search")-->
+<ul class="drawer-list" role="navigation">
+<li class="drawer-list-item">
+<a data-pjax="" href="/">
+<i class="fa fa-home"></i>Home
+  </a>
+</li>
+<li class="drawer-list-item">
+<a data-pjax="" href="/tag/web">
+<i class="fa fa-rocket"></i>Web
+  </a>
+</li>
+<li class="drawer-list-item">
+<a href="http://www.firesun.me/rss/">
+<i class="fa fa-rss"></i>Subscribe to Feed
+  </a>
+</li>
+<li class="drawer-list-divider"></li>
+<li class="drawer-list-item drawer-list-title">
+  Follow me
+</li>
+<li class="drawer-list-item">
+<a href="http://twitter.com" target="_blank">
+<i class="fa fa-twitter"></i>Twitter
+  </a>
+</li>
+<li class="drawer-list-item">
+<a href="http://github.com/firesunCN" target="_blank">
+<i class="fa fa-github"></i>Github
+  </a>
+</li>
+</ul>
+</div>
+</nav>
+<div class="drawer-overlay"></div>
+<main class="container" id="container" role="main">
+<div class="surface">
+<div class="surface-container">
+<div class="content" data-pjax-container="">
+<section class="wrapper wrapper-post">
+<div class="wrapper-container">
+<article class="post post tag-web tag-encode" itemscope="" itemtype="http://schema.org/BlogPosting" role="article">
+<section class="post-container">
+<header class="post-header">
+<ul class="post-meta-list">
+<li class="post-meta-item">
+<time datetime="2016-05-09" itemprop="datePublished">
+                  a year ago
+                </time>
+</li>
+<li class="post-meta-item">
+<a data-pjax="" href="/tag/web/" itemprop="articleSection">WEB</a>, 
+                    <a data-pjax="" href="/tag/encode/" itemprop="keywords">encode</a>
+</li>
+<li class="post-meta-item">
+<a data-disqus-identifier="16" href="#disqus_thread">Comments</a>
+</li>
+</ul>
+<h1 class="post-title" itemprop="name headline"><a data-pjax="" href="/bian-ma-na-xie-shi-yi-zi-fu-bian-ma/" itemprop="url" title="编码那些事（一）——字符编码">编码那些事（一）——字符编码</a></h1>
+<!--h2 itemprop="about" class="post-subtitle"></h2-->
+</header>
+<aside class="post-side">
+<div class="post-author">
+<a class="post-author-avatar" href="http://www.firesun.me/">
+<img alt="火日攻天" src="./编码那些事（一）——字符编码/avatar.png"/>
+</a>
+<div class="post-author-info">
+<a class="post-author-name" href="http://www.firesun.me/">
+                  火日攻天
+                </a>
+<p class="post-author-bio"></p>
+</div>
+</div>
+<ul class="ztree" id="tree" style="width:100%"></ul>
+</aside>
+<div class="post-body" itemprop="articleBody">
+<p>ASCII 、GB2312、GBK、Unicode、UTF-8，相信大家对这些编码的名字都不陌生，但是说出他们究竟是啥可能就没有那么容易，其实以上编码都属于字符编码（Character encoding），所以我们第一章先来了解一下字符编码。</p>
+<h1 id="">定义</h1>
+<p>先来看看维基的定义：字符编码、字集码是把字符集中的字符编码为指定集合中某一对象（例如：比特模式、自然数序列、8位组或者电脉冲），以便文本在计算机中存储和通过通信网络的传递。常见的例子包括将拉丁字母表编码成摩斯电码和ASCII。</p>
+<p>这个定义太拗口了，我们用通俗的话来解释。我们的文字是一个一个的字符，但是计算机的文字是01比特（二进制），当我们想用计算机来存储我们的文字，就需要制定一套规则，通过这个规则我们可以把字符文字翻译成二进制，也可以将二进制翻译回字符文字，而这个规则就是字符编码。</p>
+<p>显而易见，这套规则不是唯一的，但是如果有一套规则，大家都使用，这套规则就会渐渐成为标准，一旦所有人都遵守这套标准，我们数据在计算机的世界就能畅通无阻。很遗憾，到现在为止还是有各种编码存在，我们也经常面临转码的问题。不过随着互联网的发展，终于出现了一种通行的编码，RFC2277规定，互联网协议都必须支持UTF-8编码。</p>
+<h1 id="">相关概念</h1>
+<p>在开始介绍各种编码之前，我们先捋一捋这些容易混淆的名词：</p>
+<h3 id="character">字符（character）</h3>
+<p>信息的单位，或者可以说具有语义的最小单元，简单来讲就是一个英文、一个汉字等等</p>
+<h3 id="characterset">字符集（character set）</h3>
+<p>顾名思义，就是字符的集合。不过通常我们都会限定一个场景，比如英语的所有字符构成的集合也就是拉丁字符集。而我们所讲的一个个字符编码也是针对某个字符集进行的，所以字符编码不一定是万能的，如果某个字符没有出现在这个字符集中，针对他的字符编码就没法处理这个字符。</p>
+<h3 id="codedcharacterset">编码字符集（coded character set）</h3>
+<p>如果有这样一个字符集，和一套编码方案，在这个方案中，每一个字符都唯一对应了一个唯一的数字，那么这个字符集就叫做编码字符集。</p>
+<h3 id="codepointcodeposition">码位、编码位置（code point、code position）</h3>
+<p>就是刚才在编码字符集里所说的那个唯一的数字，是组成码空间的数值，比如ASCII码包含128个码位，范围是0到7F。</p>
+<h3 id="codeunit">码元（code unit）</h3>
+<p>是指一个已编码的文本中具有最短的比特组合的单元，其实也就是最短的有意义的二进制单元。一个码位可能由若干个码元组成，而这完全取决于编码方案，所以像UTF-8这种可变长的编码，其码元长度也是8bit，而ASCII码元长度是7bit。</p>
+<h3 id="codepage">代码页（code page）</h3>
+<p>什么是代码页，下图就是。</p>
+<p><img alt="code page" src="./编码那些事（一）——字符编码/Codepage-437.png"/></p>
+<p>代码页，也称“内码表”，是特定语言的字符集的一张表，<strong>即一个代码页对应一个字符编码</strong>，所以其实可以把一个代码页等价为一个字符编码。</p>
+<p>早期，代码页是IBM称呼电脑BIOS本身支持的字符集编码的名称。1987年4月，IBM发布了PC-DOS 3.3，正式开始使用16比特的无符号整数标识不同的代码页。当时，通用的操作系统都是命令行界面系统，这些操作系统直接使用BIOS供应的VGA功能来显示字符（或者是一组嵌入在显卡字符生成器中的字形），绘制不同语言的字符依靠BIOS硬件厂商（在当时就是指制定业界标准的IBM）提供的功能。如果想更换所支持的字符集，就必须换上支持该字符集的ROM芯片。所以在那时候操作系统的编码支持是依赖于BIOS的编码，而微软作为DOS操作系统的软件厂商，并不拥有绘制这些字符集的知识产权。所以这些字符集的绘制实现，称作OEM代码页。</p>
+<p>随着图形化的到来解决了此问题（最初被广为接受的是Windows 3.1），图形操作系统使用自己的字符呈现引擎（rendering engine），具有了字符绘制的功能，可以支持多个不同的字符集编码，微软在Windows操作系统没有转向UTF-16作为内码实现之前（也就是在Windows 2000之前），针对不同的使用地区与国家，定义了一系列的支持不同语言字符集的代码页，被称作"Windows（或ANSI）代码页"（Windows代码页最初是根据ANSI草案实现的，这个草案最终成为ISO 8859-1。这是Windows代码页被称作ANSI代码页的缘由，ANSI就是American National Standards Institute的缩写）。可以看出，其实是微软继续沿用了代码页一词，而Unix或Linux不使用代码页概念，它们使用charmap。</p>
+<p>早期IBM和微软内部使用特别数字来标记这些编码，这个习惯被操作系统沿用了下来。虽然大多数编码已经有了自己的名称，很多微软程序还使用这些数字来称呼某编码。比如代码页20936，就是GB2312。我们在cmd下使用chcp命令，可以看到cmd使用的是代码页936，也就是GBK编码。
+<img alt="" src="./编码那些事（一）——字符编码/QQ--20160510104222.png"/></p>
+<p>对于中日韩的多字节编码的代码页，OEM代码页与ASCII代码页相同。而对于单字节编码的代码页，如英语、俄语等，OEM代码页与ASCII代码页一般不同。这是因为在MS-DOS时代，计算机只能使用字符界面在屏幕上画出表格的框线，所以OEM代码页要在单字节字符集中包含方框绘制字符。此外，OEM代码页437提供的有限的变音符号，只能覆盖法语、西班牙语、德语、意大利语、瑞典语的字母表，而在Windows的早期时代，仍然使用单字节字符集，这些不必要的方框绘制字符就被舍弃了，取而代之的是丹麦语、挪威语、冰岛语、加拿大法语的变音符号。为此，一个用OEM代码页的字节流要在Windows上正确显示，就需要或者显式设定使用OEM代码页，或者要显式把OEM代码页的字节流转化为ASCII代码页的字符流。</p>
+<h3 id="internalcodeneima">内码（internal code，neima）</h3>
+<p>从英文也可以叫neima看出，很明显这是一个中国人创造的词汇，其实就是指计算机存储字符比如中文时使用的编码，更通俗的说，就是这个<strong>字符在硬盘里是怎么存的</strong>。专业的定义是“将资讯编码后，透过某种方式储存在特定记忆装置时，装置内部的编码形式”。在以前不同的本地化系统中，会有不同的内码，比如繁体中文版windows使用Big5，简体中文版的windows是用GB2312，英文系统即为ASCII，而现在，微软均使用Unicode（<strong>准确的说是UTF-16LE</strong>）作为内码。</p>
+<h3 id="">外码</h3>
+<p>很明显是相对内码而言，也叫汉字输入码。通俗的讲就是用<strong>输入法输入汉字时使用的编码</strong>。可以是拼音，仓颉、行列、大易、呒虾米、注音。当然专业一点的定义就是“外在的”经过学习之后，可直接了解的编码形式（例如：文字或语音符号）</p>
+<h1 id="">总结</h1>
+<p>历史上字符编码（character encoding），字符映射（character map），字符集（character set），代码页（code page）往往是同义概念，都是用来表示字符表（repertoire）中的字符如何编码为码元的流（stream of code units），所以在使用中经常混用，虽然这些概念我们经常混用，不过在讲解各编码之前，我们还是来再次强调这些概念的区别，因为有些称呼可能是被误用至今（比如由于微软的原因，我们在文本编辑器里常常能看到的Unicode，其实特指UTF-16LE编码）</p>
+<p>我们从设计一个字符编码说起，设计一个字符编码可分为三步，而这三步对应着三个应该分清的概念：</p>
+<ol>
+<li><p>确定要编码哪些字符(<strong>字符集</strong>)</p></li>
+<li><p>设计一个字符到数字的映射关系，将每一个要编码的字符都唯一映射到一个唯一的数字，这个唯一数字能够代表这个字符(<strong>编码字符集</strong>)  </p></li>
+<li>设计一个数字到二进制的映射关系，即如何将这个数字存储到计算机（<strong>内码</strong>）</li>
+</ol>
+<p>分清这三个过程就很容易区别区位码，国标码，Unicode，UTF-8这些容易混淆的概念，我们依次解释，主要容易混淆的是二三步，我们重点解释。</p>
+<p>第二步，从英文上讲是coded character set，就是将一个字符转换成数字，或者一个数字转换成字符，也就是一个<strong>编号</strong>的过程，一般来说是从0开始编号，而编好号的字符集就是编码字符集。而编的号就叫做码位。</p>
+<p>但是，当我们需要将字符存储到计算机时，往往不能直接存储这个编号，比如GB2312中，“火”字的编号是2780，对应的十六进制是0X0ADC，但是如果我们直接存储这个编号，在解码的时候就会遇到问题，0X0A可能会被当成ASCII字符处理，被翻译成了换行符，所以为了兼容的考虑（当然还有其他很多因素的考虑，比如节省存储空间），“火”字并没有直接存储编号，而是做了第三步的转换，讲编号做了一个映射，转换为计算机上存储的方式0XBBF0。</p>
+<p>由于字符到编号是一一映射关系，编号到实际存储的二进制是一一映射的关系，所以字符到实际存储的二进制也是一一对应的关系，所以实际使用中我们都是直接跨过了第二步，直接将一个字符转为二进制，直接将二进制转为字符，而这个映射关系才是真正意义上的<strong>字符编码</strong>（character encoding），在中文里有一个独创的词汇，<strong>内码</strong>，而一堆同义词比如代码页就都是指这个映射关系。</p>
+<p>我们可以看出，第二步往往是在设计一种编码的时候才会用到，而第三步其实是第二步的实现方式，同一个编码字符集可以有多种存储方式（实现方式），而<strong>每一个实现方式就是一种字符编码，即使他们的编码字符集是一样的</strong>。而平常我们常听说的编码大多都是指第三步，就是真正意义上的字符编码（内码）</p>
+<p>当然ASCII就比较特殊了，由于是元老级的编码方案，在设计之初根本不需要考虑兼容性问题，不过即使是这样ASCII也不是直接存储编号的（7bit），而是存储一字节（8bit），历史原因我们会在ASCII的章节介绍。</p>
+<p>了解了这些知识我们就能先对一些易于混淆的概念做一个区别。</p>
+<ul>
+<li><strong>区位码和国标码</strong>：区位码就是第二步，就是编码字符集，国标码是区位码的一种实现方式，所以国标码是第三步，是字符编码。</li>
+<li><strong>Unicode和UTF-8</strong>：Unicode就是第二步，就是编码字符集，UTF-8是Unicode的一种实现方式，即第三步，是字符编码。</li>
+</ul>
+<p>所以Unicode和国标码其实是属于编码字符集，和字符编码是两个概念，不过在大部分人的印象里，“Unicode编码”这个词是存在的吧，而且一直认为他是字符编码对吧？其实这时候的Unicode编码特指UCS-2，（现在已经发展为UTF-16LE），而UCS-2（UTF-16）确实是字符编码，而这个误用完全是历史原因，在微软正式将内码确定为UCS-2时，Unicode的主流实现方式就是UCS-2编码，所以Windows操作系统里比如记事本的编码选项都使用Unicode一词来代指UCS-2（UTF-16）编码，而就是由于这个误用导致了一个约定俗成的现象，当我们提到Unicode编码时，就是特指UTF-16（现在UCS-2已废弃）编码。
+<img alt="" src="./编码那些事（一）——字符编码/QQ--20160510221452.png"/></p>
+<p>不过如果我们把Unicode和UTF-8之类的编码做比较的时候，要明白Unicode其实就是一个编码字符集Universal Coded Character Set (UCS) standard，他不是字符编码，而UTF-8，UTF-16，UTF-32，UCS-2，UCS-4都是Unicode的实现，都是字符编码，至于UCS和UTF之间的关系，我们在Unicode篇再做说明。</p>
+<p>以上就是字符编码的内容，下一节我们就要开始介绍具体的编码，第一个就是我们最耳熟能详的编码ASCII。</p>
+</div>
+<footer class="post-footer">
+<div class="post-author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<a class="post-author-avatar" href="http://www.firesun.me/">
+<img alt="火日攻天" itemprop="image" src="./编码那些事（一）——字符编码/avatar.png"/>
+</a>
+<div class="post-author-info">
+<h4 class="post-footer-heading">Written By</h4>
+<a class="post-author-name" href="http://www.firesun.me/" itemprop="url">
+<span itemprop="name">火日攻天</span>
+</a>
+<p class="post-author-bio" itemprop="description"></p>
+<p class="post-author-website">
+<a href="http://www.firesun.me/" rel="nofollow">http://www.firesun.me/</a>
+</p>
+<p class="post-info">
+<b class="post-info-title">Published on</b>
+<time class="post-date">May 09, 2016</time>
+</p>
+</div>
+</div>
+<div class="post-social">
+<h4 class="post-footer-heading">Spread the word</h4>
+<a data-action="share-twitter" href="#"><i class="fa fa-fw fa-lg fa-twitter"></i></a>
+<a data-action="share-facebook" href="#"><i class="fa fa-fw fa-lg fa-facebook"></i></a>
+<a data-action="share-gplus" href="#"><i class="fa fa-fw fa-lg fa-google-plus"></i></a>
+</div>
+</footer>
+</section>
+<section class="post-comments" itemprop="comment">
+<div id="disqus_thread"></div>
+</section>
+</article>
+<footer class="footer" role="contentinfo">
+<p><small>© 2017. All Rights Reserved.</small></p>
+<p><small><a href="http://ghostium.oswaldoacauan.com/" target="_blank">Ghostium Theme</a> by <a href="http://twitter.com/oswaldoacauan" target="_blank">@oswaldoacauan</a></small></p>
+<p><small>Proudly published with <a href="http://ghost.org" target="_blank">Ghost</a></small></p>
+</footer>
+</div>
+</section>
+<script type="text/javascript">
+  if(GHOSTIUM.haveDisqus) {
+    var disqus_identifier = '16';
+
+    if(typeof DISQUS !== 'object') {
+      (function () {
+      var s = document.createElement('script'); s.async = true;
+      s.type = 'text/javascript';
+      s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+      }());
+    }
+  } else {
+    document.querySelector('.post-comments').remove();
+  }
+</script>
+</div>
+</div>
+</div>
+</main>
+<script src="./编码那些事（一）——字符编码/jquery.ztree.core-3.5.min.js" type="text/javascript"></script>
+<script src="./编码那些事（一）——字符编码/jquery.ztree_toc.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	$('#tree').ztree_toc({
+	});
+});
+</script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?a05502e657ee797b511d22bf25fae2a5";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./编码那些事（一）——字符编码/foot-scripts.min.jsv=92699c119f"></script>
+<script type="text/javascript">
+
+      if(GHOSTIUM.haveDisqus) {
+        (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+        }());
+      }
+    </script>
+</body>
+</html>

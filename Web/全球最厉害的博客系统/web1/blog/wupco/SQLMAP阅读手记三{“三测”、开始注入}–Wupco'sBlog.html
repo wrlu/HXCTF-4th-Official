@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<title>SQLMAP|阅读手记三{“三测”、开始注入} – Wupco's Blog</title>
+<script src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/jquery.jsver=1.12.4" type="text/javascript"></script>
+<script src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/jquery-migrate.min.jsver=1.4.1" type="text/javascript"></script>
+<link href="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/rest_route=" rel="https://api.w.org/"/>
+<link href="http://www.wupco.cn/xmlrpc.php?rsd" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<link href="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/p=378" rel="prev" title="SQLMAP|阅读手记二{参数翻译、系统初始化}"/>
+<link href="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/p=1451" rel="next" title="ZCTF2017打到心态爆炸后的反思"/>
+<link href="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/p=1437" rel="canonical"/>
+<link href="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/p=1437" rel="shortlink"/>
+<script src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/shCore.js" type="text/javascript"></script><link href=" http://www.wupco.cn/wp-content/plugins/wp-ueditor2/ueditor/third-party/SyntaxHighlighter/shCoreDefault.css" rel="stylesheet" type="text/css"/><link href="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="icon" sizes="32x32"/>
+<link href="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="icon" sizes="192x192"/>
+<link href="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="apple-touch-icon-precomposed"/>
+<meta content="http://www.wupco.cn/wp-content/uploads/2016/11/R5K8RH7ACHA7KEV8P.gif" name="msapplication-TileImage">
+<link href="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/favicon.png" rel="shortcut icon" type="image/vnd.microsoft.icon"/>
+<link href="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/style.css" rel="stylesheet" type="text/css">
+<!--[if lt IE 9]>
+<script src="//cdn.bootcss.com/html5shiv/r29/html5.min.js"></script>
+<script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+</link></meta></head>
+<body>
+<div class="container" id="main">
+<div class="pjax">
+<header id="header">
+<div class="container">
+<h1 class="logo">
+<i class="iconfont"></i><a href="http://www.wupco.cn">Wupco's Blog</a>
+</h1>
+<nav class="menu_click" id="topMenu">
+<div class="menu-menu-1-container"><ul class="menu" id="menu-menu-1"><li><a href="http://www.wupco.cn/">首页</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1174">关于我</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1448">数据备份</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1959">CTF备忘录</a></li>
+</ul></div><i class="i_1"></i>
+<i class="i_2"></i>
+</nav>
+</div>
+</header>
+<section class="blockGroup">
+<h2 class="s_title" itemprop="name headline">SQLMAP|阅读手记三{“三测”、开始注入}</h2>
+<article class="post single" itemscope="" itemtype="http://schema.org/BlogPosting">
+<blockquote><p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>sqlmap可以说是目前使用人数最多，功能最复杂的注入工具。作为一款开源工具，开发者有意的让我们自行去阅读并扩充，作为一个Web狗，阅读sqlmap源码也是有必要的，更何况从软件工程的角度，sqlmap的源码部署也是很值得学习的。</span></p>
+</blockquote>
+<h2><span style='font-family: 微软雅黑, "Microsoft YaHei";'>1 自测<br/></span></h2>
+<pre class="brush:python;toolbar:false">if conf.profile:
+            profile()
+        elif conf.smokeTest:
+            smokeTest()
+        elif conf.liveTest:
+            liveTest()</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>profile()定义在/lib/core/profiling.py中</span></p>
+<p><span style="font-family:微软雅黑, Microsoft YaHei">完成的是对性能的自测功能，调用了</span></p>
+<pre class="brush:python;toolbar:false">gprof2dot xdot</pre>
+<p><span style="font-family:微软雅黑, Microsoft YaHei">等外部库，输出为图形文件，可以直观的看出整个程序每个步骤的占用时间百分比，函数调用次数，颜色能直观的表示出瓶颈所在。例如：</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><img src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/80141489154169.png" style="width: 746px; height: 463px;" title="image_8.png"/></span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'> smokeTest()定义在/lib/core/testing.py中,译为冒烟测试，就是对一个软件进行尽可能的功能覆盖测试，最早由微软提出，这个在软件工程的课程里有所提及。</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><img src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/55431489154169.png" style="width: 823px; height: 280px;"/></span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>  liveTest()同样定义再/lib/core/testing.py中</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>  它是从livetests.xml里面加载用于测试注入功能的网站和配置样例，进行全面的注入测试。</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><img src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/96611489154169.png"/></span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><img src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/84421489154169.png"/></span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><img src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/52131489154169.png"/></span></p>
+<h2><span style='font-family: 微软雅黑, "Microsoft YaHei";'>2 开始注入<br/></span></h2>
+<pre class="brush:python;toolbar:false">else:
+            try:
+                start()</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>这时候我们就要跟踪到/lib/controller/controller.py里的start()函数了</span></p>
+<pre class="brush:python;toolbar:false">def start():
+    """
+    This function calls a function that performs checks on both URL
+    stability and all GET, POST, Cookie and User-Agent parameters to
+    check if they are dynamic and SQL injection affected
+    """</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>检查url访问的稳定性以及所有的GET,POST,Cookie和UA里面的参数是否是动态参数，以便来进行注入测试</span></p>
+<h3><span style='font-family: 微软雅黑, "Microsoft YaHei";'>2.1 数据库直连</span></h3>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>首先第一块是数据库直连的执行。<br/></span></p>
+<pre class="brush:python;toolbar:false">    if conf.direct:
+        initTargetEnv()
+        setupTargetEnv()
+        action()
+        return True</pre>
+<h4><span style='font-family: 微软雅黑, "Microsoft YaHei";'><span style='font-family: 微软雅黑, "Microsoft YaHei";'>2.1.1 initTargetEnv()</span></span></h4>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>看一下initTargetEnv()，在/lib/core/target.py 初始化目标的环境。</span></p>
+<pre class="brush:python;toolbar:false">def initTargetEnv():
+    """
+    Initialize target environment.
+    """
+    #如果有多个目标数据库，清空所有有关信息并重新指定数据库
+    if conf.multipleTargets:
+        if conf.hashDB:
+            conf.hashDB.close()
+
+        if conf.cj:
+            resetCookieJar(conf.cj)
+
+        conf.paramDict = {}
+        conf.parameters = {}
+        conf.hashDBFile = None
+
+        _setKnowledgeBaseAttributes(False)
+        _restoreMergedOptions()
+        _setDBMS()
+        
+    #对用户--data参数的输入进行编码
+    if conf.data:
+        class _(unicode):
+            pass
+
+        kb.postUrlEncode = True
+
+        for key, value in conf.httpHeaders:
+            if key.upper() == HTTP_HEADER.CONTENT_TYPE.upper():
+                kb.postUrlEncode = "urlencoded" in value
+                break
+
+        if kb.postUrlEncode:
+            original = conf.data
+            conf.data = _(urldecode(conf.data))
+            setattr(conf.data, UNENCODED_ORIGINAL_VALUE, original)
+            kb.postSpaceToPlus = '+' in original</pre>
+<h4><span style='font-family: 微软雅黑, "Microsoft YaHei";'>2.1.2 <span style='font-family: 微软雅黑, "Microsoft YaHei";'>setupTargetEnv()</span></span></h4>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>看一下setupTargetEnv()</span></p>
+<pre class="brush:python;toolbar:false">def setupTargetEnv():
+    _createTargetDirs()
+    _setRequestParams()
+    _setHashDB()
+    _resumeHashDBValues()
+    _setResultsFile()
+    _setAuthCred()</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>_createTargetDirs()是创建输出的目录，首先是要对路径和权限的检查</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><img src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/71481489154169.png"/></span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>如果错误就进行相关报错并把输出目录调整成临时目录。</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>这里把url，host，data等信息写入target.txt。</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><img src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/99101489154169.png"/></span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>然后是</span></p>
+<pre class="brush:python;toolbar:false"> _createDumpDir()
+    _createFilesDir()
+    _configureDumper()</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>创建dump数据导出的目录，创建整个任务的目录（通常以host命名），创建配置信息导出的目录（可以是xml形式导出）。</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>_setRequestParams() 检查请求参数，这里主要是指POST方式的附加--data的内容</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>首先是对GET参数的检查<br/></span></p>
+<pre class="brush:python;toolbar:false"> # Perform checks on GET parameters
+    if conf.parameters.get(PLACE.GET):
+        #获取到GET的参数
+        parameters = conf.parameters[PLACE.GET]
+        paramDict = paramToDict(PLACE.GET, parameters)
+
+        if paramDict:
+            conf.paramDict[PLACE.GET] = paramDict
+            testableParameters = True</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>然后是对POST参数的检查（有data和没有附加data）</span></p>
+<pre class="brush:python;toolbar:false"># Perform checks on POST parameters
+    if conf.method == HTTPMETHOD.POST and conf.data is None:
+        logger.warn("detected empty POST body")
+        conf.data = ""
+
+    if conf.data is not None:
+        conf.method = HTTPMETHOD.POST if not conf.method or conf.method == HTTPMETHOD.GET else conf.method
+        hintNames = []</pre>
+<p><span style="font-family:微软雅黑, Microsoft YaHei">接下来是检索注入标记符并给出提示询问是否对标记点检测注入</span></p>
+<pre class="brush:python;toolbar:false"> def process(match, repl):
+            #先取出整个字符串
+            retVal = match.group(0)
+            #如果没有指定注入参数
+            if not (conf.testParameter and match.group("name") not in conf.testParameter):
+                retVal = repl
+                while True:
+                    _ = re.search(r"\\g&lt;([^&gt;]+)&gt;", retVal)
+                    if _:
+                        retVal = retVal.replace(_.group(0), match.group(int(_.group(1)) if _.group(1).isdigit() else _.group(1)))
+                    else:
+                        break
+                #如果参数中有注入标记符
+                if CUSTOM_INJECTION_MARK_CHAR in retVal:
+                    hintNames.append((retVal.split(CUSTOM_INJECTION_MARK_CHAR)[0], match.group("name")))
+            return retVal
+        #如果data中有注入标记符(这里默认的就是*星号，可以用来指定注入位置)
+        if kb.processUserMarks is None and CUSTOM_INJECTION_MARK_CHAR in conf.data:
+            message = "custom injection marking character ('%s') found in option " % CUSTOM_INJECTION_MARK_CHAR
+            message += "'--data'. Do you want to process it? [Y/n/q] "
+            test = readInput(message, default="Y")
+            if test and test[0] in ("q", "Q"):
+                raise SqlmapUserQuitException
+            else:
+                kb.processUserMarks = not test or test[0] not in ("n", "N")
+
+                if kb.processUserMarks:
+                    kb.testOnlyCustom = True</pre>
+<p><span style="font-family:微软雅黑, Microsoft YaHei"></span></p>
+<p><span style="font-family:微软雅黑, Microsoft YaHei">用户输入‘N’（不对data里的标记符进行测试）或者不存在注入标记符</span></p>
+<pre class="brush:python;toolbar:false">if not (kb.processUserMarks and CUSTOM_INJECTION_MARK_CHAR in conf.data):</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>确定的JSON形式的输入</span></p>
+<pre class="brush:python;toolbar:false">if re.search(JSON_RECOGNITION_REGEX, conf.data):
+                message = "JSON data found in %s data. " % conf.method
+                message += "Do you want to process it? [Y/n/q] "
+                test = readInput(message, default="Y")
+                if test and test[0] in ("q", "Q"):
+                    raise SqlmapUserQuitException
+                elif test[0] not in ("n", "N"):
+                    conf.data = getattr(conf.data, UNENCODED_ORIGINAL_VALUE, conf.data)
+                    conf.data = conf.data.replace(CUSTOM_INJECTION_MARK_CHAR, ASTERISK_MARKER)
+                    conf.data = re.sub(r'("(?P&lt;name&gt;[^"]+)"\s*:\s*"[^"]+)"', functools.partial(process, repl=r'\g&lt;1&gt;%s"' % CUSTOM_INJECTION_MARK_CHAR), conf.data)
+                    conf.data = re.sub(r'("(?P&lt;name&gt;[^"]+)"\s*:\s*)(-?\d[\d\.]*\b)', functools.partial(process, repl=r'\g&lt;0&gt;%s' % CUSTOM_INJECTION_MARK_CHAR), conf.data)
+                    match = re.search(r'(?P&lt;name&gt;[^"]+)"\s*:\s*\[([^\]]+)\]', conf.data)
+                    if match and not (conf.testParameter and match.group("name") not in conf.testParameter):
+                        _ = match.group(2)
+                        _ = re.sub(r'("[^"]+)"', '\g&lt;1&gt;%s"' % CUSTOM_INJECTION_MARK_CHAR, _)
+                        _ = re.sub(r'(\A|,|\s+)(-?\d[\d\.]*\b)', '\g&lt;0&gt;%s' % CUSTOM_INJECTION_MARK_CHAR, _)
+                        conf.data = conf.data.replace(match.group(0), match.group(0).replace(match.group(2), _))
+                    kb.postHint = POST_HINT.JSON</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>类JSON形式的输入</span></p>
+<pre class="brush:python;toolbar:false"> elif re.search(JSON_LIKE_RECOGNITION_REGEX, conf.data):
+                message = "JSON-like data found in %s data. " % conf.method
+                message += "Do you want to process it? [Y/n/q] "
+                test = readInput(message, default="Y")
+                if test and test[0] in ("q", "Q"):
+                    raise SqlmapUserQuitException
+                elif test[0] not in ("n", "N"):
+                    conf.data = getattr(conf.data, UNENCODED_ORIGINAL_VALUE, conf.data)
+                    conf.data = conf.data.replace(CUSTOM_INJECTION_MARK_CHAR, ASTERISK_MARKER)
+                    conf.data = re.sub(r"('(?P&lt;name&gt;[^']+)'\s*:\s*'[^']+)'", functools.partial(process, repl=r"\g&lt;1&gt;%s'" % CUSTOM_INJECTION_MARK_CHAR), conf.data)
+                    conf.data = re.sub(r"('(?P&lt;name&gt;[^']+)'\s*:\s*)(-?\d[\d\.]*\b)", functools.partial(process, repl=r"\g&lt;0&gt;%s" % CUSTOM_INJECTION_MARK_CHAR), conf.data)
+                    kb.postHint = POST_HINT.JSON_LIKE</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>数组形式的输入</span></p>
+<pre class="brush:python;toolbar:false">elif re.search(ARRAY_LIKE_RECOGNITION_REGEX, conf.data):
+                message = "Array-like data found in %s data. " % conf.method
+                message += "Do you want to process it? [Y/n/q] "
+                test = readInput(message, default="Y")
+                if test and test[0] in ("q", "Q"):
+                    raise SqlmapUserQuitException
+                elif test[0] not in ("n", "N"):
+                    conf.data = conf.data.replace(CUSTOM_INJECTION_MARK_CHAR, ASTERISK_MARKER)
+                    conf.data = re.sub(r"(=[^%s]+)" % DEFAULT_GET_POST_DELIMITER, r"\g&lt;1&gt;%s" % CUSTOM_INJECTION_MARK_CHAR, conf.data)
+                    kb.postHint = POST_HINT.ARRAY_LIKE</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>XML形式的输入</span></p>
+<pre class="brush:python;toolbar:false"> elif re.search(XML_RECOGNITION_REGEX, conf.data):
+                message = "SOAP/XML data found in %s data. " % conf.method
+                message += "Do you want to process it? [Y/n/q] "
+                test = readInput(message, default="Y")
+                if test and test[0] in ("q", "Q"):
+                    raise SqlmapUserQuitException
+                elif test[0] not in ("n", "N"):
+                    conf.data = getattr(conf.data, UNENCODED_ORIGINAL_VALUE, conf.data)
+                    conf.data = conf.data.replace(CUSTOM_INJECTION_MARK_CHAR, ASTERISK_MARKER)
+                    conf.data = re.sub(r"(&lt;(?P&lt;name&gt;[^&gt;]+)( [^&lt;]*)?&gt;)([^&lt;]+)(&lt;/\2)", functools.partial(process, repl=r"\g&lt;1&gt;\g&lt;4&gt;%s\g&lt;5&gt;" % CUSTOM_INJECTION_MARK_CHAR), conf.data)
+                    kb.postHint = POST_HINT.SOAP if "soap" in conf.data.lower() else POST_HINT.XML</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>MULTIPART/XXX 形式的输入</span></p>
+<pre class="brush:python;toolbar:false">elif re.search(MULTIPART_RECOGNITION_REGEX, conf.data):
+                message = "Multipart-like data found in %s data. " % conf.method
+                message += "Do you want to process it? [Y/n/q] "
+                test = readInput(message, default="Y")
+                if test and test[0] in ("q", "Q"):
+                    raise SqlmapUserQuitException
+                elif test[0] not in ("n", "N"):
+                    conf.data = getattr(conf.data, UNENCODED_ORIGINAL_VALUE, conf.data)
+                    conf.data = conf.data.replace(CUSTOM_INJECTION_MARK_CHAR, ASTERISK_MARKER)
+                    conf.data = re.sub(r"(?si)((Content-Disposition[^\n]+?name\s*=\s*[\"'](?P&lt;name&gt;[^\n]+?)[\"']).+?)(((\r)?\n)+--)", functools.partial(process, repl=r"\g&lt;1&gt;%s\g&lt;4&gt;" % CUSTOM_INJECTION_MARK_CHAR), conf.data)
+                    kb.postHint = POST_HINT.MULTIPART</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>整合要测试的参数到集合中</span></p>
+<pre class="brush:python;toolbar:false">if not kb.postHint:
+            if CUSTOM_INJECTION_MARK_CHAR in conf.data:  # later processed
+                pass
+            else:
+                place = PLACE.POST
+
+                conf.parameters[place] = conf.data
+                paramDict = paramToDict(place, conf.data)
+
+                if paramDict:
+                    conf.paramDict[place] = paramDict
+                    testableParameters = True
+else:
+              if CUSTOM_INJECTION_MARK_CHAR not in conf.data:  # in case that no usable parameter values has been found
+                conf.parameters[PLACE.POST] = conf.data</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>如果用户不是正常参数的形式传参，又在这里找到了标记符号，就相当于用户输入了‘Y’（对这里的标记符进行测试），反之则保持原样</span></p>
+<pre class="brush:python;toolbar:false"> kb.processUserMarks = True if (kb.postHint and CUSTOM_INJECTION_MARK_CHAR in conf.data) else kb.processUserMarks</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>没有找到动态参数，要提醒用户</span></p>
+<pre class="brush:python;toolbar:false">    if re.search(URI_INJECTABLE_REGEX, conf.url, re.I) and not any(place in conf.parameters for place in (PLACE.GET, PLACE.POST)) and not kb.postHint and not CUSTOM_INJECTION_MARK_CHAR in (conf.data or "") and conf.url.startswith("http"):
+        warnMsg = "you've provided target URL without any GET "
+        warnMsg += "parameters (e.g. www.site.com/article.php?id=1) "
+        warnMsg += "and without providing any POST parameters "
+        warnMsg += "through --data option"
+        logger.warn(warnMsg)
+
+        message = "do you want to try URI injections "
+        message += "in the target URL itself? [Y/n/q] "
+        test = readInput(message, default="Y")
+
+        if test and test[0] in ("q", "Q"):
+            raise SqlmapUserQuitException
+        elif not test or test[0] not in ("n", "N"):
+            conf.url = "%s%s" % (conf.url, CUSTOM_INJECTION_MARK_CHAR)
+            kb.processUserMarks = True</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>接下来是将整个头部报文整合在一起，检查是否有注入标记符*在里面</span></p>
+<pre class="brush:python;toolbar:false">for place, value in ((PLACE.URI, conf.url), (PLACE.CUSTOM_POST, conf.data), (PLACE.CUSTOM_HEADER, str(conf.httpHeaders))):
+        _ = re.sub(PROBLEMATIC_CUSTOM_INJECTION_PATTERNS, "", value or "") if place == PLACE.CUSTOM_HEADER else value or ""
+        #print _</pre>
+<p><img src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/50631489154169.png"/></p>
+<pre class="brush:python;toolbar:false">if CUSTOM_INJECTION_MARK_CHAR in _:
+            #如果之前没有提示过用户是否进行注入符号检查
+            if kb.processUserMarks is None:
+                lut = {PLACE.URI: '-u', PLACE.CUSTOM_POST: '--data', PLACE.CUSTOM_HEADER: '--headers/--user-agent/--referer/--cookie'}
+                message = "custom injection marking character ('%s') found in option " % CUSTOM_INJECTION_MARK_CHAR
+                message += "'%s'. Do you want to process it? [Y/n/q] " % lut[place]
+                test = readInput(message, default="Y")
+                if test and test[0] in ("q", "Q"):
+                    raise SqlmapUserQuitException
+                else:
+                    kb.processUserMarks = not test or test[0] not in ("n", "N")
+
+                    if kb.processUserMarks:
+                        kb.testOnlyCustom = True
+
+                        if "=%s" % CUSTOM_INJECTION_MARK_CHAR in _:
+                            warnMsg = "it seems that you've provided empty parameter value(s) "
+                            warnMsg += "for testing. Please, always use only valid parameter values "
+                            warnMsg += "so sqlmap could be able to run properly"
+                            logger.warn(warnMsg)</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>如果用户选择跳过对注入标志地点的专门测试</span></p>
+<pre class="brush:python;toolbar:false">            if not kb.processUserMarks:
+                if place == PLACE.URI:
+                    query = urlparse.urlsplit(value).query
+                    if query:
+                        parameters = conf.parameters[PLACE.GET] = query
+                        paramDict = paramToDict(PLACE.GET, parameters)
+
+                        if paramDict:
+                            conf.url = conf.url.split('?')[0]
+                            conf.paramDict[PLACE.GET] = paramDict
+                            testableParameters = True
+                elif place == PLACE.CUSTOM_POST:
+                    conf.parameters[PLACE.POST] = conf.data
+                    paramDict = paramToDict(PLACE.POST, conf.data)
+
+                    if paramDict:
+                        conf.paramDict[PLACE.POST] = paramDict
+                        testableParameters = True</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>如果用户选择的Y</span></p>
+<pre class="brush:python;toolbar:false">            else:
+                conf.parameters[place] = value
+                conf.paramDict[place] = OrderedDict()
+
+                if place == PLACE.CUSTOM_HEADER:
+                    for index in xrange(len(conf.httpHeaders)):
+                        header, value = conf.httpHeaders[index]
+                        if CUSTOM_INJECTION_MARK_CHAR in re.sub(PROBLEMATIC_CUSTOM_INJECTION_PATTERNS, "", value):
+                            parts = value.split(CUSTOM_INJECTION_MARK_CHAR)
+                            for i in xrange(len(parts) - 1):
+                                conf.paramDict[place]["%s #%d%s" % (header, i + 1, CUSTOM_INJECTION_MARK_CHAR)] = "%s,%s" % (header, "".join("%s%s" % (parts[j], CUSTOM_INJECTION_MARK_CHAR if i == j else "") for j in xrange(len(parts))))
+                            conf.httpHeaders[index] = (header, value.replace(CUSTOM_INJECTION_MARK_CHAR, ""))
+                else:
+                    parts = value.split(CUSTOM_INJECTION_MARK_CHAR)
+
+                    for i in xrange(len(parts) - 1):
+                        name = None
+                        if kb.postHint:
+                            for ending, _ in hintNames:
+                                if parts[i].endswith(ending):
+                                    name = "%s %s" % (kb.postHint, _)
+                                    break
+                        if name is None:
+                            name = "%s#%s%s" % (("%s " % kb.postHint) if kb.postHint else "", i + 1, CUSTOM_INJECTION_MARK_CHAR)
+                        conf.paramDict[place][name] = "".join("%s%s" % (parts[j], CUSTOM_INJECTION_MARK_CHAR if i == j else "") for j in xrange(len(parts)))
+
+                    if place == PLACE.URI and PLACE.GET in conf.paramDict:
+                        del conf.paramDict[PLACE.GET]
+                    elif place == PLACE.CUSTOM_POST and PLACE.POST in conf.paramDict:
+                        del conf.paramDict[PLACE.POST]
+
+                testableParameters = True</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>将用户标识的注入标识符删掉</span></p>
+<pre class="brush:python;toolbar:false">    if kb.processUserMarks:
+        for item in ("url", "data", "agent", "referer", "cookie"):
+            if conf.get(item):
+                conf[item] = conf[item].replace(CUSTOM_INJECTION_MARK_CHAR, "")</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>检查--cookie附加的内容</span></p>
+<pre class="brush:python;toolbar:false">    # Perform checks on Cookie parameters
+    if conf.cookie:
+        conf.parameters[PLACE.COOKIE] = conf.cookie
+        paramDict = paramToDict(PLACE.COOKIE, conf.cookie)
+
+        if paramDict:
+            conf.paramDict[PLACE.COOKIE] = paramDict
+            testableParameters = True</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>检查 --header附加的内容</span></p>
+<pre class="brush:python;toolbar:false"> # Perform checks on header values
+    if conf.httpHeaders:
+        for httpHeader, headerValue in list(conf.httpHeaders):
+            # Url encoding of the header values should be avoided
+            # Reference: http://stackoverflow.com/questions/5085904/is-ok-to-urlencode-the-value-in-headerlocation-value
+
+            if httpHeader.title() == HTTP_HEADER.USER_AGENT:
+                conf.parameters[PLACE.USER_AGENT] = urldecode(headerValue)
+
+                condition = any((not conf.testParameter, intersect(conf.testParameter, USER_AGENT_ALIASES, True)))
+
+                if condition:
+                    conf.paramDict[PLACE.USER_AGENT] = {PLACE.USER_AGENT: headerValue}
+                    testableParameters = True
+
+            elif httpHeader.title() == HTTP_HEADER.REFERER:
+                conf.parameters[PLACE.REFERER] = urldecode(headerValue)
+
+                condition = any((not conf.testParameter, intersect(conf.testParameter, REFERER_ALIASES, True)))
+
+                if condition:
+                    conf.paramDict[PLACE.REFERER] = {PLACE.REFERER: headerValue}
+                    testableParameters = True
+
+            elif httpHeader.title() == HTTP_HEADER.HOST:
+                conf.parameters[PLACE.HOST] = urldecode(headerValue)
+
+                condition = any((not conf.testParameter, intersect(conf.testParameter, HOST_ALIASES, True)))
+
+                if condition:
+                    conf.paramDict[PLACE.HOST] = {PLACE.HOST: headerValue}
+                    testableParameters = True
+
+            else:
+                condition = intersect(conf.testParameter, [httpHeader], True)
+
+                if condition:
+                    conf.parameters[PLACE.CUSTOM_HEADER] = str(conf.httpHeaders)
+                    conf.paramDict[PLACE.CUSTOM_HEADER] = {httpHeader: "%s,%s%s" % (httpHeader, headerValue, CUSTOM_INJECTION_MARK_CHAR)}
+                    conf.httpHeaders = [(header, value.replace(CUSTOM_INJECTION_MARK_CHAR, "")) for header, value in conf.httpHeaders]
+                    testableParameters = True</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>接下来是对一些错误的处理包括对csrftoken的检查<br/></span></p>
+<pre class="brush:python;toolbar:false">    if not conf.parameters:
+        errMsg = "you did not provide any GET, POST and Cookie "
+        errMsg += "parameter, neither an User-Agent, Referer or Host header value"
+        raise SqlmapGenericException(errMsg)
+
+    elif not testableParameters:
+        errMsg = "all testable parameters you provided are not present "
+        errMsg += "within the given request data"
+        raise SqlmapGenericException(errMsg)
+
+    if conf.csrfToken:
+        if not any(conf.csrfToken in _ for _ in (conf.paramDict.get(PLACE.GET, {}), conf.paramDict.get(PLACE.POST, {}))) and not conf.csrfToken in set(_[0].lower() for _ in conf.httpHeaders) and not conf.csrfToken in conf.paramDict.get(PLACE.COOKIE, {}):
+            errMsg = "anti-CSRF token parameter '%s' not " % conf.csrfToken
+            errMsg += "found in provided GET, POST, Cookie or header values"
+            raise SqlmapGenericException(errMsg)
+    else:
+        for place in (PLACE.GET, PLACE.POST, PLACE.COOKIE):
+            for parameter in conf.paramDict.get(place, {}):
+                if any(parameter.lower().count(_) for _ in CSRF_TOKEN_PARAMETER_INFIXES):
+                    message = "%s parameter '%s' appears to hold anti-CSRF token. " % (place, parameter)
+                    message += "Do you want sqlmap to automatically update it in further requests? [y/N] "
+                    test = readInput(message, default="N")
+                    if test and test[0] in ("y", "Y"):
+                        conf.csrfToken = parameter
+                    break</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>接下来是对session.sqlite文件的设置和检查</span></p>
+<pre class="brush:python;toolbar:false">def _setHashDB():
+    """
+    Check and set the HashDB SQLite file for query resume functionality.
+    """
+
+    if not conf.hashDBFile:
+        conf.hashDBFile = conf.sessionFile or os.path.join(conf.outputPath, "session.sqlite")
+
+    if os.path.exists(conf.hashDBFile):
+        if conf.flushSession:
+            try:
+                os.remove(conf.hashDBFile)
+                logger.info("flushing session file")
+            except OSError, msg:
+                errMsg = "unable to flush the session file (%s)" % msg
+                raise SqlmapFilePathException(errMsg)
+
+    conf.hashDB = HashDB(conf.hashDBFile)</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>接下来是对session.sqlite基本历史信息的读入</span></p>
+<pre class="brush:python;toolbar:false">def _resumeHashDBValues():
+    """
+    Resume stored data values from HashDB
+    """
+
+    #文件绝对路径
+    kb.absFilePaths = hashDBRetrieve(HASHDB_KEYS.KB_ABS_FILE_PATHS, True) or kb.absFilePaths
+    #爆破表名
+    kb.brute.tables = hashDBRetrieve(HASHDB_KEYS.KB_BRUTE_TABLES, True) or kb.brute.tables
+    #爆破列名
+    kb.brute.columns = hashDBRetrieve(HASHDB_KEYS.KB_BRUTE_COLUMNS, True) or kb.brute.columns
+    #访问参数和参数值
+    kb.chars = hashDBRetrieve(HASHDB_KEYS.KB_CHARS, True) or kb.chars
+    #测试level
+    kb.dynamicMarkings = hashDBRetrieve(HASHDB_KEYS.KB_DYNAMIC_MARKINGS, True) or kb.dynamicMarkings
+    #是否可以执行cmdshell
+    kb.xpCmdshellAvailable = hashDBRetrieve(HASHDB_KEYS.KB_XP_CMDSHELL_AVAILABLE) or kb.xpCmdshellAvailable
+    #错误块的长度
+    kb.errorChunkLength = hashDBRetrieve(HASHDB_KEYS.KB_ERROR_CHUNK_LENGTH)
+    if kb.errorChunkLength and kb.errorChunkLength.isdigit():
+        kb.errorChunkLength = int(kb.errorChunkLength)
+    else:
+        kb.errorChunkLength = None
+    #临时路径
+    conf.tmpPath = conf.tmpPath or hashDBRetrieve(HASHDB_KEYS.CONF_TMP_PATH)
+    #注入记录
+    for injection in hashDBRetrieve(HASHDB_KEYS.KB_INJECTIONS, True) or []:
+
+        if isinstance(injection, InjectionDict) and injection.place in conf.paramDict and \
+            injection.parameter in conf.paramDict[injection.place]:
+
+            if not conf.tech or intersect(conf.tech, injection.data.keys()):
+                if intersect(conf.tech, injection.data.keys()):
+                    injection.data = dict(filter(lambda (key, item): key in conf.tech, injection.data.items()))
+
+                if injection not in kb.injections:
+                    kb.injections.append(injection)
+
+    _resumeDBMS()
+    _resumeOS()</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'></span><span style='font-family: 微软雅黑, "Microsoft YaHei";'>接下来是对session文件里数据库信息的提取，并与用户提供的进行比较（如果用户提交了的话）</span></p>
+<pre class="brush:python;toolbar:false">def _resumeDBMS():
+    """
+    Resume stored DBMS information from HashDB
+    """
+    #数据库类别
+    value = hashDBRetrieve(HASHDB_KEYS.DBMS)
+
+    if not value:
+        return
+
+    dbms = value.lower()
+    #版本
+    dbmsVersion = [UNKNOWN_DBMS_VERSION]
+    _ = "(%s)" % ("|".join([alias for alias in SUPPORTED_DBMS]))
+    _ = re.search(r"\A%s (.*)" % _, dbms, re.I)
+
+    if _:
+        dbms = _.group(1).lower()
+        dbmsVersion = [_.group(2)]
+    #用户设置了数据库类别，对设置的数据库和历史数据库进行对比，如果不同，就做提示，看用户下一步的操作。
+    if conf.dbms:
+        check = True
+        for aliases, _, _, _ in DBMS_DICT.values():
+            if conf.dbms.lower() in aliases and dbms not in aliases:
+                check = False
+                break
+
+        if not check:
+            message = "you provided '%s' as a back-end DBMS, " % conf.dbms
+            message += "but from a past scan information on the target URL "
+            message += "sqlmap assumes the back-end DBMS is '%s'. " % dbms
+            message += "Do you really want to force the back-end "
+            message += "DBMS value? [y/N] "
+            test = readInput(message, default="N")
+
+            if not test or test[0] in ("n", "N"):
+                conf.dbms = None
+                Backend.setDbms(dbms)
+                Backend.setVersionList(dbmsVersion)
+    else:
+        infoMsg = "resuming back-end DBMS '%s' " % dbms
+        logger.info(infoMsg)
+
+        Backend.setDbms(dbms)
+        Backend.setVersionList(dbmsVersion)</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>接下来是读取系统信息，结构同上，同样对用户指定的系统进行比对。</span></p>
+<pre class="brush:python;toolbar:false">def _resumeOS():
+    """
+    Resume stored OS information from HashDB
+    """
+    #系统信息
+    value = hashDBRetrieve(HASHDB_KEYS.OS)
+
+    if not value:
+        return
+
+    os = value
+
+    if os and os != 'None':
+        infoMsg = "resuming back-end DBMS operating system '%s' " % os
+        logger.info(infoMsg)
+
+        if conf.os and conf.os.lower() != os.lower():
+            message = "you provided '%s' as back-end DBMS operating " % conf.os
+            message += "system, but from a past scan information on the "
+            message += "target URL sqlmap assumes the back-end DBMS "
+            message += "operating system is %s. " % os
+            message += "Do you really want to force the back-end DBMS "
+            message += "OS value? [y/N] "
+            test = readInput(message, default="N")
+
+            if not test or test[0] in ("n", "N"):
+                conf.os = os
+        else:
+            conf.os = os
+
+        Backend.setOs(conf.os)</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>接下来是创建保存多目标模式输出结果的文件</span></p>
+<pre class="brush:python;toolbar:false">def _setResultsFile():</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'></span><img src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/67021489154169.png"/></p>
+<p><img src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/spacer.gif" style="background:url(http://www.wupco.cn/wp-content/plugins/wp-ueditor2/ueditor/lang/zh-cn/images/localimage.png) no-repeat center center;border:1px solid #ddd" word_img="file:///C:\Users\wupco\AppData\Roaming\Tencent\Users\827977014\QQ\WinTemp\RichOle\1TC6YQ0I5I@7B(D8)K[O4@A.png"/></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>接下来的_setAuthCred()函数追溯到 /lib/core/option.py</span></p>
+<p><span style="font-family:微软雅黑, Microsoft YaHei">用于将用户认证信息存储到密码管理器中</span></p>
+<pre class="brush:python;toolbar:false">def _setAuthCred():
+    """
+    Adds authentication credentials (if any) for current target to the password manager
+    (used by connection handler)
+    """
+
+    if kb.passwordMgr and all(_ is not None for _ in (conf.scheme, conf.hostname, conf.port, conf.authUsername, conf.authPassword)):
+        kb.passwordMgr.add_password(None, "%s://%s:%d" % (conf.scheme, conf.hostname, conf.port), conf.authUsername, conf.authPassword)</pre>
+<p><span style="font-family:微软雅黑, Microsoft YaHei"></span><span style='font-family: 微软雅黑, "Microsoft YaHei";'>我们可以看到，在整个_setupTargetEnv()函数中，经过对输出目录的设置，对待注入参数的提取，设置并读取sessiondb文件(if any), 来还原上次注入的环境或者新构建出一个可以随时存储的新注入环境。</span></p>
+<h4 style="white-space: normal;"><span style='font-family: 微软雅黑, "Microsoft YaHei";'>2.1.3 action()</span></h4>
+<p><span style="font-family:微软雅黑, Microsoft YaHei">可追溯到/lib/controller/action.py</span></p>
+<p><span style="font-family:微软雅黑, Microsoft YaHei">首先是setHandler()检查目标使用的数据库</span></p>
+<pre class="brush:python;toolbar:false">def setHandler():
+    """
+    Detect which is the target web application back-end database
+    management system.
+    """
+
+    items = [
+                  (DBMS.MYSQL, MYSQL_ALIASES, MySQLMap, MySQLConn),
+                  (DBMS.ORACLE, ORACLE_ALIASES, OracleMap, OracleConn),
+                  (DBMS.PGSQL, PGSQL_ALIASES, PostgreSQLMap, PostgreSQLConn),
+                  (DBMS.MSSQL, MSSQL_ALIASES, MSSQLServerMap, MSSQLServerConn),
+                  (DBMS.SQLITE, SQLITE_ALIASES, SQLiteMap, SQLiteConn),
+                  (DBMS.ACCESS, ACCESS_ALIASES, AccessMap, AccessConn),
+                  (DBMS.FIREBIRD, FIREBIRD_ALIASES, FirebirdMap, FirebirdConn),
+                  (DBMS.MAXDB, MAXDB_ALIASES, MaxDBMap, MaxDBConn),
+                  (DBMS.SYBASE, SYBASE_ALIASES, SybaseMap, SybaseConn),
+                  (DBMS.DB2, DB2_ALIASES, DB2Map, DB2Conn),
+                  (DBMS.HSQLDB, HSQLDB_ALIASES, HSQLDBMap, HSQLDBConn),
+            ]
+    #Backend对象定义在/lib/core/common.py里,getIdentifiedDbms()函数通过几个格式化流程，把kb.get("dbms")
+    #得到的原生数据库信息数据规范成如上的枚举类型。
+    _ = max(_ if (Backend.getIdentifiedDbms() or "").lower() in _[1] else None for _ in items)
+    if _:
+        items.remove(_)
+        items.insert(0, _)
+    #用户指定了数据库类型就要跳过这些检查
+    for dbms, aliases, Handler, Connector in items:
+        if conf.dbms and conf.dbms.lower() != dbms and conf.dbms.lower() not in aliases:
+            debugMsg = "skipping test for %s" % dbms
+            logger.debug(debugMsg)
+            continue
+
+        handler = Handler()
+        conf.dbmsConnector = Connector()
+        #数据库直连
+        if conf.direct:
+            logger.debug("forcing timeout to 10 seconds")
+            conf.timeout = 10
+
+            dialect = DBMS_DICT[dbms][3]
+
+            if dialect:
+                sqlalchemy = SQLAlchemy(dialect=dialect)
+                sqlalchemy.connect()
+
+                if sqlalchemy.connector:
+                    conf.dbmsConnector = sqlalchemy
+                else:
+                    try:
+                        conf.dbmsConnector.connect()
+                    except NameError:
+                        pass
+            else:
+                conf.dbmsConnector.connect()
+
+        if handler.checkDbms():
+            conf.dbmsHandler = handler
+            break
+        else:
+            conf.dbmsConnector = None
+
+    # At this point back-end DBMS is correctly fingerprinted, no need
+    # to enforce it anymore
+    Backend.flushForcedDbms()</pre>
+<p>如果获取数据库信息失败</p>
+<pre class="brush:python;toolbar:false">if not Backend.getDbms() or not conf.dbmsHandler:
+        htmlParsed = Format.getErrorParsedDBMSes()
+
+        errMsg = "sqlmap was not able to fingerprint the "
+        errMsg += "back-end database management system"
+        #从页面报错判断数据库类型
+        if htmlParsed:
+            errMsg += ", but from the HTML error page it was "
+            errMsg += "possible to determinate that the "
+            errMsg += "back-end DBMS is %s" % htmlParsed
+     
+        if htmlParsed and htmlParsed.lower() in SUPPORTED_DBMS:
+            errMsg += ". Do not specify the back-end DBMS manually, "
+            errMsg += "sqlmap will fingerprint the DBMS for you"
+        #空连接
+        elif kb.nullConnection:
+            errMsg += ". You can try to rerun without using optimization "
+            errMsg += "switch '%s'" % ("-o" if conf.optimize else "--null-connection")
+        else:
+            errMsg += ". Support for this DBMS will be implemented at "
+            errMsg += "some point"
+
+        raise SqlmapUnsupportedDBMSException(errMsg)
+
+    conf.dumper.singleString(conf.dbmsHandler.getFingerprint())</pre>
+<p>依据用户的选择来枚举dump信息</p>
+<pre class="brush:python;toolbar:false">    #获取banner
+    if conf.getBanner:
+        conf.dumper.banner(conf.dbmsHandler.getBanner())
+    #获取当前用户
+    if conf.getCurrentUser:
+        conf.dumper.currentUser(conf.dbmsHandler.getCurrentUser())
+    #获取当前数据库
+    if conf.getCurrentDb:
+        conf.dumper.currentDb(conf.dbmsHandler.getCurrentDb())
+    #获取主机名
+    if conf.getHostname:
+        conf.dumper.hostname(conf.dbmsHandler.getHostname())
+    #判断当前用户是否是DBA用户
+    if conf.isDba:
+        conf.dumper.dba(conf.dbmsHandler.isDba())
+    #获取用户列表
+    if conf.getUsers:
+        conf.dumper.users(conf.dbmsHandler.getUsers())
+    #获取密码的hash
+    if conf.getPasswordHashes:
+        try:
+            conf.dumper.userSettings("database management system users password hashes",
+                                    conf.dbmsHandler.getPasswordHashes(), "password hash", CONTENT_TYPE.PASSWORDS)
+        except SqlmapNoneDataException, ex:
+            logger.critical(ex)
+        except:
+            raise
+    #获取用户权限
+    if conf.getPrivileges:
+        try:
+            conf.dumper.userSettings("database management system users privileges",
+                                    conf.dbmsHandler.getPrivileges(), "privilege", CONTENT_TYPE.PRIVILEGES)
+        except SqlmapNoneDataException, ex:
+            logger.critical(ex)
+        except:
+            raise
+    #获取用户组
+    if conf.getRoles:
+        try:
+            conf.dumper.userSettings("database management system users roles",
+                                    conf.dbmsHandler.getRoles(), "role", CONTENT_TYPE.ROLES)
+        except SqlmapNoneDataException, ex:
+            logger.critical(ex)
+        except:
+            raise
+    #获取所有数据库
+    if conf.getDbs:
+        conf.dumper.dbs(conf.dbmsHandler.getDbs())
+    #获取所有/指定的数据表
+    if conf.getTables:
+        conf.dumper.dbTables(conf.dbmsHandler.getTables())
+    #爆破表（存在性检查）
+    if conf.commonTables:
+        conf.dumper.dbTables(tableExists(paths.COMMON_TABLES))
+    #获取schema
+    if conf.getSchema:
+        conf.dumper.dbTableColumns(conf.dbmsHandler.getSchema(), CONTENT_TYPE.SCHEMA)
+    #获取列
+    if conf.getColumns:
+        conf.dumper.dbTableColumns(conf.dbmsHandler.getColumns(), CONTENT_TYPE.COLUMNS)
+    #获取记录数
+    if conf.getCount:
+        conf.dumper.dbTablesCount(conf.dbmsHandler.getCount())
+    #爆破列
+    if conf.commonColumns:
+        conf.dumper.dbTableColumns(columnExists(paths.COMMON_COLUMNS))
+   #dump table
+    if conf.dumpTable:
+        conf.dbmsHandler.dumpTable()
+    #dump 所有内容
+    if conf.dumpAll:
+        conf.dbmsHandler.dumpAll()
+   #获取查找信息
+    if conf.search:
+        conf.dbmsHandler.search()
+  #执行sql语句
+    if conf.query:
+        conf.dumper.query(conf.query, conf.dbmsHandler.sqlQuery(conf.query))
+  #执行sql shell
+    if conf.sqlShell:
+        conf.dbmsHandler.sqlShell()
+  #读取sql语句的文件
+    if conf.sqlFile:
+        conf.dbmsHandler.sqlFile()</pre>
+<p>用户自定义的注入函数</p>
+<pre class="brush:python;toolbar:false">    # User-defined function options
+    if conf.udfInject:
+        conf.dbmsHandler.udfInjectCustom()</pre>
+<p>文件读/写</p>
+<pre class="brush:python;toolbar:false"># File system options
+    if conf.rFile:
+        conf.dumper.rFile(conf.dbmsHandler.readFile(conf.rFile))
+
+    if conf.wFile:
+        conf.dbmsHandler.writeFile(conf.wFile, conf.dFile, conf.wFileType)</pre>
+<p>OS命令/溢出/提权</p>
+<pre class="brush:python;toolbar:false">    # Operating system options
+    if conf.osCmd:
+        conf.dbmsHandler.osCmd()
+
+    if conf.osShell:
+        conf.dbmsHandler.osShell()
+
+    if conf.osPwn:
+        conf.dbmsHandler.osPwn()
+
+    if conf.osSmb:
+        conf.dbmsHandler.osSmb()
+
+    if conf.osBof:
+        conf.dbmsHandler.osBof()</pre>
+<p>windows注册表相关</p>
+<pre class="brush:python;toolbar:false">    # Windows registry options
+    if conf.regRead:
+        conf.dumper.registerValue(conf.dbmsHandler.regRead())
+
+    if conf.regAdd:
+        conf.dbmsHandler.regAdd()
+
+    if conf.regDel:
+        conf.dbmsHandler.regDel()</pre>
+<p>其他</p>
+<pre class="brush:python;toolbar:false">    # Miscellaneous options
+    if conf.cleanup:
+        conf.dbmsHandler.cleanup()
+
+    if conf.direct:
+        conf.dbmsConnector.close()</pre>
+<p></p>
+</article>
+<section class="ending">
+<ul class="sns">
+<li class="tencent"><a href="http://wpa.qq.com/msgrd?v=3&amp;uin=827977014&amp;site=qq&amp;menu=yes" target="_blank"><i class="iconfont"></i></a></li>
+<li class="zhihu"><a href="https://www.zhihu.com/people/wupco " target="_blank"><i class="iconfont"></i></a></li>
+</ul>
+<div class="reward">
+                打
+                <ul>
+<li><img src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/QQ图片20170222193616.png"/>用支付宝打我</li>
+<li><img src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/QQ图片20170222193616.png"/>用微信打我</li>
+</ul>
+</div>
+<div class="about">
+<img alt="" class="avatar avatar-80 photo" height="80" src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/cd0d984309c15bd1f668df0d0343eccds=80&amp;d=mm&amp;r=g" srcset="http://cn.gravatar.com/avatar/cd0d984309c15bd1f668df0d0343eccd?s=160&amp;d=mm&amp;r=g 2x" width="80"> <p></p>
+</img></div>
+</section>
+<!-- You can start editing here. -->
+<!-- If comments are open, but there are no comments. -->
+<div class="comment-respond" id="respond">
+<h3 class="comment-reply-title" id="reply-title">发表评论 <small><a href="/?p=1437#respond" id="cancel-comment-reply-link" rel="nofollow" style="display:none;">取消回复</a></small></h3> <form action="http://www.wupco.cn/wp-comments-post.php" class="comment-form" id="commentform" method="post">
+<p class="comment-notes"><span id="email-notes">电子邮件地址不会被公开。</span> 必填项已用<span class="required">*</span>标注</p><p class="comment-form-comment"><label for="comment">评论</label> <textarea aria-required="true" cols="45" id="comment" maxlength="65525" name="w" required="required" rows="8"></textarea><textarea cols="100%" name="comment" rows="4" style="display:none"></textarea></p><p class="comment-form-author"><label for="author">姓名 <span class="required">*</span></label> <input aria-required="true" id="author" maxlength="245" name="author" required="required" size="30" type="text" value=""/></p>
+<p class="comment-form-email"><label for="email">电子邮件 <span class="required">*</span></label> <input aria-describedby="email-notes" aria-required="true" id="email" maxlength="100" name="email" required="required" size="30" type="text" value=""/></p>
+<p class="comment-form-url"><label for="url">站点</label> <input id="url" maxlength="200" name="url" size="30" type="text" value=""/></p>
+<p class="form-submit"><input class="submit" id="submit" name="submit" type="submit" value="发表评论"/> <input id="comment_post_ID" name="comment_post_ID" type="hidden" value="1437"/>
+<input id="comment_parent" name="comment_parent" type="hidden" value="0"/>
+</p> </form>
+</div><!-- #respond -->
+</section>
+<div class="clearer"></div>
+<nav class="navigator">
+</nav>
+</div>
+</div>
+<div class="clearer"></div>
+<div class="search">
+<form action="http://www.wupco.cn" method="get">
+<input autocomplete="off" class="search_key" name="s" placeholder="Enter search keywords..." required="required" type="text" value=""/>
+<button alt="Search" type="submit">Search</button>
+</form>
+</div>
+<footer id="footer">
+<section class="links_adlink">
+<ul class="container">
+</ul>
+</section>
+友情链接:<a href="http://www.hazzel.cn">Hazzel师傅</a> <a href="http://www.yqxiaojunjie.com/">俊杰师傅</a> <a href="http://margular.github.io">sunshine</a> <a href="https://3wapp.github.io/">janes师傅</a><br/> <a href="http://www.au1ge.xyz/">au1ge</a><br/>
+© 2017 <a href="http://www.wupco.cn">Wupco's Blog</a>
+<a class="back2top"></a>
+</footer>
+<script type="text/javascript">SyntaxHighlighter.all();</script><script type="text/javascript">
+/* <![CDATA[ */
+var ajaxcomment = {"ajax_url":"http:\/\/www.wupco.cn\/wp-admin\/admin-ajax.php","order":"asc","formpostion":"top"};
+/* ]]> */
+</script>
+<script src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/app.jsver=20141010" type="text/javascript"></script>
+<script style="display:none">
+function index_overloaded(){
+
+}
+</script>
+<script src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/jquery.min.js"></script>
+<script src="./SQLMAP阅读手记三{“三测”、开始注入} – Wupco's Blog/functions.js"></script>
+<script>
+</script>
+</body>
+</html>

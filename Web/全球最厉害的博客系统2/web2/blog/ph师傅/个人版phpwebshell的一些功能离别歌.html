@@ -1,0 +1,318 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./个人版php webshell的一些功能  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./个人版php webshell的一些功能  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./个人版php webshell的一些功能  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>个人版php webshell的一些功能 | 离别歌</title>
+<link href="./个人版php webshell的一些功能  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./个人版php webshell的一些功能  离别歌/styles.css" rel="stylesheet"/>
+<link href="./个人版php webshell的一些功能  离别歌/style.css" rel="stylesheet"/>
+<link href="./个人版php webshell的一些功能  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./个人版php webshell的一些功能  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./个人版php webshell的一些功能  离别歌/jquery.min.js"></script>
+<link href="./个人版php webshell的一些功能  离别歌/code.css" rel="stylesheet"/>
+<link href="./个人版php webshell的一些功能  离别歌/button.css" rel="stylesheet"/>
+<link href="./个人版php webshell的一些功能  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./个人版php webshell的一些功能  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PHP/diy-php-webshell-myself.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PHP/diy-php-webshell-myself.html&amp;text=%E4%B8%AA%E4%BA%BA%E7%89%88php%20webshell%E7%9A%84%E4%B8%80%E4%BA%9B%E5%8A%9F%E8%83%BD"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PHP/diy-php-webshell-myself.html&amp;title=%E4%B8%AA%E4%BA%BA%E7%89%88php%20webshell%E7%9A%84%E4%B8%80%E4%BA%9B%E5%8A%9F%E8%83%BD"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PHP/diy-php-webshell-myself.html&amp;is_video=false&amp;description=%E4%B8%AA%E4%BA%BA%E7%89%88php%20webshell%E7%9A%84%E4%B8%80%E4%BA%9B%E5%8A%9F%E8%83%BD"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E4%B8%AA%E4%BA%BA%E7%89%88php%20webshell%E7%9A%84%E4%B8%80%E4%BA%9B%E5%8A%9F%E8%83%BD&amp;body=Check out this article: https%3A//www.leavesongs.com/PHP/diy-php-webshell-myself.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PHP/diy-php-webshell-myself.html&amp;title=%E4%B8%AA%E4%BA%BA%E7%89%88php%20webshell%E7%9A%84%E4%B8%80%E4%BA%9B%E5%8A%9F%E8%83%BD"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PHP/diy-php-webshell-myself.html&amp;title=%E4%B8%AA%E4%BA%BA%E7%89%88php%20webshell%E7%9A%84%E4%B8%80%E4%BA%9B%E5%8A%9F%E8%83%BD"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PHP/diy-php-webshell-myself.html&amp;title=%E4%B8%AA%E4%BA%BA%E7%89%88php%20webshell%E7%9A%84%E4%B8%80%E4%BA%9B%E5%8A%9F%E8%83%BD"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PHP/diy-php-webshell-myself.html&amp;title=%E4%B8%AA%E4%BA%BA%E7%89%88php%20webshell%E7%9A%84%E4%B8%80%E4%BA%9B%E5%8A%9F%E8%83%BD"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PHP/diy-php-webshell-myself.html&amp;name=%E4%B8%AA%E4%BA%BA%E7%89%88php%20webshell%E7%9A%84%E4%B8%80%E4%BA%9B%E5%8A%9F%E8%83%BD&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">个人版php webshell的一些功能</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年10月28日 23:03" itemprop="datePublished">
+                    2014 十月 28 23:03
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4490
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PHP">PHP</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/php">php</a>,
+                
+                <a class="tag-link" href="/tag/webshell">webshell</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    网上的webshell总结起来有一些缺陷：
+</p>
+<p>
+	    1.兼容性差，当某函数禁用后，该功能就不能用了。其实php是个很灵活的语言，很多功能是可以有很多实现方式的。
+</p>
+<p>
+	    2.功能单一，一般都只有常用的几个功能，不够好用。
+</p>
+<p>
+	    3.突破性不强，没用利用一些php、IIS、apache、nginx的CVE来达到一些特殊目的，比如绕过open_basedir、绕过安全模式等。
+</p>
+<p>
+	    4.别人写的自己不了解，维护起来不方便，免杀起来也不顺手。
+</p>
+<p>
+	    特别是第一点，和第二点，我想自己的webshell能够有更好的使用效果。webshell已经写了一半，除了常见功能。大概、我希望有如下一些比较好的：
+</p>
+<p>
+	    1.执行命令，囊括尽可能多的方法，和一些奇技淫巧
+</p>
+<p>
+	    2.获得内网IP，并能扫描内网端口
+</p>
+<p>
+	    3.利用一些已知漏洞，绕过open_basedir读、写、列其他虚拟主机文件/目录，或系统文件/目录。
+</p>
+<p>
+	    4.绕过安全模式。（待定）
+</p>
+<p>
+	    5.使用php进行嗅探，嗅探本机数据包。
+</p>
+<p>
+	    6.利用socket开启并监听80以外的端口，一键生成一些其他站，比如http://xxxx:8080/等。
+</p>
+<p>
+	    7.一键变身简易xss平台，成为临时接受cookie的地方。
+</p>
+<p>
+	    8.反代平台。（待定）
+</p>
+<p>
+	    9.一键变身http/socket代理。
+</p>
+<p>
+	    10.集成DDOS/CC功能。
+</p>
+<p>
+	    11.防删除功能、强制删除他人shell功能。
+</p>
+<p>
+<br>
+</br></p>
+<p>
+	    有什么不足之处大家可以补充，更欢迎猥琐思路~
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1895">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./个人版php webshell的一些功能  离别歌/30ff9ae0a56be440c9674bd3553d5be6.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">付弘雪</a>
+<time datetime="2014年12月16日 12:30" itemprop="datePublished">
+                            2014 十二月 16 12:30
+                        </time>
+<a href="javascript:reply_to('1895', '付弘雪')">回复</a>
+</p>
+<p class="comment-meta">360 isc 见过ph 牛<br>如Holger 所说插件功能<br/>还希望加入 集群的功能<br/>举个例子，就是可以定时向控制服务器索取任务进行执行，比如爆破某邮箱，这是利用了多shell多ip的方式方法，当然这个可以写成插件模式。<br/>或者分布式脱裤，用注入点脱，然后在汇总到控制服务器里面指定的存储地址。<br/><br/>如有定时任务模式之后 就可以配合 撒旦之类的，或者自行爬虫进行分布式注入点发现功能。<br/><br/>文件搜索也可以自动搜索 .sql 文件自动回传</br></p>
+</div>
+</div>
+<div class="row" id="comment-1852">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./个人版php webshell的一些功能  离别歌/dad05ee128cdcac4e603f74d05133dfb.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">gg</a>
+<time datetime="2014年11月20日 23:21" itemprop="datePublished">
+                            2014 十一月 20 23:21
+                        </time>
+<a href="javascript:reply_to('1852', 'gg')">回复</a>
+</p>
+<p class="comment-meta">求下载连接</p>
+</div>
+</div>
+<div class="row" id="comment-1828">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./个人版php webshell的一些功能  离别歌/ea9adb1b21fc6f3d24f6d9f375f3a951.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Angel</a>
+<time datetime="2014年10月29日 19:03" itemprop="datePublished">
+                            2014 十月 29 19:03
+                        </time>
+<a href="javascript:reply_to('1828', 'Angel')">回复</a>
+</p>
+<p class="comment-meta">= = 求下载连接</p>
+</div>
+</div>
+<div class="row" id="comment-1823">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./个人版php webshell的一些功能  离别歌/269a302af786f9156b30ca9f6438da9e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://ursb.org/" target="_blank">Holger</a>
+<time datetime="2014年10月29日 10:31" itemprop="datePublished">
+                            2014 十月 29 10:31
+                        </time>
+<a href="javascript:reply_to('1823', 'Holger')">回复</a>
+</p>
+<p class="comment-meta">给你一些思路，不弄这个好久，放着也没意思，还不如放出来一起分享～<br/>1、建议写成插件管理方式<br/>2、加上个弱口令爆破功能，当然，如果有1，应该会由插件的形式编写<br/>3、隐藏后门功能，可以考虑把代码放入内存执行，shell文件则删除不需要存在，当然，这样如果要链接通信的话可以考虑:1.socket, 2.http<br/>4、蠕虫功能，比如一个vps站群，可以考虑自动化的跨权或者提权进而渗透到其他站点，其他站点某一天搬离了之后慢慢扩大下去。。当然，完成这个也不是不可能<br/>5、自动化渗透其他站点功能，比如在内网的情况，可以考虑自动扫描web，自动识别cms，进而自动进行exp攻击，然后你懂的<br/>就这么点了，也许某一天还能想出点神马，博主有兴趣欢迎一起交流 :)</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1826">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./个人版php webshell的一些功能  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年10月29日 14:10" itemprop="datePublished">
+                            2014 十月 29 14:10
+                        </time>
+<a href="javascript:reply_to('1826', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@Holger：单文件的写插件不知道怎么处理，能否给个方案什么的。2、3是在计划内的，放入内存那个在强制删除、强制不允许被删除这俩功能里就会用到。后2个，如果第1个实现了，那也可以写成插件的。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1827">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./个人版php webshell的一些功能  离别歌/269a302af786f9156b30ca9f6438da9e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://ursb.org/" target="_blank">Holger</a>
+<time datetime="2014年10月29日 14:25" itemprop="datePublished">
+                            2014 十月 29 14:25
+                        </time>
+<a href="javascript:reply_to('1827', 'Holger')">回复</a>
+</p>
+<p class="comment-meta">@phithon：我以前写过插件式的东西是基于C/S结构的，代码都运行在内存里面，所以除非进程结束，否则变量什么的还在。如果是B/S结构的，插件可以考虑写入临时文件，或者考虑编码加入session,cookie，再或者可以考虑html5的localStorage，当然，如果eval神马函数禁用的话，那可以考虑远程、本地包含</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="f311154fd30d15632074fdf4e640dd569cdfc285"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./个人版php webshell的一些功能  离别歌/f311154fd30d15632074fdf4e640dd569cdfc285"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="332">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="o5c6IQpHkhf89D4pXkXKq0jalFIoFWc3WpxCwkBWL49x9isELBruZElfuJbwoq1d"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./个人版php webshell的一些功能  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./个人版php webshell的一些功能  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

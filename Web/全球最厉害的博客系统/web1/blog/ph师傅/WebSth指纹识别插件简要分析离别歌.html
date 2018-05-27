@@ -1,0 +1,409 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./WebSth 指纹识别插件简要分析  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./WebSth 指纹识别插件简要分析  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./WebSth 指纹识别插件简要分析  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>WebSth 指纹识别插件简要分析 | 离别歌</title>
+<link href="./WebSth 指纹识别插件简要分析  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./WebSth 指纹识别插件简要分析  离别歌/styles.css" rel="stylesheet"/>
+<link href="./WebSth 指纹识别插件简要分析  离别歌/style.css" rel="stylesheet"/>
+<link href="./WebSth 指纹识别插件简要分析  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./WebSth 指纹识别插件简要分析  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./WebSth 指纹识别插件简要分析  离别歌/jquery.min.js"></script>
+<link href="./WebSth 指纹识别插件简要分析  离别歌/code.css" rel="stylesheet"/>
+<link href="./WebSth 指纹识别插件简要分析  离别歌/button.css" rel="stylesheet"/>
+<link href="./WebSth 指纹识别插件简要分析  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./WebSth 指纹识别插件简要分析  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/OTHERLAN/Website-Analyzer.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/OTHERLAN/Website-Analyzer.html&amp;text=WebSth%20%E6%8C%87%E7%BA%B9%E8%AF%86%E5%88%AB%E6%8F%92%E4%BB%B6%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/OTHERLAN/Website-Analyzer.html&amp;title=WebSth%20%E6%8C%87%E7%BA%B9%E8%AF%86%E5%88%AB%E6%8F%92%E4%BB%B6%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/OTHERLAN/Website-Analyzer.html&amp;is_video=false&amp;description=WebSth%20%E6%8C%87%E7%BA%B9%E8%AF%86%E5%88%AB%E6%8F%92%E4%BB%B6%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=WebSth%20%E6%8C%87%E7%BA%B9%E8%AF%86%E5%88%AB%E6%8F%92%E4%BB%B6%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90&amp;body=Check out this article: https%3A//www.leavesongs.com/OTHERLAN/Website-Analyzer.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/OTHERLAN/Website-Analyzer.html&amp;title=WebSth%20%E6%8C%87%E7%BA%B9%E8%AF%86%E5%88%AB%E6%8F%92%E4%BB%B6%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/OTHERLAN/Website-Analyzer.html&amp;title=WebSth%20%E6%8C%87%E7%BA%B9%E8%AF%86%E5%88%AB%E6%8F%92%E4%BB%B6%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/OTHERLAN/Website-Analyzer.html&amp;title=WebSth%20%E6%8C%87%E7%BA%B9%E8%AF%86%E5%88%AB%E6%8F%92%E4%BB%B6%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/OTHERLAN/Website-Analyzer.html&amp;title=WebSth%20%E6%8C%87%E7%BA%B9%E8%AF%86%E5%88%AB%E6%8F%92%E4%BB%B6%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/OTHERLAN/Website-Analyzer.html&amp;name=WebSth%20%E6%8C%87%E7%BA%B9%E8%AF%86%E5%88%AB%E6%8F%92%E4%BB%B6%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">WebSth 指纹识别插件简要分析</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年10月22日 11:50" itemprop="datePublished">
+                    2013 十月 22 11:50
+                </time>
+</div>
+<div class="article-tag">
+            阅读：6866
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/OTHERLAN">其他语言</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/web%E6%8C%87%E7%BA%B9">web指纹</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    今天才在某个论坛上看到这个网站：<a href="http://websth.com/" target="_blank">http://websth.com/</a>， 深感所知甚晚啊，自己一直想做的web指纹识别，已经有童鞋做成chrome插件发布了，并且功能还算比较强大，不过准确性确实有待提高。于是我下载了其源码并开始围观一下。
+</p>
+<p>
+	    先看看识别效果：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201310/fb5c1382414449.png" id="ematt:222" target="_blank"><img alt="2.png" border="0" height="372" src="./WebSth 指纹识别插件简要分析  离别歌/fb5c1382414449.png" title="点击查看原图" width="406"/></a>
+</p>
+<p>
+	    之前接触过chrome插件的开发（只是看过一部分文档），所以对插件的运行流程有所了解。
+</p>
+<p>
+	    代码的文件结构是这样：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201310/4a471382414129.png" id="ematt:220" target="_blank"><img alt="1.png" border="0" height="280" src="./WebSth 指纹识别插件简要分析  离别歌/thum-4a471382414129.png" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+	    其中有一个manifest.json，一个json格式的文件，读过文档的就知道这个文件其实是chrome加载插件的主文件，里面配置了一些关于插件的信息。我们打开参观一下：
+<pre class="brush: js;auto-links: false;">{
+  "name": "__MSG_extName__",
+  "description": "__MSG_extDescription__",
+  "permissions": [ "http://*/*", "https://*/*", "tabs", "storage" ],
+  "version": "1.1.0",
+  "manifest_version": 2,
+  "default_locale": "en",
+  "icons": {
+    "128": "icon-128x128.png"
+  },
+  "background": {
+    "scripts": [
+      "js/web_technologies.js", 
+      "js/web_servers.js", 
+      "js/oses.js", 
+      "js/web_front_libraries.js", 
+      "js/web_apps.js",
+      "js/background.js"
+    ],
+    "persistent": true
+    },
+  "content_scripts": [ {
+    "js": ["js/website_analyzer.js"],
+    "matches": [ "http://*/*", "https://*/*" ],
+    "run_at": "document_end"
+  } ],
+  "options_page": "options.html",
+  "page_action": {
+    "default_popup": "popup.html"
+  }
+}</pre>
+    不长，里面有一个content_scripts字段，这个字段表示在web页面内运行的javascript脚本。chrome插件其实就是javascript脚本，所有的功能用脚本的形式执行。每当打开匹配url的页面时，就执行content_scripts里指定的脚本，这里是js/website_analyzer.js。
+</p>
+<p>
+	    于是我们跟踪一下，打开<span>js/website_analyzer.js。，发现其中代码功能是ajax获取当前访问的网页内容，并传递给扩展。其中定义了这样一个对象：
+<pre class="brush: js;auto-links: false;">var data = {
+            "header"    : this.getAllResponseHeaders(),
+            "dom"       : covertNodes(document),
+            "hostname"  : hostname,
+            "port"      : document.location.port
+        };</pre>
+    这个对象就保存了http头、DOM对象、域名和端口。然后通过 chrome.extension.sendMessage(data) 传递给我们的插件。</span>
+</p>
+<p>
+<span>    返回到我们的manifest.json中，还能找到一个background字段，里面保存了不止一个的js文件，这些js文件就是运行在我们插件整个生命周期中的脚本。其中有一个<span>background.js，</span>它接受到了浏览器页面传递来的data数据，然后对它进行处理。<br>
+</br></span>
+</p>
+<p>
+<span>    打开background.js文件，略长，我们只分析web指纹那个部分。
+<pre class="brush: js;auto-links: false;">  // match web apps
+  var apps = []
+  for (var i in web_apps) {
+    for (var j in web_apps[i]['rules']) {
+      if (findNode(root, web_apps[i]['rules'][j].type, web_apps[i]['rules'][j].match, web_apps[i]['rules'][j].name, web_apps[i]['rules'][j].attributes)) {
+        apps.push(web_apps[i]);
+        break;
+      }
+    }
+  }
+  technologyData[sender.tab.id]['web_apps'] = apps;</pre>
+    因为在加载background.js之前加载了一个web_apps.js，里面定义了一个web_apps对象，就类似一个数据库，保存着很多指纹信息。我们这里就用一个for in循环，遍历web_apps对象，在其中匹配查找。内层还有一个for in循环，进行多个条件下的匹配。比对用到findNode这个函数，这个函数在background.js中：
+<pre class="brush: js;auto-links: false;">function findNode(root, type, text, name, attr){
+  // type = [
+  //  1, // element 
+  //  3, // text
+  //  8  // comment
+  // ]
+  // text = reg to search
+  // name = element tagName
+  // attr = element attr to search
+
+  for (var node in root){
+    if(type == 1 &amp;&amp; root[node].nodeType == type){ // element
+      if (root[node].nodeName.toUpperCase() == name.toUpperCase()){
+        var search_str = root[node].attributes[attr.toLowerCase()];
+        if (search_str.match(text)){
+          return true;
+        }
+      }
+    }else if(root[node].nodeType == type){ // text &amp; comment
+      if (root[node].nodeValue.match(text)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}</pre>
+    第一个参数root是DOM，后面几个参数表示比对的内容。这个函数用一个for in循环遍历了整个DOM，如果是元素(element，type=1)节点，就比较其name元素的attr属性是否和text匹配（type/name/attr/text是传入的参数），如果是文本(TEXT/COMMENT, type=3 or 8)节点，就直接比较该文本是否和text匹配。</span>
+</p>
+<p>
+<span>    我们举个例子，比如discuz的规则：
+<pre class="brush: js;auto-links: false;">{
+        "icon": "discuz.jpg",
+        "title": "Discuz!",
+        "url"  : "http://www.discuz.net",
+        "rules": [
+            {
+                "type": 1,
+                "name": "SCRIPT",
+                "attributes": "src",
+                "match": "logging\\.js"
+            },
+            {
+                "type": 1,
+                "name": "META",
+                "attributes": "content",
+                "match": "Discuz\\!"
+            },
+            {
+                "type": 3,
+                "name": "TITLE",
+                "attributes": "",
+                "match": "Powered by Discuz\\!"
+            },
+            {
+                "type": 1,
+                "name": "A",
+                "attributes": "href",
+                "match": "^home.php\\?mod=space"
+            }
+        ]
+    },</pre>
+    我们看rules的第一项，type=1，表示元素节点，也就是说我们查找，如果找到“script”元素的“src”属性和"logging\\.js"匹配（通俗来说就是找到&lt;script src="...logging.js"&gt;&lt;/script&gt;），这里就返回true.</span>
+</p>
+<p>
+<span>    因为discuz的规则有四个，我们看代码发现，只要有一个满足就跳出，匹配下一个web app，所以准确度不高，只能说是疑似discuz。像我之前那个截图一样，出现了dedecms和pwiki两个可能，还需要进一步的确认才行。<br>
+</br></span>
+</p>
+<p>
+<span>    填充了apps这个对象以后，把它保存 technologyData[sender.tab.id]['web_apps'] = apps;<br/>
+</span>
+</p>
+<p>
+	    主目录下还有一个popup.html，作用就是我点击插件的按钮，弹出的那个小框的html代码。打开发现就是一个什么内容都没有的html，但最后加载了js/popup.js这个脚本。这个脚本就是把<span>technologyData中的内容取出来，写到popup.html里，让用户看。</span>
+</p>
+<p>
+<span>    打开popup.js，看到web指纹那个部分。<br/>
+</span>
+</p>
+<p>
+<span>    找到如下代码：
+<pre class="brush: js;auto-links: false;">if (data['web_apps'].length != 0) {
+        var tr = document.createElement('tr');
+        var td1 = document.createElement('td');
+        td1.innerHTML =  "&lt;strong&gt;";
+        td1.innerHTML += chrome.i18n.getMessage("webApps");
+        td1.innerHTML += "&lt;/strong&gt;";
+        var td2 = document.createElement('td');
+        td2.setAttribute("colspan", "2");
+        for (var i in data['web_apps']) {
+            if (data['web_apps'][i].url){
+                // td2.innerHTML += "&lt;a href=\"" + data['web_apps'][i].url + "\" target=\"_blank\"&gt;&lt;img class=\"img\" width=\"19px\" hight=\"19px\" src=\"icons/" + data['web_apps'][i].icon + "\" /&gt;  " + data['web_apps'][i].title + "&lt;/a&gt;";
+                td2.innerHTML += "&lt;a href=\"" + data['web_apps'][i].url + "\" target=\"_blank\"&gt;&lt;img class=\"img\" width=\"19px\" hight=\"19px\" src=\"icons/" + data['web_apps'][i].icon + "\" title=\"" + data['web_apps'][i].title + "\" /&gt; " + data['web_apps'][i].title + "&lt;/a&gt;  ";
+            }else{
+                td2.innerHTML += "&lt;img class=\"img\" width=\"19px\" hight=\"19px\" src=\"icons/" + data['web_apps'][i].icon + "\" /&gt; " + data['web_apps'][i].title + "  ";
+            }
+        }
+
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        document.getElementById("detail").appendChild(tr);
+    }</pre>
+    没什么好说的，就是一个一个取出来，加进html里。</span>
+</p>
+<p>
+<span>    最后，我们梳理一遍流程：<br/>
+</span>
+</p>
+<p>
+<span>    1.打开浏览器，预先加载插件的javascript，比如background.js等</span>
+</p>
+<p>
+<span>    2.进入一个网站：discuz.net<br/>
+</span>
+</p>
+<p>
+<span>    3.加载js/website_analyzer.js，通过ajax获得所访问网站的DOM和其他信息</span>
+</p>
+<p>
+<span>    4.background.js获取到DOM，执行一个for in 循环，遍历web_apps对象，对其中每一个web app类型做比对。比对过程是遍历DOM，发现匹配就退出，执行下一次比对。<br/>
+</span>
+</p>
+<p>
+<span>    5.返回比对结果。如果此时用户点击插件按钮，即弹出popup.html，其中执行popup.js，该js把相关信息写入popup.html让用户查看。<br/>
+</span>
+</p>
+<p>
+<span><br/>
+</span>
+</p>
+<p>
+<span>    读过代码后知道这个插件是靠DOM元素的匹配来识别某个web指纹，相比于其他一些比如md5指纹识别要更适合javascript，可扩展性也好（我们可以修改web_apps.js来手工添加一些web指纹信息）。<br/>
+</span>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1453">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./WebSth 指纹识别插件简要分析  离别歌/18c6f0f46cf7dc19a74d9c058bce1c99.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">中央空调</a>
+<time datetime="2013年10月23日 14:43" itemprop="datePublished">
+                            2013 十月 23 14:43
+                        </time>
+<a href="javascript:reply_to('1453', '中央空调')">回复</a>
+</p>
+<p class="comment-meta">路过 支持一下博主</p>
+</div>
+</div>
+<div class="row" id="comment-1452">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./WebSth 指纹识别插件简要分析  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">趣购网</a>
+<time datetime="2013年10月23日 10:41" itemprop="datePublished">
+                            2013 十月 23 10:41
+                        </time>
+<a href="javascript:reply_to('1452', '趣购网')">回复</a>
+</p>
+<p class="comment-meta">学习了，好</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="9eb0fff4f340904d627d56c2da299c50d26a7683"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./WebSth 指纹识别插件简要分析  离别歌/9eb0fff4f340904d627d56c2da299c50d26a7683"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="284">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="XGW79oir7VWMrzLlfVBlC18yk2iuHMTjv0hDXSuGyIQbre9A3c55bFaDt6LCqgIt"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./WebSth 指纹识别插件简要分析  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./WebSth 指纹识别插件简要分析  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

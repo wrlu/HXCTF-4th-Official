@@ -1,0 +1,372 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./一个前端DOMXSS过滤器  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./一个前端DOMXSS过滤器  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./一个前端DOMXSS过滤器  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>一个前端DOMXSS过滤器 | 离别歌</title>
+<link href="./一个前端DOMXSS过滤器  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./一个前端DOMXSS过滤器  离别歌/styles.css" rel="stylesheet"/>
+<link href="./一个前端DOMXSS过滤器  离别歌/style.css" rel="stylesheet"/>
+<link href="./一个前端DOMXSS过滤器  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./一个前端DOMXSS过滤器  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./一个前端DOMXSS过滤器  离别歌/jquery.min.js"></script>
+<link href="./一个前端DOMXSS过滤器  离别歌/code.css" rel="stylesheet"/>
+<link href="./一个前端DOMXSS过滤器  离别歌/button.css" rel="stylesheet"/>
+<link href="./一个前端DOMXSS过滤器  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./一个前端DOMXSS过滤器  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/javascript-domxss-filter.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/javascript-domxss-filter.html&amp;text=%E4%B8%80%E4%B8%AA%E5%89%8D%E7%AB%AFDOMXSS%E8%BF%87%E6%BB%A4%E5%99%A8"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/javascript-domxss-filter.html&amp;title=%E4%B8%80%E4%B8%AA%E5%89%8D%E7%AB%AFDOMXSS%E8%BF%87%E6%BB%A4%E5%99%A8"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/javascript-domxss-filter.html&amp;is_video=false&amp;description=%E4%B8%80%E4%B8%AA%E5%89%8D%E7%AB%AFDOMXSS%E8%BF%87%E6%BB%A4%E5%99%A8"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E4%B8%80%E4%B8%AA%E5%89%8D%E7%AB%AFDOMXSS%E8%BF%87%E6%BB%A4%E5%99%A8&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/javascript-domxss-filter.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/javascript-domxss-filter.html&amp;title=%E4%B8%80%E4%B8%AA%E5%89%8D%E7%AB%AFDOMXSS%E8%BF%87%E6%BB%A4%E5%99%A8"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/javascript-domxss-filter.html&amp;title=%E4%B8%80%E4%B8%AA%E5%89%8D%E7%AB%AFDOMXSS%E8%BF%87%E6%BB%A4%E5%99%A8"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/javascript-domxss-filter.html&amp;title=%E4%B8%80%E4%B8%AA%E5%89%8D%E7%AB%AFDOMXSS%E8%BF%87%E6%BB%A4%E5%99%A8"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/javascript-domxss-filter.html&amp;title=%E4%B8%80%E4%B8%AA%E5%89%8D%E7%AB%AFDOMXSS%E8%BF%87%E6%BB%A4%E5%99%A8"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/javascript-domxss-filter.html&amp;name=%E4%B8%80%E4%B8%AA%E5%89%8D%E7%AB%AFDOMXSS%E8%BF%87%E6%BB%A4%E5%99%A8&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">一个前端DOMXSS过滤器</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年8月1日 03:18" itemprop="datePublished">
+                    2014 八月 01 03:18
+                </time>
+</div>
+<div class="article-tag">
+            阅读：5987
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/DOMXSS">DOMXSS</a>,
+                
+                <a class="tag-link" href="/tag/fliter">fliter</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    最近热衷于刷twitter，各种大牛的东西让我应接不暇，感觉确实新有干货，前几天看到Yosuke发状态了：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201407/4efd1406834752.jpg" id="ematt:581" target="_blank"><img alt="01.jpg" border="0" height="139" src="./一个前端DOMXSS过滤器  离别歌/4efd1406834752.jpg" title="点击查看原图" width="589"/></a>
+</p>
+<p>
+	    是发的一个DOMParser处理、过滤html的小程序。想想觉得还是挺新颖的，以前自己也做了一个XssHtml过滤类（<a href="http://phith0n.github.io/XssHtml/" target="_blank">http://phith0n.github.io/XssHtml/</a>），但都是基于后端语言的，不能处理前端比如DOMXSS。
+</p>
+<p>
+	    看了他的代码感觉挺好的，思路也是基于白名单的过滤机制，将允许存在的标签和属性列在javascript对象中，遍历DOM后将允许的标签和属性保留，不允许的丢弃。
+</p>
+<p>
+	    我改了改，加了点过滤，做了个类，代码如下：
+</p>
+<pre class="brush: js;auto-links: false;">function Jsdxss(allows){
+	this.allows = allows || {
+	  "a" : [ "title", "ping", "href", "class", "target", "style" ],
+	  "b" : [ "class", "style" ],
+	  "img" : [ "src", "class", "style" ],
+	  "div" : [ "class", "style"],
+	  "p" : ["class", "style"]
+	}
+	var buildNodes = function( node ){
+		var i, newNode, attributes, child;
+
+		switch( node.nodeType ){
+		case 1: // ELEMENT_NODE
+			attributes = allows[ node.tagName.toLowerCase() ];
+			if( attributes === undefined ) return undefined;
+
+			newNode = document.createElement( node.tagName );
+			for( i = 0; i &lt; node.attributes.length; i++ ){
+				if( attributes.indexOf( node.attributes[ i ].name ) != -1 ){
+					switch(node.attributes[ i ].name){
+						case "href": node.attributes[ i ] = _deal_href(node.attributes[ i ]);break;
+						case "style": node.attributes[ i ] = _deal_style(node.attributes[ i ]);break;
+					}
+					newNode.setAttribute( node.attributes[ i ].name, node.attributes[ i ].value );
+				}
+			}
+			for( i = 0; i &lt; node.childNodes.length; i++ ){
+				child = buildNodes( node.childNodes[ i ] );
+				if( child !== undefined ){
+					newNode.appendChild( child );
+				}
+			}
+			return newNode;
+		case 3: // TEXT_NODE
+			return document.createTextNode( node.textContent );
+		default:
+			return undefined;
+		}
+	}
+
+	var _deal_href = function(attr){
+		var href = attr.value;
+		if (href.indexOf("http://") === 0 || href.indexOf("http://") === 0) {
+			attr.value = href;
+		}else{
+			attr.value = "http://" + href;
+		}
+		return attr;
+	}
+
+	var _deal_style = function(attr){
+		var style = attr.value;
+		var re = /expression/gim
+		style = style.replace(/\\/g, ' ').replace(/&amp;#/g, ' ').replace(/\/\*/g, ' ').replace(/\*\//g, ' ');
+		attr.value = style.replace(re, ' ');
+		return attr;
+	}
+
+	this.filter = function(html, target){
+		try{
+			var parser = new DOMParser();
+			var newDoc = parser.parseFromString( html, "text/html" );
+		}catch(e){
+			var doc = new ActiveXObject ("MSXML2.DOMDocument");
+			var newDoc = doc.loadXML(html);
+		}
+	    
+	    var newBody = newDoc.body;
+	    var target = document.getElementById( target );
+	    var i, childeNode;
+	  
+		target.innerHTML = "";
+		for( i = 0; i &lt; newBody.childNodes.length; i++ ){
+			childNode = buildNodes( newBody.childNodes[ i ] );
+			if( childNode !== undefined ){
+				target.appendChild( childNode );
+			}
+		}
+	}
+
+}</pre>
+    使用方法：
+<pre class="brush: js;auto-links: false;">var html = "HTML CODE";
+(new Jsdxss()).filter(html, "target");</pre>
+<p>
+	    运行完成后会将过滤后的代码输出在id为target的元素中。
+</p>
+<p>
+	    github：<a href="https://github.com/phith0n/Jsdxss" target="_blank">https://github.com/phith0n/Jsdxss</a>
+</p>
+<p>
+	    大家可以在这个页面测试：<a href="http://phith0n.github.io/Jsdxss/test.html" target="_blank">http://phith0n.github.io/Jsdxss/test.html</a>
+</p>
+<p>
+<br>
+</br></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1758">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./一个前端DOMXSS过滤器  离别歌/c4070df6d0f8723f99530290ab72c2c6.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://navisec.it" target="_blank">navisec.it</a>
+<time datetime="2014年8月22日 00:16" itemprop="datePublished">
+                            2014 八月 22 00:16
+                        </time>
+<a href="javascript:reply_to('1758', 'navisec.it')">回复</a>
+</p>
+<p class="comment-meta">您好　能否跟您的网站做个友情链接　这是我的网站　http://navisec.it</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1759">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./一个前端DOMXSS过滤器  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年8月22日 10:43" itemprop="datePublished">
+                            2014 八月 22 10:43
+                        </time>
+<a href="javascript:reply_to('1759', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@navisec.it：抱歉，暂不与陌生人交换链接。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1755">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./一个前端DOMXSS过滤器  离别歌/a662f03c92152d0b6b9604946de0e93d.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.sir7mall.net/" target="_blank">sir7</a>
+<time datetime="2014年8月13日 13:40" itemprop="datePublished">
+                            2014 八月 13 13:40
+                        </time>
+<a href="javascript:reply_to('1755', 'sir7')">回复</a>
+</p>
+<p class="comment-meta">我来也 留下脚印啦</p>
+</div>
+</div>
+<div class="row" id="comment-1752">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./一个前端DOMXSS过滤器  离别歌/42d8349d603d709044621bbb02c3b5b4.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://th1nk.info" target="_blank">音符</a>
+<time datetime="2014年8月6日 15:10" itemprop="datePublished">
+                            2014 八月 06 15:10
+                        </time>
+<a href="javascript:reply_to('1752', '音符')">回复</a>
+</p>
+<p class="comment-meta">消灭1回复</p>
+</div>
+</div>
+<div class="row" id="comment-1749">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./一个前端DOMXSS过滤器  离别歌/7fc2d5c0b745eb9df8e5cb662d8535c3.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://sh3ll.me/" target="_blank">Chu</a>
+<time datetime="2014年8月6日 13:41" itemprop="datePublished">
+                            2014 八月 06 13:41
+                        </time>
+<a href="javascript:reply_to('1749', 'Chu')">回复</a>
+</p>
+<p class="comment-meta">消灭0回复</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1750">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./一个前端DOMXSS过滤器  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年8月6日 15:03" itemprop="datePublished">
+                            2014 八月 06 15:03
+                        </time>
+<a href="javascript:reply_to('1750', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@Chu：Chu牛又嘲笑我</p>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="1e5e1ee8d93c4108b3eae327577992e8a616afd1"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./一个前端DOMXSS过滤器  离别歌/1e5e1ee8d93c4108b3eae327577992e8a616afd1"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="323">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="YXe5gW0Ig5pbNhNshLrwRsUC2tE5zTInwhzB4qcXHSjANWbH52Vgq6WHbx7dinxx"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./一个前端DOMXSS过滤器  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./一个前端DOMXSS过滤器  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

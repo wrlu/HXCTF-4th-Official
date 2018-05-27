@@ -1,0 +1,375 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./谈Python多线程及程序锁  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./谈Python多线程及程序锁  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./谈Python多线程及程序锁  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>谈Python多线程及程序锁 | 离别歌</title>
+<link href="./谈Python多线程及程序锁  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./谈Python多线程及程序锁  离别歌/styles.css" rel="stylesheet"/>
+<link href="./谈Python多线程及程序锁  离别歌/style.css" rel="stylesheet"/>
+<link href="./谈Python多线程及程序锁  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./谈Python多线程及程序锁  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./谈Python多线程及程序锁  离别歌/jquery.min.js"></script>
+<link href="./谈Python多线程及程序锁  离别歌/code.css" rel="stylesheet"/>
+<link href="./谈Python多线程及程序锁  离别歌/button.css" rel="stylesheet"/>
+<link href="./谈Python多线程及程序锁  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./谈Python多线程及程序锁  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PYTHON/PythonMuti.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PYTHON/PythonMuti.html&amp;text=%E8%B0%88Python%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%8A%E7%A8%8B%E5%BA%8F%E9%94%81"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PYTHON/PythonMuti.html&amp;title=%E8%B0%88Python%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%8A%E7%A8%8B%E5%BA%8F%E9%94%81"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PYTHON/PythonMuti.html&amp;is_video=false&amp;description=%E8%B0%88Python%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%8A%E7%A8%8B%E5%BA%8F%E9%94%81"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E8%B0%88Python%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%8A%E7%A8%8B%E5%BA%8F%E9%94%81&amp;body=Check out this article: https%3A//www.leavesongs.com/PYTHON/PythonMuti.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PYTHON/PythonMuti.html&amp;title=%E8%B0%88Python%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%8A%E7%A8%8B%E5%BA%8F%E9%94%81"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PYTHON/PythonMuti.html&amp;title=%E8%B0%88Python%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%8A%E7%A8%8B%E5%BA%8F%E9%94%81"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PYTHON/PythonMuti.html&amp;title=%E8%B0%88Python%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%8A%E7%A8%8B%E5%BA%8F%E9%94%81"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PYTHON/PythonMuti.html&amp;title=%E8%B0%88Python%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%8A%E7%A8%8B%E5%BA%8F%E9%94%81"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PYTHON/PythonMuti.html&amp;name=%E8%B0%88Python%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%8A%E7%A8%8B%E5%BA%8F%E9%94%81&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">谈Python多线程及程序锁</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年7月13日 00:23" itemprop="datePublished">
+                    2013 七月 13 00:23
+                </time>
+</div>
+<div class="article-tag">
+            阅读：12503
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PYTHON">Python</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E5%A4%9A%E7%BA%BF%E7%A8%8B">多线程</a>,
+                
+                <a class="tag-link" href="/tag/python">python</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+            Python中多线程使用到Threading模块。Threading模块中用到的主要的类是Thread，我们先来写一个简单的多线程代码：
+<pre class="brush: python;auto-links: false;"># coding : uft-8
+__author__ = 'Phtih0n'
+import threading
+
+class MyThread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+
+    def run(self):
+        global n
+        print n
+        n += 1
+
+if "__main__" == __name__:
+    n = 0
+    ThreadList = []
+    for i in range(0, 10):
+        t = MyThread()
+        ThreadList.append(t)
+    for t in ThreadList:
+        t.start()
+    for t in ThreadList:
+        t.join</pre>
+<p>
+	    最普通的一个多线程小例子。我一笔带过地讲一讲，我创建了一个继承Thread类的子类MyThread，作为我们的线程启动类。按照规定，重写Thread的run方法，我们的线程启动起来后会自动调用该方法。于是我首先创建了10个线程，并将其加入列表中。再使用一个for循环，开启每个线程。在使用一个for循环，调用join方法等待所有线程结束才退出主线程。
+</p>
+<p>
+	    这段代码看似简单，但实际上隐藏着一个很大的问题，只是在这里没有体现出来。你真的以为我创建了10个线程，并按顺序调用了这10个线程，每个线程为n增加了1.实际上，有可能是A线程执行了n++，再C线程执行了n++，再B线程执行n++。
+</p>
+<p>
+	    这里涉及到一个“锁”的问题，如果有多个线程同时操作一个对象，如果没有很好地保护该对象，会造成程序结果的不可预期（比如我们在每个线程的run方法中加入一个time.sleep(1)，并同时输出线程名称，则我们会发现，输出会乱七八糟。因为可能我们的一个print语句只打印出一半的字符，这个线程就被暂停，执行另一个去了，所以我们看到的结果很乱），这种现象叫做“线程不安全”：
+</p>
+<p>
+<a href="https://www.leavesongs.com/content/uploadfile/201307/13501373648562.jpg" id="ematt:156" target="_blank"><img alt="05.jpg" border="0" height="275" src="./谈Python多线程及程序锁  离别歌/thum-13501373648562.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+	    于是，Threading模块为我们提供了一个类，Threading.Lock，锁。我们创建一个该类对象，在线程函数执行前，“抢占”该锁，执行完成后，“释放”该锁，则我们确保了每次只有一个线程占有该锁。这时候对一个公共的对象进行操作，则不会发生线程不安全的现象了。
+</p>
+<p>
+	    于是，我们把代码更改如下：
+</p>
+<pre class="brush: python;auto-links: false;"># coding : uft-8
+__author__ = 'Phtih0n'
+import threading, time
+
+class MyThread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+
+    def run(self):
+        global n, lock
+        time.sleep(1)
+        if lock.acquire():
+            print n , self.name
+            n += 1
+            lock.release()
+
+if "__main__" == __name__:
+    n = 1
+    ThreadList = []
+    lock = threading.Lock()
+    for i in range(1, 200):
+        t = MyThread()
+        ThreadList.append(t)
+    for t in ThreadList:
+        t.start()
+    for t in ThreadList:
+        t.join()</pre>
+<br>
+    最后执行结果：
+<p>
+<br>
+</br></p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201307/4efd1373649364.jpg" id="ematt:158" target="_blank"><img alt="01.jpg" border="0" height="275" src="./谈Python多线程及程序锁  离别歌/thum-4efd1373649364.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+	    我们看到，我们先建立了一个threading.Lock类对象lock,在run方法里，我们使用lock.acquire()获得了这个锁。此时，其他的线程就无法再获得该锁了，他们就会阻塞在“if lock.acquire()”这里，直到锁被另一个线程释放：lock.release()。
+</p>
+<p>
+	    所以，if语句中的内容就是一块完整的代码，不会再存在执行了一半就暂停去执行别的线程的情况。所以最后结果是整齐的。
+</p>
+<p>
+	    就如同在java中，我们使用synchronized关键字修饰一个方法，目的一样，让某段代码被一个线程执行时，不会打断跳到另一个线程中。
+</p>
+<p>
+	    这是多线程占用一个公共对象时候的情况。如果多个线程要调用多个现象，而A线程调用A锁占用了A对象，B线程调用了B锁占用了B对象,A线程不能调用B对象，B线程不能调用A对象，于是一直等待。这就造成了线程“死锁”。
+</p>
+<p>
+	    Threading模块中，也有一个类，RLock，称之为可重入锁。该锁对象内部维护着一个Lock和一个counter对象。counter对象记录了acquire的次数，使得资源可以被多次require。最后，当所有RLock被release后，其他线程才能获取资源。在同一个线程中，RLock.acquire可以被多次调用，利用该特性，可以解决部分死锁问题。
+</p>
+<p>
+	    死锁问题很复杂，多年来人们想出了很多算法来解决它。我就不再多说，<span>具体还是要大家参阅帮助文档。</span>
+</p>
+</br></div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1653">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈Python多线程及程序锁  离别歌/a66c9afdd51bc695758fc5dd6e092397.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">yaxin</a>
+<time datetime="2014年5月28日 11:09" itemprop="datePublished">
+                            2014 五月 28 11:09
+                        </time>
+<a href="javascript:reply_to('1653', 'yaxin')">回复</a>
+</p>
+<p class="comment-meta">for i in range(1, 200):<br/>        t = MyThread()<br/>        t.start()<br/>        t.join()<br/><br/>不更好吗？为什么还要三次循环？</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1654">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈Python多线程及程序锁  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年5月28日 11:44" itemprop="datePublished">
+                            2014 五月 28 11:44
+                        </time>
+<a href="javascript:reply_to('1654', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@yaxin：第二个循环保证所有线程尽量在同一时间启动<br/>第三个循环是为了让主线程不退出<br/>你这么写，在开启第一个线程的时候主线程就阻塞了，没法开启下一个线程了。你还是不理解join()方法的意义。去看看文档吧。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1633">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈Python多线程及程序锁  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">D.M</a>
+<time datetime="2014年5月23日 00:13" itemprop="datePublished">
+                            2014 五月 23 00:13
+                        </time>
+<a href="javascript:reply_to('1633', 'D.M')">回复</a>
+</p>
+<p class="comment-meta">吓尿了，我现在写操作系统的作业才看了Python的Threading，大神居然在去年就写了。。。<br/>大神啊，大腿留给我一个</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1634">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈Python多线程及程序锁  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年5月23日 00:14" itemprop="datePublished">
+                            2014 五月 23 00:14
+                        </time>
+<a href="javascript:reply_to('1634', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@D.M：我插你居然写作业</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1359">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈Python多线程及程序锁  离别歌/d67c87abf36a1b2c70f56f1d78ef3028.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">不夜城手机</a>
+<time datetime="2013年7月16日 13:57" itemprop="datePublished">
+                            2013 七月 16 13:57
+                        </time>
+<a href="javascript:reply_to('1359', '不夜城手机')">回复</a>
+</p>
+<p class="comment-meta">您好，我是不夜城手机报价网的，您的文章写的不错，过来学习了！欢迎回访</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1361">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈Python多线程及程序锁  离别歌/9f767c3f96e1bf3c8adf3290c23bce2f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">落沐萧萧</a>
+<time datetime="2013年7月16日 14:01" itemprop="datePublished">
+                            2013 七月 16 14:01
+                        </time>
+<a href="javascript:reply_to('1361', '落沐萧萧')">回复</a>
+</p>
+<p class="comment-meta">@不夜城手机：已回访，链接不留。请不要刷留言做广告。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1366">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈Python多线程及程序锁  离别歌/7dad86178a0c7816d8a9d98e4c76e522.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://upker.net" target="_blank">冷夜</a>
+<time datetime="2013年7月25日 22:15" itemprop="datePublished">
+                            2013 七月 25 22:15
+                        </time>
+<a href="javascript:reply_to('1366', '冷夜')">回复</a>
+</p>
+<p class="comment-meta">@落沐萧萧：莫非你觉得它会看到这条评论=。=</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="f2cda898c21fa38468fb4d45b5c573f619122d18"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./谈Python多线程及程序锁  离别歌/f2cda898c21fa38468fb4d45b5c573f619122d18"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="266">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="huJI5w9eqF1zIfTumL7P8F0sjcRa2xB6PO4eT0ltRsVYIUhJa2BzHj2xsgkiL1qg"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./谈Python多线程及程序锁  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./谈Python多线程及程序锁  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

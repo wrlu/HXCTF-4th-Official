@@ -1,0 +1,222 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Pwhub-另一份文件-Writeup - l3m0n - 博客园</title>
+<link href="./Pwhub-另一份文件-Writeup - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./Pwhub-另一份文件-Writeup - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./Pwhub-另一份文件-Writeup - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="./Pwhub-另一份文件-Writeup - l3m0n - 博客园/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./Pwhub-另一份文件-Writeup - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./Pwhub-另一份文件-Writeup - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./Pwhub-另一份文件-Writeup - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./Pwhub-另一份文件-Writeup - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./Pwhub-另一份文件-Writeup - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./Pwhub-另一份文件-Writeup - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./Pwhub-另一份文件-Writeup - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/pwhub_other_file_writeup.html" id="cb_post_title_url">Pwhub-另一份文件-Writeup</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><p>v大佬实战经验出的一个题目，思路真的强。</p>
+<pre><code>题目介绍
+http://54.223.145.113:88/
+文件到底在哪里？我的文件又去了哪？
+------------
+12.6 21.30 发放hint，自行寻找
+------------
+12.7 08.08 Flag是个文件，不需要shell，并且听说放文件的神秘人拥有服务器最高权限</code></pre>
+<p>其中hint是：</p>
+<pre><code>@move_uploaded_file($_FILES['file']['tmp_name'], $dir.$name);
+echo "上传成功！\n\n文件内容：\n\n";
+echo file_get_contents($dir.$name);
+$files = glob($dir . '*'); 
+@unlink($files[0]);</code></pre>
+<hr/>
+<p>题外话：后面v大佬给了上传验证代码。</p>
+<pre><code>$type = array("txt","");
+$fileext = strtolower(fileext(@$_FILES['file']['name']));
+if(in_array($fileext, $type)){
+    ....
+}</code></pre>
+<p>从一开始的fuzz来看，能上传<code>.</code>结尾以及<code>.txt</code>结尾的文件，这个验证真的很好奇，感觉有啥新姿势，于是一直在fuzz文件名，看能不能getshell。＝。＝，fuzz都跑烂了。</p>
+<hr/>
+<p>本地测试：</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;form action="" method="POST" enctype="multipart/form-data"&gt;
+    &lt;input type="file" value="" name="uploaded"&gt;
+    &lt;input type="text" value="1" name="Upload"&gt;
+    &lt;input type="submit" value="submit" name="submit"&gt;
+&lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+&lt;?php
+$html = "";
+if( isset( $_POST[ 'Upload' ] ) ) {
+    $target_path  = "upload/";
+    $target_path .= $_FILES[ 'uploaded' ][ 'name' ];
+    if( !move_uploaded_file( $_FILES[ 'uploaded' ][ 'tmp_name' ], $target_path ) ) {
+        $html .= '&lt;pre&gt;Your image was not uploaded.&lt;/pre&gt;';
+    }
+    else {
+        $html .= "&lt;pre&gt;succesfully uploaded!&lt;/pre&gt;";
+        echo file_get_contents($target_path);
+        $dir = "upload/";
+        $files = glob($dir . '*');
+        var_dump($files);
+        @unlink($files[0]);
+        var_dump($_FILES);
+    }
+}
+?&gt;</code></pre>
+<p>设置upload目录下面的flag文件不可删除：</p>
+<pre><code>chattr +i w333lc0met00pwnhu66</code></pre>
+<hr/>
+<p>此题关键点是这个：</p>
+<pre><code>$files = glob($dir . '*'); 
+@unlink($files[0]);</code></pre>
+<p>glob获取文件信息是按顺序排列的，如果目录中有一个文件存在的话，可以通过类似布尔盲注的思维来猜测。</p>
+<p><img src="./Pwhub-另一份文件-Writeup - l3m0n - 博客园/804631-20161208014545147-1638438782.png"/></p>
+<p><img src="./Pwhub-另一份文件-Writeup - l3m0n - 博客园/804631-20161208014601319-164698040.png"/></p>
+<p>也就是当上传<code>x</code>的时候，<code>$files[1] = x</code>，<code>w333lc0met00pwnhu66</code>被设置不可更动文件，是删除不了的，所以x文件也就被保留下来了。这样就可以推测我们要找的文件的第一位是<code>w</code></p>
+<p><img src="./Pwhub-另一份文件-Writeup - l3m0n - 博客园/804631-20161208014810679-848626033.png"/></p>
+<p>写脚本跑一跑就出来了。</p>
+<hr/>
+<p>后面问v大佬当时的实战是什么情况以及后续，通过这个思路得到一个敏感的文件，这个文件也被管理员设置不能删除。Orz</p>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2016-12-08 01:53</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=6143469" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(6143469);return false;">收藏</a></div>
+</div>
+<script src="./Pwhub-另一份文件-Writeup - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=6143469,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2016/12/8 1:53:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./Pwhub-另一份文件-Writeup - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="./Pwhub-另一份文件-Writeup - l3m0n - 博客园/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./Pwhub-另一份文件-Writeup - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

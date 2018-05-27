@@ -1,0 +1,441 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>SRCMS 多处越权+权限提升管理员漏洞 | 离别歌</title>
+<link href="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/styles.css" rel="stylesheet"/>
+<link href="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/style.css" rel="stylesheet"/>
+<link href="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/jquery.min.js"></script>
+<link href="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/code.css" rel="stylesheet"/>
+<link href="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/button.css" rel="stylesheet"/>
+<link href="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/srcms-privilege-escalation-vulnerability.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/srcms-privilege-escalation-vulnerability.html&amp;text=SRCMS%20%E5%A4%9A%E5%A4%84%E8%B6%8A%E6%9D%83%2B%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E7%AE%A1%E7%90%86%E5%91%98%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/srcms-privilege-escalation-vulnerability.html&amp;title=SRCMS%20%E5%A4%9A%E5%A4%84%E8%B6%8A%E6%9D%83%2B%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E7%AE%A1%E7%90%86%E5%91%98%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/srcms-privilege-escalation-vulnerability.html&amp;is_video=false&amp;description=SRCMS%20%E5%A4%9A%E5%A4%84%E8%B6%8A%E6%9D%83%2B%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E7%AE%A1%E7%90%86%E5%91%98%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=SRCMS%20%E5%A4%9A%E5%A4%84%E8%B6%8A%E6%9D%83%2B%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E7%AE%A1%E7%90%86%E5%91%98%E6%BC%8F%E6%B4%9E&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/srcms-privilege-escalation-vulnerability.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/srcms-privilege-escalation-vulnerability.html&amp;title=SRCMS%20%E5%A4%9A%E5%A4%84%E8%B6%8A%E6%9D%83%2B%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E7%AE%A1%E7%90%86%E5%91%98%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/srcms-privilege-escalation-vulnerability.html&amp;title=SRCMS%20%E5%A4%9A%E5%A4%84%E8%B6%8A%E6%9D%83%2B%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E7%AE%A1%E7%90%86%E5%91%98%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/srcms-privilege-escalation-vulnerability.html&amp;title=SRCMS%20%E5%A4%9A%E5%A4%84%E8%B6%8A%E6%9D%83%2B%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E7%AE%A1%E7%90%86%E5%91%98%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/srcms-privilege-escalation-vulnerability.html&amp;title=SRCMS%20%E5%A4%9A%E5%A4%84%E8%B6%8A%E6%9D%83%2B%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E7%AE%A1%E7%90%86%E5%91%98%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/srcms-privilege-escalation-vulnerability.html&amp;name=SRCMS%20%E5%A4%9A%E5%A4%84%E8%B6%8A%E6%9D%83%2B%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E7%AE%A1%E7%90%86%E5%91%98%E6%BC%8F%E6%B4%9E&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">SRCMS 多处越权+权限提升管理员漏洞</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2016年1月25日 21:28" itemprop="datePublished">
+                    2016 一月 25 21:28
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3471
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E8%B6%8A%E6%9D%83%E6%BC%8F%E6%B4%9E">越权漏洞</a>,
+                
+                <a class="tag-link" href="/tag/thinkphp">thinkphp</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>现代cms框架（laraval/symfony/slim）的出现，导致现今的php漏洞出现点、原理、利用方法，发生了一些变化，这个系列希望可以总结一下自己挖掘的此类cms漏洞。</p>
+<p>今天这个漏洞是SRCMS里由于Model的不合理使用造成的多处越权漏洞。</p>
+<p>首先，我简要说明一下漏洞原理。</p>
+<p>【漏洞源码下载： <a href="https://mega.nz/#!4UxCTaxJ!DpVvhBPK7YE9D_jdFQ0CjQ1ylJ4sQws-CT3LIJ5AA8Y"><a href="https://mega.nz/#!4UxCTaxJ!DpVvhBPK7YE9D_jdFQ0CjQ1ylJ4sQws-CT3LIJ5AA8Y">https://mega.nz/#!4UxCTaxJ!DpVvhBPK7YE9D_jdFQ0CjQ1ylJ4sQws-CT3LIJ5AA8Y</a></a> 】</p>
+<p>今天在 <a href="http://zone.wooyun.org/content/25144"><a href="http://zone.wooyun.org/content/25144">http://zone.wooyun.org/content/25144</a></a> 里看到SRCMS更新了，其实之前一段时间就star了这套源码，但一直没看。因为我要写这个系列（现代框架系列），所以这次我下载源码进行了阅读。</p>
+<p>在挖漏洞之前，先表示我对代码作者的感谢，感谢作者贡献了一套优秀的代码。漏洞是所有程序在所难免的，所以不必有什么心理压力。</p>
+<p>SRCMS是一个开源的企业安全应急响应中心，基于ThinkPHP框架开发。我将ThinkPHP归为半现代框架，因为它在近些年的发展中已经越来越多地引入现代化的一些元素（命名空间、ORM等）。当然也由于这些元素的引入，将会造成一些以前写代码不会遇到的安全问题。</p>
+<p>这里这个漏洞就是因为SRCMS不合理使用ORM（或者说是框架的Model），造成了越权。</p>
+<h2 id="0x01-thinkphp"><a class="toclink" href="#0x01-thinkphp">0x01 ThinkPHP特性造成的越权漏洞</a></h2>
+<p>首先说一个半传统的漏洞，这个漏洞是由ThinkPHP特性造成的。<br>
+/Application/User/Controller/PostController.class.php:77</br></p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="sd">/**</span>
+<span class="sd">*查看漏洞报告</span>
+<span class="sd">*/</span>
+<span class="k">public</span> <span class="k">function</span> <span class="nf">view</span><span class="p">(){</span>
+    <span class="nv">$id</span> <span class="o">=</span> <span class="nx">session</span><span class="p">(</span><span class="s1">'userId'</span><span class="p">);</span>
+    <span class="nv">$rid</span> <span class="o">=</span> <span class="nx">I</span><span class="p">(</span><span class="s1">'get.rid'</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">'intval'</span><span class="p">);</span>
+    <span class="nv">$model</span> <span class="o">=</span> <span class="nx">M</span><span class="p">(</span><span class="s2">"Post"</span><span class="p">);</span>
+   <span class="nv">$post</span> <span class="o">=</span> <span class="nv">$model</span><span class="o">-&gt;</span><span class="na">where</span><span class="p">(</span><span class="s1">'user_id='</span><span class="o">.</span><span class="nv">$id</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">where</span><span class="p">(</span><span class="s1">'id='</span><span class="o">.</span><span class="nv">$rid</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">find</span><span class="p">();</span>
+    <span class="nv">$tmodel</span><span class="o">=</span> <span class="nx">M</span><span class="p">(</span><span class="s1">'setting'</span><span class="p">);</span>
+    <span class="nv">$title</span> <span class="o">=</span> <span class="nv">$tmodel</span><span class="o">-&gt;</span><span class="na">where</span><span class="p">(</span><span class="s1">'id=1'</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">select</span><span class="p">();</span>
+    <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assign</span><span class="p">(</span><span class="s1">'title'</span><span class="p">,</span> <span class="nv">$title</span><span class="p">);</span>
+   <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assign</span><span class="p">(</span><span class="s1">'model'</span><span class="p">,</span> <span class="nv">$post</span><span class="p">);</span>
+   <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">display</span><span class="p">();</span>
+<span class="p">}</span> 
+</pre></div>
+<p>view函数存在一个越权查看他人漏洞报告的漏洞，为什么？他这里明明有<code>where('user_id='.$id)</code>，查询了user_id的呀？</p>
+<p>这里还是涉及到thinkphp一个常见错误（特性）。很多开发者没好好看文档，原因其实文档里已经明确说明了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201601/54181453728599.png"><img alt="粘贴的图片16_1_25_下午3_36.png" src="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/thum-54181453728599.png"/></a></p>
+<p>虽说ThinkPHP支持where函数的多次调用。但如果条件是字符串的话，就只能出现一次，如果出现多次的话，将只取最后一个。</p>
+<p>查看SQL日志，可以发现果然没有where user_id这个条件。</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201601/accc1453728593.jpg"><img alt="14537078745700.jpg" src="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/thum-accc1453728593.jpg"/></a></p>
+<p>第一个越权漏洞产生：『查看任意漏洞』， <a href="http://localhost/srcms/user.php?m=User&amp;c=post&amp;a=view&amp;rid=1">http://localhost/srcms/user.php?m=User&amp;c=post&amp;a=view&amp;rid=1</a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201601/f6b01453728599.png"><img alt="粘贴的图片16_1_25_下午3_47.png" src="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/thum-f6b01453728599.png"/></a></p>
+<p>修复方法吧，我觉得还是得将字符串型where条件换成数组型。不知道这个开发者是为了挑战黑客还是为了体验ThinkPHP的功能，很多地方专门使用字符型拼接作为where的参数（虽然不存在SQL注入漏洞），这样我觉得是不合适的。</p>
+<p>由于作者使用的方法依旧是字符串拼接，所以我认为这个漏洞不能算『新型PHP安全漏洞』，只能说是在框架架构下产生的传统漏洞。</p>
+<h2 id="0x02-model"><a class="toclink" href="#0x02-model">0x02 Model误用造成的越权漏洞</a></h2>
+<p>那么来个真正的新型php安全漏洞吧。</p>
+<p>这个问题点造成的漏洞有很多处，我就以『更新联系方式』这个功能来讲解。<br>
+/Application/User/Controller/InfoController.class.php:56</br></p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">public</span> <span class="k">function</span> <span class="nf">update</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="c1">//默认显示添加表单</span>
+    <span class="nv">$id</span> <span class="o">=</span> <span class="nx">session</span><span class="p">(</span><span class="s1">'userId'</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">IS_POST</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nv">$info</span> <span class="o">=</span> <span class="nx">M</span><span class="p">(</span><span class="s1">'info'</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">where</span><span class="p">(</span><span class="s1">'user_id='</span><span class="o">.</span><span class="nv">$id</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">select</span><span class="p">();</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assign</span><span class="p">(</span><span class="s1">'info'</span><span class="p">,</span><span class="nv">$info</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">display</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">IS_POST</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">//如果用户提交数据</span>
+        <span class="nv">$model</span> <span class="o">=</span> <span class="nx">D</span><span class="p">(</span><span class="s2">"info"</span><span class="p">);</span>
+        <span class="nv">$model</span><span class="o">-&gt;</span><span class="na">user_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="nv">$model</span><span class="o">-&gt;</span><span class="na">username</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nv">$model</span><span class="o">-&gt;</span><span class="na">create</span><span class="p">())</span> <span class="p">{</span>
+            <span class="c1">// 如果创建失败 表示验证没有通过 输出错误提示信息</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">error</span><span class="p">(</span><span class="nv">$model</span><span class="o">-&gt;</span><span class="na">getError</span><span class="p">());</span>
+            <span class="k">exit</span><span class="p">();</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nv">$model</span><span class="o">-&gt;</span><span class="na">save</span><span class="p">())</span> <span class="p">{</span>
+                <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">success</span><span class="p">(</span><span class="s2">"更新成功"</span><span class="p">,</span> <span class="nx">U</span><span class="p">(</span><span class="s1">'info/index'</span><span class="p">));</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">error</span><span class="p">(</span><span class="s2">"更新失败"</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span> 
+</pre></div>
+<p>这里作者使用了一种类似于ORM的数据库更新手段，来自动获取表单中的数据create()，并更新进数据库save()。</p>
+<p>我们查看create函数：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">public</span> <span class="k">function</span> <span class="nf">create</span><span class="p">(</span><span class="nv">$data</span><span class="o">=</span><span class="s1">''</span><span class="p">,</span><span class="nv">$type</span><span class="o">=</span><span class="s1">''</span><span class="p">)</span> <span class="p">{</span>
+   <span class="c1">// 如果没有传值默认取POST数据</span>
+   <span class="k">if</span><span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$data</span><span class="p">))</span> <span class="p">{</span>
+       <span class="nv">$data</span>   <span class="o">=</span>   <span class="nx">I</span><span class="p">(</span><span class="s1">'post.'</span><span class="p">);</span>
+   <span class="p">}</span><span class="k">elseif</span><span class="p">(</span><span class="nb">is_object</span><span class="p">(</span><span class="nv">$data</span><span class="p">)){</span>
+       <span class="nv">$data</span>   <span class="o">=</span>   <span class="nb">get_object_vars</span><span class="p">(</span><span class="nv">$data</span><span class="p">);</span>
+   <span class="p">}</span>
+   <span class="c1">// 验证数据</span>
+   <span class="k">if</span><span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$data</span><span class="p">)</span> <span class="o">||</span> <span class="o">!</span><span class="nb">is_array</span><span class="p">(</span><span class="nv">$data</span><span class="p">))</span> <span class="p">{</span>
+       <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">error</span> <span class="o">=</span> <span class="nx">L</span><span class="p">(</span><span class="s1">'_DATA_TYPE_INVALID_'</span><span class="p">);</span>
+       <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
+   <span class="p">}</span>
+
+   <span class="c1">// 状态</span>
+   <span class="nv">$type</span> <span class="o">=</span> <span class="nv">$type</span><span class="o">?:</span><span class="p">(</span><span class="o">!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$data</span><span class="p">[</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getPk</span><span class="p">()])</span><span class="o">?</span><span class="nx">self</span><span class="o">::</span><span class="na">MODEL_UPDATE</span><span class="o">:</span><span class="nx">self</span><span class="o">::</span><span class="na">MODEL_INSERT</span><span class="p">);</span>
+
+   <span class="o">...</span>
+
+   <span class="c1">// 创建完成对数据进行自动处理</span>
+   <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">autoOperation</span><span class="p">(</span><span class="nv">$data</span><span class="p">,</span><span class="nv">$type</span><span class="p">);</span>
+   <span class="c1">// 赋值当前数据对象</span>
+   <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">data</span> <span class="o">=</span>   <span class="nv">$data</span><span class="p">;</span>
+   <span class="c1">// 返回创建的数据以供其他调用</span>
+   <span class="k">return</span> <span class="nv">$data</span><span class="p">;</span>
+<span class="p">}</span> 
+</pre></div>
+<p>加入第一个参数$data为空，则自己从<code>I('post.')</code>获取，实际上就是从POST数据中读取。</p>
+<p>然后中间经过了很多处理，传入autoOperation方法，我们跟进一下autoOperation方法：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">private</span> <span class="k">function</span> <span class="nf">autoOperation</span><span class="p">(</span><span class="o">&amp;</span><span class="nv">$data</span><span class="p">,</span><span class="nv">$type</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">options</span><span class="p">[</span><span class="s1">'auto'</span><span class="p">]))</span> <span class="p">{</span>
+        <span class="nv">$_auto</span>   <span class="o">=</span>   <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">options</span><span class="p">[</span><span class="s1">'auto'</span><span class="p">];</span>
+        <span class="nb">unset</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">options</span><span class="p">[</span><span class="s1">'auto'</span><span class="p">]);</span>
+    <span class="p">}</span><span class="k">elseif</span><span class="p">(</span><span class="o">!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">_auto</span><span class="p">)){</span>
+        <span class="nv">$_auto</span>   <span class="o">=</span>   <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">_auto</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="c1">// 自动填充</span>
+    <span class="k">if</span><span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$_auto</span><span class="p">))</span> <span class="p">{</span>
+        <span class="k">foreach</span> <span class="p">(</span><span class="nv">$_auto</span> <span class="k">as</span> <span class="nv">$auto</span><span class="p">){</span>
+            <span class="c1">// 填充因子定义格式</span>
+            <span class="c1">// array('field','填充内容','填充条件','附加规则',[额外参数])</span>
+            <span class="k">if</span><span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span> <span class="nv">$auto</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span>  <span class="nx">self</span><span class="o">::</span><span class="na">MODEL_INSERT</span><span class="p">;</span> <span class="c1">// 默认为新增的时候自动填充</span>
+            <span class="k">if</span><span class="p">(</span> <span class="nv">$type</span> <span class="o">==</span> <span class="nv">$auto</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">||</span> <span class="nv">$auto</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="nx">self</span><span class="o">::</span><span class="na">MODEL_BOTH</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span><span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span> <span class="nv">$auto</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span>  <span class="s1">'string'</span><span class="p">;</span>
+                <span class="k">switch</span><span class="p">(</span><span class="nb">trim</span><span class="p">(</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span> <span class="p">{</span>
+                    <span class="k">case</span> <span class="s1">'function'</span><span class="o">:</span>    <span class="c1">//  使用函数进行填充 字段的值作为参数</span>
+                    <span class="k">case</span> <span class="s1">'callback'</span><span class="o">:</span> <span class="c1">// 使用回调方法</span>
+                        <span class="nv">$args</span> <span class="o">=</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span><span class="o">?</span><span class="p">(</span><span class="k">array</span><span class="p">)</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">:</span><span class="k">array</span><span class="p">();</span>
+                        <span class="k">if</span><span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$data</span><span class="p">[</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">0</span><span class="p">]]))</span> <span class="p">{</span>
+                            <span class="nb">array_unshift</span><span class="p">(</span><span class="nv">$args</span><span class="p">,</span><span class="nv">$data</span><span class="p">[</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">0</span><span class="p">]]);</span>
+                        <span class="p">}</span>
+                        <span class="k">if</span><span class="p">(</span><span class="s1">'function'</span><span class="o">==</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="p">{</span>
+                            <span class="nv">$data</span><span class="p">[</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>  <span class="o">=</span> <span class="nb">call_user_func_array</span><span class="p">(</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nv">$args</span><span class="p">);</span>
+                        <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+                            <span class="nv">$data</span><span class="p">[</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>  <span class="o">=</span>  <span class="nb">call_user_func_array</span><span class="p">(</span><span class="k">array</span><span class="p">(</span><span class="o">&amp;</span><span class="nv">$this</span><span class="p">,</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nv">$args</span><span class="p">);</span>
+                        <span class="p">}</span>
+                        <span class="k">break</span><span class="p">;</span>
+                    <span class="k">case</span> <span class="s1">'field'</span><span class="o">:</span>    <span class="c1">// 用其它字段的值进行填充</span>
+                        <span class="nv">$data</span><span class="p">[</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="nv">$data</span><span class="p">[</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">1</span><span class="p">]];</span>
+                        <span class="k">break</span><span class="p">;</span>
+                    <span class="k">case</span> <span class="s1">'ignore'</span><span class="o">:</span> <span class="c1">// 为空忽略</span>
+                        <span class="k">if</span><span class="p">(</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">===</span><span class="nv">$data</span><span class="p">[</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+                            <span class="nb">unset</span><span class="p">(</span><span class="nv">$data</span><span class="p">[</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">0</span><span class="p">]]);</span>
+                        <span class="k">break</span><span class="p">;</span>
+                    <span class="k">case</span> <span class="s1">'string'</span><span class="o">:</span>
+                    <span class="k">default</span><span class="o">:</span> <span class="c1">// 默认作为字符串填充</span>
+                        <span class="nv">$data</span><span class="p">[</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="nv">$auto</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+                <span class="p">}</span>
+                <span class="k">if</span><span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$data</span><span class="p">[</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="o">&amp;&amp;</span> <span class="k">false</span> <span class="o">===</span> <span class="nv">$data</span><span class="p">[</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="p">)</span>   <span class="nb">unset</span><span class="p">(</span><span class="nv">$data</span><span class="p">[</span><span class="nv">$auto</span><span class="p">[</span><span class="mi">0</span><span class="p">]]);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nv">$data</span><span class="p">;</span>
+<span class="p">}</span> 
+</pre></div>
+<p>这是个自动填入条件的方法，依据的的是具体model里_auto这个数组的值来确定，我们看看InfoModel.class.php里是怎么定义的：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">namespace</span> <span class="nx">User\Model</span><span class="p">;</span>
+<span class="k">use</span> <span class="nx">Think\Model</span><span class="p">;</span>
+<span class="k">class</span> <span class="nc">InfoModel</span> <span class="k">extends</span> <span class="nx">Model</span><span class="p">{</span>
+
+    <span class="k">protected</span> <span class="nv">$_validate</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span>
+        <span class="k">array</span><span class="p">(</span><span class="s1">'realname'</span><span class="p">,</span><span class="s1">'require'</span><span class="p">,</span><span class="s1">'请填写真实姓名'</span><span class="p">),</span> <span class="c1">//默认情况下用正则进行验证</span>
+        <span class="k">array</span><span class="p">(</span><span class="s1">'zipcode'</span><span class="p">,</span><span class="s1">'require'</span><span class="p">,</span><span class="s1">'请填写邮编'</span><span class="p">),</span> <span class="c1">//默认情况下用正则进行验证</span>
+        <span class="k">array</span><span class="p">(</span><span class="s1">'location'</span><span class="p">,</span><span class="s1">'require'</span><span class="p">,</span><span class="s1">'请填写地址'</span><span class="p">),</span> <span class="c1">//默认情况下用正则进行验证</span>
+        <span class="k">array</span><span class="p">(</span><span class="s1">'tel'</span><span class="p">,</span><span class="s1">'require'</span><span class="p">,</span><span class="s1">'请填写联系电话'</span><span class="p">),</span> <span class="c1">//默认情况下用正则进行验证</span>
+        <span class="k">array</span><span class="p">(</span><span class="s1">'alipay'</span><span class="p">,</span><span class="s1">'require'</span><span class="p">,</span><span class="s1">'请填写支付宝账号，方便发放现金奖励'</span><span class="p">),</span> <span class="c1">//默认情况下用正则进行验证</span>
+    <span class="p">);</span>
+
+    <span class="k">protected</span> <span class="nv">$_auto</span> <span class="o">=</span> <span class="k">array</span> <span class="p">(</span> 
+        <span class="k">array</span><span class="p">(</span><span class="s1">'user_id'</span><span class="p">,</span><span class="s1">'getUid'</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">'callback'</span><span class="p">),</span> <span class="c1">// 对update_time字段在更新的时候写入当前用户ID</span>
+        <span class="k">array</span><span class="p">(</span><span class="s1">'username'</span><span class="p">,</span><span class="s1">'getUsername'</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">'callback'</span><span class="p">),</span> <span class="c1">// 对update_time字段在更新的时候写入当前用户名</span>
+    <span class="p">);</span>
+
+    <span class="k">protected</span> <span class="k">function</span> <span class="nf">getUid</span><span class="p">(){</span>
+        <span class="k">return</span> <span class="nx">session</span><span class="p">(</span><span class="s1">'userId'</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">protected</span> <span class="k">function</span> <span class="nf">getUsername</span><span class="p">(){</span>
+        <span class="k">return</span> <span class="nx">session</span><span class="p">(</span><span class="s1">'username'</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span> 
+</pre></div>
+<p>可见，这里的user_id绑定了回调函数getUid，而getUid返回的正是当前用户的user_id。</p>
+<p>感觉一切都没有错误啊？我们仔细观察这个_auto的第三个参数：1</p>
+<p>我们看到第三个参数的定义：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201601/dd361453728594.jpg"><img alt="14537148696774.jpg" src="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/thum-dd361453728594.jpg"/></a></p>
+<p>1代表的是insert，只有在insert的时候才进行处理。</p>
+<p>而假设我们传入的POST中有user_id (getPk)，ThinkPHP会自动判断当前type为update，也就是2：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="c1">// 状态</span>
+<span class="nv">$type</span> <span class="o">=</span> <span class="nv">$type</span><span class="o">?:</span><span class="p">(</span><span class="o">!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$data</span><span class="p">[</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getPk</span><span class="p">()])</span><span class="o">?</span><span class="nx">self</span><span class="o">::</span><span class="na">MODEL_UPDATE</span><span class="o">:</span><span class="nx">self</span><span class="o">::</span><span class="na">MODEL_INSERT</span><span class="p">);</span> 
+</pre></div>
+<p>所以在autoOperation方法里，在这个if语句的时候就卡主了，进不去：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="c1">//type是update（2），但$auto[2]却是 1, $type==$auto[2]不成立</span>
+<span class="k">if</span><span class="p">(</span> <span class="nv">$type</span> <span class="o">==</span> <span class="nv">$auto</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">||</span> <span class="nv">$auto</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="nx">self</span><span class="o">::</span><span class="na">MODEL_BOTH</span><span class="p">)</span> <span class="p">{</span> 
+</pre></div>
+<p>因为这个if语句进不去，所以实际上user_id没有被程序覆盖掉，我通过POST传入的user_id被保留了。于是，我就可以越权修改任意用户的联系方式。</p>
+<p>上诉的分析都是我在YY，现在验证一下。首先注册一个test用户（user_id为4），增加联系方式如下：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201601/53ff1453728594.jpg"><img alt="14537116458493.jpg" src="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/thum-53ff1453728594.jpg"/></a></p>
+<p>其他用户，登录以后发送如下数据包即可修改user_id=4的联系方式，包括手机号、支付宝等：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201601/7cda1453728600.png"><img alt="粘贴的图片16_1_25_下午4_47.png" src="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/thum-7cda1453728600.png"/></a></p>
+<p>返回test用户的页面，发现已经被改：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201601/61a81453728595.jpg"><img alt="14537154286412.jpg" src="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/thum-61a81453728595.jpg"/></a></p>
+<p>这就是一个典型的新型框架的越权漏洞，因为不熟悉框架，在使用框架提供的『新式方法』时，造成了错误。</p>
+<h2 id="0x03"><a class="toclink" href="#0x03">0x03 横向挖掘 —— 权限提升漏洞（可获取管理员权限）</a></h2>
+<p>既然我们这个漏洞是开发者对框架不熟悉造成的，属于是『架构漏洞』，那么srcms里可能并非一处地方存在此漏洞。</p>
+<p>存在此类漏洞需要有这个条件：Model中设置的类型与实际执行的SQL类型不同。比如这个漏洞是设置的insert，实际执行的是update。</p>
+<p>但我看了下前台，前台大部分地方都是调用的add()进行insert，都能够对上。暂时没发现其他地方存在这个问题，后台我就不看了。</p>
+<p>等下，insert？看到这个的时候，我就想到下一步利用方法了。我们看到注册时候的代码：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">public</span> <span class="k">function</span> <span class="nf">add</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="c1">//默认显示添加表单</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">IS_POST</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">display</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">IS_POST</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">//如果用户提交数据</span>
+        <span class="nv">$model</span> <span class="o">=</span> <span class="nx">D</span><span class="p">(</span><span class="s2">"Member"</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nv">$model</span><span class="o">-&gt;</span><span class="na">create</span><span class="p">())</span> <span class="p">{</span>
+            <span class="c1">// 如果创建失败 表示验证没有通过 输出错误提示信息</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">error</span><span class="p">(</span><span class="nv">$model</span><span class="o">-&gt;</span><span class="na">getError</span><span class="p">());</span>
+            <span class="k">exit</span><span class="p">();</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nv">$model</span><span class="o">-&gt;</span><span class="na">add</span><span class="p">())</span> <span class="p">{</span>
+                <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">success</span><span class="p">(</span><span class="s2">"用户添加成功"</span><span class="p">,</span> <span class="nx">U</span><span class="p">(</span><span class="s1">'index/index'</span><span class="p">));</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">error</span><span class="p">(</span><span class="s2">"用户添加失败"</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span> 
+</pre></div>
+<p>过程也是create()以后add()，再看到member.class.php</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">namespace</span> <span class="nx">User\Model</span><span class="p">;</span>
+<span class="k">use</span> <span class="nx">Think\Model</span><span class="p">;</span>
+<span class="k">class</span> <span class="nc">MemberModel</span> <span class="k">extends</span> <span class="nx">Model</span><span class="p">{</span>
+    <span class="k">protected</span> <span class="nv">$_validate</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span>
+        <span class="k">array</span><span class="p">(</span><span class="s1">'username'</span><span class="p">,</span><span class="s1">'require'</span><span class="p">,</span><span class="s1">'请填写用户名！'</span><span class="p">),</span> <span class="c1">//默认情况下用正则进行验证</span>
+        <span class="k">array</span><span class="p">(</span><span class="s1">'email'</span><span class="p">,</span><span class="s1">'require'</span><span class="p">,</span><span class="s1">'请填写邮箱！'</span><span class="p">),</span> <span class="c1">//默认情况下用正则进行验证</span>
+        <span class="k">array</span><span class="p">(</span><span class="s1">'email'</span><span class="p">,</span><span class="s1">'email'</span><span class="p">,</span><span class="s1">'邮箱格式错误！'</span><span class="p">),</span> <span class="c1">//默认情况下用正则进行验证</span>
+        <span class="k">array</span><span class="p">(</span><span class="s1">'password'</span><span class="p">,</span><span class="s1">'require'</span><span class="p">,</span><span class="s1">'请填写密码！'</span><span class="p">,</span><span class="s1">''</span><span class="p">,</span><span class="s1">''</span><span class="p">,</span><span class="nx">self</span><span class="o">::</span><span class="na">MODEL_INSERT</span><span class="p">),</span> <span class="c1">//默认情况下用正则进行验证</span>
+        <span class="k">array</span><span class="p">(</span><span class="s1">'repassword'</span><span class="p">,</span><span class="s1">'password'</span><span class="p">,</span><span class="s1">'确认密码不正确'</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">'confirm'</span><span class="p">),</span> <span class="c1">// 验证确认密码是否和密码一致</span>
+        <span class="k">array</span><span class="p">(</span><span class="s1">'username'</span><span class="p">,</span><span class="s1">''</span><span class="p">,</span><span class="s1">'用户名已存在！'</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">'unique'</span><span class="p">,</span><span class="nx">self</span><span class="o">::</span><span class="na">MODEL_BOTH</span><span class="p">),</span> <span class="c1">// 在新增的时候验证name字段是否唯一</span>
+        <span class="k">array</span><span class="p">(</span><span class="s1">'email'</span><span class="p">,</span><span class="s1">''</span><span class="p">,</span><span class="s1">'邮箱已存在！'</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">'unique'</span><span class="p">,</span><span class="nx">self</span><span class="o">::</span><span class="na">MODEL_BOTH</span><span class="p">),</span> <span class="c1">// 在新增的时候验证name字段是否唯一</span>
+    <span class="p">);</span>
+
+    <span class="k">protected</span> <span class="nv">$_auto</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span>
+        <span class="k">array</span><span class="p">(</span><span class="s1">'password'</span><span class="p">,</span><span class="s1">'md5'</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">'function'</span><span class="p">)</span> <span class="p">,</span> <span class="c1">//添加时用md5函数处理 </span>
+        <span class="k">array</span><span class="p">(</span><span class="s1">'update_at'</span><span class="p">,</span><span class="s1">'time'</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="s1">'function'</span><span class="p">),</span> <span class="c1">//更新时</span>
+        <span class="k">array</span><span class="p">(</span><span class="s1">'create_at'</span><span class="p">,</span><span class="s1">'time'</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">'function'</span><span class="p">),</span> <span class="c1">//新增时</span>
+        <span class="k">array</span><span class="p">(</span><span class="s1">'login_ip'</span><span class="p">,</span><span class="s1">'get_client_ip'</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="s1">'function'</span><span class="p">),</span> <span class="c1">//新增时</span>
+    <span class="p">);</span>
+<span class="p">}</span> 
+</pre></div>
+<p>可见，并没有对type进行设置，也就是说，我只要传入的POST数据里设置一下我自己的type=2，即可注册一个管理员。</p>
+<p>测试一下：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201601/aa091453728601.png"><img alt="粘贴的图片16_1_25_下午8_34.png" src="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/thum-aa091453728601.png"/></a></p>
+<p>成功用hacker登陆后台：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201601/f0561453728598.jpg"><img alt="14537254052062.jpg" src="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/thum-f0561453728598.jpg"/></a></p>
+<p>前台也可以看到其积分是99999：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201601/758e1453728598.jpg"><img alt="14537253325422.jpg" src="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/thum-758e1453728598.jpg"/></a></p>
+<p>后台漏洞，我就不挖了，涉及不到新型CMS的漏洞挖掘了。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2466">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">hdphp</a>
+<time datetime="2016年10月28日 22:49" itemprop="datePublished">
+                            2016 十月 28 22:49
+                        </time>
+<a href="javascript:reply_to('2466', 'hdphp')">回复</a>
+</p>
+<p class="comment-meta">以前接触过类似的框架，和thinkphp类似 ，其中也涉及到create这个方法，也有1，2，3这三种情况,也存在这个自动auto，但是如果我自动完成方法第三个参数无论什么情况都写3，应该能避免以上问题吧</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="fc38147ed0597a0cf521e71cb02c03119c97eec9"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/fc38147ed0597a0cf521e71cb02c03119c97eec9"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="377">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="O2QsYPy6ggRgWGnGIsvHshINJPKy94KvmmbYMjKlH3LFWlLVwJZr1VKSSTdGSyzF"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./SRCMS 多处越权+权限提升管理员漏洞  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

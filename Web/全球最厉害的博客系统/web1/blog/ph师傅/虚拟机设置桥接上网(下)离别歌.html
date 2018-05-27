@@ -1,0 +1,265 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./虚拟机设置桥接上网(下)  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./虚拟机设置桥接上网(下)  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./虚拟机设置桥接上网(下)  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>虚拟机设置桥接上网(下) | 离别歌</title>
+<link href="./虚拟机设置桥接上网(下)  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./虚拟机设置桥接上网(下)  离别歌/styles.css" rel="stylesheet"/>
+<link href="./虚拟机设置桥接上网(下)  离别歌/style.css" rel="stylesheet"/>
+<link href="./虚拟机设置桥接上网(下)  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./虚拟机设置桥接上网(下)  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./虚拟机设置桥接上网(下)  离别歌/jquery.min.js"></script>
+<link href="./虚拟机设置桥接上网(下)  离别歌/code.css" rel="stylesheet"/>
+<link href="./虚拟机设置桥接上网(下)  离别歌/button.css" rel="stylesheet"/>
+<link href="./虚拟机设置桥接上网(下)  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./虚拟机设置桥接上网(下)  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/SOFT/VisualNet2.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/SOFT/VisualNet2.html&amp;text=%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%AE%BE%E7%BD%AE%E6%A1%A5%E6%8E%A5%E4%B8%8A%E7%BD%91%28%E4%B8%8B%29"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/SOFT/VisualNet2.html&amp;title=%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%AE%BE%E7%BD%AE%E6%A1%A5%E6%8E%A5%E4%B8%8A%E7%BD%91%28%E4%B8%8B%29"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/SOFT/VisualNet2.html&amp;is_video=false&amp;description=%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%AE%BE%E7%BD%AE%E6%A1%A5%E6%8E%A5%E4%B8%8A%E7%BD%91%28%E4%B8%8B%29"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%AE%BE%E7%BD%AE%E6%A1%A5%E6%8E%A5%E4%B8%8A%E7%BD%91%28%E4%B8%8B%29&amp;body=Check out this article: https%3A//www.leavesongs.com/SOFT/VisualNet2.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/SOFT/VisualNet2.html&amp;title=%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%AE%BE%E7%BD%AE%E6%A1%A5%E6%8E%A5%E4%B8%8A%E7%BD%91%28%E4%B8%8B%29"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/SOFT/VisualNet2.html&amp;title=%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%AE%BE%E7%BD%AE%E6%A1%A5%E6%8E%A5%E4%B8%8A%E7%BD%91%28%E4%B8%8B%29"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/SOFT/VisualNet2.html&amp;title=%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%AE%BE%E7%BD%AE%E6%A1%A5%E6%8E%A5%E4%B8%8A%E7%BD%91%28%E4%B8%8B%29"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/SOFT/VisualNet2.html&amp;title=%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%AE%BE%E7%BD%AE%E6%A1%A5%E6%8E%A5%E4%B8%8A%E7%BD%91%28%E4%B8%8B%29"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/SOFT/VisualNet2.html&amp;name=%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%AE%BE%E7%BD%AE%E6%A1%A5%E6%8E%A5%E4%B8%8A%E7%BD%91%28%E4%B8%8B%29&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">虚拟机设置桥接上网(下)</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年1月31日 11:49" itemprop="datePublished">
+                    2013 一月 31 11:49
+                </time>
+</div>
+<div class="article-tag">
+            阅读：9342
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/SOFT">软件</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E4%B8%8A%E7%BD%91">上网</a>,
+                
+                <a class="tag-link" href="/tag/%E6%A1%A5%E6%8E%A5">桥接</a>,
+                
+                <a class="tag-link" href="/tag/%E8%99%9A%E6%8B%9F%E6%9C%BA">虚拟机</a>,
+                
+                <a class="tag-link" href="/tag/backtrack">backtrack</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+<span style="font-size:14px;">    昨天我们研究了<a href="https://www.leavesongs.com/WEB/VisualNet1.html" target="_blank">XP的虚拟机下怎样设置桥接上网</a>，通过昨天的研究，我们大概知道了桥接上网要注意的重点——无非是网段要一致。</span>
+</p>
+<p>
+<span style="font-size:14px;">    今天的linux就很简单了，我选的linux是BT5。winodws虚拟机需要手动给它分配IP，而我们的BT5下能自动获取IP，一步解决桥接上网。</span>
+</p>
+<p>
+<span style="font-size:14px;">    首先还是按照我们昨天讲的方式设置主机的IP。</span>
+</p>
+<p>
+<span style="font-size:14px;">    打开backtrack5(其他linux也大致相同)的图形界面。<span style="color:#e53333;">在打开前我们应该把上网方式选择成NAT，否则BT5不能识别你的网卡，这点很重要。</span>而后我们在命令行下输入ifconfig。</span>
+</p>
+<p>
+<span style="font-size:14px;"><a href="https://www.leavesongs.com/content/uploadfile/201301/10581359604857.jpg" id="ematt:39" target="_blank">    <img alt="ifconfig - 查看网络信息" border="0" data-pinit="registered" height="289" src="./虚拟机设置桥接上网(下)  离别歌/thum-10581359604857.jpg" title="ifconfig - 查看网络信息" width="420"/></a></span>
+</p>
+<p>
+<span style="font-size:14px;">    你会发现eth1(也许你不是1是2、3都行，就像本地连接1)的inet地址是192.168.50.132(你电脑上不一定是这个)，这是NAT模式下的ip地址。</span>
+</p>
+<p>
+<span style="font-size:14px;">    现在你更改虚拟机的联网方式，在VMware右下角第三个图标，先断开连接，再选设置，改成桥接，再连接。</span>
+</p>
+<p>
+<span style="font-size:14px;"><a href="https://www.leavesongs.com/content/uploadfile/201301/ae561359605089.jpg" id="ematt:40" target="_blank">    <img alt="VMware - 设置栏" border="0" height="20" src="./虚拟机设置桥接上网(下)  离别歌/ae561359605089.jpg" title="VMware - 设置栏" width="218"/></a></span>
+</p>
+<p>
+<span style="font-size:14px;">    再用ifconfig命令，发现IP地址没有改变，还是192.168.50.132。那是因为你还没有自动获取IP。</span>
+</p>
+<p>
+<span style="font-size:14px;">    命令行下输入dhclient eth1 (如果你是eth2就写2)</span>
+</p>
+<p>
+<span style="font-size:14px;">    <a href="https://www.leavesongs.com/content/uploadfile/201301/62bf1359605388.jpg" id="ematt:41" target="_blank"><img alt="dhclient - 自动获取IP地址" border="0" height="159" src="./虚拟机设置桥接上网(下)  离别歌/thum-62bf1359605388.jpg" title="dhclient - 自动获取IP地址" width="420"/></a></span>
+</p>
+<p>
+<span style="font-size:14px;">    这时候IP就分配好了，可以看出来是192.168.1.103 再用ifconfig查看，一切OK，上网也可以，也能ping通了。</span>
+</p>
+<p>
+<span style="font-size:14px;">    <a href="https://www.leavesongs.com/content/uploadfile/201301/8df71359605388.jpg" id="ematt:42" target="_blank"><img alt="ifconfig - 比对IP地址变化" border="0" data-pinit="registered" height="222" src="./虚拟机设置桥接上网(下)  离别歌/thum-8df71359605388.jpg" title="ifconfig - 比对IP地址变化" width="420"/></a></span>
+</p>
+<p>
+   
+</p>
+<p>
+<span style="font-size:14px;">    <b>
+    图形化界面操作
+    </b></span>
+</p>
+<p>
+<span style="font-size:14px;">    有些孩纸还是喜欢像windows一样点点鼠标就能解决问题，幸运的是bt5下提供了这个功能。选中Wicd Network Manager这个软件：</span>
+</p>
+<p>
+<span style="font-size:14px;"><a href="https://www.leavesongs.com/content/uploadfile/201301/94141359605704.jpg" id="ematt:43" target="_blank">    <img alt="Wicd Network Manager - 图形化操作网络连接" border="0" data-pinit="registered" height="340" src="./虚拟机设置桥接上网(下)  离别歌/94141359605704.jpg" title="Wicd Network Manager - 图形化操作网络连接" width="385"/></a></span>
+</p>
+<p>
+<span style="font-size:14px;">    点击连接就可以了。</span>
+</p>
+<p>
+<span style="font-size:14px;">    <a href="https://www.leavesongs.com/content/uploadfile/201301/edab1359606040.jpg" id="ematt:44" target="_blank"><img alt="Wicd Network Manager - 操作方法" border="0" height="148" src="./虚拟机设置桥接上网(下)  离别歌/thum-edab1359606040.jpg" title="Wicd Network Manager - 操作方法" width="420"/></a></span>
+</p>
+<p>
+   
+</p>
+<p>
+<span style="font-size:14px;">    <b>
+    手动分配IP
+    </b></span>
+</p>
+<p>
+<span style="font-size:14px;">    昨天XP时我们是手动给它分配的IP和DNS，BT5下也能手动分配。当然也有两种方式(命令行和图形界面)，我只介绍图形界面的操作方式，命令行的方式我把命令给你们，自己研究。</span>
+</p>
+<p>
+<span style="font-size:14px;">    还是<span style="line-height:1.5;">Wicd Network Manager这个软件，连接之前点属性，像昨天一样填写，IP地址分配成192.168.1.X ：</span></span>
+</p>
+<p>
+<span style="font-size:14px;"><span style="line-height:1.5;">    <a href="https://www.leavesongs.com/content/uploadfile/201301/db3a1359606040.jpg" id="ematt:45" target="_blank"><img alt="Wicd Network Manager - 图形化手动分配IP地址" border="0" data-pinit="registered" height="460" src="./虚拟机设置桥接上网(下)  离别歌/thum-db3a1359606040.jpg" title="Wicd Network Manager - 图形化手动分配IP地址" width="313"/></a></span></span>
+</p>
+<p>
+<span style="font-size:14px;">    确定后再点连接，连接上了再用ifconfig查看，IP已经变成192.168.1.138了。一切OK，能上网。</span>
+</p>
+<p>
+<span style="font-size:14px;">    <a href="https://www.leavesongs.com/content/uploadfile/201301/85b61359606317.jpg" id="ematt:46" target="_blank"><img alt="ifconfig - 查看IP地址变化" border="0" data-pinit="registered" height="227" src="./虚拟机设置桥接上网(下)  离别歌/thum-85b61359606317.jpg" title="ifconfig - 查看IP地址变化" width="420"/></a></span>
+</p>
+<p>
+<span style="font-size:14px;">    命令行方式的命令：</span>
+</p><span style="font-size:14px;">
+<pre class="brush:bash;">
+ifconfig eth1 192.168.1.138 netmask 255.255.255.0
+route add default gw 192.168.1.1
+nano /ect/resolv.conf
+nameserver 8.8.8.8
+</pre></span>
+<p>
+<span style="font-size:14px;">    通过这两天的学习，以为基本上解决了桥接上网的问题。其实不然，当我们手里没有路由器时，怎么桥接上网，这也是困扰很多人的问题。而且BT5下很多工具如果非桥接上网就用不了，桥接上网成了我们务必解决的问题之一。</span>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="7c80bfdb4bf1ecbf5a83717d5aefc8889c274fde"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./虚拟机设置桥接上网(下)  离别歌/7c80bfdb4bf1ecbf5a83717d5aefc8889c274fde"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="226">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="vlsZHFMWSirp19bOjQg8lS1ZX5oVR9UH3FNvv9Ybj5lO1Oz377KSUw3469R3ADJR"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./虚拟机设置桥接上网(下)  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./虚拟机设置桥接上网(下)  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

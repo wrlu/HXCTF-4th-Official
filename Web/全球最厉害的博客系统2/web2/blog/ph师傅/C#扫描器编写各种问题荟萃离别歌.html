@@ -1,0 +1,390 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./C#扫描器编写各种问题荟萃  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./C#扫描器编写各种问题荟萃  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./C#扫描器编写各种问题荟萃  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>C#扫描器编写各种问题荟萃 | 离别歌</title>
+<link href="./C#扫描器编写各种问题荟萃  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./C#扫描器编写各种问题荟萃  离别歌/styles.css" rel="stylesheet"/>
+<link href="./C#扫描器编写各种问题荟萃  离别歌/style.css" rel="stylesheet"/>
+<link href="./C#扫描器编写各种问题荟萃  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./C#扫描器编写各种问题荟萃  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./C#扫描器编写各种问题荟萃  离别歌/jquery.min.js"></script>
+<link href="./C#扫描器编写各种问题荟萃  离别歌/code.css" rel="stylesheet"/>
+<link href="./C#扫描器编写各种问题荟萃  离别歌/button.css" rel="stylesheet"/>
+<link href="./C#扫描器编写各种问题荟萃  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./C#扫描器编写各种问题荟萃  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/OTHERLAN/web-bakfile-scan-problem.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/OTHERLAN/web-bakfile-scan-problem.html&amp;text=C%23%E6%89%AB%E6%8F%8F%E5%99%A8%E7%BC%96%E5%86%99%E5%90%84%E7%A7%8D%E9%97%AE%E9%A2%98%E8%8D%9F%E8%90%83"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/OTHERLAN/web-bakfile-scan-problem.html&amp;title=C%23%E6%89%AB%E6%8F%8F%E5%99%A8%E7%BC%96%E5%86%99%E5%90%84%E7%A7%8D%E9%97%AE%E9%A2%98%E8%8D%9F%E8%90%83"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/OTHERLAN/web-bakfile-scan-problem.html&amp;is_video=false&amp;description=C%23%E6%89%AB%E6%8F%8F%E5%99%A8%E7%BC%96%E5%86%99%E5%90%84%E7%A7%8D%E9%97%AE%E9%A2%98%E8%8D%9F%E8%90%83"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=C%23%E6%89%AB%E6%8F%8F%E5%99%A8%E7%BC%96%E5%86%99%E5%90%84%E7%A7%8D%E9%97%AE%E9%A2%98%E8%8D%9F%E8%90%83&amp;body=Check out this article: https%3A//www.leavesongs.com/OTHERLAN/web-bakfile-scan-problem.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/OTHERLAN/web-bakfile-scan-problem.html&amp;title=C%23%E6%89%AB%E6%8F%8F%E5%99%A8%E7%BC%96%E5%86%99%E5%90%84%E7%A7%8D%E9%97%AE%E9%A2%98%E8%8D%9F%E8%90%83"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/OTHERLAN/web-bakfile-scan-problem.html&amp;title=C%23%E6%89%AB%E6%8F%8F%E5%99%A8%E7%BC%96%E5%86%99%E5%90%84%E7%A7%8D%E9%97%AE%E9%A2%98%E8%8D%9F%E8%90%83"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/OTHERLAN/web-bakfile-scan-problem.html&amp;title=C%23%E6%89%AB%E6%8F%8F%E5%99%A8%E7%BC%96%E5%86%99%E5%90%84%E7%A7%8D%E9%97%AE%E9%A2%98%E8%8D%9F%E8%90%83"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/OTHERLAN/web-bakfile-scan-problem.html&amp;title=C%23%E6%89%AB%E6%8F%8F%E5%99%A8%E7%BC%96%E5%86%99%E5%90%84%E7%A7%8D%E9%97%AE%E9%A2%98%E8%8D%9F%E8%90%83"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/OTHERLAN/web-bakfile-scan-problem.html&amp;name=C%23%E6%89%AB%E6%8F%8F%E5%99%A8%E7%BC%96%E5%86%99%E5%90%84%E7%A7%8D%E9%97%AE%E9%A2%98%E8%8D%9F%E8%90%83&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">C#扫描器编写各种问题荟萃</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年2月14日 01:02" itemprop="datePublished">
+                    2014 二月 14 01:02
+                </time>
+</div>
+<div class="article-tag">
+            阅读：5066
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/OTHERLAN">其他语言</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E5%A4%87%E4%BB%BD%E6%96%87%E4%BB%B6">备份文件</a>,
+                
+                <a class="tag-link" href="/tag/%E6%89%AB%E6%8F%8F%E5%99%A8">扫描器</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    最近在写一款基于C#的网站备份文件扫描器，第一次写C#程序，其中遇到各种问题。在这里荟萃一下，给其他朋友一些帮助。
+</p>
+<p>
+	    先秀一下效果：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201402/a0171392311461.jpg" id="ematt:452" target="_blank"><img alt="001.jpg" border="0" height="338" src="./C#扫描器编写各种问题荟萃  离别歌/a0171392311461.jpg" title="点击查看原图" width="507"/></a>
+</p>
+<p>
+<br>
+</br></p>
+<p>
+	    <strong>问题一、多线程中修改UI抛出异常</strong>
+</p>
+<p>
+	    一般异常信息是“现场间操作无效”、“调用线程无法访问此对象，因为另一个线程拥有该对象”。唉，线程它找不到对象，就跟我情人节没有对象，在这里写程序一个道理……苦逼。
+</p>
+<p>
+	    我们需要使用“委托”的方式，委托UI线程来处理操作UI的那个函数。比如我们要写一个扫描器，界面上有一个进度条显示扫描的进度，没扫描一个URL我们需要给进度条增加一。这个时候“增加”这部分代码就需要写在单独的一个方法中，然后由工作线程委托UI线程来执行这个方法。
+</p>
+<p>
+	    简要代码如下：
+</p>
+<pre class="brush: c#;auto-links: false;">//线程中
+void threadfunc(){
+    ...
+    this.Dispatcher.Invoke(DispatcherPriority.Background, new probarDelegate(probarAdd));
+    ...
+}
+//声明一个委托
+public delegate void probarDelegate();
+//需要委托执行的函数
+void probarAdd(){
+    probar.Value++;
+}</pre>
+    这样就能和谐地让进度条滚动起来。
+<p>
+<br>
+</br></p>
+<p>
+<br/>
+</p>
+<p>
+	    <strong>问题二、如何在WPF窗体中为listbox增加右键菜单</strong>
+</p>
+<p>
+	    这个似乎很简单。在listbox的属性中，有一项叫“ContextMenu”，我们添加它，即可为listbox增加一个右键菜单。
+</p>
+<p>
+	    但如何向菜单中增加项目？这个ContextMenu中有一项是Items，菜单项目理应在其中增加。但点击开了以后居然发现，增加按钮是灰色的！！
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201402/11f51392312324.jpg" id="ematt:453" target="_blank"><img alt="002.jpg" border="0" height="392" src="./C#扫描器编写各种问题荟萃  离别歌/thum-11f51392312324.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p>
+	    那我是怎么加进去两个项目的？既然图形化界面解决不了问题，只能手动修改xaml文件了。
+</p>
+<p>
+	    找到窗口的xaml文件，其中有一个ContextMenu节点，我们把项目加入其中即可：
+</p>
+<pre class="brush: xml;auto-links: false;">        &lt;ListBox Height="182" HorizontalAlignment="Left" Margin="6,47,0,0" Name="succBox" VerticalAlignment="Top" Width="346"&gt;
+            &lt;ListBox.ContextMenu&gt;
+                &lt;ContextMenu DataContext="{Binding ElementName=succBox}" Name="menuPop"&gt;
+                    &lt;MenuItem Header="复制" Click="Copy_Click" Name="copy_menu"&gt;&lt;/MenuItem&gt;
+                    &lt;MenuItem Header="导出" Click="Dump_Click" Name="dump_menu"&gt;&lt;/MenuItem&gt;
+                &lt;/ContextMenu&gt;
+            &lt;/ListBox.ContextMenu&gt;
+        &lt;/ListBox&gt;</pre>
+    
+<p>
+<br/>
+</p>
+<p>
+	    <strong>问题三、对话框怎么在任务栏上有自己的bar？</strong>
+</p>
+<p>
+	    什么意思，比如我程序中要弹出一个对话框，让用户输入信息。弹出对话框（不管是模态还是非模态）后，居然会在任务栏上有自己的一项：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201402/9c3c1392312664.jpg" id="ematt:455" target="_blank"><img alt="003.jpg" border="0" height="188" src="./C#扫描器编写各种问题荟萃  离别歌/9c3c1392312664.jpg" title="点击查看原图" width="469"/></a>
+</p>
+<p>
+	    而以前写MFC程序默认不是这样的，而且各种程序按道理来说也不该这样。
+</p>
+<p>
+	    于是探究了一番，发现原来只用在弹出的对话框属性中的ShowInTaskBar设置为false即可。
+</p>
+<p>
+<br/>
+</p>
+<p>
+	    <strong>问题四、扫描经常扫到中间就停下了，或变得很慢</strong>
+</p>
+<p>
+	    这个问题是大BOSS，研究了很久。后来在这里找到了答案<span style="line-height:1.5;">：</span><a href="http://www.crifan.com/fixed_problem_sometime_httpwebrequest_getresponse_timeout/comment-page-1/" style="line-height:1.5;" target="_blank">http://www.crifan.com/fixed_problem_sometime_httpwebrequest_getresponse_timeout/comment-page-1/</a>
+</p>
+<p>
+	    原来是程序限制了最大连接数，当有很多http连接没有关闭掉的时候，连接数达到了最大连接限制，就不能新增连接了。而之前的连接又没释放掉，造成了扫描停止。
+</p>
+<p>
+	    解决方法在上面那篇文章中写的很详细，把System.Net.ServicePointManager.DefaultConnectionLimit设置更大，然后每次连接结束后close一下，不必要的情况下设置HTTP的KeepAlive=false。
+</p>
+<p>
+	    感谢作者的分享。
+</p>
+<p>
+<br/>
+</p>
+<p>
+	    程序不外放，有兴趣的基友单独找我要~
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2320">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./C#扫描器编写各种问题荟萃  离别歌/73f7281d12e4c27601a629e82c28535a.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://blog.albertchang.cn" target="_blank">Albertchang</a>
+<time datetime="2016年4月12日 10:51" itemprop="datePublished">
+                            2016 四月 12 10:51
+                        </time>
+<a href="javascript:reply_to('2320', 'Albertchang')">回复</a>
+</p>
+<p class="comment-meta">求分享一下这个路径扫描工具。。。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2325">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./C#扫描器编写各种问题荟萃  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年4月19日 02:08" itemprop="datePublished">
+                            2016 四月 19 02:08
+                        </time>
+<a href="javascript:reply_to('2325', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@Albertchang：这个我也找不到了。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1571">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./C#扫描器编写各种问题荟萃  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">ctmb520</a>
+<time datetime="2014年3月17日 20:20" itemprop="datePublished">
+                            2014 三月 17 20:20
+                        </time>
+<a href="javascript:reply_to('1571', 'ctmb520')">回复</a>
+</p>
+<p class="comment-meta">最讨厌你们信安协会弄出来什么东西都藏着掖着了</p>
+</div>
+</div>
+<div class="row" id="comment-1565">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./C#扫描器编写各种问题荟萃  离别歌/2a557c10ca4ea0c3ce62cdc44b564e1f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">ctmb520</a>
+<time datetime="2014年3月11日 13:23" itemprop="datePublished">
+                            2014 三月 11 13:23
+                        </time>
+<a href="javascript:reply_to('1565', 'ctmb520')">回复</a>
+</p>
+<p class="comment-meta">希望LZ可以发份源码学习下</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1566">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./C#扫描器编写各种问题荟萃  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年3月11日 14:33" itemprop="datePublished">
+                            2014 三月 11 14:33
+                        </time>
+<a href="javascript:reply_to('1566', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@ctmb520：抱歉暂不分享</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1908">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./C#扫描器编写各种问题荟萃  离别歌/ef6ab00a490333df77d98e39691ac297.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">给我发一份咯</a>
+<time datetime="2015年1月1日 23:17" itemprop="datePublished">
+                            2015 一月 01 23:17
+                        </time>
+<a href="javascript:reply_to('1908', '给我发一份咯')">回复</a>
+</p>
+<p class="comment-meta">@phithon：谢谢</p>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1545">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./C#扫描器编写各种问题荟萃  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://WWW.WANZAILA.COM" target="_blank">万载啦</a>
+<time datetime="2014年2月16日 13:19" itemprop="datePublished">
+                            2014 二月 16 13:19
+                        </time>
+<a href="javascript:reply_to('1545', '万载啦')">回复</a>
+</p>
+<p class="comment-meta">学习了，好文章 一定得顶。、</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="d8fbe68587b075b8b78db9f6fb1f60490ba51957"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./C#扫描器编写各种问题荟萃  离别歌/d8fbe68587b075b8b78db9f6fb1f60490ba51957"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="304">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="m4TQ9DH9FbvOkxwCe0mbOVwFtECaEIihUoemX7To6YpdkcUR2hQVnzyKCI5inc7r"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./C#扫描器编写各种问题荟萃  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./C#扫描器编写各种问题荟萃  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

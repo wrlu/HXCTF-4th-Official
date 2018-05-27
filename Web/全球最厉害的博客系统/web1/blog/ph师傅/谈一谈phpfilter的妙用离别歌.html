@@ -1,0 +1,409 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./谈一谈phpfilter的妙用  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./谈一谈phpfilter的妙用  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./谈一谈phpfilter的妙用  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>谈一谈php://filter的妙用 | 离别歌</title>
+<link href="./谈一谈phpfilter的妙用  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./谈一谈phpfilter的妙用  离别歌/styles.css" rel="stylesheet"/>
+<link href="./谈一谈phpfilter的妙用  离别歌/style.css" rel="stylesheet"/>
+<link href="./谈一谈phpfilter的妙用  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./谈一谈phpfilter的妙用  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./谈一谈phpfilter的妙用  离别歌/jquery.min.js"></script>
+<link href="./谈一谈phpfilter的妙用  离别歌/code.css" rel="stylesheet"/>
+<link href="./谈一谈phpfilter的妙用  离别歌/button.css" rel="stylesheet"/>
+<link href="./谈一谈phpfilter的妙用  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./谈一谈phpfilter的妙用  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/php-filter-magic.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/php-filter-magic.html&amp;text=%E8%B0%88%E4%B8%80%E8%B0%88php%3A//filter%E7%9A%84%E5%A6%99%E7%94%A8"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/php-filter-magic.html&amp;title=%E8%B0%88%E4%B8%80%E8%B0%88php%3A//filter%E7%9A%84%E5%A6%99%E7%94%A8"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/php-filter-magic.html&amp;is_video=false&amp;description=%E8%B0%88%E4%B8%80%E8%B0%88php%3A//filter%E7%9A%84%E5%A6%99%E7%94%A8"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E8%B0%88%E4%B8%80%E8%B0%88php%3A//filter%E7%9A%84%E5%A6%99%E7%94%A8&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/php-filter-magic.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/php-filter-magic.html&amp;title=%E8%B0%88%E4%B8%80%E8%B0%88php%3A//filter%E7%9A%84%E5%A6%99%E7%94%A8"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/php-filter-magic.html&amp;title=%E8%B0%88%E4%B8%80%E8%B0%88php%3A//filter%E7%9A%84%E5%A6%99%E7%94%A8"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/php-filter-magic.html&amp;title=%E8%B0%88%E4%B8%80%E8%B0%88php%3A//filter%E7%9A%84%E5%A6%99%E7%94%A8"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/php-filter-magic.html&amp;title=%E8%B0%88%E4%B8%80%E8%B0%88php%3A//filter%E7%9A%84%E5%A6%99%E7%94%A8"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/php-filter-magic.html&amp;name=%E8%B0%88%E4%B8%80%E8%B0%88php%3A//filter%E7%9A%84%E5%A6%99%E7%94%A8&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">谈一谈php://filter的妙用</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2016年7月25日 00:28" itemprop="datePublished">
+                    2016 七月 25 00:28
+                </time>
+</div>
+<div class="article-tag">
+            阅读：5901
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/filter">filter</a>,
+                
+                <a class="tag-link" href="/tag/php">php</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>php://filter是PHP中独有的协议，利用这个协议可以创造很多“妙用”，本文说几个有意思的点，剩下的大家自己下去体会。本来本文的思路我上半年就准备拿来做XDCTF2016的题目的，没想到被三个白帽的一题抢先用了，我也就只好提前分享一下。</p>
+<h2 id="xxe"><a class="toclink" href="#xxe">XXE中的使用</a></h2>
+<p>php://filter之前最常出镜的地方是XXE。由于XXE漏洞的特殊性，我们在读取HTML、PHP等文件时可能会抛出此类错误<code>parser error : StartTag: invalid element name</code> 。其原因是，PHP是基于标签的脚本语言，<code>&lt;?php ... ?&gt;</code>这个语法也与XML相符合，所以在解析XML的时候会被误认为是XML，而其中内容（比如特殊字符）又有可能和标准XML冲突，所以导致了出错。</p>
+<p>那么，为了读取包含有敏感信息的PHP等源文件，我们就要先将“可能引发冲突的PHP代码”编码一遍，这里就会用到php://filter。</p>
+<p>php://filter是PHP语言中特有的协议流，作用是作为一个“中间流”来处理其他流。比如，我们可以用如下一行代码将POST内容转换成base64编码并输出：</p>
+<p><code>readfile("php://filter/read=convert.base64-encode/resource=php://input");</code></p>
+<p>如下：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/0f851469385893.png"><img alt="QQ截图20160724234603.png" src="./谈一谈phpfilter的妙用  离别歌/thum-0f851469385893.png" title="点击查看原图"/></a></p>
+<p>所以，在XXE中，我们也可以将PHP等容易引发冲突的文件流用php://filter协议流处理一遍，这样就能有效规避特殊字符造成混乱。</p>
+<p>如下，我们使用的是<code>php://filter/read=convert.base64-encode/resource=./xxe.php</code></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/693b1469385893.png"><img alt="QQ截图20160724235335.png" src="./谈一谈phpfilter的妙用  离别歌/thum-693b1469385893.png" title="点击查看原图"/></a></p>
+<h2 id="_1"><a class="toclink" href="#_1">巧用编码与解码</a></h2>
+<p>使用编码不光可以帮助我们获取文件，也可以帮我们去除一些“不必要的麻烦”。</p>
+<p>记得前段时间三个白帽有个比赛，其中有一部分代码大概类似于以下：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nv">$content</span> <span class="o">=</span> <span class="s1">'&lt;?php exit; ?&gt;'</span><span class="p">;</span>
+<span class="nv">$content</span> <span class="o">.=</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">'txt'</span><span class="p">];</span>
+<span class="nb">file_put_contents</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'filename'</span><span class="p">],</span> <span class="nv">$content</span><span class="p">);</span>
+</pre></div>
+<p><code>$content</code>在开头增加了exit过程，导致即使我们成功写入一句话，也执行不了（这个过程在实战中十分常见，通常出现在缓存、配置文件等等地方，不允许用户直接访问的文件，都会被加上if(!defined(xxx))exit;之类的限制）。那么这种情况下，如何绕过这个“死亡exit”？</p>
+<p>幸运的是，这里的<code>$_POST['filename']</code>是可以控制协议的，我们即可使用 php://filter协议来施展魔法：使用php://filter流的base64-decode方法，将<code>$content</code>解码，利用php base64_decode函数特性去除“死亡exit”。</p>
+<p>众所周知，base64编码中只包含64个可打印字符，而PHP在解码base64时，遇到不在其中的字符时，将会跳过这些字符，仅将合法字符组成一个新的字符串进行解码。</p>
+<p>所以，一个正常的base64_decode实际上可以理解为如下两个步骤：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nv">$_GET</span><span class="p">[</span><span class="s1">'txt'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">preg_replace</span><span class="p">(</span><span class="s1">'|[^a-z0-9A-Z+/]|s'</span><span class="p">,</span> <span class="s1">''</span><span class="p">,</span> <span class="nv">$_GET</span><span class="p">[</span><span class="s1">'txt'</span><span class="p">]);</span>
+<span class="nb">base64_decode</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">'txt'</span><span class="p">]);</span>
+</pre></div>
+<p>所以，当<code>$content</code>被加上了<code>&lt;?php exit; ?&gt;</code>以后，我们可以使用 php://filter/write=convert.base64-decode 来首先对其解码。在解码的过程中，字符&lt;、?、;、&gt;、空格等一共有7个字符不符合base64编码的字符范围将被忽略，所以最终被解码的字符仅有“phpexit”和我们传入的其他字符。</p>
+<p>“phpexit”一共7个字符，因为base64算法解码时是4个byte一组，所以给他增加1个“a”一共8个字符。这样，"phpexita"被正常解码，而后面我们传入的webshell的base64内容也被正常解码。结果就是<code>&lt;?php exit; ?&gt;</code>没有了。</p>
+<p>最后效果是 ：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/fca81469385894.png"><img alt="QQ截图20160725005316.png" src="./谈一谈phpfilter的妙用  离别歌/thum-fca81469385894.png" title="点击查看原图"/></a></p>
+<h2 id="_2"><a class="toclink" href="#_2">利用字符串操作方法</a></h2>
+<p>有的同学说，base64的算法我不懂，上面的方法太复杂了。</p>
+<p>其实，除了使用base64特性的方法外，我们还可以利用php://filter字符串处理方法来去除“死亡exit”。我们观察一下，这个<code>&lt;?php exit; ?&gt;</code>实际上是什么？</p>
+<p>实际上是一个XML标签，既然是XML标签，我们就可以利用strip_tags函数去除它，而php://filter刚好是支持这个方法的。</p>
+<p>编写如下测试代码即可查看 php://filter/read=string.strip_tags/resource=php://input 的效果：</p>
+<p><code>echo readfile('php://filter/read=string.strip_tags/resource=php://input');</code></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/499a1469385895.png"><img alt="QQ截图20160725010403.png" src="./谈一谈phpfilter的妙用  离别歌/thum-499a1469385895.png" title="点击查看原图"/></a></p>
+<p>可见，<code>&lt;?php exit; ?&gt;</code>被去除了。但回到上面的题目，我们最终的目的是写入一个webshell，而写入的webshell也是php代码，如果使用strip_tags同样会被去除。</p>
+<p>万幸的是，php://filter允许使用多个过滤器，我们可以先将webshell用base64编码。在调用完成strip_tags后再进行base64-decode。“死亡exit”在第一步被去除，而webshell在第二步被还原。</p>
+<p>最终的数据包如下：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/95b61469385895.png"><img alt="QQ截图20160725011007.png" src="./谈一谈phpfilter的妙用  离别歌/thum-95b61469385895.png" title="点击查看原图"/></a></p>
+<p>除此之外，我们还可以利用rot13编码独立完成任务。原理和上面类似，核心是将“死亡exit”去除。<code>&lt;?php exit; ?&gt;</code>在经过rot13编码后会变成<code>&lt;?cuc rkvg; ?&gt;</code>，在PHP不开启short_open_tag时，php不认识这个字符串，当然也就不会执行了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/1c471469385896.png"><img alt="QQ截图20160725012639.png" src="./谈一谈phpfilter的妙用  离别歌/thum-1c471469385896.png" title="点击查看原图"/></a></p>
+<p>当然，这个方法的条件就是不开启短标签。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2449">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈一谈phpfilter的妙用  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Lion EI'Jonson</a>
+<time datetime="2016年10月8日 15:56" itemprop="datePublished">
+                            2016 十月 08 15:56
+                        </time>
+<a href="javascript:reply_to('2449', 'Lion EI\u0027Jonson')">回复</a>
+</p>
+<p class="comment-meta">太腻害啦~T__T，伏地膜~~</p>
+</div>
+</div>
+<div class="row" id="comment-2418">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈一谈phpfilter的妙用  离别歌/efb3bc7c733979ab3ea6979d54410a60.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">bl0ck</a>
+<time datetime="2016年8月23日 14:38" itemprop="datePublished">
+                            2016 八月 23 14:38
+                        </time>
+<a href="javascript:reply_to('2418', 'bl0ck')">回复</a>
+</p>
+<p class="comment-meta">赞p牛，这篇blog也是用到了PHP Filter技巧https://www.securusglobal.com/community/2016/08/19/abusing-php-wrappers/</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2421">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈一谈phpfilter的妙用  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年8月23日 15:39" itemprop="datePublished">
+                            2016 八月 23 15:39
+                        </time>
+<a href="javascript:reply_to('2421', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@bl0ck：学习了，这个方法之前土司里也有人发过</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2411">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈一谈phpfilter的妙用  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">宋喆</a>
+<time datetime="2016年8月21日 16:51" itemprop="datePublished">
+                            2016 八月 21 16:51
+                        </time>
+<a href="javascript:reply_to('2411', '宋喆')">回复</a>
+</p>
+<p class="comment-meta">深入浅出，很好 ph牛 你缺经纪人吗</p>
+</div>
+</div>
+<div class="row" id="comment-2407">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈一谈phpfilter的妙用  离别歌/7fc2d5c0b745eb9df8e5cb662d8535c3.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://sh3ll.me" target="_blank">Chu</a>
+<time datetime="2016年8月9日 10:13" itemprop="datePublished">
+                            2016 八月 09 10:13
+                        </time>
+<a href="javascript:reply_to('2407', 'Chu')">回复</a>
+</p>
+<p class="comment-meta">这个很强势，学习了。</p>
+</div>
+</div>
+<div class="row" id="comment-2402">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈一谈phpfilter的妙用  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">L_AnG</a>
+<time datetime="2016年7月29日 14:29" itemprop="datePublished">
+                            2016 七月 29 14:29
+                        </time>
+<a href="javascript:reply_to('2402', 'L_AnG')">回复</a>
+</p>
+<p class="comment-meta">膜，学到了</p>
+</div>
+</div>
+<div class="row" id="comment-2401">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈一谈phpfilter的妙用  离别歌/66334257bf3793374217a46f959adbdf.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.hackersb.cn" target="_blank">王松_Striker</a>
+<time datetime="2016年7月28日 11:57" itemprop="datePublished">
+                            2016 七月 28 11:57
+                        </time>
+<a href="javascript:reply_to('2401', '王松_Striker')">回复</a>
+</p>
+<p class="comment-meta">膜，学到了新姿势！</p>
+</div>
+</div>
+<div class="row" id="comment-2391">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈一谈phpfilter的妙用  离别歌/7edb2f4a0823cf89ed72b0f0a154c121.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.melodia.pw" target="_blank">Melody</a>
+<time datetime="2016年7月26日 12:30" itemprop="datePublished">
+                            2016 七月 26 12:30
+                        </time>
+<a href="javascript:reply_to('2391', 'Melody')">回复</a>
+</p>
+<p class="comment-meta">膜，原来如此</p>
+</div>
+</div>
+<div class="row" id="comment-2390">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈一谈phpfilter的妙用  离别歌/ba682757321a0b3255870407208a2450.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">bipabo1l</a>
+<time datetime="2016年7月25日 17:30" itemprop="datePublished">
+                            2016 七月 25 17:30
+                        </time>
+<a href="javascript:reply_to('2390', 'bipabo1l')">回复</a>
+</p>
+<p class="comment-meta">学习了</p>
+</div>
+</div>
+<div class="row" id="comment-2389">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈一谈phpfilter的妙用  离别歌/84485568777344abc944474b2e9ecde7.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Dlive</a>
+<time datetime="2016年7月25日 15:12" itemprop="datePublished">
+                            2016 七月 25 15:12
+                        </time>
+<a href="javascript:reply_to('2389', 'Dlive')">回复</a>
+</p>
+<p class="comment-meta">新姿势，，，伏地膜，，，</p>
+</div>
+</div>
+<div class="row" id="comment-2388">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈一谈phpfilter的妙用  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">l3m0n</a>
+<time datetime="2016年7月25日 12:24" itemprop="datePublished">
+                            2016 七月 25 12:24
+                        </time>
+<a href="javascript:reply_to('2388', 'l3m0n')">回复</a>
+</p>
+<p class="comment-meta">赞师傅，很受益。</p>
+</div>
+</div>
+<div class="row" id="comment-2387">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈一谈phpfilter的妙用  离别歌/71eadc4dcb2ad0e0633a682c7ff80ced.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Ricter</a>
+<time datetime="2016年7月25日 12:21" itemprop="datePublished">
+                            2016 七月 25 12:21
+                        </time>
+<a href="javascript:reply_to('2387', 'Ricter')">回复</a>
+</p>
+<p class="comment-meta">膜。。学到新姿势</p>
+</div>
+</div>
+<div class="row" id="comment-2386">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈一谈phpfilter的妙用  离别歌/7c5822f091f1b61e5bdc832304a2b378.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">xxoo</a>
+<time datetime="2016年7月25日 09:18" itemprop="datePublished">
+                            2016 七月 25 09:18
+                        </time>
+<a href="javascript:reply_to('2386', 'xxoo')">回复</a>
+</p>
+<p class="comment-meta">p牛这篇文章深入浅出，容易理解，赞</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="8921bd378f7875f75398098b51aab3e67c3c2977"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./谈一谈phpfilter的妙用  离别歌/8921bd378f7875f75398098b51aab3e67c3c2977"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="390">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="1h8xmIuoIbXNihC1VLf6cYPQmLHjBuyOzBt3acGD9YRciW0gJ2JQLCRVvParkYnY"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./谈一谈phpfilter的妙用  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./谈一谈phpfilter的妙用  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

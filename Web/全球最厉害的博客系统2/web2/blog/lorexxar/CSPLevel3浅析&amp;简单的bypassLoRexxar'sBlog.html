@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+
+<html lang="zh-Hans">
+<head>
+<!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+<meta charset="utf-8"/>
+<meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<meta content="telephone=no" name="format-detection">
+<meta content="LoRexxar" name="author"/>
+<meta content="文章是之前发表在安全智库的文章，主要是一些CSP的分析和一部分bypass CSP的实例
+最近接触了很多次关于csp的东西，但是发现wooyun知识库只有2年前的浏览器安全策略说之内容安全策略CSP,实际阅读却发现和现在的语法差异很大，于是整理了这篇文章" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="CSP Level 3浅析&amp;简单的bypass" property="og:title"/>
+<meta content="http://lorexxar.cn/2016/08/08/ccsp/index.html" property="og:url"/>
+<meta content="LoRexxar's Blog" property="og:site_name"/>
+<meta content="文章是之前发表在安全智库的文章，主要是一些CSP的分析和一部分bypass CSP的实例
+最近接触了很多次关于csp的东西，但是发现wooyun知识库只有2年前的浏览器安全策略说之内容安全策略CSP,实际阅读却发现和现在的语法差异很大，于是整理了这篇文章" property="og:description"/>
+<meta content="http://lorexxar.cn/img/ccsp/ccsp/1.png" property="og:image"/>
+<meta content="http://lorexxar.cn/img/ccsp/ccsp/2.png" property="og:image"/>
+<meta content="http://lorexxar.cn/img/ccsp/ccsp/3.png" property="og:image"/>
+<meta content="http://lorexxar.cn/img/ccsp/ccsp/5.png" property="og:image"/>
+<meta content="http://lorexxar.cn/img/ccsp/ccsp/6.png" property="og:image"/>
+<meta content="http://lorexxar.cn/img/ccsp/ccsp/7.png" property="og:image"/>
+<meta content="http://lorexxar.cn/img/ccsp/ccsp/8.png" property="og:image"/>
+<meta content="2016-08-08T03:42:22.000Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="CSP Level 3浅析&amp;简单的bypass" name="twitter:title"/>
+<meta content="文章是之前发表在安全智库的文章，主要是一些CSP的分析和一部分bypass CSP的实例
+最近接触了很多次关于csp的东西，但是发现wooyun知识库只有2年前的浏览器安全策略说之内容安全策略CSP,实际阅读却发现和现在的语法差异很大，于是整理了这篇文章" name="twitter:description"/>
+<meta content="http://lorexxar.cn/img/ccsp/ccsp/1.png" name="twitter:image"/>
+<link href="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/atom.xml" rel="alternate" title="LoRexxar's Blog" type="application/atom+xml"/>
+<link href="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/699-14040QPP9.jpg" rel="shortcut icon"/>
+<link href="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/jquery.fancybox.min.css" rel="stylesheet"/>
+<script src="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/pace.min.js"></script>
+<link href="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/pace-theme-minimal.css" rel="stylesheet"/>
+<link href="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/style.css" rel="stylesheet"/>
+<link href="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/font-awesome.min.css" rel="stylesheet"/>
+<title>CSP Level 3浅析&amp;简单的bypass | LoRexxar's Blog</title>
+<script src="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/jquery.min.js"></script>
+<script src="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/clipboard.min.js"></script>
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: false,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+<script>
+        yiliaConfig.jquery_ui = [true, "//cdn.bootcss.com/jqueryui/1.10.4/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+<script> yiliaConfig.rootUrl = "\/";</script>
+<script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?736cd32ff67d23a009e16622fd600527";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+</meta></meta></head>
+<body>
+<div id="container">
+<div class="left-col">
+<div class="overlay"></div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="animated zoomIn" src="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/699-14040QPP9.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/">LoRexxar</a></h1>
+</hgroup>
+<p class="header-subtitle">带着对技术的敬畏之心成长，不安于一隅...</p>
+<form id="search-form">
+<input autocomplete="off" autocorrect="off" class="search form-control" id="local-search-input" name="q" placeholder="search..." searchonload="false" type="text"/>
+<i class="fa fa-times" onclick="resetSearch()"></i>
+</form>
+<div id="local-search-result"></div>
+<p class="no-result">No results found <i class="fa fa-spinner fa-pulse"></i></p>
+<div class="switch-btn" id="switch-btn">
+<div class="icon">
+<div class="icon-ctn">
+<div class="icon-wrap icon-house" data-idx="0">
+<div class="birdhouse"></div>
+<div class="birdhouse_holes"></div>
+</div>
+<div class="icon-wrap icon-ribbon hide" data-idx="1">
+<div class="ribbon"></div>
+</div>
+<div class="icon-wrap icon-link hide" data-idx="2">
+<div class="loopback_l"></div>
+<div class="loopback_r"></div>
+</div>
+<div class="icon-wrap icon-me hide" data-idx="3">
+<div class="user"></div>
+<div class="shoulder"></div>
+</div>
+</div>
+</div>
+<div class="tips-box hide">
+<div class="tips-arrow"></div>
+<ul class="tips-inner">
+<li>菜单</li>
+<li>标签</li>
+<li>友情链接</li>
+<li>关于我</li>
+</ul>
+</div>
+</div>
+<div class="switch-area" id="switch-area">
+<div class="switch-wrap">
+<section class="switch-part switch-part1">
+<nav class="header-menu">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="/archives/">所有文章</a></li>
+<li><a href="/tags/">标签云</a></li>
+<li><a href="/about/">关于我</a></li>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fa Email" href="/lorexxar@gmail.com" title="Email"></a>
+<a class="fa 新浪微博" href="/强行被换号的LoRexxar" title="新浪微博"></a>
+<a class="fa GitHub" href="https://github.com/LoRexxar" title="GitHub"></a>
+<a class="fa RSS" href="/atom.xml" title="RSS"></a>
+<a class="fa 知乎" href="https://www.zhihu.com/people/romor-rexxar" title="知乎"></a>
+</ul>
+</nav>
+</section>
+<section class="switch-part switch-part2">
+<div class="widget tagcloud" id="js-tagcloud">
+<ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/0day/">0day</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Blogs/">Blogs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CBC/">CBC</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Essay/">Essay</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Essry/">Essry</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IPC通道入侵/">IPC通道入侵</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LD-PRELOAD/">LD_PRELOAD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LFI/">LFI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RSA/">RSA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reprint/">Reprint</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shadow-Brokers/">Shadow Brokers</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/access/">access</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/book-notes/">book_notes</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bookshelf/">bookshelf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloudeye/">cloudeye</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cmd/">cmd</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crontab/">crontab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/csp/">csp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/csrf/">csrf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/curl/">curl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cve/">cve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dns/">dns</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/eassy/">eassy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fastcgi/">fastcgi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fcgi/">fcgi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/file-put-contents/">file_put_contents</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/flask/">flask</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/game/">game</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gopher/">gopher</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hctf/">hctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/injection/">injection</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lcx端口转发/">lcx端口转发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lfi/">lfi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msf/">msf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/opcache/">opcache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pdflatex/">pdflatex</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php-opcache/">php opcache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/phpmailer/">phpmailer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php伪协议/">php伪协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwnhub/">pwnhub</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rabins/">rabins</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sangebaimao/">sangebaimao</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sqli/">sqli</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sqlmap/">sqlmap</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh-sock5/">ssh_sock5</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssrf/">ssrf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/titan-souls/">titan_souls</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tqdm/">tqdm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/virtualenv/">virtualenv</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/weblogic/">weblogic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wget/">wget</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/win-server信息收集/">win server信息收集</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/windows/">windows</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/xss/">xss</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/伪协议/">伪协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/参数污染/">参数污染</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/格式化字符串/">格式化字符串</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/模板注入/">模板注入</a></li></ul>
+</div>
+</section>
+<section class="switch-part switch-part3">
+<div id="js-friends">
+<a class="main-nav-link switch-friends-link" href="https://coding.net/u/LoRexxar">Coding</a>
+<a class="main-nav-link switch-friends-link" href="https://github.com/LoRexxar">GitHub</a>
+<a class="main-nav-link switch-friends-link" href="http://hduisa.cn">HDUISA</a>
+<a class="main-nav-link switch-friends-link" href="https://wiki.hduisa.cn">HDUISA_wiki</a>
+<a class="main-nav-link switch-friends-link" href="https://lightless.me/">lightless</a>
+<a class="main-nav-link switch-friends-link" href="http://lazysheep.cc">Hcamael</a>
+<a class="main-nav-link switch-friends-link" href="http://aklis.info/">Aklis</a>
+<a class="main-nav-link switch-friends-link" href="http://libc.pw/">zh_explorer</a>
+<a class="main-nav-link switch-friends-link" href="http://edwardl.xyz/">Edward_L</a>
+<a class="main-nav-link switch-friends-link" href="http://evilddog.space/">evilddog</a>
+<a class="main-nav-link switch-friends-link" href="http://www.venenof.com/">Veneno</a>
+<a class="main-nav-link switch-friends-link" href="http://www.nohackair.net/">Airbasic</a>
+<a class="main-nav-link switch-friends-link" href="https://loli.be/">Mashiro</a>
+<a class="main-nav-link switch-friends-link" href="http://www.codersec.net/">bsmali4</a>
+<a class="main-nav-link switch-friends-link" href="/www.bertramc.cn">berTrAM</a>
+</div>
+</section>
+<section class="switch-part switch-part4">
+<div id="js-aboutme">带着对技术的敬畏之心成长，不安于一隅...</div>
+</section>
+</div>
+</div>
+</header>
+</div>
+</div>
+<div class="mid-col">
+<nav id="mobile-nav">
+<div class="overlay">
+<div class="slider-trigger"></div>
+<h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">LoRexxar</a></h1>
+</div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="animated zoomIn" src="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/699-14040QPP9.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="回到主页">LoRexxar</a></h1>
+</hgroup>
+<p class="header-subtitle">带着对技术的敬畏之心成长，不安于一隅...</p>
+<nav class="header-menu">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="/archives/">所有文章</a></li>
+<li><a href="/tags/">标签云</a></li>
+<li><a href="/about/">关于我</a></li>
+<div class="clearfix"></div>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fa Email" href="/lorexxar@gmail.com" target="_blank" title="Email"></a>
+<a class="fa 新浪微博" href="/强行被换号的LoRexxar" target="_blank" title="新浪微博"></a>
+<a class="fa GitHub" href="https://github.com/LoRexxar" target="_blank" title="GitHub"></a>
+<a class="fa RSS" href="/atom.xml" target="_blank" title="RSS"></a>
+<a class="fa 知乎" href="https://www.zhihu.com/people/romor-rexxar" target="_blank" title="知乎"></a>
+</ul>
+</nav>
+</header>
+</div>
+<link about="关于我" class="menu-list" friends="友情链接" tags="标签">
+</link></nav>
+<div class="body-wrap"><article class="article article-type-post" id="post-ccsp" itemprop="blogPost" itemscope="">
+<div class="article-meta">
+<a class="article-date" href="/2016/08/08/ccsp/">
+<time datetime="2016-08-08T08:22:31.000Z" itemprop="datePublished">2016-08-08</time>
+</a>
+</div>
+<div class="article-inner">
+<input class="isFancy" type="hidden"/>
+<header class="article-header">
+<h1 class="article-title" itemprop="name">
+      CSP Level 3浅析&amp;简单的bypass
+    </h1>
+</header>
+<div class="article-info article-info-post">
+<div class="article-category tagcloud">
+<a class="article-category-link" href="/categories/Blogs/">Blogs</a>
+</div>
+<div class="article-tag tagcloud">
+<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Blogs/">Blogs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/csp/">csp</a></li></ul>
+</div>
+<div class="clearfix"></div>
+</div>
+<div class="article-entry" itemprop="articleBody">
+<p>文章是之前发表在安全智库的文章，主要是一些CSP的分析和一部分bypass CSP的实例</p>
+<p>最近接触了很多次关于csp的东西，但是发现wooyun知识库只有2年前的<a href="http://drops.wooyun.org/tips/1439" rel="external" target="_blank">浏览器安全策略说之内容安全策略CSP</a>,实际阅读却发现和现在的语法差异很大，于是整理了这篇文章</p>
+<a id="more"></a>
+<h1 id="什么是CSP"><a class="headerlink" href="#什么是CSP" title="什么是CSP?"></a>什么是CSP?</h1><p><strong>Content Security Policy</strong> （CSP）内容安全策略，是一个附加的安全层，有助于检测并缓解某些类型的攻击，包括跨站脚本（XSS）和数据注入攻击。</p>
+<p>简单来说，csp就是为了减少xss，csrf等攻击的，是通过控制可信来源的方式，类似于同源策略…</p>
+<p>CSP以白名单的机制对网站加载或执行的资源起作用。在网页中，这样的策略通过 HTTP 头信息或者 meta 元素定义。CSP虽然提供了强大的安全保护，但是他也造成了如下问题：Eval及相关函数被禁用、内嵌的JavaScript代码将不会执行、只能通过白名单来加载远程脚本。这些问题阻碍CSP的普及，如果要使用CSP技术保护自己的网站，开发者就不得不花费大量时间分离内嵌的JavaScript代码和做一些调整…</p>
+<h1 id="支持CSP的浏览器"><a class="headerlink" href="#支持CSP的浏览器" title="支持CSP的浏览器"></a>支持CSP的浏览器</h1><p>Content Security Policy 最早在firefox 23中实现，当时使用的是 X-Content-Security-Policy，它使用了前置词的内容安全性策略，并以W3C CSP1.0规范作为标准</p>
+<p>CSP主要有三个header，分别是：Content-Security-Policy，X-Content-Security-Policy，X-WebKit-CSP</p>
+<ul>
+<li>Content-Security-Policy<br/>chrome 25+，Firefox 23+，Opera 19+</li>
+<li>X-Content-Security-Policy<br/>Firefox 23+，IE10+</li>
+<li>X-WebKit-CSP<br/>Chrome 25+</li>
+</ul>
+<p>平时见的比较多的都是第一个Content Security Policy</p>
+<h1 id="CSP语法"><a class="headerlink" href="#CSP语法" title="CSP语法"></a>CSP语法</h1><p>这一部分的东西基本都是来自于<a href="https://www.w3.org/TR/CSP3/#source-expression" rel="external" target="_blank">w3c的文档</a></p>
+<h2 id="CSP的来源"><a class="headerlink" href="#CSP的来源" title="CSP的来源"></a>CSP的来源</h2><p>我们经常见到的CSP都是类似于这样的：<br/><figure class="highlight csp"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">header("Content-Security-Policy:<span class="keyword">default-src</span> <span class="string">'none'</span>; <span class="keyword">connect-src</span> <span class="string">'self'</span>; <span class="keyword">frame-src</span> <span class="string">'self'</span>; <span class="keyword">script-src</span> xxxx/js/ <span class="string">'sha256-KcMxZjpVxhUhzZiwuZ82bc0vAhYbUJsxyCXODP5ulto='</span> <span class="string">'sha256-u++5+hMvnsKeoBWohJxxO3U9yHQHZU+2damUA6wnikQ='</span> <span class="string">'sha256-zArnh0kTjtEOVDnamfOrI8qSpoiZbXttc6LzqNno8MM='</span> <span class="string">'sha256-3PB3EBmojhuJg8mStgxkyy3OEJYJ73ruOF7nRScYnxk='</span> <span class="string">'sha256-bk9UfcsBy+DUFULLU6uX/sJa0q7O7B8Aal2VVl43aDs='</span>;<span class="keyword">font-src</span> xxxx/fonts/ fonts.gstatic.com; <span class="keyword">style-src</span> xxxx/css/ fonts.googleapis.com; <span class="keyword">img-src</span> <span class="string">'self'</span>");</div></pre></td></tr></table></figure></p>
+<p>里面包括了各种各样的写法：</p>
+<p>1、none和self，none代表什么都不匹配，self代表匹配同源的来源<br/>2、类似于<a href="https://example.com/path/to/file.js这样的会匹配特殊的文件，或者https://example.com/这样会匹配源下的所有。" rel="external" target="_blank">https://example.com/path/to/file.js这样的会匹配特殊的文件，或者https://example.com/这样会匹配源下的所有。</a><br/>3、第三种是类似于https:，会匹配所有包含这个特殊的格式的来源。<br/>4、也有可能是example.com这样的，会匹配所有这个host的来源，或者会有*.example.com,会匹配这个host的所有子域。<br/>5、第五种是类似于nonce-qwertyu12345会匹配一个特殊的节点。<br/>6、当然还有加密过的类似于sha256-abcd…同样会匹配页面中一个特殊的节点（每次修改这个值都会改变）。</p>
+<p>在文档上能够找到一个详细的例子：<br/><figure class="highlight abnf"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="attribute">serialized-source-list</span> = ( source-expression *( RWS source-expression ) ) / <span class="string">"'none'"</span></div><div class="line"><span class="attribute">source-expression</span>      = scheme-source / host-source / keyword-source</div><div class="line">                         / nonce-source / hash-source</div><div class="line"></div><div class="line"><span class="comment">; Schemes:</span></div><div class="line"><span class="attribute">scheme-source</span> = scheme <span class="string">":"</span></div><div class="line">                <span class="comment">; scheme is defined in section 3.1 of RFC 3986.</span></div><div class="line"></div><div class="line"><span class="comment">; Hosts: "example.com" / "*.example.com" / "https://*.example.com:12/path/to/file.js"</span></div><div class="line"><span class="attribute">host-source</span> = [ scheme-part <span class="string">"://"</span> ] host-part [ port-part ] [ path-part ]</div><div class="line"><span class="attribute">scheme-part</span> = scheme</div><div class="line"><span class="attribute">host-part</span>   = <span class="string">"*"</span> / [ <span class="string">"*."</span> ] <span class="number">1</span>*host-char *( <span class="string">"."</span> <span class="number">1</span>*host-char )</div><div class="line"><span class="attribute">host-char</span>   = <span class="keyword">ALPHA</span> / <span class="keyword">DIGIT</span> / <span class="string">"-"</span></div><div class="line"><span class="attribute">port-part</span>   = <span class="string">":"</span> ( <span class="number">1</span>*<span class="keyword">DIGIT</span> / <span class="string">"*"</span> )</div><div class="line"><span class="attribute">path-part</span>   = path</div><div class="line">              <span class="comment">; path is defined in section 3.3 of RFC 3986.</span></div><div class="line">   </div><div class="line"><span class="comment">; Keywords:</span></div><div class="line"><span class="attribute">keyword-source</span> = <span class="string">"'self'"</span> / <span class="string">"'unsafe-inline'"</span> / <span class="string">"'unsafe-eval'"</span> </div><div class="line"></div><div class="line"><span class="comment">; Nonces: 'nonce-[nonce goes here]'</span></div><div class="line"><span class="attribute">nonce-source</span>  = <span class="string">"'nonce-"</span> base64-value <span class="string">"'"</span></div><div class="line"><span class="attribute">base64-value</span>  = <span class="number">1</span>*( <span class="keyword">ALPHA</span> / <span class="keyword">DIGIT</span> / <span class="string">"+"</span> / <span class="string">"/"</span> / <span class="string">"-"</span> / <span class="string">"_"</span> )*<span class="number">2</span>( <span class="string">"="</span> ) </div><div class="line"></div><div class="line"><span class="comment">; Digests: 'sha256-[digest goes here]'</span></div><div class="line"><span class="attribute">hash-source</span>    = <span class="string">"'"</span> hash-algorithm <span class="string">"-"</span> base64-value <span class="string">"'"</span></div><div class="line"><span class="attribute">hash-algorithm</span> = <span class="string">"sha256"</span> / <span class="string">"sha384"</span> / <span class="string">"sha512"</span></div></pre></td></tr></table></figure></p>
+<p>有个小问题是关于使用ip的</p>
+<p>使用ip尽管符合上述语法，但是直接对ip地址的请求的安全性本身就是受到怀疑的，如果可以最好还是用域名。</p>
+<h2 id="CSP的属性"><a class="headerlink" href="#CSP的属性" title="CSP的属性"></a>CSP的属性</h2><h3 id="child-src"><a class="headerlink" href="#child-src" title="child-src"></a>child-src</h3><p>child-src指令管理了套嵌浏览的部分（类似于iframe、frame标签）</p>
+<p>会匹配iframe和frame标签<br/><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">举一个页面的例子:</div><div class="line">首先设置csp</div><div class="line">Content-Security-Policy: child-src https://example.com/</div><div class="line"></div><div class="line">而下面的请求会被CSP拦截</div><div class="line"></div><div class="line"><span class="tag">&lt;<span class="name">iframe</span> <span class="attr">src</span>=<span class="string">"https://not-example.com"</span>&gt;</span><span class="tag">&lt;/<span class="name">iframe</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="actionscript"></span></div><div class="line">  <span class="keyword">var</span> blockedWorker = <span class="keyword">new</span> Worker(<span class="string">"data:application/javascript,..."</span>);</div><div class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<h3 id="connect-src"><a class="headerlink" href="#connect-src" title="connect-src"></a>connect-src</h3><p>connect-src指令限制了可使用的脚本加载的url，会阻止a的ping属性，也控制着websocket的连接，有点难描述，举个例子。</p>
+<figure class="highlight dust"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="xml"><span class="tag">&lt;<span class="name">a</span> <span class="attr">ping</span>=<span class="string">"https://not-example.com"</span>&gt;</span>...</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="actionscript"></span></div><div class="line">  <span class="keyword">var</span> xhr = <span class="keyword">new</span> XMLHttpRequest();</div><div class="line">  xhr.open(<span class="string">'GET'</span>, <span class="string">'https://not-example.com/'</span>);</div><div class="line">  xhr.send();</div><div class="line"></div><div class="line">  <span class="keyword">var</span> ws = <span class="keyword">new</span> WebSocket(<span class="string">"https://not-example.com/"</span>);</div><div class="line">        </div><div class="line">  <span class="keyword">var</span> es = <span class="keyword">new</span> EventSource(<span class="string">"https://not-example.com/"</span>);</div><div class="line"></div><div class="line">  navigator.sendBeacon(<span class="string">"https://not-example.com/"</span>, <span class="template-variable">{ ... }</span><span class="xml"><span class="undefined">);</span></span></div><div class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>这样的请求都会返回网络错误。</p>
+<h3 id="default-src"><a class="headerlink" href="#default-src" title="default-src"></a>default-src</h3><p>default-src作为所有其他指令的备用，一般来说default-src ‘none’; script-src ‘self’这样的情况就会是script-src遵循self，其他的都会使用none。（也就是说除了被设置的指令以外，其余指令都会被设置为default-src指令所设置的属性）</p>
+<figure class="highlight csp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">如果设置了</div><div class="line"><span class="attribute">Content-Security-Policy</span>: <span class="keyword">default-src</span> <span class="string">'self'</span>; <span class="keyword">script-src</span> https://example.com</div><div class="line">就会出现</div><div class="line"><span class="attribute">Content-Security-Policy</span>: <span class="keyword">child-src</span> <span class="string">'self'</span>;</div><div class="line">                         <span class="keyword">connect-src</span> <span class="string">'self'</span>;</div><div class="line">                         <span class="keyword">font-src</span> <span class="string">'self'</span>;</div><div class="line">                         <span class="keyword">img-src</span> <span class="string">'self'</span>;</div><div class="line">                         <span class="keyword">media-src</span> <span class="string">'self'</span>;</div><div class="line">                         <span class="keyword">object-src</span> <span class="string">'self'</span>;</div><div class="line">                         <span class="keyword">script-src</span> https://example.com;</div><div class="line">                         <span class="keyword">style-src</span> <span class="string">'self'</span></div><div class="line">这样的情况</div></pre></td></tr></table></figure>
+<h3 id="font-src"><a class="headerlink" href="#font-src" title="font-src"></a>font-src</h3><p>font-src指令限制了所有可以被加载的字体资源。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">举个例子:</div><div class="line">Content-Security-Policy: font-src https://example.com/</div><div class="line"></div><div class="line">下面的请求都会返回错误</div><div class="line"></div><div class="line"><span class="tag">&lt;<span class="name">style</span>&gt;</span><span class="css"></span></div><div class="line">  @<span class="keyword">font-face</span> {</div><div class="line">    <span class="attribute">font-family</span>: <span class="string">"Example Font"</span>;</div><div class="line">    <span class="attribute">src</span>: <span class="built_in">url</span>(<span class="string">"https://not-example.com/font"</span>);</div><div class="line">  }</div><div class="line">  <span class="selector-tag">body</span> {</div><div class="line">    <span class="attribute">font-family</span>: <span class="string">"Example Font"</span>;</div><div class="line">  }</div><div class="line"><span class="tag">&lt;/<span class="name">style</span>&gt;</span></div></pre></td></tr></table></figure>
+<h3 id="img-src"><a class="headerlink" href="#img-src" title="img-src"></a>img-src</h3><p>img-src指令限制着所有可以加载的图片资源的来源</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">举个例子:</div><div class="line">Content-Security-<span class="string">Policy:</span> img-src <span class="string">https:</span><span class="comment">//example.com/</span></div><div class="line"></div><div class="line">下面的请求会返回错误:</div><div class="line"></div><div class="line">&lt;img src=<span class="string">"https://not-example.com/img"</span>&gt;</div></pre></td></tr></table></figure>
+<h3 id="manifest-src"><a class="headerlink" href="#manifest-src" title="manifest-src"></a>manifest-src</h3><p>manifest-src指令限制了从应用清单可以加载的url。</p>
+<p>这个属性不太熟，比较常见的就是link</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">举个例子：</div><div class="line">Content-Security-<span class="string">Policy:</span> manifest-src <span class="string">https:</span><span class="comment">//example.com/</span></div><div class="line"></div><div class="line">下面的请求会返回错误:</div><div class="line"></div><div class="line">&lt;link rel=<span class="string">"manifest"</span> href=<span class="string">"https://not-example.com/manifest"</span>&gt;</div></pre></td></tr></table></figure>
+<h3 id="media-src"><a class="headerlink" href="#media-src" title="media-src"></a>media-src</h3><p>media-src指令限制令额所有从视频、音频、和相关的文本来源.</p>
+<p>这个属性主要针对的是audio video以及连带的文本<br/><figure class="highlight http"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="attribute">Content-Security-Policy</span>: media-src https://example.com/</div><div class="line"></div><div class="line"><span class="javascript">下面的请求都会返回错误:</span></div><div class="line"></div><div class="line"><span class="xml"><span class="tag">&lt;<span class="name">audio</span> <span class="attr">src</span>=<span class="string">"https://not-example.com/audio"</span>&gt;</span><span class="tag">&lt;/<span class="name">audio</span>&gt;</span></span></div><div class="line">&lt;video src=<span class="string">"https://not-example.com/video"</span>&gt;</div><div class="line">    <span class="xml"><span class="tag">&lt;<span class="name">track</span> <span class="attr">kind</span>=<span class="string">"subtitles"</span> <span class="attr">src</span>=<span class="string">"https://not-example.com/subtitles"</span>&gt;</span></span></div><div class="line"><span class="tag">&lt;/<span class="name">video</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<h3 id="object-src"><a class="headerlink" href="#object-src" title="object-src"></a>object-src</h3><p>object-src限制了所有从插件加载的来源.</p>
+<p>不太熟的属性，好像是和flash相关的。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">举个例子:</div><div class="line">Content-Security-Policy: object-src https:<span class="comment">//example.com/</span></div><div class="line"></div><div class="line">下面的请求都会返回错误:</div><div class="line"></div><div class="line"><span class="xml"><span class="tag">&lt;<span class="name">embed</span> <span class="attr">src</span>=<span class="string">"https://not-example.com/flash"</span>&gt;</span><span class="tag">&lt;/<span class="name">embed</span>&gt;</span></span></div><div class="line">&lt;object data=<span class="string">"https://not-example.com/flash"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">object</span>&gt;</span></span></div><div class="line">&lt;applet archive=<span class="string">"https://not-example.com/flash"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">applet</span>&gt;</span></span></div></pre></td></tr></table></figure>
+<p>###　script-src</p>
+<p>script-src指令限制了所有js脚本可以被执行的地方，不仅仅是包括通过链接方式加载的脚本url，同样包括所有内联脚本，甚至包括各种方式的引用。</p>
+<p>还有个很重要的参数叫’unsafe-inline’<br/>,如果加上这个参数，就不会阻止内联脚本，但这被认为是不安全的。</p>
+<p>对于这个属性有个特殊的配置叫unsafe-eval，他会允许下面几个函数<br/><figure class="highlight vbscript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">eval</span>()</div><div class="line"></div><div class="line"><span class="keyword">Function</span>()</div><div class="line"></div><div class="line">setTimeout() <span class="keyword">with</span> an initial argument which <span class="keyword">is</span> <span class="keyword">not</span> callable.</div><div class="line"></div><div class="line">setInterval() <span class="keyword">with</span> an initial argument which <span class="keyword">is</span> <span class="keyword">not</span> callable.</div></pre></td></tr></table></figure></p>
+<h3 id="style-src"><a class="headerlink" href="#style-src" title="style-src"></a>style-src</h3><p>style-src指令限制了所有可能被引用的css，包括下面三种引用的css属性，style也有个‘unsafe-inline’这个参数，同理会允许所有的内联css。</p>
+<p>1、第一种是通过link标签加载的css,类似于<code>&lt;link href="001.css" type="text/css" rel="Stylesheet"/&gt;</code></p>
+<p>2、当然还有style标签<br/><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">style</span> <span class="attr">type</span>=<span class="string">"text/css"</span>&gt;</span><span class="css"></span></div><div class="line"><span class="selector-class">.main</span>{ <span class="attribute">width</span>:<span class="number">1002px</span>; <span class="attribute">margin</span>:<span class="number">0</span> auto;}</div><div class="line"><span class="tag">&lt;/<span class="name">style</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>3、还有通过@import引入的样式表<br/><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt; STYLE TYPE=<span class="string">"text/css"</span>&gt; </div><div class="line">@<span class="keyword">import</span> <span class="string">"example.css"</span>; </div><div class="line">@<span class="keyword">import</span> <span class="string">"style/other.css"</span>; </div><div class="line"><span class="xml"><span class="tag">&lt; /<span class="attr">STYLE</span>&gt;</span></span></div></pre></td></tr></table></figure></p>
+<p>4、内联样式表，类似于<code>style="font-size:10px;font-color:#ff0000"</code></p>
+<h3 id="总的来说"><a class="headerlink" href="#总的来说" title="总的来说"></a>总的来说</h3><p>CSP的检测方式是通过先判断特定的请求类型，然后通过下面的方式返回有效指令的名称，总的来说根据request类型的不同，会执行下面不同的步骤：</p>
+<p>要读懂下面的算法，首先我们要知道什么是请求的发起者和</p>
+<p>initiator：每个请求都有一个发起者，包括 “download”, “imageset”, “manifest”, or “xslt”.</p>
+<p>destination:每个请求都有一个对应的目的地，包括 “document”, “embed”, “font”, “image”, “manifest”, “media”, “object”, “report”, “script”, “serviceworker”, “sharedworker”, “style”, “worker”, or “xslt”.</p>
+<p><strong>“”</strong></p>
+<p>1、If the request’s initiator is “fetch”, return connect-src.</p>
+<p>2、If the request’s initiator is “manifest”, return manifest-src.</p>
+<p>3、If the request’s destination is “subresource”, return connect-src.</p>
+<p>4、If the request’s destination is “unknown”, return object-src.</p>
+<p>5、If the request’s destination is “document” and the request’s target browsing context is a nested browsing context, return child-src.</p>
+<p><strong>“audio”</strong></p>
+<p><strong>“track”</strong></p>
+<p><strong>“video”</strong></p>
+<p>   Return media-src.</p>
+<p><strong>“font”</strong></p>
+<p>   Return font-src.</p>
+<p><strong>“image”</strong></p>
+<p>   Return image-src.</p>
+<p><strong>“style”</strong></p>
+<p>   Return style-src.</p>
+<p><strong>“script”</strong></p>
+<p>1、Switch on request’s destination, and execute the associated steps:</p>
+<pre><code>**"subresource"**
+
+       Return script-src.
+
+**"serviceworker"**
+
+**"sharedworker"**
+
+**"worker"**
+
+   Return child-src.
+</code></pre><p>2、Return null.</p>
+<p>基本上来说根据上面的文档，csp的意思已经能够理解了，那么怎么bypass csp呢</p>
+<h1 id="一个编写CSP的网站"><a class="headerlink" href="#一个编写CSP的网站" title="一个编写CSP的网站"></a>一个编写CSP的网站</h1><p><a href="http://cspisawesome.com/" rel="external" target="_blank">http://cspisawesome.com/</a></p>
+<h1 id="Bypass-CSP"><a class="headerlink" href="#Bypass-CSP" title="Bypass CSP"></a>Bypass CSP</h1><p>基本上来说，CSP上容易存在的xss漏洞不多，除非你坚持使用‘unsafe-inline’，(多数情况来说，csp仍没有得到普及的原因就是因为大量的禁用内联脚本和eval这样的函数，导致如果配置不当，甚至网站都无法正常使用)否则来说，xss会被大幅度的减少，而bypass CSP更多来说是不容易被csp杀掉的csrf。</p>
+<h2 id="xxxx-src"><a class="headerlink" href="#xxxx-src" title="xxxx-src *"></a>xxxx-src *</h2><p>上面的那个*符号出现，表示，允许除了内联函数以外所有的url式的请求，那么bypass的方式比较简单，类似于src引用的方式，很容易造成csrf漏洞。</p>
+<p>当然，如果熟悉了解CSP，一般来说不容易出现这样的情况，大部分来说会出现这种情况大多是下面这种情况。</p>
+<h3 id="范例"><a class="headerlink" href="#范例" title="范例"></a>范例</h3><p>首先通过响应头信息看看CSP的构成，很容易发现问题<br/><figure class="highlight oxygene"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Content-Security-Policy	</div><div class="line"><span class="keyword">default</span>-src <span class="string">'none'</span>; connect-src <span class="string">'self'</span>; frame-src *; script-src http:<span class="comment">//xxxxx/js/ 'sha256-T32nlLrKkuMnyNpkJKR7kozfPzdcJi</span></div><div class="line">+Ql4gfcfl6PSM=<span class="string">';font-src http://xxxx/fonts/ fonts.gstatic.com; style-src '</span><span class="keyword">self</span><span class="string">' '</span><span class="keyword">unsafe</span>-<span class="keyword">inline</span><span class="string">'</span></div><div class="line">; img-src '<span class="keyword">self</span><span class="string">'</span></div></pre></td></tr></table></figure></p>
+<p>很容易发现问题<code>frame-src *</code>（当然为了支持W3C CSP标准，这里应该是child-src，测试环境就不乱改了）,对于iframe的来源并没有做任何限制，当然实际环境可能需要iframe标签来内联来包含别的页面…</p>
+<p>由于iframe的内联不同源，不无法通过任何方式get cookie，不存在xss漏洞（这也是大多开发者容易造成的想法），但是我们可以利用这种方式构造CSRF漏洞…</p>
+<p>payload:(暂时拿www.baidu.com测试)</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">iframe</span> <span class="attr">src</span>=<span class="string">"www.baidu.com"</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">iframe</span>&gt;</span></div></pre></td></tr></table></figure>
+<p><img alt="" src="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/1.png"/></p>
+<h2 id="script-src-unsafe-inline"><a class="headerlink" href="#script-src-unsafe-inline" title="script-src unsafe-inline"></a>script-src unsafe-inline</h2><p>在实际开发环境中，我们往往能够遇到这样的情况发生，明明开启了CSP，但是却对xss防护并没有任何帮助，就是上面这种情况的发生。</p>
+<p>在真实的网站中，开发人员众多，在调试各个js文件的时候，往往会出现各种问题，为了尽快的修复bug，不得已加入大量的内联脚本，导致没办法简单的指定源来构造CSP，那么就会开启这个选项，殊不知，这样一来问题变得更严重了。</p>
+<h3 id="范例-1"><a class="headerlink" href="#范例-1" title="范例"></a>范例</h3><p>首先我们看一下CSP设置<br/><figure class="highlight awk"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Content-Security-Policy	</div><div class="line">default-src <span class="string">'none'</span>; connect-src <span class="string">'self'</span>; frame-src *; script-src http:<span class="regexp">//</span>xxx<span class="regexp">/js/</span> <span class="string">'unsafe-inline'</span>;font-src http:<span class="regexp">//</span>xxx<span class="regexp">/fonts/</span> fonts.gstatic.com; style-src <span class="string">'self'</span> <span class="string">'unsafe-inline'</span>; img-src</div><div class="line"> <span class="string">'self'</span></div></pre></td></tr></table></figure></p>
+<p>重点是这一项<br/><figure class="highlight awk"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">script-src http:<span class="regexp">//</span>xxx<span class="regexp">/js/</span> <span class="string">'unsafe-inline'</span>;</div></pre></td></tr></table></figure></p>
+<p>我们先尝试构造payload</p>
+<p><img alt="" src="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/2.png"/></p>
+<p>可以明显的看到被拦了</p>
+<p><img alt="" src="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/3.png"/></p>
+<p>但是我们尝试构造内联脚本</p>
+<p><img alt="" src="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/5.png"/></p>
+<p>能看到成功执行<br/><img alt="" src="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/6.png"/></p>
+<p>值得庆幸的是由于同源策略，这个请求不能发往别的域下，但是实战环境中利用方式很多，就比如这个聊天版，可以通过发给别的用户的方式get cookie<br/><figure class="highlight accesslog"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;script&gt;var xmlhttp=new XMLHttpRequest();</div><div class="line">xmlhttp.open(<span class="string">"<span class="keyword">POST</span>"</span>,<span class="string">"submit.php"</span>,true);</div><div class="line">xmlhttp.setRequestHeader(_Ctent-type_,_applicati/x-www-form-urlencoded_);</div><div class="line">xmlhttp.send(_to=lorexxar&amp;&amp;message=_+document.cookie);&lt;/script&gt;;</div></pre></td></tr></table></figure></p>
+<p>所以，安全性仍然应该被更多仔细考虑…</p>
+<h2 id="xxxx-src-self"><a class="headerlink" href="#xxxx-src-self" title="xxxx-src self"></a>xxxx-src self</h2><p>一般来说，self代表只接受符合同源策略的url，这样一来，大部分的xss和crsf都会失效，有个标签比较例外，虽然已经被加入的现在的csp草案中，但是的确还没有施行。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"prefetch"</span> <span class="attr">herf</span>=<span class="string">"xxxxxxx"</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>经过测试发现firefox在CSP规范的施行上还是走在前列，这种请求在firefox上会被拦截（除非同源），在公认安全性比较高的chrome确实存在</p>
+<h3 id="范例-2"><a class="headerlink" href="#范例-2" title="范例"></a>范例</h3><p>当然首先我们先看看CSP的配置<br/><figure class="highlight oxygene"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Content-Security-Policy	</div><div class="line"><span class="keyword">default</span>-src <span class="string">'none'</span>; connect-src <span class="string">'self'</span>; frame-src <span class="string">'self'</span>; script-src http:<span class="comment">//xxxx/js 'sha256-T32nlLrKkuMnyNpkJKR7kozfPzdcJi</span></div><div class="line">+Ql4gfcfl6PSM=<span class="string">';font-src http://xxxx/fonts/ fonts.gstatic.com; style-src '</span><span class="keyword">self</span><span class="string">' '</span><span class="keyword">unsafe</span>-<span class="keyword">inline</span><span class="string">'</span></div><div class="line">; img-src '<span class="keyword">self</span><span class="string">'</span></div></pre></td></tr></table></figure></p>
+<p>几乎可以说是滴水不漏了</p>
+<p><img alt="" src="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/7.png"/></p>
+<p>然后我们刷新看,请求已经发出去了</p>
+<p><img alt="" src="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/8.png"/></p>
+<p>当然是对外域的请求，如果站内有某种漏洞，可以通过这个构造csrf。</p>
+<p>测试环境下admin存在特殊的权限，可以添加管理员<br/><figure class="highlight stata"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;!--only <span class="keyword">for</span> admin</div><div class="line">	&lt;<span class="keyword">form</span> method=<span class="string">"get"</span> action=<span class="string">"submit.php"</span>&gt;</div><div class="line">	&lt;<span class="keyword">input</span> <span class="keyword">type</span>=<span class="string">"text"</span> <span class="keyword">class</span>=<span class="string">"form-control"</span> name=<span class="string">"addadmin"</span>&gt;</div><div class="line">	&lt;<span class="keyword">input</span> <span class="keyword">type</span>=<span class="string">"submit"</span> value=<span class="string">"send"</span>&gt;</div><div class="line">	&lt;/<span class="keyword">form</span>&gt;</div><div class="line"></div><div class="line">--&gt;</div></pre></td></tr></table></figure></p>
+<p>如果构造<br/><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"prefetch"</span> <span class="attr">src</span>=<span class="string">"http://xxxx/submit.php?addadmin=123456"</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>发给admin，就可以在不知情的情况下添加一个管理员</p>
+<h2 id="CSP滴水不漏-但存在内网文件上传点"><a class="headerlink" href="#CSP滴水不漏-但存在内网文件上传点" title="CSP滴水不漏 但存在内网文件上传点"></a>CSP滴水不漏 但存在内网文件上传点</h2><p>不知道有多少人了解过cctf2016，其中有一道web题目IDS-Chicken</p>
+<p>题目环境就符合我说的情况，CSP滴水不漏，几乎没办法用任何方式构造xss，但是内网存在上传点，上传文件会被重写为文件，link包含形成xss漏洞。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">'import'</span> <span class="attr">href</span>=<span class="string">'/upload/xxxxx'</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>有兴趣继续了解的可以读博客的wp</p>
+<p><a href="http://lorexxar.cn/2016/04/25/cctf2016/#more">http://lorexxar.cn/2016/04/25/cctf2016/#more</a></p>
+</div>
+</div>
+<div class="copyright">
+<p><span>本文标题:</span><a href="/2016/08/08/ccsp/">CSP Level 3浅析&amp;简单的bypass</a></p>
+<p><span>文章作者:</span><a href="/" title="回到主页">LoRexxar</a></p>
+<p><span>发布时间:</span>2016-08-08, 16:22:31</p>
+<p><span>最后更新:</span>2016-08-08, 11:42:22</p>
+<p>
+<span>原始链接:</span><a class="post-url" href="/2016/08/08/ccsp/" title="CSP Level 3浅析&amp;简单的bypass">http://lorexxar.cn/2016/08/08/ccsp/</a>
+<span class="copy-path" data-clipboard-text="原文: http://lorexxar.cn/2016/08/08/ccsp/　　作者: LoRexxar" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+<script> var clipboard = new Clipboard('.copy-path'); </script>
+</p>
+<p>
+<span>许可协议:</span><i class="fa fa-creative-commons"></i> <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license" target="_blank" title="CC BY-NC-SA 4.0 International">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+</div>
+<nav id="article-nav">
+<div class="article-nav-title" id="article-nav-newer">
+<a href="/2016/08/09/sqlmap-source1/">
+                    sqlmap 源码分析（一）开始、参数解析
+                </a>
+</div>
+<div class="article-nav-title" id="article-nav-older">
+<a href="/2016/08/07/python-virtualenv/">
+                    python virtualenv沙盒命令
+                </a>
+</div>
+</nav>
+</article>
+<div class="toc-article" id="toc">
+<strong class="toc-title">文章目录</strong>
+<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#什么是CSP"><span class="toc-number">1.</span> <span class="toc-text">什么是CSP?</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#支持CSP的浏览器"><span class="toc-number">2.</span> <span class="toc-text">支持CSP的浏览器</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CSP语法"><span class="toc-number">3.</span> <span class="toc-text">CSP语法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#CSP的来源"><span class="toc-number">3.1.</span> <span class="toc-text">CSP的来源</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CSP的属性"><span class="toc-number">3.2.</span> <span class="toc-text">CSP的属性</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#child-src"><span class="toc-number">3.2.1.</span> <span class="toc-text">child-src</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#connect-src"><span class="toc-number">3.2.2.</span> <span class="toc-text">connect-src</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#default-src"><span class="toc-number">3.2.3.</span> <span class="toc-text">default-src</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#font-src"><span class="toc-number">3.2.4.</span> <span class="toc-text">font-src</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#img-src"><span class="toc-number">3.2.5.</span> <span class="toc-text">img-src</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#manifest-src"><span class="toc-number">3.2.6.</span> <span class="toc-text">manifest-src</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#media-src"><span class="toc-number">3.2.7.</span> <span class="toc-text">media-src</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#object-src"><span class="toc-number">3.2.8.</span> <span class="toc-text">object-src</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#style-src"><span class="toc-number">3.2.9.</span> <span class="toc-text">style-src</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#总的来说"><span class="toc-number">3.2.10.</span> <span class="toc-text">总的来说</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#一个编写CSP的网站"><span class="toc-number">4.</span> <span class="toc-text">一个编写CSP的网站</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Bypass-CSP"><span class="toc-number">5.</span> <span class="toc-text">Bypass CSP</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#xxxx-src"><span class="toc-number">5.1.</span> <span class="toc-text">xxxx-src *</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#范例"><span class="toc-number">5.1.1.</span> <span class="toc-text">范例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#script-src-unsafe-inline"><span class="toc-number">5.2.</span> <span class="toc-text">script-src unsafe-inline</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#范例-1"><span class="toc-number">5.2.1.</span> <span class="toc-text">范例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#xxxx-src-self"><span class="toc-number">5.3.</span> <span class="toc-text">xxxx-src self</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#范例-2"><span class="toc-number">5.3.1.</span> <span class="toc-text">范例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CSP滴水不漏-但存在内网文件上传点"><span class="toc-number">5.4.</span> <span class="toc-text">CSP滴水不漏 但存在内网文件上传点</span></a></li></ol></li></ol>
+</div>
+<style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+<input id="tocButton" title="点击按钮隐藏或者显示文章目录" type="button" value="隐藏目录"/>
+<script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+<div class="share">
+<div class="bdsharebuttonbox">
+<a class="fa fa-twitter bds_twi" data-cmd="twi" href="#" title="分享到推特"></a>
+<a class="fa fa-weibo bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="fa fa-qq bds_sqq" data-cmd="sqq" href="#" title="分享给 QQ 好友"></a>
+<a class="fa fa-files-o bds_copy" data-cmd="copy" href="#" title="复制网址"></a>
+<a class="fa fa fa-envelope-o bds_mail" data-cmd="mail" href="#" title="通过邮件分享"></a>
+<a class="fa fa-weixin bds_weixin" data-cmd="weixin" href="#" title="生成文章二维码"></a>
+<a class="fa fa-share-alt bds_more" data-cmd="more" href="#"></a></div></div></div></div></div></body></html>
+
+<script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"CSP Level 3浅析&简单的bypass　| LoRexxar's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+
+<section class="youyan" id="comments">
+<script>
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = 'http://v2.uyan.cc/code/uyan.js?uid=2127998';
+            (d.head || d.body).appendChild(s);
+        }
+    </script>
+<script> loadComment(); </script>
+<div id="uyan_frame"></div>
+</section>
+<div class="scroll" id="post-nav-button">
+<a href="/2016/08/09/sqlmap-source1/" title="上一篇: sqlmap 源码分析（一）开始、参数解析">
+<i class="fa fa-angle-left"></i>
+</a>
+<a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+<a href="/2016/08/07/python-virtualenv/" title="下一篇: python virtualenv沙盒命令">
+<i class="fa fa-angle-right"></i>
+</a>
+</div>
+<ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/16/nonce-bypass-script/">通过浏览器缓存来bypass CSP script nonce</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/12/pppctf2017/">PlaidCTF 2017 web writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/12/xss-bot2/">xss bot从入门到弃坑</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/09/CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy/">CSP Is Dead, Long Live CSP! 翻译</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/24/pwnhub-jue/">pwnhub 绝对防御 出题思路和反思</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/21/Shadow-Brokers/">Shadow Brokers大新闻整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/21/360chunqiu2017/">360春秋杯2017 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/18/bctf2017-web/">bctf2017 web部分wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/27/pwnhub-xiaom/">pwnhub 之小m的复仇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/21/0ctf2017-web/">0ctf201 web部分writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/njctf2017-wp/">NJCTF Web部分writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/05/pwnhub-another-php/">pwnhub_another php web部分</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/27/zctf2017-writeup/">zctf2017 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/20/pwnhub-open/">pwnhub 打开电脑</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/16/cdn-bypass-csp/">有趣的cdn bypass CSP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/26/hctf2016-something/">聊聊hctf2016</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/17/pwnhub-shen/">pwnhub 深入敌后</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/03/33c3-wp/">33c32016 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/28/cve-2016-10030/">phpmailer RCE漏洞分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/pwnhub_mi/">pwnhub_迷</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/24/xss-protect/">浅谈xss的后台守护问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/18/pwnhub-pai2/">pwnhub_拍卖行</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/18/pwnhub-pai/">pwnhub_找朋友</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/10/pwnhub-WTF-writeup/">pwnhub_WTF_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/07/polyglot-JPEGs-bypass-csp/">using polyglot JPEGs bypass CSP 分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/03/redis-getshell/">通过redis getshell的一些小问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/01/hctf2016-other/">hctf2016 简单部分WEB &amp;&amp; misc writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/30/hctf2016-xss/">hctf2016 guestbook&amp;secret; area writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/29/hctf2016-ATField/">HCTF2016 ATField writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/19/web2-giligili/">hctf2016 giligili writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/31/csp-then2/">CSP进阶-302 Bypass CSP</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/28/csp-then/">CSP进阶-link Bypass unsafe line</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/26/ctf-start/">什么是ctf呢？</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/hitcon2016-misc/">hitcon2016 misc writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/10/hitcon2016/">hitcon2016 web writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/03/Lctf2016/">L-ctf2016 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/14/php-wei/">php 伪协议</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/11/huashanbei2016/">华山杯2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/29/crypto-start/">crypto 简单的RSA</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/18/sqlmap-source4/">sqlmap 源码分析（四）开始注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/16/sqlmap-source3/">sqlmap 源码分析（三）在注入之前</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/11/sqlmap-source2/">sqlmap 源码分析（二）初始化</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/09/sqlmap-source1/">sqlmap 源码分析（一）开始、参数解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/08/ccsp/">CSP Level 3浅析&amp;简单的bypass</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/07/python-virtualenv/">python virtualenv沙盒命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/01/xnuca-ctf-wp/">XNUCA2016 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/21/python-tqdm/">python tqdm模块分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/18/cmd-shell/">shell上一些有趣的命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/17/sangebaimao_huobi/">sangebaimao之火币网</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/12/guosai-ctf-wp/">信息安全国赛技能赛 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/26/cloudeye/">一个有趣的东西-cloudeye</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/17/sangebaimao-zhao/">sangebaimao之招聘又开始了，你怕了吗？</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/06/alictf2016/">alictf2016_web_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/04/sangebaimao1/">sangebaimao 寻找来自星星的你一</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/27/opcache-jcfx/">在php opcache检测隐藏的后门程序</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/12/php-shell/">php webshell 各种函数</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/10/asis-bcloud/">Asis2016_Binary Cloud</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/09/sctf2016/">sctf2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/05/dockerfile/">dockerfile  (・ω・)ノ</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/04/docker-jc/">docker 基础操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/ggctf2016/">google_ctf2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/25/cctf2016/">CCTF2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/20/gif-ccsp/">gif bypass CSP?</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/11/j123jt-wp/">j123jt的聊天板大型wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/11/sctf-Obfusion/">sctfq1_Obfusion_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/08/input-bypasscsrf/">input属性bypass csp</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/06/hctfgame-llfx/">hctfgame_ll的流量分析题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/04/phpblack/">is_numeric和trim导致的判断绕过</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/30/web-for-pentest-II/">web_for_pentest_II writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/bctf2016/">bctf2016</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/hctfgame_week4+5_writeup/">hctf_game_week4+5_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/0ctf2016/">0ctf2016 &amp;&amp; sunshinectf2016 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/07/bkp2016-writeup/">bkp2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/05/hexo-coding/">hexo转移到coding配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/01/ssctf2015-writeup/">ssctf2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/29/hctfgame_week3_writeup/">hctf_game_week3_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/28/ldpai/">ldpa简单注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/28/titan-souls-ez/">titan souls 普通模式通关攻略</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/easy_git/">简单的git教程</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week2_writeup/">hctf_game_week2_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week1_writeup/">hctf_game_week1_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week0_writeup/">hctf_game_week0_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/21/dmsj-book/">《代码审计》一点儿笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/19/hctf2015/">hctf2015的一点儿记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/19/xss-link/">xss link&amp;svg;黑魔法</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/19/sql-error/">SQL 显错注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/17/rctf2015/">RCTF2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/17/isg2015/">ISG2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/02/hsb/">SPWC &amp; 华山杯？ writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/10/24/sqli_h/">关于sqli注入的特殊函数</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/10/04/XDCTF2015-writeup/">XDCTF2015-writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/09/28/nsctf-writeup/">Nsctf2015_Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/07/02/xss-p/">xss无声挑战赛_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/06/11/ctf0611/">ctf近期总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/22/Hexo-blogs/">Windows Hexo博客安装配置优化（小白篇）</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/21/fucksql/">Hduisa_ctf_wee4_fucksql</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/10/webforpentester/">Web for pentester_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/hduisa-ctf-writeup2/">Hduisa_ctf_writeup02</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/hduisa-ctf-writeup1/">Hduisa_ctf_writeup01</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/shinian/">（转）十年学会程序设计</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/01/22/webfirst/">0基础如何学好WEB（转）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/31/hackx/">凤凰挽歌，黑客独白（作者：我是老鹰&amp;炫凤舞）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/29/bookshelf1/">（转）学长们给我们的书目（结尾附上PDF地址）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/29/xiaobaistart/">菜鸟小白的开始...</a></li></ul>
+<script>
+</script>
+
+<footer id="footer">
+<div class="outer">
+<div id="footer-info">
+<div class="footer-left">
+<i class="fa fa-copyright"></i> 
+                2014-2017 LoRexxar
+            </div>
+<div class="footer-right">
+<a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+</div>
+</div>
+<div class="visit">
+<span id="busuanzi_container_site_pv" style="display:none">
+<span id="site-visit" title="本站到访数"><i aria-hidden="true" class="fa fa-user"></i><span id="busuanzi_value_site_uv"></span>
+</span>
+</span>
+<span>| </span>
+<span id="busuanzi_container_page_pv" style="display:none">
+<span id="page-visit" title="本页阅读量"><i aria-hidden="true" class="fa fa-eye animated infinite pulse"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+</div>
+</div>
+</footer>
+
+<script data-main="/js/main.js" src="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/require.min.js"></script>
+<script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 7;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+<div class="scroll" id="scroll">
+<a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+<a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+<a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+<script async="" src="./CSP Level 3浅析&amp;amp;简单的bypass  LoRexxar's Blog/busuanzi.pure.mini.js">
+</script>
+
+

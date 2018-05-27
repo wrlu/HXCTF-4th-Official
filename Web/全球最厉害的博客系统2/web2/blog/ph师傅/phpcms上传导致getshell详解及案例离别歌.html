@@ -1,0 +1,305 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./phpcms上传导致getshell详解及案例  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./phpcms上传导致getshell详解及案例  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./phpcms上传导致getshell详解及案例  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>phpcms上传导致getshell详解及案例 | 离别歌</title>
+<link href="./phpcms上传导致getshell详解及案例  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./phpcms上传导致getshell详解及案例  离别歌/styles.css" rel="stylesheet"/>
+<link href="./phpcms上传导致getshell详解及案例  离别歌/style.css" rel="stylesheet"/>
+<link href="./phpcms上传导致getshell详解及案例  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./phpcms上传导致getshell详解及案例  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./phpcms上传导致getshell详解及案例  离别歌/jquery.min.js"></script>
+<link href="./phpcms上传导致getshell详解及案例  离别歌/code.css" rel="stylesheet"/>
+<link href="./phpcms上传导致getshell详解及案例  离别歌/button.css" rel="stylesheet"/>
+<link href="./phpcms上传导致getshell详解及案例  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./phpcms上传导致getshell详解及案例  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/phpcms-upload-getshell.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/phpcms-upload-getshell.html&amp;text=phpcms%E4%B8%8A%E4%BC%A0%E5%AF%BC%E8%87%B4getshell%E8%AF%A6%E8%A7%A3%E5%8F%8A%E6%A1%88%E4%BE%8B"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/phpcms-upload-getshell.html&amp;title=phpcms%E4%B8%8A%E4%BC%A0%E5%AF%BC%E8%87%B4getshell%E8%AF%A6%E8%A7%A3%E5%8F%8A%E6%A1%88%E4%BE%8B"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/phpcms-upload-getshell.html&amp;is_video=false&amp;description=phpcms%E4%B8%8A%E4%BC%A0%E5%AF%BC%E8%87%B4getshell%E8%AF%A6%E8%A7%A3%E5%8F%8A%E6%A1%88%E4%BE%8B"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=phpcms%E4%B8%8A%E4%BC%A0%E5%AF%BC%E8%87%B4getshell%E8%AF%A6%E8%A7%A3%E5%8F%8A%E6%A1%88%E4%BE%8B&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/phpcms-upload-getshell.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/phpcms-upload-getshell.html&amp;title=phpcms%E4%B8%8A%E4%BC%A0%E5%AF%BC%E8%87%B4getshell%E8%AF%A6%E8%A7%A3%E5%8F%8A%E6%A1%88%E4%BE%8B"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/phpcms-upload-getshell.html&amp;title=phpcms%E4%B8%8A%E4%BC%A0%E5%AF%BC%E8%87%B4getshell%E8%AF%A6%E8%A7%A3%E5%8F%8A%E6%A1%88%E4%BE%8B"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/phpcms-upload-getshell.html&amp;title=phpcms%E4%B8%8A%E4%BC%A0%E5%AF%BC%E8%87%B4getshell%E8%AF%A6%E8%A7%A3%E5%8F%8A%E6%A1%88%E4%BE%8B"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/phpcms-upload-getshell.html&amp;title=phpcms%E4%B8%8A%E4%BC%A0%E5%AF%BC%E8%87%B4getshell%E8%AF%A6%E8%A7%A3%E5%8F%8A%E6%A1%88%E4%BE%8B"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/phpcms-upload-getshell.html&amp;name=phpcms%E4%B8%8A%E4%BC%A0%E5%AF%BC%E8%87%B4getshell%E8%AF%A6%E8%A7%A3%E5%8F%8A%E6%A1%88%E4%BE%8B&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">phpcms上传导致getshell详解及案例</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年12月5日 17:34" itemprop="datePublished">
+                    2013 十二月 05 17:34
+                </time>
+</div>
+<div class="article-tag">
+            阅读：6722
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/phpcms">phpcms</a>,
+                
+                <a class="tag-link" href="/tag/0day">0day</a>,
+                
+                <a class="tag-link" href="/tag/%E4%B8%8A%E4%BC%A0%E6%BC%8F%E6%B4%9E">上传漏洞</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+<span><span style="font-size:14px;line-height:21px;">这篇文章好几天前写了，给协会里新成员普及知识，看大家也都玩的差不多了，就发表到博客里，增加一点噱头和访问量，哈哈~</span></span>
+</p>
+<br>
+<span style="font-weight:700;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">0x01 什么是上传漏洞</span><br>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">很多cms为了丰富自己的功能都提供了上传头像、上传图片等功能。但如果上传的内容没有做好过滤，则等于说给了攻击者一个执行任意代码的途径。比如攻击者可以在上传一个含有恶意代码的文件，伪装成图片，来绕过后台的检测机制。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">以前一般的上传漏洞主要有以下几个方式造成：</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">0.在客户端用javascript或flash验证用户上传的文件格式，但上传到服务器后没验证。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">1.对用户上传的文件只检查了ContentType，但ContentType是可以被用户修改的，所以用户上传的脚本文件可以将ContentType改成image/gif来绕过检查。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">2.黑名单机制。检查用户上传的文件的后缀，如果是处于黑名单中的后缀，就返回错误信息。但黑名单机制很不好，不够完善，当黑名单中有遗漏的时候，攻击者就能够生虚而入。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">3.没有对用户上传的文件改名。网站有时候检查了用户上传的文件后缀是.jpg或.gif，于是就上传成功了，不对上传的文件进行改名。但一旦服务器存在解析漏洞，攻击者就可以利用畸形文件名来上传恶意代码。比如IIS6.0的解析漏洞，攻击者即可上传文件名类似“muma.asp;.gif”的文件，虽然看起来是一个gif格式，但IIS6.0就会把它解析成asp脚本运行。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">4.解压缩功能造成问题。有些网站有这样的功能，比如wordpress和emlog后台支持上传压缩包（上传后自动解压），这样我们把恶意代码写在压缩包中某文件里，就能在上传解压后被运行。</span><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">像一些大型的CMS，用户量很多，他们的安全也做的较好，前台直接上传绕过执行任意代码的漏洞很少。一旦前台存在这种漏洞，任何人都能上传webshell到网站中。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">但据说一年前phpcms就有这个0day了，知道昨天才被公开。</span><br/>
+<br/>
+<span style="font-weight:700;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">0x02 过程演示</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">首先找到目标网站（使用phpcms搭建），注册一个账号。来到用户中心 - 上传头像</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201312/4efd1386236427.jpg" id="ematt:262" target="_blank"><img alt="01.jpg" border="0" height="247" src="./phpcms上传导致getshell详解及案例  离别歌/thum-4efd1386236427.jpg" title="点击查看原图" width="420"/></a><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">先选择一个正常的头像：</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201312/3fb51386236429.jpg" id="ematt:264" target="_blank"><img alt="02.jpg" border="0" height="389" src="./phpcms上传导致getshell详解及案例  离别歌/thum-3fb51386236429.jpg" title="点击查看原图" width="420"/></a><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">打开burp_suite，这是我很喜欢的一个工具，里面有一个抓包、改包的功能，我们就需要改我们上传时发送的数据包，绕过客户端的后缀验证。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">具体的burp_suite怎么用就不是重点了，想了解的同学自己谷歌。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">打开burp_suite后，监听8080，然后我们把浏览器代理开成localhost:8080，点击这里的“保存图片”。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">这时，burp_suite中就截获了上传的数据包：</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201312/f9961386236430.jpg" id="ematt:266" target="_blank"><img alt="03.jpg" border="0" height="164" src="./phpcms上传导致getshell详解及案例  离别歌/thum-f9961386236430.jpg" title="点击查看原图" width="420"/></a><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">从那个“PK”到最后结尾，一大段东西，实际上就是我们上传的这个图片。我们把它们全部删掉，包括“PK”。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">然后我们要构造一个包含恶意代码的数据包，我新建了一个zip压缩包，里面包含一个文件夹“phi”，这个文件夹里包含一个我的webshell：“xm.php”。就是/phi/xm.php</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">然后我们回到burp_suite中，在刚才PK的位置右键 - Paste from file：</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201312/2de41386236432.jpg" id="ematt:268" target="_blank"><img alt="04.jpg" border="0" height="326" src="./phpcms上传导致getshell详解及案例  离别歌/thum-2de41386236432.jpg" title="点击查看原图" width="420"/></a><br/>
+<br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">选择我们这个压缩包：</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201312/13501386236433.jpg" id="ematt:270" target="_blank"><img alt="05.jpg" border="0" height="303" src="./phpcms上传导致getshell详解及案例  离别歌/thum-13501386236433.jpg" title="点击查看原图" width="420"/></a><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"></span><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">然后点上面的Forward，将数据包放行。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">然后来到历史记录，翻一下，应该会看到返回一个类似 phpsso_server/uploadfile/avatar/1/1/1/90*90.jpg的文件，这里就是我们的头像上传目录。</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201312/fac41386236434.jpg" id="ematt:272" target="_blank"><img alt="06.jpg" border="0" height="39" src="./phpcms上传导致getshell详解及案例  离别歌/thum-fac41386236434.jpg" title="点击查看原图" width="420"/></a><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"></span><br/>
+<br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">其实到这里我们已经上传成功了，我们上传的这个webshell就在这里：</span><a href="http://www.xxx.com/" target="_blank">http://www.xxx.com/</a><span style="background-color:#FFFFFF;">phpsso_server/uploadfile/avatar/1/1/1</span><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">/</span><span style="background-color:#FFFFFF;">phi/xm.php</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">红色的就是你的头像上传目录。蓝色的是你压缩包的文件结构。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">访问这个地址发现OK了。</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201312/e4bd1386236435.jpg" id="ematt:274" target="_blank"><img alt="07.jpg" border="0" height="195" src="./phpcms上传导致getshell详解及案例  离别歌/thum-e4bd1386236435.jpg" title="点击查看原图" width="420"/></a><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"></span><br/>
+<br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">菜刀连一下成功，在剩下的事我就没兴趣了：</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201312/86c31386236436.jpg" id="ematt:276" target="_blank"><img alt="08.jpg" border="0" height="260" src="./phpcms上传导致getshell详解及案例  离别歌/thum-86c31386236436.jpg" title="点击查看原图" width="420"/></a><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"></span><br/>
+<br/>
+<br/>
+<span style="font-weight:700;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">0x03 漏洞原理</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">说一下为什么我们构造一个这样的压缩包就能getshell。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">phpcms对头像上传是这么处理，上传上去的zip文件，它先解压好，然后删除非图片文件。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">关键地方代码：
+<pre class="brush: php;auto-links: false;">//存储flashpost图片
+  $filename = $dir.$this-&gt;uid.'.zip';
+  file_put_contents($filename, $this-&gt;avatardata);
+ 
+//此时写入压缩文件夹内容
+  
+  //解压缩文件
+  pc_base::load_app_class('pclzip', 'phpsso', 0);
+  $archive = new PclZip($filename);
+  if ($archive-&gt;extract(PCLZIP_OPT_PATH, $dir) == 0) {
+   die("Error : ".$archive-&gt;errorInfo(true));
+  }
+ 
+//568 行
+ 
+//判断文件安全，删除压缩包和非jpg图片
+  $avatararr = array('180x180.jpg', '30x30.jpg', '45x45.jpg', '90x90.jpg');
+  if($handle = opendir($dir)) {
+      while(false !== ($file = readdir($handle))) {
+    if($file !== '.' &amp;&amp; $file !== '..') {
+     if(!in_array($file, $avatararr)) {
+      @unlink($dir.$file);
+     } else {
+      $info = @getimagesize($dir.$file);
+      if(!$info || $info[2] !=2) {
+       @unlink($dir.$file);
+      }
+     }
+    }
+      }</pre>
+<br/>
+<br/>
+</span> <span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">可以看到，它删除的时候没有递归删除，也没有删除文件夹。这样，只要我们的webshell放在压缩包的文件夹中，即可避免被删除了。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">所以我就创建了一个包含phi文件夹的压缩包，phi里面放上小马xm.php，上传上去。</span><br/>
+<br/>
+<span style="font-weight:700;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">0x04 防范上传漏洞</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">首先必须在服务器验证用户上传，可以不用检查ContentType，直接检查后缀，如果在白名单中，就对该文件重命名后再复制到网站目录中，重命名时就用白名单里的后缀。重命名的方式可以是 "时间戳 + 随机数.jpg"等。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">尽量不允许前台用户上传压缩包，如果上传压缩包，一定要递归检查压缩包中所有文件后缀，删除非法的文件。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">最后，将上传目录设置成不可执行。这样就算webshell被上传了也不能被执行，比如我测试的某大型黑客网站，虽然xm.php上传成功了，但被禁止执行了：</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201312/ae561386236437.jpg" id="ematt:280" target="_blank"><img alt="10.jpg" border="0" height="164" src="./phpcms上传导致getshell详解及案例  离别歌/thum-ae561386236437.jpg" title="点击查看原图" width="420"/></a><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"></span><br/>
+<br/>
+<br/>
+<span style="font-weight:700;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">0x05 附加篇：怎么找到使用phpcms的网站</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">我前两篇都有这个栏目，因为大家处在web安全初期，平时要多练手，所以可以找一些网站进行实战。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">phpcms是一个大型的cms，用的人很多，基本上是以万计数，所以找起来很容易。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">直接百度 powered by phpcms即可：</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201312/10581386236437.jpg" id="ematt:278" target="_blank"><img alt="09.jpg" border="0" height="372" src="./phpcms上传导致getshell详解及案例  离别歌/thum-10581386236437.jpg" title="点击查看原图" width="420"/></a><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"></span><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">大家学习的时候请低调，不要惹出什么事端，被请去喝茶。</span>
+</br></br></div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1519">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpcms上传导致getshell详解及案例  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">聚合新闻</a>
+<time datetime="2013年12月5日 21:11" itemprop="datePublished">
+                            2013 十二月 05 21:11
+                        </time>
+<a href="javascript:reply_to('1519', '聚合新闻')">回复</a>
+</p>
+<p class="comment-meta">不错，学习了。</p>
+</div>
+</div>
+<div class="row" id="comment-1518">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpcms上传导致getshell详解及案例  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">趣购网</a>
+<time datetime="2013年12月5日 17:58" itemprop="datePublished">
+                            2013 十二月 05 17:58
+                        </time>
+<a href="javascript:reply_to('1518', '趣购网')">回复</a>
+</p>
+<p class="comment-meta">不错不错，学习了</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="a4ace1bc9d4b71b82b5281895468789a94e27112"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./phpcms上传导致getshell详解及案例  离别歌/a4ace1bc9d4b71b82b5281895468789a94e27112"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="289">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="nZgNihq0KJDAInFo9peKv5kcP1WKj2fnVjBj6LCfbwxZI23DXGIu4JmhY5pS2w4x"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./phpcms上传导致getshell详解及案例  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./phpcms上传导致getshell详解及案例  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

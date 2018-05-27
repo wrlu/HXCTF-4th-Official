@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html class="no-js" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<link href="./常见web源码泄漏解析 – Melody有奥妙/11" rel="profile"/>
+<link href="http://www.melodia.pw/xmlrpc.php" rel="pingback"/>
+<script>(function(html){html.className = html.className.replace(/\bno-js\b/,'js')})(document.documentElement);</script>
+<title>常见web源码泄漏解析 – Melody有奥妙</title>
+<link href="./常见web源码泄漏解析 – Melody有奥妙/s.w.org" rel="dns-prefetch">
+<link href="./常见web源码泄漏解析 – Melody有奥妙/feed=rss2" rel="alternate" title="Melody有奥妙 » Feed" type="application/rss+xml">
+<link href="./常见web源码泄漏解析 – Melody有奥妙/feed=comments-rss2" rel="alternate" title="Melody有奥妙 » 评论Feed" type="application/rss+xml"/>
+<link href="./常见web源码泄漏解析 – Melody有奥妙/feed=rss2&amp;p=704" rel="alternate" title="Melody有奥妙 » 常见web源码泄漏解析评论Feed" type="application/rss+xml"/>
+<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/2.2.1\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/2.2.1\/svg\/","svgExt":".svg","source":{"concatemoji":"http:\/\/www.melodia.pw\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.7.5"}};
+			!function(a,b,c){function d(a){var b,c,d,e,f=String.fromCharCode;if(!k||!k.fillText)return!1;switch(k.clearRect(0,0,j.width,j.height),k.textBaseline="top",k.font="600 32px Arial",a){case"flag":return k.fillText(f(55356,56826,55356,56819),0,0),!(j.toDataURL().length<3e3)&&(k.clearRect(0,0,j.width,j.height),k.fillText(f(55356,57331,65039,8205,55356,57096),0,0),b=j.toDataURL(),k.clearRect(0,0,j.width,j.height),k.fillText(f(55356,57331,55356,57096),0,0),c=j.toDataURL(),b!==c);case"emoji4":return k.fillText(f(55357,56425,55356,57341,8205,55357,56507),0,0),d=j.toDataURL(),k.clearRect(0,0,j.width,j.height),k.fillText(f(55357,56425,55356,57341,55357,56507),0,0),e=j.toDataURL(),d!==e}return!1}function e(a){var c=b.createElement("script");c.src=a,c.defer=c.type="text/javascript",b.getElementsByTagName("head")[0].appendChild(c)}var f,g,h,i,j=b.createElement("canvas"),k=j.getContext&&j.getContext("2d");for(i=Array("flag","emoji4"),c.supports={everything:!0,everythingExceptFlag:!0},h=0;h<i.length;h++)c.supports[i[h]]=d(i[h]),c.supports.everything=c.supports.everything&&c.supports[i[h]],"flag"!==i[h]&&(c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&c.supports[i[h]]);c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&!c.supports.flag,c.DOMReady=!1,c.readyCallback=function(){c.DOMReady=!0},c.supports.everything||(g=function(){c.readyCallback()},b.addEventListener?(b.addEventListener("DOMContentLoaded",g,!1),a.addEventListener("load",g,!1)):(a.attachEvent("onload",g),b.attachEvent("onreadystatechange",function(){"complete"===b.readyState&&c.readyCallback()})),f=c.source||{},f.concatemoji?e(f.concatemoji):f.wpemoji&&f.twemoji&&(e(f.twemoji),e(f.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script>
+<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+<link href="./常见web源码泄漏解析 – Melody有奥妙/genericons.cssver=3.4.1" id="genericons-css" media="all" rel="stylesheet" type="text/css"/>
+<link href="./常见web源码泄漏解析 – Melody有奥妙/style.cssver=4.7.5" id="twentysixteen-style-css" media="all" rel="stylesheet" type="text/css"/>
+<!--[if lt IE 10]>
+<link rel='stylesheet' id='twentysixteen-ie-css'  href='http://www.melodia.pw/wp-content/themes/twentysixteen/css/ie.css?ver=20160816' type='text/css' media='all' />
+<![endif]-->
+<!--[if lt IE 9]>
+<link rel='stylesheet' id='twentysixteen-ie8-css'  href='http://www.melodia.pw/wp-content/themes/twentysixteen/css/ie8.css?ver=20160816' type='text/css' media='all' />
+<![endif]-->
+<!--[if lt IE 8]>
+<link rel='stylesheet' id='twentysixteen-ie7-css'  href='http://www.melodia.pw/wp-content/themes/twentysixteen/css/ie7.css?ver=20160816' type='text/css' media='all' />
+<![endif]-->
+<!--[if lt IE 9]>
+<script type='text/javascript' src='http://www.melodia.pw/wp-content/themes/twentysixteen/js/html5.js?ver=3.7.3'></script>
+<![endif]-->
+<script src="./常见web源码泄漏解析 – Melody有奥妙/jquery.jsver=1.12.4" type="text/javascript"></script>
+<script src="./常见web源码泄漏解析 – Melody有奥妙/jquery-migrate.min.jsver=1.4.1" type="text/javascript"></script>
+<link href="./常见web源码泄漏解析 – Melody有奥妙/rest_route=" rel="https://api.w.org/"/>
+<link href="http://www.melodia.pw/xmlrpc.php?rsd" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./常见web源码泄漏解析 – Melody有奥妙/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<link href="./常见web源码泄漏解析 – Melody有奥妙/p=698" rel="prev" title="民族仇恨还能有多深？——记阿尔巴尼亚病毒的起源"/>
+<link href="./常见web源码泄漏解析 – Melody有奥妙/p=706" rel="next" title="三个白帽代码审计之条条大路通罗马1"/>
+<meta content="WordPress 4.7.5" name="generator">
+<link href="./常见web源码泄漏解析 – Melody有奥妙/p=704" rel="canonical"/>
+<link href="./常见web源码泄漏解析 – Melody有奥妙/p=704" rel="shortlink"/>
+<link href="./常见web源码泄漏解析 – Melody有奥妙/rest_route=%2Foembed%2F1.0%2Fembed&amp;url=http%3A%2F%2Fwww.melodia.pw%2F%3Fp%3D704" rel="alternate" type="application/json+oembed"/>
+<link href="./常见web源码泄漏解析 – Melody有奥妙/rest_route=%2Foembed%2F1.0%2Fembed&amp;url=http%3A%2F%2Fwww.melodia.pw%2F%3Fp%3D704&amp;format=xml" rel="alternate" type="text/xml+oembed"/>
+<style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>
+</meta></link></link></head>
+<body class="post-template-default single single-post postid-704 single-format-standard">
+<div class="site" id="page">
+<div class="site-inner">
+<a class="skip-link screen-reader-text" href="#content">跳至内容</a>
+<header class="site-header" id="masthead" role="banner">
+<div class="site-header-main">
+<div class="site-branding">
+<p class="site-title"><a href="http://www.melodia.pw/" rel="home">Melody有奥妙</a></p>
+<p class="site-description">Keep thinking, sometimes naive.</p>
+</div><!-- .site-branding -->
+<button class="menu-toggle" id="menu-toggle">菜单</button>
+<div class="site-header-menu" id="site-header-menu">
+<nav aria-label="主菜单" class="main-navigation" id="site-navigation" role="navigation">
+<div class="menu-%e9%a1%b5%e9%9d%a2-container"><ul class="primary-menu" id="menu-%e9%a1%b5%e9%9d%a2"><li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-688" id="menu-item-688"><a href="http://www.melodia.pw/?page_id=5">About</a></li>
+</ul></div> </nav><!-- .main-navigation -->
+</div><!-- .site-header-menu -->
+</div><!-- .site-header-main -->
+</header><!-- .site-header -->
+<div class="site-content" id="content">
+<div class="content-area" id="primary">
+<main class="site-main" id="main" role="main">
+<article class="post-704 post type-post status-publish format-standard hentry category-2" id="post-704">
+<header class="entry-header">
+<h1 class="entry-title">常见web源码泄漏解析</h1> </header><!-- .entry-header -->
+<div class="entry-content">
+<pre><code>web题目中源码泄露还是比较常见的，在什么时候需要去考虑源码泄漏呢，一是题目中所有猜测的可能存在漏洞的点都确认应该没有漏洞的时候，比如说在有一次比赛中题目中给了个登录框...后来确认是静态的页面，那这个时候就必须考虑源码泄露了。二是已经确认了解题思路，但是对漏洞的测试非常难以进行的，比如说这次bctf，xss在我们这里没有回显，而管理的页面也看不到，每次都要等到robot看过了我们提交的页面之后才能确认xss是否成功，这是非常麻烦的，而主办方也不希望因为自己的机器人出问题而影响大家漏洞的测试，这次比赛中robot屡次出现问题...有源码泄漏的可能性还是很高的。为什么要强调这一点，这一点其实只有在比赛中才会比较有用，因为一道题没有人做出来的话，才有放hint的可能性，如果你的思路比较跳，你就容易在这样的比赛中获得优势。本次bctf因为第二道homework太久没人做出来才放的hint，如果说很早就有人发现了源码泄露，那么这道题估计注定只有一个人能做出来了。本篇将对网络上常见的源码泄露做些分析，浅薄之见还望多多包涵。</code></pre>
+<ul>
+<li>Bitkeeper(上古神器)</li>
+<li>CVS</li>
+<li>Subversion(SVN)</li>
+<li>Git</li>
+<li>Mercurial</li>
+</ul>
+<p> </p>
+<h3><a class="anchor" href="https://github.com/team-s2/docs/blob/master/Web/sourcecode_leak.md#bitkeeper" id="user-content-bitkeeper"></a>Bitkeeper</h3>
+<p>这真的是上古神器了，我后面要介绍的其他几款工具推出的时候都是要号称取代bitkeeper…<br/>
+该款软件如何安装的说明，上面附带有把试用版本发送到自己的邮箱…：<a href="http://www.bitkeeper.com/installation.instructions">http://www.bitkeeper.com/installation.instructions</a><br/>
+测试的目录</p>
+<blockquote><p>http://url/.bk 403 Forbidden</p></blockquote>
+<p>取回源码的命令</p>
+<blockquote><p>bk clone http://url/name dir</p></blockquote>
+<p>这个命令的意思就是把远端一个名为name的repo clone到本地名为dir的目录下。</p>
+<p>查看所有的改变的命令，转到download的目录</p>
+<blockquote><p>bk changes</p></blockquote>
+<h3><a class="anchor" href="https://github.com/team-s2/docs/blob/master/Web/sourcecode_leak.md#cvs" id="user-content-cvs"></a>CVS</h3>
+<p>测试的目录</p>
+<blockquote><p>http://url/CVS/Root 返回根信息</p>
+<p>http://url/CVS/Entries 返回所有文件的结构</p></blockquote>
+<p>取回源码的命令</p>
+<blockquote><p>bk clone http://url/name dir</p></blockquote>
+<p>这个命令的意思就是把远端一个名为name的repo clone到本地名为dir的目录下。</p>
+<p>查看所有的改变的命令，转到download的目录</p>
+<blockquote><p>bk changes</p></blockquote>
+<h3><a class="anchor" href="https://github.com/team-s2/docs/blob/master/Web/sourcecode_leak.md#svn" id="user-content-svn"></a>SVN</h3>
+<p>测试链接</p>
+<blockquote><p>http://url/.svn</p></blockquote>
+<p>这个已经有利用工具了 <a href="http://pan.baidu.com/s/1mrNpB">http://pan.baidu.com/s/1mrNpB</a></p>
+<h3><a class="anchor" href="https://github.com/team-s2/docs/blob/master/Web/sourcecode_leak.md#git" id="user-content-git"></a>Git</h3>
+<p>这个太常见了，测试目录就是/.git，也已经有现成的利用工具了，这里不多说了。 <a href="http://www.freebuf.com/tools/66096.html">http://www.freebuf.com/tools/66096.html</a></p>
+<h3><a class="anchor" href="https://github.com/team-s2/docs/blob/master/Web/sourcecode_leak.md#mercurial" id="user-content-mercurial"></a>Mercurial</h3>
+<p>也是这次bctf使用的，测试目录</p>
+<blockquote><p>http://url/.hg 403 Forbidden</p></blockquote>
+<p>clone下来的命令:</p>
+<blockquote><p>hg clone url</p></blockquote>
+<p>查看更改的</p>
+<blockquote><p>hg log</p></blockquote>
+<p>实际上版本控制工具还有很多，这里介绍了几个比较常用的，其他的需要参考wiki:<a href="https://zh.wikipedia.org/zh/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6">https://zh.wikipedia.org/zh/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6</a></p>
+</div><!-- .entry-content -->
+<footer class="entry-footer">
+<span class="byline"><span class="author vcard"><img alt="" class="avatar avatar-49 photo" height="49" src="./常见web源码泄漏解析 – Melody有奥妙/7edb2f4a0823cf89ed72b0f0a154c121s=49&amp;d=mm&amp;r=g" srcset="http://1.gravatar.com/avatar/7edb2f4a0823cf89ed72b0f0a154c121?s=98&amp;d=mm&amp;r=g 2x" width="49"/><span class="screen-reader-text">作者 </span> <a class="url fn n" href="http://www.melodia.pw/?author=1">Melody</a></span></span><span class="posted-on"><span class="screen-reader-text">发布于 </span><a href="http://www.melodia.pw/?p=704" rel="bookmark"><time class="entry-date published" datetime="2016-05-05T00:59:17+00:00">2016年5月5日</time><time class="updated" datetime="2016-05-05T01:00:37+00:00">2016年5月5日</time></a></span><span class="cat-links"><span class="screen-reader-text">分类 </span><a href="http://www.melodia.pw/?cat=2" rel="category">每刻，知识分享</a></span> </footer><!-- .entry-footer -->
+</article><!-- #post-## -->
+<div class="comments-area" id="comments">
+<h2 class="comments-title">
+			《常见web源码泄漏解析》有1个想法		</h2>
+<ol class="comment-list">
+<li class="comment even thread-even depth-1" id="comment-47855">
+<article class="comment-body" id="div-comment-47855">
+<footer class="comment-meta">
+<div class="comment-author vcard">
+<img alt="" class="avatar avatar-42 photo" height="42" src="./常见web源码泄漏解析 – Melody有奥妙/5fb89150137afa39f2703e803e658675s=42&amp;d=mm&amp;r=g" srcset="http://2.gravatar.com/avatar/5fb89150137afa39f2703e803e658675?s=84&amp;d=mm&amp;r=g 2x" width="42"/> <b class="fn"><a class="url" href="http://coshadow.com" rel="external nofollow">霜酱</a></b><span class="says">说道：</span> </div><!-- .comment-author -->
+<div class="comment-metadata">
+<a href="http://www.melodia.pw/?p=704#comment-47855">
+<time datetime="2016-05-07T23:53:28+00:00">
+								2016年5月7日 下午11:53							</time>
+</a>
+</div><!-- .comment-metadata -->
+</footer><!-- .comment-meta -->
+<div class="comment-content">
+<p>melodymelodymelody 上篇文章的密码是啥啊。<br/>
+还有，你网页右上角的GuestBook和About是怎么加上去的啊。</p>
+</div><!-- .comment-content -->
+<div class="reply"><a aria-label="回复给霜酱" class="comment-reply-link" href="http://www.melodia.pw/?p=704&amp;replytocom=47855#respond" onclick='return addComment.moveForm( "div-comment-47855", "47855", "respond", "704" )' rel="nofollow">回复</a></div> </article><!-- .comment-body -->
+</li><!-- #comment-## -->
+</ol><!-- .comment-list -->
+<div class="comment-respond" id="respond">
+<h2 class="comment-reply-title" id="reply-title">发表评论 <small><a href="/?p=704#respond" id="cancel-comment-reply-link" rel="nofollow" style="display:none;">取消回复</a></small></h2> <form action="http://www.melodia.pw/wp-comments-post.php" class="comment-form" id="commentform" method="post" novalidate="">
+<p class="comment-notes"><span id="email-notes">电子邮件地址不会被公开。</span> 必填项已用<span class="required">*</span>标注</p><p class="comment-form-comment"><label for="comment">评论</label> <textarea aria-required="true" cols="45" id="comment" maxlength="65525" name="comment" required="required" rows="8"></textarea></p><p class="comment-form-author"><label for="author">姓名 <span class="required">*</span></label> <input aria-required="true" id="author" maxlength="245" name="author" required="required" size="30" type="text" value=""/></p>
+<p class="comment-form-email"><label for="email">电子邮件 <span class="required">*</span></label> <input aria-describedby="email-notes" aria-required="true" id="email" maxlength="100" name="email" required="required" size="30" type="email" value=""/></p>
+<p class="comment-form-url"><label for="url">站点</label> <input id="url" maxlength="200" name="url" size="30" type="url" value=""/></p>
+<p class="form-submit"><input class="submit" id="submit" name="submit" type="submit" value="发表评论"/> <input id="comment_post_ID" name="comment_post_ID" type="hidden" value="704"/>
+<input id="comment_parent" name="comment_parent" type="hidden" value="0"/>
+</p><p style="display: none;"><input id="akismet_comment_nonce" name="akismet_comment_nonce" type="hidden" value="90a722a70a"/></p><p style="display: none;"><input id="ak_js" name="ak_js" type="hidden" value="219"/></p> </form>
+</div><!-- #respond -->
+</div><!-- .comments-area -->
+<nav class="navigation post-navigation" role="navigation">
+<h2 class="screen-reader-text">文章导航</h2>
+<div class="nav-links"><div class="nav-previous"><a href="http://www.melodia.pw/?p=698" rel="prev"><span aria-hidden="true" class="meta-nav">上一</span> <span class="screen-reader-text">上篇文章：</span> <span class="post-title">民族仇恨还能有多深？——记阿尔巴尼亚病毒的起源</span></a></div><div class="nav-next"><a href="http://www.melodia.pw/?p=706" rel="next"><span aria-hidden="true" class="meta-nav">下一</span> <span class="screen-reader-text">下篇文章：</span> <span class="post-title">三个白帽代码审计之条条大路通罗马1</span></a></div></div>
+</nav>
+</main><!-- .site-main -->
+<aside class="content-bottom-widgets" id="content-bottom-widgets" role="complementary">
+<div class="widget-area">
+<section class="widget widget_text" id="text-2"> <div class="textwidget"></div>
+</section> </div><!-- .widget-area -->
+</aside><!-- .content-bottom-widgets -->
+</div><!-- .content-area -->
+<aside class="sidebar widget-area" id="secondary" role="complementary">
+<section class="widget widget_search" id="search-2">
+<form action="http://www.melodia.pw/" class="search-form" method="get" role="search">
+<label>
+<span class="screen-reader-text">搜索：</span>
+<input class="search-field" name="s" placeholder="搜索…" type="search" value=""/>
+</label>
+<button class="search-submit" type="submit"><span class="screen-reader-text">搜索</span></button>
+</form>
+</section> <section class="widget widget_recent_entries" id="recent-posts-2"> <h2 class="widget-title">近期文章</h2> <ul>
+<li>
+<a href="http://www.melodia.pw/?p=895">简单谈谈过去一年看得动漫</a>
+</li>
+<li>
+<a href="http://www.melodia.pw/?p=889">0ctf 2017 quals web writeup</a>
+</li>
+<li>
+<a href="http://www.melodia.pw/?p=771">Boston Key Party 2017 writeup</a>
+</li>
+<li>
+<a href="http://www.melodia.pw/?p=743">HITCON 2016 WEB WRITEUP[2016.10.12已更新web500]</a>
+</li>
+<li>
+<a href="http://www.melodia.pw/?p=730">LCTF 2016 WEB Writeup</a>
+</li>
+</ul>
+</section> <section class="widget widget_recent_comments" id="recent-comments-2"><h2 class="widget-title">近期评论</h2><ul id="recentcomments"><li class="recentcomments"><span class="comment-author-link"><a class="url" href="http://www.netsec0day.com/?p=294" rel="external nofollow">半月安全看看看第四期 – 安全0day</a></span>发表在《<a href="http://www.melodia.pw/?p=889#comment-257433">0ctf 2017 quals web writeup</a>》</li><li class="recentcomments"><span class="comment-author-link">Melody</span>发表在《<a href="http://www.melodia.pw/?p=889#comment-257432">0ctf 2017 quals web writeup</a>》</li><li class="recentcomments"><span class="comment-author-link"><a class="url" href="http://blog.albertchang.cn" rel="external nofollow">albertchang</a></span>发表在《<a href="http://www.melodia.pw/?p=889#comment-257419">0ctf 2017 quals web writeup</a>》</li><li class="recentcomments"><span class="comment-author-link">jjj</span>发表在《<a href="http://www.melodia.pw/?p=889#comment-257418">0ctf 2017 quals web writeup</a>》</li><li class="recentcomments"><span class="comment-author-link">Melody</span>发表在《<a href="http://www.melodia.pw/?p=889#comment-257417">0ctf 2017 quals web writeup</a>》</li></ul></section><section class="widget widget_links" id="linkcat-0"><h2 class="widget-title">书签</h2>
+<ul class="xoxo blogroll">
+<li><a href="http://aklis.info">Aklis</a></li>
+<li><a href="http://blog.albertchang.cn">albertchang</a></li>
+<li><a href="http://blog.cal1.cn/" target="_blank" title="社会我猫哥">CurseRed</a></li>
+<li><a href="http://www.venenof.com/" target="_blank">Veneno</a></li>
+<li><a href="https://www.virzz.com/">Virink</a></li>
+</ul>
+</section>
+<section class="widget widget_archive" id="archives-2"><h2 class="widget-title">文章归档</h2> <ul>
+<li><a href="http://www.melodia.pw/?m=201704">2017年四月</a></li>
+<li><a href="http://www.melodia.pw/?m=201703">2017年三月</a></li>
+<li><a href="http://www.melodia.pw/?m=201702">2017年二月</a></li>
+<li><a href="http://www.melodia.pw/?m=201610">2016年十月</a></li>
+<li><a href="http://www.melodia.pw/?m=201605">2016年五月</a></li>
+<li><a href="http://www.melodia.pw/?m=201602">2016年二月</a></li>
+<li><a href="http://www.melodia.pw/?m=201208">2012年八月</a></li>
+<li><a href="http://www.melodia.pw/?m=201207">2012年七月</a></li>
+<li><a href="http://www.melodia.pw/?m=201109">2011年九月</a></li>
+<li><a href="http://www.melodia.pw/?m=201108">2011年八月</a></li>
+<li><a href="http://www.melodia.pw/?m=201106">2011年六月</a></li>
+<li><a href="http://www.melodia.pw/?m=201104">2011年四月</a></li>
+<li><a href="http://www.melodia.pw/?m=201103">2011年三月</a></li>
+</ul>
+</section><section class="widget widget_categories" id="categories-2"><h2 class="widget-title">分类目录</h2> <ul>
+<li class="cat-item cat-item-1"><a href="http://www.melodia.pw/?cat=1">未分类</a>
+</li>
+<li class="cat-item cat-item-2"><a href="http://www.melodia.pw/?cat=2">每刻，知识分享</a>
+</li>
+<li class="cat-item cat-item-5"><a href="http://www.melodia.pw/?cat=5">每日，寻寻觅觅</a>
+</li>
+<li class="cat-item cat-item-6"><a href="http://www.melodia.pw/?cat=6">每时，走走停停</a>
+</li>
+</ul>
+</section><section class="widget widget_meta" id="meta-2"><h2 class="widget-title">功能</h2> <ul>
+<li><a href="http://www.melodia.pw/wp-login.php">登录</a></li>
+<li><a href="http://www.melodia.pw/?feed=rss2">文章<abbr title="Really Simple Syndication">RSS</abbr></a></li>
+<li><a href="http://www.melodia.pw/?feed=comments-rss2">评论<abbr title="Really Simple Syndication">RSS</abbr></a></li>
+<li><a href="https://cn.wordpress.org/" title="基于WordPress，一个优美、先进的个人信息发布平台。">WordPress.org</a></li> </ul>
+</section> </aside><!-- .sidebar .widget-area -->
+</div><!-- .site-content -->
+<footer class="site-footer" id="colophon" role="contentinfo">
+<nav aria-label="页脚主菜单" class="main-navigation" role="navigation">
+<div class="menu-%e9%a1%b5%e9%9d%a2-container"><ul class="primary-menu" id="menu-%e9%a1%b5%e9%9d%a2-1"><li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-688"><a href="http://www.melodia.pw/?page_id=5">About</a></li>
+</ul></div> </nav><!-- .main-navigation -->
+<div class="site-info">
+<span class="site-title"><a href="http://www.melodia.pw/" rel="home">Melody有奥妙</a></span>
+<a href="https://cn.wordpress.org/">自豪地采用WordPress</a>
+</div><!-- .site-info -->
+</footer><!-- .site-footer -->
+</div><!-- .site-inner -->
+</div><!-- .site -->
+<script src="./常见web源码泄漏解析 – Melody有奥妙/form.jsver=3.3.1" type="text/javascript"></script>
+<script src="./常见web源码泄漏解析 – Melody有奥妙/skip-link-focus-fix.jsver=20160816" type="text/javascript"></script>
+<script src="./常见web源码泄漏解析 – Melody有奥妙/comment-reply.min.jsver=4.7.5" type="text/javascript"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+var screenReaderText = {"expand":"\u5c55\u5f00\u5b50\u83dc\u5355","collapse":"\u6298\u53e0\u5b50\u83dc\u5355"};
+/* ]]> */
+</script>
+<script src="./常见web源码泄漏解析 – Melody有奥妙/functions.jsver=20160816" type="text/javascript"></script>
+<script src="./常见web源码泄漏解析 – Melody有奥妙/wp-embed.min.jsver=4.7.5" type="text/javascript"></script>
+</body>
+</html>

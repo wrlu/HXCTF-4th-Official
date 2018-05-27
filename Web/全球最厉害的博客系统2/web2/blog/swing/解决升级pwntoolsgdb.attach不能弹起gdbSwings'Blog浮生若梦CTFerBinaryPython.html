@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>解决升级pwntools  gdb.attach不能弹起gdb | Swings'Blog|浮生若梦|CTFer|Binary|Python</title>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<meta content="RT" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="解决升级pwntools  gdb.attach不能弹起gdb" property="og:title"/>
+<meta content="http://bestwing.me/2017/04/23/after-upgrade-gdb-wont-attach-to-process/index.html" property="og:url"/>
+<meta content="Swings'Blog|浮生若梦|CTFer|Binary|Python" property="og:site_name"/>
+<meta content="RT" property="og:description"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-23/34496130-file_1492928370352_e86d.png" property="og:image"/>
+<meta content="2017-04-23T06:48:31.580Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="解决升级pwntools  gdb.attach不能弹起gdb" name="twitter:title"/>
+<meta content="RT" name="twitter:description"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-4-23/34496130-file_1492928370352_e86d.png" name="twitter:image"/>
+<link href="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/atom.xml" rel="alternative" title="Swings'Blog|浮生若梦|CTFer|Binary|Python" type="application/atom+xml"/>
+<link href="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/98028288-file_1488275496708_10f1d.jpg" rel="icon"/>
+<link href="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/animate.min.css" rel="stylesheet"/>
+<link href="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/style.css" rel="stylesheet"/>
+<link href="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/font-awesome.min.css" rel="stylesheet"/>
+<link href="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/jquery.fancybox.css" rel="stylesheet"/>
+<!-- 加载特效 -->
+<script src="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/pace.js"></script>
+<link href="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/pace-theme-flash.css" rel="stylesheet">
+<script>
+      var yiliaConfig = {
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</link></head>
+<body>
+<div id="container">
+<div class="left-col">
+<div class="overlay"></div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/180526%20"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/">Swing|浮生若梦</a></h1>
+</hgroup>
+<p class="header-subtitle">努力是为了 站在万人中央 成为别人的光</p>
+<div class="switch-btn" id="switch-btn">
+<div class="icon">
+<div class="icon-ctn">
+<div class="icon-wrap icon-house" data-idx="0">
+<div class="birdhouse"></div>
+<div class="birdhouse_holes"></div>
+</div>
+<div class="icon-wrap icon-ribbon hide" data-idx="1">
+<div class="ribbon"></div>
+</div>
+<div class="icon-wrap icon-link hide" data-idx="2">
+<div class="loopback_l"></div>
+<div class="loopback_r"></div>
+</div>
+<div class="icon-wrap icon-me hide" data-idx="3">
+<div class="user"></div>
+<div class="shoulder"></div>
+</div>
+</div>
+</div>
+<div class="tips-box hide">
+<div class="tips-arrow"></div>
+<ul class="tips-inner">
+<li>菜单</li>
+<li>标签</li>
+<li>友情链接</li>
+<li>关于我</li>
+</ul>
+</div>
+</div>
+<div class="switch-area" id="switch-area">
+<div class="switch-wrap">
+<section class="switch-part switch-part1">
+<nav class="header-menu">
+<ul>
+<li><a href="http://bestwing.me">博客首页</a></li>
+<li><a href="/archives/">文章归档</a></li>
+<li><a href="/about">留言打卡</a></li>
+<li><a href="/CTF-Study">学习导航</a></li>
+<li><a href="/PWNABLE">PWNABLE</a></li>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fl mail" href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&amp;email=kvH99PT39-Dn_efS5PvivOPjvPH9-w" target="_blank" title="mail">mail</a>
+<a class="fl github" href="https://github.com/WinMin" target="_blank" title="github">github</a>
+<a class="fl zhihu" href="https://www.zhihu.com/people/swing-57-29/activities" target="_blank" title="zhihu">zhihu</a>
+<a class="fl twitter" href="https://twitter.com/bestswngs" target="_blank" title="twitter">twitter</a>
+<a class="fl rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</ul>
+</nav>
+</section>
+<section class="switch-part switch-part2">
+<div class="widget tagcloud" id="js-tagcloud">
+<a href="/tags/0CTF/" style="font-size: 10px;">0CTF</a> <a href="/tags/360春秋杯/" style="font-size: 10px;">360春秋杯</a> <a href="/tags/Bin/" style="font-size: 10px;">Bin</a> <a href="/tags/Book/" style="font-size: 10px;">Book</a> <a href="/tags/CCTF/" style="font-size: 10px;">CCTF</a> <a href="/tags/CTF/" style="font-size: 10px;">CTF</a> <a href="/tags/Crypto/" style="font-size: 12px;">Crypto</a> <a href="/tags/DEFCON/" style="font-size: 10px;">DEFCON</a> <a href="/tags/ELF/" style="font-size: 10px;">ELF</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Hexo/" style="font-size: 18px;">Hexo</a> <a href="/tags/John/" style="font-size: 10px;">John</a> <a href="/tags/Kcon/" style="font-size: 10px;">Kcon</a> <a href="/tags/Linux-kernel/" style="font-size: 16px;">Linux-kernel</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Misc/" style="font-size: 10px;">Misc</a> <a href="/tags/NJCTF/" style="font-size: 10px;">NJCTF</a> <a href="/tags/NUCA/" style="font-size: 12px;">NUCA</a> <a href="/tags/PCTF/" style="font-size: 10px;">PCTF</a> <a href="/tags/Pwn/" style="font-size: 20px;">Pwn</a> <a href="/tags/Pwntools/" style="font-size: 10px;">Pwntools</a> <a href="/tags/Python/" style="font-size: 10px;">Python</a> <a href="/tags/RSA/" style="font-size: 10px;">RSA</a> <a href="/tags/Reverse/" style="font-size: 18px;">Reverse</a> <a href="/tags/SSTF/" style="font-size: 10px;">SSTF</a> <a href="/tags/SUCTF/" style="font-size: 10px;">SUCTF</a> <a href="/tags/Think/" style="font-size: 14px;">Think</a> <a href="/tags/Tools/" style="font-size: 10px;">Tools</a> <a href="/tags/VPN/" style="font-size: 10px;">VPN</a> <a href="/tags/Web/" style="font-size: 12px;">Web</a> <a href="/tags/WiFi/" style="font-size: 10px;">WiFi</a> <a href="/tags/Writeup/" style="font-size: 14px;">Writeup</a> <a href="/tags/angry/" style="font-size: 10px;">angry</a> <a href="/tags/exploit/" style="font-size: 10px;">exploit</a> <a href="/tags/i春秋-百度杯/" style="font-size: 14px;">i春秋-百度杯</a> <a href="/tags/i春秋-腾讯30强/" style="font-size: 12px;">i春秋-腾讯30强</a> <a href="/tags/kernel/" style="font-size: 10px;">kernel</a> <a href="/tags/ubuntu/" style="font-size: 10px;">ubuntu</a> <a href="/tags/wooyun/" style="font-size: 10px;">wooyun</a> <a href="/tags/上海省赛/" style="font-size: 10px;">上海省赛</a> <a href="/tags/华山杯CTF/" style="font-size: 10px;">华山杯CTF</a> <a href="/tags/科学上网/" style="font-size: 10px;">科学上网</a> <a href="/tags/陕西省赛/" style="font-size: 10px;">陕西省赛</a>
+</div>
+</section>
+<section class="switch-part switch-part3">
+<div id="js-friends">
+<a class="main-nav-link switch-friends-link" href="http://ring3.xyz/" target="_blank">Yllen</a>
+<a class="main-nav-link switch-friends-link" href="http://mxny.org/" target="_blank">麦香浓郁</a>
+<a class="main-nav-link switch-friends-link" href="http://whereisk0shl.top/" target="_blank">K0sh1</a>
+<a class="main-nav-link switch-friends-link" href="http://www.ycjcl.cc/" target="_blank">信鑫</a>
+<a class="main-nav-link switch-friends-link" href="http://bystudent.com/" target="_blank">ByStundet表哥</a>
+<a class="main-nav-link switch-friends-link" href="https://www.jarviswang.me/" target="_blank">汪神_Jarvis</a>
+<a class="main-nav-link switch-friends-link" href="http://sh3ll.me/" target="_blank">Chu</a>
+<a class="main-nav-link switch-friends-link" href="https://www.hackfun.org/" target="_blank">4ido10n</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/iamstudy" target="_blank">L3m0n</a>
+<a class="main-nav-link switch-friends-link" href="http://o0xmuhe.me/" target="_blank">muhe</a>
+<a class="main-nav-link switch-friends-link" href="http://blog.nuptzj.cn/" target="_blank">_画船听雨</a>
+<a class="main-nav-link switch-friends-link" href="http://www.virzz.com/index.html" target="_blank">Virink</a>
+<a class="main-nav-link switch-friends-link" href="http://www.sqlsec.com/" target="_blank">国光</a>
+<a class="main-nav-link switch-friends-link" href="http://www.bodkin.ren/" target="_blank">老锥</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cizel.cn/" target="_blank">C1zel</a>
+<a class="main-nav-link switch-friends-link" href="http://1phan.cc" target="_blank">1phan</a>
+<a class="main-nav-link switch-friends-link" href="https://www.liuil.top/" target="_blank">liuil</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/Ox9A82/" target="_blank">Ox9A82</a>
+<a class="main-nav-link switch-friends-link" href="http://burnegg.com/" target="_blank">burnegg</a>
+<a class="main-nav-link switch-friends-link" href="https://jwrsec.cn/" target="_blank">jwr-sec</a>
+<a class="main-nav-link switch-friends-link" href="http://sudalover.cn/" target="_blank">苏打</a>
+<a class="main-nav-link switch-friends-link" href="http://blog.binklac.com" target="_blank">VeroFess</a>
+<a class="main-nav-link switch-friends-link" href="http://www.bendawang.site/" target="_blank">bendawang</a>
+<a class="main-nav-link switch-friends-link" href="http://weeklyalgo.codes/" target="_blank">hook</a>
+</div>
+</section>
+<section class="switch-part switch-part4">
+<div id="js-aboutme">我想一年后再来写这个 2016年9月4日</div>
+</section>
+</div>
+</div>
+</header>
+</div>
+</div>
+<div class="mid-col">
+<nav id="mobile-nav">
+<div class="overlay">
+<div class="slider-trigger"></div>
+<h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Swing|浮生若梦</a></h1>
+</div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/180526%20"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="回到主页">Swing|浮生若梦</a></h1>
+</hgroup>
+<p class="header-subtitle">努力是为了 站在万人中央 成为别人的光</p>
+<nav class="header-menu">
+<ul>
+<li><a href="http://bestwing.me">博客首页</a></li>
+<li><a href="/archives/">文章归档</a></li>
+<li><a href="/about">留言打卡</a></li>
+<li><a href="/CTF-Study">学习导航</a></li>
+<li><a href="/PWNABLE">PWNABLE</a></li>
+<div class="clearfix"></div>
+</ul>
+</nav>
+<nav class="header-nav">
+<div class="social">
+<a class="mail" href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&amp;email=kvH99PT39-Dn_efS5PvivOPjvPH9-w" target="_blank" title="mail">mail</a>
+<a class="github" href="https://github.com/WinMin" target="_blank" title="github">github</a>
+<a class="zhihu" href="https://www.zhihu.com/people/swing-57-29/activities" target="_blank" title="zhihu">zhihu</a>
+<a class="twitter" href="https://twitter.com/bestswngs" target="_blank" title="twitter">twitter</a>
+<a class="rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</div>
+</nav>
+</header>
+</div>
+</nav>
+<div class="body-wrap"><article class="article article-type-post" id="post-after-upgrade-gdb-wont-attach-to-process" itemprop="blogPost" itemscope="">
+<div class="article-meta">
+<a class="article-date" href="/2017/04/23/after-upgrade-gdb-wont-attach-to-process/">
+<time datetime="2017-04-22T16:00:00.000Z" itemprop="datePublished">2017-04-23</time>
+</a>
+</div>
+<div class="article-inner">
+<input class="isFancy" type="hidden"/>
+<header class="article-header">
+<h1 class="article-title" itemprop="name">
+      解决升级pwntools  gdb.attach不能弹起gdb
+    </h1>
+</header>
+<div class="article-info article-info-post">
+<div class="article-category tagcloud">
+<a class="article-category-link" href="/categories/Summary/">Summary</a>
+</div>
+<div class="article-tag tagcloud">
+<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Pwntools/">Pwntools</a></li></ul>
+</div>
+<div class="clearfix"></div>
+</div>
+<div class="article-entry" itemprop="articleBody">
+<p>&lt;–more–&gt;</p>
+<h1 id="问题"><a class="headerlink" href="#问题" title="问题"></a>问题</h1><p><img alt="" src="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/34496130-file_1492928370352_e86d.png"/></p>
+<p>发现 <code>gdb.attach</code>弹不出gdb窗口了…</p>
+<p> 后来发现问题出在ubuntu身上，</p>
+<p>Ubuntu引入了一个补丁来禁止非root用户对非子进程的追踪 - 即。只有作为另一个进程的父进程的进程可以为普通用户追踪它，而root仍然可以追踪每个进程。所以为什么你可以使用gdb来通过sudo来附加。</p>
+<p>所以我们需要使用root权限，来运行我们的<code>gdb.attach</code></p>
+<h1 id="解决"><a class="headerlink" href="#解决" title="解决"></a>解决</h1><p>但是，我们不也非得用<code>sudo</code></p>
+<h2 id="临时解决方案"><a class="headerlink" href="#临时解决方案" title="临时解决方案"></a>临时解决方案</h2><p><code>echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope</code></p>
+<h1 id="长久解决方案"><a class="headerlink" href="#长久解决方案" title="长久解决方案"></a>长久解决方案</h1><p>修改 <code>/etc/sysctl.d/10-ptrace.conf</code></p>
+<p>​    修改内容 <code>kernel.yama.ptrace_scope = 1</code> </p>
+<p>​    结果为       <code>kernel.yama.ptrace_scope = 0</code></p>
+</div>
+</div>
+<div class="copyright">
+<p><span>本文标题:</span><a href="/2017/04/23/after-upgrade-gdb-wont-attach-to-process/">解决升级pwntools  gdb.attach不能弹起gdb</a></p>
+<p><span>文章作者:</span><a href="/" title="访问 Swing|浮生若梦 的个人博客">Swing|浮生若梦</a></p>
+<p><span>发布时间:</span>2017年04月23日 - 00时00分</p>
+<p><span>最后更新:</span>2017年04月23日 - 14时48分</p>
+<p>
+<span>原始链接:</span><a class="post-url" href="/2017/04/23/after-upgrade-gdb-wont-attach-to-process/" title="解决升级pwntools  gdb.attach不能弹起gdb">http://bestwing.me/2017/04/23/after-upgrade-gdb-wont-attach-to-process/</a>
+<span class="copy-path" data-clipboard-text="原文: http://bestwing.me/2017/04/23/after-upgrade-gdb-wont-attach-to-process/　　作者: Swing|浮生若梦" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+<script src="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/clipboard.min.js"></script>
+<script> var clipboard = new Clipboard('.copy-path'); </script>
+</p>
+<p>
+<span>许可协议:</span><i class="fa fa-creative-commons"></i> <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" rel="license" target="_blank" title="中国大陆 (CC BY-NC-SA 3.0 CN)">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+</div>
+<nav id="article-nav">
+<a class="article-nav-link-wrap" href="/2017/04/23/2017-360chunqiu-online/" id="article-nav-newer">
+<strong class="article-nav-caption">&lt;</strong>
+<div class="article-nav-title">
+        
+          2017 360春秋杯线上 部分Pwn writeup
+        
+      </div>
+</a>
+<a class="article-nav-link-wrap" href="/2017/04/17/cstc-xatu-writeup/" id="article-nav-older">
+<div class="article-nav-title">第三届全国网络空间安全技术大赛(线上初赛)</div>
+<strong class="article-nav-caption">&gt;</strong>
+</a>
+</nav>
+<!-- -- ���Ӿ���ͼ�� ---->
+<div class="post-donate">
+<div class="donate_bar center" id="donate_board">
+<a class="btn_donate" href="javascript:;" id="btn_donate" title="����"></a>
+<span class="donate_txt">
+           ↑<br/>
+		   如果觉得文章对你有用，不妨赏一点小钱吧！
+        </span>
+<br/>
+</div>
+<div class="donate_bar center hidden" id="donate_guide">
+<!-- ֧��������ͼ�� -->
+<img alt="֧��������" src="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/zhifubao.jpg"/>
+<!-- ΢�Ŵ���ͼ�� -->
+<img alt="΢�Ŵ���" src="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/weixin.jpg"/>
+</div>
+<script type="text/javascript">
+		document.getElementById('btn_donate').onclick = function(){
+			$('#donate_board').addClass('hidden');
+			$('#donate_guide').removeClass('hidden');
+		}
+	</script>
+</div>
+<!-- -- ���Ӿ���ͼ�� ---->
+</article>
+<div class="toc-article" id="toc">
+<strong class="toc-title">文章目录</strong>
+<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#问题"><span class="toc-number">1.</span> <span class="toc-text">问题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#解决"><span class="toc-number">2.</span> <span class="toc-text">解决</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#临时解决方案"><span class="toc-number">2.1.</span> <span class="toc-text">临时解决方案</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#长久解决方案"><span class="toc-number">3.</span> <span class="toc-text">长久解决方案</span></a></li></ol>
+</div>
+<input id="tocButton" title="点击按钮隐藏或者显示文章目录" type="button" value="隐藏目录"/>
+<script src="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+        }
+    })
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+    }
+</script>
+<div class="share">
+<div class="bdsharebuttonbox">
+<a class="bds_more" data-cmd="more" href="#"></a>
+<a class="bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="bds_sqq" data-cmd="sqq" href="#" title="分享给 QQ 好友"></a>
+<a class="bds_copy" data-cmd="copy" href="#" title="复制网址"></a>
+<a class="bds_mail" data-cmd="mail" href="#" title="通过邮件分享"></a>
+<a class="bds_weixin" data-cmd="weixin" href="#" title="生成文章二维码"></a>
+</div>
+<script>
+        window._bd_share_config={
+            "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+    </script>
+</div>
+<div class="bdsharebuttonbox">
+<a class="fx fa-weibo bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="fx fa-weixin bds_weixin" data-cmd="weixin" href="#" title="分享到微信"></a>
+<a class="fx fa-qq bds_sqq" data-cmd="sqq" href="#" title="分享到QQ好友"></a>
+<a class="fx fa-facebook-official bds_fbook" data-cmd="fbook" href="#" title="分享到Facebook"></a>
+<a class="fx fa-twitter bds_twi" data-cmd="twi" href="#" title="分享到Twitter"></a>
+<a class="fx fa-linkedin bds_linkedin" data-cmd="linkedin" href="#" title="分享到linkedin"></a>
+<a class="fx fa-files-o bds_copy" data-cmd="copy" href="#" title="分享到复制网址"></a>
+</div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+<div class="duoshuo" id="comments">
+<!-- 多说评论框 start -->
+<div class="ds-thread" data-thread-key="2017/04/23/after-upgrade-gdb-wont-attach-to-process/" data-title="解决升级pwntools  gdb.attach不能弹起gdb" data-url="http://bestwing.me/2017/04/23/after-upgrade-gdb-wont-attach-to-process/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    var duoshuoQuery = {short_name:"WinMin"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = '/js/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- 多说公共JS代码 end -->
+</div>
+<div class="scroll" id="post-nav-button">
+<a href="/2017/04/23/2017-360chunqiu-online/" title="上一篇: 2017 360春秋杯线上 部分Pwn writeup">
+<i class="fa fa-angle-left"></i>
+</a>
+<a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+<a href="/2017/04/17/cstc-xatu-writeup/" title="下一篇: 第三届全国网络空间安全技术大赛(线上初赛)">
+<i class="fa fa-angle-right"></i>
+</a>
+</div>
+<ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/07/2017-SSCTF-Pwn/">2017- SSCTF-Pwn250</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/01/2017-defcon-peROPdo/">2017 DEFCON ---  peROPdo writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/23/2017-360chunqiu-online/">2017 360春秋杯线上 部分Pwn writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/23/after-upgrade-gdb-wont-attach-to-process/">解决升级pwntools  gdb.attach不能弹起gdb</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/17/cstc-xatu-writeup/">第三届全国网络空间安全技术大赛(线上初赛)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/10/write-kernel-exploits-2/">linux-kernel expoit  study (3)---栈溢出</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/08/write-kernel-exploits-1/">linux-kernel expoit  study (3)---NULL dereference</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/06/add-a-system-call/">linux-kernel expoit  study (2)---添加系统调用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/04/Complie-linux-kernel-and-running-it-using-qemu/">linux-kernel expoit  study（1） ---编译并用qemu运行内核</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/01/hoo_free/">Hook_free  解决保护全开的问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/30/《程序员的自我修养》读书笔记/">《程序员的自我修养》读书笔记---ELF文件结构</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/29/2017-0CTF-部分Pwn/">2017年 0CTF---部分Pwn writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/28/愿你出走半生，归来仍是少年/">不忘初心</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/26/markdown图片设置方法/">Markdown中对图片进行居中,设置大小等操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/24/stack-overflow-four/">基础栈溢出复习 四 之 BROP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/20/stack-overflow-three/">基础栈溢出复习 三 之 SROP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/19/stack-overflow-two/">基础栈溢出复习 二 之 ROP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/18/stack-overflow-one/">基础栈溢出复习 之基础</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/15/2017-NJCTF-part-writeup/">2017 XCTF 南京站　线上赛　NJCTF</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/08/angr-study/">angr初探</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/28/ichunqiu-CTF-Pwn-2017-2/">i 春秋-CTF-Pwn-2017-2</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/27/python-沙箱-逃逸/">Python沙箱逃逸</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/15/Memory Leak &amp; DynELF/">leak技巧以及DynELF的温习</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/13/WiFi_Attack/">蹭隔壁的WiFI</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/02/Those-of-the-Breakpoint/">断点的那些事</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/26/使用Git开发使用介绍/">使用Git开发使用介绍</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/19/Windows-Kernel-Exploit-Study-1/">Windows Kernel Exploit Study(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/17/pwnable刷题日记/">pwnable刷题日记 第一阶梯部分</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/30/one-gadget-rce/">One gadget rce</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/15/CSRF-Preliminary-Study/">CSRF初探</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/23/ichuqiu-reverse-November/">ichunqiu百度杯-十一月reverse专题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/18/Second Shanghai college students ' network security competition/">第二届上海市大学生网络安全大赛 Re400</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/13/2016-SUCTF-Writeup-pwn/">2016-SUCTF-PWN-Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/10/As-a-Software security engineer-must-know-and-read-books-recommended/">作为一个二进制安全学习者必知必读的书籍推荐</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/08/ichuqiu-pwn-November/">ichunqiu百度杯-十一月pwn专题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/22/基于zio的exp初次尝试/">一次基于zio编写pwn的exp的尝试</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/16/2016-sycgeek-Writeup/">Sycsec-极客大挑战-Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/29/2016-NUCA-pwn-Writeup/">NUCA---pwn-2016</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/24/The_hulling_method/">逆向学习——脱壳方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/18/tell_myself/">有时候想想 是得规划一下自己了</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/11/2016-Hs-ctf-SeeSea-writeup/">2016-中国·西安 华山杯 Writeup-SeeSea</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/10/Common types of RSA/">一大波RSA就要来了~~</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/08/2016-NUCA-Reverse-Writeup/">全国高校网安联赛--逆向篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/05/2016-ichunqiu-September/">百度杯 CTF夺旗大赛 ---ichunqiu</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/05/Want to say a bit/">一点想说的</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/27/John the Ripper password cracker/">John 破解rar 或者 zip密码</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/23/wooyun搭建/">记一次在服务器上wooyun搜索站的搭建</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/10/ubuntu-mount-new-disk/">ubuntu系统新增硬盘空间</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/29/渗透测试/">这是一波 ichunqiu在线挑战攻略 -(一)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/29/记一次Hexo主题的修改/">记一次Hexo主题修改</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/27/CTF-Misc&amp;Crypto-Tools/">工具以及脚本的整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/04/i春秋30强部分通关指南/">i春秋30强部分write-up</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/04/ichunqiu-Tencent-top30-Pwn/">ichunqiu-Pwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/04/浅谈格式化字符串漏洞/">浅谈格式化字符串漏洞</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/24/利用阿里云搭建VPN/">利用阿里云搭建VPN</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/04/2016黑客西部大会/">2016黑客西部大会</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/28/2016-Networ-space-security-technology-competition-of-shaanxi/">陕西省网络空间安全技术大赛</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/26/2016-PCTF-Writup/">Phrack--CTF 整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/25/2015-CCTF-Writeup/">酱油之旅--CCTF</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/14/Hexo-Use/">Hexo 使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/27/Hexo-Theme/">Hexo 主题：SPFK</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/27/Hexo-use-Introduction/">Hexo的使用介绍</a></li></ul>
+<script src="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+            }
+        })
+    </script>
+<script>
+</script>
+</div>
+<footer id="footer">
+<div class="outer">
+<div id="footer-info">
+<div class="footer-left">
+                © 2017 Swing|浮生若梦
+            </div>
+<div class="footer-right">
+<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+</div>
+<div class="visit">
+<span id="busuanzi_container_site_pv" style="display:none">
+<span id="site-visit">表哥到访数: 
+                            <span id="busuanzi_value_site_uv"></span>
+</span>
+</span>
+<span>, </span>
+<span id="busuanzi_container_page_pv" style="display:none">
+<span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+</div>
+</div>
+</footer>
+</div>
+<script src="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/main.js"></script>
+<script>
+        $(document).ready(function() {
+            var backgroundnum = 24;
+            var backgroundimg = "url(http://oezgohqzq.bkt.clouddn.com/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+<script src="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/MathJax.jsconfig=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+</script>
+<div class="scroll" id="scroll">
+<a href="#"><i class="fa fa-arrow-up"></i></a>
+<a href="#comments"><i class="fa fa-comments-o"></i></a>
+<a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+<script async="" src="./解决升级pwntools  gdb.attach不能弹起gdb  Swings'Blog浮生若梦CTFerBinaryPython/busuanzi.pure.mini.js">
+</script>
+<script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+</div>
+</body>
+</html>

@@ -1,0 +1,302 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>利用CSP探测网站登陆状态（支付宝/百度为例） | 离别歌</title>
+<link href="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/styles.css" rel="stylesheet"/>
+<link href="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/style.css" rel="stylesheet"/>
+<link href="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/jquery.min.js"></script>
+<link href="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/code.css" rel="stylesheet"/>
+<link href="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/button.css" rel="stylesheet"/>
+<link href="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/HTML/using-csp-detect-user-login.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/HTML/using-csp-detect-user-login.html&amp;text=%E5%88%A9%E7%94%A8CSP%E6%8E%A2%E6%B5%8B%E7%BD%91%E7%AB%99%E7%99%BB%E9%99%86%E7%8A%B6%E6%80%81%EF%BC%88%E6%94%AF%E4%BB%98%E5%AE%9D/%E7%99%BE%E5%BA%A6%E4%B8%BA%E4%BE%8B%EF%BC%89"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/HTML/using-csp-detect-user-login.html&amp;title=%E5%88%A9%E7%94%A8CSP%E6%8E%A2%E6%B5%8B%E7%BD%91%E7%AB%99%E7%99%BB%E9%99%86%E7%8A%B6%E6%80%81%EF%BC%88%E6%94%AF%E4%BB%98%E5%AE%9D/%E7%99%BE%E5%BA%A6%E4%B8%BA%E4%BE%8B%EF%BC%89"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/HTML/using-csp-detect-user-login.html&amp;is_video=false&amp;description=%E5%88%A9%E7%94%A8CSP%E6%8E%A2%E6%B5%8B%E7%BD%91%E7%AB%99%E7%99%BB%E9%99%86%E7%8A%B6%E6%80%81%EF%BC%88%E6%94%AF%E4%BB%98%E5%AE%9D/%E7%99%BE%E5%BA%A6%E4%B8%BA%E4%BE%8B%EF%BC%89"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E5%88%A9%E7%94%A8CSP%E6%8E%A2%E6%B5%8B%E7%BD%91%E7%AB%99%E7%99%BB%E9%99%86%E7%8A%B6%E6%80%81%EF%BC%88%E6%94%AF%E4%BB%98%E5%AE%9D/%E7%99%BE%E5%BA%A6%E4%B8%BA%E4%BE%8B%EF%BC%89&amp;body=Check out this article: https%3A//www.leavesongs.com/HTML/using-csp-detect-user-login.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/HTML/using-csp-detect-user-login.html&amp;title=%E5%88%A9%E7%94%A8CSP%E6%8E%A2%E6%B5%8B%E7%BD%91%E7%AB%99%E7%99%BB%E9%99%86%E7%8A%B6%E6%80%81%EF%BC%88%E6%94%AF%E4%BB%98%E5%AE%9D/%E7%99%BE%E5%BA%A6%E4%B8%BA%E4%BE%8B%EF%BC%89"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/HTML/using-csp-detect-user-login.html&amp;title=%E5%88%A9%E7%94%A8CSP%E6%8E%A2%E6%B5%8B%E7%BD%91%E7%AB%99%E7%99%BB%E9%99%86%E7%8A%B6%E6%80%81%EF%BC%88%E6%94%AF%E4%BB%98%E5%AE%9D/%E7%99%BE%E5%BA%A6%E4%B8%BA%E4%BE%8B%EF%BC%89"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/HTML/using-csp-detect-user-login.html&amp;title=%E5%88%A9%E7%94%A8CSP%E6%8E%A2%E6%B5%8B%E7%BD%91%E7%AB%99%E7%99%BB%E9%99%86%E7%8A%B6%E6%80%81%EF%BC%88%E6%94%AF%E4%BB%98%E5%AE%9D/%E7%99%BE%E5%BA%A6%E4%B8%BA%E4%BE%8B%EF%BC%89"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/HTML/using-csp-detect-user-login.html&amp;title=%E5%88%A9%E7%94%A8CSP%E6%8E%A2%E6%B5%8B%E7%BD%91%E7%AB%99%E7%99%BB%E9%99%86%E7%8A%B6%E6%80%81%EF%BC%88%E6%94%AF%E4%BB%98%E5%AE%9D/%E7%99%BE%E5%BA%A6%E4%B8%BA%E4%BE%8B%EF%BC%89"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/HTML/using-csp-detect-user-login.html&amp;name=%E5%88%A9%E7%94%A8CSP%E6%8E%A2%E6%B5%8B%E7%BD%91%E7%AB%99%E7%99%BB%E9%99%86%E7%8A%B6%E6%80%81%EF%BC%88%E6%94%AF%E4%BB%98%E5%AE%9D/%E7%99%BE%E5%BA%A6%E4%B8%BA%E4%BE%8B%EF%BC%89&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">利用CSP探测网站登陆状态（支付宝/百度为例）</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年1月4日 15:55" itemprop="datePublished">
+                    2015 一月 04 15:55
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3806
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/HTML">web前端</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/CSP">CSP</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>收假啦，收假啦，一篇文首发drops：<a href="http://drops.wooyun.org/tips/4482"><a href="http://drops.wooyun.org/tips/4482">http://drops.wooyun.org/tips/4482</a></a></p>
+<p>今天看到zone里有同学发帖说了探测支付宝登录状态的帖子：<a href="http://zone.wooyun.org/content/17665"><a href="http://zone.wooyun.org/content/17665">http://zone.wooyun.org/content/17665</a></a></p>
+<p>由此我想到了我们parsec的@/fd 半年前提到的一个思路，当时他给出了一个探测twitter是否登录的页面，可是我那个时候才疏学浅，好像一直没理解。这时候返回去看看，就有了这篇文章。</p>
+<h2 id="0x01-csp"><a class="toclink" href="#0x01-csp">0x01 CSP简介</a></h2>
+<p>内容安全策略（Content Security Policy，简称CSP）是一种以可信白名单作机制，来限制网站中是否可以包含某来源内容。默认配置下不允许执行内联代码（&lt;script&gt;块内容，内联事件，内联样式），以及禁止执行eval() , newFunction() , setTimeout([string], …) 和setInterval([string], …) 。</p>
+<p>CSP更详尽的介绍可以在drops看到：<a href="http://drops.wooyun.org/tips/1439"><a href="http://drops.wooyun.org/tips/1439">http://drops.wooyun.org/tips/1439</a></a></p>
+<h2 id="0x02"><a class="toclink" href="#0x02">0x02 大环境介绍与原理</a></h2>
+<p>简单了解一下CSP，我们知道CSP可以限制网站中可否包含某来源的内容。同时，csp还可以在页面违反规则的时候发送一个数据包，将具体细节通知给服务端。</p>
+<p>我们再来想想像支付宝这种集成度很高的网站服务，当我们在未登录的情况下访问alipay的某个子域名（如test.alipay.com），很可能是会302跳转到一个用户登陆专用的域名（如login.alipay.com）下要求用户登录。而在已登录的情况下是不会跳转的。</p>
+<p>这就造成了一个登录/未登录的一个差别，主要差别如下：</p>
+<p>1、HTTP状态码（302和200）</p>
+<p>2、最终访问的域名（test.alipay.com和login.alipay.com）</p>
+<p>因为浏览器SOP（同源策略）的限制，正常情况下我们是无法获取到alipay域名下HTTP状态码的。</p>
+<p>但结合CSP安全策略，我们却可以简单获得第2个，也就是最终访问域名。为什么？</p>
+<p>我前面说了CSP是可以限制页面中允许加载哪些来源的内容的。所以，当我们将CSP设置为只接受来源为test.alipay.com的内容，那么当加载来源为login.alipay.com的请求时就会被CSP策略拒绝，并可以将这个访问report给服务端，我们通过report的内容就能判断用户访问的是test还是login。</p>
+<p>过程如下：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201501/77111420382743.png"><img alt="detect.png" src="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/thum-77111420382743.png"/></a></p>
+<p>这就是原理，很赞的一个思路，再次崇拜一次@/fd。</p>
+<h2 id="0x03"><a class="toclink" href="#0x03">0x03 以支付宝为例编写探测代码</a></h2>
+<p>所以，根据上面的思路，我们第一步就是找到一个这样的页面：登录、未登录用户访问时到达的“域名”不相同。这里的“域名”包括protocol和hostname，也就是说 <a href="http://test.alipay.com">http://test.alipay.com</a> 和 <a href="https://test.alipay.com">https://test.alipay.com</a> 是不同的域名。</p>
+<p>像支付宝这种网站有很多这样的页面，因为支付宝的很多服务是登录用户才能查看的，而登录入口又只有那么一个。</p>
+<p>比如这个URL：<a href="https://my.alipay.com/portal/i.htm"><a href="https://my.alipay.com/portal/i.htm">https://my.alipay.com/portal/i.htm</a></a>，当未登录用户访问的时候会跳转到https://auth.alipay.com/login/index.htm，已登录用户访问时不会跳转。</p>
+<p>这时候我们将CSP的img-src限制为https://my.alipay.com，再将https://my.alipay.com/portal/i.htm作为img的src，这个时候就会出现一个有趣的现象：未登录的用户访问时，会触发CSP规则。</p>
+<p>因为未登录的用户访问时实际img加载的src是https://auth.alipay.com/login/index.htm，不符合CSP限制的img-src，自然就触发规则了。</p>
+<p>这时候我们在设置CSP的report-uri为report.php，不符合规则的请求会被记录下作为日志发送到report.php里：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201501/b2581420382472.png"><img alt="利用CSP探测网站登陆状态（alipay、baidu为例）1740.png" src="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/b2581420382472.png"/></a></p>
+<p>不过浏览器在发送这个report包的时候是不带cookie的，所以服务器那边并不能直接判断是哪个用户发送的report包，所以我们在report的GET参数里带上用户的session id。</p>
+<p>示例代码如下：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nb">session_start</span><span class="p">();</span>
+<span class="nv">$ssid</span> <span class="o">=</span> <span class="nb">session_id</span><span class="p">();</span>
+<span class="nb">header</span><span class="p">(</span><span class="s2">"Content-Security-Policy:img-src https://my.alipay.com; report-uri report.php?ssid=</span><span class="si">{</span><span class="nv">$ssid</span><span class="si">}</span><span class="s2">"</span><span class="p">);</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+<span class="x">&lt;html&gt;</span>
+<span class="x">&lt;head&gt;</span>
+<span class="x">&lt;meta charset="utf-8" /&gt;</span>
+<span class="x">&lt;title&gt;支付宝登陆检测&lt;/title&gt;</span>
+<span class="x">&lt;/head&gt;</span>
+<span class="x">&lt;body onload="return check();"&gt;</span>
+<span class="x">&lt;img src="https://my.alipay.com/portal/i.htm"&gt;</span>
+<span class="x">&lt;b id="result"&gt;&lt;/b&gt;</span>
+<span class="x">&lt;script type="text/javascript"&gt;</span>
+<span class="x">function check()</span>
+<span class="x">{</span>
+<span class="x">    with(new XMLHttpRequest) {</span>
+<span class="x">        open('GET', 'alipay.php');</span>
+<span class="x">        send();</span>
+<span class="x">        onreadystatechange = function() {</span>
+<span class="x">            if (readyState ^ 4) return;</span>
+<span class="x">            result.innerHTML = parseInt(responseText) &gt; 0 ? '未登录' : '已登录';</span>
+<span class="x">        }</span>
+<span class="x">    }</span>
+<span class="x">}</span>
+<span class="x">&lt;/script&gt;</span>
+<span class="x">&lt;/body&gt;</span>
+</pre></div>
+<p>report.php用来记录：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nb">session_start</span><span class="p">();</span>
+<span class="k">if</span> <span class="p">(</span><span class="nb">preg_match</span><span class="p">(</span><span class="s1">'/^[a-z0-9]*$/i'</span><span class="p">,</span> <span class="nv">$_GET</span><span class="p">[</span><span class="s1">'ssid'</span><span class="p">]))</span> <span class="p">{</span>
+    <span class="nb">session_id</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">'ssid'</span><span class="p">]);</span>
+<span class="p">}</span><span class="k">else</span><span class="p">{</span>
+    <span class="k">exit</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nv">$report</span> <span class="o">=</span> <span class="nb">file_get_contents</span><span class="p">(</span><span class="s2">"php://input"</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$report</span><span class="p">))</span> <span class="p">{</span>
+    <span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">'nologin'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span><span class="k">else</span><span class="p">{</span>
+    <span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">'nologin'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+<p>当接收到php://input的时候说明CSP发送报告了，说明请求违反的CSP规则了，也就意味着用户没有登录，所以将session中的nologin设置为1。</p>
+<p>然后在index.php里用一个ajax来向alipay.php请求，实际上就是获得$_SESSION[nologin]的值：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nb">session_start</span><span class="p">();</span>
+<span class="k">echo</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">'nologin'</span><span class="p">])</span> <span class="o">?</span> <span class="nv">$_SESSION</span><span class="p">[</span><span class="s1">'nologin'</span><span class="p">]</span> <span class="o">:</span> <span class="mi">0</span><span class="p">;</span>
+<span class="nb">setcookie</span><span class="p">(</span><span class="s1">'PHPSESSID'</span><span class="p">,</span> <span class="s1">''</span><span class="p">,</span> <span class="nb">time</span><span class="p">()</span> <span class="o">-</span> <span class="mi">10</span><span class="p">);</span>
+<span class="nb">session_destroy</span><span class="p">();</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+<p>如上，获取完后将session清除一下，以免影响下一次的判断。</p>
+<p>获得值如果为1的话，说明没有登录，如果为0说明已登录，就可以显示出来或做任何其他操作了。</p>
+<p>来个演示：<a href="http://mhz.pw/game/detect/alipay/"><a href="http://mhz.pw/game/detect/alipay/">http://mhz.pw/game/detect/alipay/</a></a></p>
+<p>登录支付宝以后访问，显示“已登录”</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201501/e9f61420382474.png"><img alt="利用CSP探测网站登陆状态（alipay、baidu为例）3233.png" src="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/e9f61420382474.png"/></a></p>
+<p>换个浏览器，直接访问则显示“未登录”：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201501/e54c1420382475.png"><img alt="利用CSP探测网站登陆状态（alipay、baidu为例）3255.png" src="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/e54c1420382475.png"/></a></p>
+<h2 id="0x04-httphttps"><a class="toclink" href="#0x04-httphttps">0x04 由http/https混用造成的问题（百度为例）</a></h2>
+<p>同样的问题，不仅仅是支付宝存在，只要有“统一登录入口”的网站都可能出现这个问题，因为统一登录入口通常是一个单独的域名。</p>
+<p>还有一种情况，是http和https混用造成的。有些网站的登录页面是https加密传输的，但登陆以后实际的操作页面是走http。</p>
+<p>这之间一样存在一个跳转的问题，当我们访问一个登陆后才能看到的页面如http://xxx.com/index，未登录的用户就会跳转到登录页面，如https://xxx.com/login。</p>
+<p>在CSP里http和https是完全不同的两个来源，所以也能触发CSP规则。</p>
+<p>比如 <a href="https://passport.baidu.com"><a href="https://passport.baidu.com">https://passport.baidu.com</a></a>，这是百度的安全中心。当已登录用户访问的时候会跳转到“安全中心”首页 <a href="http://passport.baidu.com/center"><a href="http://passport.baidu.com/center">http://passport.baidu.com/center</a></a>（注意，此处是http）：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201501/e6a81420382476.png"><img alt="利用CSP探测网站登陆状态（alipay、baidu为例）3654.png" src="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/e6a81420382476.png"/></a></p>
+<p>而未登录用户访问则会跳转到 <a href="https://passport.baidu.com/v2/?login"><a href="https://passport.baidu.com/v2/?login">https://passport.baidu.com/v2/?login</a></a>（这时候是https）：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201501/044a1420382478.png"><img alt="利用CSP探测网站登陆状态（alipay、baidu为例）3718.png" src="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/044a1420382478.png"/></a></p>
+<p>虽然两个域名都是passport.baidu.com，但因为protocol不同，混用的http和https就能够影响CSP的拦截情况。</p>
+<p>我们将CSP设置为img-src <a href="https://passport.baidu.com">https://passport.baidu.com</a> ，那么img的src就只接受来源为https://passport.baidu.com 的img，那么已登录用户访问的http://passport.baidu.com/center 就会被阻止，产生一个CSP报告。记录下这个报告，一样能判断访客是否已登录百度。</p>
+<p>测试你是否登录百度：<a href="http://mhz.pw/game/detect/baidu/"><a href="http://mhz.pw/game/detect/baidu/">http://mhz.pw/game/detect/baidu/</a></a></p>
+<h2 id="0x05"><a class="toclink" href="#0x05">0x05 影响及防范方法</a></h2>
+<p>严格来论，只是判断用户是否登录，这个问题并不算一个漏洞。当时@/fd将问题提交到推特之后推特的回应也是不算漏洞，但确实如果与其他一些漏洞结合使用，会让某些漏洞的成功率提高一大截。所以我们可以将之归为一个“奇技淫巧”。</p>
+<p>这个问题更容易出现在一些大型网站、企业网络之中，往往这些网站的统一性和重用性都做的很好，所以往往登录入口只有一个（现在流行一个user center的概念），所以难免会出现一些跳转的问题。有这些跳转，就是探测用户登录的基础。</p>
+<p>这个方法还有一个限制，就是用户使用的浏览器需要是现代浏览器，需要支持CSP安全策略。如果你要探测的用户还在用IE6~IE10，那么是肯定不行的。</p>
+<p>如何解决这个问题？如果你真的觉得这是个安全问题的话，那么尽量避免跳转，或者使用javascript进行页面的跳转。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1929">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/7fc2d5c0b745eb9df8e5cb662d8535c3.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://sh3ll.me" target="_blank">Chu</a>
+<time datetime="2015年2月3日 22:28" itemprop="datePublished">
+                            2015 二月 03 22:28
+                        </time>
+<a href="javascript:reply_to('1929', 'Chu')">回复</a>
+</p>
+<p class="comment-meta">来学习</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1930">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年2月5日 14:40" itemprop="datePublished">
+                            2015 二月 05 14:40
+                        </time>
+<a href="javascript:reply_to('1930', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@Chu：chu牛最近在忙啥</p>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="00f88d334ab7c1c81401e4fa1044f606b93c3f1a"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/00f88d334ab7c1c81401e4fa1044f606b93c3f1a"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="343">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="23W8Co2oDR2tXFDfdNpqTRHJGQt5OMEmAnhEqSeD4EWSXk1u14TasvJOPUWdxgtw"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./利用CSP探测网站登陆状态（支付宝百度为例）  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

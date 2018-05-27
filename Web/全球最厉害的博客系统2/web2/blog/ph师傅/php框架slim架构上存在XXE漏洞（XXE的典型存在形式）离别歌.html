@@ -1,0 +1,274 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>php框架slim架构上存在XXE漏洞（XXE的典型存在形式） | 离别歌</title>
+<link href="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/styles.css" rel="stylesheet"/>
+<link href="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/style.css" rel="stylesheet"/>
+<link href="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/jquery.min.js"></script>
+<link href="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/code.css" rel="stylesheet"/>
+<link href="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/button.css" rel="stylesheet"/>
+<link href="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/slim3-xxe.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/slim3-xxe.html&amp;text=php%E6%A1%86%E6%9E%B6slim%E6%9E%B6%E6%9E%84%E4%B8%8A%E5%AD%98%E5%9C%A8XXE%E6%BC%8F%E6%B4%9E%EF%BC%88XXE%E7%9A%84%E5%85%B8%E5%9E%8B%E5%AD%98%E5%9C%A8%E5%BD%A2%E5%BC%8F%EF%BC%89"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/slim3-xxe.html&amp;title=php%E6%A1%86%E6%9E%B6slim%E6%9E%B6%E6%9E%84%E4%B8%8A%E5%AD%98%E5%9C%A8XXE%E6%BC%8F%E6%B4%9E%EF%BC%88XXE%E7%9A%84%E5%85%B8%E5%9E%8B%E5%AD%98%E5%9C%A8%E5%BD%A2%E5%BC%8F%EF%BC%89"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/slim3-xxe.html&amp;is_video=false&amp;description=php%E6%A1%86%E6%9E%B6slim%E6%9E%B6%E6%9E%84%E4%B8%8A%E5%AD%98%E5%9C%A8XXE%E6%BC%8F%E6%B4%9E%EF%BC%88XXE%E7%9A%84%E5%85%B8%E5%9E%8B%E5%AD%98%E5%9C%A8%E5%BD%A2%E5%BC%8F%EF%BC%89"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=php%E6%A1%86%E6%9E%B6slim%E6%9E%B6%E6%9E%84%E4%B8%8A%E5%AD%98%E5%9C%A8XXE%E6%BC%8F%E6%B4%9E%EF%BC%88XXE%E7%9A%84%E5%85%B8%E5%9E%8B%E5%AD%98%E5%9C%A8%E5%BD%A2%E5%BC%8F%EF%BC%89&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/slim3-xxe.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/slim3-xxe.html&amp;title=php%E6%A1%86%E6%9E%B6slim%E6%9E%B6%E6%9E%84%E4%B8%8A%E5%AD%98%E5%9C%A8XXE%E6%BC%8F%E6%B4%9E%EF%BC%88XXE%E7%9A%84%E5%85%B8%E5%9E%8B%E5%AD%98%E5%9C%A8%E5%BD%A2%E5%BC%8F%EF%BC%89"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/slim3-xxe.html&amp;title=php%E6%A1%86%E6%9E%B6slim%E6%9E%B6%E6%9E%84%E4%B8%8A%E5%AD%98%E5%9C%A8XXE%E6%BC%8F%E6%B4%9E%EF%BC%88XXE%E7%9A%84%E5%85%B8%E5%9E%8B%E5%AD%98%E5%9C%A8%E5%BD%A2%E5%BC%8F%EF%BC%89"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/slim3-xxe.html&amp;title=php%E6%A1%86%E6%9E%B6slim%E6%9E%B6%E6%9E%84%E4%B8%8A%E5%AD%98%E5%9C%A8XXE%E6%BC%8F%E6%B4%9E%EF%BC%88XXE%E7%9A%84%E5%85%B8%E5%9E%8B%E5%AD%98%E5%9C%A8%E5%BD%A2%E5%BC%8F%EF%BC%89"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/slim3-xxe.html&amp;title=php%E6%A1%86%E6%9E%B6slim%E6%9E%B6%E6%9E%84%E4%B8%8A%E5%AD%98%E5%9C%A8XXE%E6%BC%8F%E6%B4%9E%EF%BC%88XXE%E7%9A%84%E5%85%B8%E5%9E%8B%E5%AD%98%E5%9C%A8%E5%BD%A2%E5%BC%8F%EF%BC%89"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/slim3-xxe.html&amp;name=php%E6%A1%86%E6%9E%B6slim%E6%9E%B6%E6%9E%84%E4%B8%8A%E5%AD%98%E5%9C%A8XXE%E6%BC%8F%E6%B4%9E%EF%BC%88XXE%E7%9A%84%E5%85%B8%E5%9E%8B%E5%AD%98%E5%9C%A8%E5%BD%A2%E5%BC%8F%EF%BC%89&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">php框架slim架构上存在XXE漏洞（XXE的典型存在形式）</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2016年2月12日 02:34" itemprop="datePublished">
+                    2016 二月 12 02:34
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3703
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/XXE">XXE</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>【过年了，每天发一篇以前的存货，一共七篇。】</p>
+<p>现代cms框架（laraval/symfony/slim）的出现，导致现今的php漏洞出现点、原理、利用方法，发生了一些变化，这个系列希望可以总结一下自己挖掘的此类cms漏洞。</p>
+<p>slim是一个设计思路超前的知名的php轻框架，完美结合了psr7来设计，至今用户已超过100w：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/dedd1455216071.png"><img alt="QQ20151126-2@2x.png" src="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/thum-dedd1455216071.png"/></a></p>
+<p>在阅读其源码的过程中，我发现其存在一个只有在框架式CMS中才会出现的漏洞。</p>
+<p>官方网站: <a href="http://www.slimframework.com/"><a href="http://www.slimframework.com/">http://www.slimframework.com/</a></a></p>
+<h2 id="_1"><a class="toclink" href="#_1">漏洞详情</a></h2>
+<p>这个漏洞存在于最新版（3.0）中。<br>
+首先用conposer安装之</br></p>
+<div class="codehilite"><pre><span></span>composer require slim/slim "^3.0@RC"
+</pre></div>
+<p>看其文档: <a href="http://www.slimframework.com/docs/objects/request.html#the-request-body"><a href="http://www.slimframework.com/docs/objects/request.html#the-request-body">http://www.slimframework.com/docs/objects/request.html#the-request-body</a></a><br>
+获取POST数据，是利用getParsedBody方法，而这个方法对POST的处理，是按照content-type来区分和解析的：</br></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/a3c61455216075.png"><img alt="QQ20151127-0@2x.png" src="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/thum-a3c61455216075.png"/></a> </p>
+<p>很典型的问题，在这篇帖子里也提到过: <a href="http://zone.wooyun.org/content/19908"><a href="http://zone.wooyun.org/content/19908">http://zone.wooyun.org/content/19908</a></a><br/>
+有时候框架会帮开发者一些他可能并不需要的『忙』，比如slimphp这里，常规的POST的content-type为application/x-www-form-urlencoded，但只要我将其修改为application/json，我就可以传入json格式的POST数据，修改为application/xml，我就可以传入XML格式的数据。<br/>
+这个特性将会导致两个问题：</p>
+<ol>
+<li>WAF绕过</li>
+<li>可能存在的XXE漏洞</li>
+</ol>
+<p>WAF绕过这个肯定不用说了，常规的WAF一般只检测application/x-www-form-urlencoded的数据，一旦修改数据类型则将通杀各大WAF。<br/>
+XXE是本漏洞的重点。<br/>
+我们看到解析body的代码：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="fm">__construct</span><span class="p">(</span><span class="nv">$method</span><span class="p">,</span> <span class="nx">UriInterface</span> <span class="nv">$uri</span><span class="p">,</span> <span class="nx">HeadersInterface</span> <span class="nv">$headers</span><span class="p">,</span> <span class="k">array</span> <span class="nv">$cookies</span><span class="p">,</span> <span class="k">array</span> <span class="nv">$serverParams</span><span class="p">,</span> <span class="nx">StreamInterface</span> <span class="nv">$body</span><span class="p">,</span> <span class="k">array</span> <span class="nv">$uploadedFiles</span> <span class="o">=</span> <span class="p">[])</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">originalMethod</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">filterMethod</span><span class="p">(</span><span class="nv">$method</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">uri</span> <span class="o">=</span> <span class="nv">$uri</span><span class="p">;</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">headers</span> <span class="o">=</span> <span class="nv">$headers</span><span class="p">;</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">cookies</span> <span class="o">=</span> <span class="nv">$cookies</span><span class="p">;</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">serverParams</span> <span class="o">=</span> <span class="nv">$serverParams</span><span class="p">;</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">attributes</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Collection</span><span class="p">();</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">body</span> <span class="o">=</span> <span class="nv">$body</span><span class="p">;</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">uploadedFiles</span> <span class="o">=</span> <span class="nv">$uploadedFiles</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">headers</span><span class="o">-&gt;</span><span class="na">has</span><span class="p">(</span><span class="s1">'Host'</span><span class="p">)</span> <span class="o">||</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">uri</span><span class="o">-&gt;</span><span class="na">getHost</span><span class="p">()</span> <span class="o">!==</span> <span class="s1">''</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">headers</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="s1">'Host'</span><span class="p">,</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">uri</span><span class="o">-&gt;</span><span class="na">getHost</span><span class="p">());</span>
+        <span class="p">}</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">registerMediaTypeParser</span><span class="p">(</span><span class="s1">'application/json'</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nv">$input</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nb">json_decode</span><span class="p">(</span><span class="nv">$input</span><span class="p">,</span> <span class="k">true</span><span class="p">);</span>
+        <span class="p">});</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">registerMediaTypeParser</span><span class="p">(</span><span class="s1">'application/xml'</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nv">$input</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nb">simplexml_load_string</span><span class="p">(</span><span class="nv">$input</span><span class="p">);</span>
+        <span class="p">});</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">registerMediaTypeParser</span><span class="p">(</span><span class="s1">'text/xml'</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nv">$input</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nb">simplexml_load_string</span><span class="p">(</span><span class="nv">$input</span><span class="p">);</span>
+        <span class="p">});</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">registerMediaTypeParser</span><span class="p">(</span><span class="s1">'application/x-www-form-urlencoded'</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nv">$input</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nb">parse_str</span><span class="p">(</span><span class="nv">$input</span><span class="p">,</span> <span class="nv">$data</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nv">$data</span><span class="p">;</span>
+        <span class="p">});</span>
+    <span class="p">}</span>   
+</pre></div>
+<p>实际上解析代码是作为回调函数写在Request类的构造方法里了。<br/>
+可见这里直接调用了simplexml_load_string解析$input，造成XML实体注入漏洞。<br/>
+所以，用slim framework 3.0开发的CMS，只要获取了POST数据，都将受到此XXE漏洞的影响。</p>
+<h2 id="_2"><a class="toclink" href="#_2">漏洞证明</a></h2>
+<p>编写一个最简单的demo页面，只有一个获取POST信息并输出的功能：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">require</span> <span class="s1">'vendor/autoload.php'</span><span class="p">;</span>
+<span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\Slim\App</span><span class="p">();</span>
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">post</span><span class="p">(</span><span class="s2">"/post"</span><span class="p">,</span> <span class="k">function</span><span class="p">(</span><span class="nv">$request</span><span class="p">,</span> <span class="nv">$response</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">$parsedBody</span> <span class="o">=</span> <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">getParsedBody</span><span class="p">();</span>
+    <span class="nb">print_r</span><span class="p">(</span><span class="nv">$parsedBody</span><span class="p">);</span>
+<span class="p">});</span>
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">();</span>
+</pre></div>
+<p>搭建在三个白帽里：<a href="http://520fdc0ca2c37864f.jie.sangebaimao.com/"><a href="http://520fdc0ca2c37864f.jie.sangebaimao.com/">http://520fdc0ca2c37864f.jie.sangebaimao.com/</a></a><br/>
+正常请求： </p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/e0711455216077.png"><img alt="QQ20151127-1@2x.png" src="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/thum-e0711455216077.png"/></a> </p>
+<p>触发XXE漏洞并读取/etc/passwd： </p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/fddc1455216085.png"><img alt="QQ20151127-2@2x.png" src="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/thum-fddc1455216085.png"/></a> </p>
+<h2 id="_3"><a class="toclink" href="#_3">漏洞修复</a></h2>
+<p>在slimphp2中，官方是对这块进行一定处理了：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+    <span class="sd">/**</span>
+<span class="sd">     * Parse XML</span>
+<span class="sd">     *</span>
+<span class="sd">     * This method creates a SimpleXMLElement</span>
+<span class="sd">     * based upon the XML input. If the SimpleXML</span>
+<span class="sd">     * extension is not available, the raw input</span>
+<span class="sd">     * will be returned unchanged.</span>
+<span class="sd">     *</span>
+<span class="sd">     * @param  string                  $input</span>
+<span class="sd">     * @return \SimpleXMLElement|string</span>
+<span class="sd">     */</span>
+    <span class="k">protected</span> <span class="k">function</span> <span class="nf">parseXml</span><span class="p">(</span><span class="nv">$input</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">class_exists</span><span class="p">(</span><span class="s1">'SimpleXMLElement'</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="nv">$backup</span> <span class="o">=</span> <span class="nb">libxml_disable_entity_loader</span><span class="p">(</span><span class="k">true</span><span class="p">);</span>
+                <span class="nv">$result</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\SimpleXMLElement</span><span class="p">(</span><span class="nv">$input</span><span class="p">);</span>
+                <span class="nb">libxml_disable_entity_loader</span><span class="p">(</span><span class="nv">$backup</span><span class="p">);</span>
+                <span class="k">return</span> <span class="nv">$result</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">\Exception</span> <span class="nv">$e</span><span class="p">)</span> <span class="p">{</span>
+                <span class="c1">// Do nothing</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nv">$input</span><span class="p">;</span>
+    <span class="p">}</span>
+</pre></div>
+<p>不知为何在3.0版本中官方就无视这个问题了。<br/>
+我猜可能有两个原因：</p>
+<ol>
+<li>官方注意到了这个问题，但认为3.0版本需求的php版本在5.5以上，而错以为5.5以上的php就已经不存在XXE的隐患了。但实际上XML外部实体的解析，和php版本并无关系，而是和编译时的libxml库版本有关。</li>
+<li>官方尚未注意到这个问题。</li>
+</ol>
+<p>感觉前者的可能性较大。<br/>
+所以解决方案也还是按照2中的方案进行。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="98565d00a0c93cef15257e0f403a91735e523019"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/98565d00a0c93cef15257e0f403a91735e523019"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="381">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="FwkmhEFJNK9DQyDf374Dy3eL6BDiGz1IdQFS58RYex32Qd1uRoyn7HgQfF6qp3QS"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./php框架slim架构上存在XXE漏洞（XXE的典型存在形式）  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

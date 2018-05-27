@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Have fun with glibc内存管理 | o0xmuhe's blog</title>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<meta content="使用的源码版本 glibc-2.24
+持续更新，治疗拖延症。" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="Have fun with glibc内存管理" property="og:title"/>
+<meta content="http://o0xmuhe.me/2016/11/21/Have-fun-with-glibc内存管理/index.html" property="og:url"/>
+<meta content="o0xmuhe's blog" property="og:site_name"/>
+<meta content="使用的源码版本 glibc-2.24
+持续更新，治疗拖延症。" property="og:description"/>
+<meta content="2016-11-25T09:45:59.571Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="Have fun with glibc内存管理" name="twitter:title"/>
+<meta content="使用的源码版本 glibc-2.24
+持续更新，治疗拖延症。" name="twitter:description"/>
+<link href="./Have fun with glibc内存管理  o0xmuhe's blog/atom.xml" rel="alternative" title="o0xmuhe's blog" type="application/atom+xml"/>
+<link href="./Have fun with glibc内存管理  o0xmuhe's blog/favicon.png" rel="icon"/>
+<link href="./Have fun with glibc内存管理  o0xmuhe's blog/animate.min.css" rel="stylesheet"/>
+<link href="./Have fun with glibc内存管理  o0xmuhe's blog/style.css" rel="stylesheet"/>
+<link href="./Have fun with glibc内存管理  o0xmuhe's blog/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Have fun with glibc内存管理  o0xmuhe's blog/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./Have fun with glibc内存管理  o0xmuhe's blog/jquery.fancybox.css" rel="stylesheet"/>
+<!-- 加载特效 -->
+<script src="./Have fun with glibc内存管理  o0xmuhe's blog/pace.js"></script>
+<link href="./Have fun with glibc内存管理  o0xmuhe's blog/pace-theme-flash.css" rel="stylesheet">
+<script>
+      var yiliaConfig = {
+          rootUrl: '/',
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</link></head>
+<body>
+<div id="container">
+<div class="left-col">
+<div class="overlay"></div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./Have fun with glibc内存管理  o0xmuhe's blog/head.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="Hi Mate">muhe</a></h1>
+</hgroup>
+<p class="header-subtitle">一个有情怀的二进制狗</p>
+<div class="switch-btn" id="switch-btn">
+<div class="icon">
+<div class="icon-ctn">
+<div class="icon-wrap icon-house" data-idx="0">
+<div class="birdhouse"></div>
+<div class="birdhouse_holes"></div>
+</div>
+<div class="icon-wrap icon-ribbon hide" data-idx="1">
+<div class="ribbon"></div>
+</div>
+<div class="icon-wrap icon-link hide" data-idx="2">
+<div class="loopback_l"></div>
+<div class="loopback_r"></div>
+</div>
+<div class="icon-wrap icon-me hide" data-idx="3">
+<div class="user"></div>
+<div class="shoulder"></div>
+</div>
+</div>
+</div>
+<div class="tips-box hide">
+<div class="tips-arrow"></div>
+<ul class="tips-inner">
+<li>菜单</li>
+<li>标签</li>
+<li>友情链接</li>
+<li>关于我</li>
+</ul>
+</div>
+</div>
+<div class="switch-area" id="switch-area">
+<div class="switch-wrap">
+<section class="switch-part switch-part1">
+<nav class="header-menu">
+<ul>
+<li><a href="/">博客首页</a></li>
+<li><a href="/archives">所有文章</a></li>
+<li><a href="/tags">标签</a></li>
+<li><a href="/about">关于我</a></li>
+<li><a href="/Pwnable-Log">Pwnable</a></li>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fl github" href="https://github.com/o0xmuhe" target="_blank" title="github">github</a>
+<a class="fl weibo" href="http://weibo.com/2070174943/" target="_blank" title="weibo">weibo</a>
+<a class="fl twitter" href="https://twitter.com/0xmuhe" target="_blank" title="twitter">twitter</a>
+<a class="fl rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</ul>
+</nav>
+</section>
+<section class="switch-part switch-part2">
+<div class="widget tagcloud" id="js-tagcloud">
+<a href="/tags/C/" style="font-size: 10px;">C</a> <a href="/tags/CTF/" style="font-size: 10px;">CTF</a> <a href="/tags/CTF-Writeup/" style="font-size: 10px;">CTF Writeup</a> <a href="/tags/CVE-analysis/" style="font-size: 10px;">CVE analysis</a> <a href="/tags/LLVM/" style="font-size: 10px;">LLVM</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/angr/" style="font-size: 12px;">angr</a> <a href="/tags/ctf/" style="font-size: 18px;">ctf</a> <a href="/tags/ctf-writeup/" style="font-size: 20px;">ctf writeup</a> <a href="/tags/env-config/" style="font-size: 10px;">env config</a> <a href="/tags/exploit/" style="font-size: 16px;">exploit</a> <a href="/tags/fuzz/" style="font-size: 14px;">fuzz</a> <a href="/tags/gdb/" style="font-size: 10px;">gdb</a> <a href="/tags/glibc内存管理/" style="font-size: 10px;">glibc内存管理</a> <a href="/tags/life/" style="font-size: 12px;">life</a> <a href="/tags/linux-kernel/" style="font-size: 12px;">linux kernel</a> <a href="/tags/peach/" style="font-size: 10px;">peach</a> <a href="/tags/pwn/" style="font-size: 16px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/ret-2-dl-resolve/" style="font-size: 10px;">ret 2 dl-resolve</a> <a href="/tags/wargame/" style="font-size: 12px;">wargame</a> <a href="/tags/winafl/" style="font-size: 10px;">winafl</a> <a href="/tags/windows-kernel/" style="font-size: 14px;">windows kernel</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a>
+</div>
+</section>
+<section class="switch-part switch-part3">
+<div id="js-friends">
+<a class="main-nav-link switch-friends-link" href="http://syclover.sinaapp.com/" target="_blank">Syclover Team</a>
+<a class="main-nav-link switch-friends-link" href="http://www.Ox9A82.com" target="_blank">0x9A82学弟</a>
+<a class="main-nav-link switch-friends-link" href="http://k1n9.me/" target="_blank">K1n9师傅</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/iamstudy" target="_blank">L3mon</a>
+<a class="main-nav-link switch-friends-link" href="http://www.xianyusec.com" target="_blank">咸鱼</a>
+<a class="main-nav-link switch-friends-link" href="http://v1ct0r.com/" target="_blank">V1ct0r</a>
+<a class="main-nav-link switch-friends-link" href="http://godot.win" target="_blank">Godot学弟</a>
+<a class="main-nav-link switch-friends-link" href="http://hebic.me/" target="_blank">Homaebic学弟</a>
+<a class="main-nav-link switch-friends-link" href="https://iqwq.me" target="_blank">两米的sco4x0</a>
+<a class="main-nav-link switch-friends-link" href="https://zmy.im/" target="_blank">JimmyZhou</a>
+<a class="main-nav-link switch-friends-link" href="http://silic.top/" target="_blank">灭亡叔叔</a>
+<a class="main-nav-link switch-friends-link" href="https://dwx.io" target="_blank">Jason</a>
+<a class="main-nav-link switch-friends-link" href="	http://www.0aa.me/" target="_blank">Mosuan</a>
+<a class="main-nav-link switch-friends-link" href="http://whereisk0shl.top" target="_blank">k0sh1</a>
+<a class="main-nav-link switch-friends-link" href="http://winter3un.github.io" target="_blank">WinterSun</a>
+<a class="main-nav-link switch-friends-link" href="http://venenof.com" target="_blank">Venenof</a>
+<a class="main-nav-link switch-friends-link" href="http://r0p.me/" target="_blank">Icemakr</a>
+<a class="main-nav-link switch-friends-link" href="http://bestwing.me/" target="_blank">Swing</a>
+<a class="main-nav-link switch-friends-link" href="https://www.hackfun.org/" target="_blank">4ido10n</a>
+<a class="main-nav-link switch-friends-link" href="http://www.hackersb.cn/" target="_blank">王松_Striker</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/7top/" target="_blank">7top</a>
+<a class="main-nav-link switch-friends-link" href="http://www.bendawang.site" target="_blank">bendawang</a>
+<a class="main-nav-link switch-friends-link" href="http://ctfrank.org" target="_blank">CTF Rank</a>
+<a class="main-nav-link switch-friends-link" href="http://askook.me/" target="_blank">A酱</a>
+</div>
+</section>
+<section class="switch-part switch-part4">
+<div id="js-aboutme">关注二进制安全. Member of Syclover. CTFer/INTJ.</div>
+</section>
+</div>
+</div>
+</header>
+</div>
+</div>
+<div class="mid-col">
+<nav id="mobile-nav">
+<div class="overlay">
+<div class="slider-trigger"></div>
+<h1 class="header-author js-mobile-header hide"><a href="/" title="Me">muhe</a></h1>
+</div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./Have fun with glibc内存管理  o0xmuhe's blog/head.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="Me">muhe</a></h1>
+</hgroup>
+<p class="header-subtitle">一个有情怀的二进制狗</p>
+<nav class="header-menu">
+<ul>
+<li><a href="/">博客首页</a></li>
+<li><a href="/archives">所有文章</a></li>
+<li><a href="/tags">标签</a></li>
+<li><a href="/about">关于我</a></li>
+<li><a href="/Pwnable-Log">Pwnable</a></li>
+<div class="clearfix"></div>
+</ul>
+</nav>
+<nav class="header-nav">
+<div class="social">
+<a class="github" href="https://github.com/o0xmuhe" target="_blank" title="github">github</a>
+<a class="weibo" href="http://weibo.com/2070174943/" target="_blank" title="weibo">weibo</a>
+<a class="twitter" href="https://twitter.com/0xmuhe" target="_blank" title="twitter">twitter</a>
+<a class="rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</div>
+</nav>
+</header>
+</div>
+</nav>
+<div class="body-wrap"><article class="article article-type-post" id="post-Have-fun-with-glibc内存管理" itemprop="blogPost" itemscope="">
+<div class="article-meta">
+<a class="article-date" href="/2016/11/21/Have-fun-with-glibc内存管理/">
+<time datetime="2016-11-21T12:38:22.000Z" itemprop="datePublished">2016-11-21</time>
+</a>
+</div>
+<div class="article-inner">
+<input class="isFancy" type="hidden"/>
+<header class="article-header">
+<h1 class="article-title" itemprop="name">
+      Have fun with glibc内存管理
+    </h1>
+</header>
+<div class="article-info article-info-post">
+<div class="article-tag tagcloud">
+<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/glibc内存管理/">glibc内存管理</a></li></ul>
+</div>
+<div class="clearfix"></div>
+</div>
+<div class="article-entry" itemprop="articleBody">
+<ul>
+<li>使用的源码版本 glibc-2.24</li>
+<li>持续更新，治疗拖延症。</li>
+</ul>
+<a id="more"></a>
+<h4 id="1-malloc-分析"><a class="headerlink" href="#1-malloc-分析" title="1.malloc 分析"></a>1.malloc 分析</h4><p>​    malloc其实是调用了<code>void *__libc_malloc (size_t bytes)</code>，但是这个函数实质是对<code>static void *_int_malloc (mstate av, size_t bytes)</code>的封装。</p>
+<p>​    分析开始，先来看<code>void *__libc_malloc (size_t bytes)</code>函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> *__libc_malloc (<span class="keyword">size_t</span> bytes)</div><div class="line">{</div><div class="line">  mstate ar_ptr;</div><div class="line">  <span class="keyword">void</span> *victim;</div><div class="line">  </div><div class="line">  <span class="comment">//首先检查是否存在内存分配的hook函数，如果有，就直接调用；hook函数主要</span></div><div class="line">  <span class="comment">//是进程创建新线程的时候内存分配，或者支持用户提供的内存分配函数。</span></div><div class="line">  <span class="keyword">void</span> *(*hook) (<span class="keyword">size_t</span>, <span class="keyword">const</span> <span class="keyword">void</span> *)</div><div class="line">    = atomic_forced_read (__malloc_hook);</div><div class="line">  <span class="keyword">if</span> (__builtin_expect (hook != <span class="literal">NULL</span>, <span class="number">0</span>))</div><div class="line">    <span class="keyword">return</span> (*hook)(bytes, RETURN_ADDRESS (<span class="number">0</span>));</div><div class="line"></div><div class="line">  arena_get (ar_ptr, bytes);</div><div class="line">  </div><div class="line">  victim = _int_malloc (ar_ptr, bytes);</div><div class="line">  <span class="comment">/* Retry with another arena only if we were able to find a usable arena</span></div><div class="line">     before.  */</div><div class="line">  <span class="keyword">if</span> (!victim &amp;&amp; ar_ptr != <span class="literal">NULL</span>)</div><div class="line">    {</div><div class="line">      LIBC_PROBE (memory_malloc_retry, <span class="number">1</span>, bytes);</div><div class="line">      ar_ptr = arena_get_retry (ar_ptr, bytes);</div><div class="line">      victim = _int_malloc (ar_ptr, bytes);</div><div class="line">    }</div><div class="line"></div><div class="line">  <span class="comment">//若分配成功，释放锁</span></div><div class="line">  <span class="keyword">if</span> (ar_ptr != <span class="literal">NULL</span>)</div><div class="line">    (<span class="keyword">void</span>) mutex_unlock (&amp;ar_ptr-&gt;mutex);</div><div class="line"></div><div class="line">  assert (!victim || chunk_is_mmapped (mem2chunk (victim)) ||</div><div class="line">          ar_ptr == arena_for_chunk (mem2chunk (victim)));</div><div class="line">  <span class="keyword">return</span> victim;</div><div class="line">}</div></pre></td></tr></table></figure>
+<p><code>arena_get (ar_ptr, bytes)</code>展开宏就是</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> arena_get(ptr, size) do { \</span></div><div class="line">      ptr = thread_arena;						      \</div><div class="line">      arena_lock (ptr, size);						      \</div><div class="line">  } while (0)</div></pre></td></tr></table></figure>
+<p>​    获得分配区并加锁，之后就进入了主要负责内存分配的<code>_int_malloc (ar_ptr, bytes)</code>函数</p>
+<p>​    该函数代码特别长，只能一部分一部分看了，首先给出原型，函数有两个参数，即分配区和要分配的内存的大小(用户传进来的，并不是真正的要分配的大小)。</p>
+<h6 id="1-概述"><a class="headerlink" href="#1-概述" title="1.概述"></a>1.概述</h6><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> <span class="keyword">void</span> *</div><div class="line">_int_malloc (mstate av, <span class="keyword">size_t</span> bytes) <span class="comment">//分配区，大小</span></div><div class="line">{</div><div class="line">  INTERNAL_SIZE_T nb;               <span class="comment">/* normalized request size */</span></div><div class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> idx;                 <span class="comment">/* associated bin index */</span></div><div class="line">  mbinptr bin;                      <span class="comment">/* associated bin */</span></div><div class="line"></div><div class="line">  mchunkptr victim;                 <span class="comment">/* inspected/selected chunk */</span></div><div class="line">  INTERNAL_SIZE_T size;             <span class="comment">/* its size */</span></div><div class="line">  <span class="keyword">int</span> victim_index;                 <span class="comment">/* its bin index */</span></div><div class="line"></div><div class="line">  mchunkptr remainder;              <span class="comment">/* remainder from a split */</span></div><div class="line">  <span class="keyword">unsigned</span> <span class="keyword">long</span> remainder_size;     <span class="comment">/* its size */</span></div><div class="line"></div><div class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> block;               <span class="comment">/* bit map traverser */</span></div><div class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> bit;                 <span class="comment">/* bit map traverser */</span></div><div class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="built_in">map</span>;                 <span class="comment">/* current word of binmap */</span></div><div class="line"></div><div class="line">  mchunkptr fwd;                    <span class="comment">/* misc temp for linking */</span></div><div class="line">  mchunkptr bck;                    <span class="comment">/* misc temp for linking */</span></div><div class="line">  </div><div class="line">  <span class="keyword">const</span> <span class="keyword">char</span> *errstr = <span class="literal">NULL</span>;</div><div class="line">  <span class="comment">/*</span></div><div class="line">     Convert request size to internal form by adding SIZE_SZ bytes</div><div class="line">     overhead plus possibly more to obtain necessary alignment and/or</div><div class="line">     to obtain a size of at least MINSIZE, the smallest allocatable</div><div class="line">     size. Also, checked_request2size traps (returning 0) request sizes</div><div class="line">     that are so large that they wrap around zero when padded and</div><div class="line">     aligned.</div><div class="line">   */</div><div class="line">  checked_request2size (bytes, nb);</div><div class="line"></div><div class="line">  <span class="comment">/* There are no usable arenas.  Fall back to sysmalloc to get a chunk from</span></div><div class="line">     mmap.  */</div><div class="line">  <span class="keyword">if</span> (__glibc_unlikely (av == <span class="literal">NULL</span>))</div><div class="line">    {</div><div class="line">      <span class="keyword">void</span> *p = sysmalloc (nb, av);</div><div class="line">      <span class="keyword">if</span> (p != <span class="literal">NULL</span>)</div><div class="line">4alloc_perturb (p, bytes);</div><div class="line">      <span class="keyword">return</span> p;</div><div class="line">    }</div></pre></td></tr></table></figure>
+<p>这个转换是把需要的内存大小bytes，转换成需要分配的chunk的大小nb。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">#define checked_request2size(req, sz)                             \</div><div class="line">  if (REQUEST_OUT_OF_RANGE (req)) {					      \</div><div class="line">      __set_errno (ENOMEM);						      \</div><div class="line">      return 0;								      \</div><div class="line">    }									      \</div><div class="line">  (sz) = request2size (req);</div><div class="line"></div><div class="line">#define request2size(req)                                         \</div><div class="line">  (((req) + SIZE_SZ + MALLOC_ALIGN_MASK &lt; MINSIZE)  ?             \</div><div class="line">   MINSIZE :                                                      \</div><div class="line">   ((req) + SIZE_SZ + MALLOC_ALIGN_MASK) &amp; ~MALLOC_ALIGN_MASK)</div></pre></td></tr></table></figure>
+<hr/>
+<h6 id="2-fastbin"><a class="headerlink" href="#2-fastbin" title="2.fastbin"></a>2.fastbin</h6><p>如果分配大小正好是fastbin，那就直接从fastbin分配。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div></pre></td><td class="code"><pre><div class="line">  <span class="comment">/*</span></div><div class="line">     If the size qualifies as a fastbin, first check corresponding bin.</div><div class="line">     This code is safe to execute even if av is not yet initialized, so we</div><div class="line">     can try it without checking, which saves some time on this fast path.</div><div class="line">   */</div><div class="line">4</div><div class="line">  <span class="comment">//要分配的值小于等于最大的fastbin大小</span></div><div class="line">  <span class="keyword">if</span> ((<span class="keyword">unsigned</span> <span class="keyword">long</span>) (nb) &lt;= (<span class="keyword">unsigned</span> <span class="keyword">long</span>) (get_max_fast ()))</div><div class="line">    {</div><div class="line">      idx = fastbin_index (nb);</div><div class="line">      mfastbinptr *fb = &amp;fastbin (av, idx);</div><div class="line">      mchunkptr pp = *fb;</div><div class="line">      <span class="keyword">do</span></div><div class="line">        {</div><div class="line">          victim = pp;</div><div class="line">          <span class="keyword">if</span> (victim == <span class="literal">NULL</span>)</div><div class="line">            <span class="keyword">break</span>;</div><div class="line">        }</div><div class="line">      <span class="keyword">while</span> ((pp = catomic_compare_and_exchange_val_acq (fb, victim-&gt;fd, victim))</div><div class="line">             != victim);</div><div class="line">      <span class="keyword">if</span> (victim != <span class="number">0</span>)</div><div class="line">        {</div><div class="line">          <span class="keyword">if</span> (__builtin_expect (fastbin_index (chunksize (victim)) != idx, <span class="number">0</span>))</div><div class="line">            {</div><div class="line">              errstr = <span class="string">"malloc(): memory corruption (fast)"</span>;</div><div class="line">            errout:</div><div class="line">              malloc_printerr (check_action, errstr, chunk2mem (victim), av);</div><div class="line">              <span class="keyword">return</span> <span class="literal">NULL</span>;</div><div class="line">            }</div><div class="line">          check_remalloced_chunk (av, victim, nb);</div><div class="line">          <span class="keyword">void</span> *p = chunk2mem (victim);</div><div class="line">          alloc_perturb (p, bytes);</div><div class="line">          <span class="keyword">return</span> p;</div><div class="line">        }</div><div class="line">    }</div><div class="line"></div><div class="line"><span class="comment">//一些其他的宏</span></div><div class="line"><span class="comment">/* Atomically store NEWVAL in *MEM if *MEM is equal to OLDVAL.</span></div><div class="line">   Return the old *MEM value.  */</div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> !defined atomic_compare_and_exchange_val_acq \</span></div><div class="line">    &amp;&amp; defined __arch_compare_and_exchange_val_32_acq</div><div class="line"><span class="meta"># <span class="meta-keyword">define</span> atomic_compare_and_exchange_val_acq(mem, newval, oldval) \</span></div><div class="line">  __atomic_val_bysize (__arch_compare_and_exchange_val,acq,		      \</div><div class="line">44       mem, newval, oldval)</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> catomic_compare_and_exchange_val_acq</span></div><div class="line"><span class="meta"># <span class="meta-keyword">ifdef</span> __arch_c_compare_and_exchange_val_32_acq</span></div><div class="line"><span class="meta">#  <span class="meta-keyword">define</span> catomic_compare_and_exchange_val_acq(mem, newval, oldval) \</span></div><div class="line">  __atomic_val_bysize (__arch_c_compare_and_exchange_val,acq,		      \</div><div class="line">44       mem, newval, oldval)</div><div class="line"><span class="meta"># <span class="meta-keyword">else</span></span></div><div class="line"><span class="meta">#  <span class="meta-keyword">define</span> catomic_compare_and_exchange_val_acq(mem, newval, oldval) \</span></div><div class="line">  atomic_compare_and_exchange_val_acq (mem, newval, oldval)</div><div class="line"><span class="meta"># <span class="meta-keyword">endif</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line"><span class="comment">//展开之后</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> __atomic_val_bysize(pre, post, mem, ...)			      \</span></div><div class="line">  ({									      \</div><div class="line">    __typeof (*mem) __atg1_result;					      \</div><div class="line">    <span class="meta-keyword">if</span> (sizeof (*mem) == 1)						      \</div><div class="line">      __atg1_result = pre##_8_##post (mem, __VA_ARGS__);		      \</div><div class="line">    <span class="meta-keyword">else</span> <span class="meta-keyword">if</span> (sizeof (*mem) == 2)					      \</div><div class="line">      __atg1_result = pre##_16_##post (mem, __VA_ARGS__);		      \</div><div class="line">    <span class="meta-keyword">else</span> <span class="meta-keyword">if</span> (sizeof (*mem) == 4)					      \</div><div class="line">      __atg1_result = pre##_32_##post (mem, __VA_ARGS__);		      \</div><div class="line">    <span class="meta-keyword">else</span> <span class="meta-keyword">if</span> (sizeof (*mem) == 8)					      \</div><div class="line">      __atg1_result = pre##_64_##post (mem, __VA_ARGS__);		      \</div><div class="line">    <span class="meta-keyword">else</span>								      \</div><div class="line">      abort ();								      \</div><div class="line">    __atg1_result;							      \</div><div class="line">  })</div></pre></td></tr></table></figure>
+<p>​    首先根据分配大小，获取该chunk所属的fastbin的index，然后根据index获取所需要的fastbin的空闲链表的头指针；然后将头指针的下一个chunk 作为空闲chunk 链表的头部。后面check之后，直接使用<code>chunk2mem()</code>把用户所需的内存块转换并且返回。</p>
+<hr/>
+<h6 id="3-small-bin"><a class="headerlink" href="#3-small-bin" title="3.small bin"></a>3.small bin</h6><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line"> <span class="comment">/*</span></div><div class="line">    If a small request, check regular bin.  Since these "smallbins"</div><div class="line">    hold one size each, no searching within bins is necessary.</div><div class="line">    (For a large request, we need to wait until unsorted chunks are</div><div class="line">    processed to find best fit. But for small ones, fits are exact</div><div class="line">    anyway, so we can check now, which is faster.)</div><div class="line">  */</div><div class="line"></div><div class="line"> <span class="keyword">if</span> (in_smallbin_range (nb))</div><div class="line">   {</div><div class="line">     idx = smallbin_index (nb);</div><div class="line">     bin = bin_at (av, idx);</div><div class="line"></div><div class="line">     <span class="keyword">if</span> ((victim = last (bin)) != bin)<span class="comment">//与表头相同，说明链表是空的；不相同的话进入下面的逻辑</span></div><div class="line">       {</div><div class="line">         <span class="keyword">if</span> (victim == <span class="number">0</span>) <span class="comment">/* initialization check */</span></div><div class="line">           malloc_consolidate (av); <span class="comment">//合并fastbin</span></div><div class="line">         <span class="keyword">else</span></div><div class="line">           { </div><div class="line">           	<span class="comment">//将victim从双向循环链表中取出来</span></div><div class="line">             bck = victim-&gt;bk;</div><div class="line"><span class="keyword">if</span> (__glibc_unlikely (bck-&gt;fd != victim)) </div><div class="line">               {</div><div class="line">                 errstr = <span class="string">"malloc(): smallbin double linked list corrupted"</span>;</div><div class="line">                 <span class="keyword">goto</span> errout;</div><div class="line">               }</div><div class="line">44<span class="comment">//设置inuse标志。</span></div><div class="line">             set_inuse_bit_at_offset (victim, nb);</div><div class="line">             bin-&gt;bk = bck;</div><div class="line">             bck-&gt;fd = bin;</div><div class="line"></div><div class="line">             <span class="keyword">if</span> (av != &amp;main_arena)</div><div class="line">               victim-&gt;size |= NON_MAIN_ARENA;</div><div class="line">             check_malloced_chunk (av, victim, nb);</div><div class="line">             <span class="keyword">void</span> *p = chunk2mem (victim);</div><div class="line">             alloc_perturb (p, bytes);</div><div class="line">             <span class="keyword">return</span> p;</div><div class="line">           }</div><div class="line">       }</div><div class="line">   }</div></pre></td></tr></table></figure>
+<p>​    首先还是根据分配的大小，找到所对应的small bin的index，然后根据这个index去找到所需的small bin的空闲链表头指针；然后将最后一个chunk赋值给victim，然后做判断，如果和表头相同，那么说明这个链表当前是空的，就不能从这个small bin中分配内存，这就要走后面的流程了；如果不同，这里有两种情况：</p>
+<ol>
+<li>victim为0，即还没有初始化双向循环链表，这时候就要去合并fast bin；</li>
+<li>victim不为0，直接把victim从small bin中取出来，设置标志位，然后判断是否属于主分配区，之后调用<code>chunk2meme()</code>转换成用户所需内存空间并返回。</li>
+</ol>
+<hr/>
+<h6 id="4-large-bin"><a class="headerlink" href="#4-large-bin" title="4.large bin"></a>4.large bin</h6><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*</span></div><div class="line">   If this is a large request, consolidate fastbins before continuing.</div><div class="line">   While it might look excessive to kill all fastbins before</div><div class="line">   even seeing if there is space available, this avoids</div><div class="line">   fragmentation problems normally associated with fastbins.</div><div class="line">   Also, in practice, programs tend to have runs of either small or</div><div class="line">   large requests, but less often mixtures, so consolidation is not</div><div class="line">   invoked all that often in most programs. And the programs that</div><div class="line">   it is called frequently in otherwise tend to fragment.</div><div class="line"> */</div><div class="line"></div><div class="line"><span class="keyword">else</span></div><div class="line">  {</div><div class="line">    idx = largebin_index (nb);</div><div class="line">    <span class="keyword">if</span> (have_fastchunks (av))</div><div class="line"> 	<span class="comment">//合并fastbin中的chunk，加入unsorted bin</span></div><div class="line">      malloc_consolidate (av);</div><div class="line">  }</div></pre></td></tr></table></figure>
+<p>​    在分配之前会先合并fast bin中的chunk，加入unsorted bin。</p>
+<p>​    下面代码是遍历unsorted bin中的空闲块，加入到相应的small bin 或者large bin之中，代码比较长，所以一部分一部分的看。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*</span></div><div class="line">   Process recently freed or remaindered chunks, taking one only if</div><div class="line">   it is exact fit, or, if this a small request, the chunk is remainder from</div><div class="line">   the most recent non-exact fit.  Place other traversed chunks in</div><div class="line">   bins.  Note that this step is the only place in any routine where</div><div class="line">   chunks are placed in bins.</div><div class="line"></div><div class="line">   The outer loop here is needed because we might not realize until</div><div class="line">   near the end of malloc that we should have consolidated, so must</div><div class="line">   do so and retry. This happens at most once, and only when we would</div><div class="line">   otherwise need to expand memory to service a "small" request.</div><div class="line"> */</div><div class="line"></div><div class="line"><span class="keyword">for</span> (;; )</div><div class="line">  {</div><div class="line">    <span class="keyword">int</span> iters = <span class="number">0</span>;</div><div class="line">    <span class="keyword">while</span> ((victim = unsorted_chunks (av)-&gt;bk) != unsorted_chunks (av))</div><div class="line">      {</div><div class="line">        bck = victim-&gt;bk;</div><div class="line">        <span class="keyword">if</span> (__builtin_expect (victim-&gt;size &lt;= <span class="number">2</span> * SIZE_SZ, <span class="number">0</span>)</div><div class="line">            || __builtin_expect (victim-&gt;size &gt; av-&gt;system_mem, <span class="number">0</span>))</div><div class="line">          malloc_printerr (check_action, <span class="string">"malloc(): memory corruption"</span>,</div><div class="line">                           chunk2mem (victim), av);</div><div class="line">        size = chunksize (victim);</div></pre></td></tr></table></figure>
+<p>这里先是反向遍历链表，检查size，要小于等于 <code>2*SIZE_SZ</code>，并且不能大于系统分配的总量。然后获取chunk的size。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*</span></div><div class="line">          If a small request, try to use last remainder if it is the</div><div class="line">          only chunk in unsorted bin.  This helps promote locality for</div><div class="line">          runs of consecutive small requests. This is the only</div><div class="line">          exception to best-fit, and applies only when there is</div><div class="line">          no exact fit for a small chunk.</div><div class="line">        */</div><div class="line"></div><div class="line">       <span class="keyword">if</span> (in_smallbin_range (nb) &amp;&amp;</div><div class="line">           bck == unsorted_chunks (av) &amp;&amp;</div><div class="line">           victim == av-&gt;last_remainder &amp;&amp;</div><div class="line">           (<span class="keyword">unsigned</span> <span class="keyword">long</span>) (size) &gt; (<span class="keyword">unsigned</span> <span class="keyword">long</span>) (nb + MINSIZE))</div><div class="line">         {</div><div class="line">           <span class="comment">/* split and reattach remainder */</span></div><div class="line">           remainder_size = size - nb;</div><div class="line">           remainder = chunk_at_offset (victim, nb);</div><div class="line">           unsorted_chunks (av)-&gt;bk = unsorted_chunks (av)-&gt;fd = remainder;</div><div class="line">           av-&gt;last_remainder = remainder;</div><div class="line">           remainder-&gt;bk = remainder-&gt;fd = unsorted_chunks (av);</div><div class="line">  <span class="comment">//large chunk</span></div><div class="line">           <span class="keyword">if</span> (!in_smallbin_range (remainder_size))</div><div class="line">             {</div><div class="line">               remainder-&gt;fd_nextsize = <span class="literal">NULL</span>;</div><div class="line">               remainder-&gt;bk_nextsize = <span class="literal">NULL</span>;</div><div class="line">             }</div><div class="line"></div><div class="line">           set_head (victim, nb | PREV_INUSE |</div><div class="line">                     (av != &amp;main_arena ? NON_MAIN_ARENA : <span class="number">0</span>));</div><div class="line">           set_head (remainder, remainder_size | PREV_INUSE);</div><div class="line">           set_foot (remainder, remainder_size);</div><div class="line"></div><div class="line">           check_malloced_chunk (av, victim, nb);</div><div class="line">           <span class="keyword">void</span> *p = chunk2mem (victim);</div><div class="line">           alloc_perturb (p, bytes);</div><div class="line">           <span class="keyword">return</span> p;</div><div class="line">         }</div></pre></td></tr></table></figure>
+<p>​    之前的small bin 没有成功分配，并且只有一个chunk的时候，那个chunk就是last remainder chunk，且last remainder chunk 的size大于所需要的<code>大小+MINSIZE</code>，这个时候就可已从这个块中去分配所需要的内存。</p>
+<p>​    后面就是从这个chunk 中切分出所需大小的chunk，计算切分后剩下chunk 的大小，将剩下的chunk加入unsorted bin 的链表中，并将剩下的chunk 作为分配区的last remainder chunk，若剩下的chunk 属于large bin chunk，将该chunk 的<code>fd_nextsize</code> 和<code>bk_nextsize</code>设置为NULL。</p>
+<p>​    然后设置一些标志位，对于last remainder chunk需要调用<code>set_foot()</code>，因为处于空闲状态的chunk的<code>pre_size</code>才是有效的；之后就是利用<code>chunk2mem()</code>转换，然后返回给用户了。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* remove from unsorted list */</span></div><div class="line">unsorted_chunks (av)-&gt;bk = bck;</div><div class="line">bck-&gt;fd = unsorted_chunks (av);</div></pre></td></tr></table></figure>
+<p>​    将双向循环链表中的最后一个chunk 移除</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment">/* Take now instead of binning if exact fit */</span></div><div class="line"></div><div class="line"><span class="keyword">if</span> (size == nb)</div><div class="line">  {</div><div class="line">    set_inuse_bit_at_offset (victim, size);</div><div class="line">    <span class="keyword">if</span> (av != &amp;main_arena)</div><div class="line">      victim-&gt;size |= NON_MAIN_ARENA;</div><div class="line">    check_malloced_chunk (av, victim, nb);</div><div class="line">    <span class="keyword">void</span> *p = chunk2mem (victim);</div><div class="line">    alloc_perturb (p, bytes);</div><div class="line">    <span class="keyword">return</span> p;</div><div class="line">  }</div></pre></td></tr></table></figure>
+<p>​    如果当前遍历的chunk的size正好和需要的分配的大小nb相等，那直接就返回当前块：设置inuse标志位，然后判断是否属于主分配区，并设置相应的标志位，之后调用<code>chunk2mem()</code>转换后就返回给用户了。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* place chunk in bin */</span></div><div class="line"></div><div class="line">         <span class="keyword">if</span> (in_smallbin_range (size))</div><div class="line">           {</div><div class="line">             victim_index = smallbin_index (size);</div><div class="line">             bck = bin_at (av, victim_index);</div><div class="line">             fwd = bck-&gt;fd;</div><div class="line">           }</div></pre></td></tr></table></figure>
+<p>判断当前遍历的chunk是否在small bin的范围，在的话插入到small bin的表头，成为第一个块。</p>
+<p>不在small bin的范围的话，就是large bin了，就走下面的逻辑：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"> </div><div class="line"><span class="keyword">else</span></div><div class="line">  {</div><div class="line">    victim_index = largebin_index (size);</div><div class="line">    bck = bin_at (av, victim_index);</div><div class="line">    fwd = bck-&gt;fd;</div></pre></td></tr></table></figure>
+<p>类似上面的，把当前遍历的这个chunk插入到large bin的表头成为large bin的第一个块。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* maintain large bins in sorted order */</span></div><div class="line">           <span class="keyword">if</span> (fwd != bck)</div><div class="line">             {</div><div class="line">               <span class="comment">/* Or with inuse bit to speed comparisons */</span></div><div class="line">               size |= PREV_INUSE;</div><div class="line">               <span class="comment">/* if smaller than smallest, bypass loop below */</span></div><div class="line">               assert ((bck-&gt;bk-&gt;size &amp; NON_MAIN_ARENA) == <span class="number">0</span>);</div><div class="line">               <span class="keyword">if</span> ((<span class="keyword">unsigned</span> <span class="keyword">long</span>) (size) &lt; (<span class="keyword">unsigned</span> <span class="keyword">long</span>) (bck-&gt;bk-&gt;size))</div><div class="line">                 {</div><div class="line">                   fwd = bck;</div><div class="line">                   bck = bck-&gt;bk;</div><div class="line"></div><div class="line">                   victim-&gt;fd_nextsize = fwd-&gt;fd;</div><div class="line">                   victim-&gt;bk_nextsize = fwd-&gt;fd-&gt;bk_nextsize;</div><div class="line">                   fwd-&gt;fd-&gt;bk_nextsize = victim-&gt;bk_nextsize-&gt;fd_nextsize = victim;</div><div class="line">                 }</div></pre></td></tr></table></figure>
+<p><code>if (fwd != bck)</code>意味着当前链表不为空，需要把当前的块插入large bin的链表中，设置inuse标志，并且插入到适合的位置。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">else</span></div><div class="line">                {</div><div class="line">                  assert ((fwd-&gt;size &amp; NON_MAIN_ARENA) == <span class="number">0</span>);</div><div class="line">                  <span class="keyword">while</span> ((<span class="keyword">unsigned</span> <span class="keyword">long</span>) size &lt; fwd-&gt;size)</div><div class="line">                    {</div><div class="line">                      fwd = fwd-&gt;fd_nextsize;</div><div class="line">                      assert ((fwd-&gt;size &amp; NON_MAIN_ARENA) == <span class="number">0</span>);</div><div class="line">                    }</div></pre></td></tr></table></figure>
+<p>如果size比最后一个chunk的siz还要小，那就直接插入到最后。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> ((<span class="keyword">unsigned</span> <span class="keyword">long</span>) size == (<span class="keyword">unsigned</span> <span class="keyword">long</span>) fwd-&gt;size)</div><div class="line">                   <span class="comment">/* Always insert in the second position.  */</span></div><div class="line">                   fwd = fwd-&gt;fd;</div><div class="line">                 <span class="keyword">else</span></div><div class="line">                   {</div><div class="line">                     victim-&gt;fd_nextsize = fwd;</div><div class="line">                     victim-&gt;bk_nextsize = fwd-&gt;bk_nextsize;</div><div class="line">                     fwd-&gt;bk_nextsize = victim;</div><div class="line">                     victim-&gt;bk_nextsize-&gt;fd_nextsize = victim;</div><div class="line">                   }</div><div class="line">                 bck = fwd-&gt;bk;</div></pre></td></tr></table></figure>
+<p>正向遍历chunk size链表，找到一个和当前chunk大小相同的chunk就退出，那么chunk size 链表中一定包含fwd 所指向的chunk，为了不修改chunk size 链表，当前chunk 只能插入fwd 之后。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">        }</div><div class="line">    }</div><div class="line">  <span class="keyword">else</span></div><div class="line">    victim-&gt;fd_nextsize = victim-&gt;bk_nextsize = victim;</div><div class="line">}</div></pre></td></tr></table></figure>
+<p>如果large bin链表里没有chunk，那么就直接插入chunk size链表。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">mark_bin (av, victim_index);</div><div class="line">       victim-&gt;bk = bck;</div><div class="line">       victim-&gt;fd = fwd;</div><div class="line">       fwd-&gt;bk = victim;</div><div class="line">       bck-&gt;fd = victim;</div></pre></td></tr></table></figure>
+<p>完成chunk的插入空闲链表之后，设置bitmap。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> MAX_ITERS       10000</span></div><div class="line">          <span class="keyword">if</span> (++iters &gt;= MAX_ITERS)</div><div class="line">            <span class="keyword">break</span>;</div><div class="line">        }</div></pre></td></tr></table></figure>
+<p>这里设置了最大的迭代次数，超出就直接退出了。</p>
+<p>​    当将unsorted bin 中的空闲chunk 加入到相应的small bins 和large bins 后，将使用最佳匹配法分配large bin chunk。源代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*</span></div><div class="line">   If a large request, scan through the chunks of current bin in</div><div class="line">   sorted order to find smallest that fits.  Use the skip list for this.</div><div class="line"> */</div><div class="line"></div><div class="line"><span class="keyword">if</span> (!in_smallbin_range (nb))</div><div class="line">  {</div><div class="line">    bin = bin_at (av, idx);</div><div class="line"></div><div class="line">    <span class="comment">/* skip scan if empty or largest chunk is too small */</span></div><div class="line">    <span class="keyword">if</span> ((victim = first (bin)) != bin &amp;&amp;</div><div class="line">        (<span class="keyword">unsigned</span> <span class="keyword">long</span>) (victim-&gt;size) &gt;= (<span class="keyword">unsigned</span> <span class="keyword">long</span>) (nb))</div><div class="line">      {</div><div class="line">        victim = victim-&gt;bk_nextsize;</div><div class="line">        <span class="keyword">while</span> (((<span class="keyword">unsigned</span> <span class="keyword">long</span>) (size = chunksize (victim)) &lt;</div><div class="line">                (<span class="keyword">unsigned</span> <span class="keyword">long</span>) (nb)))</div><div class="line">          victim = victim-&gt;bk_nextsize;</div></pre></td></tr></table></figure>
+<p>​    如果所分配的块是large bin chunk，那么进入这段逻辑，当large bin list不为空且最大的chunk可以满足需要，就反向遍历链表，找到大小最合适的chunk，然后退出循环。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* Avoid removing the first entry for a size so that the skip</span></div><div class="line">              list does not have to be rerouted.  */</div><div class="line">           <span class="keyword">if</span> (victim != last (bin) &amp;&amp; victim-&gt;size == victim-&gt;fd-&gt;size)</div><div class="line">             victim = victim-&gt;fd;</div><div class="line"></div><div class="line">           remainder_size = size - nb;</div><div class="line">           unlink (av, victim, bck, fwd);</div></pre></td></tr></table></figure>
+<p>​    如果所选的chunk(即victim)不是最后一个chunk，且下一个块chunk大小和所选的chunk大小一致，那么把后面的那个chunk作为备选。</p>
+<p>​    计算victim分割后剩余的size，然后使用<code>unlink()</code>宏去把victim从链表中取出来。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* Exhaust */</span></div><div class="line">          <span class="keyword">if</span> (remainder_size &lt; MINSIZE)</div><div class="line">            {</div><div class="line">              set_inuse_bit_at_offset (victim, size);</div><div class="line">              <span class="keyword">if</span> (av != &amp;main_arena)</div><div class="line">                victim-&gt;size |= NON_MAIN_ARENA;</div><div class="line">            }</div></pre></td></tr></table></figure>
+<p>​    之后判断分割后剩余大小，如果小于MINSIZE(分配的chunk要略大于需要的chunk)，那么就给victim设置inuse标志，然后根据是否是主分配区的判断，设置相应的标志位。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">           <span class="comment">/* Split */</span></div><div class="line">           <span class="keyword">else</span></div><div class="line">             {</div><div class="line">               remainder = chunk_at_offset (victim, nb);</div><div class="line">               <span class="comment">/* We cannot assume the unsorted list is empty and therefore</span></div><div class="line">                  have to perform a complete insert here.  */</div><div class="line">               bck = unsorted_chunks (av);</div><div class="line">               fwd = bck-&gt;fd;</div><div class="line"><span class="keyword">if</span> (__glibc_unlikely (fwd-&gt;bk != bck))</div><div class="line">                 {</div><div class="line">                   errstr = <span class="string">"malloc(): corrupted unsorted chunks"</span>;</div><div class="line">                   <span class="keyword">goto</span> errout;</div><div class="line">                 }</div><div class="line">               remainder-&gt;bk = bck;</div><div class="line">               remainder-&gt;fd = fwd;</div><div class="line">               bck-&gt;fd = remainder;</div><div class="line">               fwd-&gt;bk = remainder;</div><div class="line">               <span class="keyword">if</span> (!in_smallbin_range (remainder_size))</div><div class="line">                 {</div><div class="line">                   remainder-&gt;fd_nextsize = <span class="literal">NULL</span>;</div><div class="line">                   remainder-&gt;bk_nextsize = <span class="literal">NULL</span>;</div><div class="line">                 }</div><div class="line">               set_head (victim, nb | PREV_INUSE |</div><div class="line">                         (av != &amp;main_arena ? NON_MAIN_ARENA : <span class="number">0</span>));</div><div class="line">               set_head (remainder, remainder_size | PREV_INUSE);</div><div class="line">               set_foot (remainder, remainder_size);</div><div class="line">             }</div><div class="line">           check_malloced_chunk (av, victim, nb);</div><div class="line">           <span class="keyword">void</span> *p = chunk2mem (victim);</div><div class="line">           alloc_perturb (p, bytes);</div><div class="line">           <span class="keyword">return</span> p;</div><div class="line">         }</div><div class="line">     }</div></pre></td></tr></table></figure>
+<p>​    从victim中分割出去的剩余部分作为新chunk加入到unsorted bin中，接着是判断大小，如果是large bin的范围，还要把<code>fd_nextsize</code>和<code>bk_nextsize</code>置为NULL，之后设置标志位，因为remainder空闲，所以还要设置foot(上面的分析里也有类似这段设置标志位的逻辑)。最后就很简单了，调用<code>chunk2mem()</code>的到可用的内存指针并返回给用户。</p>
+<p>​    上面从最合适的small bin和large bin都没有合适的chunk去分配，那么就会查看比当前index大的下一个small bin 或者large bin中有没有合适的块去分配给用户，源码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*</span></div><div class="line">        Search for a chunk by scanning bins, starting with next largest</div><div class="line">        bin. This search is strictly by best-fit; i.e., the smallest</div><div class="line">        (with ties going to approximately the least recently used) chunk</div><div class="line">        that fits is selected.</div><div class="line"></div><div class="line">        The bitmap avoids needing to check that most blocks are nonempty.</div><div class="line">        The particular case of skipping all bins during warm-up phases</div><div class="line">        when no chunks have been returned yet is faster than it might look.</div><div class="line">      */</div><div class="line"></div><div class="line">     ++idx;</div><div class="line">     bin = bin_at (av, idx);</div><div class="line">     block = idx2block (idx);</div><div class="line">     <span class="built_in">map</span> = av-&gt;binmap[block];</div><div class="line">     bit = idx2bit (idx);</div></pre></td></tr></table></figure>
+<p>​    首先获取下一个bin，下面是<code>malloc_state</code>的结构体，bitmap是标识对应的bin中有没有空闲chunk。bitmap是按照block管理的，所以先获取了block，然后根据获取到的block去获取bitmap。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> malloc_state</div><div class="line">{</div><div class="line">  <span class="comment">/* Serialize access.  */</span></div><div class="line">  <span class="keyword">mutex_t</span> mutex;</div><div class="line"></div><div class="line">  <span class="comment">/* Flags (formerly in max_fast).  */</span></div><div class="line">  <span class="keyword">int</span> flags;</div><div class="line"></div><div class="line">  <span class="comment">/* Fastbins */</span></div><div class="line">  mfastbinptr fastbinsY[NFASTBINS];</div><div class="line"></div><div class="line">  <span class="comment">/* Base of the topmost chunk -- not otherwise kept in a bin */</span></div><div class="line">  mchunkptr top; <span class="comment">//point to the TOP CHUNK of malloc state -- by muhe</span></div><div class="line"></div><div class="line">  <span class="comment">/* The remainder from the most recent split of a small request */</span></div><div class="line">  mchunkptr last_remainder;</div><div class="line"></div><div class="line">  <span class="comment">/* Normal bins packed as described above */</span></div><div class="line">  mchunkptr bins[NBINS * <span class="number">2</span> - <span class="number">2</span>];</div><div class="line"></div><div class="line">  <span class="comment">/* Bitmap of bins */</span></div><div class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> binmap[BINMAPSIZE];</div><div class="line"></div><div class="line">  <span class="comment">/* Linked list */</span></div><div class="line">  <span class="keyword">struct</span> malloc_state *next;</div><div class="line"></div><div class="line">  <span class="comment">/* Linked list for free arenas.  Access to this field is serialized</span></div><div class="line">     by free_list_lock in arena.c.  */</div><div class="line">  <span class="keyword">struct</span> malloc_state *next_free;</div><div class="line"></div><div class="line">  <span class="comment">/* Number of threads attached to this arena.  0 if the arena is on</span></div><div class="line">     the free list.  Access to this field is serialized by</div><div class="line">     free_list_lock in arena.c.  */</div><div class="line">  INTERNAL_SIZE_T attached_threads;</div><div class="line"></div><div class="line">  <span class="comment">/* Memory allocated from the system in this arena.  */</span></div><div class="line">  INTERNAL_SIZE_T system_mem;</div><div class="line">  INTERNAL_SIZE_T max_system_mem;</div><div class="line">};</div></pre></td></tr></table></figure>
+<p>​    bit通过下面的宏被设置，idx指定的位置为1，其他位为0 。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> idx2bit(i)       ((1U <span class="meta-string">&lt;&lt; ((i) &amp; ((1U &lt;&lt; BINMAPSHIFT) - 1))))</span></span></div></pre></td></tr></table></figure>
+<p>​    如果bit大于map，则map为0，map为0，说明当前bin中没有空闲chunk，所以去遍历bitmap的下一个block，直到找到一个不为0，或者遍历完才结束。</p>
+<p>​    在退出循环遍历后，设置bin 指向block 的第一个bit 对应的bin，并将bit 为1，    表示该block中bit 1 对应的bin，这个bin 中如果有空闲chunk，该chunk 的大小一定满足要求。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BINMAPSHIFT      5</span></div></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span> (;; )</div><div class="line">       {</div><div class="line">         <span class="comment">/* Skip rest of block if there are no more set bits in this block.  */</span></div><div class="line">         <span class="keyword">if</span> (bit &gt; <span class="built_in">map</span> || bit == <span class="number">0</span>)</div><div class="line">           {</div><div class="line">             <span class="keyword">do</span></div><div class="line">               {</div><div class="line">                 <span class="keyword">if</span> (++block &gt;= BINMAPSIZE) <span class="comment">/* out of bins */</span></div><div class="line">                   <span class="keyword">goto</span> use_top;			<span class="comment">//走top chunk的逻辑</span></div><div class="line">               }</div><div class="line">             <span class="keyword">while</span> ((<span class="built_in">map</span> = av-&gt;binmap[block]) == <span class="number">0</span>); <span class="comment">//取到下一个block的map</span></div><div class="line"></div><div class="line">             bin = bin_at (av, (block &lt;&lt; BINMAPSHIFT));</div><div class="line">             bit = <span class="number">1</span>;</div><div class="line">           }</div></pre></td></tr></table></figure>
+<p>​    这段逻辑，是遍历一个block里所有的bin，因为map是非0的，所以找到bit不为0就退出循环，那么这个bit对应bin中一定有空闲chunk。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* Advance to bin with set bit. There must be one. */</span></div><div class="line">        <span class="keyword">while</span> ((bit &amp; <span class="built_in">map</span>) == <span class="number">0</span>)</div><div class="line">          {</div><div class="line">            bin = next_bin (bin);</div><div class="line">            bit &lt;&lt;= <span class="number">1</span>;</div><div class="line">            assert (bit != <span class="number">0</span>);</div><div class="line">          }</div></pre></td></tr></table></figure>
+<p>​    获取这个bin的最后一个chunk即victim，如果最后一个chunk和链表头指针相同，那么说明这个链表中没有空chunk，这个时候就先把之前bit清零，然后到下一个bin中，</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* Inspect the bin. It is likely to be non-empty */</span></div><div class="line">        victim = last (bin);</div><div class="line"></div><div class="line">        <span class="comment">/*  If a false alarm (empty bin), clear the bit. */</span></div><div class="line">        <span class="keyword">if</span> (victim == bin)</div><div class="line">          {</div><div class="line">            av-&gt;binmap[block] = <span class="built_in">map</span> &amp;= ~bit; <span class="comment">/* Write through */</span></div><div class="line">            bin = next_bin (bin);</div><div class="line">            bit &lt;&lt;= <span class="number">1</span>;</div><div class="line">          }</div></pre></td></tr></table></figure>
+<p>​    如果不相同，那么先的到victim的size，然后和之前的逻辑类似，计算分割后的大小remainder_size，然后使用unlink宏去把victim从链表中解链出来。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">else</span></div><div class="line">          {</div><div class="line">            size = chunksize (victim);</div><div class="line"></div><div class="line">            <span class="comment">/*  We know the first chunk in this bin is big enough to use. */</span></div><div class="line">            assert ((<span class="keyword">unsigned</span> <span class="keyword">long</span>) (size) &gt;= (<span class="keyword">unsigned</span> <span class="keyword">long</span>) (nb));</div><div class="line"></div><div class="line">            remainder_size = size - nb;</div><div class="line"></div><div class="line">            <span class="comment">/* unlink */</span></div><div class="line">            unlink (av, victim, bck, fwd);</div></pre></td></tr></table></figure>
+<p>​    这里判断切割后的大小并针对不同的大小做不同的处理。</p>
+<ol>
+<li>如果切割剩余大小比MINSIZE小，那么就应该把整个chunk分给用户，之后就设置对应的标志位，之后就是返回的工作了；</li>
+<li>如果比MINSIZE大，就要分割了。分割剩下的这块，要作为新的chunk加入unsorted bin。</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* Exhaust */</span></div><div class="line">           <span class="keyword">if</span> (remainder_size &lt; MINSIZE)</div><div class="line">             {</div><div class="line">               set_inuse_bit_at_offset (victim, size);</div><div class="line">               <span class="keyword">if</span> (av != &amp;main_arena)</div><div class="line">                 victim-&gt;size |= NON_MAIN_ARENA;</div><div class="line">             }</div><div class="line"></div><div class="line">           <span class="comment">/* Split */</span></div><div class="line">           <span class="keyword">else</span></div><div class="line">             {</div><div class="line">               remainder = chunk_at_offset (victim, nb);</div><div class="line"></div><div class="line">               <span class="comment">/* We cannot assume the unsorted list is empty and therefore</span></div><div class="line">                  have to perform a complete insert here.  */</div><div class="line">               bck = unsorted_chunks (av);</div><div class="line">               fwd = bck-&gt;fd;</div><div class="line"><span class="keyword">if</span> (__glibc_unlikely (fwd-&gt;bk != bck))</div><div class="line">                 {</div><div class="line">                   errstr = <span class="string">"malloc(): corrupted unsorted chunks 2"</span>;</div><div class="line">                   <span class="keyword">goto</span> errout;</div><div class="line">                 }</div><div class="line">               <span class="comment">//添加到第一个位置</span></div><div class="line">               remainder-&gt;bk = bck;</div><div class="line">               remainder-&gt;fd = fwd;</div><div class="line">               bck-&gt;fd = remainder;</div><div class="line">               fwd-&gt;bk = remainder;</div></pre></td></tr></table></figure>
+<p>​    如果整个剩余的chunk是small bin，那么就要把分配区的last remainder 设置为这个chunk；如果是large bin，要把<code>fd_nextsize</code>和<code>bk_nextsize</code>置NULL，然后和之前对large bin处理的逻辑一样，设置head、foot的标志位。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* advertise as last remainder */</span></div><div class="line">               <span class="keyword">if</span> (in_smallbin_range (nb))</div><div class="line">                 av-&gt;last_remainder = remainder;</div><div class="line">               <span class="keyword">if</span> (!in_smallbin_range (remainder_size))</div><div class="line">                 {</div><div class="line">                   remainder-&gt;fd_nextsize = <span class="literal">NULL</span>;</div><div class="line">                   remainder-&gt;bk_nextsize = <span class="literal">NULL</span>;</div><div class="line">                 }</div><div class="line">               set_head (victim, nb | PREV_INUSE |</div><div class="line">                         (av != &amp;main_arena ? NON_MAIN_ARENA : <span class="number">0</span>));</div><div class="line">               set_head (remainder, remainder_size | PREV_INUSE);</div><div class="line">               set_foot (remainder, remainder_size);</div><div class="line">             }</div></pre></td></tr></table></figure>
+<p>​    最后逻辑很简单，调用<code>chunk2mem</code>的到可用的内存指针，并返回给用户。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">check_malloced_chunk (av, victim, nb);</div><div class="line">           <span class="keyword">void</span> *p = chunk2mem (victim);</div><div class="line">           alloc_perturb (p, bytes);</div><div class="line">           <span class="keyword">return</span> p;</div><div class="line">         }</div><div class="line">     }</div></pre></td></tr></table></figure>
+<h6 id="5-top-chunk"><a class="headerlink" href="#5-top-chunk" title="5.top chunk"></a>5.top chunk</h6><p>​    这部分是在前面所有分配都失败的情况下才会到的逻辑，即fastbin 、small bin、large bin 都没有分配到所需要的chunk，就会从当前分配实例的top chunk直接分配内存，代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">use_top:</div><div class="line">     <span class="comment">/*</span></div><div class="line">        If large enough, split off the chunk bordering the end of memory</div><div class="line">        (held in av-&gt;top). Note that this is in accord with the best-fit</div><div class="line">        search rule.  In effect, av-&gt;top is treated as larger (and thus</div><div class="line">        less well fitting) than any other available chunk since it can</div><div class="line">        be extended to be as large as necessary (up to system</div><div class="line">        limitations).</div><div class="line"></div><div class="line">        We require that av-&gt;top always exists (i.e., has size &gt;=</div><div class="line">        MINSIZE) after initialization, so if it would otherwise be</div><div class="line">        exhausted by current request, it is replenished. (The main</div><div class="line">        reason for ensuring it exists is that we may need MINSIZE space</div><div class="line">        to put in fenceposts in sysmalloc.)</div><div class="line">      */</div><div class="line"></div><div class="line">     victim = av-&gt;top;</div><div class="line">     size = chunksize (victim);</div><div class="line"></div><div class="line">     <span class="keyword">if</span> ((<span class="keyword">unsigned</span> <span class="keyword">long</span>) (size) &gt;= (<span class="keyword">unsigned</span> <span class="keyword">long</span>) (nb + MINSIZE))</div><div class="line">       {</div><div class="line">         remainder_size = size - nb;</div><div class="line">         remainder = chunk_at_offset (victim, nb);</div><div class="line">         av-&gt;top = remainder;</div><div class="line">         set_head (victim, nb | PREV_INUSE |</div><div class="line">                   (av != &amp;main_arena ? NON_MAIN_ARENA : <span class="number">0</span>));</div><div class="line">         set_head (remainder, remainder_size | PREV_INUSE);</div><div class="line"></div><div class="line">         check_malloced_chunk (av, victim, nb);</div><div class="line">         <span class="keyword">void</span> *p = chunk2mem (victim);</div><div class="line">         alloc_perturb (p, bytes);</div><div class="line">         <span class="keyword">return</span> p;</div><div class="line">       }</div></pre></td></tr></table></figure>
+<p>​    首先，获取到top chunk，然后获取top chunk的size，接着判断size和要分配的大小nb，如果size大于我们要分配的大小nb，那就直接从top chunk中分割，的到victim，分割剩余部分作为新的top chunk，设置victim的一些标志位之后，调用<code>chunk2mem()</code>的到可用内存指针并且返回给用户。</p>
+<p>​    一点小细节，因为top chunk需要MINSIZE 的空间来作为fencepost，所以大小比较的时候要加个MINSIZE；所以在分割完成之后并不用去设置foot。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* When we are using atomic ops to free fast chunks we can get</span></div><div class="line">   here for all block sizes.  */</div><div class="line"><span class="keyword">else</span> <span class="keyword">if</span> (have_fastchunks (av))</div><div class="line">  {</div><div class="line">    malloc_consolidate (av);</div><div class="line">    <span class="comment">/* restore original bin index */</span></div><div class="line">    <span class="keyword">if</span> (in_smallbin_range (nb))</div><div class="line">      idx = smallbin_index (nb);</div><div class="line">    <span class="keyword">else</span></div><div class="line">      idx = largebin_index (nb);</div><div class="line">  }</div></pre></td></tr></table></figure>
+<p>​    如果还是没从top chunk中分配到，判断当前分配区中是否有fast bins中是否有chunk，有的话就合并到unsorted bin中，接着判断，在small bin范围内，就再次设置idx，进到最外层循环，再来一次，相对应的，large bin范围内也是一样，设置idx，再到最外层循环。</p>
+<h6 id="6-sysmalloc"><a class="headerlink" href="#6-sysmalloc" title="6.sysmalloc"></a>6.sysmalloc</h6><p>​    在之前的分配策略都没办法分配到我们想要的内存的时候，就会走到这里。这里直接调用了<code>sycmalloc()</code>去分配，其实就是使用了<code>mmap()</code>直接映射，当然这个函数不可能这么简单，他对不同情况做了不同的处理。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">      <span class="comment">/*</span></div><div class="line">         Otherwise, relay to handle system-dependent cases</div><div class="line">       */</div><div class="line">      <span class="keyword">else</span></div><div class="line">        {</div><div class="line">          <span class="keyword">void</span> *p = sysmalloc (nb, av);</div><div class="line">          <span class="keyword">if</span> (p != <span class="literal">NULL</span>)</div><div class="line">            alloc_perturb (p, bytes);</div><div class="line">          <span class="keyword">return</span> p;</div><div class="line">        }</div><div class="line">    }</div><div class="line">}</div></pre></td></tr></table></figure>
+<h4 id="2-sysmalloc-分析"><a class="headerlink" href="#2-sysmalloc-分析" title="2. sysmalloc 分析"></a>2. sysmalloc 分析</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> * </span></div><div class="line">  <span class="title">sysmalloc</span> <span class="params">(INTERNAL_SIZE_T nb, mstate av)</span></div></pre></td></tr></table></figure>
+<pre><code>为了治疗拖延症，所以把过程记录在博客上，慢慢更新...
+</code></pre>
+</div>
+</div>
+<div class="copyright">
+<p><span>本文标题:</span><a href="/2016/11/21/Have-fun-with-glibc内存管理/">Have fun with glibc内存管理</a></p>
+<p><span>文章作者:</span><a href="/" title="访问 muhe 的个人博客">muhe</a></p>
+<p><span>发布时间:</span>2016年11月21日 - 20时38分</p>
+<p><span>最后更新:</span>2016年11月25日 - 17时45分</p>
+<p>
+<span>原始链接:</span><a class="post-url" href="/2016/11/21/Have-fun-with-glibc内存管理/" title="Have fun with glibc内存管理">http://o0xmuhe.me/2016/11/21/Have-fun-with-glibc内存管理/</a>
+<span class="copy-path" data-clipboard-text="原文: http://o0xmuhe.me/2016/11/21/Have-fun-with-glibc内存管理/　　作者: muhe" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+<script src="./Have fun with glibc内存管理  o0xmuhe's blog/clipboard.min.js"></script>
+<script> var clipboard = new Clipboard('.copy-path'); </script>
+</p>
+<p>
+<span>许可协议:</span><i class="fa fa-creative-commons"></i> <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" rel="license" target="_blank" title="中国大陆 (CC BY-NC-SA 3.0 CN)">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+</div>
+<nav id="article-nav">
+<a class="article-nav-link-wrap" href="/2016/11/25/PlaidCTF-2016-butterfly/" id="article-nav-newer">
+<strong class="article-nav-caption">&lt;</strong>
+<div class="article-nav-title">
+        
+          PlaidCTF 2016 butterfly
+        
+      </div>
+</a>
+<a class="article-nav-link-wrap" href="/2016/11/10/linux-下起shell失败的分析/" id="article-nav-older">
+<div class="article-nav-title">linux 下起shell失败的分析</div>
+<strong class="article-nav-caption">&gt;</strong>
+</a>
+</nav>
+</article>
+<div class="toc-article" id="toc">
+<strong class="toc-title">文章目录</strong>
+<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-malloc-分析"><span class="toc-number">1.</span> <span class="toc-text">1.malloc 分析</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#1-概述"><span class="toc-number">1.0.1.</span> <span class="toc-text">1.概述</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#2-fastbin"><span class="toc-number">1.0.2.</span> <span class="toc-text">2.fastbin</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#3-small-bin"><span class="toc-number">1.0.3.</span> <span class="toc-text">3.small bin</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#4-large-bin"><span class="toc-number">1.0.4.</span> <span class="toc-text">4.large bin</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#5-top-chunk"><span class="toc-number">1.0.5.</span> <span class="toc-text">5.top chunk</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#6-sysmalloc"><span class="toc-number">1.0.6.</span> <span class="toc-text">6.sysmalloc</span></a></li></ol></li></ol></div></div></div></div></body></html><li class="toc-item toc-level-4"><a class="toc-link" href="#2-sysmalloc-分析"><span class="toc-number">2.</span> <span class="toc-text">2. sysmalloc 分析</span></a></li>
+
+<input id="tocButton" title="点击按钮隐藏或者显示文章目录" type="button" value="隐藏目录"/>
+<script src="./Have fun with glibc内存管理  o0xmuhe's blog/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+        }
+    })
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+    }
+</script>
+<div class="bdsharebuttonbox">
+<a class="fx fa-weibo bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="fx fa-weixin bds_weixin" data-cmd="weixin" href="#" title="分享到微信"></a>
+<a class="fx fa-qq bds_sqq" data-cmd="sqq" href="#" title="分享到QQ好友"></a>
+<a class="fx fa-facebook-official bds_fbook" data-cmd="fbook" href="#" title="分享到Facebook"></a>
+<a class="fx fa-twitter bds_twi" data-cmd="twi" href="#" title="分享到Twitter"></a>
+<a class="fx fa-linkedin bds_linkedin" data-cmd="linkedin" href="#" title="分享到linkedin"></a>
+<a class="fx fa-files-o bds_copy" data-cmd="copy" href="#" title="分享到复制网址"></a>
+</div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+<div class="duoshuo" id="comments">
+<!-- 多说评论框 start -->
+<div class="ds-thread" data-thread-key="2016/11/21/Have-fun-with-glibc内存管理/" data-title="Have fun with glibc内存管理" data-url="http://o0xmuhe.me/2016/11/21/Have-fun-with-glibc内存管理/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    var duoshuoQuery = {short_name:"o0xmuhe"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = '/js/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- 多说公共JS代码 end -->
+</div>
+<div class="scroll" id="post-nav-button">
+<a href="/2016/11/25/PlaidCTF-2016-butterfly/" title="上一篇: PlaidCTF 2016 butterfly">
+<i class="fa fa-angle-left"></i>
+</a>
+<a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+<a href="/2016/11/10/linux-下起shell失败的分析/" title="下一篇: linux 下起shell失败的分析">
+<i class="fa fa-angle-right"></i>
+</a>
+</div>
+<ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/08/SSCTF-2017部分Writeup/">SSCTF-2017部分Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/22/360春秋CTF-pwn/">360春秋CTF--pwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/06/Linux-Kernel-Exploit-4-beginners/">Linux Kernel Exploit 4 beginners</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/15/NJCTF-2017部分wp/">NJCTF-2017部分wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/06/SECCON-2016-jmper/">SECCON-2016 jmper</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/04/codegate2017-angrybird/">codegate2017-angrybird</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/27/LLVM-Study-Log/">LLVM Study Log</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/16/ichunqiu-CTF-2017-2/">ichunqiu-CTF-2017-2</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/08/Adding-your-own-syscall-in-linux-kernel/">Adding your own syscall in linux kernel</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/04/Windows-Kernel-Exploit-Study-3/">Windows-Kernel-Exploit-Study(3)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/30/Linux socket进程间通信及应用/">Linux socket进程间通信及应用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/28/一点碎碎念/">一点碎碎念</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/22/Have-fun-with-Blind-ROP/">Have fun with Blind ROP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/20/Windows-Kernel-Exploit-Study-2/">Windows Kernel Exploit Study(2)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/19/Windows-Kernel-Exploit-Study-1/">Windows Kernel Exploit Study(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/24/what-DynELF-does-basically/">what DynELF does basically</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/17/fuzzing-with-peach-Just-a-toy/">fuzzing with peach(Just a toy)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/25/PlaidCTF-2016-butterfly/">PlaidCTF 2016 butterfly</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/21/Have-fun-with-glibc内存管理/">Have fun with glibc内存管理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/10/linux-下起shell失败的分析/">linux 下起shell失败的分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/07/Baiudu杯-pwn专场记录/">Baiudu杯 pwn专场记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/29/how-to-compile-WinAFL/">how to compile WinAFL</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/25/yocto-writeup/">yocto writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/HITCON-2016-Quals-SecretHolder/">HITCON-2016-Quals-SecretHolder</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/CVE-2012-4792学习/">CVE-2012-4792学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/06/一点感悟/">一点感悟</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/27/BCTF-cloud/">BCTF--cloud</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/24/一些环境配置遇到的坑-持续更新/">一些环境配置遇到的坑(持续更新)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/16/Malloc-Maleficarum-复盘/">Malloc-Maleficarum-复盘</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/26/初试winafl/">初试winafl</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/14/pwnable-kr-alloca/">pwnable.kr -- alloca</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/01/简单的尝试angr/">简单的尝试angr</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/29/第一个android-cm调试分析/">第一个android cm调试分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/29/install-gef/">install gef</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/30/cctf-pwn350/">cctf pwn350</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/15/heap-vuln-unlink/">heap vuln -- unlink</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/02/format-string-with-stack-frame/">format string with stack frame</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/16/RCTF-PWN200/">RCTF -- PWN200</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/05/dragon/">dragon</a></li></ul>
+<script src="./Have fun with glibc内存管理  o0xmuhe's blog/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+            }
+        })
+    </script>
+<script>
+</script>
+
+<footer id="footer">
+<div class="outer">
+<div id="footer-info">
+<div class="footer-left">
+                © 2017 muhe
+            </div>
+<div class="footer-right">
+<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+</div>
+<div class="visit">
+<span id="busuanzi_container_site_pv" style="display:none">
+<span id="site-visit">访客数量: 
+                            <span id="busuanzi_value_site_uv"></span>
+</span>
+</span>
+<span>, </span>
+<span id="busuanzi_container_page_pv" style="display:none">
+<span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+</div>
+</div>
+</footer>
+
+<script src="./Have fun with glibc内存管理  o0xmuhe's blog/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="./Have fun with glibc内存管理  o0xmuhe's blog/main.js"></script>
+<script>
+        $(document).ready(function() {
+            var backgroundnum = 24;
+            var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+<div class="scroll" id="scroll">
+<a href="#"><i class="fa fa-arrow-up"></i></a>
+<a href="#comments"><i class="fa fa-comments-o"></i></a>
+<a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+<script async="" src="./Have fun with glibc内存管理  o0xmuhe's blog/busuanzi.pure.mini.js">
+</script>
+<script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+
+

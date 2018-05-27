@@ -1,0 +1,562 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./BKP-CTF-2017-RSA-BUFFET-WriteUp/font-awesome.min.css" rel="stylesheet"/>
+<link href="./BKP-CTF-2017-RSA-BUFFET-WriteUp/screen.css" rel="stylesheet"/>
+<link href="./BKP-CTF-2017-RSA-BUFFET-WriteUp/prism_okaidia.css" rel="stylesheet"/>
+<link href="./BKP-CTF-2017-RSA-BUFFET-WriteUp/bendawang.css" rel="stylesheet"/>
+<script src="./BKP-CTF-2017-RSA-BUFFET-WriteUp/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./BKP-CTF-2017-RSA-BUFFET-WriteUp/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./BKP-CTF-2017-RSA-BUFFET-WriteUp/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="bkpctf2017rsabuffetwriteup">BKP CTF 2017 RSA-BUFFET WriteUp</h1>
+<p style="max-width:100%;height:auto;">(部分代码因为重启电脑遗失，这里加思路就行了)
+这道题首先给了一个压缩包，里面有两个py，五个密文bin文件,十个公玥pem文件，然后提示说解除三个然后根据secret_share的帮助就能解出flag。一下子看到这么多文件就头大，先看看公玥们把，把所有公玥pem文件的e,n都提取出来。
+<br/><img alt="" data-action="zoom" src="./BKP-CTF-2017-RSA-BUFFET-WriteUp/58b808d8a5f32f1a87000000.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="0x01key3">0x01 key-3</h2>
+<p style="max-width:100%;height:auto;">首先发现问题的就是<code style="max-width:100%;height:auto;">key-3.pem</code>,
+它的e值格外的大，那么我们就用<code style="max-width:100%;height:auto;">winner attack</code>来破解出私钥d，如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from Crypto.PublicKey import RSA
+from libnum import invmod, gcd,xgcd
+import random
+def divide_pq(ed, n):
+    # ed = e*d
+    k = ed - 1
+    while True:
+        g = random.randint(3, n-2)
+        t = k
+        while True:
+            if t % 2 != 0:
+                break
+            t /= 2
+            x = pow(g, t, n)
+            if x &gt; 1 and gcd(x-1, n) &gt; 1:
+                p = gcd(x-1, n)
+                return (p, n/p)
+def isqrt(n):
+    x = n
+    y = (x + 1) // 2
+    while y &lt; x:
+        x = y
+        y = (x + n // x) // 2
+    if pow(x, 2) == n:
+        return x
+    else:
+        return False
+def con_fra(a, b):
+    r = []
+    while True:
+        if a == 1:
+            break
+        tmp = a/b
+        if tmp != 0:
+            r.append(tmp)
+        a, b = b, (a-tmp*b)
+    return r
+def wiener_attack(e, n):
+    cf = con_fra(e, n)
+    for x in xrange(len(cf)):
+        k, d = 0, 1
+        while x &gt;= 0:
+            k, d = d, d*cf[x] + k
+            x -= 1
+        # print "k: %s\nd: %s\n" %(k, d)
+        phi_n = (e*d - 1)/k
+        B = n - phi_n + 1
+        C = n
+        dt = pow(B, 2) - 4*C    # b^2 - 4*a*c
+        if dt &gt;= 0 and isqrt(dt) and (B+isqrt(dt)) % 2 == 0:
+            #return phi_n
+            return d
+    print "wiener attack fail!"
+e=0x380d01edb6ecc75e51056ef60dec807a8c17356ea6644ecf62c2b85763f79fa65f1b54d4ff283fbb0b0b3e6fa57186c52bea20e096368c194141cded75978bbe14d2709d20145601d0dd6b7e2df0dded42a514d298c68182289b8241aa09afebe7f3d0a187a6545b89a06cee5287e8257264e04bd09683d9b4b3b04f2ea86782d3e379e5014ff616202c78ad9b0801b67eeeeaaf3b43055a6f096c9bfb119f1b57c78c6e4050acf3c9677f93257a2baab9ffbc0f562fc64d468d639db090cdb626101268fbc286c5c9845abafb6c06fc0625904ccf32837fb2fd5d160df8360b33fe2fa55fb43fd4ba0ba69dde44f72f9e06509a636ec8456857597b9a5530b43b6c2f11038c9fce71d5debd7b63c7fb1daf7c84379093b1f9d8f5e1d4ab5e96e487c4ac4cd1629767a559e0fe95699975d3b2969fbc48e6c0529b42e45051ac5ce998b8a7772512dc32c48902a996c3fbd315967be6a4035563088f3bbee79dc324fd083b2e529f2d114bae5e6dea53dde3e518081a4a13e696b50ed8a51bac565353a98a6b841fad798e970150629956a4816b1d7968f65cefe71b192073412cdd69c0c22219a49c5891e636662ae3429ca9c2a3a29a89251674b37c076f66244b41fb228c82568967c0940e454f4974f68d1863f7398ddd6231fae8c7ff6f83faf31b472e75ae26ced598191b0f627dc2759e2a9a860a3e3b03caf68aacbf
+n=0x994A5E2C2303B40943D9B744B5709EE601FB5C4AC300CFA44A7608107A74D06AC04963A3F8201FA7801335EDD3F323090425924B74F6AC39EEAFF7B4A6BCAA241533FD5F57505B388668F24D8D65330745CC515EE1B3C96016B399C35EEFEF0612BAFF82761088117B07E25F9263F914981023319165D209C4784BC37A92ED7FECB470317B3FDE5343CDD9AA13794B74831892CF6EA1002D7A3F760F1BB3EDFBF6273B15361127424F1712892E0C6CC759B3C690DA8C6184A90BE6486B8F25C745554C0AAA445764589A5177038A67CD73E66FE1B0D559E0BBBE3E5B8D4AEEF72FFA874CC16110BBC135C3E9928C5FCAE737815F49FB023C64EDA62AD2ED7D0D32249617DC512DC540006C0F059B2FDAEB3B0AE1C2B9615DB7C83B909E222719451736E1F07C3919C3965FD9D003BD8813EC1E9CD540FAF7F70F72FE8F0F544B2CAB51A8A062865AE4F46A0530B7E11A264D717F3CF13B6018D09DE1A0C28EA20CEE2A6711DA5D115FD71C096D115C13F0B5E40D94696C67105C2F709AE5D2FE0AC85847B3C9017ACE7DB2EB00D410D9D2DA7685776A8099472D01791C57810D160ABD6C9E420276320EB11B80A0B2F5722E20E9D8822A1D143C97A63EF81733E52F263E3A7F77B6900BF95DA215544DF51E61ECC468F037A2B39CCF153D984B32A9A4CE757BBB38798CE0B080F503CE1A396D47E14CC41BF18E34EDBD9137EB
+d=wiener_attack(e,n)
+#d=9420364147446085639274379387786973162152074307922801332015153785267117724595265070646876503524212628628959579565360669628828274045000595263801870978909279
+(p,q)=divide_pq(e*d,n)
+#(p,q)=(24333562944687516822197571192658754203291290861678417217447438854540594847087766562404339574537862439116548079253289466115128767870577648533973566286797593441730003379848043825634065823911136780045362090360846493427099473619203426216220826743478974241107765471416754913629766068614128278553165309459614540881272639715963742807416312087758332567870818068056326342400589601117982695439948496482753836668023789721452705706258642830333890588979897355741176673670662543132574318628603066958811749579934075668455748590286427527491514861437629540690813171672435522560204943058263324060332232490301430308879676240097644556943L, 25699922293123622238012005113928758274338093880738911843144609876290300384447243164527369410936522534026502861166228851341858617366580840945546916656960397913459416157594030359887797479829819533476376181670391998963549074371737295746623468123112547424135047636878302121269250886314724602949616886176008642837449632045010113812032294774060357611189602487961064611234002464905006798590256478016955856378120527444702590839053848988168714049387256070864726124290373739801554166928887083826045058481026363141572007235867367607974662051368481037707609970666363610931674810380477197023311110704572295255843715262143691203301L)
+print RSA.construct((n, e, d, p, q)).exportKey()
+</code></pre>
+<p style="max-width:100%;height:auto;">这样就成功破解一个公玥，拿到第一个私钥文件了</p>
+<h2 id="0x02key2">0x02 key-2</h2>
+<p style="max-width:100%;height:auto;">然后把所有的n都拿去暴力分解尝试了下，链接这里http://factordb.com/index.php，发现<code style="max-width:100%;height:auto;">key-2.pem</code>被秒分解出来，原来<code style="max-width:100%;height:auto;">key-2.pem</code>有一个小质因子的值为<code style="max-width:100%;height:auto;">2758599203</code>，那么p,q都出来了，d也就知道了，这样就成功破解第二个个公玥，生成第二个私钥文件了。</p>
+<h2 id="0x03key0key6">0x03 key-0和key-6</h2>
+<p style="max-width:100%;height:auto;">其他文件都没有发现什么大的问题，然后相互查看有没有公因子，发现0和6的n值有公约数，那么就能够很容易分解出两个公玥文件的各个参数，从而生成第三个和第四个私钥文件</p>
+<h2 id="0x04key1">0x04 key-1</h2>
+<p style="max-width:100%;height:auto;">这是后来看题解的时候发现的，说是key-1的n值对应的p和q相距根号n很近，这样就可以通过费马分解来暴力破解出q和p</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">def isqrt(n):
+  x = n
+  y = (x + n // x) // 2
+  while y &lt; x:
+    x = y
+    y = (x + n // x) // 2
+  return x
+def fermat(n):
+    a = isqrt(n)
+    b2 = a*a - n
+    b = isqrt(n)
+    count = 0
+    while b*b != b2:
+        a = a + 1
+        b2 = a*a - n
+        b = isqrt(b2)
+        count += 1
+    p=a+b
+    q=a-b
+    assert n == p * q
+    return p, q
+n=0xC4FF486B14CD9C37B956F08FF19CA2F83DBA86509CB840CD6A5A95F1352009B18D1D56B4A0FEC0E95A29CA96CAEFAA5DEFF71D6AEB0AD89EEAAD908CEE93582BD71B2CD7DAF709A54B98D163B508D3FD1F0A9709FB69E499D1B8ABC50AF3A4CBAE77C070444933613A452954F91ACDAF461D6A364035920561F7885D30EBDC82BE3560E6428864B9715E1734D013E23DFB8C1DA662F5CE6DA3712402F8DA445D0CA49B9BB1E47ABEEEF58A6385CA3F9EB9D24008B6E68E1DE7C2F12FEA14F7729C248D8DB7D9B85E6279AB68B0517F739D9745BA02F8AABC33819C326116C327396B5716C6895495AE8D3CF60A3B6A11557329383F6D5F414D9E05E87E13D5D7CBF87994C86F1419A8FC969500E36D8570FBE1BC13DF8BFE3888209B0BD684B9265BF7F4E05CF670D8F288E1D82740E9812F9AA68A99B5E569420B38CC1538787EAD253DF53341E3C2697CE76152B02ED437CCE19386E2A13608BFB7B23336356F032C550F1FBC4F8EE00294CBECB03ECE45DFC5F5C115D73ADC988BA297104C81351BB73C2AC01D3ACFC5A814C4947B5758B0193222102C1541F398D2D7B1C2CFDD53A172AA899880F53A8B5C7E6A39E6E408141DF99AE2F6BEFC00B02E2AC4C3AF122BE5097F3231C5B4E607BCA2A78C1F1040AA3C4351DE4B3172E3882C116E5F586DE33CEE9C911875AC196EFB8355D4CDDFE5479B19FA426A25E0EA1891
+print fermat(n)
+</code></pre>
+<p style="max-width:100%;height:auto;">其实不需要这个也能成功解出flag了。</p>
+<h2 id="0x05">0x05 最终解密</h2>
+<p style="max-width:100%;height:auto;">先把上述几个破解出的私钥生成openssl的私钥格式的文件。
+<br/><img alt="" data-action="zoom" src="./BKP-CTF-2017-RSA-BUFFET-WriteUp/58b80ec26b87c74292000000.png" style="max-width:100%;height:auto;"/><br/>
+这下再看它给的py文件里面已经给了解密的代码了，由于不知道哪个私钥解密那个文件，那么就暴力尝试下，代码如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from Crypto.Cipher import AES,PKCS1_OAEP
+from Crypto.PublicKey import RSA
+
+def decrypt(private_key, ciphertext):
+  """Decrypt a message with a given private key.
+
+  Takes in a private_key generated by Crypto.PublicKey.RSA, which must be of
+  size exactly 4096
+
+  If the ciphertext is invalid, return None
+  """
+  if len(ciphertext) &lt; 512 + 16:
+    return None
+  msg_header = ciphertext[:512]
+  msg_iv = ciphertext[512:512+16]
+  msg_body = ciphertext[512+16:]
+  try:
+    symmetric_key = PKCS1_OAEP.new(private_key).decrypt(msg_header)
+  except ValueError:
+    return None
+  if len(symmetric_key) != 32:
+    return None
+  return AES.new(symmetric_key,
+      mode=AES.MODE_CFB,
+      IV=msg_iv).decrypt(msg_body)
+
+
+for i in xrange(5):
+    f=open("key"+str(i)+".private","r")
+    private_key = RSA.importKey(f.read())
+    for j in xrange(1,6):
+        f=open("ciphertext-"+str(j)+".bin","r")
+        flag=f.read()
+        print decrypt(private_key,flag)
+</code></pre>
+<p style="max-width:100%;height:auto;">得到如下图所示的数据：
+<br/><img alt="" data-action="zoom" src="./BKP-CTF-2017-RSA-BUFFET-WriteUp/58b80f586b87c74292000001.png" style="max-width:100%;height:auto;"/><br/>
+根据提示说是通过<code style="max-width:100%;height:auto;">secretsharing</code>就能获取flag,那么去<code style="max-width:100%;height:auto;">https://github.com/blockstack/secret-sharing</code>，学习后修改代码如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">string= [
+&amp;apos;1-32a1cd9f414f14cff6685879444acbe41e5dba6574a072cace6e8d0eb338ad64910897369b7589e6a408c861c8e708f60fbbbe91953d4a73bcf1df11e1ecaa2885bed1e5a772bfed42d776a9&amp;apos;,
+&amp;apos;1-e0c113fa1ebea9318dd413bf28308707fd660a5d1417fbc7da72416c8baaa5bf628f11c660dcee518134353e6ff8d37c&amp;apos;,
+&amp;apos;1-1b8b6c4e3145a96b1b0031f63521c8df58713c4d6d737039b0f1c0750e16e1579340cfc5dadef4e96d6b95ecf89f52b8136ae657c9c32e96bf4384e18bd8190546ff5102cd006be5e1580053&amp;apos;,
+&amp;apos;1-c332b8b93a914532a2dab045ea52b86d4d3950a990b5fc5e041dce9be1fd3912f9978cad009320e18f4383ca71d9d79114c9816b5f950305a6dd19c9f458695d52&amp;apos;,
+&amp;apos;3-17e568ddc3ed3e6fe330ca47a2b27a2707edd0e0839df59fe9114fe6c08c6fc1ac1c3c8d9ab3cf7860dac103dff464d4c215e197b54f0cb46993912c3d0220a3eb1b80adf33ee2cc59b0372c&amp;apos;,
+&amp;apos;3-b69efb4f9c5205175a4c9afb9d3c7bef728d9fb6c9cc1241411b31d4bd18744660391a330cefa8a86af8d2b80c881cfa&amp;apos;,
+&amp;apos;3-572e70c5acfbe8b4c2cbd47217477d217da88c256ff2586af6a18391972c258bbea6143e7cd2ff6d39393efeb64d51d9318a2c337e50e2d764a42173bc3a1d5c7c8f24b64043daf5d2a8e9f4&amp;apos;,
+&amp;apos;3-e9e6850880eb0a44d36fe9f2e5a458c6da3977b7fcd285afa27e9bfc116b1408570991504116b81864b03a7060bfd5d3fb6e007bb346f276d749befd545d1489c4&amp;apos;,
+&amp;apos;4-4a87367d053c533fd995032ed1e651487cb5dc1e0b1cb70a7662b152c73650f039a60f391a52f2413f43bd54eb7b12c41b42f31ac557edd4bfe46a396a8cdbe19dc9d8121924f43be51c976d&amp;apos;,
+&amp;apos;4-abbbcee71f140198ff8c50f51069465075979c31d32b052e7ae82ec7f6783aef7b41a597f9504d3340967b8d70cbe5a3&amp;apos;,
+&amp;apos;4-35fbbe40058e20463547b363d1f164c0bbbb97cfd9ffe7619bce31a59392f0e9625a2cd035276e09c4df3c0932f22bd322f16e375c7c7fd88da0f972832707eb549ff1e776db37649019ebce&amp;apos;,
+&amp;apos;4-012b466934911986bda845d8d26710a12250d210546f46716c78d7a17b1f2c893b95b934c8c7beafcf81a3123eb2ea05ca89101b23349e455794a8d56608c8ee49dd&amp;apos;,
+&amp;apos;5-7d29041c468b680fcff93c16011a2869f17de75b929b787503b412becde0321ec72fe1e499f2150a1dacb9a5f701c0b37470049dd560cef5163543469817971f50782f763f0b05ab7088f7ae&amp;apos;,
+&amp;apos;5-a7a1e271cf263279cece532b540545fa539b0f3650e2929163b02ee5459debdc53c1e07149eb2153015bb5c88e6270e8&amp;apos;,
+&amp;apos;5-149480c5c75cbe320564adfa432ac8ea241e048ed39c8bc6be14ca80c392487f43a7882075d785d62cb314ea6c89a6b5f28adfa56ec481e124567b88241de2a6cabcc7ec9de3acac8be5375b&amp;apos;,
+&amp;apos;5-7285289084282d559573f68eef10191091d76d6670014202670651f867cd2bc8640a86eef1c1e482affc7ae801fa446956c2186972fb6b7bac88c91d050c9d3cca&amp;apos;
+]
+print PlaintextToHexSecretSharer.recover_secret(string[::4])
+print PlaintextToHexSecretSharer.recover_secret(string[1::4])
+print PlaintextToHexSecretSharer.recover_secret(string[2::4])
+print PlaintextToHexSecretSharer.recover_secret(string[3::4])
+</code></pre>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./BKP-CTF-2017-RSA-BUFFET-WriteUp/58b80fcd6b87c74292000002.png" style="max-width:100%;height:auto;"/><br/>
+已经拿到flag了，最后答案也确实就是这个flag，至于解出来后面的东西我也没有太去研究。</p>
+<h2 id="0x06">0x06 后记</h2>
+<p style="max-width:100%;height:auto;">这里推荐一个能够一次性做出这道题的工具，来源自这里<code style="max-width:100%;height:auto;">https://ctf.rip/bkp2017-rsabuffet/</code>，工具是<code style="max-width:100%;height:auto;">https://github.com/sourcekris/RsaCtfTool</code>，相当好用。
+受此，我也打算写一个做rsa的工具，由于常见的rsa，都是不断尝试各种方法，所以打算把以前的代码整理出来写成一个完整的工具，到时候会上传到我的github上去，希望大家多多支持下，帮忙一起完善它。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./BKP-CTF-2017-RSA-BUFFET-WriteUp/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="bkpctf2017rsabuffetwriteup">BKP CTF 2017 RSA-BUFFET WriteUp</h1>
+<p style="max-width:100%;height:auto;">(部分代码因为重启电脑遗失，这里加思路就行了)
+这道题首先给了一个压缩包，里面有两个py，五个密文bin文件,十个公玥pem文件，然后提示说解除三个然后根据secret_share的帮助就能解出flag。一下子看到这么多文件就头大，先看看公玥们把，把所有公玥pem文件的e,n都提取出来。
+<br/><img alt="" data-action="zoom" src="./BKP-CTF-2017-RSA-BUFFET-WriteUp/58b808d8a5f32f1a87000000.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="0x01key3">0x01 key-3</h2>
+<p style="max-width:100%;height:auto;">首先发现问题的就是<code style="max-width:100%;height:auto;">key-3.pem</code>,
+它的e值格外的大，那么我们就用<code style="max-width:100%;height:auto;">winner attack</code>来破解出私钥d，如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from Crypto.PublicKey import RSA
+from libnum import invmod, gcd,xgcd
+import random
+def divide_pq(ed, n):
+    # ed = e*d
+    k = ed - 1
+    while True:
+        g = random.randint(3, n-2)
+        t = k
+        while True:
+            if t % 2 != 0:
+                break
+            t /= 2
+            x = pow(g, t, n)
+            if x &gt; 1 and gcd(x-1, n) &gt; 1:
+                p = gcd(x-1, n)
+                return (p, n/p)
+def isqrt(n):
+    x = n
+    y = (x + 1) // 2
+    while y &lt; x:
+        x = y
+        y = (x + n // x) // 2
+    if pow(x, 2) == n:
+        return x
+    else:
+        return False
+def con_fra(a, b):
+    r = []
+    while True:
+        if a == 1:
+            break
+        tmp = a/b
+        if tmp != 0:
+            r.append(tmp)
+        a, b = b, (a-tmp*b)
+    return r
+def wiener_attack(e, n):
+    cf = con_fra(e, n)
+    for x in xrange(len(cf)):
+        k, d = 0, 1
+        while x &gt;= 0:
+            k, d = d, d*cf[x] + k
+            x -= 1
+        # print "k: %s\nd: %s\n" %(k, d)
+        phi_n = (e*d - 1)/k
+        B = n - phi_n + 1
+        C = n
+        dt = pow(B, 2) - 4*C    # b^2 - 4*a*c
+        if dt &gt;= 0 and isqrt(dt) and (B+isqrt(dt)) % 2 == 0:
+            #return phi_n
+            return d
+    print "wiener attack fail!"
+e=0x380d01edb6ecc75e51056ef60dec807a8c17356ea6644ecf62c2b85763f79fa65f1b54d4ff283fbb0b0b3e6fa57186c52bea20e096368c194141cded75978bbe14d2709d20145601d0dd6b7e2df0dded42a514d298c68182289b8241aa09afebe7f3d0a187a6545b89a06cee5287e8257264e04bd09683d9b4b3b04f2ea86782d3e379e5014ff616202c78ad9b0801b67eeeeaaf3b43055a6f096c9bfb119f1b57c78c6e4050acf3c9677f93257a2baab9ffbc0f562fc64d468d639db090cdb626101268fbc286c5c9845abafb6c06fc0625904ccf32837fb2fd5d160df8360b33fe2fa55fb43fd4ba0ba69dde44f72f9e06509a636ec8456857597b9a5530b43b6c2f11038c9fce71d5debd7b63c7fb1daf7c84379093b1f9d8f5e1d4ab5e96e487c4ac4cd1629767a559e0fe95699975d3b2969fbc48e6c0529b42e45051ac5ce998b8a7772512dc32c48902a996c3fbd315967be6a4035563088f3bbee79dc324fd083b2e529f2d114bae5e6dea53dde3e518081a4a13e696b50ed8a51bac565353a98a6b841fad798e970150629956a4816b1d7968f65cefe71b192073412cdd69c0c22219a49c5891e636662ae3429ca9c2a3a29a89251674b37c076f66244b41fb228c82568967c0940e454f4974f68d1863f7398ddd6231fae8c7ff6f83faf31b472e75ae26ced598191b0f627dc2759e2a9a860a3e3b03caf68aacbf
+n=0x994A5E2C2303B40943D9B744B5709EE601FB5C4AC300CFA44A7608107A74D06AC04963A3F8201FA7801335EDD3F323090425924B74F6AC39EEAFF7B4A6BCAA241533FD5F57505B388668F24D8D65330745CC515EE1B3C96016B399C35EEFEF0612BAFF82761088117B07E25F9263F914981023319165D209C4784BC37A92ED7FECB470317B3FDE5343CDD9AA13794B74831892CF6EA1002D7A3F760F1BB3EDFBF6273B15361127424F1712892E0C6CC759B3C690DA8C6184A90BE6486B8F25C745554C0AAA445764589A5177038A67CD73E66FE1B0D559E0BBBE3E5B8D4AEEF72FFA874CC16110BBC135C3E9928C5FCAE737815F49FB023C64EDA62AD2ED7D0D32249617DC512DC540006C0F059B2FDAEB3B0AE1C2B9615DB7C83B909E222719451736E1F07C3919C3965FD9D003BD8813EC1E9CD540FAF7F70F72FE8F0F544B2CAB51A8A062865AE4F46A0530B7E11A264D717F3CF13B6018D09DE1A0C28EA20CEE2A6711DA5D115FD71C096D115C13F0B5E40D94696C67105C2F709AE5D2FE0AC85847B3C9017ACE7DB2EB00D410D9D2DA7685776A8099472D01791C57810D160ABD6C9E420276320EB11B80A0B2F5722E20E9D8822A1D143C97A63EF81733E52F263E3A7F77B6900BF95DA215544DF51E61ECC468F037A2B39CCF153D984B32A9A4CE757BBB38798CE0B080F503CE1A396D47E14CC41BF18E34EDBD9137EB
+d=wiener_attack(e,n)
+#d=9420364147446085639274379387786973162152074307922801332015153785267117724595265070646876503524212628628959579565360669628828274045000595263801870978909279
+(p,q)=divide_pq(e*d,n)
+#(p,q)=(24333562944687516822197571192658754203291290861678417217447438854540594847087766562404339574537862439116548079253289466115128767870577648533973566286797593441730003379848043825634065823911136780045362090360846493427099473619203426216220826743478974241107765471416754913629766068614128278553165309459614540881272639715963742807416312087758332567870818068056326342400589601117982695439948496482753836668023789721452705706258642830333890588979897355741176673670662543132574318628603066958811749579934075668455748590286427527491514861437629540690813171672435522560204943058263324060332232490301430308879676240097644556943L, 25699922293123622238012005113928758274338093880738911843144609876290300384447243164527369410936522534026502861166228851341858617366580840945546916656960397913459416157594030359887797479829819533476376181670391998963549074371737295746623468123112547424135047636878302121269250886314724602949616886176008642837449632045010113812032294774060357611189602487961064611234002464905006798590256478016955856378120527444702590839053848988168714049387256070864726124290373739801554166928887083826045058481026363141572007235867367607974662051368481037707609970666363610931674810380477197023311110704572295255843715262143691203301L)
+print RSA.construct((n, e, d, p, q)).exportKey()
+</code></pre>
+<p style="max-width:100%;height:auto;">这样就成功破解一个公玥，拿到第一个私钥文件了</p>
+<h2 id="0x02key2">0x02 key-2</h2>
+<p style="max-width:100%;height:auto;">然后把所有的n都拿去暴力分解尝试了下，链接这里http://factordb.com/index.php，发现<code style="max-width:100%;height:auto;">key-2.pem</code>被秒分解出来，原来<code style="max-width:100%;height:auto;">key-2.pem</code>有一个小质因子的值为<code style="max-width:100%;height:auto;">2758599203</code>，那么p,q都出来了，d也就知道了，这样就成功破解第二个个公玥，生成第二个私钥文件了。</p>
+<h2 id="0x03key0key6">0x03 key-0和key-6</h2>
+<p style="max-width:100%;height:auto;">其他文件都没有发现什么大的问题，然后相互查看有没有公因子，发现0和6的n值有公约数，那么就能够很容易分解出两个公玥文件的各个参数，从而生成第三个和第四个私钥文件</p>
+<h2 id="0x04key1">0x04 key-1</h2>
+<p style="max-width:100%;height:auto;">这是后来看题解的时候发现的，说是key-1的n值对应的p和q相距根号n很近，这样就可以通过费马分解来暴力破解出q和p</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">def isqrt(n):
+  x = n
+  y = (x + n // x) // 2
+  while y &lt; x:
+    x = y
+    y = (x + n // x) // 2
+  return x
+def fermat(n):
+    a = isqrt(n)
+    b2 = a*a - n
+    b = isqrt(n)
+    count = 0
+    while b*b != b2:
+        a = a + 1
+        b2 = a*a - n
+        b = isqrt(b2)
+        count += 1
+    p=a+b
+    q=a-b
+    assert n == p * q
+    return p, q
+n=0xC4FF486B14CD9C37B956F08FF19CA2F83DBA86509CB840CD6A5A95F1352009B18D1D56B4A0FEC0E95A29CA96CAEFAA5DEFF71D6AEB0AD89EEAAD908CEE93582BD71B2CD7DAF709A54B98D163B508D3FD1F0A9709FB69E499D1B8ABC50AF3A4CBAE77C070444933613A452954F91ACDAF461D6A364035920561F7885D30EBDC82BE3560E6428864B9715E1734D013E23DFB8C1DA662F5CE6DA3712402F8DA445D0CA49B9BB1E47ABEEEF58A6385CA3F9EB9D24008B6E68E1DE7C2F12FEA14F7729C248D8DB7D9B85E6279AB68B0517F739D9745BA02F8AABC33819C326116C327396B5716C6895495AE8D3CF60A3B6A11557329383F6D5F414D9E05E87E13D5D7CBF87994C86F1419A8FC969500E36D8570FBE1BC13DF8BFE3888209B0BD684B9265BF7F4E05CF670D8F288E1D82740E9812F9AA68A99B5E569420B38CC1538787EAD253DF53341E3C2697CE76152B02ED437CCE19386E2A13608BFB7B23336356F032C550F1FBC4F8EE00294CBECB03ECE45DFC5F5C115D73ADC988BA297104C81351BB73C2AC01D3ACFC5A814C4947B5758B0193222102C1541F398D2D7B1C2CFDD53A172AA899880F53A8B5C7E6A39E6E408141DF99AE2F6BEFC00B02E2AC4C3AF122BE5097F3231C5B4E607BCA2A78C1F1040AA3C4351DE4B3172E3882C116E5F586DE33CEE9C911875AC196EFB8355D4CDDFE5479B19FA426A25E0EA1891
+print fermat(n)
+</code></pre>
+<p style="max-width:100%;height:auto;">其实不需要这个也能成功解出flag了。</p>
+<h2 id="0x05">0x05 最终解密</h2>
+<p style="max-width:100%;height:auto;">先把上述几个破解出的私钥生成openssl的私钥格式的文件。
+<br/><img alt="" data-action="zoom" src="./BKP-CTF-2017-RSA-BUFFET-WriteUp/58b80ec26b87c74292000000.png" style="max-width:100%;height:auto;"/><br/>
+这下再看它给的py文件里面已经给了解密的代码了，由于不知道哪个私钥解密那个文件，那么就暴力尝试下，代码如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from Crypto.Cipher import AES,PKCS1_OAEP
+from Crypto.PublicKey import RSA
+
+def decrypt(private_key, ciphertext):
+  """Decrypt a message with a given private key.
+
+  Takes in a private_key generated by Crypto.PublicKey.RSA, which must be of
+  size exactly 4096
+
+  If the ciphertext is invalid, return None
+  """
+  if len(ciphertext) &lt; 512 + 16:
+    return None
+  msg_header = ciphertext[:512]
+  msg_iv = ciphertext[512:512+16]
+  msg_body = ciphertext[512+16:]
+  try:
+    symmetric_key = PKCS1_OAEP.new(private_key).decrypt(msg_header)
+  except ValueError:
+    return None
+  if len(symmetric_key) != 32:
+    return None
+  return AES.new(symmetric_key,
+      mode=AES.MODE_CFB,
+      IV=msg_iv).decrypt(msg_body)
+
+
+for i in xrange(5):
+    f=open("key"+str(i)+".private","r")
+    private_key = RSA.importKey(f.read())
+    for j in xrange(1,6):
+        f=open("ciphertext-"+str(j)+".bin","r")
+        flag=f.read()
+        print decrypt(private_key,flag)
+</code></pre>
+<p style="max-width:100%;height:auto;">得到如下图所示的数据：
+<br/><img alt="" data-action="zoom" src="./BKP-CTF-2017-RSA-BUFFET-WriteUp/58b80f586b87c74292000001.png" style="max-width:100%;height:auto;"/><br/>
+根据提示说是通过<code style="max-width:100%;height:auto;">secretsharing</code>就能获取flag,那么去<code style="max-width:100%;height:auto;">https://github.com/blockstack/secret-sharing</code>，学习后修改代码如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">string= [
+&amp;apos;1-32a1cd9f414f14cff6685879444acbe41e5dba6574a072cace6e8d0eb338ad64910897369b7589e6a408c861c8e708f60fbbbe91953d4a73bcf1df11e1ecaa2885bed1e5a772bfed42d776a9&amp;apos;,
+&amp;apos;1-e0c113fa1ebea9318dd413bf28308707fd660a5d1417fbc7da72416c8baaa5bf628f11c660dcee518134353e6ff8d37c&amp;apos;,
+&amp;apos;1-1b8b6c4e3145a96b1b0031f63521c8df58713c4d6d737039b0f1c0750e16e1579340cfc5dadef4e96d6b95ecf89f52b8136ae657c9c32e96bf4384e18bd8190546ff5102cd006be5e1580053&amp;apos;,
+&amp;apos;1-c332b8b93a914532a2dab045ea52b86d4d3950a990b5fc5e041dce9be1fd3912f9978cad009320e18f4383ca71d9d79114c9816b5f950305a6dd19c9f458695d52&amp;apos;,
+&amp;apos;3-17e568ddc3ed3e6fe330ca47a2b27a2707edd0e0839df59fe9114fe6c08c6fc1ac1c3c8d9ab3cf7860dac103dff464d4c215e197b54f0cb46993912c3d0220a3eb1b80adf33ee2cc59b0372c&amp;apos;,
+&amp;apos;3-b69efb4f9c5205175a4c9afb9d3c7bef728d9fb6c9cc1241411b31d4bd18744660391a330cefa8a86af8d2b80c881cfa&amp;apos;,
+&amp;apos;3-572e70c5acfbe8b4c2cbd47217477d217da88c256ff2586af6a18391972c258bbea6143e7cd2ff6d39393efeb64d51d9318a2c337e50e2d764a42173bc3a1d5c7c8f24b64043daf5d2a8e9f4&amp;apos;,
+&amp;apos;3-e9e6850880eb0a44d36fe9f2e5a458c6da3977b7fcd285afa27e9bfc116b1408570991504116b81864b03a7060bfd5d3fb6e007bb346f276d749befd545d1489c4&amp;apos;,
+&amp;apos;4-4a87367d053c533fd995032ed1e651487cb5dc1e0b1cb70a7662b152c73650f039a60f391a52f2413f43bd54eb7b12c41b42f31ac557edd4bfe46a396a8cdbe19dc9d8121924f43be51c976d&amp;apos;,
+&amp;apos;4-abbbcee71f140198ff8c50f51069465075979c31d32b052e7ae82ec7f6783aef7b41a597f9504d3340967b8d70cbe5a3&amp;apos;,
+&amp;apos;4-35fbbe40058e20463547b363d1f164c0bbbb97cfd9ffe7619bce31a59392f0e9625a2cd035276e09c4df3c0932f22bd322f16e375c7c7fd88da0f972832707eb549ff1e776db37649019ebce&amp;apos;,
+&amp;apos;4-012b466934911986bda845d8d26710a12250d210546f46716c78d7a17b1f2c893b95b934c8c7beafcf81a3123eb2ea05ca89101b23349e455794a8d56608c8ee49dd&amp;apos;,
+&amp;apos;5-7d29041c468b680fcff93c16011a2869f17de75b929b787503b412becde0321ec72fe1e499f2150a1dacb9a5f701c0b37470049dd560cef5163543469817971f50782f763f0b05ab7088f7ae&amp;apos;,
+&amp;apos;5-a7a1e271cf263279cece532b540545fa539b0f3650e2929163b02ee5459debdc53c1e07149eb2153015bb5c88e6270e8&amp;apos;,
+&amp;apos;5-149480c5c75cbe320564adfa432ac8ea241e048ed39c8bc6be14ca80c392487f43a7882075d785d62cb314ea6c89a6b5f28adfa56ec481e124567b88241de2a6cabcc7ec9de3acac8be5375b&amp;apos;,
+&amp;apos;5-7285289084282d559573f68eef10191091d76d6670014202670651f867cd2bc8640a86eef1c1e482affc7ae801fa446956c2186972fb6b7bac88c91d050c9d3cca&amp;apos;
+]
+print PlaintextToHexSecretSharer.recover_secret(string[::4])
+print PlaintextToHexSecretSharer.recover_secret(string[1::4])
+print PlaintextToHexSecretSharer.recover_secret(string[2::4])
+print PlaintextToHexSecretSharer.recover_secret(string[3::4])
+</code></pre>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./BKP-CTF-2017-RSA-BUFFET-WriteUp/58b80fcd6b87c74292000002.png" style="max-width:100%;height:auto;"/><br/>
+已经拿到flag了，最后答案也确实就是这个flag，至于解出来后面的东西我也没有太去研究。</p>
+<h2 id="0x06">0x06 后记</h2>
+<p style="max-width:100%;height:auto;">这里推荐一个能够一次性做出这道题的工具，来源自这里<code style="max-width:100%;height:auto;">https://ctf.rip/bkp2017-rsabuffet/</code>，工具是<code style="max-width:100%;height:auto;">https://github.com/sourcekris/RsaCtfTool</code>，相当好用。
+受此，我也打算写一个做rsa的工具，由于常见的rsa，都是不断尝试各种方法，所以打算把以前的代码整理出来写成一个完整的工具，到时候会上传到我的github上去，希望大家多多支持下，帮忙一起完善它。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./BKP-CTF-2017-RSA-BUFFET-WriteUp/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./BKP-CTF-2017-RSA-BUFFET-WriteUp/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./BKP-CTF-2017-RSA-BUFFET-WriteUp/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./BKP-CTF-2017-RSA-BUFFET-WriteUp/prism.js"></script>
+<script src="./BKP-CTF-2017-RSA-BUFFET-WriteUp/zooming.js"></script>
+<script src="./BKP-CTF-2017-RSA-BUFFET-WriteUp/Bendawang.js"></script>
+
+

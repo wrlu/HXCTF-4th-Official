@@ -1,0 +1,317 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./使用tea算法对数据进行加密  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./使用tea算法对数据进行加密  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./使用tea算法对数据进行加密  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>使用tea算法对数据进行加密 | 离别歌</title>
+<link href="./使用tea算法对数据进行加密  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./使用tea算法对数据进行加密  离别歌/styles.css" rel="stylesheet"/>
+<link href="./使用tea算法对数据进行加密  离别歌/style.css" rel="stylesheet"/>
+<link href="./使用tea算法对数据进行加密  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./使用tea算法对数据进行加密  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./使用tea算法对数据进行加密  离别歌/jquery.min.js"></script>
+<link href="./使用tea算法对数据进行加密  离别歌/code.css" rel="stylesheet"/>
+<link href="./使用tea算法对数据进行加密  离别歌/button.css" rel="stylesheet"/>
+<link href="./使用tea算法对数据进行加密  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./使用tea算法对数据进行加密  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/tea-encrypt.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/tea-encrypt.html&amp;text=%E4%BD%BF%E7%94%A8tea%E7%AE%97%E6%B3%95%E5%AF%B9%E6%95%B0%E6%8D%AE%E8%BF%9B%E8%A1%8C%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/tea-encrypt.html&amp;title=%E4%BD%BF%E7%94%A8tea%E7%AE%97%E6%B3%95%E5%AF%B9%E6%95%B0%E6%8D%AE%E8%BF%9B%E8%A1%8C%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/tea-encrypt.html&amp;is_video=false&amp;description=%E4%BD%BF%E7%94%A8tea%E7%AE%97%E6%B3%95%E5%AF%B9%E6%95%B0%E6%8D%AE%E8%BF%9B%E8%A1%8C%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E4%BD%BF%E7%94%A8tea%E7%AE%97%E6%B3%95%E5%AF%B9%E6%95%B0%E6%8D%AE%E8%BF%9B%E8%A1%8C%E5%8A%A0%E5%AF%86&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/tea-encrypt.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/tea-encrypt.html&amp;title=%E4%BD%BF%E7%94%A8tea%E7%AE%97%E6%B3%95%E5%AF%B9%E6%95%B0%E6%8D%AE%E8%BF%9B%E8%A1%8C%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/tea-encrypt.html&amp;title=%E4%BD%BF%E7%94%A8tea%E7%AE%97%E6%B3%95%E5%AF%B9%E6%95%B0%E6%8D%AE%E8%BF%9B%E8%A1%8C%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/tea-encrypt.html&amp;title=%E4%BD%BF%E7%94%A8tea%E7%AE%97%E6%B3%95%E5%AF%B9%E6%95%B0%E6%8D%AE%E8%BF%9B%E8%A1%8C%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/tea-encrypt.html&amp;title=%E4%BD%BF%E7%94%A8tea%E7%AE%97%E6%B3%95%E5%AF%B9%E6%95%B0%E6%8D%AE%E8%BF%9B%E8%A1%8C%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/tea-encrypt.html&amp;name=%E4%BD%BF%E7%94%A8tea%E7%AE%97%E6%B3%95%E5%AF%B9%E6%95%B0%E6%8D%AE%E8%BF%9B%E8%A1%8C%E5%8A%A0%E5%AF%86&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">使用tea算法对数据进行加密</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年10月30日 17:46" itemprop="datePublished">
+                    2013 十月 30 17:46
+                </time>
+</div>
+<div class="article-tag">
+            阅读：7787
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/tea">tea</a>,
+                
+                <a class="tag-link" href="/tag/%E5%8A%A0%E5%AF%86">加密</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    对QQ协议进行分析过的同学可能知道，QQ的数据传输是使用tea算法进行的加密。
+</p>
+<p>
+	    tea算法是一种对称加密算法，特点是速度快，代码量小（加密、解密的核心算法总共才20来行）。算法的安全性虽然不比AES，但其算法的破译难度取决于其迭代的次数。网上说QQ是16次迭代，推荐的迭代次数是64次。我就对这些简洁小巧的事物没有抗拒力，于是在网上搜索一下其代码，研究一下。
+</p>
+<p>
+	    找到了一个别人封装好的类，很好用，我一会打包起来给大家。
+</p>
+<p>
+	    我对代码进行了处理，写了一个简单的加密字符串的软件。
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201311/3fb51383726071.jpg" id="ematt:253" target="_blank"><img alt="02.jpg" border="0" height="375" src="./使用tea算法对数据进行加密  离别歌/thum-3fb51383726071.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+	    首先引用了网上的一个类，很简洁的90行代码，其中加密的方法是：
+</p>
+<pre class="brush: cpp;auto-links: false;">		TEA tea(key, TIMES, false);
+		tea.encrypt(plain, crypt);</pre>
+    解密的方法是：
+<pre class="brush: cpp;auto-links: false;">		TEA tea(key, TIMES, false);
+		tea.decrypt(crypt, plain);</pre>
+<p>
+	    构造函数中传入密钥key，TIMES是迭代次数，我用的64次，第三个参数是“是否专为网络序”，如果加密完成后的密文不在网络上传输的话，就填false。
+</p>
+<p>
+	    encrypt方法对密文进行加密，plain是明文，crypt是输出密文的缓冲区。而decrypt方法正好相反。
+</p>
+<p>
+	    下面是几点要注意的：
+</p>
+<p>
+	    第一，plain、key、crypt三个参数类型都是byte *，也就unsigned char *，里面保存的是二进制码，是不能直接输出在屏幕上的，所以你如果要加密字符串，输出hex，就得加一些代码处理一下。如果大家加密一个文件的话，就不用处理了。
+</p>
+<p>
+	    第二，key长度16bit，所以我用了一个md5处理之。将我们输入的任意长度的字符串先hash成md5，再作为一个16bit的key传入tea的构造函数。
+</p>
+<p>
+	    第三，加密时，明文长度必须是8bit，于是我把明文分成许多8bit的段，将每段密文加密。如果密文密文长度不是8的倍数，则我会在最后一段明文后面补随机二进制位，凑成8bit。所以一段明文加密出来的结果可能不相同，但不相同的一定是最后8bit，前面都应该是一样的。而最后8bit中有效长度，我就放在密文的第一位。所以密文一定是奇数长度。
+</p>
+<p>
+<br>
+</br></p>
+<p>
+	    我在网上看QQ的TEA加密是这样两个技巧：和我类似补随机二进制位补齐8的倍数，但采用了交织算法：消息被分为多个加密单元，每一个加密单元都是8字节，使用TEA进行加密，加密结果与下一个加密单元做异或运算后再作为待加密的明文。
+</p>
+<p>
+	    这样感觉会更加复杂和安全一点，但我嫌麻烦就没这么处理了。如果对安全性要求更高的同学可以自己下去稍微一改。
+</p>
+<p>
+	    我把源文件打包给大家，里面包含了我的整个工程。附件中自己下。大家可以根据自己的需要进行修改。
+</p>
+<p>
+	    附件：<span class="attachment"><a href="https://www.leavesongs.com/content/uploadfile/201311/90cd1383730476.zip" target="_blank">tea.zip</a></span>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1977">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用tea算法对数据进行加密  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">warlock</a>
+<time datetime="2015年3月19日 00:19" itemprop="datePublished">
+                            2015 三月 19 00:19
+                        </time>
+<a href="javascript:reply_to('1977', 'warlock')">回复</a>
+</p>
+<p class="comment-meta">下载失效，可否修一下</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1978">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用tea算法对数据进行加密  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年3月19日 00:21" itemprop="datePublished">
+                            2015 三月 19 00:21
+                        </time>
+<a href="javascript:reply_to('1978', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@warlock：附件下载不支持IE浏览器。使用chrome或FF可正常下载。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1572">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用tea算法对数据进行加密  离别歌/3e437e704870e12f6a6283d3e3ff1521.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">echotl</a>
+<time datetime="2014年3月19日 16:45" itemprop="datePublished">
+                            2014 三月 19 16:45
+                        </time>
+<a href="javascript:reply_to('1572', 'echotl')">回复</a>
+</p>
+<p class="comment-meta">我研究了一下代码，发现当加密的内容中含有空格时，加密程序就会自动截断，只加密空格之前的内容。。。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1574">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用tea算法对数据进行加密  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年3月20日 16:24" itemprop="datePublished">
+                            2014 三月 20 16:24
+                        </time>
+<a href="javascript:reply_to('1574', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@echotl：我有时间看看，你有没有研究到具体的代码，是哪出了这个问题</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1496">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用tea算法对数据进行加密  离别歌/2f79fe50f853471c124ac8e177bed0b3.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.youmew.com/" target="_blank">圈圈</a>
+<time datetime="2013年11月14日 14:56" itemprop="datePublished">
+                            2013 十一月 14 14:56
+                        </time>
+<a href="javascript:reply_to('1496', '圈圈')">回复</a>
+</p>
+<p class="comment-meta">了解了，就是看不懂</p>
+</div>
+</div>
+<div class="row" id="comment-1490">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用tea算法对数据进行加密  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">趣购网</a>
+<time datetime="2013年11月7日 20:01" itemprop="datePublished">
+                            2013 十一月 07 20:01
+                        </time>
+<a href="javascript:reply_to('1490', '趣购网')">回复</a>
+</p>
+<p class="comment-meta">学习了哈。</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="94d454258d6ab748a24d5187f84a88b1a959d1f6"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./使用tea算法对数据进行加密  离别歌/94d454258d6ab748a24d5187f84a88b1a959d1f6"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="287">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="vaqlg6jJ8TqPuqRIU4aHouTLMJxjprFd3uLR4AvYzGkeu5fXIlErX8VQVN0r8Vun"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./使用tea算法对数据进行加密  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./使用tea算法对数据进行加密  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

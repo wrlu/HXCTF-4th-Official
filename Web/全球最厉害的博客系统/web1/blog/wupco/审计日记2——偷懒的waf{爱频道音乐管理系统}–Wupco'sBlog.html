@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<title>审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog</title>
+<script src="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/jquery.jsver=1.12.4" type="text/javascript"></script>
+<script src="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/jquery-migrate.min.jsver=1.4.1" type="text/javascript"></script>
+<link href="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/rest_route=" rel="https://api.w.org/"/>
+<link href="http://www.wupco.cn/xmlrpc.php?rsd" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<link href="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/p=59" rel="prev" title="娱乐至死——娱乐的XSS {超级表格}"/>
+<link href="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/p=93" rel="next" title="整理思维——等于等于等于？{MySQL条件等号的异常}"/>
+<link href="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/p=68" rel="canonical"/>
+<link href="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/p=68" rel="shortlink"/>
+<script src="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/shCore.js" type="text/javascript"></script><link href=" http://www.wupco.cn/wp-content/plugins/wp-ueditor2/ueditor/third-party/SyntaxHighlighter/shCoreDefault.css" rel="stylesheet" type="text/css"/><link href="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="icon" sizes="32x32"/>
+<link href="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="icon" sizes="192x192"/>
+<link href="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="apple-touch-icon-precomposed"/>
+<meta content="http://www.wupco.cn/wp-content/uploads/2016/11/R5K8RH7ACHA7KEV8P.gif" name="msapplication-TileImage">
+<link href="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/favicon.png" rel="shortcut icon" type="image/vnd.microsoft.icon"/>
+<link href="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/style.css" rel="stylesheet" type="text/css">
+<!--[if lt IE 9]>
+<script src="//cdn.bootcss.com/html5shiv/r29/html5.min.js"></script>
+<script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+</link></meta></head>
+<body>
+<div class="container" id="main">
+<div class="pjax">
+<header id="header">
+<div class="container">
+<h1 class="logo">
+<i class="iconfont"></i><a href="http://www.wupco.cn">Wupco's Blog</a>
+</h1>
+<nav class="menu_click" id="topMenu">
+<div class="menu-menu-1-container"><ul class="menu" id="menu-menu-1"><li><a href="http://www.wupco.cn/">首页</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1174">关于我</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1448">数据备份</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1959">CTF备忘录</a></li>
+</ul></div><i class="i_1"></i>
+<i class="i_2"></i>
+</nav>
+</div>
+</header>
+<section class="blockGroup">
+<h2 class="s_title" itemprop="name headline">审计日记2——偷懒的waf{爱频道音乐管理系统}</h2>
+<article class="post single" itemscope="" itemtype="http://schema.org/BlogPosting">
+<p>  我们都知道addslashes()与magic_quotes_gpc 只能对sql语句中被引号包围的部分加固安全，对于数字型的可以用intval或者(int)强制转换或者is_numric检测，但是一些php项目中，开发者没有考虑周全，导致我们可以绕过他看似坚固的WAF。</p>
+<p>  在第一篇日记中，我们遇到了order by后注入的问题，这个是可以绕过addslashes()与magic_quotes_gpc的，同样的，$SERVER变量也可以绕过magic_quotes_gpc，这点基本都是利用伪造ip来构造注入的。看似很强大的addslashes()对于数字型的，而且没有被 '包裹的sql语句毫无作用。</p>
+<p>  我们来看一下这个“爱频道音乐管理系统”。</p>
+<p><img src="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/1-2.jpg" title="1.jpg"/></p>
+<p> 首先大致看了下对get和post数据的处理，发现基本都被一个SafeRequest函数进行处理，我们跟踪一下这个函数 </p>
+<pre class="brush:php;toolbar:false">function SafeRequest($key,$mode,$isfilter=''){
+	set_magic_quotes_runtime(0);
+	$magic= get_magic_quotes_gpc();	
+	switch ($mode){
+		case 'post':
+			$value=isset($_POST[$key]) ? $magic?trim($_POST[$key]):addslashes(trim(
+			$_POST[$key])) : '';
+			break;
+		case 'posts':
+			$value=isset($_POST[$key]) ? $magic?trim($_POST[$key]):addslashes(trim(
+			$_POST[$key])) : '';
+			$value=shtmlspecialchars($value);
+			break;
+		case 'get':
+			$value=isset($_GET[$key]) ? $magic?trim($_GET[$key]):addslashes(trim(
+			$_GET[$key])) : '';
+			break;
+		case 'gets':
+			$value=isset($_GET[$key]) ? $magic?trim($_GET[$key]):addslashes(trim(
+			$_GET[$key])) : '';
+			$value=shtmlspecialchars($value);
+			break;
+		default:
+			$value=isset($_POST[$key]) ? $magic?trim($_POST[$key]):addslashes(trim(
+			$_POST[$key])) : '';
+			if($value==""){
+				$value=isset($_GET[$key]) ? $magic?trim($_GET[$key]):addslashes(trim(
+				$_GET[$key])) : '';
+			}
+			break;
+	}
+	if($isfilter!=''){
+		$value=str_encode($value);
+	}
+	return $value;	
+}</pre>
+<p>  其中，str_encode是XSS的过滤函数（可以猜想这个程序员想一个函数用在整个系统里了）</p>
+<pre class="brush:php;toolbar:false">function str_encode($str) {
+	$str=ReplaceStr($str, "&lt;", "&amp;lt;");
+	$str=ReplaceStr($str, "&gt;", "&amp;gt;");
+	$str=ReplaceStr($str, "'", "&amp;apos;");
+	$str=ReplaceStr($str, " ", "&amp;nbsp;");
+	$str=ReplaceStr($str, "\r\n", "&lt;br&gt;");
+	$str=ReplaceStr($str, "\"", "&amp;quot;");
+	$str=ReplaceStr($str, "&amp;", "&amp;amp;");
+	return $str;
+}</pre>
+<p>  可以看到，这个系统对于被引号包裹的sql语句有着一定的抵抗能力，然而如果是数字型的，缺完全没有抵抗能力，有了这个思路，我们就可以搜索所有数字型的注入点了。</p>
+<p><img src="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/26621479212000.png" title="4.png"/></p>
+<p>  使用这个函数的共有2358处，带有**id我们就可以猜测是数字型的了。比如</p>
+<p><img src="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/671479212000.jpg" title="3.jpg"/></p>
+<p>  isNul函数</p>
+<pre class="brush:php;toolbar:false">function IsNul($str) {
+	if(!is_string($str))
+		return false;
+	if(empty($str))
+		return false;
+	if($str=='')
+		return false;
+	return true;
+}</pre>
+<p> 之后就直接带入sql语句了，结果想必大家都应该知道了......</p>
+<p> 但在审计的过程中，我又发现了一处cookie注入，这个就是根本没有过滤</p>
+<pre class="brush:php;toolbar:false">if(($_COOKIE["cd_name"]&lt;&gt;"") || ($_COOKIE["cd_password"]&lt;&gt;"")) {
+
+	$userid=$_COOKIE["cd_id"];
+	$username=$_COOKIE["cd_name"];
+	$password=$_COOKIE["cd_password"];
+	
+	global $db;
+	$cd_ids=$db-&gt;getrow("select cd_id,cd_logintime from " . tname('session') . " where 
+	cd_uid =$userid and cd_uname='$username'");</pre>
+<p> 测试一下，可以盲注...</p>
+<p><img src="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/2.jpg" title="2.jpg"/></p>
+<p> 总之都是考虑不周带来的后果。</p>
+</article>
+<section class="ending">
+<ul class="sns">
+<li class="tencent"><a href="http://wpa.qq.com/msgrd?v=3&amp;uin=827977014&amp;site=qq&amp;menu=yes" target="_blank"><i class="iconfont"></i></a></li>
+<li class="zhihu"><a href="https://www.zhihu.com/people/wupco " target="_blank"><i class="iconfont"></i></a></li>
+</ul>
+<div class="reward">
+                打
+                <ul>
+<li><img src="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/QQ图片20170222193616.png"/>用支付宝打我</li>
+<li><img src="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/QQ图片20170222193616.png"/>用微信打我</li>
+</ul>
+</div>
+<div class="about">
+<img alt="" class="avatar avatar-80 photo" height="80" src="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/cd0d984309c15bd1f668df0d0343eccds=80&amp;d=mm&amp;r=g" srcset="http://cn.gravatar.com/avatar/cd0d984309c15bd1f668df0d0343eccd?s=160&amp;d=mm&amp;r=g 2x" width="80"> <p></p>
+</img></div>
+</section>
+<!-- You can start editing here. -->
+<h3 id="comments">
+		一条回应：“审计日记2——偷懒的waf{爱频道音乐管理系统}”	</h3>
+<div class="navigation">
+<div class="alignleft"></div>
+<div class="alignright"></div>
+</div>
+<ol class="commentlist">
+<li class="comment even thread-even depth-1" id="comment-5">
+<div class="comment-body" id="div-comment-5">
+<div class="comment-author vcard">
+<img alt="" class="avatar avatar-32 photo" height="32" src="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/4f2eb556e132007beec9ef38c244fdc8s=32&amp;d=mm&amp;r=g" srcset="http://cn.gravatar.com/avatar/4f2eb556e132007beec9ef38c244fdc8?s=64&amp;d=mm&amp;r=g 2x" width="32"> <cite class="fn">s1N</cite><span class="says">说道：</span> </img></div>
+<div class="comment-meta commentmetadata"><a href="http://www.wupco.cn/?p=68#comment-5">
+			2016年11月16日 上午8:37</a> </div>
+<p>打开\(≧▽≦)/</p>
+<div class="reply"><a aria-label="回复给s1N" class="comment-reply-link" href="http://www.wupco.cn/?p=68&amp;replytocom=5#respond" onclick='return addComment.moveForm( "div-comment-5", "5", "respond", "68" )' rel="nofollow">回复</a></div>
+</div>
+</li><!-- #comment-## -->
+</ol>
+<div class="navigation">
+<div class="alignleft"></div>
+<div class="alignright"></div>
+</div>
+<div class="comment-respond" id="respond">
+<h3 class="comment-reply-title" id="reply-title">发表评论 <small><a href="/?p=68#respond" id="cancel-comment-reply-link" rel="nofollow" style="display:none;">取消回复</a></small></h3> <form action="http://www.wupco.cn/wp-comments-post.php" class="comment-form" id="commentform" method="post">
+<p class="comment-notes"><span id="email-notes">电子邮件地址不会被公开。</span> 必填项已用<span class="required">*</span>标注</p><p class="comment-form-comment"><label for="comment">评论</label> <textarea aria-required="true" cols="45" id="comment" maxlength="65525" name="w" required="required" rows="8"></textarea><textarea cols="100%" name="comment" rows="4" style="display:none"></textarea></p><p class="comment-form-author"><label for="author">姓名 <span class="required">*</span></label> <input aria-required="true" id="author" maxlength="245" name="author" required="required" size="30" type="text" value=""/></p>
+<p class="comment-form-email"><label for="email">电子邮件 <span class="required">*</span></label> <input aria-describedby="email-notes" aria-required="true" id="email" maxlength="100" name="email" required="required" size="30" type="text" value=""/></p>
+<p class="comment-form-url"><label for="url">站点</label> <input id="url" maxlength="200" name="url" size="30" type="text" value=""/></p>
+<p class="form-submit"><input class="submit" id="submit" name="submit" type="submit" value="发表评论"/> <input id="comment_post_ID" name="comment_post_ID" type="hidden" value="68"/>
+<input id="comment_parent" name="comment_parent" type="hidden" value="0"/>
+</p> </form>
+</div><!-- #respond -->
+</section>
+<div class="clearer"></div>
+<nav class="navigator">
+</nav>
+</div>
+</div>
+<div class="clearer"></div>
+<div class="search">
+<form action="http://www.wupco.cn" method="get">
+<input autocomplete="off" class="search_key" name="s" placeholder="Enter search keywords..." required="required" type="text" value=""/>
+<button alt="Search" type="submit">Search</button>
+</form>
+</div>
+<footer id="footer">
+<section class="links_adlink">
+<ul class="container">
+</ul>
+</section>
+友情链接:<a href="http://www.hazzel.cn">Hazzel师傅</a> <a href="http://www.yqxiaojunjie.com/">俊杰师傅</a> <a href="http://margular.github.io">sunshine</a> <a href="https://3wapp.github.io/">janes师傅</a><br/> <a href="http://www.au1ge.xyz/">au1ge</a><br/>
+© 2017 <a href="http://www.wupco.cn">Wupco's Blog</a>
+<a class="back2top"></a>
+</footer>
+<script type="text/javascript">SyntaxHighlighter.all();</script><script type="text/javascript">
+/* <![CDATA[ */
+var ajaxcomment = {"ajax_url":"http:\/\/www.wupco.cn\/wp-admin\/admin-ajax.php","order":"asc","formpostion":"top"};
+/* ]]> */
+</script>
+<script src="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/app.jsver=20141010" type="text/javascript"></script>
+<script style="display:none">
+function index_overloaded(){
+
+}
+</script>
+<script src="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/jquery.min.js"></script>
+<script src="./审计日记2——偷懒的waf{爱频道音乐管理系统} – Wupco's Blog/functions.js"></script>
+<script>
+</script>
+</body>
+</html>

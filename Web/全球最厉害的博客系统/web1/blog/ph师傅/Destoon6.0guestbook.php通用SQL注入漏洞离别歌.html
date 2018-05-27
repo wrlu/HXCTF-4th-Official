@@ -1,0 +1,337 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>Destoon 6.0 guestbook.php 通用SQL注入漏洞 | 离别歌</title>
+<link href="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/styles.css" rel="stylesheet"/>
+<link href="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/style.css" rel="stylesheet"/>
+<link href="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/jquery.min.js"></script>
+<link href="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/code.css" rel="stylesheet"/>
+<link href="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/button.css" rel="stylesheet"/>
+<link href="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/destoon-v6-0-sql-injection.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/destoon-v6-0-sql-injection.html&amp;text=Destoon%206.0%20guestbook.php%20%E9%80%9A%E7%94%A8SQL%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/destoon-v6-0-sql-injection.html&amp;title=Destoon%206.0%20guestbook.php%20%E9%80%9A%E7%94%A8SQL%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/destoon-v6-0-sql-injection.html&amp;is_video=false&amp;description=Destoon%206.0%20guestbook.php%20%E9%80%9A%E7%94%A8SQL%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=Destoon%206.0%20guestbook.php%20%E9%80%9A%E7%94%A8SQL%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/destoon-v6-0-sql-injection.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/destoon-v6-0-sql-injection.html&amp;title=Destoon%206.0%20guestbook.php%20%E9%80%9A%E7%94%A8SQL%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/destoon-v6-0-sql-injection.html&amp;title=Destoon%206.0%20guestbook.php%20%E9%80%9A%E7%94%A8SQL%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/destoon-v6-0-sql-injection.html&amp;title=Destoon%206.0%20guestbook.php%20%E9%80%9A%E7%94%A8SQL%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/destoon-v6-0-sql-injection.html&amp;title=Destoon%206.0%20guestbook.php%20%E9%80%9A%E7%94%A8SQL%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/destoon-v6-0-sql-injection.html&amp;name=Destoon%206.0%20guestbook.php%20%E9%80%9A%E7%94%A8SQL%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">Destoon 6.0 guestbook.php 通用SQL注入漏洞</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2017年1月13日 13:21" itemprop="datePublished">
+                    2017 一月 13 13:21
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4900
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/destoon">destoon</a>,
+                
+                <a class="tag-link" href="/tag/%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E">注入漏洞</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<h2 id="_1"><a class="toclink" href="#_1">补丁分析</a></h2>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201701/3bcf1484288670.jpg"><img alt="14842844351228.jpg" src="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/3bcf1484288670.jpg" title="点击查看原图"/></a></p>
+<p>刚看到今天发布了Destoon 6.0 2017-01-09 更新，用我在【代码审计】小密圈里说过的方法，瞬间找到修复的一处SQL注入漏洞。用中午的20分钟，小小地分析一下。</p>
+<p>我们先看看diff（左新右老）：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201701/6c6e1484288668.jpg"><img alt="14842843330983.jpg" src="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/thum-6c6e1484288668.jpg" title="点击查看原图"/></a></p>
+<p>mobile/guestbook.php 中将<code>$_SERVER['HTTP_USER_AGENT']</code>删掉了。分析一下，这里是手机端的留言板，destoon将用户的User-Agent放入了留言内容变量<code>$post[content]</code>中。</p>
+<p>而据我对destoon的了解，其全局对GPC做了转义和WAF，但User-Agent没有进行过滤，所以这里有可能存在一个SQL注入漏洞。</p>
+<p>所以往后看看吧，其调用了guestbook类的add方法，将<code>$post</code>变量传入：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">function</span> <span class="nf">add</span><span class="p">(</span><span class="nv">$post</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">$post</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="nv">$post</span><span class="p">);</span>
+    <span class="nv">$sqlk</span> <span class="o">=</span> <span class="nv">$sqlv</span> <span class="o">=</span> <span class="s1">''</span><span class="p">;</span>
+    <span class="k">foreach</span><span class="p">(</span><span class="nv">$post</span> <span class="k">as</span> <span class="nv">$k</span><span class="o">=&gt;</span><span class="nv">$v</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">in_array</span><span class="p">(</span><span class="nv">$k</span><span class="p">,</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">fields</span><span class="p">))</span> <span class="p">{</span> <span class="nv">$sqlk</span> <span class="o">.=</span> <span class="s1">','</span><span class="o">.</span><span class="nv">$k</span><span class="p">;</span> <span class="nv">$sqlv</span> <span class="o">.=</span> <span class="s2">",'</span><span class="si">$v</span><span class="s2">'"</span><span class="p">;</span> <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="nv">$sqlk</span> <span class="o">=</span> <span class="nb">substr</span><span class="p">(</span><span class="nv">$sqlk</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="nv">$sqlv</span> <span class="o">=</span> <span class="nb">substr</span><span class="p">(</span><span class="nv">$sqlv</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">db</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="s2">"INSERT INTO </span><span class="si">{</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">table</span><span class="si">}</span><span class="s2"> (</span><span class="si">$sqlk</span><span class="s2">) VALUES (</span><span class="si">$sqlv</span><span class="s2">)"</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">itemid</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>这里调用了<code>$this-&gt;set($post)</code>进行处理，跟进：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">function</span> <span class="nf">set</span><span class="p">(</span><span class="nv">$post</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">global</span> <span class="nv">$DT_TIME</span><span class="p">,</span> <span class="nv">$_username</span><span class="p">,</span> <span class="nv">$DT_IP</span><span class="p">,</span> <span class="nv">$TYPE</span><span class="p">;</span>
+    <span class="nv">$post</span><span class="p">[</span><span class="s1">'content'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">strip_tags</span><span class="p">(</span><span class="nv">$post</span><span class="p">[</span><span class="s1">'content'</span><span class="p">]);</span>
+    <span class="nv">$post</span><span class="p">[</span><span class="s1">'title'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">in_array</span><span class="p">(</span><span class="nv">$post</span><span class="p">[</span><span class="s1">'type'</span><span class="p">],</span> <span class="nv">$TYPE</span><span class="p">)</span> <span class="o">?</span> <span class="s1">'['</span><span class="o">.</span><span class="nv">$post</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span><span class="o">.</span><span class="s1">']'</span> <span class="o">:</span> <span class="s1">''</span><span class="p">;</span>
+    <span class="nv">$post</span><span class="p">[</span><span class="s1">'title'</span><span class="p">]</span> <span class="o">.=</span> <span class="nx">dsubstr</span><span class="p">(</span><span class="nv">$post</span><span class="p">[</span><span class="s1">'content'</span><span class="p">],</span> <span class="mi">30</span><span class="p">);</span>
+    <span class="nv">$post</span><span class="p">[</span><span class="s1">'title'</span><span class="p">]</span> <span class="o">=</span> <span class="nx">daddslashes</span><span class="p">(</span><span class="nv">$post</span><span class="p">[</span><span class="s1">'title'</span><span class="p">]);</span>
+    <span class="nv">$post</span><span class="p">[</span><span class="s1">'hidden'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$post</span><span class="p">[</span><span class="s1">'hidden'</span><span class="p">])</span> <span class="o">?</span> <span class="mi">1</span> <span class="o">:</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">if</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">itemid</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nv">$post</span><span class="p">[</span><span class="s1">'status'</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$post</span><span class="p">[</span><span class="s1">'status'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span> <span class="o">?</span> <span class="mi">2</span> <span class="o">:</span> <span class="mi">3</span><span class="p">;</span>
+        <span class="nv">$post</span><span class="p">[</span><span class="s1">'editor'</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$_username</span><span class="p">;</span>
+        <span class="nv">$post</span><span class="p">[</span><span class="s1">'edittime'</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$DT_TIME</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nv">$post</span><span class="p">[</span><span class="s1">'username'</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$_username</span><span class="p">;</span>
+        <span class="nv">$post</span><span class="p">[</span><span class="s1">'addtime'</span><span class="p">]</span> <span class="o">=</span>  <span class="nv">$DT_TIME</span><span class="p">;</span>
+        <span class="nv">$post</span><span class="p">[</span><span class="s1">'ip'</span><span class="p">]</span> <span class="o">=</span>  <span class="nv">$DT_IP</span><span class="p">;</span>
+        <span class="nv">$post</span><span class="p">[</span><span class="s1">'edittime'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nv">$post</span><span class="p">[</span><span class="s1">'reply'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">''</span><span class="p">;</span>
+        <span class="nv">$post</span><span class="p">[</span><span class="s1">'status'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="nv">$post</span> <span class="o">=</span> <span class="nx">dhtmlspecialchars</span><span class="p">(</span><span class="nv">$post</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nb">array_map</span><span class="p">(</span><span class="s2">"trim"</span><span class="p">,</span> <span class="nv">$post</span><span class="p">);</span>
+<span class="p">}</span> 
+</pre></div>
+<p>简单分析可以发现，以下几点：</p>
+<ol>
+<li>content 有如下过程：<code>strip_tags</code> -&gt; <code>htmlspecialchars</code> -&gt; <code>trim</code></li>
+<li>title 有如下过程：<code>in_array($post['type'], $TYPE) ? '['.$post['type'].']' : ''</code> -&gt; <code>substr($post['content'], 30)</code> -&gt; <code>addslashes</code> -&gt; <code>trim</code></li>
+</ol>
+<p>先看content，因为destoon中的htmlspecialchars是设置了<code>ENT_QUOTES</code>参数的，所以单引号也被转义了，我们无法直接逃逸出单引号，但因为<code>\</code>没有转义，所以我们可以利用content来消灭掉一个单引号。</p>
+<p>紧跟其后的title，又是从content中截取了三十个字符（令<code>$post['type']</code>为空），所以我们大概可以构造出这样一个content: <code>,user(),0,0,0,0,0,0,2);...\</code></p>
+<p>最后执行的SQL语句如下：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201701/fd821484288693.jpg"><img alt="14842868001640.jpg" src="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/thum-fd821484288693.jpg" title="点击查看原图"/></a></p>
+<h2 id="_2"><a class="toclink" href="#_2">漏洞利用</a></h2>
+<p>但上述SQL语句有个问题，因为原信息有一部分<code>--来自','0','','1484286570','10.211.55.2','0','','2')</code>是被我们抛弃了，这部分又没法注释（因为有换行），在执行的过程中就会出错，导致执行失败。</p>
+<p>怎么办呢？</p>
+<p>其实这里之所以不能执行，就是因为有一个换行符\n，但因为前面存在一个 <code>substr($post['content'], 30)</code> ，所以我们只需要将长度设置的大于30，就能让换行符被切掉。</p>
+<p>所以，我最后得到的payload如下：<code>,0,0,0,0,0,0,user(),3)##########</code>，再将UA最后一位设置为<code>\</code>，如下图：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201701/e9d01484288710.jpg"><img alt="14842883094791.jpg" src="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/thum-e9d01484288710.jpg" title="点击查看原图"/></a></p>
+<p>就能成功在reply的位置注入信息出来啦：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201701/c6ca1484288703.jpg"><img alt="14842881833070.jpg" src="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/thum-c6ca1484288703.jpg" title="点击查看原图"/></a></p>
+<p>不过大家也看到了，这个注入有个30字符的限制，所以要注意一下几点：</p>
+<ol>
+<li>怎么绕过长度限制，这个后面说</li>
+<li>使用这个方法，就一定要以游客身份留言，否则会有更多没意义的键使长度限制更大</li>
+</ol>
+<h2 id="_3"><a class="toclink" href="#_3">长度限制绕过</a></h2>
+<p>【代码审计】小密圈中，@雨了个雨 师傅提出，登录用户其实是可以注入出管理员账号密码的。</p>
+<p>我们翻一下diff前面的代码就可以发现，登录用户其实是有很多可控字段的：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">if</span><span class="p">(</span><span class="nv">$do</span><span class="o">-&gt;</span><span class="na">pass</span><span class="p">(</span><span class="nv">$post</span><span class="p">))</span> <span class="p">{</span>
+    <span class="nv">$post</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">''</span><span class="p">;</span>
+    <span class="k">if</span><span class="p">(</span><span class="nv">$_userid</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nv">$user</span> <span class="o">=</span> <span class="nx">userinfo</span><span class="p">(</span><span class="nv">$_username</span><span class="p">);</span>
+        <span class="nv">$post</span><span class="p">[</span><span class="s1">'truename'</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$user</span><span class="p">[</span><span class="s1">'truename'</span><span class="p">];</span>
+        <span class="nv">$post</span><span class="p">[</span><span class="s1">'telephone'</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$user</span><span class="p">[</span><span class="s1">'telephone'</span><span class="p">]</span> <span class="o">?</span> <span class="nv">$user</span><span class="p">[</span><span class="s1">'telephone'</span><span class="p">]</span> <span class="o">:</span> <span class="nv">$user</span><span class="p">[</span><span class="s1">'mobile'</span><span class="p">];</span>
+        <span class="nv">$post</span><span class="p">[</span><span class="s1">'email'</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$user</span><span class="p">[</span><span class="s1">'mail'</span><span class="p">]</span> <span class="o">?</span> <span class="nv">$user</span><span class="p">[</span><span class="s1">'mail'</span><span class="p">]</span> <span class="o">:</span> <span class="nv">$user</span><span class="p">[</span><span class="s1">'email'</span><span class="p">];</span>
+        <span class="nv">$post</span><span class="p">[</span><span class="s1">'qq'</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$user</span><span class="p">[</span><span class="s1">'qq'</span><span class="p">];</span>
+        <span class="nv">$post</span><span class="p">[</span><span class="s1">'msn'</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$user</span><span class="p">[</span><span class="s1">'msn'</span><span class="p">];</span>
+        <span class="nv">$post</span><span class="p">[</span><span class="s1">'ali'</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$user</span><span class="p">[</span><span class="s1">'ali'</span><span class="p">];</span>
+        <span class="nv">$post</span><span class="p">[</span><span class="s1">'skype'</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$user</span><span class="p">[</span><span class="s1">'skype'</span><span class="p">];</span>
+    <span class="p">}</span>
+    <span class="nv">$do</span><span class="o">-&gt;</span><span class="na">add</span><span class="p">(</span><span class="nv">$post</span><span class="p">);</span>
+    <span class="k">exit</span><span class="p">(</span><span class="s1">'ok'</span><span class="p">);</span>
+<span class="p">}</span> 
+</pre></div>
+<p>如truename、telephone、email、qq、msn、ali、skype等，我们只需要找到其中可以控制内容的字段，用多个字段拼接的方法绕过长度限制。我就不细说了，有兴趣可以去看看 @雨了个雨 给出的POC。</p>
+<p>最后感叹一下前一个方法吧，有意思的一点在于，他和很多CTF里出现的题目一样，但又是那么巧合——巧合的是，content前面的部分进行了addslashes，最后的部分没有addslashes，却有htmlspecialchars。也就说，后面的部分没有单引号，却有反斜线；前面的部分没有反斜线，却有多出来的一个单引号。二者相结合，构成了一个SQL注入漏洞。</p>
+<p>最后，请使用者尽快升级20170109版本吧，以修复这个漏洞。</p>
+<p>==== 分割线 ==== </p>
+<p>这个链接最下方，有【代码审计】小密圈的加入方式： <a href="https://www.leavesongs.com/other/tinger.html">https://www.leavesongs.com/other/tinger.html</a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2511">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/98b1c939848d27c2d882b02afb28ca45.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.baidu.com" target="_blank">100</a>
+<time datetime="2017年1月18日 14:31" itemprop="datePublished">
+                            2017 一月 18 14:31
+                        </time>
+<a href="javascript:reply_to('2511', '100')">回复</a>
+</p>
+<p class="comment-meta">默认是有验证码的。。。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2512">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2017年1月18日 15:25" itemprop="datePublished">
+                            2017 一月 18 15:25
+                        </time>
+<a href="javascript:reply_to('2512', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@100：对，我为了测试方便，去掉了。嘿铲批量的大佬们可能需要费点脑经了。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2510">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/076a841928e6d66d6f7a982b69c2b521.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.baidu.com" target="_blank">test001</a>
+<time datetime="2017年1月17日 23:52" itemprop="datePublished">
+                            2017 一月 17 23:52
+                        </time>
+<a href="javascript:reply_to('2510', 'test001')">回复</a>
+</p>
+<p class="comment-meta">求加入小密圈</p>
+</div>
+</div>
+<div class="row" id="comment-2509">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/30d4fd73c5fd78a89b9a9ee259cab000.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">凯哥自媒体</a>
+<time datetime="2017年1月13日 15:09" itemprop="datePublished">
+                            2017 一月 13 15:09
+                        </time>
+<a href="javascript:reply_to('2509', '凯哥自媒体')">回复</a>
+</p>
+<p class="comment-meta">分享是美德，谢谢博主的分享。</p>
+</div>
+</div>
+<div class="row" id="comment-2508">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">一叶知秋</a>
+<time datetime="2017年1月13日 14:50" itemprop="datePublished">
+                            2017 一月 13 14:50
+                        </time>
+<a href="javascript:reply_to('2508', '一叶知秋')">回复</a>
+</p>
+<p class="comment-meta">小密圈万岁</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="29a72594ef0a1ea8c9d383fa153d77fc28ba09fd"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/29a72594ef0a1ea8c9d383fa153d77fc28ba09fd"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="403">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="HYwv63so2PGbMbOy4eDdCPMRZpH13yKvfiR1UxEDtCAAMQcNSv7XbtOW8ta9M2zF"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./Destoon 6.0 guestbook.php 通用SQL注入漏洞  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

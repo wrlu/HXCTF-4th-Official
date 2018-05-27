@@ -1,0 +1,422 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./如何简单地找回保存在浏览器里的密码  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./如何简单地找回保存在浏览器里的密码  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./如何简单地找回保存在浏览器里的密码  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>如何简单地找回保存在浏览器里的密码 | 离别歌</title>
+<link href="./如何简单地找回保存在浏览器里的密码  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./如何简单地找回保存在浏览器里的密码  离别歌/styles.css" rel="stylesheet"/>
+<link href="./如何简单地找回保存在浏览器里的密码  离别歌/style.css" rel="stylesheet"/>
+<link href="./如何简单地找回保存在浏览器里的密码  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./如何简单地找回保存在浏览器里的密码  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./如何简单地找回保存在浏览器里的密码  离别歌/jquery.min.js"></script>
+<link href="./如何简单地找回保存在浏览器里的密码  离别歌/code.css" rel="stylesheet"/>
+<link href="./如何简单地找回保存在浏览器里的密码  离别歌/button.css" rel="stylesheet"/>
+<link href="./如何简单地找回保存在浏览器里的密码  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./如何简单地找回保存在浏览器里的密码  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/SHARE/how-to-find-password-in-browser.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/SHARE/how-to-find-password-in-browser.html&amp;text=%E5%A6%82%E4%BD%95%E7%AE%80%E5%8D%95%E5%9C%B0%E6%89%BE%E5%9B%9E%E4%BF%9D%E5%AD%98%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E9%87%8C%E7%9A%84%E5%AF%86%E7%A0%81"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/SHARE/how-to-find-password-in-browser.html&amp;title=%E5%A6%82%E4%BD%95%E7%AE%80%E5%8D%95%E5%9C%B0%E6%89%BE%E5%9B%9E%E4%BF%9D%E5%AD%98%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E9%87%8C%E7%9A%84%E5%AF%86%E7%A0%81"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/SHARE/how-to-find-password-in-browser.html&amp;is_video=false&amp;description=%E5%A6%82%E4%BD%95%E7%AE%80%E5%8D%95%E5%9C%B0%E6%89%BE%E5%9B%9E%E4%BF%9D%E5%AD%98%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E9%87%8C%E7%9A%84%E5%AF%86%E7%A0%81"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E5%A6%82%E4%BD%95%E7%AE%80%E5%8D%95%E5%9C%B0%E6%89%BE%E5%9B%9E%E4%BF%9D%E5%AD%98%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E9%87%8C%E7%9A%84%E5%AF%86%E7%A0%81&amp;body=Check out this article: https%3A//www.leavesongs.com/SHARE/how-to-find-password-in-browser.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/SHARE/how-to-find-password-in-browser.html&amp;title=%E5%A6%82%E4%BD%95%E7%AE%80%E5%8D%95%E5%9C%B0%E6%89%BE%E5%9B%9E%E4%BF%9D%E5%AD%98%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E9%87%8C%E7%9A%84%E5%AF%86%E7%A0%81"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/SHARE/how-to-find-password-in-browser.html&amp;title=%E5%A6%82%E4%BD%95%E7%AE%80%E5%8D%95%E5%9C%B0%E6%89%BE%E5%9B%9E%E4%BF%9D%E5%AD%98%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E9%87%8C%E7%9A%84%E5%AF%86%E7%A0%81"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/SHARE/how-to-find-password-in-browser.html&amp;title=%E5%A6%82%E4%BD%95%E7%AE%80%E5%8D%95%E5%9C%B0%E6%89%BE%E5%9B%9E%E4%BF%9D%E5%AD%98%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E9%87%8C%E7%9A%84%E5%AF%86%E7%A0%81"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/SHARE/how-to-find-password-in-browser.html&amp;title=%E5%A6%82%E4%BD%95%E7%AE%80%E5%8D%95%E5%9C%B0%E6%89%BE%E5%9B%9E%E4%BF%9D%E5%AD%98%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E9%87%8C%E7%9A%84%E5%AF%86%E7%A0%81"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/SHARE/how-to-find-password-in-browser.html&amp;name=%E5%A6%82%E4%BD%95%E7%AE%80%E5%8D%95%E5%9C%B0%E6%89%BE%E5%9B%9E%E4%BF%9D%E5%AD%98%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E9%87%8C%E7%9A%84%E5%AF%86%E7%A0%81&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">如何简单地找回保存在浏览器里的密码</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年6月19日 08:41" itemprop="datePublished">
+                    2014 六月 19 08:41
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4788
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/SHARE">资源分享</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E6%B5%8F%E8%A7%88%E5%99%A8">浏览器</a>,
+                
+                <a class="tag-link" href="/tag/%E6%89%BE%E5%9B%9E%E5%AF%86%E7%A0%81">找回密码</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    一个简单的议题，也是同学们比较常遇到的问题，怎样找回保存在浏览器的“自动填写表单”功能中的密码。最容易想到的当然是抓包。一般的网站数据包里密码就是明文的，不过有些却也不是，可能是经过hash之后传递的（多数大网站）。
+</p>
+<p>
+	    还有些浏览器自带此功能，但总有诸多限制。比如chrome需要输入当前windows密码：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201406/bd221403139344.jpg" id="ematt:550" target="_blank"><img alt="0011.jpg" border="0" height="584" src="./如何简单地找回保存在浏览器里的密码  离别歌/bd221403139344.jpg" title="点击查看原图" width="645"/></a>
+</p>
+<p>
+	    猎豹浏览器需要输入之前设置的手势安全锁：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201406/dda61403139351.jpg" id="ematt:551" target="_blank"><img alt="0012.jpg" border="0" height="480" src="./如何简单地找回保存在浏览器里的密码  离别歌/dda61403139351.jpg" title="点击查看原图" width="382"/></a>
+</p>
+<p>
+	    真蛋疼是吧。
+</p>
+<p>
+	    这里给一个小技巧，利用javascript来获取当前保存的密码，多浏览器通用的，简单又实用。
+</p>
+<p>
+	    我平时多用猎豹浏览器，这里先用猎豹做个例子吧。dnspod应该是安全性要求很高的一个网站了，从域名的https就可以看出。那么，我现在就来找回一下保存在猎豹浏览器中的dnspod密码。
+</p>
+<p>
+	    首先来到dnspod，发现存在自动保存的密码：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201406/664a1403139327.jpg" id="ematt:542" target="_blank"><img alt="005.jpg" border="0" height="350" src="./如何简单地找回保存在浏览器里的密码  离别歌/thum-664a1403139327.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p>
+	    右键审核元素，看到密码这个input框的id是password。
+</p>
+<p>
+	    然后来到控制台，输入password.value即可看到密码了：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201406/6bc21403139329.jpg" id="ematt:544" target="_blank"><img alt="006.jpg" border="0" height="149" src="./如何简单地找回保存在浏览器里的密码  离别歌/6bc21403139329.jpg" title="点击查看原图" width="475"/></a>
+</p>
+<p>
+	    是不是很神奇。原理很简单，就是利用了javascript的DOM操作，来获取到DOM中的内容。为什么我记下的是input框的id，因为id方便。在javascript中所有元素的id会被注册成为一个javascript变量。所以在控制台直接使用password即可访问密码框这个元素。而value既是input框的值。
+</p>
+<p>
+	    那么，我们换个浏览器，chrome是现在使用量最大的浏览器，他也有自带的密码填充功能。
+</p>
+<p>
+	    来到乌云，发现乌云密码被自动填充了，我们还是按刚才的方法审核元素，看到密码的input框：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201406/10671403139333.jpg" id="ematt:545" target="_blank"><img alt="007.jpg" border="0" height="452" src="./如何简单地找回保存在浏览器里的密码  离别歌/10671403139333.jpg" title="点击查看原图" width="490"/></a>
+</p>
+<p>
+	    发现没有id这个属性。但name属性是有的，于是我们还是来到控制台，输入$("[name='password']").val()，即可看到密码：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201406/39551403139336.jpg" id="ematt:546" target="_blank"><img alt="008.jpg" border="0" height="140" src="./如何简单地找回保存在浏览器里的密码  离别歌/39551403139336.jpg" title="点击查看原图" width="491"/></a>
+</p>
+<p>
+	    原理相同，不过因为这次的password框没有id属性，所以不能直接用id.value来获得值了。但乌云这个页面加载了Jquery，所以我用Jquery的一个方法来获取到了value，不懂的同学可以看看Jquery的文档。
+</p>
+<p>
+	    然后，firefox看看如何。用firefox访问emlog博客后台，发现记录了用户名与密码，我们按刚才的方法审核元素（或firebug），看到密码字段：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201406/c2f51403139339.jpg" id="ematt:547" target="_blank"><img alt="009.jpg" border="0" height="480" src="./如何简单地找回保存在浏览器里的密码  离别歌/thum-c2f51403139339.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p>
+	    id是"pw"，于是来到控制台输入pw.value获得密码：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201406/55a21403139342.jpg" id="ematt:549" target="_blank"><img alt="0010.jpg" border="0" height="148" src="./如何简单地找回保存在浏览器里的密码  离别歌/55a21403139342.jpg" title="点击查看原图" width="510"/></a>
+</p>
+<p>
+	    最后剩下IE，我的IE9不知道为何不会记录密码，所以没法测试我也就不测试了，毕竟用IE的少，我个人也基本不碰IE。从原理上讲是没有什么问题的。
+</p>
+<p>
+	    因为javascript是所有浏览器都必须支持的一种语言，而它又能够访问DOM，所以利用js就能轻松获得浏览器保存的密码。所以这个方法应该是通杀，支持所有含有控制台的浏览器。
+</p>
+<p>
+<br>
+</br></p>
+<p>
+	    ps. 还是M老师的方法简单，直接把type="password"改成type="text"~
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1764">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./如何简单地找回保存在浏览器里的密码  离别歌/4b772b9f612aaad589206502a223cd5e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">err02</a>
+<time datetime="2014年8月31日 12:45" itemprop="datePublished">
+                            2014 八月 31 12:45
+                        </time>
+<a href="javascript:reply_to('1764', 'err02')">回复</a>
+</p>
+<p class="comment-meta">我一般直接把 type = "password" 改成 type = "text"</p>
+</div>
+</div>
+<div class="row" id="comment-1728">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./如何简单地找回保存在浏览器里的密码  离别歌/a50c3bfb30bc9284858d76d8e1f0343e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">shutear</a>
+<time datetime="2014年7月20日 22:28" itemprop="datePublished">
+                            2014 七月 20 22:28
+                        </time>
+<a href="javascript:reply_to('1728', 'shutear')">回复</a>
+</p>
+<p class="comment-meta">你好！<br>我的Chrome可以通过" chrome://settings/passwords "直接查看密码，无需当前windows密码，请问你是用了什么插件，还是？<br/>谢谢！</br></p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1731">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./如何简单地找回保存在浏览器里的密码  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年7月21日 12:57" itemprop="datePublished">
+                            2014 七月 21 12:57
+                        </time>
+<a href="javascript:reply_to('1731', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@shutear：没呀，我是win7开了UAC的chrome 33，没装其他插件</p>
+</div>
+</div>
+<div class="row" id="comment-2406">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./如何简单地找回保存在浏览器里的密码  离别歌/a762e9655043e92c0dac93a2e46af0ad.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">6666</a>
+<time datetime="2016年8月7日 09:01" itemprop="datePublished">
+                            2016 八月 07 09:01
+                        </time>
+<a href="javascript:reply_to('2406', '6666')">回复</a>
+</p>
+<p class="comment-meta">@shutear：那是因为你的windows没设置密码~~~~</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1717">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./如何简单地找回保存在浏览器里的密码  离别歌/c826ebd590af4d4a35e266f5935ae414.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.yanyu3.com/" target="_blank">颜域</a>
+<time datetime="2014年7月11日 00:22" itemprop="datePublished">
+                            2014 七月 11 00:22
+                        </time>
+<a href="javascript:reply_to('1717', '颜域')">回复</a>
+</p>
+<p class="comment-meta">博主你好，你文中提到的两种方式我都试了，确实不错。 <br/>但是在对路由器的页面访问时，弹出来的输入框中的密码该如何获取呢？ <br/>难道只能通过抓包，有没有类似文中的方法来达到目的？ <br/>先谢谢了~</p>
+</div>
+</div>
+<div class="row" id="comment-1701">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./如何简单地找回保存在浏览器里的密码  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.henghost.com/" target="_blank">香港云主机</a>
+<time datetime="2014年6月26日 18:46" itemprop="datePublished">
+                            2014 六月 26 18:46
+                        </time>
+<a href="javascript:reply_to('1701', '香港云主机')">回复</a>
+</p>
+<p class="comment-meta">一切能用代码解决的问题就不是问题</p>
+</div>
+</div>
+<div class="row" id="comment-1697">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./如何简单地找回保存在浏览器里的密码  离别歌/7f39d71411ade8d7a7e2e409675f5055.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://crazyof.me/" target="_blank">_zero</a>
+<time datetime="2014年6月23日 23:21" itemprop="datePublished">
+                            2014 六月 23 23:21
+                        </time>
+<a href="javascript:reply_to('1697', '_zero')">回复</a>
+</p>
+<p class="comment-meta">博主你好，你文中提到的两种方式我都试了，确实不错。<br/>但是在对路由器的页面访问时，弹出来的输入框中的密码该如何获取呢？<br/>难道只能通过抓包，有没有类似文中的方法来达到目的？<br/>先谢谢了~</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1698">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./如何简单地找回保存在浏览器里的密码  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年6月23日 23:25" itemprop="datePublished">
+                            2014 六月 23 23:25
+                        </time>
+<a href="javascript:reply_to('1698', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@_zero：那个估计只能抓包了，那是http基础认证，抓包也很简单。直接浏览器的审核元素里能看数据包</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1699">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./如何简单地找回保存在浏览器里的密码  离别歌/7f39d71411ade8d7a7e2e409675f5055.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://crazyof.me/" target="_blank">_zero</a>
+<time datetime="2014年6月23日 23:32" itemprop="datePublished">
+                            2014 六月 23 23:32
+                        </time>
+<a href="javascript:reply_to('1699', '_zero')">回复</a>
+</p>
+<p class="comment-meta">@phithon：嗯，我试过用Fiddler2了比较简单，只是想问问有没有文中这样的方式，比较新奇</p>
+</div>
+</div>
+<div class="row" id="comment-1713">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./如何简单地找回保存在浏览器里的密码  离别歌/a8a3793e0b95deaad3f08ce32b067794.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Pany</a>
+<time datetime="2014年7月9日 04:05" itemprop="datePublished">
+                            2014 七月 09 04:05
+                        </time>
+<a href="javascript:reply_to('1713', 'Pany')">回复</a>
+</p>
+<p class="comment-meta">@phithon：type="password"<br/>改成不是password类型就可以了</p>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1696">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./如何简单地找回保存在浏览器里的密码  离别歌/1efcbc6ddae9dba42613d1146baaa62f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.go2mj.com" target="_blank">麦杰机械</a>
+<time datetime="2014年6月21日 23:54" itemprop="datePublished">
+                            2014 六月 21 23:54
+                        </time>
+<a href="javascript:reply_to('1696', '麦杰机械')">回复</a>
+</p>
+<p class="comment-meta">感谢分享</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="17a69bdf077cdc4d087c04d3ba7db39f2084ed5b"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./如何简单地找回保存在浏览器里的密码  离别歌/17a69bdf077cdc4d087c04d3ba7db39f2084ed5b"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="317">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="WKJNZzR8ImXC4JLevNq0EHLIlpvcczZWu44jN33n99R14o9tj4UKdlNNutYkV3O6"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./如何简单地找回保存在浏览器里的密码  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./如何简单地找回保存在浏览器里的密码  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

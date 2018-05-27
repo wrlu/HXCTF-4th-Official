@@ -1,0 +1,464 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./sqlite3的C语言使用(一)  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./sqlite3的C语言使用(一)  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./sqlite3的C语言使用(一)  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>sqlite3的C语言使用(一) | 离别歌</title>
+<link href="./sqlite3的C语言使用(一)  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./sqlite3的C语言使用(一)  离别歌/styles.css" rel="stylesheet"/>
+<link href="./sqlite3的C语言使用(一)  离别歌/style.css" rel="stylesheet"/>
+<link href="./sqlite3的C语言使用(一)  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./sqlite3的C语言使用(一)  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./sqlite3的C语言使用(一)  离别歌/jquery.min.js"></script>
+<link href="./sqlite3的C语言使用(一)  离别歌/code.css" rel="stylesheet"/>
+<link href="./sqlite3的C语言使用(一)  离别歌/button.css" rel="stylesheet"/>
+<link href="./sqlite3的C语言使用(一)  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./sqlite3的C语言使用(一)  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/C/sqlite3_1.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/C/sqlite3_1.html&amp;text=sqlite3%E7%9A%84C%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%28%E4%B8%80%29"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/C/sqlite3_1.html&amp;title=sqlite3%E7%9A%84C%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%28%E4%B8%80%29"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/C/sqlite3_1.html&amp;is_video=false&amp;description=sqlite3%E7%9A%84C%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%28%E4%B8%80%29"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=sqlite3%E7%9A%84C%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%28%E4%B8%80%29&amp;body=Check out this article: https%3A//www.leavesongs.com/C/sqlite3_1.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/C/sqlite3_1.html&amp;title=sqlite3%E7%9A%84C%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%28%E4%B8%80%29"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/C/sqlite3_1.html&amp;title=sqlite3%E7%9A%84C%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%28%E4%B8%80%29"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/C/sqlite3_1.html&amp;title=sqlite3%E7%9A%84C%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%28%E4%B8%80%29"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/C/sqlite3_1.html&amp;title=sqlite3%E7%9A%84C%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%28%E4%B8%80%29"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/C/sqlite3_1.html&amp;name=sqlite3%E7%9A%84C%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%28%E4%B8%80%29&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">sqlite3的C语言使用(一)</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年3月19日 17:03" itemprop="datePublished">
+                    2013 三月 19 17:03
+                </time>
+</div>
+<div class="article-tag">
+            阅读：15593
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/C">C/C++</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93">数据库</a>,
+                
+                <a class="tag-link" href="/tag/sqlite">sqlite</a>,
+                
+                <a class="tag-link" href="/tag/API%E5%87%BD%E6%95%B0">API函数</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p><span style="font-size:14px;">    前一天我讲了如何<a href="https://www.leavesongs.com/C/VCSQLITE.html" target="_blank">在VC中连接sqlite的库</a>，从今天开始就分几个专题详细学习一下sqlite的一些API。当然我也是才接触sqlite3，这些题也都是我的作业题，如果有什么错误大家可以联系我，共同进步。</span></p>
+<p><span style="font-size:14px;">0.准备工作</span></p>
+<p><span style="font-size:14px;">    在代码头上加上这样一个宏定义：typedef struct sqlite3 sqlite3; 以后我们就可以将sqlite3视为一个新数据类型，表示一个sqlite3数据库句柄。</span></p>
+<p><span style="font-size:14px;">    明确一下今天我们写的这个程序的目的（也就是我的作业题）：</span></p>
+<p style="margin-left:18.0000pt;"><strong>通讯录管理软件。<br>
+通讯者信息包括：姓名、性别、手机、Email、地址。<br>
+软件功能：添加、查询、删除、全部输出。 </br></br></strong></p>
+<p><span style="font-size:14px;">1.sqlite3_open 打开或新建一个数据库文件</span></p>
+<table border="1" cellpadding="1" cellspacing="1" style="width: 500px; ">
+<tbody>
+<tr>
+<td>
+<pre style="color: rgb(0, 0, 0); line-height: normal; ">
+<span style="font-size:14px;"><strong>函数原型：</strong>
+int sqlite3_open(
+const char *filename,   /* Database filename (UTF-8) */
+sqlite3 **ppDb          /* OUT: SQLite db handle */
+);</span>
+</pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p><span style="font-size:14px;">    filename：数据库文件地址</span></p>
+<p><span style="font-size:14px;">    ppDb:sqlite3数据库类型句柄。</span></p>
+<p><span style="font-size:14px;">    函数作用是打开一个数据库文件，如果文件不存在，则创建之。所以我们的程序开头就是：</span></p>
+<pre class="brush:cpp;">
+int _tmain(int argc, _TCHAR* argv[])
+{
+	bool flag = true;
+	sqlite3 * db;
+	char szErr[256];
+	char * pErr;
+	int n;
+	int rc = sqlite3_open("addresslist.db",&amp;db);
+	if (rc != SQLITE_OK)
+	{
+		printf("打开数据库出错\n");
+		return 0;
+	}</pre>
+<p><span style="font-size:14px;">2.sqlite3_exec 执行sql语句。（一般用来执行不用返回值的sql语句，如create table、update等）</span></p>
+<table border="1" cellpadding="1" cellspacing="1" style="width: 500px; ">
+<tbody>
+<tr>
+<td>
+<pre style="color: rgb(0, 0, 0); line-height: normal; ">
+<span style="font-size:14px;"><strong>函数原型</strong>
+int sqlite3_exec(
+sqlite3 *,                                  /* An open database */
+const char *sql,                           /* SQL to be evaluated */
+int (*callback)(void*,int,char**,char**),  /* Callback function */
+void *,                                    /* 1st argument to callback */
+char **errmsg                              /* Error msg written here */
+);</span>
+</pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p><span style="font-size:14px;">    第一个参数是sqlite3数据库句柄，和sqlite3_open函数第2个参数一样。</span></p>
+<p><span style="font-size:14px;">    sql:执行的sql语句。</span></p>
+<p><span style="font-size:14px;">    第三个参数是个回调函数，在执行本函数后会执行回调函数，不用则填NULL。</span></p>
+<p><span style="font-size:14px;">    第四个参数是传给回调函数的参数，不用则填NULL。</span></p>
+<p><span style="font-size:14px;">    errmsg：出错信息，不用则填NULL。</span></p>
+<p><span style="font-size:14px;">    这个函数可以执行一些非查询类的sql语句，很方便。我们在主函数里用sqlite3_exec来创建一个表：</span></p>
+<pre class="brush:cpp;">
+	const char * sql = "CREATE TABLE IF NOT EXISTS addlist(  \
+		per_id INTEGER PRIMARY KEY,  \
+		per_name VARCHAR(16) NOT NULL,  \
+		per_sex VARCHAR(2),  \
+		per_number VARCHAR(20),  \
+		per_email VARCHAR(256),  \
+		per_address varchar(256));";
+	rc = sqlite3_exec(db,sql,NULL,NULL,&amp;pErr);
+	if (rc != SQLITE_OK)
+	{
+		printf("创建表失败\n");
+		return 0;
+	}</pre>
+<p><span style="font-size:14px;">    sql语句的意思大家应该都知道，IF NOT EXIST如果表addlist不存在则创建它，当我们第二次运行时执行这个语句也不会再创建表了。</span></p>
+<p><span style="font-size:14px;">3.接下来就可以等待用户的输入了，我们可以给用户一些选择，比如选1表示要添加联系人，选2表示删除联系人，选3表示查询联系人。这个就一个swich语句完了，我就不发代码了。</span></p>
+<p><span style="font-size:14px;">    再开始写函数，首先是添加联系人的函数AddPerson</span></p>
+<pre class="brush:cpp;">
+void AddPerson(sqlite3 * db)
+{
+	while (getchar() != '\n') ;
+	char szName[16],szSex[8],szNum[32],szEmail[256],szAddress[256];
+	printf("输入姓名(回车结束):");
+	gets(szName);
+	printf("输入性别(回车结束):");
+	gets(szSex);
+	printf("输入电话号码(回车结束):");
+	gets(szNum);
+	printf("输入e-mail(回车结束):");
+	gets(szEmail);
+	printf("输入地址(回车结束):");
+	gets(szAddress);
+	char sql[512];
+	sprintf(sql,"INSERT INTO addlist VALUES(null,'%s','%s','%s','%s','%s');",
+		szName,szSex,szNum,szEmail,szAddress);
+	int rc = sqlite3_exec(db,sql,NULL,NULL,NULL);
+	if (rc != SQLITE_OK)
+	{
+		printf("出错\n");
+	}
+	return ;
+}</pre>
+<p><span style="font-size:14px;">    没有用新的API，一个sqlite3_exec就解决了问题。</span></p>
+<p><span style="font-size:14px;">4.sqlite3_prepare 把一条SQL语句编译成字节码留给后面的执行函数(并不执行)</span></p>
+<table border="1" cellpadding="1" cellspacing="1" style="width: 500px; ">
+<tbody>
+<tr>
+<td>
+<pre style="color: rgb(0, 0, 0); line-height: normal; ">
+<span style="font-size:14px;"><strong>函数原型</strong>
+int sqlite3_prepare(
+sqlite3 *db,            /* Database handle */
+const char *zSql,       /* SQL statement, UTF-8 encoded */
+int nByte,              /* Maximum length of zSql in bytes. */
+sqlite3_stmt **ppStmt,  /* OUT: Statement handle */
+const char **pzTail     /* OUT: Pointer to unused portion of zSql */
+);</span>
+</pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p><span style="font-size:14px;">    db:数据库句柄</span></p>
+<p><span style="font-size:14px;">    zSql:sql语句</span></p>
+<p><span style="font-size:14px;">    nByte:如果nByte小于0，则函数取出zSql中从开始到第一个0终止符的内容；如果nByte不是负的，那么它就是这个函数能从zSql中读取的字节数的最大值。</span></p>
+<p style="margin-left:3.3pt;"><span style="font-size:14px;">    pzTail：上面提到zSql在遇见终止符或者是达到设定的nByte之后结束，假如zSql还有剩余的内容，那么这些剩余的内容被存放到pZTail中，不包括终止符</span></p>
+<p style="margin-left:3.3pt;"><span style="font-size:14px;">    ppStmt：能够使用sqlite3_step()执行的编译好的准备语句的句柄，如果错误发生，它被置为NULL，如假如输入的文本不包括sql语句。调用过程必须负责在编译好的sql语句完成使用后使用sqlite3_finalize()删除它。</span></p>
+<p style="margin-left:3.3pt;"><span style="font-size:14px;">    我们这个函数将sql语句编译成二进制字节码，以便后面的函数使用，编译好的东西就是stmt(第五个参数)。别问我为什么，我也不知道，但要执行sql来查询就要编译。于是我们查询函数SelectPerson可以这么写：</span></p>
+<pre class="brush:cpp;">
+void SelectPerson(sqlite3 * db)
+{
+	char sql[256];
+	int per_num;
+	sqlite3_stmt * stmt;
+	printf("输入要查询的联系人编号:\n");
+	scanf("%d",&amp;per_num);
+	sprintf(sql,"select * from addlist where per_id='%d'",per_num);
+	sqlite3_prepare(db,sql,-1,&amp;stmt,NULL);</pre>
+<p><span style="font-size:14px;">5.sqlite3_step 执行编译好的sql语句，获得结果的一行</span></p>
+<table border="1" cellpadding="1" cellspacing="1" style="width: 500px; ">
+<tbody>
+<tr>
+<td>
+<pre style="color: rgb(0, 0, 0); line-height: normal; ">
+<span style="font-size:14px;"><strong>函数原型</strong>
+int sqlite3_step(sqlite3_stmt*);</span>
+</pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p><span style="font-size:14px;">    stmt:就是刚才执行sqlite3_prepare后得到的sql语句句柄。</span></p>
+<p><span style="font-size:14px;">    这个函数很简单，执行sql语句，得到返回结果的一行。当然这个得到不是说从返回值得到，而是一个抽象的得到，要真正得到具体数据，还得利用其它函数。</span></p>
+<p><span style="font-size:14px;">    因为是得到返回值的一行，所以说要用循环语句来得到所有行。当然如果只有一行就不用了。我们这里查询某个人的信息，结果应该只有一行，所以执行一次step就行。</span></p>
+<p><span style="font-size:14px;">    这是SelectPerson函数剩下的部分：</span></p>
+<pre class="brush:cpp;">
+	if(sqlite3_step(stmt) == SQLITE_ROW)
+	{
+		printf("编号:%d 姓名:%s 性别:%s 电话:%s Email:%s 地址:%s\n",
+			sqlite3_column_int(stmt,0),sqlite3_column_text(stmt,1),sqlite3_column_text(stmt,2),
+			sqlite3_column_text(stmt,3),sqlite3_column_text(stmt,4),sqlite3_column_text(stmt,5));
+	}
+	else
+	{
+		printf("输入错误\n");
+	}
+
+	sqlite3_finalize(stmt);
+	return;
+}</pre>
+<p><span style="font-size:14px;">6.如果要查询全部人的数据，sqlite3_step函数就要用while语句来循环读取了，我直接给代码：</span></p>
+<pre class="brush:cpp;">
+void AllSelect(sqlite3 * db)
+{
+	sqlite3_stmt * stmt;
+	sqlite3_prepare(db,"select * from addlist",-1,&amp;stmt,NULL);
+	while(sqlite3_step(stmt) == SQLITE_ROW)
+	{
+		printf("编号:%d 姓名:%s 性别:%s 电话:%s Email:%s 地址:%s\n",
+			sqlite3_column_int(stmt,0),sqlite3_column_text(stmt,1),sqlite3_column_text(stmt,2),
+			sqlite3_column_text(stmt,3),sqlite3_column_text(stmt,4),sqlite3_column_text(stmt,5));
+	}
+	sqlite3_finalize(stmt);
+	return ;
+}</pre>
+<p><span style="font-size:14px;">7.sqlite3_finalize 销毁sql语句句柄。这个函数很简单就不给原型了，记住创建了以后一定要销毁就行。</span></p>
+<p><span style="font-size:14px;">8.到现在，我们已经完成了3个任务了，添加联系人、查询联系人、列出所有联系人，最后再写一个删除联系人的函数就完成任务了：</span></p>
+<pre class="brush:java;">
+void DelPerson(sqlite3 * db)
+{
+	int n;
+	char sql[256];
+	printf("输入要删除的联系人编号:");
+	scanf("%d",&amp;n);
+	sprintf(sql,"delete from addlist where per_id=%d",n);
+	int rc = sqlite3_exec(db,sql,NULL,NULL,NULL);
+
+	if(SQLITE_OK == rc)
+	{
+		printf("执行成功\n");
+	}
+	else
+	{
+		printf("删除失败\n");
+	}
+	return ;
+}</pre>
+<p><span style="font-size:14px;">    一个sqlite3_exec函数解决问题。</span></p>
+<p><span style="font-size:14px;">9.总结</span></p>
+<p><span style="font-size:14px;">    这个题目写完了，我也介绍了一些常用的sqlite3的API，并没有想象中那么复杂。这是运行的截图，代码我不发了，如果想要可以联系我。</span></p>
+<p>     <a href="https://www.leavesongs.com/content/uploadfile/201303/3fb51363688100.jpg" id="ematt:75" target="_blank"><img alt="点击查看原图" border="0" src="./sqlite3的C语言使用(一)  离别歌/thum-3fb51363688100.jpg"/></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2343">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./sqlite3的C语言使用(一)  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">kid</a>
+<time datetime="2016年5月28日 18:46" itemprop="datePublished">
+                            2016 五月 28 18:46
+                        </time>
+<a href="javascript:reply_to('2343', 'kid')">回复</a>
+</p>
+<p class="comment-meta">博主，我最近在写一个图书管理系统的作业，想用数据库，能发代码参考一下吗？O(∩_∩)O谢谢，1038210252@qq.com</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2344">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./sqlite3的C语言使用(一)  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年5月28日 19:24" itemprop="datePublished">
+                            2016 五月 28 19:24
+                        </time>
+<a href="javascript:reply_to('2344', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@kid：这个时间太久了，我也找不到代码了</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2345">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./sqlite3的C语言使用(一)  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">kid</a>
+<time datetime="2016年5月29日 12:04" itemprop="datePublished">
+                            2016 五月 29 12:04
+                        </time>
+<a href="javascript:reply_to('2345', 'kid')">回复</a>
+</p>
+<p class="comment-meta">@phithon：那打扰了</p>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2125">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./sqlite3的C语言使用(一)  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">kaka</a>
+<time datetime="2015年6月10日 08:49" itemprop="datePublished">
+                            2015 六月 10 08:49
+                        </time>
+<a href="javascript:reply_to('2125', 'kaka')">回复</a>
+</p>
+<p class="comment-meta">406732298@qq.com 求代码</p>
+</div>
+</div>
+<div class="row" id="comment-1925">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./sqlite3的C语言使用(一)  离别歌/e0cd209b2cc8061c157feeb579944379.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/C/sqlite3_1.html" target="_blank">maomao</a>
+<time datetime="2015年1月26日 17:00" itemprop="datePublished">
+                            2015 一月 26 17:00
+                        </time>
+<a href="javascript:reply_to('1925', 'maomao')">回复</a>
+</p>
+<p class="comment-meta">1015787417@qq.com 求代码</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="609b7aa2784be97bfd8f74edab9cda282f005361"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./sqlite3的C语言使用(一)  离别歌/609b7aa2784be97bfd8f74edab9cda282f005361"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="242">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="GCZrAwiCeU06XscXLueBw7bGNsh2K6FEeWkXo0uRFHUvX7AczLIl5LdLWwKatAuO"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./sqlite3的C语言使用(一)  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./sqlite3的C语言使用(一)  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

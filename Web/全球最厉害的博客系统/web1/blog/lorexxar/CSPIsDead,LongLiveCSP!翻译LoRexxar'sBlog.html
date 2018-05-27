@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+
+<html lang="zh-Hans">
+<head>
+<!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+<meta charset="utf-8"/>
+<meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<meta content="telephone=no" name="format-detection">
+<meta content="LoRexxar" name="author"/>
+<meta content="CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy
+无意间阅读到了去年google团队写的关于CSP现状和展望的论文，深有感触，所以翻译了大部分的文章内容，分享给大家。
+https://static.googleusercontent.com/me" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="CSP Is Dead, Long Live CSP! 翻译" property="og:title"/>
+<meta content="http://lorexxar.cn/2017/05/09/CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy/index.html" property="og:url"/>
+<meta content="LoRexxar's Blog" property="og:site_name"/>
+<meta content="CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy
+无意间阅读到了去年google团队写的关于CSP现状和展望的论文，深有感触，所以翻译了大部分的文章内容，分享给大家。
+https://static.googleusercontent.com/me" property="og:description"/>
+<meta content="http://static.zybuluo.com/LoRexxar/a56u1xigxrgg1wyph9h4ng15/image_1bbt7blfa15tg1l1p1ai51oigppa9.png" property="og:image"/>
+<meta content="2017-05-12T07:07:29.070Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="CSP Is Dead, Long Live CSP! 翻译" name="twitter:title"/>
+<meta content="CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy
+无意间阅读到了去年google团队写的关于CSP现状和展望的论文，深有感触，所以翻译了大部分的文章内容，分享给大家。
+https://static.googleusercontent.com/me" name="twitter:description"/>
+<meta content="http://static.zybuluo.com/LoRexxar/a56u1xigxrgg1wyph9h4ng15/image_1bbt7blfa15tg1l1p1ai51oigppa9.png" name="twitter:image"/>
+<link href="./CSP Is Dead, Long Live CSP! 翻译  LoRexxar's Blog/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./CSP Is Dead, Long Live CSP! 翻译  LoRexxar's Blog/atom.xml" rel="alternate" title="LoRexxar's Blog" type="application/atom+xml"/>
+<link href="./CSP Is Dead, Long Live CSP! 翻译  LoRexxar's Blog/699-14040QPP9.jpg" rel="shortcut icon"/>
+<link href="./CSP Is Dead, Long Live CSP! 翻译  LoRexxar's Blog/jquery.fancybox.min.css" rel="stylesheet"/>
+<script src="./CSP Is Dead, Long Live CSP! 翻译  LoRexxar's Blog/pace.min.js"></script>
+<link href="./CSP Is Dead, Long Live CSP! 翻译  LoRexxar's Blog/pace-theme-minimal.css" rel="stylesheet"/>
+<link href="./CSP Is Dead, Long Live CSP! 翻译  LoRexxar's Blog/style.css" rel="stylesheet"/>
+<link href="./CSP Is Dead, Long Live CSP! 翻译  LoRexxar's Blog/font-awesome.min.css" rel="stylesheet"/>
+<title>CSP Is Dead, Long Live CSP! 翻译 | LoRexxar's Blog</title>
+<script src="./CSP Is Dead, Long Live CSP! 翻译  LoRexxar's Blog/jquery.min.js"></script>
+<script src="./CSP Is Dead, Long Live CSP! 翻译  LoRexxar's Blog/clipboard.min.js"></script>
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: false,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+<script>
+        yiliaConfig.jquery_ui = [true, "//cdn.bootcss.com/jqueryui/1.10.4/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+<script> yiliaConfig.rootUrl = "\/";</script>
+<script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?736cd32ff67d23a009e16622fd600527";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+</meta></meta></head>
+<body>
+<div id="container">
+<div class="left-col">
+<div class="overlay"></div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="animated zoomIn" src="./CSP Is Dead, Long Live CSP! 翻译  LoRexxar's Blog/699-14040QPP9.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/">LoRexxar</a></h1>
+</hgroup>
+<p class="header-subtitle">带着对技术的敬畏之心成长，不安于一隅...</p>
+<form id="search-form">
+<input autocomplete="off" autocorrect="off" class="search form-control" id="local-search-input" name="q" placeholder="search..." searchonload="false" type="text"/>
+<i class="fa fa-times" onclick="resetSearch()"></i>
+</form>
+<div id="local-search-result"></div>
+<p class="no-result">No results found <i class="fa fa-spinner fa-pulse"></i></p>
+<div class="switch-btn" id="switch-btn">
+<div class="icon">
+<div class="icon-ctn">
+<div class="icon-wrap icon-house" data-idx="0">
+<div class="birdhouse"></div>
+<div class="birdhouse_holes"></div>
+</div>
+<div class="icon-wrap icon-ribbon hide" data-idx="1">
+<div class="ribbon"></div>
+</div>
+<div class="icon-wrap icon-link hide" data-idx="2">
+<div class="loopback_l"></div>
+<div class="loopback_r"></div>
+</div>
+<div class="icon-wrap icon-me hide" data-idx="3">
+<div class="user"></div>
+<div class="shoulder"></div>
+</div>
+</div>
+</div>
+<div class="tips-box hide">
+<div class="tips-arrow"></div>
+<ul class="tips-inner">
+<li>菜单</li>
+<li>标签</li>
+<li>友情链接</li>
+<li>关于我</li>
+</ul>
+</div>
+</div>
+<div class="switch-area" id="switch-area">
+<div class="switch-wrap">
+<section class="switch-part switch-part1">
+<nav class="header-menu">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="/archives/">所有文章</a></li>
+<li><a href="/tags/">标签云</a></li>
+<li><a href="/about/">关于我</a></li>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fa Email" href="/lorexxar@gmail.com" title="Email"></a>
+<a class="fa 新浪微博" href="/强行被换号的LoRexxar" title="新浪微博"></a>
+<a class="fa GitHub" href="https://github.com/LoRexxar" title="GitHub"></a>
+<a class="fa RSS" href="/atom.xml" title="RSS"></a>
+<a class="fa 知乎" href="https://www.zhihu.com/people/romor-rexxar" title="知乎"></a>
+</ul>
+</nav>
+</section>
+<section class="switch-part switch-part2">
+<div class="widget tagcloud" id="js-tagcloud">
+<ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/0day/">0day</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Blogs/">Blogs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CBC/">CBC</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Essay/">Essay</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Essry/">Essry</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IPC通道入侵/">IPC通道入侵</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LD-PRELOAD/">LD_PRELOAD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LFI/">LFI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RSA/">RSA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reprint/">Reprint</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shadow-Brokers/">Shadow Brokers</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/access/">access</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/book-notes/">book_notes</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bookshelf/">bookshelf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloudeye/">cloudeye</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cmd/">cmd</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crontab/">crontab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/csp/">csp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/csrf/">csrf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/curl/">curl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cve/">cve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dns/">dns</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/eassy/">eassy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fastcgi/">fastcgi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fcgi/">fcgi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/file-put-contents/">file_put_contents</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/flask/">flask</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/game/">game</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gopher/">gopher</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hctf/">hctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/injection/">injection</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lcx端口转发/">lcx端口转发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lfi/">lfi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msf/">msf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/opcache/">opcache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pdflatex/">pdflatex</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php-opcache/">php opcache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/phpmailer/">phpmailer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php伪协议/">php伪协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwnhub/">pwnhub</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rabins/">rabins</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sangebaimao/">sangebaimao</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sqli/">sqli</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sqlmap/">sqlmap</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh-sock5/">ssh_sock5</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssrf/">ssrf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/titan-souls/">titan_souls</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tqdm/">tqdm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/virtualenv/">virtualenv</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/weblogic/">weblogic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wget/">wget</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/win-server信息收集/">win server信息收集</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/windows/">windows</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/xss/">xss</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/伪协议/">伪协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/参数污染/">参数污染</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/格式化字符串/">格式化字符串</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/模板注入/">模板注入</a></li></ul>
+</div>
+</section>
+<section class="switch-part switch-part3">
+<div id="js-friends">
+<a class="main-nav-link switch-friends-link" href="https://coding.net/u/LoRexxar">Coding</a>
+<a class="main-nav-link switch-friends-link" href="https://github.com/LoRexxar">GitHub</a>
+<a class="main-nav-link switch-friends-link" href="http://hduisa.cn">HDUISA</a>
+<a class="main-nav-link switch-friends-link" href="https://wiki.hduisa.cn">HDUISA_wiki</a>
+<a class="main-nav-link switch-friends-link" href="https://lightless.me/">lightless</a>
+<a class="main-nav-link switch-friends-link" href="http://lazysheep.cc">Hcamael</a>
+<a class="main-nav-link switch-friends-link" href="http://aklis.info/">Aklis</a>
+<a class="main-nav-link switch-friends-link" href="http://libc.pw/">zh_explorer</a>
+<a class="main-nav-link switch-friends-link" href="http://edwardl.xyz/">Edward_L</a>
+<a class="main-nav-link switch-friends-link" href="http://evilddog.space/">evilddog</a>
+<a class="main-nav-link switch-friends-link" href="http://www.venenof.com/">Veneno</a>
+<a class="main-nav-link switch-friends-link" href="http://www.nohackair.net/">Airbasic</a>
+<a class="main-nav-link switch-friends-link" href="https://loli.be/">Mashiro</a>
+<a class="main-nav-link switch-friends-link" href="http://www.codersec.net/">bsmali4</a>
+<a class="main-nav-link switch-friends-link" href="/www.bertramc.cn">berTrAM</a>
+</div>
+</section>
+<section class="switch-part switch-part4">
+<div id="js-aboutme">带着对技术的敬畏之心成长，不安于一隅...</div>
+</section>
+</div>
+</div>
+</header>
+</div>
+</div>
+<div class="mid-col">
+<nav id="mobile-nav">
+<div class="overlay">
+<div class="slider-trigger"></div>
+<h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">LoRexxar</a></h1>
+</div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="animated zoomIn" src="./CSP Is Dead, Long Live CSP! 翻译  LoRexxar's Blog/699-14040QPP9.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="回到主页">LoRexxar</a></h1>
+</hgroup>
+<p class="header-subtitle">带着对技术的敬畏之心成长，不安于一隅...</p>
+<nav class="header-menu">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="/archives/">所有文章</a></li>
+<li><a href="/tags/">标签云</a></li>
+<li><a href="/about/">关于我</a></li>
+<div class="clearfix"></div>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fa Email" href="/lorexxar@gmail.com" target="_blank" title="Email"></a>
+<a class="fa 新浪微博" href="/强行被换号的LoRexxar" target="_blank" title="新浪微博"></a>
+<a class="fa GitHub" href="https://github.com/LoRexxar" target="_blank" title="GitHub"></a>
+<a class="fa RSS" href="/atom.xml" target="_blank" title="RSS"></a>
+<a class="fa 知乎" href="https://www.zhihu.com/people/romor-rexxar" target="_blank" title="知乎"></a>
+</ul>
+</nav>
+</header>
+</div>
+<link about="关于我" class="menu-list" friends="友情链接" tags="标签">
+</link></nav>
+<div class="body-wrap"><article class="article article-type-post" id="post-CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy" itemprop="blogPost" itemscope="">
+<div class="article-meta">
+<a class="article-date" href="/2017/05/09/CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy/">
+<time datetime="2017-05-09T06:42:37.000Z" itemprop="datePublished">2017-05-09</time>
+</a>
+</div>
+<div class="article-inner">
+<input class="isFancy" type="hidden"/>
+<header class="article-header">
+<h1 class="article-title" itemprop="name">
+      CSP Is Dead, Long Live CSP! 翻译
+    </h1>
+</header>
+<div class="article-info article-info-post">
+<div class="article-category tagcloud">
+<a class="article-category-link" href="/categories/Blogs/">Blogs</a>
+</div>
+<div class="article-tag tagcloud">
+<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Blogs/">Blogs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/csp/">csp</a></li></ul>
+</div>
+<div class="clearfix"></div>
+</div>
+<div class="article-entry" itemprop="articleBody">
+<p>CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy</p>
+<p>无意间阅读到了去年google团队写的关于CSP现状和展望的论文，深有感触，所以翻译了大部分的文章内容，分享给大家。</p>
+<p><a href="https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/45542.pdf" rel="external" target="_blank">https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/45542.pdf</a></p>
+<a id="more"></a>
+<h1 id="摘要"><a class="headerlink" href="#摘要" title="摘要"></a>摘要</h1><p>Content Security Policy是一种web平台的安全机制，是为了减少xss漏洞而出现，这应该是现代web应用中顶级的安全漏洞。在本文中，我们仔细观察和考虑CSP的实际好处，也确定下现实世界中出现的可以导致94.72%的所有不同策略重大缺陷。</p>
+<p>我们对互联网超过10亿个主机名大约1000亿的搜索引擎库，1680867台主机的CSP部署方式，26011种独特的CSP策略做了研究，这里我们介绍CSP规范的安全相关，并提供对其威胁模型的深入分析，重点关注对于XSS的保护，这里我们确定三种常见的CSP绕过方式，并解释它们是如何颠覆策略的安全性的。</p>
+<p>之后呢，我们转而对部署在互联网上的策略分析，来了解他们的安全程度，我们发现，加载脚本最常列入白名单的有15个域，其中有14个不安全的站点，因此有75.81%的策略因为使用了了脚本白名单，允许了攻击者绕过了CSP。总而言之，我们发现尝试限制脚本执行的策略中有94.68%是无效的，并且99.34%具有CSP的主机制定的CSP策略对xss防御没有任何帮助。</p>
+<p>最后，我们提出了“strict-dynamic”的关键字，这是规范的一个附加，它有助于基于加密随机数创建策略，而不依赖域白名单。我们讨论我们在复杂应用成语中部署一个这样基于nonce策略的经验，来为程序要提供指导来改进策略。</p>
+<h1 id="1、介绍"><a class="headerlink" href="#1、介绍" title="1、介绍"></a>1、介绍</h1><p>XSS-跨站脚本攻击，将攻击者控制的脚本注入到Web代码的上下文来控制脚本，可以说是最臭名昭著的Web漏洞之一。自从2000年第一正式提出了XSS以来，经过很多代人的研究、预防、环节，XSS仍然是网络最流行的安全问题之一，随着网络的发展，新的变化也被不断的被发现。</p>
+<p>至今为止，CSP的仍然是最有希望的针对XSS对策。CSP是一个声明性的策略机制，允许Web开发者定义哪些客户端资源可以由浏览器加载和执行。通过禁止内敛脚本并仅允许可信域作为外部脚本的源，通过这种方式限制站点执行恶意客户端的代码。因此，即使攻击这发现了xss漏洞，CSP也可以保护应用程序的安全，攻击者不能在不控制可信主机的情况下加载恶意代码。</p>
+<p>在这篇文章中，我们介绍第一次深入分析CSP在整个网络部署的结果，为了研究这一点，我们首先需要调查CSP的保护能力，通过分析威胁模型，分析可能的漏洞和可以使攻击这绕过保护的攻击方式。</p>
+<p>我们遵循从google搜索引擎提取的真实世界CSP策略的大规模研究。我们发现目前至少有168000个网络主机部署了CSP策略。在对数据集进行归一化和重复数据处理后，我们确定了26011个唯一的CSP策略，其中94.72%都是可以被忽略的。攻击这可以使用各种方式破坏CSP保护的站点，尽管部署CSP方面花费了相当大的努力。现在的策略中90.63%可以包含通过允许执行内敛脚本或从任意外部主机加载脚本。而只有9.37%的策略具有更严格的配置，甚至防范着潜在的XSS。但是，我们发现，只有51%的这类策略仍然可以绕过，因为在script-src中存在微妙的策略配置错误或不安全的站点。</p>
+<p>基于我们的研究结果，我们认为，为复杂的web端应用维护安全白名单在实践中是不可行的；因此，我们建议改变CSP的使用方式。我们建议通过指定脚本可以执行的url白名单来指定信任的应该被替换为基于nonce和散列值的方法，这已经被CSP规范定义并且在主流的浏览器实现中可用。</p>
+<p>在基于nonce的策略中，web应用程序定义了在CSP中传递单一、不可猜测的token（nonce），以及一些合理的html属性，而不是把主机和域白名单用于脚本执行。用户代理仅允许执行那些nonce与策略中指定值匹配的脚本。可以将html注入到页面内的攻击者不知道临时值，因此无法执行恶意脚本。为了简化这种基于nonce的方式，我们提出了一个新的CSP源表达式关于script，我们称它为strict-dynamic。使用这个，动态生成的脚本隐式地从穿件他们的可信脚本集成值。这样，已经执行的合法脚本可以轻松地将新脚本添加到DOM，而不需要大量的代码修改。但是如果攻击者找到了xss漏洞，但是不知道正确的nonce，他们的脚本将会被阻止。</p>
+<p>为了证明这种方法的可行性，我们提出了一个真实世界的案例研究。在一个比较主流的cms中使用基于nonce的策略。</p>
+<p>我们的总结如下：</p>
+<ul>
+<li><p>我们提出了CSP安全模型的第一深入分析结果，分析对标准中对于web漏洞的保护。我们识别常见的策略配置错误，并提供3类CSP的绕过方式，可以禁用策略的保护能力</p>
+</li>
+<li><p>我们通过google搜索引擎中提取策略，对现实世界的CSP部署的好处进行了大规模的研究。基于一个大约1060亿页的资料库，其中39亿是收到了CSP保护的，我们分析除了26011个独特的策略。我们发现，由于策略配置的错误和白名单的不安全，这些策略至少有94.71%对xss缓解没有帮助。</p>
+</li>
+<li><p>基于我们的研究结果，我们建议改变CSP在实际中的部署方式，不适用白名单，我们主张基于nonce的方式。为了进一步实现这种方法，我们提出了strict-dynamic，这是当前在chrome浏览器中实现的CSP3特性之一。我们讨论这种方法的好处，并提出了在主流cms中部署基于nonce和strict-dynamic策略的案例研究</p>
+</li>
+</ul>
+<p>在本文中，第二节中我们深入分析CSP，包括2.1中的技术基础，2.2和2.3讲了CSP设计策略时的常见漏洞。随后第3节中我们介绍了我们实际研究的结果，为了能够描述清楚问题，3.1中首先概述问题，3.2介绍我们的数据集，3.3中解释我们的研究方法，最后在3.4中给出结果和分析。基于这次研究，我们提出了改进CSP的方法，最后我们在第5节中介绍相关的东西，在第6节总结。</p>
+<h1 id="2-CSP"><a class="headerlink" href="#2-CSP" title="2.CSP"></a>2.CSP</h1><h2 id="2-1-概述"><a class="headerlink" href="#2-1-概述" title="2.1 概述"></a>2.1 概述</h2><p>CSP是一种声明机制的策略，它允许Web作者在站内指定许多安全限制，由浏览器执行。</p>
+<p>CSP使开发人员在开发时可以以各种方式锁定他的站，减少XSS的风险和危害，降低站内各类脚本的执行权限。</p>
+<p>CSP从建立开始一直快速发展，现在正在进行规范的是CSP3，但该标准在不同浏览器都是不同程度的试行，比如Chromium中具有完整的CSP2支持，并实现了CSP3中的大部分草案，但仍然落后于实验的标准，而在Firefox和基于Webkit的浏览器刚刚完成了完整的CSP2支持。这里我们不关注关于各个标准之间的修订，只是提供一个关于版本的概述。</p>
+<p>CSP策略一般通过HTTP响应头中或在<code>&lt;meta&gt;</code>元素中传递。CSP的功能可以分为3类。</p>
+<p><strong>限制资源加载</strong></p>
+<p>CSP的最广为人知和常用的的方面是限制浏览器只加载开发人员允许的子资源，称之为源列表。常用的执行包括script-src, style-src, catcall, default-src, 作为特殊情况，script-src和style-src指令还有额外的配置选项，这些允许script和css有更精细的控制方式。</p>
+<p><strong>基于url的控制</strong></p>
+<p>某些类型的攻击不能通过仅管理子资源来防止，但仍然需要一个可以与之交互的可信来源。一个比较常见的例子是frame-ancestors指令，它定义了框架资源的起源，以防止点击劫持。类似的，base-url和form-action定义了<code>&lt;base#href&gt;</code>和<code>&lt;form#action&gt;</code>元素的目标，以防一部分xss攻击</p>
+<p><strong>其他限制</strong></p>
+<p>这里包括blocks-all-mixed-content和upgrade-insecurerequests关键字，可以防止混合内容错误和改进了对于https的支持，plugin-types限制了允许的插件格式，sandbox反应了一些HTML5沙箱框架的一些安全功能</p>
+<p>为了能让整个Web站和CSP兼容，对XSS的防御有帮助，Web的开发者通常需要重构正常逻辑生成的html标记，框架以及模板化整个站。特别是涉及到内联脚本、eval和等效的结构、内联时间处理和javascript: URL的使用必须避免和重构为对CSP友好的结构。</p>
+<p>除了默认的强制执行策略限制方式之外，还可以在Reprot-Only模式配置CSP，其中记录不合理的配置，但不会强制执行。在这两种情况下，report-uri指令都可以用作发送不合理配置报告，已通知站开发者站不合理的标记。</p>
+<h3 id="2-1-1-源列表"><a class="headerlink" href="#2-1-1-源列表" title="2.1.1 源列表"></a>2.1.1 源列表</h3><p>CSP源列表（也可以叫做白名单）是CSP的核心部分，并且是指定信任关系的和新方式。例如：</p>
+<figure class="highlight csp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="attribute">Content-Security-Policy</span>: <span class="keyword">script-src</span> ’self’; <span class="keyword">style-src</span></div><div class="line">cdn.example.org third-party.org; <span class="keyword">child-src</span> https:</div></pre></td></tr></table></figure>
+<p>应用程序仅允许信任的托管域可以加载脚本，也允许来自cdn.example.org\third-party.org的字体或者图像，并且需要通过https加载，同时有不对其他资源施加任何限制。</p>
+<p>对于任何指令，白名单可以由主机名（example.org, example.com）组成，可能包括*通配符以拓展对所有子域（*.example.com）的信任、schema(https:/http:)、和特殊的关键字’self’（表示当前文档的来源）还有’none’（强制执行空源，也就是说精致加载任何资源）</p>
+<p>从CSP2开始，开发者还可以选择在白名单中制定路径（example.org/resources/js/）.有趣的是，不能依赖基于路径的限制来限制可以加载资源的位置，这个问题稍后在讨论。</p>
+<h3 id="2-1-2脚本执行的限制"><a class="headerlink" href="#2-1-2脚本执行的限制" title="2.1.2脚本执行的限制"></a>2.1.2脚本执行的限制</h3><p>由于脚本在现在Web应用程序中的重要性，script-src提供了几个关键字，以允许对脚本的执行提供更精细的控制：</p>
+<p>1、unsafe-inline </p>
+<p>允许执行内联的<code>&lt;script&gt;</code>块和javascript时间处理程序。</p>
+<p>2、unsafe-eval</p>
+<p>允许使用javascript api来执行字符串作为代码，包括eval、settimeout、setinterval和function。否则，这些api会被script-src指令策略阻止</p>
+<p>3、CSP随机数</p>
+<p>允许策略指定允许的脚本授权令牌(<code>script-src 'nonce-random-value'</code>)，将允许页面上具有正确token属性的任何脚本执行。</p>
+<p>4、CSP散列值</p>
+<p>允许开发人员列出页面中预期的脚本加密散列（<code>scriptsrc'sha256-nGA ...</code>），将允许任何内容的摘要和策略中提供相匹配的脚本执行。</p>
+<p>nonce和hash同样可以在style-src中使用，来允许通过随机数加载CSS。</p>
+<h2 id="2-2-CSP的威胁模型"><a class="headerlink" href="#2-2-CSP的威胁模型" title="2.2 CSP的威胁模型"></a>2.2 CSP的威胁模型</h2><p>CSP提供的的优势在于，即使这些漏洞会对访问站的用户产生恶意行为，CSP也会拦截。在目前的形式中，CSP提供了3种类型的保护：</p>
+<ul>
+<li><p>XSS: 在站内注入和执行不受信任的脚本的能力（受到script-src和object-src指令保护）</p>
+</li>
+<li><p>Clickjacking(点击劫持): 欺骗用户点击受攻击这控制的页面上覆盖的隐藏内容（受到frame-ancestors）</p>
+</li>
+<li><p>mixed content: 通过https传递的不安全协议加载资源（受到upgrade-insecure-requests和blockall-mixed-content保护，通过限制脚本和加载敏感资源）</p>
+</li>
+</ul>
+<p>因此，只有一小部分CSP指令对XSS保护游泳。此外，在站内上下文中执行恶意脚本的能力破坏了其他指令提供的保护，后面2.2.2会提到这个。</p>
+<h3 id="2-2-1-采用CSP的好处"><a class="headerlink" href="#2-2-1-采用CSP的好处" title="2.2.1 采用CSP的好处"></a>2.2.1 采用CSP的好处</h3><p>由于一些流行的用户代理还不支持CSP或者只提供部分支持，所以CSP应该只被应用于深度防御，用于主安全机制失败后的攻击尝试。因此，使用CSP的站仍然需要采用传统的保护机制。例如，采用具有严格上下文转移的框架来生成标签，使用<code>x-frame-options</code>的头来防止点击劫持，并确保页面上的资源通过https获取。</p>
+<p>设置CSP的实际好处就在于此，在主安全机制失效的情况下，CSP可以帮助保护用户，当开发人员出现了编程错误，CSP可以有效的减少XSS、点击劫持、混合内容的攻击危害。</p>
+<p>然而，在实际生活中，<code>x-frame-options</code>的点击劫持很少有办法破坏，而且在现代的用户代理中，默认情况下已经组织了混合内容的攻击（通过http从https网页加载脚本和内容），因此，CSP的主要价值其实就是在于防止XSS的利用，因为他是唯一一类可以通过CSP减轻的漏洞，而且通常被开发人员无意中完成。</p>
+<h3 id="2-2-2-防御XSS"><a class="headerlink" href="#2-2-2-防御XSS" title="2.2.2 防御XSS"></a>2.2.2 防御XSS</h3><p>CSP的安全优势绝大多数集中在两个防止脚本执行的指令中: script-src和object-src（flash可以在嵌入式页面中执行js）或者default-src的缺漏。</p>
+<p>能够注入和执行脚本的攻击者一般能绕过所有其他指令的限制。因此，使用不够安全的script-src和object-src源列表的策略的站从CSP中获取的利益非常有限。比起提供有意义的安全优势，站点必须首先使用能成功防止脚本执行的安全策略。一般来说，攻击者可以作post-xss或者无脚本攻击（类似于csrf或者是网络钓鱼），所以，CSP只在对XSS保护有效的时候才能提高安全性。（也就是说并不是对所有的xss攻击都有效）</p>
+<p>为了组织不必要的脚本执行，策略必须满足三个要求:</p>
+<ul>
+<li>策略必须同时定义script-src和object-src（或default-src）</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">bypass CSP 当script-src和object-src未定义时</div><div class="line"></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"//evil.com"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"></div><div class="line"><span class="tag">&lt;<span class="name">object</span> <span class="attr">data</span>=<span class="string">"//evil.com/evil.swf"</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"allowscriptaccess"</span> <span class="attr">value</span>=<span class="string">"always"</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">object</span>&gt;</span></div></pre></td></tr></table></figure>
+<ul>
+<li>script-src源列表不应该包含<code>unsafe-inline</code>(除非伴随有nonce)或者允许<code>data: URLs</code></li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">当定义了unsafe-inline或者data: URLs</div><div class="line"></div><div class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">"x"</span> <span class="attr">onerror</span>=<span class="string">"evil()"</span>&gt;</span></div><div class="line"></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"data:text/javascript,evil()"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div></pre></td></tr></table></figure>
+<ul>
+<li>scrip-src和object-src源列表不能包含攻击可以控制响应的不安全的站点</li>
+</ul>
+<figure class="highlight django"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="xml">当攻击者可以控制返回的bypass方式</span></div><div class="line"></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/api/jsonp?callback=evil"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"angular.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span> <span class="tag">&lt;<span class="name">div</span> <span class="attr">ng-app</span>&gt;</span></div><div class="line"><span class="template-variable">{{ executeEvilCodeInUnsafeSandbox() }}</span><span class="xml"> <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></div></pre></td></tr></table></figure>
+<p>如果不满足上面的任何一个条件，则策略在防止脚本执行上都不是有效的，不能对xss有防护作用。</p>
+<p>下面我们专注于研究对于端点类型的分析，也就是将CDN等加入了白名单导致攻击者可以绕过CSP保护执行脚本的方式。</p>
+<h2 id="绕过CSP执行脚本"><a class="headerlink" href="#绕过CSP执行脚本" title="绕过CSP执行脚本"></a>绕过CSP执行脚本</h2><p>在使用CSP的基本安全原则之一就是，在策略中列入白名单的域仅提供安全内容。因此，攻击者不应该能在这些白名单来源的响应中注入有效的js代码。在下面的小节中，我们讨论现代web应用违反这个原则的几个例子。</p>
+<h3 id="2-3-1-带有用户控制回调的js"><a class="headerlink" href="#2-3-1-带有用户控制回调的js" title="2.3.1 带有用户控制回调的js"></a>2.3.1 带有用户控制回调的js</h3><p>尽管许多的js资源都是静态的，但是在某些情况下，开发人员可能希望通过允许请求参数来动态生成脚本，用来设置加载脚本时必要的函数。例如：在回调函数中包装js对象的jsonp接口通常允许通过第三方域的脚本作为源数据来加载api数据。</p>
+<figure class="highlight dust"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="xml"><span class="tag">&lt;<span class="name">script</span></span></span></div><div class="line"><span class="attr">src</span>=<span class="string">"/path/jsonp?callback=alert(document.domain)//"</span>&gt;<span class="undefined"></span></div><div class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"></div><div class="line">/* API response */</div><div class="line">alert(document.domain);//<span class="template-variable">{"var": "data", ...}</span><span class="xml">);</span></div></pre></td></tr></table></figure>
+<p>如同范例上一样，如果策略中列入白名单的域包含jsonp接口，攻击者可以通过控制回调函数的加载作为<code>&lt;script&gt;</code>来执行任何js函数。如果攻击者可以控制jsonp响应，那么就可以无限制的执行脚本，它们可以使用类似<a href="http://www.benhayak.com/2015/06/same-origin-method-execution-some.html" rel="external" target="_blank">some</a>的技术，这些技术几乎等于没有约束的xss。</p>
+<h3 id="2-3-2-Reflection-or-symbolic-execution"><a class="headerlink" href="#2-3-2-Reflection-or-symbolic-execution" title="2.3.2 Reflection or symbolic execution"></a>2.3.2 Reflection or symbolic execution</h3><p>CSP对脚本执行的限制有可能会被白名单中的协作脚本绕过。例如，脚本可以使用反射来查找和调用全局域下的函数。</p>
+<figure class="highlight smali"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">// Can be used to<span class="built_in"> invoke </span>window.* functions with</div><div class="line">// arbitrary arguments via markup such as:</div><div class="line">// &lt;input id=<span class="string">"cmd"</span> value=<span class="string">"alert,safe string"</span>&gt;</div><div class="line"></div><div class="line">var<span class="built_in"> array </span>= document.getElementById(’cmd’).value.split(’,’);</div><div class="line">window[array[0]].apply(this, array.slice(1));</div></pre></td></tr></table></figure>
+<p>这种js工具通常不会危害安全，因为参数受到网页加载脚本开发者的控制。但当这样的脚本通过检查dom获取数据时出现问题，如果站内有可控的标签属性，攻击者可以通过绕过CSP来执行任意函数。</p>
+<p>有一个比较有名的例子就是引入angularJS库，它允许强大的模板语法来创建web页面。</p>
+<figure class="highlight django"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="xml"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"whitelisted.com/angular.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></div><div class="line"></div><div class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">ng-app</span>&gt;</span><span class="template-variable">{{ 1000 - 1 }}</span><span class="xml"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></div></pre></td></tr></table></figure>
+<p>angularJS在页面指定部分解析模板并执行他们。如果我们可以控制能被angularJS解析执行就可以认为，我们可以执行任意js。默认情况下，angular使用eval函数来评估沙箱的执行，这是不会被unsafe-eval拦截的。然而angularJS还提供了CSP兼容模式（ng-csp），其中通过符号执行来执行代码，使得在CSP模式下仍然可以调用任意js代码。</p>
+<p>因此，可以从CSP白名单源列表中加载angular库，以绕过CSP。即便被攻击的站本身不使用angular，但只要白名单域内存在angular库的托管，因此，可信域中只要存在任何angular库就能破坏CSP提供的保护。</p>
+<h3 id="2-3-3-Unexpected-JavaScript-parseable-responses"><a class="headerlink" href="#2-3-3-Unexpected-JavaScript-parseable-responses" title="2.3.3 Unexpected JavaScript-parseable responses"></a>2.3.3 Unexpected JavaScript-parseable responses</h3><p>由于兼容性的原因，Web浏览器通常很容易检查响应的MIME类型是否与使用响应的页面上下文匹配。任何可以解析为js而没有出现语法错误，并且在第一个运行时错误出现的攻击者控制的数据响应可以导致脚本执行。因此，CSP可以被下面的方式绕过：</p>
+<ul>
+<li><p>部分可以被攻击者控制的内容的逗号分隔（csv）数据：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Name,Value</div><div class="line"><span class="function"><span class="title">alert</span><span class="params">(<span class="number">1</span>)</span></span>,<span class="number">234</span></div></pre></td></tr></table></figure>
+</li>
+<li><p>回显请求参数的错误消息</p>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">Error: </span>alert(1)// not found.</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>因此，如果白名单的源列表中具有此类属性的任何页面，攻击者可以伪造脚本响应并执行js。类似的问题也适用于object-src白名单：如果攻击者可以将一个被解释为flash对象的资源上传到针对object-src的白名单域中，则可以执行脚本。</p>
+<p>重要的是要注意，上述的几种情况都不会造成直接的安全风险，因此开发人员通常不会直接改变他们。然而，当站内采用csp时，这样的端点变为安全问题，因为他们可以绕过CSP。</p>
+<p>更大的问题是，这样的问题不仅仅存在于部分白名单来源，还影响了将其列入script-src白名单中的所有其他域。这些域通常包含不太了解CSP的第三方或者CDN，他们没理由修复这样的CSP绕过问题。</p>
+<h3 id="2-3-4-Path-restrictions-as-a-security-mechanism"><a class="headerlink" href="#2-3-4-Path-restrictions-as-a-security-mechanism" title="2.3.4 Path restrictions as a security mechanism"></a>2.3.4 Path restrictions as a security mechanism</h3><p>为了解决CSP对于域限制不足的问题，CSP2引入了可以将白名单限制到域的特定路径的能力（类似于example.org/foo/bar），开发者可以选择在可信域上指定特定的目录来加载脚本和其他资源。</p>
+<p>不幸的是，由于处理跨源重定向的问题，这种限制被放宽了。如果白名单源列表目录中包含重定向器，则这个重定向器可以在不被允许的目录加载资源。</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">Content-Security-Policy: script-src example.org</div><div class="line">partially-trusted.org/foo/bar.js</div><div class="line">// Allows loading of untrusted resources <span class="keyword">vi</span><span class="variable">a:</span></div><div class="line"></div><div class="line">&lt;script src=<span class="comment">"//example.org?</span></div><div class="line">redirect=partially-trusted.org/evil/script.js<span class="comment">"&gt;</span></div></pre></td></tr></table></figure>
+<p>由于这种行为和复杂Web应用的重定向很流行，所以限制路径作为CSP中的安全机制是不安全的。</p>
+<p>上面我们展示了很多看上去很安全的编程方式是如何允许攻击者绕过CSP来xss的了，反过来，我们转向分析这种绕过对于现实世界的影响。</p>
+<h1 id="CSP的实证研究"><a class="headerlink" href="#CSP的实证研究" title="CSP的实证研究"></a>CSP的实证研究</h1><p>由于原文属于论文性质的文章，为了使翻译不过于拖沓，所以略过前面关于准备工作的描述，直接跳到关键部分。</p>
+<h3 id="评估策略的安全性"><a class="headerlink" href="#评估策略的安全性" title="评估策略的安全性"></a>评估策略的安全性</h3><p>为了评估是否可以绕过CSP以执行攻击者控制的脚本，我们需要进行以下检查：</p>
+<p>1、’unsafe-inline’的使用，使用unsafe-inline关键字的策略如果不指定脚本随机数，那本质上是不安全的，这样的策略会被标记为可绕过。</p>
+<p>2、缺少object-src: 指定了script-src但缺少object-src(并且不设置default-src)的策略允许通过插入插件资源来执行脚本。</p>
+<p>3、在白名单中包含通配符： 如果CSP的白名单列表中包含通配符或url schema2,允许包含任意主机的内容，则策略仍然是不安全的。</p>
+<p>4、白名单中的不安全策略：当把可以绕过CSP的端点域列入白名单时，CSP的保护能力将变为无效，如2、3节所述，为了评估具有这种特性的列表。如果给定策略的白名单中出现在列表中，我们将认为这个策略是可以被bypass的。</p>
+<p>接下来的部分，原文对会造成csp bypass的域做了基本分析，可以发现会造成这样情况的域中基本有包含jsonp和angularjs两种，而在jsonp下，即便对接口做了字符限制，仍然可以使用same手段执行任意js函数。所以可以认为包含jsonp接口的源就是不安全的。而angularjs更多问题出在低版本上，所以危害性又有不同。</p>
+<p>经过数据量庞大的分析，有了下面的结果</p>
+<p><img alt="image_1bbt7blfa15tg1l1p1ai51oigppa9.png-85.9kB" src="./CSP Is Dead, Long Live CSP! 翻译  LoRexxar's Blog/image_1bbt7blfa15tg1l1p1ai51oigppa9.png"/></p>
+<p>后面篇幅着重介绍了基于nonce的方法和“strict-dynamic”关键字这两个新提出来的csp实现方式，但这种实现方式和现在web端js实现方式本身有冲突，所以其作用还有待考证。</p>
+</div>
+</div>
+<div class="copyright">
+<p><span>本文标题:</span><a href="/2017/05/09/CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy/">CSP Is Dead, Long Live CSP! 翻译</a></p>
+<p><span>文章作者:</span><a href="/" title="回到主页">LoRexxar</a></p>
+<p><span>发布时间:</span>2017-05-09, 14:42:37</p>
+<p><span>最后更新:</span>2017-05-12, 15:07:29</p>
+<p>
+<span>原始链接:</span><a class="post-url" href="/2017/05/09/CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy/" title="CSP Is Dead, Long Live CSP! 翻译">http://lorexxar.cn/2017/05/09/CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy/</a>
+<span class="copy-path" data-clipboard-text="原文: http://lorexxar.cn/2017/05/09/CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy/　　作者: LoRexxar" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+<script> var clipboard = new Clipboard('.copy-path'); </script>
+</p>
+<p>
+<span>许可协议:</span><i class="fa fa-creative-commons"></i> <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license" target="_blank" title="CC BY-NC-SA 4.0 International">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+</div>
+<nav id="article-nav">
+<div class="article-nav-title" id="article-nav-newer">
+<a href="/2017/05/12/xss-bot2/">
+                    xss bot从入门到弃坑
+                </a>
+</div>
+<div class="article-nav-title" id="article-nav-older">
+<a href="/2017/04/24/pwnhub-jue/">
+                    pwnhub 绝对防御 出题思路和反思
+                </a>
+</div>
+</nav>
+</article>
+<div class="toc-article" id="toc">
+<strong class="toc-title">文章目录</strong>
+<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#摘要"><span class="toc-number">1.</span> <span class="toc-text">摘要</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1、介绍"><span class="toc-number">2.</span> <span class="toc-text">1、介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-CSP"><span class="toc-number">3.</span> <span class="toc-text">2.CSP</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-概述"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 概述</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-1-源列表"><span class="toc-number">3.1.1.</span> <span class="toc-text">2.1.1 源列表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-2脚本执行的限制"><span class="toc-number">3.1.2.</span> <span class="toc-text">2.1.2脚本执行的限制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-CSP的威胁模型"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 CSP的威胁模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-1-采用CSP的好处"><span class="toc-number">3.2.1.</span> <span class="toc-text">2.2.1 采用CSP的好处</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-2-防御XSS"><span class="toc-number">3.2.2.</span> <span class="toc-text">2.2.2 防御XSS</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#绕过CSP执行脚本"><span class="toc-number">3.3.</span> <span class="toc-text">绕过CSP执行脚本</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-1-带有用户控制回调的js"><span class="toc-number">3.3.1.</span> <span class="toc-text">2.3.1 带有用户控制回调的js</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-2-Reflection-or-symbolic-execution"><span class="toc-number">3.3.2.</span> <span class="toc-text">2.3.2 Reflection or symbolic execution</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-3-Unexpected-JavaScript-parseable-responses"><span class="toc-number">3.3.3.</span> <span class="toc-text">2.3.3 Unexpected JavaScript-parseable responses</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-4-Path-restrictions-as-a-security-mechanism"><span class="toc-number">3.3.4.</span> <span class="toc-text">2.3.4 Path restrictions as a security mechanism</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#CSP的实证研究"><span class="toc-number">4.</span> <span class="toc-text">CSP的实证研究</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#评估策略的安全性"><span class="toc-number">4.0.1.</span> <span class="toc-text">评估策略的安全性</span></a></li></ol></li></ol></div></div></div></div></body></html>
+
+<style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+<input id="tocButton" title="点击按钮隐藏或者显示文章目录" type="button" value="隐藏目录"/>
+<script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+<div class="share">
+<div class="bdsharebuttonbox">
+<a class="fa fa-twitter bds_twi" data-cmd="twi" href="#" title="分享到推特"></a>
+<a class="fa fa-weibo bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="fa fa-qq bds_sqq" data-cmd="sqq" href="#" title="分享给 QQ 好友"></a>
+<a class="fa fa-files-o bds_copy" data-cmd="copy" href="#" title="复制网址"></a>
+<a class="fa fa fa-envelope-o bds_mail" data-cmd="mail" href="#" title="通过邮件分享"></a>
+<a class="fa fa-weixin bds_weixin" data-cmd="weixin" href="#" title="生成文章二维码"></a>
+<a class="fa fa-share-alt bds_more" data-cmd="more" href="#"></a></div></div>
+
+<script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"CSP Is Dead, Long Live CSP! 翻译　| LoRexxar's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+
+<section class="youyan" id="comments">
+<script>
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = 'http://v2.uyan.cc/code/uyan.js?uid=2127998';
+            (d.head || d.body).appendChild(s);
+        }
+    </script>
+<script> loadComment(); </script>
+<div id="uyan_frame"></div>
+</section>
+<div class="scroll" id="post-nav-button">
+<a href="/2017/05/12/xss-bot2/" title="上一篇: xss bot从入门到弃坑">
+<i class="fa fa-angle-left"></i>
+</a>
+<a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+<a href="/2017/04/24/pwnhub-jue/" title="下一篇: pwnhub 绝对防御 出题思路和反思">
+<i class="fa fa-angle-right"></i>
+</a>
+</div>
+<ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/16/nonce-bypass-script/">通过浏览器缓存来bypass CSP script nonce</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/12/pppctf2017/">PlaidCTF 2017 web writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/12/xss-bot2/">xss bot从入门到弃坑</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/09/CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy/">CSP Is Dead, Long Live CSP! 翻译</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/24/pwnhub-jue/">pwnhub 绝对防御 出题思路和反思</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/21/Shadow-Brokers/">Shadow Brokers大新闻整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/21/360chunqiu2017/">360春秋杯2017 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/18/bctf2017-web/">bctf2017 web部分wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/27/pwnhub-xiaom/">pwnhub 之小m的复仇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/21/0ctf2017-web/">0ctf201 web部分writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/njctf2017-wp/">NJCTF Web部分writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/05/pwnhub-another-php/">pwnhub_another php web部分</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/27/zctf2017-writeup/">zctf2017 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/20/pwnhub-open/">pwnhub 打开电脑</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/16/cdn-bypass-csp/">有趣的cdn bypass CSP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/26/hctf2016-something/">聊聊hctf2016</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/17/pwnhub-shen/">pwnhub 深入敌后</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/03/33c3-wp/">33c32016 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/28/cve-2016-10030/">phpmailer RCE漏洞分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/pwnhub_mi/">pwnhub_迷</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/24/xss-protect/">浅谈xss的后台守护问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/18/pwnhub-pai2/">pwnhub_拍卖行</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/18/pwnhub-pai/">pwnhub_找朋友</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/10/pwnhub-WTF-writeup/">pwnhub_WTF_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/07/polyglot-JPEGs-bypass-csp/">using polyglot JPEGs bypass CSP 分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/03/redis-getshell/">通过redis getshell的一些小问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/01/hctf2016-other/">hctf2016 简单部分WEB &amp;&amp; misc writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/30/hctf2016-xss/">hctf2016 guestbook&amp;secret; area writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/29/hctf2016-ATField/">HCTF2016 ATField writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/19/web2-giligili/">hctf2016 giligili writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/31/csp-then2/">CSP进阶-302 Bypass CSP</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/28/csp-then/">CSP进阶-link Bypass unsafe line</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/26/ctf-start/">什么是ctf呢？</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/hitcon2016-misc/">hitcon2016 misc writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/10/hitcon2016/">hitcon2016 web writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/03/Lctf2016/">L-ctf2016 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/14/php-wei/">php 伪协议</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/11/huashanbei2016/">华山杯2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/29/crypto-start/">crypto 简单的RSA</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/18/sqlmap-source4/">sqlmap 源码分析（四）开始注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/16/sqlmap-source3/">sqlmap 源码分析（三）在注入之前</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/11/sqlmap-source2/">sqlmap 源码分析（二）初始化</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/09/sqlmap-source1/">sqlmap 源码分析（一）开始、参数解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/08/ccsp/">CSP Level 3浅析&amp;简单的bypass</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/07/python-virtualenv/">python virtualenv沙盒命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/01/xnuca-ctf-wp/">XNUCA2016 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/21/python-tqdm/">python tqdm模块分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/18/cmd-shell/">shell上一些有趣的命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/17/sangebaimao_huobi/">sangebaimao之火币网</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/12/guosai-ctf-wp/">信息安全国赛技能赛 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/26/cloudeye/">一个有趣的东西-cloudeye</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/17/sangebaimao-zhao/">sangebaimao之招聘又开始了，你怕了吗？</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/06/alictf2016/">alictf2016_web_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/04/sangebaimao1/">sangebaimao 寻找来自星星的你一</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/27/opcache-jcfx/">在php opcache检测隐藏的后门程序</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/12/php-shell/">php webshell 各种函数</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/10/asis-bcloud/">Asis2016_Binary Cloud</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/09/sctf2016/">sctf2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/05/dockerfile/">dockerfile  (・ω・)ノ</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/04/docker-jc/">docker 基础操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/ggctf2016/">google_ctf2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/25/cctf2016/">CCTF2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/20/gif-ccsp/">gif bypass CSP?</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/11/j123jt-wp/">j123jt的聊天板大型wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/11/sctf-Obfusion/">sctfq1_Obfusion_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/08/input-bypasscsrf/">input属性bypass csp</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/06/hctfgame-llfx/">hctfgame_ll的流量分析题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/04/phpblack/">is_numeric和trim导致的判断绕过</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/30/web-for-pentest-II/">web_for_pentest_II writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/bctf2016/">bctf2016</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/hctfgame_week4+5_writeup/">hctf_game_week4+5_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/0ctf2016/">0ctf2016 &amp;&amp; sunshinectf2016 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/07/bkp2016-writeup/">bkp2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/05/hexo-coding/">hexo转移到coding配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/01/ssctf2015-writeup/">ssctf2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/29/hctfgame_week3_writeup/">hctf_game_week3_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/28/ldpai/">ldpa简单注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/28/titan-souls-ez/">titan souls 普通模式通关攻略</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/easy_git/">简单的git教程</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week2_writeup/">hctf_game_week2_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week1_writeup/">hctf_game_week1_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week0_writeup/">hctf_game_week0_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/21/dmsj-book/">《代码审计》一点儿笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/19/hctf2015/">hctf2015的一点儿记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/19/xss-link/">xss link&amp;svg;黑魔法</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/19/sql-error/">SQL 显错注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/17/rctf2015/">RCTF2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/17/isg2015/">ISG2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/02/hsb/">SPWC &amp; 华山杯？ writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/10/24/sqli_h/">关于sqli注入的特殊函数</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/10/04/XDCTF2015-writeup/">XDCTF2015-writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/09/28/nsctf-writeup/">Nsctf2015_Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/07/02/xss-p/">xss无声挑战赛_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/06/11/ctf0611/">ctf近期总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/22/Hexo-blogs/">Windows Hexo博客安装配置优化（小白篇）</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/21/fucksql/">Hduisa_ctf_wee4_fucksql</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/10/webforpentester/">Web for pentester_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/hduisa-ctf-writeup2/">Hduisa_ctf_writeup02</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/hduisa-ctf-writeup1/">Hduisa_ctf_writeup01</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/shinian/">（转）十年学会程序设计</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/01/22/webfirst/">0基础如何学好WEB（转）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/31/hackx/">凤凰挽歌，黑客独白（作者：我是老鹰&amp;炫凤舞）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/29/bookshelf1/">（转）学长们给我们的书目（结尾附上PDF地址）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/29/xiaobaistart/">菜鸟小白的开始...</a></li></ul>
+<script>
+</script>
+
+<footer id="footer">
+<div class="outer">
+<div id="footer-info">
+<div class="footer-left">
+<i class="fa fa-copyright"></i> 
+                2014-2017 LoRexxar
+            </div>
+<div class="footer-right">
+<a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+</div>
+</div>
+<div class="visit">
+<span id="busuanzi_container_site_pv" style="display:none">
+<span id="site-visit" title="本站到访数"><i aria-hidden="true" class="fa fa-user"></i><span id="busuanzi_value_site_uv"></span>
+</span>
+</span>
+<span>| </span>
+<span id="busuanzi_container_page_pv" style="display:none">
+<span id="page-visit" title="本页阅读量"><i aria-hidden="true" class="fa fa-eye animated infinite pulse"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+</div>
+</div>
+</footer>
+
+<script data-main="/js/main.js" src="./CSP Is Dead, Long Live CSP! 翻译  LoRexxar's Blog/require.min.js"></script>
+<script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 7;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+<div class="scroll" id="scroll">
+<a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+<a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+<a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+<script async="" src="./CSP Is Dead, Long Live CSP! 翻译  LoRexxar's Blog/busuanzi.pure.mini.js">
+</script>
+
+

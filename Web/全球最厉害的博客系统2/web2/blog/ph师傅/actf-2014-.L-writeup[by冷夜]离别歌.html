@@ -1,0 +1,203 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./actf-2014-.L-writeup [by 冷夜]  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./actf-2014-.L-writeup [by 冷夜]  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./actf-2014-.L-writeup [by 冷夜]  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>actf-2014-.L-writeup [by 冷夜] | 离别歌</title>
+<link href="./actf-2014-.L-writeup [by 冷夜]  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./actf-2014-.L-writeup [by 冷夜]  离别歌/styles.css" rel="stylesheet"/>
+<link href="./actf-2014-.L-writeup [by 冷夜]  离别歌/style.css" rel="stylesheet"/>
+<link href="./actf-2014-.L-writeup [by 冷夜]  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./actf-2014-.L-writeup [by 冷夜]  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./actf-2014-.L-writeup [by 冷夜]  离别歌/jquery.min.js"></script>
+<link href="./actf-2014-.L-writeup [by 冷夜]  离别歌/code.css" rel="stylesheet"/>
+<link href="./actf-2014-.L-writeup [by 冷夜]  离别歌/button.css" rel="stylesheet"/>
+<link href="./actf-2014-.L-writeup [by 冷夜]  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./actf-2014-.L-writeup [by 冷夜]  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/SHARE/L-actf-2014-writeup.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/SHARE/L-actf-2014-writeup.html&amp;text=actf-2014-.L-writeup%20%5Bby%20%E5%86%B7%E5%A4%9C%5D"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/SHARE/L-actf-2014-writeup.html&amp;title=actf-2014-.L-writeup%20%5Bby%20%E5%86%B7%E5%A4%9C%5D"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/SHARE/L-actf-2014-writeup.html&amp;is_video=false&amp;description=actf-2014-.L-writeup%20%5Bby%20%E5%86%B7%E5%A4%9C%5D"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=actf-2014-.L-writeup%20%5Bby%20%E5%86%B7%E5%A4%9C%5D&amp;body=Check out this article: https%3A//www.leavesongs.com/SHARE/L-actf-2014-writeup.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/SHARE/L-actf-2014-writeup.html&amp;title=actf-2014-.L-writeup%20%5Bby%20%E5%86%B7%E5%A4%9C%5D"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/SHARE/L-actf-2014-writeup.html&amp;title=actf-2014-.L-writeup%20%5Bby%20%E5%86%B7%E5%A4%9C%5D"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/SHARE/L-actf-2014-writeup.html&amp;title=actf-2014-.L-writeup%20%5Bby%20%E5%86%B7%E5%A4%9C%5D"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/SHARE/L-actf-2014-writeup.html&amp;title=actf-2014-.L-writeup%20%5Bby%20%E5%86%B7%E5%A4%9C%5D"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/SHARE/L-actf-2014-writeup.html&amp;name=actf-2014-.L-writeup%20%5Bby%20%E5%86%B7%E5%A4%9C%5D&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">actf-2014-.L-writeup [by 冷夜]</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年4月8日 13:50" itemprop="datePublished">
+                    2014 四月 08 13:50
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4687
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/SHARE">资源分享</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/writeup">writeup</a>,
+                
+                <a class="tag-link" href="/tag/ctf">ctf</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<h4 id="toc_1" style="margin:10px 0px;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;line-height:20px;color:#333333;text-rendering:optimizelegibility;font-size:17.5px;white-space:normal;background-color:#FFFFFF;">
+	   协会actf2014队伍.L所有writeup，writen by 冷夜<br>
+</br></h4>
+<p>
+<span style="font-size:14px;">    播放地址：</span><a href="http://le4f.net/post/writeup/-ctf-actf-2014-l.-writeup" target="_blank"><span style="font-size:14px;">http://le4f.net/post/writeup/-ctf-actf-2014-l.-writeup</span></a>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1601">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./actf-2014-.L-writeup [by 冷夜]  离别歌/12d45d55e36b31d522825437a654767b.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">blind</a>
+<time datetime="2014年4月13日 12:37" itemprop="datePublished">
+                            2014 四月 13 12:37
+                        </time>
+<a href="javascript:reply_to('1601', 'blind')">回复</a>
+</p>
+<p class="comment-meta">为啥Ox04我http://218.2.197.236:2005/index.php?way=H4ck_F0r_Fun!GoGoGo!后，却发现是<br>the flag can only access by local machine？...<br/><br/>小白不懂，请教下！</br></p>
+</div>
+</div>
+<div class="row" id="comment-1600">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./actf-2014-.L-writeup [by 冷夜]  离别歌/83203f8538c83a12135a29d957a7d66c.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.wangshifu.net" target="_blank">王师傅装修队</a>
+<time datetime="2014年4月10日 15:59" itemprop="datePublished">
+                            2014 四月 10 15:59
+                        </time>
+<a href="javascript:reply_to('1600', '王师傅装修队')">回复</a>
+</p>
+<p class="comment-meta">为什么我总感觉别人的博客是这么的漂亮呢。</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="b188b3a5adb0ee9072db0ba795b3ecf0586a698a"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./actf-2014-.L-writeup [by 冷夜]  离别歌/b188b3a5adb0ee9072db0ba795b3ecf0586a698a"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="311">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="3GKsTff8bJ6EzpDMt3fxLvVSlEJsyQMbB05YHJrnCw03z411hkJhk9XXuIcAhkBl"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./actf-2014-.L-writeup [by 冷夜]  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./actf-2014-.L-writeup [by 冷夜]  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

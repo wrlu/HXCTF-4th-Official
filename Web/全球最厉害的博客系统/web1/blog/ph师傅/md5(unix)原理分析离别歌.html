@@ -1,0 +1,409 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./md5(unix)原理分析  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./md5(unix)原理分析  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./md5(unix)原理分析  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>md5(unix)原理分析 | 离别歌</title>
+<link href="./md5(unix)原理分析  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./md5(unix)原理分析  离别歌/styles.css" rel="stylesheet"/>
+<link href="./md5(unix)原理分析  离别歌/style.css" rel="stylesheet"/>
+<link href="./md5(unix)原理分析  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./md5(unix)原理分析  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./md5(unix)原理分析  离别歌/jquery.min.js"></script>
+<link href="./md5(unix)原理分析  离别歌/code.css" rel="stylesheet"/>
+<link href="./md5(unix)原理分析  离别歌/button.css" rel="stylesheet"/>
+<link href="./md5(unix)原理分析  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./md5(unix)原理分析  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/about-hash-password.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/about-hash-password.html&amp;text=md5%28unix%29%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/about-hash-password.html&amp;title=md5%28unix%29%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/about-hash-password.html&amp;is_video=false&amp;description=md5%28unix%29%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=md5%28unix%29%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/about-hash-password.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/about-hash-password.html&amp;title=md5%28unix%29%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/about-hash-password.html&amp;title=md5%28unix%29%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/about-hash-password.html&amp;title=md5%28unix%29%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/about-hash-password.html&amp;title=md5%28unix%29%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/about-hash-password.html&amp;name=md5%28unix%29%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">md5(unix)原理分析</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年11月7日 17:22" itemprop="datePublished">
+                    2015 十一月 07 17:22
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4461
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/hashcat">hashcat</a>,
+                
+                <a class="tag-link" href="/tag/%E5%AF%86%E6%96%87%E7%A0%B4%E8%A7%A3">密文破解</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>看到t00ls上有同学在问这个问题: <a href="https://www.t00ls.net/thread-31914-1-1.html"><a href="https://www.t00ls.net/thread-31914-1-1.html">https://www.t00ls.net/thread-31914-1-1.html</a></a></p>
+<p>里面有说到通过注入拿到网站的密码，加密方式是md5(unix)，破解不了于是很尴尬。我们通过他文中给出的hash入手，来分析一下unix(md5)的原理与破解方法。</p>
+<p>目标hash：<code>$1$Dx1bONFt$Hsrx102ek28d03B5dqgAv/</code></p>
+<p>实际上，我们要先明白一点。无论是何种哈希，说到底是摘要算法，是将任意长度的任意字节对应成固定长度的一段字节。<br>
+这段摘要字节因为包含很多不易显示的字符，所以人们通常使用hex或者base64等类似方法将它转换成可见字符显示出来。<br>
+所以这个hash也一样，我们用<code>$</code>将hash切割成三部分：”1“、”Dx1bONFt“、”Hsrx102ek28d03B5dqgAv/“ ，给这三部分分别起个名字：magic、salt、password。<br/>
+其中password实际上就是哈希完成后的字符串，再通过类似base64的算法转换成了可见字符串。</br></br></p>
+<h2 id="magic"><a class="toclink" href="#magic">Magic</a></h2>
+<p>magic是表明这一段哈希是通过什么算法得到的，对应关系如下：</p>
+<div class="codehilite"><pre><span></span>$0 = DES
+$1 = MD5
+$2a(2y) = Blowfish
+$5 = SHA-256
+$6 = SHA-512
+</pre></div>
+<p>目标hash的magic==1，说明是md5加密。<br/>
+当然内部实现不会是单纯单次md5，但总体来说是以MD5为hash函数，通过多次计算得到的最终值。</p>
+<p>类似，这个是sha-256的哈希(明文 admin)：<br/>
+<code>$5$DnnkiE71Scb5$lHT.SBfgQKoiTi8cF.cbuxlZ9ZBVFG8CGDxh8CpgPe8</code><br/>
+这个是sha-512的哈希(明文 admin)：<br/>
+<code>$6$I7iRFjXdW9rZA2$/4WJ35KCqtrfc3BFmoargIm8WiKhY5cSBuJIb7ItjO0I7Dj99ZVIPZ3fgKvxaDgZqrWNWwL5aSVwQUkd8D7LT0</code></p>
+<p>对比发现，magic值确实不同。除了通过magic来判断密文的加密方式以外，通过哈希的长度也可以判断。比如原哈希Hsrx102ek28d03B5dqgAv/，我们可以用以下代码来看看其长度:</p>
+<div class="codehilite"><pre><span></span>php -r "echo strlen(base64_decode('Hsrx102ek28d03B5dqgAv/'));"
+</pre></div>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201511/20491446888251.jpg"><img alt="14461841678162.jpg" src="./md5(unix)原理分析  离别歌/thum-20491446888251.jpg"/></a></p>
+<p>可见结果为16，正是md5的摘要的长度（hex后长度为32），这样也能佐证这个哈希的加密方式为md5。</p>
+<h2 id="salt"><a class="toclink" href="#salt">Salt</a></h2>
+<p>salt是此次哈希的盐值，长度是8位，超过8的后面的位数将不影响哈希的结果。<br/>
+在正常情况下，进行加密的时候，这个盐值是随机字符串，所以说其实这个哈希：<br/>
+<code>$1$Dx1bONFt$Hsrx102ek28d03B5dqgAv/</code><br/>
+我们可以类比为<br/>
+<code>1ecaf1d74d9e936f1dd3707976a800bf:Dx1bONFt</code></p>
+<blockquote>
+<p>这个值1ecaf1d74d9e936f1dd3707976a800bf也不是我胡编的，是将原hash用base64解码后再转换为hex得到的。<br/>
+而实际上原hash并不是base64编码，只是用类似base64编码的一种算法。这里用base64举例，具体算法后面会讲到</p>
+</blockquote>
+<p>所以很多同学一看到<code>$1$xxx$abcdef</code>这样的密码就懵逼了，其实完全不必，你可就把他理解为abcdef:xxx。</p>
+<h2 id="password"><a class="toclink" href="#password">Password</a></h2>
+<p>password就是加密完成后得到的hash。<br/>
+我这里给出其php实现的具体算法：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">namespace</span> <span class="nx">Md5Crypt</span><span class="p">;</span>
+<span class="k">class</span> <span class="nc">Md5Crypt</span> 
+<span class="p">{</span>
+    <span class="k">static</span> <span class="k">public</span> <span class="nv">$itoa64</span> <span class="o">=</span> <span class="s1">'./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'</span><span class="p">;</span> 
+            <span class="c1">// [a-zA-Z0-9./]</span>
+
+    <span class="k">static</span> <span class="k">protected</span> <span class="k">function</span> <span class="nf">to64</span><span class="p">(</span><span class="nv">$v</span><span class="p">,</span> <span class="nv">$n</span><span class="p">)</span> 
+    <span class="p">{</span>
+        <span class="nv">$itoa64</span> <span class="o">=</span> <span class="nx">self</span><span class="o">::</span><span class="nv">$itoa64</span><span class="p">;</span>
+        <span class="nv">$ret</span> <span class="o">=</span> <span class="s1">''</span><span class="p">;</span>
+
+        <span class="k">while</span><span class="p">(</span><span class="o">--</span><span class="nv">$n</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$ret</span> <span class="o">.=</span> <span class="nv">$itoa64</span><span class="p">{</span><span class="nv">$v</span> <span class="o">&amp;</span> <span class="mh">0x3f</span><span class="p">};</span>   
+            <span class="nv">$v</span> <span class="o">=</span> <span class="nv">$v</span> <span class="o">&gt;&gt;</span> <span class="mi">6</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nv">$ret</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">static</span> <span class="k">public</span> <span class="k">function</span> <span class="nf">apache</span><span class="p">(</span><span class="nv">$pw</span><span class="p">,</span> <span class="nv">$salt</span> <span class="o">=</span> <span class="k">NULL</span><span class="p">)</span> 
+    <span class="p">{</span>
+        <span class="nv">$Magic</span> <span class="o">=</span> <span class="s1">'$apr1$'</span><span class="p">;</span>
+
+        <span class="k">return</span> <span class="nx">self</span><span class="o">::</span><span class="na">unix</span><span class="p">(</span><span class="nv">$pw</span><span class="p">,</span> <span class="nv">$salt</span><span class="p">,</span> <span class="nv">$Magic</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">static</span> <span class="k">public</span> <span class="k">function</span> <span class="nf">unix</span><span class="p">(</span><span class="nv">$pw</span><span class="p">,</span> <span class="nv">$salt</span> <span class="o">=</span> <span class="k">NULL</span><span class="p">,</span> <span class="nv">$Magic</span> <span class="o">=</span> <span class="s1">'$1$'</span><span class="p">)</span> 
+    <span class="p">{</span>
+        <span class="nv">$itoa64</span> <span class="o">=</span> <span class="nx">self</span><span class="o">::</span><span class="nv">$itoa64</span><span class="p">;</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="nv">$salt</span> <span class="o">!==</span> <span class="k">NULL</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// Take care of the magic string if present</span>
+            <span class="k">if</span><span class="p">(</span><span class="nb">substr</span><span class="p">(</span><span class="nv">$salt</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">strlen</span><span class="p">(</span><span class="nv">$Magic</span><span class="p">))</span> <span class="o">==</span> <span class="nv">$Magic</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nv">$salt</span> <span class="o">=</span> <span class="nb">substr</span><span class="p">(</span><span class="nv">$salt</span><span class="p">,</span> <span class="nb">strlen</span><span class="p">(</span><span class="nv">$Magic</span><span class="p">),</span> <span class="nb">strlen</span><span class="p">(</span><span class="nv">$salt</span><span class="p">));</span>
+            <span class="p">}</span>
+            <span class="c1">// Salt can have up to 8 characters</span>
+            <span class="nv">$parts</span> <span class="o">=</span> <span class="nb">explode</span><span class="p">(</span><span class="s1">'$'</span><span class="p">,</span> <span class="nv">$salt</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+            <span class="nv">$salt</span> <span class="o">=</span> <span class="nb">substr</span><span class="p">(</span><span class="nv">$parts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nv">$salt</span> <span class="o">=</span> <span class="s1">''</span><span class="p">;</span>
+            <span class="nb">mt_srand</span><span class="p">((</span><span class="nx">double</span><span class="p">)(</span><span class="nb">microtime</span><span class="p">()</span> <span class="o">*</span> <span class="mi">10000000</span><span class="p">));</span>
+
+            <span class="k">while</span><span class="p">(</span><span class="nb">strlen</span><span class="p">(</span><span class="nv">$salt</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nv">$salt</span> <span class="o">.=</span> <span class="nv">$itoa64</span><span class="p">{</span><span class="nb">mt_rand</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">strlen</span><span class="p">(</span><span class="nv">$itoa64</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)};</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="nv">$ctx</span> <span class="o">=</span> <span class="nv">$pw</span> <span class="o">.</span> <span class="nv">$Magic</span> <span class="o">.</span> <span class="nv">$salt</span><span class="p">;</span>
+
+        <span class="nv">$final</span> <span class="o">=</span> <span class="nb">pack</span><span class="p">(</span><span class="s1">'H*'</span><span class="p">,</span> <span class="nb">md5</span><span class="p">(</span><span class="nv">$pw</span> <span class="o">.</span> <span class="nv">$salt</span> <span class="o">.</span> <span class="nv">$pw</span><span class="p">));</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="nv">$pl</span> <span class="o">=</span> <span class="nb">strlen</span><span class="p">(</span><span class="nv">$pw</span><span class="p">);</span> <span class="nv">$pl</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span> <span class="nv">$pl</span> <span class="o">-=</span> <span class="mi">16</span><span class="p">)</span> <span class="p">{</span>
+           <span class="nv">$ctx</span> <span class="o">.=</span> <span class="nb">substr</span><span class="p">(</span><span class="nv">$final</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="nv">$pl</span> <span class="o">&gt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">?</span> <span class="mi">16</span> <span class="o">:</span> <span class="nv">$pl</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="c1">// Now the 'weird' xform</span>
+        <span class="k">for</span><span class="p">(</span><span class="nv">$i</span> <span class="o">=</span> <span class="nb">strlen</span><span class="p">(</span><span class="nv">$pw</span><span class="p">);</span> <span class="nv">$i</span><span class="p">;</span> <span class="nv">$i</span> <span class="o">&gt;&gt;=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>   
+            <span class="k">if</span><span class="p">(</span><span class="nv">$i</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>                <span class="c1">// This comes from the original version,</span>
+                <span class="nv">$ctx</span> <span class="o">.=</span> <span class="nb">pack</span><span class="p">(</span><span class="s2">"C"</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>   <span class="c1">// where a memset() is done to $final</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>                    <span class="c1">// before this loop</span>
+                <span class="nv">$ctx</span> <span class="o">.=</span> <span class="nv">$pw</span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="nv">$final</span> <span class="o">=</span> <span class="nb">pack</span><span class="p">(</span><span class="s1">'H*'</span><span class="p">,</span> <span class="nb">md5</span><span class="p">(</span><span class="nv">$ctx</span><span class="p">));</span> <span class="c1">// The following is supposed to make</span>
+                                        <span class="c1">// things run slower</span>
+
+        <span class="k">for</span><span class="p">(</span><span class="nv">$i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nv">$i</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">;</span> <span class="nv">$i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$ctx1</span> <span class="o">=</span> <span class="s1">''</span><span class="p">;</span>
+            <span class="k">if</span><span class="p">(</span><span class="nv">$i</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nv">$ctx1</span> <span class="o">.=</span> <span class="nv">$pw</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nv">$ctx1</span> <span class="o">.=</span> <span class="nb">substr</span><span class="p">(</span><span class="nv">$final</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">16</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">if</span><span class="p">(</span><span class="nv">$i</span> <span class="o">%</span> <span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nv">$ctx1</span> <span class="o">.=</span> <span class="nv">$salt</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">if</span><span class="p">(</span><span class="nv">$i</span> <span class="o">%</span> <span class="mi">7</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nv">$ctx1</span> <span class="o">.=</span> <span class="nv">$pw</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">if</span><span class="p">(</span><span class="nv">$i</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nv">$ctx1</span> <span class="o">.=</span> <span class="nb">substr</span><span class="p">(</span><span class="nv">$final</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">16</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nv">$ctx1</span> <span class="o">.=</span> <span class="nv">$pw</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="nv">$final</span> <span class="o">=</span> <span class="nb">pack</span><span class="p">(</span><span class="s1">'H*'</span><span class="p">,</span> <span class="nb">md5</span><span class="p">(</span><span class="nv">$ctx1</span><span class="p">));</span>
+        <span class="p">}</span>
+
+        <span class="c1">// Final xform</span>
+        <span class="nv">$passwd</span> <span class="o">=</span> <span class="s1">''</span><span class="p">;</span>
+        <span class="nv">$passwd</span> <span class="o">.=</span> <span class="nx">self</span><span class="o">::</span><span class="na">to64</span><span class="p">((</span><span class="nb">intval</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="nv">$final</span><span class="p">{</span><span class="mi">0</span><span class="p">}))</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span>
+                        <span class="o">|</span><span class="p">(</span><span class="nb">intval</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="nv">$final</span><span class="p">{</span><span class="mi">6</span><span class="p">}))</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span>
+                        <span class="o">|</span><span class="p">(</span><span class="nb">intval</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="nv">$final</span><span class="p">{</span><span class="mi">12</span><span class="p">}))),</span><span class="mi">4</span><span class="p">);</span>
+        <span class="nv">$passwd</span> <span class="o">.=</span> <span class="nx">self</span><span class="o">::</span><span class="na">to64</span><span class="p">((</span><span class="nb">intval</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="nv">$final</span><span class="p">{</span><span class="mi">1</span><span class="p">}))</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span>
+                        <span class="o">|</span><span class="p">(</span><span class="nb">intval</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="nv">$final</span><span class="p">{</span><span class="mi">7</span><span class="p">}))</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span>
+                        <span class="o">|</span><span class="p">(</span><span class="nb">intval</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="nv">$final</span><span class="p">{</span><span class="mi">13</span><span class="p">}))),</span> <span class="mi">4</span><span class="p">);</span>
+        <span class="nv">$passwd</span> <span class="o">.=</span> <span class="nx">self</span><span class="o">::</span><span class="na">to64</span><span class="p">((</span><span class="nb">intval</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="nv">$final</span><span class="p">{</span><span class="mi">2</span><span class="p">}))</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span>
+                        <span class="o">|</span><span class="p">(</span><span class="nb">intval</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="nv">$final</span><span class="p">{</span><span class="mi">8</span><span class="p">}))</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span>
+                        <span class="o">|</span><span class="p">(</span><span class="nb">intval</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="nv">$final</span><span class="p">{</span><span class="mi">14</span><span class="p">}))),</span> <span class="mi">4</span><span class="p">);</span>
+        <span class="nv">$passwd</span> <span class="o">.=</span> <span class="nx">self</span><span class="o">::</span><span class="na">to64</span><span class="p">((</span><span class="nb">intval</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="nv">$final</span><span class="p">{</span><span class="mi">3</span><span class="p">}))</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span>
+                        <span class="o">|</span><span class="p">(</span><span class="nb">intval</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="nv">$final</span><span class="p">{</span><span class="mi">9</span><span class="p">}))</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span>
+                        <span class="o">|</span><span class="p">(</span><span class="nb">intval</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="nv">$final</span><span class="p">{</span><span class="mi">15</span><span class="p">}))),</span> <span class="mi">4</span><span class="p">);</span>
+        <span class="nv">$passwd</span> <span class="o">.=</span> <span class="nx">self</span><span class="o">::</span><span class="na">to64</span><span class="p">((</span><span class="nb">intval</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="nv">$final</span><span class="p">{</span><span class="mi">4</span><span class="p">})</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span>
+                        <span class="o">|</span><span class="p">(</span><span class="nb">intval</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="nv">$final</span><span class="p">{</span><span class="mi">10</span><span class="p">}))</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span>
+                        <span class="o">|</span><span class="p">(</span><span class="nb">intval</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="nv">$final</span><span class="p">{</span><span class="mi">5</span><span class="p">})))),</span> <span class="mi">4</span><span class="p">);</span>
+        <span class="nv">$passwd</span> <span class="o">.=</span> <span class="nx">self</span><span class="o">::</span><span class="na">to64</span><span class="p">((</span><span class="nb">intval</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="nv">$final</span><span class="p">{</span><span class="mi">11</span><span class="p">}))),</span> <span class="mi">2</span><span class="p">);</span>
+
+        <span class="c1">// Return the final string</span>
+        <span class="k">return</span> <span class="nv">$Magic</span> <span class="o">.</span> <span class="nv">$salt</span> <span class="o">.</span> <span class="s1">'$'</span> <span class="o">.</span> <span class="nv">$passwd</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span> 
+</pre></div>
+<p>我们可以如下调用这个类，获得<code>elon11:Dx1bONFt</code>的哈希：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">include_once</span><span class="p">(</span><span class="s2">"php-crypt-md5/library/Md5Crypt/Md5Crypt.php"</span><span class="p">);</span>
+
+<span class="nv">$password</span> <span class="o">=</span> <span class="s2">"elon11"</span><span class="p">;</span>
+<span class="nv">$salt</span> <span class="o">=</span> <span class="s2">"Dx1bONFt"</span><span class="p">;</span>
+
+<span class="k">echo</span> <span class="nx">\Md5Crypt\Md5Crypt</span><span class="o">::</span><span class="na">unix</span><span class="p">(</span><span class="nv">$password</span><span class="p">,</span> <span class="nv">$salt</span><span class="p">);</span> 
+</pre></div>
+<p>得到的结果其实就是最开始给出的目标哈希 <code>$1$Dx1bONFt$Hsrx102ek28d03B5dqgAv/</code>：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201511/21851446888254.jpg"><img alt="14461854097387.jpg" src="./md5(unix)原理分析  离别歌/21851446888254.jpg"/></a></p>
+<p>分析一下这个类，你会发现实际上它的核心算法是1002次循环md5，中间再进行一些截断、移位等过程。<br/>
+在密码学中，对于防范哈希暴力破解的一种方式就是“密钥延伸”，简单来说就是利用多次hash计算，来延长暴力破解hash的时间，比如这里的1002次md5，就等于将单次md5破解时间延长了1002倍。<br/>
+然而，在当今的计算机速度下，1002次md5，其实速度也是秒速。我用hashcat尝试破解上述hash，</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201511/48191446888287.jpg"><img alt="14462245474953.jpg" src="./md5(unix)原理分析  离别歌/thum-48191446888287.jpg"/></a></p>
+<p>7510个字典，仅用1秒不到跑完，速度为18.28k/s。<br/>
+相对的，现代linux系统使用的hash方法为SHA-512(Unix)，算法核心为sha512，我们可以通过<code>cat /etc/shadow</code>来获得之，通过hashcat来跑：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201511/4bee1446888292.jpg"><img alt="14462249868313.jpg" src="./md5(unix)原理分析  离别歌/thum-4bee1446888292.jpg"/></a></p>
+<p>速度明显降下来了，只有656 words/s<br/>
+前两天爆出的Joomla注入，获取到的hash值使用的加密方法是Bcrypt + Blowfish 。我们可以利用如下命令来跑这个密码：</p>
+<div class="codehilite"><pre><span></span>hashcat --hash-type=3200 --attack-mode=0 joomla.txt less.dict
+</pre></div>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201511/1d621446888295.jpg"><img alt="14462251619189.jpg" src="./md5(unix)原理分析  离别歌/thum-1d621446888295.jpg"/></a></p>
+<p>可见，速度已经降到45 words/s了，7510个密码的字典需要跑2分半才能全部跑完。足以见得joomla密码的安全性。<br/>
+不过，这却不是最慢的，Minos(<a href="https://github.com/phith0n/Minos"><a href="https://github.com/phith0n/Minos">https://github.com/phith0n/Minos</a></a>) 使用的也是Bcrypt + Blowfish，但我将其cost设置为12。<br/>
+cost在Blowfish算法中就是延缓其速度，增加破解难度的选项，如果将cost设置为12，生成的hash，破解起来速度可以降到10 words/s:</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201511/e8951446888297.jpg"><img alt="14462268441059.jpg" src="./md5(unix)原理分析  离别歌/thum-e8951446888297.jpg"/></a></p>
+<p>基本达到这样的速度，就可以满足安全需求了。这样的话，即使黑客拿到密码的hash，跑一万个密码的字典需要用16分钟，极大地增加了密码碰撞的难度。</p>
+<h2 id="hash"><a class="toclink" href="#hash">开发与渗透中如何生成hash</a></h2>
+<p>那么，这些hash是怎么生成的呢？<br/>
+我用php举例说明。<br/>
+生成一个普通的unix(md5)，直接用上面给出的源码即可。当然php也有自带的方法可以办到：</p>
+<div class="codehilite"><pre><span></span>echo crypt("admin", '$1$12345678');
+</pre></div>
+<p>生成一个sha512(unix)</p>
+<div class="codehilite"><pre><span></span>echo crypt("admin", '$6$12345678');
+</pre></div>
+<p>生成一个bcrypt+blowfish(cost=10默认)(joomla的加密方式)</p>
+<div class="codehilite"><pre><span></span>echo password_hash("123123", CRYPT_BLOWFISH);
+</pre></div>
+<p>生成一个bcrypt+blowfish(cost=12)(minos的加密方式)</p>
+<div class="codehilite"><pre><span></span>echo password_hash("123123", CRYPT_BLOWFISH, ["cost" =&gt; 12]);
+</pre></div>
+<p>在渗透过程中，我们也可以直接用工具生成这类密码。比如htpasswd工具，以下是生成密码的一些方法：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201511/bfd11446888299.jpg"><img alt="14468853725448.jpg" src="./md5(unix)原理分析  离别歌/thum-bfd11446888299.jpg"/></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2478">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./md5(unix)原理分析  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">匿名</a>
+<time datetime="2016年11月24日 15:05" itemprop="datePublished">
+                            2016 十一月 24 15:05
+                        </time>
+<a href="javascript:reply_to('2478', '匿名')">回复</a>
+</p>
+<p class="comment-meta">很喜欢你的博客，涨了很多知识。我准备要把你博客的文章都看完。！<br/>还有，很希望能跟你成为朋友。</p>
+</div>
+</div>
+<div class="row" id="comment-2291">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./md5(unix)原理分析  离别歌/d832f116cafcd2608947371702255c2f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://kfd.me" target="_blank">mr</a>
+<time datetime="2016年1月20日 23:47" itemprop="datePublished">
+                            2016 一月 20 23:47
+                        </time>
+<a href="javascript:reply_to('2291', 'mr')">回复</a>
+</p>
+<p class="comment-meta">还不忘安利一波Minos……</p>
+</div>
+</div>
+<div class="row" id="comment-2249">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./md5(unix)原理分析  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">windcarp</a>
+<time datetime="2015年11月8日 00:39" itemprop="datePublished">
+                            2015 十一月 08 00:39
+                        </time>
+<a href="javascript:reply_to('2249', 'windcarp')">回复</a>
+</p>
+<p class="comment-meta">消灭零评论，睡前读物涨姿势~</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="f0f7abc0528096fd94c270f4d5b8190228e88067"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./md5(unix)原理分析  离别歌/f0f7abc0528096fd94c270f4d5b8190228e88067"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="372">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="hvXU8nXkY67ybTjDOhVT9zZKjWikXhPbPPiqWR9zpT1XbyHSCypDId1Ps0LsGLEl"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./md5(unix)原理分析  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./md5(unix)原理分析  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

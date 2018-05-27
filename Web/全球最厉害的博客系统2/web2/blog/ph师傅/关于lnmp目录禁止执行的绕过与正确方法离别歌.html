@@ -1,0 +1,293 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>关于lnmp目录禁止执行的绕过与正确方法 | 离别歌</title>
+<link href="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/styles.css" rel="stylesheet"/>
+<link href="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/style.css" rel="stylesheet"/>
+<link href="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/jquery.min.js"></script>
+<link href="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/code.css" rel="stylesheet"/>
+<link href="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/button.css" rel="stylesheet"/>
+<link href="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/nginx-deny-exec-php-file.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/nginx-deny-exec-php-file.html&amp;text=%E5%85%B3%E4%BA%8Elnmp%E7%9B%AE%E5%BD%95%E7%A6%81%E6%AD%A2%E6%89%A7%E8%A1%8C%E7%9A%84%E7%BB%95%E8%BF%87%E4%B8%8E%E6%AD%A3%E7%A1%AE%E6%96%B9%E6%B3%95"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/nginx-deny-exec-php-file.html&amp;title=%E5%85%B3%E4%BA%8Elnmp%E7%9B%AE%E5%BD%95%E7%A6%81%E6%AD%A2%E6%89%A7%E8%A1%8C%E7%9A%84%E7%BB%95%E8%BF%87%E4%B8%8E%E6%AD%A3%E7%A1%AE%E6%96%B9%E6%B3%95"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/nginx-deny-exec-php-file.html&amp;is_video=false&amp;description=%E5%85%B3%E4%BA%8Elnmp%E7%9B%AE%E5%BD%95%E7%A6%81%E6%AD%A2%E6%89%A7%E8%A1%8C%E7%9A%84%E7%BB%95%E8%BF%87%E4%B8%8E%E6%AD%A3%E7%A1%AE%E6%96%B9%E6%B3%95"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E5%85%B3%E4%BA%8Elnmp%E7%9B%AE%E5%BD%95%E7%A6%81%E6%AD%A2%E6%89%A7%E8%A1%8C%E7%9A%84%E7%BB%95%E8%BF%87%E4%B8%8E%E6%AD%A3%E7%A1%AE%E6%96%B9%E6%B3%95&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/nginx-deny-exec-php-file.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/nginx-deny-exec-php-file.html&amp;title=%E5%85%B3%E4%BA%8Elnmp%E7%9B%AE%E5%BD%95%E7%A6%81%E6%AD%A2%E6%89%A7%E8%A1%8C%E7%9A%84%E7%BB%95%E8%BF%87%E4%B8%8E%E6%AD%A3%E7%A1%AE%E6%96%B9%E6%B3%95"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/nginx-deny-exec-php-file.html&amp;title=%E5%85%B3%E4%BA%8Elnmp%E7%9B%AE%E5%BD%95%E7%A6%81%E6%AD%A2%E6%89%A7%E8%A1%8C%E7%9A%84%E7%BB%95%E8%BF%87%E4%B8%8E%E6%AD%A3%E7%A1%AE%E6%96%B9%E6%B3%95"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/nginx-deny-exec-php-file.html&amp;title=%E5%85%B3%E4%BA%8Elnmp%E7%9B%AE%E5%BD%95%E7%A6%81%E6%AD%A2%E6%89%A7%E8%A1%8C%E7%9A%84%E7%BB%95%E8%BF%87%E4%B8%8E%E6%AD%A3%E7%A1%AE%E6%96%B9%E6%B3%95"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/nginx-deny-exec-php-file.html&amp;title=%E5%85%B3%E4%BA%8Elnmp%E7%9B%AE%E5%BD%95%E7%A6%81%E6%AD%A2%E6%89%A7%E8%A1%8C%E7%9A%84%E7%BB%95%E8%BF%87%E4%B8%8E%E6%AD%A3%E7%A1%AE%E6%96%B9%E6%B3%95"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/nginx-deny-exec-php-file.html&amp;name=%E5%85%B3%E4%BA%8Elnmp%E7%9B%AE%E5%BD%95%E7%A6%81%E6%AD%A2%E6%89%A7%E8%A1%8C%E7%9A%84%E7%BB%95%E8%BF%87%E4%B8%8E%E6%AD%A3%E7%A1%AE%E6%96%B9%E6%B3%95&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">关于lnmp目录禁止执行的绕过与正确方法</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年11月2日 16:35" itemprop="datePublished">
+                    2014 十一月 02 16:35
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3425
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/nginx">nginx</a>,
+                
+                <a class="tag-link" href="/tag/%E9%98%BB%E6%AD%A2%E8%84%9A%E6%9C%AC%E8%BF%90%E8%A1%8C">阻止脚本运行</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>无意中看到了这篇文章：<a href="http://www.freebuf.com/articles/system/49428.html"><a href="http://www.freebuf.com/articles/system/49428.html">http://www.freebuf.com/articles/system/49428.html</a></a></p>
+<p>对于下面我莫名其妙中枪的事。。。我就不多说了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201411/86c31414918055.jpg"><img alt="08.jpg" src="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/thum-86c31414918055.jpg"/></a></p>
+<p>于是我详细地把文章看了一遍，文章比较基础但也不失为一个引导新手的一个方法。但其中对于禁止执行的方式，我就不敢苟同了。在某种配置下，这个方法是能够很容易被绕过的。</p>
+<p>文中提到，使用lnmp1.1搭建的nginx环境，正好我的vps也是lnmp搭建的环境，所以我可以在我的vps里做实验。</p>
+<p>看到文中的解决方案：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201411/62bf1414918773.jpg"><img alt="11.jpg" src="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/thum-62bf1414918773.jpg"/></a></p>
+<p>在location中，将匹配到/(avatar|uploads|ups)/.*.(php|php5)?$的请求全部禁用掉。</p>
+<p>似乎是一个很好的方法，那我们怎么绕过？</p>
+<p>在web世界里，有一种请求方式叫pathinfo，我们在图中也可以看到，倒数第二行注释掉了一个include pathinfo.conf。前面的说明里也说到了，如果要开启pathinfo，只要注释掉try_files $uri =404即可。</p>
+<p>很多框架、CMS的默认请求方式就是pathinfo，如著名php框架codeigniter，所以可见pathinfo用的是比较广的，所以也会有大量vps在这里是允许pathinfo的。</p>
+<p>那么，当开启了pathinfo后，前面的deny all;就完全失效了，我们只需要在upload目录里上传xxx.php后，如下方式访问：</p>
+<p>http://xxx/upload/xxx.php/xxx</p>
+<p>即可让<code>location /(avatar|uploads|ups)/.*\.(php|php5)?$</code>这条规则完全失效，因为上述请求并不以.php结尾。</p>
+<p>那么，怎样才能有效禁止某目录下解析php？</p>
+<p>那还是应该回到nginx解析php的方式上。我们看到上图，我们可以发现，实际上进入这个location块：<code>location ~ [^/]\.php(/|$)</code>，才真正将请求交给fastcgi去解析。</p>
+<p>所以，我们只需要阻止请求进入这个location块，那么这个请求不论是怎样的后缀，怎样的方式，都不会被php-fpm解析的。</p>
+<p>所以，我的方法是：</p>
+<div class="codehilite"><pre><span></span><span class="nt">location</span> <span class="o">^~</span> <span class="o">/</span><span class="nt">upload</span><span class="o">/</span> <span class="p">{</span>
+<span class="err">default_type</span> <span class="err">text/plain</span><span class="p">;</span>
+<span class="err">expires</span> <span class="err">30d</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nt">location</span> <span class="o">~</span> <span class="cp">[</span><span class="p">^</span><span class="o">/</span><span class="cp">]</span><span class="err">\</span><span class="p">.</span><span class="nc">php</span><span class="o">(/|$)</span>
+<span class="p">{</span>
+<span class="err">#</span> <span class="err">comment</span> <span class="err">try_files</span> <span class="err">$uri</span> <span class="err">=404</span><span class="p">;</span> <span class="err">to</span> <span class="err">enable</span> <span class="err">pathinfo</span>
+<span class="err">#try_files</span> <span class="err">$uri</span> <span class="err">=404</span><span class="p">;</span>
+<span class="err">fastcgi_pass</span>  <span class="n">unix</span><span class="p">:</span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">php-cgi-leavesongs</span><span class="o">.</span><span class="n">sock</span><span class="p">;</span>
+<span class="err">fastcgi_index</span> <span class="err">index.php</span><span class="p">;</span>
+<span class="err">include</span> <span class="err">fastcgi.conf</span><span class="p">;</span>
+<span class="err">include</span> <span class="err">pathinfo.conf</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>在php的解析块前，加上<code>location ^~ /upload/</code>块，^~的意思是“一旦匹配上该块，则不再匹配其他块，一般匹配目录”。所以，这里正好满足我的要求，只要在/upload/目录下的文件，都将匹配到这个块中，而且不会再匹配别的块，所以也不会再进入下面的php解析块中。</p>
+<p>附location匹配命令的一些说明：<a href="http://www.nginx.cn/115.html"><a href="http://www.nginx.cn/115.html">http://www.nginx.cn/115.html</a></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1854">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">wskwsk</a>
+<time datetime="2014年11月21日 16:46" itemprop="datePublished">
+                            2014 十一月 21 16:46
+                        </time>
+<a href="javascript:reply_to('1854', 'wskwsk')">回复</a>
+</p>
+<p class="comment-meta">include pathinfo.conf;<br> # comment try_files $uri =404;<br><br/>我yum的官方nginx 1.6.2包，怎么发现没有上面2行？  也找不到 pathinfo.conf 文件</br></br></p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1856">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年11月21日 16:59" itemprop="datePublished">
+                            2014 十一月 21 16:59
+                        </time>
+<a href="javascript:reply_to('1856', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@wskwsk：你看默认是否支持pathinfo。如果支持，就不需要这个了，这不是重点，这只是lnmp下开启pathinfo的方法。debian下nginx默认是直接开启的，不需要这么麻烦。</p>
+</div>
+</div>
+<div class="row" id="comment-1857">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年11月21日 17:01" itemprop="datePublished">
+                            2014 十一月 21 17:01
+                        </time>
+<a href="javascript:reply_to('1857', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@wskwsk：nginx官方的配置文件里是没这个东西的，这是LNMP这个一键环境自己加的，因为它将pathinfo禁用了，但有些环境需要pathinfo，于是提供给管理员能够随时开启pathinfo。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1834">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/4ba642e65f7c446808165fa86748e791.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">大牛你好赞</a>
+<time datetime="2014年11月4日 13:55" itemprop="datePublished">
+                            2014 十一月 04 13:55
+                        </time>
+<a href="javascript:reply_to('1834', '大牛你好赞')">回复</a>
+</p>
+<p class="comment-meta">大牛你好赞，转走了。好爱你</p>
+</div>
+</div>
+<div class="row" id="comment-1833">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/c55be243bb9ea33219fe33c9bf6a5c61.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">我是TJ</a>
+<time datetime="2014年11月3日 11:04" itemprop="datePublished">
+                            2014 十一月 03 11:04
+                        </time>
+<a href="javascript:reply_to('1833', '我是TJ')">回复</a>
+</p>
+<p class="comment-meta">啊啊啊。 挺不错的</p>
+</div>
+</div>
+<div class="row" id="comment-1832">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/f7d71c363982cf5a565da29859faf425.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">4c</a>
+<time datetime="2014年11月2日 21:05" itemprop="datePublished">
+                            2014 十一月 02 21:05
+                        </time>
+<a href="javascript:reply_to('1832', '4c')">回复</a>
+</p>
+<p class="comment-meta">你咋么这么叼</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="4ddcdbe0ac643fb387771409aeda99023e82ceb1"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/4ddcdbe0ac643fb387771409aeda99023e82ceb1"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="333">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="hQ1UXlhII0QelLYkMxdJulNRyGI9viLGPamqLPtX9NKDlqmzAOHt3ZPWHKbheMAQ"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./关于lnmp目录禁止执行的绕过与正确方法  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

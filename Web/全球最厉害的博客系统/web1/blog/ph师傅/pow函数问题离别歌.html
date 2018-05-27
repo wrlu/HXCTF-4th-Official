@@ -1,0 +1,224 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./pow函数问题  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./pow函数问题  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./pow函数问题  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>pow函数问题 | 离别歌</title>
+<link href="./pow函数问题  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./pow函数问题  离别歌/styles.css" rel="stylesheet"/>
+<link href="./pow函数问题  离别歌/style.css" rel="stylesheet"/>
+<link href="./pow函数问题  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./pow函数问题  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./pow函数问题  离别歌/jquery.min.js"></script>
+<link href="./pow函数问题  离别歌/code.css" rel="stylesheet"/>
+<link href="./pow函数问题  离别歌/button.css" rel="stylesheet"/>
+<link href="./pow函数问题  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./pow函数问题  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/C/pow.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/C/pow.html&amp;text=pow%E5%87%BD%E6%95%B0%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/C/pow.html&amp;title=pow%E5%87%BD%E6%95%B0%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/C/pow.html&amp;is_video=false&amp;description=pow%E5%87%BD%E6%95%B0%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=pow%E5%87%BD%E6%95%B0%E9%97%AE%E9%A2%98&amp;body=Check out this article: https%3A//www.leavesongs.com/C/pow.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/C/pow.html&amp;title=pow%E5%87%BD%E6%95%B0%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/C/pow.html&amp;title=pow%E5%87%BD%E6%95%B0%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/C/pow.html&amp;title=pow%E5%87%BD%E6%95%B0%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/C/pow.html&amp;title=pow%E5%87%BD%E6%95%B0%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/C/pow.html&amp;name=pow%E5%87%BD%E6%95%B0%E9%97%AE%E9%A2%98&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">pow函数问题</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年1月22日 14:00" itemprop="datePublished">
+                    2013 一月 22 14:00
+                </time>
+</div>
+<div class="article-tag">
+            阅读：8102
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/C">C/C++</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E5%85%BC%E5%AE%B9%E6%80%A7">兼容性</a>,
+                
+                <a class="tag-link" href="/tag/%E5%BA%93%E5%87%BD%E6%95%B0">库函数</a>,
+                
+                <a class="tag-link" href="/tag/%E5%87%BD%E6%95%B0">函数</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<h3>    不要随便用pow函数</h3>
+<div>    ——这是我这几天写程序的切身体会，如果需要用整数的乘方运算，自己写一个函数吧。</div>
+<div>    昨天在网上做一道题，其中我写了一句<b>n = (int) pow ( 5.0 , ( double ) k );</b>我认为应该没有问题。因为math库里的pow函数的两个参数和返回值都是浮点型。返回的数我只要它的整数部分（本来也应该是个整数）。</div>
+<div>    于是后来题目一直不能过，而且我的两个编译器( VC6和CFREE )算出的结果还不一样。通过一晚上的调试，我才找到这里。后来自己写了一个pow函数，解决了问题。</div>
+<div>    我们可以来做个试验，写一个程序:<pre class="brush: cpp;">#include &lt;stdio.h&gt;
+#include &lt;math.h&gt;
+int main()
+{
+	for(int i = 0 ; i &lt; 10 ; i++)
+	{
+		long n;
+		n = (int)pow(5,i);
+		printf("%d\n",n);
+	}
+	return 0;
+}</pre>    你放在VC6下运行，毫无问题是吗，输出为:<pre class="brush: cpp;">1
+5
+25
+125
+625
+3125
+15625
+78125
+390625
+1953125</pre>    你放在linux下编译运行(或者在win下用cfree这种用mingw32编译器的软件编译运行)，结果如下:<pre class="brush: cpp;">1
+5
+24
+124
+624
+3125
+15624
+78124
+390624
+1953124</pre><p>    看到了么？从5<sup>2</sup>开始就错。你把<span style="line-height:1.5;"><b>n = ( int ) pow ( 5 , i );</b> 换成</span><b style="line-height:1.5;">n = (int) pow ( 5.0 , ( double ) k ); </b><span style="line-height:1.5;">结果一样。为什么，我也不知道为什么。你算3的乘方都没出问题。</span><span style="line-height:1.5;">下次我真的不敢用pow函数了。</span></p>
+<p><span style="line-height:1.5;">    题目交了一晚上过不了，因为评测系统用的是linux，而我是在VC6下调试运行的。</span></p>
+<p><span style="line-height:1.5;">    无力吐槽C的兼容性。后来还遇到了一个64位整数的问题，一样也是因为不同平台下不同编译器出的结果就不一样，这些兼容性问题在一道题里面集中反映了出来，也真是不简单。(关于这个64位整数的问题我以后会讲讲)<br>
+</br></span></p>
+<p><span style="line-height:1.5;">    <br>
+</br></span></p>
+</div>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1289">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./pow函数问题  离别歌/c99a2c53a26d3c1b3d46428de604e4f1.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">陈汉泉</a>
+<time datetime="2013年1月22日 23:24" itemprop="datePublished">
+                            2013 一月 22 23:24
+                        </time>
+<a href="javascript:reply_to('1289', '陈汉泉')">回复</a>
+</p>
+<p class="comment-meta">同是天崖爱好者！！！</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="d4a3ed4053e91e3d96bbc78814e0c1c64736fe93"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./pow函数问题  离别歌/d4a3ed4053e91e3d96bbc78814e0c1c64736fe93"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="222">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="JyYaeGNJRkYKjpOkhupyqLzbGKoBWh7ThSjG2aZYi7S9j4cz5LTiZpBgPORJFLW3"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./pow函数问题  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./pow函数问题  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

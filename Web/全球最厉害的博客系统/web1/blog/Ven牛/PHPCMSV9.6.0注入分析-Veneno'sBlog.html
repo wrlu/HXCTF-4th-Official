@@ -1,0 +1,437 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable">
+<title>PHPCMS V9.6.0注入分析 - Veneno's Blog</title>
+<link href="./PHPCMS V9.6.0注入分析 - Veneno's Blog/highslide.css" rel="stylesheet" type="text/css"/>
+<!--[if lt IE 7]>
+<link rel="stylesheet" type="text/css" href="http://www.venenof.com/usr/plugins/HighSlide/css/highslide-ie6.css" />
+<![endif]-->
+<meta content="昨天基佬问我有没有phpcms的洞，然后找了下，发现三月份某技术博客已经有了分析(大家应该都知道，但是瞅了几眼...感觉分析的并没有让人明白...索性自己写了下...当然还有个前台shell的洞..." name="description">
+<script type="text/javascript">
+(function () {
+    window.TypechoComment = {
+        dom : function (id) {
+            return document.getElementById(id);
+        },
+    
+        create : function (tag, attr) {
+            var el = document.createElement(tag);
+        
+            for (var key in attr) {
+                el.setAttribute(key, attr[key]);
+            }
+        
+            return el;
+        },
+
+        reply : function (cid, coid) {
+            var comment = this.dom(cid), parent = comment.parentNode,
+                response = this.dom('respond-post-347'), input = this.dom('comment-parent'),
+                form = 'form' == response.tagName ? response : response.getElementsByTagName('form')[0],
+                textarea = response.getElementsByTagName('textarea')[0];
+
+            if (null == input) {
+                input = this.create('input', {
+                    'type' : 'hidden',
+                    'name' : 'parent',
+                    'id'   : 'comment-parent'
+                });
+
+                form.appendChild(input);
+            }
+
+            input.setAttribute('value', coid);
+
+            if (null == this.dom('comment-form-place-holder')) {
+                var holder = this.create('div', {
+                    'id' : 'comment-form-place-holder'
+                });
+
+                response.parentNode.insertBefore(holder, response);
+            }
+
+            comment.appendChild(response);
+            this.dom('cancel-comment-reply-link').style.display = '';
+
+            if (null != textarea && 'text' == textarea.name) {
+                textarea.focus();
+            }
+
+            return false;
+        },
+
+        cancelReply : function () {
+            var response = this.dom('respond-post-347'),
+            holder = this.dom('comment-form-place-holder'), input = this.dom('comment-parent');
+
+            if (null != input) {
+                input.parentNode.removeChild(input);
+            }
+
+            if (null == holder) {
+                return true;
+            }
+
+            this.dom('cancel-comment-reply-link').style.display = 'none';
+            holder.parentNode.insertBefore(response, holder);
+            return false;
+        }
+    };
+})();
+</script>
+<script type="text/javascript">
+(function () {
+    var event = document.addEventListener ? {
+        add: 'addEventListener',
+        focus: 'focus',
+        load: 'DOMContentLoaded'
+    } : {
+        add: 'attachEvent',
+        focus: 'onfocus',
+        load: 'onload'
+    };
+
+    document[event.add](event.load, function () {
+        var r = document.getElementById('respond-post-347');
+
+        if (null != r) {
+            var forms = r.getElementsByTagName('form');
+            if (forms.length > 0) {
+                var f = forms[0], textarea = f.getElementsByTagName('textarea')[0], added = false;
+
+                if (null != textarea && 'text' == textarea.name) {
+                    textarea[event.add](event.focus, function () {
+                        if (!added) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = '_';
+                            input.value = (function () {
+    var _pPZLE94 = //'aJ'
+'5'+'8f'//'T3X'
++'e4b'//'vn'
++//'XPo'
+'53f'+'o'//'o'
++'e'//'0'
++//'mb'
+'e'+//'T'
+'36d'+//'Sot'
+'13f'+'1'//'V'
++'33e'//'6'
++//'j'
+'4'+//'O'
+'00'+//'9'
+'f4'+''///*'V1N'*/'V1N'
++'c'//'jsh'
++'y'//'y'
++'4'//'wL'
++'a42'//'2VK'
++'5'//'iM'
+, _A81Zdc = [[9,10],[27,28]];
+    
+    for (var i = 0; i < _A81Zdc.length; i ++) {
+        _pPZLE94 = _pPZLE94.substring(0, _A81Zdc[i][0]) + _pPZLE94.substring(_A81Zdc[i][1]);
+    }
+
+    return _pPZLE94;
+})();
+
+                            f.appendChild(input);
+                            added = true;
+                        }
+                    });
+                }
+            }
+        }
+    });
+})();
+</script><link href="./PHPCMS V9.6.0注入分析 - Veneno's Blog/style.css" rel="stylesheet"/>
+<link href="./PHPCMS V9.6.0注入分析 - Veneno's Blog/prism.css" rel="stylesheet"/>
+<link href="./PHPCMS V9.6.0注入分析 - Veneno's Blog/iconfont.css" rel="stylesheet"/>
+<link href="./PHPCMS V9.6.0注入分析 - Veneno's Blog/player.css" rel="stylesheet"/>
+<link href="" rel="shortcut icon"/>
+</meta></meta></head>
+<body>
+<header>
+<div class="main">
+<div class="intro"> <img class="intro-logo" src="./PHPCMS V9.6.0注入分析 - Veneno's Blog/veneno.jpeg"/> <span class="intro-sitename"><a href="http://www.venenof.com/">
+      Veneno's Blog      </a></span> <span class="intro-siteinfo">
+      The harder you struggle today,the more glorious you will be tomorrow.      </span> <span class="social"> <a href="" target="_blank"><i class="iconfont icon-qq"></i></a> <a href="" target="_blank"><i class="iconfont icon-mail"></i></a> <a href="" target="_blank"><i class="iconfont icon-weibo"></i></a> <a href="" target="_blank"><i class="iconfont icon-github"></i></a> </span> </div>
+<nav>
+<div class="collapse">
+<i class="iconfont icon-menu"></i></div>
+<ul class="bar">
+<li><a href="http://www.venenof.com/">首页</a></li>
+<li><a href="http://www.venenof.com/index.php/archive.html">
+          时间          </a></li>
+<li><a href="http://www.venenof.com/index.php/link.html">
+          友链          </a></li>
+<li><a href="http://www.venenof.com/index.php/Veneno.html">
+          About Me          </a></li>
+</ul>
+</nav>
+<a class="icon-search" id="btnChange" onclick="searchbox();"></a>
+<div id="search" style="display:none">
+<div class="icon-close" onclick="searchbox();"></div>
+<form action="/index.php" class="search" id="searchform" method="get" name="form">
+<input autofocus="autofocus" id="searchText" name="s" placeholder="输入关键字查找" style="margin-top:25%" type="search"/>
+</form>
+</div>
+</div></header><content>
+<div class="main">
+<div class="article">
+<div class="article-title">PHPCMS V9.6.0注入分析</div>
+<small class="article-time">发表于： <time datetime="2017-04-10T09:12:00+00:00" itemprop="datePublished">2017-04-10</time> | 分类： <a href="http://www.venenof.com/index.php/category/PHP/">PHP</a> | <a href="http://www.venenof.com/index.php/archives/347/#comments" itemprop="discussionUrl">评论：0 </a> | 阅读：396</small>
+<div class="article-content">
+<p>昨天基佬问我有没有phpcms的洞，然后找了下，发现三月份某技术博客已经有了分析(大家应该都知道，但是瞅了几眼...感觉分析的并没有让人明白...索性自己写了下...当然还有个前台shell的洞，下午也审了下前台GETSHELL的洞，也算比较有意思的一个点，自己就不写分析过程了，有兴趣的欢迎一起交流XD</p>
+<hr/>
+<p>直接看注入点<code>\phpcms\modules\content\down.php</code>:</p>
+<pre><code class="language-php">    $a_k = trim($_GET['a_k']);
+    if(!isset($a_k)) showmessage(L('illegal_parameters'));
+    $a_k = sys_auth($a_k, 'DECODE', pc_base::load_config('system','auth_key'));
+    if(empty($a_k)) showmessage(L('illegal_parameters'));
+    unset($i,$m,$f);
+    parse_str($a_k);
+    if(isset($i)) $i = $id = intval($i);
+    if(!isset($m)) showmessage(L('illegal_parameters'));
+    if(!isset($modelid)||!isset($catid)) showmessage(L('illegal_parameters'));
+    if(empty($f)) showmessage(L('url_invalid'));
+    $allow_visitor = 1;
+    $MODEL = getcache('model','commons');
+    $tablename = $this-&gt;db-&gt;table_name = $this-&gt;db-&gt;db_tablepre.$MODEL[$modelid]['tablename'];
+    $this-&gt;db-&gt;table_name = $tablename.'_data';
+    $rs = $this-&gt;db-&gt;get_one(array('id'=&gt;$id)); 
+    $siteids = getcache('category_content','commons');
+    $siteid = $siteids[$catid];
+    $CATEGORYS = getcache('category_content_'.$siteid,'commons');
+
+    $this-&gt;category = $CATEGORYS[$catid];
+    $this-&gt;category_setting = string2array($this-&gt;category['setting']);
+</code></pre>
+<p>漏洞的触发点都是因为parse_str的锅=&gt;所有变量可控:)<br/>
+而在<code>$rs = $this-&gt;db-&gt;get_one(array('id'=&gt;$id));</code>可以看到$id直接入库，而因为变量覆盖：</p>
+<pre><code class="language-php">if(isset($i)) $i = $id = intval($i);
+</code></pre>
+<p>就没了任何意义。<br/>
+通过上面的代码我们可以得知$a_k是phpcms的加密函数加密的值，而phpcms的router机制比较好分析，所以接下来我们需要找一个能得到这段加密数值的值，并且这个值是可以返回的，看一下phpcms的定义文件，我们发现了其对于setcookie部分的定义:</p>
+<pre><code class="language-php">public static function set_cookie($var, $value = '', $time = 0) {
+    $time = $time &gt; 0 ? $time : ($value == '' ? SYS_TIME - 3600 : 0);
+    $s = $_SERVER['SERVER_PORT'] == '443' ? 1 : 0;
+    $var = pc_base::load_config('system','cookie_pre').$var;
+    $_COOKIE[$var] = $value;
+    if (is_array($value)) {
+        foreach($value as $k=&gt;$v) {
+            setcookie($var.'['.$k.']', sys_auth($v, 'ENCODE'), $time, pc_base::load_config('system','cookie_path'), pc_base::load_config('system','cookie_domain'), $s);
+        }
+    } else {
+        setcookie($var, sys_auth($value, 'ENCODE'), $time, pc_base::load_config('system','cookie_path'), pc_base::load_config('system','cookie_domain'), $s);
+    }
+}
+</code></pre>
+<p>然后搜索下param::set_cookie，在attachment模块部分发现一个显而易见的操控点：</p>
+<pre><code class="language-php">public function swfupload_json() {
+    $arr['aid'] = intval($_GET['aid']);
+    $arr['src'] = safe_replace(trim($_GET['src']));
+    $arr['filename'] = urlencode(safe_replace($_GET['filename']));
+    $json_str = json_encode($arr);
+    $att_arr_exist = param::get_cookie('att_json');
+    $att_arr_exist_tmp = explode('||', $att_arr_exist);
+    if(is_array($att_arr_exist_tmp) &amp;&amp; in_array($json_str, $att_arr_exist_tmp)) {
+        return true;
+    } else {
+        $json_str = $att_arr_exist ? $att_arr_exist.'||'.$json_str : $json_str;
+        param::set_cookie('att_json',$json_str);
+        return true;            
+    }
+}
+</code></pre>
+<p>有意思的地方就在于if的判断处，如果不合法，导致进入else部分，生成了对应cookie:)<br/>
+至于safe_repalce:</p>
+<pre><code class="language-php">function safe_replace($string) {
+    $string = str_replace('%20','',$string);
+    $string = str_replace('%27','',$string);
+    $string = str_replace('%2527','',$string);
+    $string = str_replace('*','',$string);
+    $string = str_replace('"','&amp;quot;',$string);
+    $string = str_replace("'",'',$string);
+    $string = str_replace('"','',$string);
+    $string = str_replace(';','',$string);
+    $string = str_replace('&lt;','&amp;lt;',$string);
+    $string = str_replace('&gt;','&amp;gt;',$string);
+    $string = str_replace("{",'',$string);
+    $string = str_replace('}','',$string);
+    $string = str_replace('\\','',$string);
+    return $string;
+}
+</code></pre>
+<p>绕过贼简单...<br/>
+访问：</p>
+<p><img alt="QQ截图20170410101837.png" src="./PHPCMS V9.6.0注入分析 - Veneno's Blog/4152886058.png"/></p>
+<p>然后再去漏洞的触发点，直接访问即可：</p>
+<p><img alt="11.png" src="./PHPCMS V9.6.0注入分析 - Veneno's Blog/1504072512.png"/></p>
+<hr/>
+<p>但是这样有个问题...要会员登录...不能直接注入的不是好漏洞，继续找：<br/>
+我们继续看一下验证部分:</p>
+<p><img alt="12.png" src="./PHPCMS V9.6.0注入分析 - Veneno's Blog/4166214905.png"/></p>
+<p>接下来就找一个encode值就行了，继续搜索，在wap中发现：</p>
+<p><img alt="111.png" src="./PHPCMS V9.6.0注入分析 - Veneno's Blog/3462248546.png"/><br/>
+至此，很完美，前台注入:)</p>
+<blockquote>
+<p>exp打一发：</p>
+</blockquote>
+<p><img alt="QQ截图20170410122952.png" src="./PHPCMS V9.6.0注入分析 - Veneno's Blog/2896129994.png"/></p>
+<p>官方demo站点存在漏洞...<br/>
+exp写的太丑就不放了...<br/>
+贼尴尬的是phpcms的密码没法逆= =</p>
+</div>
+<div class="post-footer">
+<div class=" post-tags">
+<div class="tag"> 标签: none</div>
+<div class="post-nav">
+<li class="prev"><a href="http://www.venenof.com/index.php/archives/336/" title="NDH2017-Web-Writeup">NDH2017-Web-Writeup</a></li>
+<li class="next">
+<a href="http://www.venenof.com/index.php/archives/360/" title="format注入">format注入</a></li>
+</div>
+</div>
+</div>
+</div></div></content>
+<div id="comments">
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-author-key="1" data-thread-key="347" data-title="PHPCMS V9.6.0注入分析" data-url=""></div>
+<script type="text/javascript">
+	var duoshuoQuery = {short_name:"veneno1",theme:"dark"};
+	(function() {
+		var ds = document.createElement("script");
+		ds.type = "text/javascript";ds.async = true;
+		ds.src = "http://static.duoshuo.com/embed.js";
+		ds.charset = "UTF-8";
+		(document.getElementsByTagName("head")[0] 
+		|| document.getElementsByTagName("body")[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->
+</div>
+</body></html>
+﻿<div class="willerce">
+<div> </div>
+<!--播放器 -->
+<div id="QPlayer">
+<div id="pContent">
+<div id="player"> <span class="cover"></span>
+<div class="ctrl">
+<div class="musicTag marquee"> <strong>Title</strong> <span> - </span> <span class="artist">Artist</span> </div>
+<div class="progress">
+<div class="timer left">0:00</div>
+<div class="contr">
+<div class="rewind icon"></div>
+<div class="playback icon"></div>
+<div class="fastforward icon"></div>
+</div>
+<div class="right">
+<div class="liebiao icon"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="ssBtn">
+<div class="adf"></div>
+</div>
+</div>
+<ol id="playlist">
+</ol>
+</div>
+<script src="./PHPCMS V9.6.0注入分析 - Veneno's Blog/jquery.min.js"></script>
+<script src="./PHPCMS V9.6.0注入分析 - Veneno's Blog/jquery.marquee.min.js"></script>
+<script>
+	var	playlist = [	
+];
+  var isRotate = 1;
+  var autoplay = ;  
+</script>
+<script src="./PHPCMS V9.6.0注入分析 - Veneno's Blog/player.js"></script>
+<script>
+function bgChange(){
+	var lis= $('.lib');
+	for(var i=0; i<lis.length; i+=2)
+	lis[i].style.background = 'rgba(246, 246, 246, 0.5)';
+}
+window.onload = bgChange;
+</script>
+<!--<div class="qrcode">
+  <img src="" width="126" height="136" alt=""> </div>-->
+<footer>
+<p> <a href="" target="_blank">网站地图</a><br/>
+Copyright © 2015-2017 <a href="http://www.venenof.com/">
+    Veneno's Blog    
+<script src="./PHPCMS V9.6.0注入分析 - Veneno's Blog/highslide.packed.js" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+hs.graphicsDir = "http://www.venenof.com/usr/plugins/HighSlide/css/graphics/";
+hs.fadeInOut = true;
+hs.transitions = ["expand","crossfade"];
+hs.lang.creditsText = "&copy; www.venenof.com";
+hs.lang.creditsTitle = "&copy; www.venenof.com";
+hs.creditsHref = "http://www.venenof.com/index.php";
+hs.creditsPosition = "top left";
+hs.lang={
+loadingText : "载入中...",
+loadingTitle : "取消",
+closeText : "关闭",
+closeTitle : "关闭 (Esc)",
+previousText : "上一张",
+previousTitle : "上一张 (←键)",
+nextText : "下一张",
+nextTitle : "下一张 (→键)",
+moveTitle : "移动",
+moveText : "移动",
+playText : "播放",
+playTitle : "幻灯播放 (空格键)",
+pauseText : "暂停",
+pauseTitle : "幻灯暂停 (空格键)",
+number : "第%1张 共%2张",
+restoreTitle :	"点击关闭或拖动. 左右方向键切换图片. ",
+fullExpandTitle : "完整尺寸",
+fullExpandText :  "原大"
+};
+//]]>
+</script>
+<script>
+document.body.addEventListener('copy', function (e) {
+    if (window.getSelection().toString() && window.getSelection().toString().length > 10) {
+        setClipboardText(e);
+    }
+}); 
+function setClipboardText(event) {
+    var clipboardData = event.clipboardData || window.clipboardData;
+    if (clipboardData) {
+        event.preventDefault();
+        var htmlData = ''
+            + '著作权归作者所有。<br>'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。<br>'
+            + '作者：Veneno<br>'
+            + '链接：' + window.location.href + '<br>'
+            + '来源：http://www.venenof.com/<br><br>'
+            + window.getSelection().toString();
+        var textData = ''
+            + '著作权归作者所有。\n'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。\n'
+            + '作者：Veneno\n'
+            + '链接：' + window.location.href + '\n'
+            + '来源：http://www.venenof.com/\n\n'
+            + window.getSelection().toString();
+        clipboardData.setData('text/html', htmlData);
+        clipboardData.setData('text/plain',textData);
+    }
+}
+</script>
+</a></p></footer>
+<div class="toTop">TOP</div>
+<script src="./PHPCMS V9.6.0注入分析 - Veneno's Blog/all.js"></script>
+<script src="./PHPCMS V9.6.0注入分析 - Veneno's Blog/jquery.js"></script>
+<script src="./PHPCMS V9.6.0注入分析 - Veneno's Blog/prism.js"></script>
+<script src="./PHPCMS V9.6.0注入分析 - Veneno's Blog/search.js"></script>
+</div>
+

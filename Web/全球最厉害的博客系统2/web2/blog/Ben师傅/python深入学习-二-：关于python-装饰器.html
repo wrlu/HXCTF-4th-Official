@@ -1,0 +1,764 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./python深入学习-二-：关于python-装饰器/font-awesome.min.css" rel="stylesheet"/>
+<link href="./python深入学习-二-：关于python-装饰器/screen.css" rel="stylesheet"/>
+<link href="./python深入学习-二-：关于python-装饰器/prism_okaidia.css" rel="stylesheet"/>
+<link href="./python深入学习-二-：关于python-装饰器/bendawang.css" rel="stylesheet"/>
+<script src="./python深入学习-二-：关于python-装饰器/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./python深入学习-二-：关于python-装饰器/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./python深入学习-二-：关于python-装饰器/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h2 id="0x00">0x00 前言</h2>
+<p style="max-width:100%;height:auto;">一般来说我们经常性会在工程性的代码里面经常性看到例如<code style="max-width:100%;height:auto;">@staticmethod</code>或是<code style="max-width:100%;height:auto;">@classmethod</code>等等，这就是装饰器，通常来说，装饰器的作用我们可以这样理解，它可以让其他函数在不需要做任何代码变动的前提下增加额外功能，概括的讲，装饰器的作用就是为已经存在的对象添加额外的功能。这样说着可能比较抽象，我们稍微接着看个很简单的例子就能很容易理解了。</p>
+<h2 id="0x01">0x01 关于装饰器</h2>
+<p style="max-width:100%;height:auto;">直接看一个很简单的例子
+比如说我有一个<code style="max-width:100%;height:auto;">func()</code>函数，</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">def func():
+    for i in xrange(100):
+        print "bendawang"
+</code></pre>
+<p style="max-width:100%;height:auto;">我现在想要记录这个函数的执行时间。一般我们可能会这样写</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import time
+def func():
+    a=time.time()
+    for i in xrange(100):
+        print "bendawang"
+    b=time.time()
+    print str((b-a))+" s"
+</code></pre>
+<p style="max-width:100%;height:auto;">即记录下前后的时间，然后做个减法。
+那如果我有100个和<code style="max-width:100%;height:auto;">func()</code>一样的函数<code style="max-width:100%;height:auto;">func1(),func2(),func3()......</code>，我要对每一个都记录执行时间怎么办呢？
+这样一个一个加代码肯定不划算啊，而且考虑到以后万一我又不想统计它们的时间，又还得一个个注释掉。
+这里我们先看一种写法，</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import time
+def get_time(myfunc):
+    a=time.time()
+    myfunc()
+    b=time.time()
+    print myfunc.__name__+" cost "+str((b-a))+" s"
+
+def func():
+    for i in xrange(100):
+        print "bendawang"
+
+get_time(func)
+</code></pre>
+<p style="max-width:100%;height:auto;">这样我通过一个<code style="max-width:100%;height:auto;">get_time()</code>来间接调用<code style="max-width:100%;height:auto;">func(),func1(),func2()......</code>就能够成功记录时间了。
+好的，能够简单的记录所有时间的问题解决了。</p>
+<p style="max-width:100%;height:auto;">但是现在我们又面临了一个新的问题，比如我使用上面的方法，也就意味着我所有调用<code style="max-width:100%;height:auto;">func(),func1(),func2()......</code>的地方,现在都要换成<code style="max-width:100%;height:auto;">get_time(func),get_time(func1),get_time(func2)......</code>，但是我这是一个大的工程，要改那么多地方相当麻烦啊。</p>
+<p style="max-width:100%;height:auto;">这个时候我们突然想到了，之前第一篇文章里面说过<code style="max-width:100%;height:auto;">python</code>一切皆对象，函数也是，那么我们的返回值也可以是一个函数咯，所以可以这样子写：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import time
+def get_time(myfunc):
+    def wrapper():
+        a=time.time()
+        myfunc()
+        b=time.time()
+        print myfunc.__name__+" cost "+str((b-a))+" s"
+    return wrapper
+def func():
+    for i in xrange(100):
+        print "bendawang"
+func=get_time(func)
+func()
+</code></pre>
+<p style="max-width:100%;height:auto;">我们以一个函数为返回值覆盖原来的<code style="max-width:100%;height:auto;">func</code>，这样子我们就可以直接调用<code style="max-width:100%;height:auto;">func(),func1(),func2()......</code>，而且也能够记录时间也不用大动干戈去修改工程里面的其他代码。
+这<code style="max-width:100%;height:auto;">get_time()</code>函数就可以叫做装饰器了，即装饰器的本质实际上就是一个函数而已，不过通常我们都通过<code style="max-width:100%;height:auto;">@</code>语法糖来简化装饰器的写法，上述代码可以这样子写：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import time
+def get_time(myfunc):
+    def wrapper():
+        a=time.time()
+        myfunc()
+        b=time.time()
+        print myfunc.__name__+" cost "+str((b-a))+" s"
+    return wrapper
+
+@get_time
+def func():
+    for i in xrange(100):
+        print "bendawang"
+func()
+</code></pre>
+<p style="max-width:100%;height:auto;">所以其实<code style="max-width:100%;height:auto;">@get_time</code>的本质就是<code style="max-width:100%;height:auto;">func=get_time(func)</code>。</p>
+<h2 id="0x02">0x02 关于参数问题</h2>
+<p style="max-width:100%;height:auto;">装饰器基本理解了，那么如果我们需要往函数里面传递参数怎么办？
+那其实这个问题是一样的，如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import time
+def get_time(myfunc):
+    def wrapper(count):
+        a=time.time()
+        myfunc(count)
+        b=time.time()
+        print myfunc.__name__+" cost "+str((b-a))+" s"
+    return wrapper
+
+@get_time
+def func(count):
+    for i in xrange(count):
+        print "bendawang"
+
+func(10)
+</code></pre>
+<p style="max-width:100%;height:auto;">有一个就给<code style="max-width:100%;height:auto;">get_time</code>加一个参数，有两个就给它搞两个参数就好了。</p>
+<p style="max-width:100%;height:auto;">那么这样子又有新的问题了。刚才说了，我有100个<code style="max-width:100%;height:auto;">func</code>函数，那么如果这些函数传入的参数不一样怎么办？怎么共用这个装饰器<code style="max-width:100%;height:auto;">get_time</code>？</p>
+<p style="max-width:100%;height:auto;">那么我们通常装饰器的写法就出来了，利用<code style="max-width:100%;height:auto;">python</code>中的<code style="max-width:100%;height:auto;">*args, **kwargs</code>来引入可变参数
+简单说一下这两兄弟的用法，<code style="max-width:100%;height:auto;">*args</code>表示任何多个无名参数，它是一个tuple；<code style="max-width:100%;height:auto;">**kwargs</code>表示关键字参数，它是一个 dict。并且同时使用<code style="max-width:100%;height:auto;">*args</code>和<code style="max-width:100%;height:auto;">**kwargs</code>时，必须<code style="max-width:100%;height:auto;">*args</code>参数列要在<code style="max-width:100%;height:auto;">**kwargs</code>前。
+那么看一个例子就基本能理解了。</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">def foo(*args, **kwargs):
+    print &amp;apos;args = &amp;apos;, args
+    print &amp;apos;kwargs = &amp;apos;, kwargs
+    print &amp;apos;---------------------------------------&amp;apos;
+
+if __name__ == &amp;apos;__main__&amp;apos;:
+    foo(1,2,3,4)
+    foo(a=1,b=2,c=3)
+    foo(1,2,3,4, a=1,b=2,c=3)
+    foo(&amp;apos;a&amp;apos;, 1, None, a=1, b=&amp;apos;2&amp;apos;, c=3)
+
+&amp;apos;&amp;apos;&amp;apos;
+Result as follow:
+
+args =  (1, 2, 3, 4)
+kwargs =  {}
+---------------------------------------
+args =  ()
+kwargs =  {&amp;apos;a&amp;apos;: 1, &amp;apos;c&amp;apos;: 3, &amp;apos;b&amp;apos;: 2}
+---------------------------------------
+args =  (1, 2, 3, 4)
+kwargs =  {&amp;apos;a&amp;apos;: 1, &amp;apos;c&amp;apos;: 3, &amp;apos;b&amp;apos;: 2}
+---------------------------------------
+args =  (&amp;apos;a&amp;apos;, 1, None)
+kwargs =  {&amp;apos;a&amp;apos;: 1, &amp;apos;c&amp;apos;: 3, &amp;apos;b&amp;apos;: &amp;apos;2&amp;apos;}
+---------------------------------------
+&amp;apos;&amp;apos;&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">所以我们的装饰器可以这样写</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import time
+def get_time(myfunc):
+    def wrapper(*args,**kwargs):
+        a=time.time()
+        myfunc(*args,**kwargs)
+        b=time.time()
+        print myfunc.__name__+" cost "+str((b-a))+" s"
+    return wrapper
+
+@get_time
+def func(count):
+    for i in xrange(count):
+        print "bendawang"
+
+func(10)
+</code></pre>
+<p style="max-width:100%;height:auto;">所以其实我们经常在一些工程的项目里面都会看到例如下面的一些代码</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">def handleException(func):
+    def _wrapper(args):
+        try:
+            out = Output()
+            return func(args, out)
+        except PenError as error:
+            out.error(str(error))
+        except ExploitError as error:
+            out.error(str(error))
+        except NotImplementError as error:
+            out.error(str(error))
+        except ORMError as error:
+            out.error(str(error))
+        except Exception as error:
+            out.error(u"未知错误, &amp;apos;{0}&amp;apos;".format(error))
+        except KeyboardInterrupt:
+            out.error(u"用户强制退出")
+        finally:
+            out.close()
+    return _wrapper
+</code></pre>
+<p style="max-width:100%;height:auto;">然后工程中的很多函数都会用<code style="max-width:100%;height:auto;">@handleException</code>，相信很好理解了，就是对这些函数统一进行出错处理避免代码冗杂。这是工程中必不可少的思维，虽然我还没怎么写过工程性的东西。。XD。。。。。。</p>
+<h2 id="0x03">0x03 关于多个装饰器的问题</h2>
+<p style="max-width:100%;height:auto;">因为可以使用多个装饰器，那么执行顺序就是问题，如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">@get_time
+@test
+def func(count):
+    for i in xrange(count):
+        print "bendawang"
+
+func(10)
+</code></pre>
+<p style="max-width:100%;height:auto;">上述代码我用了<code style="max-width:100%;height:auto;">get_time</code>和<code style="max-width:100%;height:auto;">test</code>两个装饰器，执行顺序是先执行<code style="max-width:100%;height:auto;">test</code>在执行<code style="max-width:100%;height:auto;">get_time</code>。</p>
+<h2 id="0x04python">0x04 python 内置装饰器</h2>
+<p style="max-width:100%;height:auto;">这个算是本文的重要部分了，Python中有三个内置的装饰器，<code style="max-width:100%;height:auto;">staticmethod</code>、<code style="max-width:100%;height:auto;">classmethod</code> 和<code style="max-width:100%;height:auto;">property</code>。这些都是和类相关的，所以尽量看完第一篇再看这里。</p>
+<p style="max-width:100%;height:auto;">首先说说<code style="max-width:100%;height:auto;">staticmethod</code>、<code style="max-width:100%;height:auto;">classmethod</code>，用文字说起来可能比较绕，用<code style="max-width:100%;height:auto;">staticmethod</code>和<code style="max-width:100%;height:auto;">classmethod</code>装饰的类中的函数实际上和一个全局函数差不多，可以通过类或是类的实例来调用，而一般的函数是不能通过类本身来调用，只能通过类的实例来调用。而这两个装饰器的差别在于，<code style="max-width:100%;height:auto;">classmethod</code>会将类本身当作第一个参数传入,即可以获得当前类的属性和方法。看一个例子</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">class Foo:  
+    @staticmethod  
+    def bar1(hello):  
+        print "this is the staticmethod===&gt;"+hello+"\n"
+
+    @classmethod  
+    def bar2(cls,hello):  
+        print "this is the classmethod ===&gt;"+hello+"\n"
+
+    def bar3(self,hello):  
+        print "this is a normal method ===&gt;"+hello+"\n"    
+
+Foo.bar1(&amp;apos;test&amp;apos;)
+Foo.bar2(&amp;apos;test&amp;apos;)
+Foo.bar3(&amp;apos;test&amp;apos;)
+</code></pre>
+<p style="max-width:100%;height:auto;">结果如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">this is the staticmethod===&gt;test
+
+this is the classmethod ===&gt;test
+
+Traceback (most recent call last):
+  File "a.py", line 15, in &lt;module&gt;
+    Foo.bar3(&amp;apos;test&amp;apos;)
+TypeError: unbound method bar3() must be called with Foo instance as first argument (got str instance instead)
+</code></pre>
+<p style="max-width:100%;height:auto;">可以看出来第三个报错了，因为说过了普通函数只能用实例来调用，所以只能这样子写</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">class Foo:  
+    @staticmethod  
+    def bar1(hello):  
+        print "this is the staticmethod===&gt;"+hello+"\n"
+
+    @classmethod  
+    def bar2(cls,hello):  
+        print "this is the classmethod ===&gt;"+hello+"\n"
+
+    def bar3(self,hello):  
+        print "this is a normal method ===&gt;"+hello+"\n"    
+
+Foo.bar1(&amp;apos;test&amp;apos;)
+Foo.bar2(&amp;apos;test&amp;apos;)
+foo=Foo()
+foo.bar3(&amp;apos;test&amp;apos;)
+</code></pre>
+<p style="max-width:100%;height:auto;">接下来是<code style="max-width:100%;height:auto;">@property</code>，个人感觉这就是java程序员带过来的东西。。。先说这个装饰器吧，这里直接用了<a href="http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000/001386820062641f3bcc60a4b164f8d91df476445697b9e000">廖雪峰官网关于@property的介绍</a>中的例子。</p>
+<p style="max-width:100%;height:auto;">在绑定类属性时，如果我们直接把属性暴露出去，虽然写起来很简单，但是，没办法检查参数，比如如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">s = Student()
+s.score = 9999
+</code></pre>
+<p style="max-width:100%;height:auto;">如果我们想要限制<code style="max-width:100%;height:auto;">s.score</code>在一个范围怎么办，作为半个曾经的java程序员，我必然是会用eclipse的右键对这个<code style="max-width:100%;height:auto;">score</code>属性创建一个<code style="max-width:100%;height:auto;">getter</code>和<code style="max-width:100%;height:auto;">setter</code>方法，即在调用的时候不直接<code style="max-width:100%;height:auto;">s.score</code>，而是用getter方法，在修改的时候不直接赋值，而是用<code style="max-width:100%;height:auto;">setter</code>方法，从而避免属性暴露。用python 写就是这样子：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">class Student(object):
+
+    def get_score(self):
+        return self._score
+
+    def set_score(self, value):
+        if not isinstance(value, int):
+            raise ValueError(&amp;apos;score must be an integer!&amp;apos;)
+        if value &lt; 0 or value &gt; 100:
+            raise ValueError(&amp;apos;score must between 0 ~ 100!&amp;apos;)
+        self._score = value
+</code></pre>
+<p style="max-width:100%;height:auto;">但是这样子的话就很麻烦，每一次调用都要手动调用一次<code style="max-width:100%;height:auto;">get_score</code>函数，每次修改都要手动调用一次<code style="max-width:100%;height:auto;">set_score</code>函数，当然java这门语言本身就很麻烦所以再麻烦一点也没啥关系了，但是python不一样啊。所以有了这个<code style="max-width:100%;height:auto;">@property</code>，如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">class Student(object):
+
+    @property
+    def score(self):
+        return self._score
+
+    @score.setter
+    def score(self, value):
+        if not isinstance(value, int):
+            raise ValueError(&amp;apos;score must be an integer!&amp;apos;)
+        if value &lt; 0 or value &gt; 100:
+            raise ValueError(&amp;apos;score must between 0 ~ 100!&amp;apos;)
+        self._score = value
+</code></pre>
+<p style="max-width:100%;height:auto;">把一个<code style="max-width:100%;height:auto;">getter</code>方法变成属性，只需要加上<code style="max-width:100%;height:auto;">@property</code>就可以了，此时，<code style="max-width:100%;height:auto;">@property</code>本身又创建了另一个装饰器<code style="max-width:100%;height:auto;">@score.setter</code>，负责把一个<code style="max-width:100%;height:auto;">setter</code>方法变成属性赋值。
+当然如果这个变量不叫<code style="max-width:100%;height:auto;">score</code>，比如叫<code style="max-width:100%;height:auto;">point</code>，那么另一个装饰器自然就变成了<code style="max-width:100%;height:auto;">@point.setter</code>。
+这样子我们就可以这样操作了：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&gt;&gt;&gt; s=Student()
+&gt;&gt;&gt; s.score=50
+&gt;&gt;&gt; s.score
+50
+&gt;&gt;&gt; s.score=1000
+Traceback (most recent call last):
+  File "&lt;input&gt;", line 1, in &lt;module&gt;
+    s.score=1000
+  File "&lt;input&gt;", line 12, in score
+    raise ValueError(&amp;apos;score must between 0 ~ 100!&amp;apos;)
+ValueError: score must between 0 ~ 100!
+</code></pre>
+<p style="max-width:100%;height:auto;">所以有了这个<code style="max-width:100%;height:auto;">@property</code>，我们在对实例属性操作的时候，就知道该属性很可能不是直接暴露的，而是通过getter和setter方法来实现的。</p>
+<p style="max-width:100%;height:auto;">当然python里面除了本文介绍的函数装饰器之外，还有类装饰器，但是个人遇到的较少所以此处不介绍了。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./python深入学习-二-：关于python-装饰器/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h2 id="0x00">0x00 前言</h2>
+<p style="max-width:100%;height:auto;">一般来说我们经常性会在工程性的代码里面经常性看到例如<code style="max-width:100%;height:auto;">@staticmethod</code>或是<code style="max-width:100%;height:auto;">@classmethod</code>等等，这就是装饰器，通常来说，装饰器的作用我们可以这样理解，它可以让其他函数在不需要做任何代码变动的前提下增加额外功能，概括的讲，装饰器的作用就是为已经存在的对象添加额外的功能。这样说着可能比较抽象，我们稍微接着看个很简单的例子就能很容易理解了。</p>
+<h2 id="0x01">0x01 关于装饰器</h2>
+<p style="max-width:100%;height:auto;">直接看一个很简单的例子
+比如说我有一个<code style="max-width:100%;height:auto;">func()</code>函数，</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">def func():
+    for i in xrange(100):
+        print "bendawang"
+</code></pre>
+<p style="max-width:100%;height:auto;">我现在想要记录这个函数的执行时间。一般我们可能会这样写</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import time
+def func():
+    a=time.time()
+    for i in xrange(100):
+        print "bendawang"
+    b=time.time()
+    print str((b-a))+" s"
+</code></pre>
+<p style="max-width:100%;height:auto;">即记录下前后的时间，然后做个减法。
+那如果我有100个和<code style="max-width:100%;height:auto;">func()</code>一样的函数<code style="max-width:100%;height:auto;">func1(),func2(),func3()......</code>，我要对每一个都记录执行时间怎么办呢？
+这样一个一个加代码肯定不划算啊，而且考虑到以后万一我又不想统计它们的时间，又还得一个个注释掉。
+这里我们先看一种写法，</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import time
+def get_time(myfunc):
+    a=time.time()
+    myfunc()
+    b=time.time()
+    print myfunc.__name__+" cost "+str((b-a))+" s"
+
+def func():
+    for i in xrange(100):
+        print "bendawang"
+
+get_time(func)
+</code></pre>
+<p style="max-width:100%;height:auto;">这样我通过一个<code style="max-width:100%;height:auto;">get_time()</code>来间接调用<code style="max-width:100%;height:auto;">func(),func1(),func2()......</code>就能够成功记录时间了。
+好的，能够简单的记录所有时间的问题解决了。</p>
+<p style="max-width:100%;height:auto;">但是现在我们又面临了一个新的问题，比如我使用上面的方法，也就意味着我所有调用<code style="max-width:100%;height:auto;">func(),func1(),func2()......</code>的地方,现在都要换成<code style="max-width:100%;height:auto;">get_time(func),get_time(func1),get_time(func2)......</code>，但是我这是一个大的工程，要改那么多地方相当麻烦啊。</p>
+<p style="max-width:100%;height:auto;">这个时候我们突然想到了，之前第一篇文章里面说过<code style="max-width:100%;height:auto;">python</code>一切皆对象，函数也是，那么我们的返回值也可以是一个函数咯，所以可以这样子写：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import time
+def get_time(myfunc):
+    def wrapper():
+        a=time.time()
+        myfunc()
+        b=time.time()
+        print myfunc.__name__+" cost "+str((b-a))+" s"
+    return wrapper
+def func():
+    for i in xrange(100):
+        print "bendawang"
+func=get_time(func)
+func()
+</code></pre>
+<p style="max-width:100%;height:auto;">我们以一个函数为返回值覆盖原来的<code style="max-width:100%;height:auto;">func</code>，这样子我们就可以直接调用<code style="max-width:100%;height:auto;">func(),func1(),func2()......</code>，而且也能够记录时间也不用大动干戈去修改工程里面的其他代码。
+这<code style="max-width:100%;height:auto;">get_time()</code>函数就可以叫做装饰器了，即装饰器的本质实际上就是一个函数而已，不过通常我们都通过<code style="max-width:100%;height:auto;">@</code>语法糖来简化装饰器的写法，上述代码可以这样子写：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import time
+def get_time(myfunc):
+    def wrapper():
+        a=time.time()
+        myfunc()
+        b=time.time()
+        print myfunc.__name__+" cost "+str((b-a))+" s"
+    return wrapper
+
+@get_time
+def func():
+    for i in xrange(100):
+        print "bendawang"
+func()
+</code></pre>
+<p style="max-width:100%;height:auto;">所以其实<code style="max-width:100%;height:auto;">@get_time</code>的本质就是<code style="max-width:100%;height:auto;">func=get_time(func)</code>。</p>
+<h2 id="0x02">0x02 关于参数问题</h2>
+<p style="max-width:100%;height:auto;">装饰器基本理解了，那么如果我们需要往函数里面传递参数怎么办？
+那其实这个问题是一样的，如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import time
+def get_time(myfunc):
+    def wrapper(count):
+        a=time.time()
+        myfunc(count)
+        b=time.time()
+        print myfunc.__name__+" cost "+str((b-a))+" s"
+    return wrapper
+
+@get_time
+def func(count):
+    for i in xrange(count):
+        print "bendawang"
+
+func(10)
+</code></pre>
+<p style="max-width:100%;height:auto;">有一个就给<code style="max-width:100%;height:auto;">get_time</code>加一个参数，有两个就给它搞两个参数就好了。</p>
+<p style="max-width:100%;height:auto;">那么这样子又有新的问题了。刚才说了，我有100个<code style="max-width:100%;height:auto;">func</code>函数，那么如果这些函数传入的参数不一样怎么办？怎么共用这个装饰器<code style="max-width:100%;height:auto;">get_time</code>？</p>
+<p style="max-width:100%;height:auto;">那么我们通常装饰器的写法就出来了，利用<code style="max-width:100%;height:auto;">python</code>中的<code style="max-width:100%;height:auto;">*args, **kwargs</code>来引入可变参数
+简单说一下这两兄弟的用法，<code style="max-width:100%;height:auto;">*args</code>表示任何多个无名参数，它是一个tuple；<code style="max-width:100%;height:auto;">**kwargs</code>表示关键字参数，它是一个 dict。并且同时使用<code style="max-width:100%;height:auto;">*args</code>和<code style="max-width:100%;height:auto;">**kwargs</code>时，必须<code style="max-width:100%;height:auto;">*args</code>参数列要在<code style="max-width:100%;height:auto;">**kwargs</code>前。
+那么看一个例子就基本能理解了。</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">def foo(*args, **kwargs):
+    print &amp;apos;args = &amp;apos;, args
+    print &amp;apos;kwargs = &amp;apos;, kwargs
+    print &amp;apos;---------------------------------------&amp;apos;
+
+if __name__ == &amp;apos;__main__&amp;apos;:
+    foo(1,2,3,4)
+    foo(a=1,b=2,c=3)
+    foo(1,2,3,4, a=1,b=2,c=3)
+    foo(&amp;apos;a&amp;apos;, 1, None, a=1, b=&amp;apos;2&amp;apos;, c=3)
+
+&amp;apos;&amp;apos;&amp;apos;
+Result as follow:
+
+args =  (1, 2, 3, 4)
+kwargs =  {}
+---------------------------------------
+args =  ()
+kwargs =  {&amp;apos;a&amp;apos;: 1, &amp;apos;c&amp;apos;: 3, &amp;apos;b&amp;apos;: 2}
+---------------------------------------
+args =  (1, 2, 3, 4)
+kwargs =  {&amp;apos;a&amp;apos;: 1, &amp;apos;c&amp;apos;: 3, &amp;apos;b&amp;apos;: 2}
+---------------------------------------
+args =  (&amp;apos;a&amp;apos;, 1, None)
+kwargs =  {&amp;apos;a&amp;apos;: 1, &amp;apos;c&amp;apos;: 3, &amp;apos;b&amp;apos;: &amp;apos;2&amp;apos;}
+---------------------------------------
+&amp;apos;&amp;apos;&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">所以我们的装饰器可以这样写</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import time
+def get_time(myfunc):
+    def wrapper(*args,**kwargs):
+        a=time.time()
+        myfunc(*args,**kwargs)
+        b=time.time()
+        print myfunc.__name__+" cost "+str((b-a))+" s"
+    return wrapper
+
+@get_time
+def func(count):
+    for i in xrange(count):
+        print "bendawang"
+
+func(10)
+</code></pre>
+<p style="max-width:100%;height:auto;">所以其实我们经常在一些工程的项目里面都会看到例如下面的一些代码</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">def handleException(func):
+    def _wrapper(args):
+        try:
+            out = Output()
+            return func(args, out)
+        except PenError as error:
+            out.error(str(error))
+        except ExploitError as error:
+            out.error(str(error))
+        except NotImplementError as error:
+            out.error(str(error))
+        except ORMError as error:
+            out.error(str(error))
+        except Exception as error:
+            out.error(u"未知错误, &amp;apos;{0}&amp;apos;".format(error))
+        except KeyboardInterrupt:
+            out.error(u"用户强制退出")
+        finally:
+            out.close()
+    return _wrapper
+</code></pre>
+<p style="max-width:100%;height:auto;">然后工程中的很多函数都会用<code style="max-width:100%;height:auto;">@handleException</code>，相信很好理解了，就是对这些函数统一进行出错处理避免代码冗杂。这是工程中必不可少的思维，虽然我还没怎么写过工程性的东西。。XD。。。。。。</p>
+<h2 id="0x03">0x03 关于多个装饰器的问题</h2>
+<p style="max-width:100%;height:auto;">因为可以使用多个装饰器，那么执行顺序就是问题，如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">@get_time
+@test
+def func(count):
+    for i in xrange(count):
+        print "bendawang"
+
+func(10)
+</code></pre>
+<p style="max-width:100%;height:auto;">上述代码我用了<code style="max-width:100%;height:auto;">get_time</code>和<code style="max-width:100%;height:auto;">test</code>两个装饰器，执行顺序是先执行<code style="max-width:100%;height:auto;">test</code>在执行<code style="max-width:100%;height:auto;">get_time</code>。</p>
+<h2 id="0x04python">0x04 python 内置装饰器</h2>
+<p style="max-width:100%;height:auto;">这个算是本文的重要部分了，Python中有三个内置的装饰器，<code style="max-width:100%;height:auto;">staticmethod</code>、<code style="max-width:100%;height:auto;">classmethod</code> 和<code style="max-width:100%;height:auto;">property</code>。这些都是和类相关的，所以尽量看完第一篇再看这里。</p>
+<p style="max-width:100%;height:auto;">首先说说<code style="max-width:100%;height:auto;">staticmethod</code>、<code style="max-width:100%;height:auto;">classmethod</code>，用文字说起来可能比较绕，用<code style="max-width:100%;height:auto;">staticmethod</code>和<code style="max-width:100%;height:auto;">classmethod</code>装饰的类中的函数实际上和一个全局函数差不多，可以通过类或是类的实例来调用，而一般的函数是不能通过类本身来调用，只能通过类的实例来调用。而这两个装饰器的差别在于，<code style="max-width:100%;height:auto;">classmethod</code>会将类本身当作第一个参数传入,即可以获得当前类的属性和方法。看一个例子</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">class Foo:  
+    @staticmethod  
+    def bar1(hello):  
+        print "this is the staticmethod===&gt;"+hello+"\n"
+
+    @classmethod  
+    def bar2(cls,hello):  
+        print "this is the classmethod ===&gt;"+hello+"\n"
+
+    def bar3(self,hello):  
+        print "this is a normal method ===&gt;"+hello+"\n"    
+
+Foo.bar1(&amp;apos;test&amp;apos;)
+Foo.bar2(&amp;apos;test&amp;apos;)
+Foo.bar3(&amp;apos;test&amp;apos;)
+</code></pre>
+<p style="max-width:100%;height:auto;">结果如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">this is the staticmethod===&gt;test
+
+this is the classmethod ===&gt;test
+
+Traceback (most recent call last):
+  File "a.py", line 15, in &lt;module&gt;
+    Foo.bar3(&amp;apos;test&amp;apos;)
+TypeError: unbound method bar3() must be called with Foo instance as first argument (got str instance instead)
+</code></pre>
+<p style="max-width:100%;height:auto;">可以看出来第三个报错了，因为说过了普通函数只能用实例来调用，所以只能这样子写</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">class Foo:  
+    @staticmethod  
+    def bar1(hello):  
+        print "this is the staticmethod===&gt;"+hello+"\n"
+
+    @classmethod  
+    def bar2(cls,hello):  
+        print "this is the classmethod ===&gt;"+hello+"\n"
+
+    def bar3(self,hello):  
+        print "this is a normal method ===&gt;"+hello+"\n"    
+
+Foo.bar1(&amp;apos;test&amp;apos;)
+Foo.bar2(&amp;apos;test&amp;apos;)
+foo=Foo()
+foo.bar3(&amp;apos;test&amp;apos;)
+</code></pre>
+<p style="max-width:100%;height:auto;">接下来是<code style="max-width:100%;height:auto;">@property</code>，个人感觉这就是java程序员带过来的东西。。。先说这个装饰器吧，这里直接用了<a href="http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000/001386820062641f3bcc60a4b164f8d91df476445697b9e000">廖雪峰官网关于@property的介绍</a>中的例子。</p>
+<p style="max-width:100%;height:auto;">在绑定类属性时，如果我们直接把属性暴露出去，虽然写起来很简单，但是，没办法检查参数，比如如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">s = Student()
+s.score = 9999
+</code></pre>
+<p style="max-width:100%;height:auto;">如果我们想要限制<code style="max-width:100%;height:auto;">s.score</code>在一个范围怎么办，作为半个曾经的java程序员，我必然是会用eclipse的右键对这个<code style="max-width:100%;height:auto;">score</code>属性创建一个<code style="max-width:100%;height:auto;">getter</code>和<code style="max-width:100%;height:auto;">setter</code>方法，即在调用的时候不直接<code style="max-width:100%;height:auto;">s.score</code>，而是用getter方法，在修改的时候不直接赋值，而是用<code style="max-width:100%;height:auto;">setter</code>方法，从而避免属性暴露。用python 写就是这样子：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">class Student(object):
+
+    def get_score(self):
+        return self._score
+
+    def set_score(self, value):
+        if not isinstance(value, int):
+            raise ValueError(&amp;apos;score must be an integer!&amp;apos;)
+        if value &lt; 0 or value &gt; 100:
+            raise ValueError(&amp;apos;score must between 0 ~ 100!&amp;apos;)
+        self._score = value
+</code></pre>
+<p style="max-width:100%;height:auto;">但是这样子的话就很麻烦，每一次调用都要手动调用一次<code style="max-width:100%;height:auto;">get_score</code>函数，每次修改都要手动调用一次<code style="max-width:100%;height:auto;">set_score</code>函数，当然java这门语言本身就很麻烦所以再麻烦一点也没啥关系了，但是python不一样啊。所以有了这个<code style="max-width:100%;height:auto;">@property</code>，如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">class Student(object):
+
+    @property
+    def score(self):
+        return self._score
+
+    @score.setter
+    def score(self, value):
+        if not isinstance(value, int):
+            raise ValueError(&amp;apos;score must be an integer!&amp;apos;)
+        if value &lt; 0 or value &gt; 100:
+            raise ValueError(&amp;apos;score must between 0 ~ 100!&amp;apos;)
+        self._score = value
+</code></pre>
+<p style="max-width:100%;height:auto;">把一个<code style="max-width:100%;height:auto;">getter</code>方法变成属性，只需要加上<code style="max-width:100%;height:auto;">@property</code>就可以了，此时，<code style="max-width:100%;height:auto;">@property</code>本身又创建了另一个装饰器<code style="max-width:100%;height:auto;">@score.setter</code>，负责把一个<code style="max-width:100%;height:auto;">setter</code>方法变成属性赋值。
+当然如果这个变量不叫<code style="max-width:100%;height:auto;">score</code>，比如叫<code style="max-width:100%;height:auto;">point</code>，那么另一个装饰器自然就变成了<code style="max-width:100%;height:auto;">@point.setter</code>。
+这样子我们就可以这样操作了：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&gt;&gt;&gt; s=Student()
+&gt;&gt;&gt; s.score=50
+&gt;&gt;&gt; s.score
+50
+&gt;&gt;&gt; s.score=1000
+Traceback (most recent call last):
+  File "&lt;input&gt;", line 1, in &lt;module&gt;
+    s.score=1000
+  File "&lt;input&gt;", line 12, in score
+    raise ValueError(&amp;apos;score must between 0 ~ 100!&amp;apos;)
+ValueError: score must between 0 ~ 100!
+</code></pre>
+<p style="max-width:100%;height:auto;">所以有了这个<code style="max-width:100%;height:auto;">@property</code>，我们在对实例属性操作的时候，就知道该属性很可能不是直接暴露的，而是通过getter和setter方法来实现的。</p>
+<p style="max-width:100%;height:auto;">当然python里面除了本文介绍的函数装饰器之外，还有类装饰器，但是个人遇到的较少所以此处不介绍了。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./python深入学习-二-：关于python-装饰器/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./python深入学习-二-：关于python-装饰器/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./python深入学习-二-：关于python-装饰器/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./python深入学习-二-：关于python-装饰器/prism.js"></script>
+<script src="./python深入学习-二-：关于python-装饰器/zooming.js"></script>
+<script src="./python深入学习-二-：关于python-装饰器/Bendawang.js"></script>
+
+

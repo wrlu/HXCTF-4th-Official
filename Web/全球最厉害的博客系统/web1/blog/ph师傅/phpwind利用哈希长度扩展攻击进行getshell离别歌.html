@@ -1,0 +1,559 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>phpwind 利用哈希长度扩展攻击进行getshell | 离别歌</title>
+<link href="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/styles.css" rel="stylesheet"/>
+<link href="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/style.css" rel="stylesheet"/>
+<link href="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/jquery.min.js"></script>
+<link href="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/code.css" rel="stylesheet"/>
+<link href="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/button.css" rel="stylesheet"/>
+<link href="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/phpwind-hash-length-extension-attack.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/phpwind-hash-length-extension-attack.html&amp;text=phpwind%20%E5%88%A9%E7%94%A8%E5%93%88%E5%B8%8C%E9%95%BF%E5%BA%A6%E6%89%A9%E5%B1%95%E6%94%BB%E5%87%BB%E8%BF%9B%E8%A1%8Cgetshell"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/phpwind-hash-length-extension-attack.html&amp;title=phpwind%20%E5%88%A9%E7%94%A8%E5%93%88%E5%B8%8C%E9%95%BF%E5%BA%A6%E6%89%A9%E5%B1%95%E6%94%BB%E5%87%BB%E8%BF%9B%E8%A1%8Cgetshell"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/phpwind-hash-length-extension-attack.html&amp;is_video=false&amp;description=phpwind%20%E5%88%A9%E7%94%A8%E5%93%88%E5%B8%8C%E9%95%BF%E5%BA%A6%E6%89%A9%E5%B1%95%E6%94%BB%E5%87%BB%E8%BF%9B%E8%A1%8Cgetshell"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=phpwind%20%E5%88%A9%E7%94%A8%E5%93%88%E5%B8%8C%E9%95%BF%E5%BA%A6%E6%89%A9%E5%B1%95%E6%94%BB%E5%87%BB%E8%BF%9B%E8%A1%8Cgetshell&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/phpwind-hash-length-extension-attack.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/phpwind-hash-length-extension-attack.html&amp;title=phpwind%20%E5%88%A9%E7%94%A8%E5%93%88%E5%B8%8C%E9%95%BF%E5%BA%A6%E6%89%A9%E5%B1%95%E6%94%BB%E5%87%BB%E8%BF%9B%E8%A1%8Cgetshell"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/phpwind-hash-length-extension-attack.html&amp;title=phpwind%20%E5%88%A9%E7%94%A8%E5%93%88%E5%B8%8C%E9%95%BF%E5%BA%A6%E6%89%A9%E5%B1%95%E6%94%BB%E5%87%BB%E8%BF%9B%E8%A1%8Cgetshell"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/phpwind-hash-length-extension-attack.html&amp;title=phpwind%20%E5%88%A9%E7%94%A8%E5%93%88%E5%B8%8C%E9%95%BF%E5%BA%A6%E6%89%A9%E5%B1%95%E6%94%BB%E5%87%BB%E8%BF%9B%E8%A1%8Cgetshell"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/phpwind-hash-length-extension-attack.html&amp;title=phpwind%20%E5%88%A9%E7%94%A8%E5%93%88%E5%B8%8C%E9%95%BF%E5%BA%A6%E6%89%A9%E5%B1%95%E6%94%BB%E5%87%BB%E8%BF%9B%E8%A1%8Cgetshell"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/phpwind-hash-length-extension-attack.html&amp;name=phpwind%20%E5%88%A9%E7%94%A8%E5%93%88%E5%B8%8C%E9%95%BF%E5%BA%A6%E6%89%A9%E5%B1%95%E6%94%BB%E5%87%BB%E8%BF%9B%E8%A1%8Cgetshell&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">phpwind 利用哈希长度扩展攻击进行getshell</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2016年5月24日 08:33" itemprop="datePublished">
+                    2016 五月 24 08:33
+                </time>
+</div>
+<div class="article-tag">
+            阅读：8698
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E5%93%88%E5%B8%8C%E9%95%BF%E5%BA%A6%E6%89%A9%E5%B1%95%E6%94%BB%E5%87%BB">哈希长度扩展攻击</a>,
+                
+                <a class="tag-link" href="/tag/phpwind">phpwind</a>,
+                
+                <a class="tag-link" href="/tag/getshell">getshell</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>一哥新发的漏洞，还是蛮屌的： <a href="http://www.wooyun.org/bugs/wooyun-2016-0210850"><a href="http://www.wooyun.org/bugs/wooyun-2016-0210850">http://www.wooyun.org/bugs/wooyun-2016-0210850</a></a>。分析补丁（ <a href="http://www.phpwind.net/read/3709549"><a href="http://www.phpwind.net/read/3709549">http://www.phpwind.net/read/3709549</a></a> ）加上一些风闻，我得知利用的是哈希长度扩展攻击。之前CTF中经常出境的MD5 Length Extension Attack，终于在实战中露了一次面。</p>
+<p>今晚基本没睡觉，一直在调试这个漏洞，虽说不知道一哥后续getshell用的是什么方法，但我这个文章基本把该漏洞的原理讲清楚了。至于getshell的话，等漏洞公开了再看看吧。</p>
+<h2 id="0x01"><a class="toclink" href="#0x01">0x01 漏洞点分析</a></h2>
+<p>phpwind逻辑太冗杂了，一看就是java程序员开发的。</p>
+<p>补丁文件修补了src/windid/service/base/WindidUtility.php的appKey函数。之前的appKey函数如下：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">public</span> <span class="k">static</span> <span class="k">function</span> <span class="nf">appKey</span><span class="p">(</span><span class="nv">$apiId</span><span class="p">,</span> <span class="nv">$time</span><span class="p">,</span> <span class="nv">$secretkey</span><span class="p">,</span> <span class="nv">$get</span><span class="p">,</span> <span class="nv">$post</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 注意这里需要加上__data，因为下面的buildRequest()里加了。</span>
+    <span class="nv">$array</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="s1">'windidkey'</span><span class="p">,</span> <span class="s1">'clientid'</span><span class="p">,</span> <span class="s1">'time'</span><span class="p">,</span> <span class="s1">'_json'</span><span class="p">,</span> <span class="s1">'jcallback'</span><span class="p">,</span> <span class="s1">'csrf_token'</span><span class="p">,</span>
+                   <span class="s1">'Filename'</span><span class="p">,</span> <span class="s1">'Upload'</span><span class="p">,</span> <span class="s1">'token'</span><span class="p">,</span> <span class="s1">'__data'</span><span class="p">);</span>
+    <span class="nv">$str</span> <span class="o">=</span> <span class="s1">''</span><span class="p">;</span>
+    <span class="nb">ksort</span><span class="p">(</span><span class="nv">$get</span><span class="p">);</span>
+    <span class="nb">ksort</span><span class="p">(</span><span class="nv">$post</span><span class="p">);</span>
+    <span class="k">foreach</span> <span class="p">(</span><span class="nv">$get</span> <span class="k">AS</span> <span class="nv">$k</span><span class="o">=&gt;</span><span class="nv">$v</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">in_array</span><span class="p">(</span><span class="nv">$k</span><span class="p">,</span> <span class="nv">$array</span><span class="p">))</span> <span class="k">continue</span><span class="p">;</span>
+        <span class="nv">$str</span> <span class="o">.=</span><span class="nv">$k</span><span class="o">.</span><span class="nv">$v</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">foreach</span> <span class="p">(</span><span class="nv">$post</span> <span class="k">AS</span> <span class="nv">$k</span><span class="o">=&gt;</span><span class="nv">$v</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">in_array</span><span class="p">(</span><span class="nv">$k</span><span class="p">,</span> <span class="nv">$array</span><span class="p">))</span> <span class="k">continue</span><span class="p">;</span>
+        <span class="nv">$str</span> <span class="o">.=</span><span class="nv">$k</span><span class="o">.</span><span class="nv">$v</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nb">md5</span><span class="p">(</span><span class="nb">md5</span><span class="p">(</span><span class="nv">$apiId</span><span class="o">.</span><span class="s1">'||'</span><span class="o">.</span><span class="nv">$secretkey</span><span class="p">)</span><span class="o">.</span><span class="nv">$time</span><span class="o">.</span><span class="nv">$str</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>可见，这里其实是一个『签名』函数，将GET、POST变量使用secrectkey进行签名，但签名的算法比较古老，直接用md5。</p>
+<p>我们可以看看道哥在09年发的一篇博客： <a href="http://blog.chinaunix.net/uid-27070210-id-3255947.html"><a href="http://blog.chinaunix.net/uid-27070210-id-3255947.html">http://blog.chinaunix.net/uid-27070210-id-3255947.html</a></a></p>
+<p>其中详尽的说明了哈希长度扩展攻击的原理及利用方法（所以我文章就不细说了），总结起来其实就一句话：</p>
+<blockquote>
+<p><strong>当知道 MD5(secret) 时，在不知道secret的情况下，可以很轻易的推算出 MD5(secret||padding||m')</strong></p>
+</blockquote>
+<p>当前phpwind的签名算法刚好符合上述的格式 <code>md5(md5($apiId.'||'.$secretkey).$time.$str)</code>。我们虽然不知道<code>md5($apiId.'||'.$secretkey)</code>，但<code>$time</code>和<code>$str</code>是可控的，可以进行哈希长度扩展攻击。</p>
+<h2 id="0x02"><a class="toclink" href="#0x02">0x02 寻找已知哈希</a></h2>
+<p>根据哈希长度扩展攻击的原理，也就是 <code>MD5(secret) --&gt; MD5(secret||padding||m')</code>，我们就需要先找到一个已知的secret。</p>
+<p>src/windid/service/user/srv/WindidUserService.php showFlash函数：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">public</span> <span class="k">function</span> <span class="nf">showFlash</span><span class="p">(</span><span class="nv">$uid</span><span class="p">,</span> <span class="nv">$appId</span><span class="p">,</span> <span class="nv">$appKey</span><span class="p">,</span> <span class="nv">$getHtml</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">$time</span> <span class="o">=</span> <span class="nx">Pw</span><span class="o">::</span><span class="na">getTime</span><span class="p">();</span>
+    <span class="nv">$key</span> <span class="o">=</span> <span class="nx">WindidUtility</span><span class="o">::</span><span class="na">appKey</span><span class="p">(</span><span class="nv">$appId</span><span class="p">,</span> <span class="nv">$time</span><span class="p">,</span> <span class="nv">$appKey</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">'uid'</span><span class="o">=&gt;</span><span class="nv">$uid</span><span class="p">,</span> <span class="s1">'type'</span><span class="o">=&gt;</span><span class="s1">'flash'</span><span class="p">,</span> <span class="s1">'m'</span><span class="o">=&gt;</span><span class="s1">'api'</span><span class="p">,</span> <span class="s1">'a'</span><span class="o">=&gt;</span><span class="s1">'doAvatar'</span><span class="p">,</span> <span class="s1">'c'</span><span class="o">=&gt;</span><span class="s1">'avatar'</span><span class="p">),</span> <span class="k">array</span><span class="p">(</span><span class="s1">'uid'</span><span class="o">=&gt;</span><span class="s1">'undefined'</span><span class="p">));</span>
+    <span class="nv">$key2</span> <span class="o">=</span> <span class="nx">WindidUtility</span><span class="o">::</span><span class="na">appKey</span><span class="p">(</span><span class="nv">$appId</span><span class="p">,</span> <span class="nv">$time</span><span class="p">,</span> <span class="nv">$appKey</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">'uid'</span><span class="o">=&gt;</span><span class="nv">$uid</span><span class="p">,</span> <span class="s1">'type'</span><span class="o">=&gt;</span><span class="s1">'normal'</span><span class="p">,</span> <span class="s1">'m'</span><span class="o">=&gt;</span><span class="s1">'api'</span><span class="p">,</span> <span class="s1">'a'</span><span class="o">=&gt;</span><span class="s1">'doAvatar'</span><span class="p">,</span> <span class="s1">'c'</span><span class="o">=&gt;</span><span class="s1">'avatar'</span><span class="p">),</span> <span class="k">array</span><span class="p">());</span>
+
+    <span class="nv">$postUrl</span> <span class="o">=</span> <span class="s2">"postAction=ra_postAction&amp;redirectURL=/&amp;requestURL="</span> <span class="o">.</span> <span class="nb">urlencode</span><span class="p">(</span><span class="nx">Wekit</span><span class="o">::</span><span class="na">app</span><span class="p">(</span><span class="s1">'windid'</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">url</span><span class="o">-&gt;</span><span class="na">base</span> <span class="o">.</span> <span class="s2">"/index.php?m=api&amp;c=avatar&amp;a=doAvatar&amp;uid="</span> <span class="o">.</span> <span class="nv">$uid</span> <span class="o">.</span> <span class="s1">'&amp;windidkey='</span> <span class="o">.</span> <span class="nv">$key</span> <span class="o">.</span> <span class="s1">'&amp;time='</span> <span class="o">.</span> <span class="nv">$time</span> <span class="o">.</span> <span class="s1">'&amp;clientid='</span> <span class="o">.</span> <span class="nv">$appId</span> <span class="o">.</span> <span class="s1">'&amp;type=flash'</span><span class="p">)</span> <span class="o">.</span> <span class="s1">'&amp;avatar='</span> <span class="o">.</span> <span class="nb">urlencode</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getAvatar</span><span class="p">(</span><span class="nv">$uid</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span> <span class="o">.</span> <span class="s1">'?r='</span> <span class="o">.</span> <span class="nb">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">99999</span><span class="p">));</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</pre></div>
+<p>这里调用了WindidUtility::appKey生成key，并将这个key放入了url中。其实这个功能是前台用户头像上传，我们来到 <a href="http://10.211.55.3/phpwind/index.php?m=profile&amp;c=avatar&amp;_left=avatar"><a href="http://10.211.55.3/phpwind/index.php?m=profile&amp;c=avatar&amp;_left=avatar">http://10.211.55.3/phpwind/index.php?m=profile&amp;c=avatar&amp;_left=avatar</a></a> 右键源码即可查看到当前的key:</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201605/6d281464050082.jpg"><img alt="14640455257307.jpg" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/thum-6d281464050082.jpg" title="点击查看原图"/></a></p>
+<p>这个key，实际上是通过如下计算获得：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nv">$get</span> <span class="o">=</span> <span class="nx">some_sort</span><span class="p">(</span><span class="k">array</span><span class="p">(</span><span class="s1">'uid'</span><span class="o">=&gt;</span><span class="nv">$uid</span><span class="p">,</span> <span class="s1">'type'</span><span class="o">=&gt;</span><span class="s1">'flash'</span><span class="p">,</span> <span class="s1">'m'</span><span class="o">=&gt;</span><span class="s1">'api'</span><span class="p">,</span> <span class="s1">'a'</span><span class="o">=&gt;</span><span class="s1">'doAvatar'</span><span class="p">,</span> <span class="s1">'c'</span><span class="o">=&gt;</span><span class="s1">'avatar'</span><span class="p">));</span>
+<span class="nv">$post</span> <span class="o">=</span> <span class="nx">some_sort</span><span class="p">(</span><span class="k">array</span><span class="p">(</span><span class="s1">'uid'</span><span class="o">=&gt;</span><span class="s1">'undefined'</span><span class="p">));</span>
+<span class="nb">md5</span><span class="p">(</span> <span class="nb">md5</span><span class="p">(</span><span class="nv">$apiId</span><span class="o">.</span><span class="s1">'||'</span><span class="o">.</span><span class="nv">$secretkey</span><span class="p">)</span> <span class="o">.</span> <span class="nb">time</span><span class="p">()</span> <span class="o">.</span> <span class="nv">$get</span> <span class="o">.</span> <span class="nv">$post</span> <span class="p">)</span> 
+</pre></div>
+<p>也就是说，此时的secret其实是 <code>md5($apiId.'||'.$secretkey) . time() . $get . $post</code>，大概类似<code>md5(...) + 1464044063adoAvatarcavatarmapitypeflashuid2uidundefined</code><br>
+在哈希长度扩展攻击中，我们是不需要知道这个secret的值的，只需要知道它的长度，上面这个字符串的长度很好算，md5固定32位，time时间戳10位，get和post两个数组也是固定的。<br>
+所以，经过计算，uid=2的用户获得的secret长度为55位。</br></br></p>
+<h2 id="0x03"><a class="toclink" href="#0x03">0x03 进行扩展攻击</a></h2>
+<p>公式： <code>MD5(secret) --&gt; MD5(secret||padding||m')</code>，我们已经知道了MD5(secret)和secret的长度（55），现在可以推MD5(secret||padding||m')了。</p>
+<p>因为secret的值为<code>md5(...) + 1464044063adoAvatarcavatarmapitypeflashuid2uidundefined</code>，所以下次增加的padding和m'必须放在1464044063adoAvatarcavatarmapitypeflashuid2uidundefined后面。</p>
+<p>我们需要推导并绕过的是如下函数 src/applications/windidserver/api/controller/OpenBaseController.php beforeAction函数：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">public</span>  <span class="k">function</span> <span class="nf">beforeAction</span><span class="p">(</span><span class="nv">$handlerAdapter</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">parent</span><span class="o">::</span><span class="na">beforeAction</span><span class="p">(</span><span class="nv">$handlerAdapter</span><span class="p">);</span>
+    <span class="nv">$charset</span> <span class="o">=</span> <span class="s1">'utf-8'</span><span class="p">;</span>
+    <span class="nv">$_windidkey</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getInput</span><span class="p">(</span><span class="s1">'windidkey'</span><span class="p">,</span> <span class="s1">'get'</span><span class="p">);</span>
+    <span class="nv">$_time</span> <span class="o">=</span> <span class="p">(</span><span class="nx">int</span><span class="p">)</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getInput</span><span class="p">(</span><span class="s1">'time'</span><span class="p">,</span> <span class="s1">'get'</span><span class="p">);</span>
+    <span class="nv">$_clientid</span> <span class="o">=</span> <span class="p">(</span><span class="nx">int</span><span class="p">)</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getInput</span><span class="p">(</span><span class="s1">'clientid'</span><span class="p">,</span> <span class="s1">'get'</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nv">$_time</span> <span class="o">||</span> <span class="o">!</span><span class="nv">$_clientid</span><span class="p">)</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">output</span><span class="p">(</span><span class="nx">WindidError</span><span class="o">::</span><span class="na">FAIL</span><span class="p">);</span>
+    <span class="nv">$clent</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">_getAppDs</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">getApp</span><span class="p">(</span><span class="nv">$_clientid</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nv">$clent</span><span class="p">)</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">output</span><span class="p">(</span><span class="nx">WindidError</span><span class="o">::</span><span class="na">FAIL</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">WindidUtility</span><span class="o">::</span><span class="na">appKey</span><span class="p">(</span><span class="nv">$clent</span><span class="p">[</span><span class="s1">'id'</span><span class="p">],</span> <span class="nv">$_time</span><span class="p">,</span> <span class="nv">$clent</span><span class="p">[</span><span class="s1">'secretkey'</span><span class="p">],</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getRequest</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">getGet</span><span class="p">(</span><span class="k">null</span><span class="p">),</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">getRequest</span><span class="p">()</span><span class="o">-&gt;</span><span class="na">getPost</span><span class="p">())</span> <span class="o">!=</span> <span class="nv">$_windidkey</span><span class="p">)</span>  <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">output</span><span class="p">(</span><span class="nx">WindidError</span><span class="o">::</span><span class="na">FAIL</span><span class="p">);</span>
+
+    <span class="nv">$time</span> <span class="o">=</span> <span class="nx">Pw</span><span class="o">::</span><span class="na">getTime</span><span class="p">();</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nv">$time</span> <span class="o">-</span> <span class="nv">$_time</span> <span class="o">&gt;</span> <span class="mi">1200</span><span class="p">)</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">output</span><span class="p">(</span><span class="nx">WindidError</span><span class="o">::</span><span class="na">TIMEOUT</span><span class="p">);</span>
+    <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">appid</span> <span class="o">=</span> <span class="nv">$_clientid</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>我们看到，这里计算出 <code>WindidUtility::appKey($clent['id'], $_time, $clent['secretkey'], $this-&gt;getRequest()-&gt;getGet(null), $this-&gt;getRequest()-&gt;getPost())</code> 的结果，与传入的windidkey进行比较，如果不相等，则函数报错。</p>
+<p>我们需要先构造出1464044063adoAvatarcavatarmapitypeflashuid2uidundefined，才能够在后面增加我们需要的GET和POST值。</p>
+<p>所以，我传入time=1464044063，而adoAvatarcavatarmapitypeflashuid2uidundefined作为一个GET数组的键传入。</p>
+<p>这样，在appKey函数构造的过程中，就可以人为构造出secret，然后后面的内容就是可以利用的padding，如下图（s是未知的key，t是获取md5时的时间戳，R就是adoAvatarcavatarmapitypeflashuid2uidundefined）：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201605/18231464050083.jpg"><img alt="14640478360329.jpg" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/thum-18231464050083.jpg" title="点击查看原图"/></a></p>
+<p>所以，我们构造出类似如下的数据包：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201605/711e1464050084.jpg"><img alt="14640481720300.jpg" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/thum-711e1464050084.jpg" title="点击查看原图"/></a></p>
+<p>此时后端进行的加密如下：</p>
+<div class="codehilite"><pre><span></span>MD5( key + 1464048076 + adoAvatarcavatarmapitypeflashuid2uidundefined + %80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%B8%02%00%00%00%00%00%00 + sort(a=get&amp;c=app&amp;m=api&amp;id=1) )
+</pre></div>
+<p>我之前获取的secret如下：</p>
+<div class="codehilite"><pre><span></span>MD5( key + 1464048076 + adoAvatarcavatarmapitypeflashuid2uidundefined )
+</pre></div>
+<p>正好满足哈希长度扩展攻击的条件，成功绕过beforeAction中的验证。</p>
+<h2 id="0x04-getshell"><a class="toclink" href="#0x04-getshell">0x04 获取敏感信息 + 修改管理员密码 + getshell</a></h2>
+<p>我绕过了beforeAction的验证，其实效果类似于绕过了discuz中UC_KEY的验证过程。拿到了UC_KEY，就可以构造为任意用户做其权限（甚至是管理员权限）下的很多事情。<br/>
+比如，获取敏感信息：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201605/59961464050085.jpg"><img alt="14640484775768.jpg" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/thum-59961464050085.jpg" title="点击查看原图"/></a></p>
+<p>获得所有系统配置信息（包括cookie加密的密钥）：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201605/f8c41464050087.jpg"><img alt="14640486498469.jpg" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/thum-f8c41464050087.jpg" title="点击查看原图"/></a></p>
+<p>我写了一个脚本用来生成payload，我就不公开了。看懂的人自然会写，看不懂的人好好琢磨琢磨：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201605/25471464050088.jpg"><img alt="14640495312072.jpg" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/thum-25471464050088.jpg" title="点击查看原图"/></a></p>
+<p>另外，利用该方法可以修改所有系统配置、增删改APP、增删改查用户、修改用户密码等等。phpwind有个奇怪的逻辑，其管理员分为『创始人』和『管理员』，而创始人如果要登录后台，需要一个保存在文件中的账号密码，而管理员登录后台需要的是数据库中的账号密码。</p>
+<p>这个漏洞只能修改数据库中的账号密码，所以无法修改创始人的后台账号，但管理员权限也就够了，配合我之前发的phpwind后台getshell（ <a href="http://www.wooyun.org/bugs/wooyun-2010-0175815"><a href="http://www.wooyun.org/bugs/wooyun-2010-0175815">http://www.wooyun.org/bugs/wooyun-2010-0175815</a></a> ），即可完美拿下。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2354">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/9ac84ffb9a6dbd4364250491e518ec6a.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">xxlegend</a>
+<time datetime="2016年6月8日 15:53" itemprop="datePublished">
+                            2016 六月 08 15:53
+                        </time>
+<a href="javascript:reply_to('2354', 'xxlegend')">回复</a>
+</p>
+<p class="comment-meta">请教：我使用md5 length Extension attack poc的时候校验的md5值不对，这里面有什么限制因素吗？我在chrome上的输出如下：<br/>=== MD5 Length Extension Attack POC ====== by axis ===<br/>[+] secret is :0.7104842912105351[+] length is :18<br/>[+] message want to append is :axis is smart!<br/>[+] Start calculating secret's hash<br/>[+] Calculate secret's md5 hash: E1DD22A37AC6D24F6F1650DE1D5C7125<br/>================================<br/>[+] Start calculating new hash<br/>[+] theory: h(m||p||m1)<br/>[+] that is: md5_compression_function('E1DD22A37AC6D24F6F1650DE1D5C7125', 'secret's length', 'axis is smart! ')<br/>run times: 1h3: -549672650h2: 1411096006h1: 377315664h0: 979963726run times: 1<br/>h3: -549672650<br/>h2: 1411096006<br/>h1: 377315664<br/>h0: 979963726<br/>[+] padding(urlencode format) is: %80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%90%00%00%00%00%00%00%00<br/>[+] guessing new hash is: 4e0f693a50617d16c69d1b5436a93cdf<br/>================================<br/>[+] now verifying the new hash<br/>[+] new message(urlencode format) is: 0.7104842912105351%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%90%00%00%00%00%00%00%00axis%20is%20smart%21%0A<br/>md5 of the new message is: 93342C3CCD05FBD7091C2287863278F8</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2355">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/9ac84ffb9a6dbd4364250491e518ec6a.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">xxlegend</a>
+<time datetime="2016年6月8日 16:24" itemprop="datePublished">
+                            2016 六月 08 16:24
+                        </time>
+<a href="javascript:reply_to('2355', 'xxlegend')">回复</a>
+</p>
+<p class="comment-meta">@xxlegend：手工用python库检测了一下md5值的输出，预测值是准确的，但是调用faultylabs.MD5(x1)的值却是有问题的</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2356">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年6月8日 17:44" itemprop="datePublished">
+                            2016 六月 08 17:44
+                        </time>
+<a href="javascript:reply_to('2356', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@xxlegend：可能是faultylabs.MD5这库使用方法不对吧。<br/>建议用 https://github.com/bwall/HashPump ，可以直接生成</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2363">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/9ac84ffb9a6dbd4364250491e518ec6a.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">xxlegend</a>
+<time datetime="2016年6月12日 10:20" itemprop="datePublished">
+                            2016 六月 12 10:20
+                        </time>
+<a href="javascript:reply_to('2363', 'xxlegend')">回复</a>
+</p>
+<p class="comment-meta">@phithon：不错，我当时还想python怎么调起js库的呢？</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2359">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/d5b234984190822adf2f31a4d5a371bb.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://joychou.org" target="_blank">JoyChou</a>
+<time datetime="2016年6月8日 23:51" itemprop="datePublished">
+                            2016 六月 08 23:51
+                        </time>
+<a href="javascript:reply_to('2359', 'JoyChou')">回复</a>
+</p>
+<p class="comment-meta">@xxlegend：刺文章中的js在验证md5有问题，建议有py版本的，可读性比js强。</p>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2351">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/32e93a81618a48e927424e65e8575470.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.baidu.com" target="_blank">菜鸟</a>
+<time datetime="2016年6月7日 19:57" itemprop="datePublished">
+                            2016 六月 07 19:57
+                        </time>
+<a href="javascript:reply_to('2351', '菜鸟')">回复</a>
+</p>
+<p class="comment-meta">phithon求源码:xiaoqiu19820@163.com</p>
+</div>
+</div>
+<div class="row" id="comment-2334">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">iant</a>
+<time datetime="2016年5月26日 17:37" itemprop="datePublished">
+                            2016 五月 26 17:37
+                        </time>
+<a href="javascript:reply_to('2334', 'iant')">回复</a>
+</p>
+<p class="comment-meta">请教：我写了一个测试脚本<br/>&lt;?php<br/>$key = 'safwefdsfsacxww';<br/><br/>//假设a=11,b=22,k=b12a3ff0b11a5ea852840a632f533218<br/>//根据提示我算出了padding=%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%98%00%00%00%00%00%00%00<br/><br/>$k = md5($key.$_GET['a'].$_GET['b']);<br/><br/>if($_GET['b'] === '123456' &amp;&amp; $k ===$_GET['k']){<br/>	print '我成功绕过了&lt;/br&gt;';<br/>}else{<br/>	print '我没有绕过&lt;/br&gt;';<br/>}<br/>?&gt;<br/>我请求：?a=1122%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%98%00%00%00%00%00%00%00&amp;b=123456&amp;k=b12a3ff0b11a5ea852840a632f533218<br/>根据我自己测试，始终不能成功，我哪里写错了吗？还是我压根就理解错误了？</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2335">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年5月26日 22:18" itemprop="datePublished">
+                            2016 五月 26 22:18
+                        </time>
+<a href="javascript:reply_to('2335', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@iant：第二次计算的md5怎么会和第一次算出来一样呢</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2340">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">iant</a>
+<time datetime="2016年5月27日 16:55" itemprop="datePublished">
+                            2016 五月 27 16:55
+                        </time>
+<a href="javascript:reply_to('2340', 'iant')">回复</a>
+</p>
+<p class="comment-meta">@phithon：这里是我忽略了....<br/>第二次的K我算出来是26ea8c899d259a02f1ae4b56d6a9213e<br/>但是还是不对，能帮我瞅瞅是哪错了吗？<br/>这个跟双向MD5加密应该没关系吧？</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2341">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年5月27日 18:17" itemprop="datePublished">
+                            2016 五月 27 18:17
+                        </time>
+<a href="javascript:reply_to('2341', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@iant：$_GET['a'] = urldecode("1122%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%98%00%00%00%00%00%00%00");<br/>$_GET['b'] = urldecode("123456");<br/>echo md5($key.$_GET['a'].$_GET['b']); <br/>我算出来可不是26ea8c899d259a02f1ae4b56d6a9213e。</p>
+</div>
+</div>
+<div class="row" id="comment-2342">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">iant</a>
+<time datetime="2016年5月27日 20:10" itemprop="datePublished">
+                            2016 五月 27 20:10
+                        </time>
+<a href="javascript:reply_to('2342', 'iant')">回复</a>
+</p>
+<p class="comment-meta">@phithon：感谢，明白了！</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2333">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/be7765a6f3ae32be6d6a6f68a5929061.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">黑皮</a>
+<time datetime="2016年5月26日 15:54" itemprop="datePublished">
+                            2016 五月 26 15:54
+                        </time>
+<a href="javascript:reply_to('2333', '黑皮')">回复</a>
+</p>
+<p class="comment-meta">为什么我利用每次返回的都是 0</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2336">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年5月26日 22:18" itemprop="datePublished">
+                            2016 五月 26 22:18
+                        </time>
+<a href="javascript:reply_to('2336', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@黑皮：返回0说明没做对。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2346">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">黑皮</a>
+<time datetime="2016年6月1日 03:38" itemprop="datePublished">
+                            2016 六月 01 03:38
+                        </time>
+<a href="javascript:reply_to('2346', '黑皮')">回复</a>
+</p>
+<p class="comment-meta">@phithon：但是我完全复现的博客上的数据，返回还是0</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2347">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">黑皮</a>
+<time datetime="2016年6月1日 11:02" itemprop="datePublished">
+                            2016 六月 01 11:02
+                        </time>
+<a href="javascript:reply_to('2347', '黑皮')">回复</a>
+</p>
+<p class="comment-meta">@黑皮：楼上的回复用自己id呀，借用我的id是个什么鬼????</p>
+</div>
+</div>
+<div class="row" id="comment-2348">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年6月1日 14:31" itemprop="datePublished">
+                            2016 六月 01 14:31
+                        </time>
+<a href="javascript:reply_to('2348', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@黑皮：完全复现博客里的数据包肯定不对。我讲的是方法，数据包每个网站都不一样。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2332">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/d0746a8862e98489d9438d5faad4a6c6.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">阿呆</a>
+<time datetime="2016年5月26日 10:04" itemprop="datePublished">
+                            2016 五月 26 10:04
+                        </time>
+<a href="javascript:reply_to('2332', '阿呆')">回复</a>
+</p>
+<p class="comment-meta">文章中secret的长度应该是87<br/>请教：假设POST参数a=get&amp;c=app&amp;m=api&amp;id=1，后台padding我得到是agetcappid1mapi，但是自己扩展后得到的md5和后台生成的不一样？</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2337">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年5月26日 22:37" itemprop="datePublished">
+                            2016 五月 26 22:37
+                        </time>
+<a href="javascript:reply_to('2337', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@阿呆：嗯，忘记加md5长度了，利用程序里是自动算的。<br/>生成的一样的，不一样怎么绕过验证。。</p>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="e49e534c8a8b614b144b62c1427c4f2bed4c51f3"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/e49e534c8a8b614b144b62c1427c4f2bed4c51f3"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="387">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="evZmcrAiStLhPy0b5UX4feV8cXnkfQ2zMPkS0VMxjgFGPdoqTbrOOSXdl1QsYkRJ"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./phpwind 利用哈希长度扩展攻击进行getshell  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

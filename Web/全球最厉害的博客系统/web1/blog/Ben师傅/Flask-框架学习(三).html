@@ -1,0 +1,526 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./Flask-框架学习(三)/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Flask-框架学习(三)/screen.css" rel="stylesheet"/>
+<link href="./Flask-框架学习(三)/prism_okaidia.css" rel="stylesheet"/>
+<link href="./Flask-框架学习(三)/bendawang.css" rel="stylesheet"/>
+<script src="./Flask-框架学习(三)/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./Flask-框架学习(三)/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./Flask-框架学习(三)/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<p style="max-width:100%;height:auto;">（ 上接Flask 框架学习(二) ）</p>
+<h2 id="4">4、数据库</h2>
+<p style="max-width:100%;height:auto;"><a href="http://docs.sqlalchemy.org/en/rel_1_0/">SQLAlchemy文档</a></p>
+<h3 id="41">4.1 引入</h3>
+<p style="max-width:100%;height:auto;">Flask在可使用的数据库包上没有限制，所以可以使用MySQL、Postgres、SQLite、Redis、MongoDB或者CouchDB等等任意一个。
+这里要引入一个概念。</p>
+<p style="max-width:100%;height:auto;"><code style="max-width:100%;height:auto;">ORM（对象关系映射，Object Relational Mapping)</code>是一种程序技术，用于实现面向对象编程语言里不同类型系统的数据之间的转换。从效果上说，它其实是创建了一个可在编程语言里使用的“虚拟对象数据库”。</p>
+<p style="max-width:100%;height:auto;">听着就感觉很蛋疼，我们即将使用的Flask-SQLAlchemy扩展就是一个已经封装了关系对象映射（ORM）的一个插件。</p>
+<p style="max-width:100%;height:auto;">而ORMs允许数据库程序用对象的方式替代表和SQL语句。面向对象的操作被ORM转化为数据库命令。这样就意味着，不用sql语句，让Flask-SQLAlchemy为我们执行sql语句。</p>
+<p style="max-width:100%;height:auto;">简单的说，就是如SQLAlchemy或MongoEngine让你像操作常规Python对象那样，而不是数据库实体表、文档或查询语句。</p>
+<p style="max-width:100%;height:auto;">应该稍微明白一点了，在之后的例子中能够很快就明白的。
+此处我们以链接Mysql为例，在我们使用数据库的时候，需要在Flask配置对象中的<code style="max-width:100%;height:auto;">SQLALCHEMY_DATABASE_URI</code>键中进行配置。另一个有用的选项是<code style="max-width:100%;height:auto;">SQLALCHEMY_COMMIT_ON_TEARDOWN</code>，可以设置为True来启用自动提交数据库更改在每个请求中。
+下述为.py文件的配置部分：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from flask.ext.sqlalchemy import SQLAlchemy
+from flask import Flask
+app = Flask(__name__)
+app.config[&amp;apos;SQLALCHEMY_DATABASE_URI&amp;apos;] ="mysql://root:@localhost/flask"
+app.config[&amp;apos;SQLALCHEMY_COMMIT_ON_TEARDOWN&amp;apos;] = True
+app.config[&amp;apos;SQLALCHEMY_TRACK_MODIFICATIONS&amp;apos;]=True
+db = SQLAlchemy(app)
+</code></pre>
+<p style="max-width:100%;height:auto;">在<code style="max-width:100%;height:auto;">SQLALCHEMY_DATABASE_URI</code>键的配置时，规定使用url来确定数据库，几个常用数据库的配置URL如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160650581" style="max-width:100%;height:auto;"/><br/></p>
+<blockquote>
+<p style="max-width:100%;height:auto;">hostname是指托管MySQL服务的服务器（本地localhost或是远程服务器）
+  database指出要使用的数据库名
+  username和 password是数据库用户凭证
+  我的URL配置是</p>
+</blockquote>
+<pre><code style="max-width:100%;height:auto;">mysql://root:@localhost/flask
+</code></pre>
+<p style="max-width:100%;height:auto;">即我使用的用户名是root，而且没有密码，然后连接本地服务器，使用了名为flask的数据库。</p>
+<p style="max-width:100%;height:auto;">现在我们例子如下:</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">class temp1(db.model):
+    __tablename__=&amp;apos;temp1&amp;apos;
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True)
+
+class temp2(db.Model):
+    __tablename__ = &amp;apos;temp2&amp;apos;
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), unique=True)
+</code></pre>
+<p style="max-width:100%;height:auto;">来解释下上面的代码，</p>
+<ul>
+<li>上述两个类就是我们的两个表，在ORM的背景下，我们将两个temp1表和temp2表抽象成了两个类，或是说两个模型。</li>
+<li><strong><em>_table</em>_</strong>类变量定义数据库中表的名称，缺省的复制<code style="max-width:100%;height:auto;">Flask-SQLAlchemy</code>会默认赋值，但是我们使用的时候肯定要自己起上表名的。</li>
+<li>而其他的类变量则是<code style="max-width:100%;height:auto;">db.Column</code>的实例，即表中的列名。而<code style="max-width:100%;height:auto;">db.Column</code>的第一个参数就是列的数据类型。而在<code style="max-width:100%;height:auto;">Flask-SQLAlchemy</code>中，原有的SQL类型对应的<code style="max-width:100%;height:auto;">Flask-SQLAlchemy</code>列类型如下：</li>
+</ul>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160731192" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">db.Column的其他参数大概如下，都是列的一些属性，了解SQL的应该能够直接看懂:</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160751958" style="max-width:100%;height:auto;"/><br/></p>
+<blockquote>
+<p style="max-width:100%;height:auto;">小技巧，类定义中可以重载一下repr函数，就我个人的习惯来说，我经常犯各种错误，而且自己找不出来，这个时候就需要动用到ide来调试，这时候重写repr函数的优势就显示出来了.......</p>
+</blockquote>
+<h3 id="42">4.2 数据库关系</h3>
+<p style="max-width:100%;height:auto;">通常来说，正常的SQL一般表之间会存在各式各样的关系，现在列出一个配置模型的完整的源码(sql_1.py)：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from flask.ext.sqlalchemy import SQLAlchemy
+from flask import Flask
+app = Flask(__name__)
+app.config[&amp;apos;SQLALCHEMY_DATABASE_URI&amp;apos;] ="mysql://root:@localhost/flask"
+app.config[&amp;apos;SQLALCHEMY_COMMIT_ON_TEARDOWN&amp;apos;] = True
+app.config[&amp;apos;SQLALCHEMY_TRACK_MODIFICATIONS&amp;apos;]=True
+db = SQLAlchemy(app)
+class temp1(db.Model):
+    __tablename__=&amp;apos;temp1&amp;apos;
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True)
+    brackref = db.relationship(&amp;apos;temp2&amp;apos;, backref=&amp;apos;temp&amp;apos;)
+    def __repr__(self):
+        return &amp;apos;&lt;name %r&gt;&amp;apos; % self.name
+
+class temp2(db.Model):
+    __tablename__ = &amp;apos;temp2&amp;apos;
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), unique=True)
+    tempfk=db.Column(db.Integer, db.ForeignKey(&amp;apos;temp1.id&amp;apos;))
+    def __repr__(self):
+        return &amp;apos;&lt;username %r&gt;&amp;apos; % self.username
+</code></pre>
+<p style="max-width:100%;height:auto;">上述应该比较好理解，添加给temp2一个tempfk的外键，链接的是temp1中的id列，<code style="max-width:100%;height:auto;">db.relationship()</code>的<code style="max-width:100%;height:auto;">backref</code>参数通过给temp2表增加<code style="max-width:100%;height:auto;">temp</code>属性来定义反向关系。这个属性可以替代role_id访问Role模型，是作为对象而不是外键。</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">PS:这里我们重写了repr函数，具体的用途在之后会说的。</p>
+<h3 id="43">4.3 数据库操作</h3>
+<p style="max-width:100%;height:auto;">有了配置文件，我们就可以进入数据库操作部分了。
+  这里的演示我们直接在cmd中进行，然后一边配置mysql客户端来检验。</p>
+</blockquote>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160827050" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">直接调用</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">db.create_all()
+</code></pre>
+<p style="max-width:100%;height:auto;">就可以创建出数据表，</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160836894" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">确实成功了。
+另一个<code style="max-width:100%;height:auto;">db.drop_all()</code>则是删除所有表，这里不做演示了。</p>
+<hr/>
+<p style="max-width:100%;height:auto;">下面是插入数据</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160847475" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">但是执行完上述语句之后还没有将数据写入Mysql</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160855819" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">只是存于Python中，而且它们对应的id值还没有分配。
+修改数据库的操作由Flask-SQLAlchemy提供的db.session数据库会话来管理。准备写入到数据库中的对象必须添加到会话中：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160904957" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">或是更简单点的：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160913538" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">为了写对象到数据库，需要通过它的commit()方法来提交会话：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">db.session.commit()
+</code></pre>
+<p style="max-width:100%;height:auto;">运行之后观察MYSQL，发现数据已经写入：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160930820" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">这里发现我们之前没有对id赋值但是它却有值，而且该字段是<code style="max-width:100%;height:auto;">auto_increment</code>的，
+如果我们没有显示赋值是会从0自增的，当然肯定也是可以显示赋值的。</p>
+<hr/>
+<p style="max-width:100%;height:auto;">如果要修改会话中存在的值，例如我们添加了一个</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&gt;&gt;&gt; from sql_1 import db,temp1,temp2
+&gt;&gt;&gt; test=temp1(name="1234",id=100)
+&gt;&gt;&gt; db.session.add(test)
+&gt;&gt;&gt; db.session.commit()
+</code></pre>
+<p style="max-width:100%;height:auto;">我们想把name字段改成4321
+那么直接</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&gt;&gt;&gt; test.name="4321"
+&gt;&gt;&gt; db.session.commit()
+</code></pre>
+<hr/>
+<p style="max-width:100%;height:auto;">接下来是删除行</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&gt;&gt;&gt; db.session.delete(test)
+&gt;&gt;&gt; db.session.commit()
+</code></pre>
+<hr/>
+<p style="max-width:100%;height:auto;">然后是返回行
+Flask-SQLAlchemy为每个模型类创建一个query对象。最基本的查询模型是返回对应的表的全部内容：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&gt;&gt;&gt; from sql_1 import db,temp1,temp2
+&gt;&gt;&gt; temp1.query.all()
+[&lt;name u&amp;apos;4321&amp;apos;&gt;, &lt;name u&amp;apos;admin&amp;apos;&gt;, &lt;name u&amp;apos;user&amp;apos;&gt;]
+&gt;&gt;&gt; temp2.query.all()
+[&lt;username u&amp;apos;admin&amp;apos;&gt;, &lt;username u&amp;apos;user&amp;apos;&gt;]
+</code></pre>
+<p style="max-width:100%;height:auto;">大家看看这个query.all()函数返回值是不是很眼熟，这就是我们之前在sql_1.py里面重写的repr函数的结构啊。</p>
+<p style="max-width:100%;height:auto;">使用过滤器可以配置查询对象去执行更具体的数据库搜索。在表一中找出name字段为&amp;apos;admin&amp;apos;的记录。</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&gt;&gt;&gt; temp1.query.filter_by(name="admin").all()
+[&lt;name u&amp;apos;admin&amp;apos;&gt;]
+</code></pre>
+<p style="max-width:100%;height:auto;">对于给定的查询还可以检查SQLAlchemy生成的原生SQL查询，并将查询对象转换为一个字符串：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&gt;&gt;&gt; str(temp1.query.filter_by(name="admin"))
+&amp;apos;SELECT temp1.id AS temp1_id, temp1.name AS temp1_name \nFROM temp1 \nWHERE temp1.name = :name_1&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">还有另外一种方式来查询，如果我们知道了用户的id，我们可以使用下面的方式查找用户信息：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&gt;&gt;&gt; temp2.query.get(1)
+&lt;username u&amp;apos;admin&amp;apos;&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">想更深入的学习，还是看原文档吧<a href="http://docs.sqlalchemy.org/en/rel_1_0/">SQLAlchemy文档</a></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./Flask-框架学习(三)/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<p style="max-width:100%;height:auto;">（ 上接Flask 框架学习(二) ）</p>
+<h2 id="4">4、数据库</h2>
+<p style="max-width:100%;height:auto;"><a href="http://docs.sqlalchemy.org/en/rel_1_0/">SQLAlchemy文档</a></p>
+<h3 id="41">4.1 引入</h3>
+<p style="max-width:100%;height:auto;">Flask在可使用的数据库包上没有限制，所以可以使用MySQL、Postgres、SQLite、Redis、MongoDB或者CouchDB等等任意一个。
+这里要引入一个概念。</p>
+<p style="max-width:100%;height:auto;"><code style="max-width:100%;height:auto;">ORM（对象关系映射，Object Relational Mapping)</code>是一种程序技术，用于实现面向对象编程语言里不同类型系统的数据之间的转换。从效果上说，它其实是创建了一个可在编程语言里使用的“虚拟对象数据库”。</p>
+<p style="max-width:100%;height:auto;">听着就感觉很蛋疼，我们即将使用的Flask-SQLAlchemy扩展就是一个已经封装了关系对象映射（ORM）的一个插件。</p>
+<p style="max-width:100%;height:auto;">而ORMs允许数据库程序用对象的方式替代表和SQL语句。面向对象的操作被ORM转化为数据库命令。这样就意味着，不用sql语句，让Flask-SQLAlchemy为我们执行sql语句。</p>
+<p style="max-width:100%;height:auto;">简单的说，就是如SQLAlchemy或MongoEngine让你像操作常规Python对象那样，而不是数据库实体表、文档或查询语句。</p>
+<p style="max-width:100%;height:auto;">应该稍微明白一点了，在之后的例子中能够很快就明白的。
+此处我们以链接Mysql为例，在我们使用数据库的时候，需要在Flask配置对象中的<code style="max-width:100%;height:auto;">SQLALCHEMY_DATABASE_URI</code>键中进行配置。另一个有用的选项是<code style="max-width:100%;height:auto;">SQLALCHEMY_COMMIT_ON_TEARDOWN</code>，可以设置为True来启用自动提交数据库更改在每个请求中。
+下述为.py文件的配置部分：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from flask.ext.sqlalchemy import SQLAlchemy
+from flask import Flask
+app = Flask(__name__)
+app.config[&amp;apos;SQLALCHEMY_DATABASE_URI&amp;apos;] ="mysql://root:@localhost/flask"
+app.config[&amp;apos;SQLALCHEMY_COMMIT_ON_TEARDOWN&amp;apos;] = True
+app.config[&amp;apos;SQLALCHEMY_TRACK_MODIFICATIONS&amp;apos;]=True
+db = SQLAlchemy(app)
+</code></pre>
+<p style="max-width:100%;height:auto;">在<code style="max-width:100%;height:auto;">SQLALCHEMY_DATABASE_URI</code>键的配置时，规定使用url来确定数据库，几个常用数据库的配置URL如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160650581" style="max-width:100%;height:auto;"/><br/></p>
+<blockquote>
+<p style="max-width:100%;height:auto;">hostname是指托管MySQL服务的服务器（本地localhost或是远程服务器）
+  database指出要使用的数据库名
+  username和 password是数据库用户凭证
+  我的URL配置是</p>
+</blockquote>
+<pre><code style="max-width:100%;height:auto;">mysql://root:@localhost/flask
+</code></pre>
+<p style="max-width:100%;height:auto;">即我使用的用户名是root，而且没有密码，然后连接本地服务器，使用了名为flask的数据库。</p>
+<p style="max-width:100%;height:auto;">现在我们例子如下:</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">class temp1(db.model):
+    __tablename__=&amp;apos;temp1&amp;apos;
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True)
+
+class temp2(db.Model):
+    __tablename__ = &amp;apos;temp2&amp;apos;
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), unique=True)
+</code></pre>
+<p style="max-width:100%;height:auto;">来解释下上面的代码，</p>
+<ul>
+<li>上述两个类就是我们的两个表，在ORM的背景下，我们将两个temp1表和temp2表抽象成了两个类，或是说两个模型。</li>
+<li><strong><em>_table</em>_</strong>类变量定义数据库中表的名称，缺省的复制<code style="max-width:100%;height:auto;">Flask-SQLAlchemy</code>会默认赋值，但是我们使用的时候肯定要自己起上表名的。</li>
+<li>而其他的类变量则是<code style="max-width:100%;height:auto;">db.Column</code>的实例，即表中的列名。而<code style="max-width:100%;height:auto;">db.Column</code>的第一个参数就是列的数据类型。而在<code style="max-width:100%;height:auto;">Flask-SQLAlchemy</code>中，原有的SQL类型对应的<code style="max-width:100%;height:auto;">Flask-SQLAlchemy</code>列类型如下：</li>
+</ul>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160731192" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">db.Column的其他参数大概如下，都是列的一些属性，了解SQL的应该能够直接看懂:</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160751958" style="max-width:100%;height:auto;"/><br/></p>
+<blockquote>
+<p style="max-width:100%;height:auto;">小技巧，类定义中可以重载一下repr函数，就我个人的习惯来说，我经常犯各种错误，而且自己找不出来，这个时候就需要动用到ide来调试，这时候重写repr函数的优势就显示出来了.......</p>
+</blockquote>
+<h3 id="42">4.2 数据库关系</h3>
+<p style="max-width:100%;height:auto;">通常来说，正常的SQL一般表之间会存在各式各样的关系，现在列出一个配置模型的完整的源码(sql_1.py)：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from flask.ext.sqlalchemy import SQLAlchemy
+from flask import Flask
+app = Flask(__name__)
+app.config[&amp;apos;SQLALCHEMY_DATABASE_URI&amp;apos;] ="mysql://root:@localhost/flask"
+app.config[&amp;apos;SQLALCHEMY_COMMIT_ON_TEARDOWN&amp;apos;] = True
+app.config[&amp;apos;SQLALCHEMY_TRACK_MODIFICATIONS&amp;apos;]=True
+db = SQLAlchemy(app)
+class temp1(db.Model):
+    __tablename__=&amp;apos;temp1&amp;apos;
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True)
+    brackref = db.relationship(&amp;apos;temp2&amp;apos;, backref=&amp;apos;temp&amp;apos;)
+    def __repr__(self):
+        return &amp;apos;&lt;name %r&gt;&amp;apos; % self.name
+
+class temp2(db.Model):
+    __tablename__ = &amp;apos;temp2&amp;apos;
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), unique=True)
+    tempfk=db.Column(db.Integer, db.ForeignKey(&amp;apos;temp1.id&amp;apos;))
+    def __repr__(self):
+        return &amp;apos;&lt;username %r&gt;&amp;apos; % self.username
+</code></pre>
+<p style="max-width:100%;height:auto;">上述应该比较好理解，添加给temp2一个tempfk的外键，链接的是temp1中的id列，<code style="max-width:100%;height:auto;">db.relationship()</code>的<code style="max-width:100%;height:auto;">backref</code>参数通过给temp2表增加<code style="max-width:100%;height:auto;">temp</code>属性来定义反向关系。这个属性可以替代role_id访问Role模型，是作为对象而不是外键。</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">PS:这里我们重写了repr函数，具体的用途在之后会说的。</p>
+<h3 id="43">4.3 数据库操作</h3>
+<p style="max-width:100%;height:auto;">有了配置文件，我们就可以进入数据库操作部分了。
+  这里的演示我们直接在cmd中进行，然后一边配置mysql客户端来检验。</p>
+</blockquote>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160827050" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">直接调用</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">db.create_all()
+</code></pre>
+<p style="max-width:100%;height:auto;">就可以创建出数据表，</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160836894" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">确实成功了。
+另一个<code style="max-width:100%;height:auto;">db.drop_all()</code>则是删除所有表，这里不做演示了。</p>
+<hr/>
+<p style="max-width:100%;height:auto;">下面是插入数据</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160847475" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">但是执行完上述语句之后还没有将数据写入Mysql</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160855819" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">只是存于Python中，而且它们对应的id值还没有分配。
+修改数据库的操作由Flask-SQLAlchemy提供的db.session数据库会话来管理。准备写入到数据库中的对象必须添加到会话中：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160904957" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">或是更简单点的：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160913538" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">为了写对象到数据库，需要通过它的commit()方法来提交会话：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">db.session.commit()
+</code></pre>
+<p style="max-width:100%;height:auto;">运行之后观察MYSQL，发现数据已经写入：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(三)/20160314160930820" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">这里发现我们之前没有对id赋值但是它却有值，而且该字段是<code style="max-width:100%;height:auto;">auto_increment</code>的，
+如果我们没有显示赋值是会从0自增的，当然肯定也是可以显示赋值的。</p>
+<hr/>
+<p style="max-width:100%;height:auto;">如果要修改会话中存在的值，例如我们添加了一个</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&gt;&gt;&gt; from sql_1 import db,temp1,temp2
+&gt;&gt;&gt; test=temp1(name="1234",id=100)
+&gt;&gt;&gt; db.session.add(test)
+&gt;&gt;&gt; db.session.commit()
+</code></pre>
+<p style="max-width:100%;height:auto;">我们想把name字段改成4321
+那么直接</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&gt;&gt;&gt; test.name="4321"
+&gt;&gt;&gt; db.session.commit()
+</code></pre>
+<hr/>
+<p style="max-width:100%;height:auto;">接下来是删除行</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&gt;&gt;&gt; db.session.delete(test)
+&gt;&gt;&gt; db.session.commit()
+</code></pre>
+<hr/>
+<p style="max-width:100%;height:auto;">然后是返回行
+Flask-SQLAlchemy为每个模型类创建一个query对象。最基本的查询模型是返回对应的表的全部内容：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&gt;&gt;&gt; from sql_1 import db,temp1,temp2
+&gt;&gt;&gt; temp1.query.all()
+[&lt;name u&amp;apos;4321&amp;apos;&gt;, &lt;name u&amp;apos;admin&amp;apos;&gt;, &lt;name u&amp;apos;user&amp;apos;&gt;]
+&gt;&gt;&gt; temp2.query.all()
+[&lt;username u&amp;apos;admin&amp;apos;&gt;, &lt;username u&amp;apos;user&amp;apos;&gt;]
+</code></pre>
+<p style="max-width:100%;height:auto;">大家看看这个query.all()函数返回值是不是很眼熟，这就是我们之前在sql_1.py里面重写的repr函数的结构啊。</p>
+<p style="max-width:100%;height:auto;">使用过滤器可以配置查询对象去执行更具体的数据库搜索。在表一中找出name字段为&amp;apos;admin&amp;apos;的记录。</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&gt;&gt;&gt; temp1.query.filter_by(name="admin").all()
+[&lt;name u&amp;apos;admin&amp;apos;&gt;]
+</code></pre>
+<p style="max-width:100%;height:auto;">对于给定的查询还可以检查SQLAlchemy生成的原生SQL查询，并将查询对象转换为一个字符串：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&gt;&gt;&gt; str(temp1.query.filter_by(name="admin"))
+&amp;apos;SELECT temp1.id AS temp1_id, temp1.name AS temp1_name \nFROM temp1 \nWHERE temp1.name = :name_1&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">还有另外一种方式来查询，如果我们知道了用户的id，我们可以使用下面的方式查找用户信息：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&gt;&gt;&gt; temp2.query.get(1)
+&lt;username u&amp;apos;admin&amp;apos;&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">想更深入的学习，还是看原文档吧<a href="http://docs.sqlalchemy.org/en/rel_1_0/">SQLAlchemy文档</a></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./Flask-框架学习(三)/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="/static/images/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./Flask-框架学习(三)/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./Flask-框架学习(三)/prism.js"></script>
+<script src="./Flask-框架学习(三)/zooming.js"></script>
+<script src="./Flask-框架学习(三)/Bendawang.js"></script>
+
+

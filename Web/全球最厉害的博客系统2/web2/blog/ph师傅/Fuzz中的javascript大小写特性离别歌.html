@@ -1,0 +1,314 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./Fuzz中的javascript大小写特性  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./Fuzz中的javascript大小写特性  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./Fuzz中的javascript大小写特性  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>Fuzz中的javascript大小写特性 | 离别歌</title>
+<link href="./Fuzz中的javascript大小写特性  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Fuzz中的javascript大小写特性  离别歌/styles.css" rel="stylesheet"/>
+<link href="./Fuzz中的javascript大小写特性  离别歌/style.css" rel="stylesheet"/>
+<link href="./Fuzz中的javascript大小写特性  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./Fuzz中的javascript大小写特性  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./Fuzz中的javascript大小写特性  离别歌/jquery.min.js"></script>
+<link href="./Fuzz中的javascript大小写特性  离别歌/code.css" rel="stylesheet"/>
+<link href="./Fuzz中的javascript大小写特性  离别歌/button.css" rel="stylesheet"/>
+<link href="./Fuzz中的javascript大小写特性  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./Fuzz中的javascript大小写特性  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/HTML/javascript-up-low-ercase-tip.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/HTML/javascript-up-low-ercase-tip.html&amp;text=Fuzz%E4%B8%AD%E7%9A%84javascript%E5%A4%A7%E5%B0%8F%E5%86%99%E7%89%B9%E6%80%A7"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/HTML/javascript-up-low-ercase-tip.html&amp;title=Fuzz%E4%B8%AD%E7%9A%84javascript%E5%A4%A7%E5%B0%8F%E5%86%99%E7%89%B9%E6%80%A7"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/HTML/javascript-up-low-ercase-tip.html&amp;is_video=false&amp;description=Fuzz%E4%B8%AD%E7%9A%84javascript%E5%A4%A7%E5%B0%8F%E5%86%99%E7%89%B9%E6%80%A7"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=Fuzz%E4%B8%AD%E7%9A%84javascript%E5%A4%A7%E5%B0%8F%E5%86%99%E7%89%B9%E6%80%A7&amp;body=Check out this article: https%3A//www.leavesongs.com/HTML/javascript-up-low-ercase-tip.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/HTML/javascript-up-low-ercase-tip.html&amp;title=Fuzz%E4%B8%AD%E7%9A%84javascript%E5%A4%A7%E5%B0%8F%E5%86%99%E7%89%B9%E6%80%A7"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/HTML/javascript-up-low-ercase-tip.html&amp;title=Fuzz%E4%B8%AD%E7%9A%84javascript%E5%A4%A7%E5%B0%8F%E5%86%99%E7%89%B9%E6%80%A7"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/HTML/javascript-up-low-ercase-tip.html&amp;title=Fuzz%E4%B8%AD%E7%9A%84javascript%E5%A4%A7%E5%B0%8F%E5%86%99%E7%89%B9%E6%80%A7"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/HTML/javascript-up-low-ercase-tip.html&amp;title=Fuzz%E4%B8%AD%E7%9A%84javascript%E5%A4%A7%E5%B0%8F%E5%86%99%E7%89%B9%E6%80%A7"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/HTML/javascript-up-low-ercase-tip.html&amp;name=Fuzz%E4%B8%AD%E7%9A%84javascript%E5%A4%A7%E5%B0%8F%E5%86%99%E7%89%B9%E6%80%A7&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">Fuzz中的javascript大小写特性</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年9月21日 01:28" itemprop="datePublished">
+                    2014 九月 21 01:28
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3652
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/HTML">web前端</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/javascript">javascript</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    某比赛实在有点坑人，题目涉嫌抄袭不说，还不停改来改去。算了不吐槽了，说一则javascript小特性吧。
+</p>
+<p>
+	    toUpperCase()是javascript中将小写转换成大写的函数。toLowerCase()是javascript中将大写转换成小写的函数。但是这俩函数真的只有这两个功能么？
+</p>
+<p>
+	    不如我们来fuzz一下，看看toUpperCase功能如何？
+</p>
+<pre class="brush: js;auto-links: false;">if (!String.fromCodePoint) {
+	(function() {
+		var defineProperty = (function() {
+			// IE 8 only supports `Object.defineProperty` on DOM elements
+			try {
+				var object = {};
+				var $defineProperty = Object.defineProperty;
+				var result = $defineProperty(object, object, object) &amp;&amp; $defineProperty;
+			} catch(error) {}
+			return result;
+		}());
+		var stringFromCharCode = String.fromCharCode;
+		var floor = Math.floor;
+		var fromCodePoint = function() {
+			var MAX_SIZE = 0x4000;
+			var codeUnits = [];
+			var highSurrogate;
+			var lowSurrogate;
+			var index = -1;
+			var length = arguments.length;
+			if (!length) {
+				return '';
+			}
+			var result = '';
+			while (++index &lt; length) {
+				var codePoint = Number(arguments[index]);
+				if (
+					!isFinite(codePoint) || // `NaN`, `+Infinity`, or `-Infinity`
+					codePoint &lt; 0 || // not a valid Unicode code point
+					codePoint &gt; 0x10FFFF || // not a valid Unicode code point
+					floor(codePoint) != codePoint // not an integer
+				) {
+					throw RangeError('Invalid code point: ' + codePoint);
+				}
+				if (codePoint &lt;= 0xFFFF) { // BMP code point
+					codeUnits.push(codePoint);
+				} else { // Astral code point; split in surrogate halves
+					// http://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
+					codePoint -= 0x10000;
+					highSurrogate = (codePoint &gt;&gt; 10) + 0xD800;
+					lowSurrogate = (codePoint % 0x400) + 0xDC00;
+					codeUnits.push(highSurrogate, lowSurrogate);
+				}
+				if (index + 1 == length || codeUnits.length &gt; MAX_SIZE) {
+					result += stringFromCharCode.apply(null, codeUnits);
+					codeUnits.length = 0;
+				}
+			}
+			return result;
+		};
+		if (defineProperty) {
+			defineProperty(String, 'fromCodePoint', {
+				'value': fromCodePoint,
+				'configurable': true,
+				'writable': true
+			});
+		} else {
+			String.fromCodePoint = fromCodePoint;
+		}
+	}());
+}
+for (var j = 'A'.charCodeAt(); j &lt;= 'Z'.charCodeAt(); j++){
+	var s = String.fromCodePoint(j);
+	for (var i = 0; i &lt; 0x10FFFF; i++) {
+		var e = String.fromCodePoint(i);
+		if (s == e.toUpperCase() &amp;&amp; s != e) {
+			document.write("char: "+e+"&lt;br/&gt;");
+	};
+};
+}</pre>
+    结果我们可以看到：
+<p>
+<br>
+</br></p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201409/a0171411234653.jpg" id="ematt:598" target="_blank"><img alt="001.jpg" border="0" height="528" src="./Fuzz中的javascript大小写特性  离别歌/a0171411234653.jpg" title="点击查看原图" width="133"/></a>
+</p>
+<p>
+	    其中混入了两个奇特的字符"<span style="font-family:Simsun;font-size:medium;line-height:normal;white-space:normal;">ı</span>"、"<span style="font-family:Simsun;font-size:medium;line-height:normal;white-space:normal;">ſ</span>"。
+</p>
+<p>
+	    这两个字符的“大写”是I和S。也就是说<span style="white-space:normal;">"</span><span style="white-space:normal;font-family:Simsun;font-size:medium;line-height:normal;">ı</span><span style="white-space:normal;">".toUpperCase() == 'I'</span>，"<span style="font-family:Simsun;font-size:medium;line-height:normal;white-space:normal;">ſ</span>".toUpperCase() == 'S'。通过这个小特性可以绕过一些限制。
+</p>
+<p>
+	    同样，toLowerCase也有同样的字符：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201409/11f51411234890.jpg" id="ematt:599" target="_blank"><img alt="002.jpg" border="0" height="519" src="./Fuzz中的javascript大小写特性  离别歌/11f51411234890.jpg" title="点击查看原图" width="172"/></a>
+</p>
+<p>
+	    这个"<span style="font-family:Simsun;font-size:medium;line-height:normal;white-space:normal;">K</span>"的“小写”字符是k，也就是"<span style="font-family:Simsun;font-size:medium;line-height:normal;white-space:normal;">K</span>".toLowerCase() == 'k'.
+</p>
+<p>
+	    用这个特性可以完成 <a href="http://prompt.ml/9" target="_blank">http://prompt.ml/9</a> 。还有某比赛的神题，当然有更简单的方法。
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1777">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Fuzz中的javascript大小写特性  离别歌/80c4111478dcc4324aa500ce0ac30367.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.baidu.com" target="_blank">wenson</a>
+<time datetime="2014年10月1日 19:42" itemprop="datePublished">
+                            2014 十月 01 19:42
+                        </time>
+<a href="javascript:reply_to('1777', 'wenson')">回复</a>
+</p>
+<p class="comment-meta">够坑的咯</p>
+</div>
+</div>
+<div class="row" id="comment-1775">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Fuzz中的javascript大小写特性  离别歌/b4efac1f46f683131f806af4ea8feb52.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">东吃</a>
+<time datetime="2014年9月29日 21:07" itemprop="datePublished">
+                            2014 九月 29 21:07
+                        </time>
+<a href="javascript:reply_to('1775', '东吃')">回复</a>
+</p>
+<p class="comment-meta">还有某比赛的神题！<br>无力吐槽</br></p>
+</div>
+</div>
+<div class="row" id="comment-1773">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Fuzz中的javascript大小写特性  离别歌/7e895ff4c08fe59e07324806551ca3f0.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">爆破测振仪</a>
+<time datetime="2014年9月26日 14:34" itemprop="datePublished">
+                            2014 九月 26 14:34
+                        </time>
+<a href="javascript:reply_to('1773', '爆破测振仪')">回复</a>
+</p>
+<p class="comment-meta">技术含量比较高哦。<br/>多学习</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="62c764b63f5e0aa3271d49982955e8d0c426a9b2"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./Fuzz中的javascript大小写特性  离别歌/62c764b63f5e0aa3271d49982955e8d0c426a9b2"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="326">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="k8VRezyWdjWIrnd0eWHw07Kzy4dQqVsYSsgn23KbE6Q7r2Bf2dbgzLMEH8GY9ph8"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./Fuzz中的javascript大小写特性  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./Fuzz中的javascript大小写特性  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

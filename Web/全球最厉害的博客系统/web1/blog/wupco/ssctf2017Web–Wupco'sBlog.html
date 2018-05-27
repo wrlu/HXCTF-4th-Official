@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<title>ssctf2017|Web – Wupco's Blog</title>
+<script src="./ssctf2017Web – Wupco's Blog/jquery.jsver=1.12.4" type="text/javascript"></script>
+<script src="./ssctf2017Web – Wupco's Blog/jquery-migrate.min.jsver=1.4.1" type="text/javascript"></script>
+<link href="./ssctf2017Web – Wupco's Blog/rest_route=" rel="https://api.w.org/"/>
+<link href="http://www.wupco.cn/xmlrpc.php?rsd" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./ssctf2017Web – Wupco's Blog/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<link href="./ssctf2017Web – Wupco's Blog/p=2554" rel="prev" title="0CTF2017|Web"/>
+<link href="./ssctf2017Web – Wupco's Blog/p=3585" rel="next" title="基于sqlite3的Web流量抓取系统（php）"/>
+<link href="./ssctf2017Web – Wupco's Blog/p=3455" rel="canonical"/>
+<link href="./ssctf2017Web – Wupco's Blog/p=3455" rel="shortlink"/>
+<script src="./ssctf2017Web – Wupco's Blog/shCore.js" type="text/javascript"></script><link href=" http://www.wupco.cn/wp-content/plugins/wp-ueditor2/ueditor/third-party/SyntaxHighlighter/shCoreDefault.css" rel="stylesheet" type="text/css"/><link href="./ssctf2017Web – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="icon" sizes="32x32"/>
+<link href="./ssctf2017Web – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="icon" sizes="192x192"/>
+<link href="./ssctf2017Web – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="apple-touch-icon-precomposed"/>
+<meta content="http://www.wupco.cn/wp-content/uploads/2016/11/R5K8RH7ACHA7KEV8P.gif" name="msapplication-TileImage">
+<link href="./ssctf2017Web – Wupco's Blog/favicon.png" rel="shortcut icon" type="image/vnd.microsoft.icon"/>
+<link href="./ssctf2017Web – Wupco's Blog/style.css" rel="stylesheet" type="text/css">
+<!--[if lt IE 9]>
+<script src="//cdn.bootcss.com/html5shiv/r29/html5.min.js"></script>
+<script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+</link></meta></head>
+<body>
+<div class="container" id="main">
+<div class="pjax">
+<header id="header">
+<div class="container">
+<h1 class="logo">
+<i class="iconfont"></i><a href="http://www.wupco.cn">Wupco's Blog</a>
+</h1>
+<nav class="menu_click" id="topMenu">
+<div class="menu-menu-1-container"><ul class="menu" id="menu-menu-1"><li><a href="http://www.wupco.cn/">首页</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1174">关于我</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1448">数据备份</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1959">CTF备忘录</a></li>
+</ul></div><i class="i_1"></i>
+<i class="i_2"></i>
+</nav>
+</div>
+</header>
+<section class="blockGroup">
+<h2 class="s_title" itemprop="name headline">ssctf2017|Web</h2>
+<article class="post single" itemscope="" itemtype="http://schema.org/BlogPosting">
+<p>说是贴近实战，实际是虐Web狗，好想打死出题人啊0。0</p>
+<p>注意！排版极差，内容极其混乱（因为不想仔细写了，太多细节了，太多戏了）</p>
+<ol>
+<li><a id="post-3455-_Hlk481957181"></a> Web100</li>
+</ol>
+<p>看到有<a href="http://xxxxx/news.php?url=127.0.0.1/xxx.jpg">http://xxxxx/news.php?url=127.0.0.1/xxx.jpg</a></p>
+<p>测试http://xxxxx/news.php?url=http:// 127.0.0.1/xxx.jpg</p>
+<p>解析失败</p>
+<p>测试http://xxxxx/news.php?url=127.0.0.1/http://dsadasd</p>
+<p>利用404页面_dsadasd文件找不到</p>
+<p>说明http被替换成_了</p>
+<p>于是大写http</p>
+<p>可以，于是换成大写的FILE协议</p>
+<p>读到news源码，经证实，果然过滤了一堆东西</p>
+<p>提示给了第二台内网主机的网段，测试之</p>
+<p><a href="http://xxxxx/news.php?url=10.xx.x.x/index.php">http://xxxxx/news.php?url=10.xx.x.x/index.php</a></p>
+<p>ok，然后查看源码看到第三台主机的网段</p>
+<p>172.0.0.x</p>
+<p>然后利用第二台主机的news.php再去读第三台主机，fuzz一下，得到<a href="FTP://172.0.0.x">FTP://172.0.0.x</a></p>
+<p>读flag.txt</p>
+<ol>
+<li>Web 200</li>
+</ol>
+<p>一个弹幕网站，测试了一些payload，可以X到人，但是感觉不是这样的</p>
+<p>于是发现每一个新人进来，都会给一个公告弹幕:欢迎XXXXXXX</p>
+<p>于是看到里面有个奇怪的url domain/xssbalabala(这里忘记了)/index.php</p>
+<p>是一个xss平台，登陆（这里用万能密码）</p>
+<p>进去后发现cookie里 有：you must be uid 1 to get flag</p>
+<p>于是测试发现，这个xss平台本身就有XSS漏洞</p>
+<p>提交一个XSS的内容到这平台（给admin）</p>
+<p>然后admin 读取xss平台被X</p>
+<p>然后你就能拿到admin的cookie</p>
+<p>flag在里面</p>
+<ol>
+<li>Web300</li>
+</ol>
+<p>通过题1继续内网渗透，发现第二台主机刚好是这题的主机</p>
+<p>首先读一堆源码（发现好多都是静态的</p>
+<p>甚至还有假装自己是sql注入的。。。。太傻逼了。。。感受下。。。</p>
+<p><img alt="C:\Users\wupco\Documents\Tencent Files\827977014\Image\C2C\Image1\)@GF7EV{JKZTT1Y[T)6T[E2.png" class="wp-image-3569" src="./ssctf2017Web – Wupco's Blog/c-users-wupco-documents-tencent-files-827977014-i-24.png"/></p>
+<p>），甚至还能下载到wwwroot.zip（里面都是假消息填充的文件）</p>
+<p>然后submit.php一个insert注入（http-header注入），发现表里都是无用信息，</p>
+<p>最后发现是个XSS，submit 通过insert注入XSS payload到第四个字段里，拿到管理员的</p>
+<p>referrer，读源码，发现是个XSS平台，里面有个js.php（真的套路），读到flag…..</p>
+<ol>
+<li>Web 500 webhook</li>
+</ol>
+<p>拿到源码审计，发现</p>
+<p><img class="wp-image-3570" src="./ssctf2017Web – Wupco's Blog/word-image-80.png"/></p>
+<p>flask注入，然后读一下repos变量，就能读到json的内容（被记录在那个webhooklog里，可以未验证访问）</p>
+<p>内容是这样的</p>
+<p><img alt="C:\Users\wupco\AppData\Roaming\Tencent\Users\827977014\QQ\WinTemp\RichOle\RN4YUB8R1[5MZ4Q{1~396ZP.png" class="wp-image-3571" src="./ssctf2017Web – Wupco's Blog/c-users-wupco-appdata-roaming-tencent-users-82797-8.png"/></p>
+<p><img class="wp-image-3572" src="./ssctf2017Web – Wupco's Blog/word-image-81.png"/></p>
+<p>加密方式是这样的。。。私钥怎么办呢？？</p>
+<p>这里flask注入不能读私钥变量，会报错。。</p>
+<p>于是解密了一个弱口令 我记得那个老哥叫 fuckssctf</p>
+<p>然后猜到私钥是ssctf</p>
+<p>于是就可以添加用户了</p>
+<p><img alt="C:\Users\wupco\Documents\Tencent Files\827977014\Image\C2C\Image1\~(DQGTS]]M{(TBD6A8JU04P.png" class="wp-image-3573" src="./ssctf2017Web – Wupco's Blog/c-users-wupco-documents-tencent-files-827977014-i-25.png"/></p>
+<p>然后就是审计其他功能</p>
+<p>发现 每次push之后都会对这用户进行build操作</p>
+<p>（从你的github里clone项目，然后读取项目中名为build.json的文件，找到include和exclude对象，然后当作地址拼凑到rootpath，再到地址对应的目录下，把所有的文件push了，然后生成zip返回给你）</p>
+<p>于是就可以读任意目录</p>
+<p><img class="wp-image-3574" src="./ssctf2017Web – Wupco's Blog/word-image-82.png"/></p>
+<p><img class="wp-image-3575" src="./ssctf2017Web – Wupco's Blog/word-image-83.png"/></p>
+<p><img class="wp-image-3576" src="./ssctf2017Web – Wupco's Blog/word-image-84.png"/></p>
+<p>然后就是读目录，注意不能读内容太多的，否则会压缩失败</p>
+<p>最终拿到/home/www-root/下的ssh私钥</p>
+<p>在自己机子上git pull 把flag文件取出来，就OK</p>
+<ol>
+<li>Web 500</li>
+</ol>
+<p>发现一个注入（只允许括号和引号，另外过滤了or,and等（遇到这样的单词双写））</p>
+<p><img alt="C:\Users\wupco\Documents\Tencent Files\827977014\Image\C2C\Image1\RXLY$M_J907$IK[TOKKB@UQ.png" class="wp-image-3577" src="./ssctf2017Web – Wupco's Blog/c-users-wupco-documents-tencent-files-827977014-i-26.png"/></p>
+<p>跑到 表 dedecms 和user</p>
+<p>user 里面跑到用户名和密码</p>
+<p>密码是20位hash</p>
+<p>结合dedecms，去掉头3位，去掉尾1位</p>
+<p>得到16位hash</p>
+<p>cmd5 解之</p>
+<p>拿到密码登陆</p>
+<p>发现.swp文件泄露</p>
+<p>那道源码。关键位置</p>
+<p><img class="wp-image-3578" src="./ssctf2017Web – Wupco's Blog/word-image-85.png"/></p>
+<p>反序列化漏洞结合文件包含漏洞</p>
+<p>首先绕过</p>
+<p><img class="wp-image-3579" src="./ssctf2017Web – Wupco's Blog/word-image-86.png"/></p>
+<p>用php://input</p>
+<p>构造 1234</p>
+<p>然后 <img class="wp-image-3580" src="./ssctf2017Web – Wupco's Blog/word-image-87.png"/></p>
+<p>到</p>
+<p><img class="wp-image-3581" src="./ssctf2017Web – Wupco's Blog/word-image-88.png"/></p>
+<p>反序列化正则绕过用o:+4:{} 中间加个+号不影响解析，还能绕过正则</p>
+<p>然后是绕过 <img class="wp-image-3582" src="./ssctf2017Web – Wupco's Blog/word-image-89.png"/></p>
+<p>用php://filter</p>
+<p>最终读到flag</p>
+</article>
+<section class="ending">
+<ul class="sns">
+<li class="tencent"><a href="http://wpa.qq.com/msgrd?v=3&amp;uin=827977014&amp;site=qq&amp;menu=yes" target="_blank"><i class="iconfont"></i></a></li>
+<li class="zhihu"><a href="https://www.zhihu.com/people/wupco " target="_blank"><i class="iconfont"></i></a></li>
+</ul>
+<div class="reward">
+                打
+                <ul>
+<li><img src="./ssctf2017Web – Wupco's Blog/QQ图片20170222193616.png"/>用支付宝打我</li>
+<li><img src="./ssctf2017Web – Wupco's Blog/QQ图片20170222193616.png"/>用微信打我</li>
+</ul>
+</div>
+<div class="about">
+<img alt="" class="avatar avatar-80 photo" height="80" src="./ssctf2017Web – Wupco's Blog/cd0d984309c15bd1f668df0d0343eccds=80&amp;d=mm&amp;r=g" srcset="http://cn.gravatar.com/avatar/cd0d984309c15bd1f668df0d0343eccd?s=160&amp;d=mm&amp;r=g 2x" width="80"> <p></p>
+</img></div>
+</section>
+<!-- You can start editing here. -->
+<!-- If comments are open, but there are no comments. -->
+<div class="comment-respond" id="respond">
+<h3 class="comment-reply-title" id="reply-title">发表评论 <small><a href="/?p=3455#respond" id="cancel-comment-reply-link" rel="nofollow" style="display:none;">取消回复</a></small></h3> <form action="http://www.wupco.cn/wp-comments-post.php" class="comment-form" id="commentform" method="post">
+<p class="comment-notes"><span id="email-notes">电子邮件地址不会被公开。</span> 必填项已用<span class="required">*</span>标注</p><p class="comment-form-comment"><label for="comment">评论</label> <textarea aria-required="true" cols="45" id="comment" maxlength="65525" name="w" required="required" rows="8"></textarea><textarea cols="100%" name="comment" rows="4" style="display:none"></textarea></p><p class="comment-form-author"><label for="author">姓名 <span class="required">*</span></label> <input aria-required="true" id="author" maxlength="245" name="author" required="required" size="30" type="text" value=""/></p>
+<p class="comment-form-email"><label for="email">电子邮件 <span class="required">*</span></label> <input aria-describedby="email-notes" aria-required="true" id="email" maxlength="100" name="email" required="required" size="30" type="text" value=""/></p>
+<p class="comment-form-url"><label for="url">站点</label> <input id="url" maxlength="200" name="url" size="30" type="text" value=""/></p>
+<p class="form-submit"><input class="submit" id="submit" name="submit" type="submit" value="发表评论"/> <input id="comment_post_ID" name="comment_post_ID" type="hidden" value="3455"/>
+<input id="comment_parent" name="comment_parent" type="hidden" value="0"/>
+</p> </form>
+</div><!-- #respond -->
+</section>
+<div class="clearer"></div>
+<nav class="navigator">
+</nav>
+</div>
+</div>
+<div class="clearer"></div>
+<div class="search">
+<form action="http://www.wupco.cn" method="get">
+<input autocomplete="off" class="search_key" name="s" placeholder="Enter search keywords..." required="required" type="text" value=""/>
+<button alt="Search" type="submit">Search</button>
+</form>
+</div>
+<footer id="footer">
+<section class="links_adlink">
+<ul class="container">
+</ul>
+</section>
+友情链接:<a href="http://www.hazzel.cn">Hazzel师傅</a> <a href="http://www.yqxiaojunjie.com/">俊杰师傅</a> <a href="http://margular.github.io">sunshine</a> <a href="https://3wapp.github.io/">janes师傅</a><br/> <a href="http://www.au1ge.xyz/">au1ge</a><br/>
+© 2017 <a href="http://www.wupco.cn">Wupco's Blog</a>
+<a class="back2top"></a>
+</footer>
+<script type="text/javascript">SyntaxHighlighter.all();</script><script type="text/javascript">
+/* <![CDATA[ */
+var ajaxcomment = {"ajax_url":"http:\/\/www.wupco.cn\/wp-admin\/admin-ajax.php","order":"asc","formpostion":"top"};
+/* ]]> */
+</script>
+<script src="./ssctf2017Web – Wupco's Blog/app.jsver=20141010" type="text/javascript"></script>
+<script style="display:none">
+function index_overloaded(){
+
+}
+</script>
+<script src="./ssctf2017Web – Wupco's Blog/jquery.min.js"></script>
+<script src="./ssctf2017Web – Wupco's Blog/functions.js"></script>
+<script>
+</script>
+</body>
+</html>

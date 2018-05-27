@@ -1,0 +1,269 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./遇到一个有趣的逻辑漏洞  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./遇到一个有趣的逻辑漏洞  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./遇到一个有趣的逻辑漏洞  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>遇到一个有趣的逻辑漏洞 | 离别歌</title>
+<link href="./遇到一个有趣的逻辑漏洞  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./遇到一个有趣的逻辑漏洞  离别歌/styles.css" rel="stylesheet"/>
+<link href="./遇到一个有趣的逻辑漏洞  离别歌/style.css" rel="stylesheet"/>
+<link href="./遇到一个有趣的逻辑漏洞  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./遇到一个有趣的逻辑漏洞  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./遇到一个有趣的逻辑漏洞  离别歌/jquery.min.js"></script>
+<link href="./遇到一个有趣的逻辑漏洞  离别歌/code.css" rel="stylesheet"/>
+<link href="./遇到一个有趣的逻辑漏洞  离别歌/button.css" rel="stylesheet"/>
+<link href="./遇到一个有趣的逻辑漏洞  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./遇到一个有趣的逻辑漏洞  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/findpwd-funny-logic-vul.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/findpwd-funny-logic-vul.html&amp;text=%E9%81%87%E5%88%B0%E4%B8%80%E4%B8%AA%E6%9C%89%E8%B6%A3%E7%9A%84%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/findpwd-funny-logic-vul.html&amp;title=%E9%81%87%E5%88%B0%E4%B8%80%E4%B8%AA%E6%9C%89%E8%B6%A3%E7%9A%84%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/findpwd-funny-logic-vul.html&amp;is_video=false&amp;description=%E9%81%87%E5%88%B0%E4%B8%80%E4%B8%AA%E6%9C%89%E8%B6%A3%E7%9A%84%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E9%81%87%E5%88%B0%E4%B8%80%E4%B8%AA%E6%9C%89%E8%B6%A3%E7%9A%84%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/findpwd-funny-logic-vul.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/findpwd-funny-logic-vul.html&amp;title=%E9%81%87%E5%88%B0%E4%B8%80%E4%B8%AA%E6%9C%89%E8%B6%A3%E7%9A%84%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/findpwd-funny-logic-vul.html&amp;title=%E9%81%87%E5%88%B0%E4%B8%80%E4%B8%AA%E6%9C%89%E8%B6%A3%E7%9A%84%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/findpwd-funny-logic-vul.html&amp;title=%E9%81%87%E5%88%B0%E4%B8%80%E4%B8%AA%E6%9C%89%E8%B6%A3%E7%9A%84%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/findpwd-funny-logic-vul.html&amp;title=%E9%81%87%E5%88%B0%E4%B8%80%E4%B8%AA%E6%9C%89%E8%B6%A3%E7%9A%84%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/findpwd-funny-logic-vul.html&amp;name=%E9%81%87%E5%88%B0%E4%B8%80%E4%B8%AA%E6%9C%89%E8%B6%A3%E7%9A%84%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">遇到一个有趣的逻辑漏洞</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年10月17日 19:32" itemprop="datePublished">
+                    2014 十月 17 19:32
+                </time>
+</div>
+<div class="article-tag">
+            阅读：7149
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E">逻辑漏洞</a>,
+                
+                <a class="tag-link" href="/tag/Mysql">Mysql</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>遇到个有趣的逻辑漏洞，和大家分享一下。 </p>
+<p>某系统数据库是mysql。user表有个code字段，类型是int(11)，这个字段是保存一个随机数，用来找回密码的时候做验证，默认值是0。 </p>
+<p>找回密码时候的步骤是，首先填写自己邮箱，接收重置密码的邮件，点击链接，访问如下代码： </p>
+<div class="codehilite"><pre><span></span><span class="x">if (!empty($_GET['email']) &amp;&amp; !empty($_GET['code'])) </span>
+<span class="cp">{</span> 
+    <span class="na">if</span> <span class="o">(!</span><span class="nv">$db</span><span class="o">-&gt;</span><span class="na">count</span><span class="o">(</span><span class="s1">'user'</span><span class="o">,</span><span class="s2">"email='{$_GET['email']}' AND code='{$_GET['code']}'"</span><span class="o">))</span> 
+        <span class="na">die</span><span class="o">(</span><span class="s1">'error'</span><span class="o">);</span> 
+    <span class="nv">$_SESSION</span><span class="o">[</span><span class="s1">'email'</span><span class="o">]</span> <span class="o">=</span> <span class="nv">$_GET</span><span class="o">[</span><span class="s1">'email'</span><span class="o">];</span> 
+    <span class="o">...</span> 
+<span class="cp">}</span><span class="x"></span>
+</pre></div>
+<p>在数据库中查找<code>email=$_GET['email']</code>并且<code>code=$_GET['code']</code>的行数，如果行数为0则die出去，否则设置<code>$_SESSION['email'] = $_GET['email'];</code> </p>
+<p>最后就以<code>$_SESSION['email']</code>内存储的邮箱重置密码。 </p>
+<p>看似似乎没问题，只有当email为你的email，并且你知道他的随机code的时候，才能不die，才能获得<code>$_SESSION['email']</code>。</p>
+<p>但关键问题就是：code的默认值是0，也就是说所有用户只要没有重置过密码，他的code就是0，所以等于说我知道了所有用户的code，那我不就可以重置所有用户的密码了吗？ </p>
+<p>不不，等下，我们看到这行代码： </p>
+<div class="codehilite"><pre><span></span>if (!empty($_GET['email']) &amp;&amp; !empty($_GET['code'])) 
+</pre></div>
+<p>必须要<code>!empty($_GET['code'])</code>的时候，才可能进入这个if语句。熟悉php的人都知道，empty(0)是返回真的。所以说，如果<code>$_GET['code']=0</code>的话，根本进不来这个if语句。 </p>
+<p>那怎么办？ </p>
+<p>又涉及到mysql一个tip，很容易犯错的点。 </p>
+<p>我之前说了，code这个字段的类型是整型int(11)。而在mysql里面，当字段类型为整型，而where语句中的值不为整型的时候，会被转换成整型才放入查询。也就是说，如果<code>where code='xxx'</code>，xxx不为整型的话，则会先将xxx转换成整数，才放入查询。 </p>
+<p>也就是说，如果我们传入的字符串为0aaa，则会转换成0，再执行。 </p>
+<p>我们可以来做个试验， </p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201410/38691413545563.jpg"><img alt="0015.jpg" src="./遇到一个有趣的逻辑漏洞  离别歌/38691413545563.jpg"/></a></p>
+<p>上图大家可以看到，<code>select count(*) from `user` where `id`='0a';</code>和<code>select count(*) from `user` where `id`='0';</code>得到的结果都是1。 </p>
+<p>所以通过这个tip，就可以绕过<code>if (!empty($_GET['email']) &amp;&amp; !empty($_GET['code']))</code>，只要我们传入的<code>$_GET['code']=0xxx</code>，就可以进入if语句，并且让<code>select count(*)</code>语句返回1，最后找回任意用户密码，不需要爆破。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2256">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./遇到一个有趣的逻辑漏洞  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Tkk</a>
+<time datetime="2015年11月13日 10:53" itemprop="datePublished">
+                            2015 十一月 13 10:53
+                        </time>
+<a href="javascript:reply_to('2256', 'Tkk')">回复</a>
+</p>
+<p class="comment-meta">请收下我的膝盖</p>
+</div>
+</div>
+<div class="row" id="comment-2159">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./遇到一个有趣的逻辑漏洞  离别歌/7f3a0aa00bb9edef1339fc5f84ccdccf.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.mrxn.net" target="_blank">mrxn</a>
+<time datetime="2015年6月28日 01:45" itemprop="datePublished">
+                            2015 六月 28 01:45
+                        </time>
+<a href="javascript:reply_to('2159', 'mrxn')">回复</a>
+</p>
+<p class="comment-meta">Mark 方便日后查看 我转载了 会注明地址得! ( - /\- )</p>
+</div>
+</div>
+<div class="row" id="comment-2115">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./遇到一个有趣的逻辑漏洞  离别歌/7fc2d5c0b745eb9df8e5cb662d8535c3.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://sh3ll.me/" target="_blank">Chu</a>
+<time datetime="2015年6月7日 11:14" itemprop="datePublished">
+                            2015 六月 07 11:14
+                        </time>
+<a href="javascript:reply_to('2115', 'Chu')">回复</a>
+</p>
+<p class="comment-meta">日了.. 以前看过这个，昨天竟然没想起来.. 看来以后一定要细细研读ph牛的文章</p>
+</div>
+</div>
+<div class="row" id="comment-2114">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./遇到一个有趣的逻辑漏洞  离别歌/995444ba7d484b547d829f56e838a4c9.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.secbox.cn" target="_blank">Striker</a>
+<time datetime="2015年6月6日 21:35" itemprop="datePublished">
+                            2015 六月 06 21:35
+                        </time>
+<a href="javascript:reply_to('2114', 'Striker')">回复</a>
+</p>
+<p class="comment-meta">学到了.. 感谢大神分享~</p>
+</div>
+</div>
+<div class="row" id="comment-1806">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./遇到一个有趣的逻辑漏洞  离别歌/98414c470706dfbe7dca4db7db1fac5c.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">兴义补课</a>
+<time datetime="2014年10月18日 04:24" itemprop="datePublished">
+                            2014 十月 18 04:24
+                        </time>
+<a href="javascript:reply_to('1806', '兴义补课')">回复</a>
+</p>
+<p class="comment-meta">很有操作性，不知博主试过没有？</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="dd7d6372a8efb77d480e296d74dfbe0a168d3cb3"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./遇到一个有趣的逻辑漏洞  离别歌/dd7d6372a8efb77d480e296d74dfbe0a168d3cb3"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="329">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="OND4JOEuYfx1fHFpVrzua0wueV1xNlt6m7YAxiQJp2rqfm3EJI3eJEyznZuFwPig"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./遇到一个有趣的逻辑漏洞  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./遇到一个有趣的逻辑漏洞  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

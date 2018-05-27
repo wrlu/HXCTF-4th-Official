@@ -1,0 +1,567 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>[ 转载 ] 解开人人网登录密码的 RSA 加密 | 离别歌</title>
+<link href="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/styles.css" rel="stylesheet"/>
+<link href="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/style.css" rel="stylesheet"/>
+<link href="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/jquery.min.js"></script>
+<link href="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/code.css" rel="stylesheet"/>
+<link href="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/button.css" rel="stylesheet"/>
+<link href="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/renren-rsa-password.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/renren-rsa-password.html&amp;text=%5B%20%E8%BD%AC%E8%BD%BD%20%5D%20%E8%A7%A3%E5%BC%80%E4%BA%BA%E4%BA%BA%E7%BD%91%E7%99%BB%E5%BD%95%E5%AF%86%E7%A0%81%E7%9A%84%20RSA%20%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/renren-rsa-password.html&amp;title=%5B%20%E8%BD%AC%E8%BD%BD%20%5D%20%E8%A7%A3%E5%BC%80%E4%BA%BA%E4%BA%BA%E7%BD%91%E7%99%BB%E5%BD%95%E5%AF%86%E7%A0%81%E7%9A%84%20RSA%20%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/renren-rsa-password.html&amp;is_video=false&amp;description=%5B%20%E8%BD%AC%E8%BD%BD%20%5D%20%E8%A7%A3%E5%BC%80%E4%BA%BA%E4%BA%BA%E7%BD%91%E7%99%BB%E5%BD%95%E5%AF%86%E7%A0%81%E7%9A%84%20RSA%20%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%5B%20%E8%BD%AC%E8%BD%BD%20%5D%20%E8%A7%A3%E5%BC%80%E4%BA%BA%E4%BA%BA%E7%BD%91%E7%99%BB%E5%BD%95%E5%AF%86%E7%A0%81%E7%9A%84%20RSA%20%E5%8A%A0%E5%AF%86&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/renren-rsa-password.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/renren-rsa-password.html&amp;title=%5B%20%E8%BD%AC%E8%BD%BD%20%5D%20%E8%A7%A3%E5%BC%80%E4%BA%BA%E4%BA%BA%E7%BD%91%E7%99%BB%E5%BD%95%E5%AF%86%E7%A0%81%E7%9A%84%20RSA%20%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/renren-rsa-password.html&amp;title=%5B%20%E8%BD%AC%E8%BD%BD%20%5D%20%E8%A7%A3%E5%BC%80%E4%BA%BA%E4%BA%BA%E7%BD%91%E7%99%BB%E5%BD%95%E5%AF%86%E7%A0%81%E7%9A%84%20RSA%20%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/renren-rsa-password.html&amp;title=%5B%20%E8%BD%AC%E8%BD%BD%20%5D%20%E8%A7%A3%E5%BC%80%E4%BA%BA%E4%BA%BA%E7%BD%91%E7%99%BB%E5%BD%95%E5%AF%86%E7%A0%81%E7%9A%84%20RSA%20%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/renren-rsa-password.html&amp;title=%5B%20%E8%BD%AC%E8%BD%BD%20%5D%20%E8%A7%A3%E5%BC%80%E4%BA%BA%E4%BA%BA%E7%BD%91%E7%99%BB%E5%BD%95%E5%AF%86%E7%A0%81%E7%9A%84%20RSA%20%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/renren-rsa-password.html&amp;name=%5B%20%E8%BD%AC%E8%BD%BD%20%5D%20%E8%A7%A3%E5%BC%80%E4%BA%BA%E4%BA%BA%E7%BD%91%E7%99%BB%E5%BD%95%E5%AF%86%E7%A0%81%E7%9A%84%20RSA%20%E5%8A%A0%E5%AF%86&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">[ 转载 ] 解开人人网登录密码的 RSA 加密</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年5月15日 20:59" itemprop="datePublished">
+                    2014 五月 15 20:59
+                </time>
+</div>
+<div class="article-tag">
+            阅读：6866
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/RSA">RSA</a>,
+                
+                <a class="tag-link" href="/tag/%E5%8A%A0%E5%AF%86">加密</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	我很少转载别人的文章的。但这篇确实让我眼前一亮，希望各位看客也能有所收获。
+</p>
+<p>
+	From 91ri ： http://www.91ri.org/8928.html
+</p>
+<p>
+	-- 
+</p>
+<p>
+<span style="color:#444444;font-family:'Open Sans', Helvetica, Arial, sans-serif;font-size:14px;font-style:italic;line-height:23px;text-align:right;white-space:normal;background-color:#FFFFFF;">世界上有两种密码：一种是防止你的小妹妹偷看你的文件；另一种是防止当局阅读你的文件。</span><br style="color:#444444;font-family:'Open Sans', Helvetica, Arial, sans-serif;font-size:14px;font-style:italic;line-height:23px;text-align:right;white-space:normal;background-color:#FFFFFF;">
+<span style="color:#444444;font-family:'Open Sans', Helvetica, Arial, sans-serif;font-size:14px;font-style:italic;line-height:23px;text-align:right;white-space:normal;background-color:#FFFFFF;">—— Bruce Schneier《应用密码学》</span>
+</br></p>
+<p>
+<br>
+</br></p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+	传说中的 “明文密码” 有两种形式：明文传输和明文存储。明文传输的密码不一定明文存储，明文存储的密码也不一定明文传输。去年沸沸扬扬的明文密码事件，就是密码明文存储，网站的数据库一旦被窃取，用户的密码也就随之失窃了。密码明文传输也是非常危险的，网络中的很多位置都可能安装有嗅探装置，明文传输的密码对这些嗅探者来说也就无密可言了。本文关注的是密码传输中的安全问题。
+</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+	什么是 “明文”？如果密码以 ASCII 字符的形式直接发出去，对任何人来说这都是明文；如果密码用 base64 编码一下（例如 123456 经过 base64 编码就是 MTIzNDU2），对多数人来说这也许是密文，而对任何专业程序员来说就是明文。有些人认为，把“加密”算法弄得复杂些，再用代码混淆工具弄乱，就没人能分析出来了。这样的做法叫做隐藏，而不是安全，属于防止小妹妹偷看文件的级别。真正的安全依赖于公开的、被广泛使用的密码学算法，靠密钥而不是算法本身来保证安全。
+</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+	可惜，密码学算法和协议并不是随便拼凑起来就安全的。
+</p>
+<h2 style="margin:1.71rem 0px;padding:0px;color:#444444;font-family:'Open Sans', Helvetica, Arial, sans-serif;font-size:1.28rem;white-space:normal;border:0px currentcolor;line-height:1.6;clear:both;vertical-align:baseline;background-color:#FFFFFF;">
+	观察人人网密码传输
+</h2>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+	很久很久以前，人人网的密码是使用没有经过任何编码的明文传输的。现在，人人网的登录密码是加密传输的。在浏览器的开发者工具中查看登录人人网的那个 HTTP POST 请求（/ajaxLogin/login），就能发现密码变成了长长的一串。
+</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+<a class="cboxElement" href="https://boj.blog.ustc.edu.cn/wp-content/uploads/2014/05/Capture1.png" rel="lightbox[8928]" style="color:#9F9F9F;text-decoration:none;border:0px currentcolor;font-family:'Open Sans', Helvetica, Arial, sans-serif;font-size:14px;line-height:24px;white-space:normal;margin:0px;padding:0px;vertical-align:baseline;" title="解开人人网登录密码的 RSA 加密"><img alt="Capture" class="alignnone wp-image-703 size-full" height="164" src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/Capture1.png" style="border-style:none;margin:0px;padding:0px;" width="544"/></a>
+</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		我最初想到的就是 hash 了，会不会是把用户输入的密码和 rkey 做某种运算，然后取 hash 值作为 password 呢？尝试字符串连接和常见的 hash 算法，发现并不是这样的。这个 rkey 是从哪里来的呢？ /getEncryptionKey HTTP 请求会返回包括 rkey 在内的一些数据。我看到 e: “10001″ 就猜到这可能是 RSA 加密，不过暂且按下不表。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+<a class="cboxElement" href="https://boj.blog.ustc.edu.cn/wp-content/uploads/2014/05/Capture.png" rel="lightbox[8928]" style="color:#9F9F9F;text-decoration:none;border:0px currentcolor;margin:0px;padding:0px;vertical-align:baseline;" title="解开人人网登录密码的 RSA 加密"><img alt="Capture" class="alignnone size-full wp-image-702" height="81" src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/Capture.png" style="border-style:none;margin:0px;padding:0px;" width="498"/></a>
+</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		插一句，这里发现一个重放攻击漏洞，在成功登录之后，rkey 并没有失效。使用同样的 POST 请求在大洋彼岸的机器上仍然可以成功登录，而且即使原来的用户登出也不影响 POST 登录的可用性，只有修改密码或者等足够长的时间才能使这个被嗅探到的 POST 请求无效。对想窥探他人隐私的脚本小子来说，这也许就足够了。但我们的目标是恢复明文密码，岂能就此止步？
+	</p>
+<h2 style="margin:1.71rem 0px;padding:0px;color:#444444;font-family:'Open Sans', Helvetica, Arial, sans-serif;font-size:1.28rem;white-space:normal;border:0px currentcolor;line-height:1.6;clear:both;vertical-align:baseline;background-color:#FFFFFF;">
+		分析混乱 JS 代码
+	</h2>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		看来，我们必须看源码了。人人网登录是 login-v6.js 处理的，这段 JavaScript 代码经过了混淆，用 JSBeautifier 处理后就好看多了。（处理后的代码片段如下图所示）
+	</p>
+<p style="margin-top:0px;margin-bottom:15px;padding:0px;color:#2A2A2A;font-family:Tahoma, Helvetica, Arial, sans-serif;font-size:14px;line-height:25px;white-space:normal;background-color:#FFFFFF;">
+<img alt="" class="alignnone" src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/Capture2.png" style="border-style:none;margin:0px;padding:0px;" width="600"/>
+</p>
+<p style="margin-top:0px;margin-bottom:15px;padding:0px;color:#2A2A2A;font-family:Tahoma, Helvetica, Arial, sans-serif;font-size:14px;line-height:25px;white-space:normal;background-color:#FFFFFF;text-align:justify;">
+		初学编程时，老师告诉我们 “程序要从 main 函数读起”，但对任何有一定规模的程序来说，如果从 main 读起，恐怕找到关心的代码片段时头发都白了，更可能的是还没找到关心的代码片段，大脑的栈先溢出了。不信你可以读读下面这段代码（RSA 加密库的一部分），读懂的举手。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+<a class="cboxElement" href="https://boj.blog.ustc.edu.cn/wp-content/uploads/2014/05/Capture3.png" rel="lightbox[8928]" style="color:#9F9F9F;text-decoration:none;border:0px currentcolor;margin:0px;padding:0px;vertical-align:baseline;" title="解开人人网登录密码的 RSA 加密"><img alt="Capture" class="alignnone size-full wp-image-705" height="344" src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/Capture3.png" style="border-style:none;margin:0px;padding:0px;" width="567"/></a>
+</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		分析大型程序的有力武器也许是字符串查找（grep）。这些字符串或者魔术数字（magic number）或者是屏幕上的提示，可以让我们知道这段代码的作用；或者是某个库的标识字符串。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		从上面贴的第一段代码（用户输入密码）开始找，可以找到上面贴的第二段代码，这第二段代码看起来像是某些数学操作。其中的一组魔术数字泄露了天机：
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+<a class="cboxElement" href="https://boj.blog.ustc.edu.cn/wp-content/uploads/2014/05/Capture4.png" rel="lightbox[8928]" style="color:#9F9F9F;text-decoration:none;border:0px currentcolor;margin:0px;padding:0px;vertical-align:baseline;" title="解开人人网登录密码的 RSA 加密"><img alt="Capture" class="alignnone size-full wp-image-706" height="109" src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/Capture4.png" style="border-style:none;margin:0px;padding:0px;" width="183"/></a>
+</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		在 Google 中搜索这两个魔术数字，估计是某个库的一部分：
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+<a class="cboxElement" href="https://boj.blog.ustc.edu.cn/wp-content/uploads/2014/05/Capture5.png" rel="lightbox[8928]" style="color:#9F9F9F;text-decoration:none;border:0px currentcolor;margin:0px;padding:0px;vertical-align:baseline;" title="解开人人网登录密码的 RSA 加密"><img alt="Capture" class="alignnone size-full wp-image-707" height="513" src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/Capture5.png" style="border-style:none;margin:0px;padding:0px;" width="547"/></a>
+</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		进一步搜索可以发现，这是一个纯 JavaScript 实现的开源 RSA 库，主页是<a href="http://www.ohdave.com/rsa/" style="color:#9F9F9F;text-decoration:none;border:0px currentcolor;margin:0px;padding:0px;vertical-align:baseline;" target="_blank">http://www.ohdave.com/rsa/</a>。跟混淆过的人人网代码一对比，确定无误。大致过程如下：
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		1.浏览器发起 getEncryptionKey 请求，服务器生成一对 256 位的 RSA 公私钥，随机生成一个 rkey，以 rkey 为索引把公私钥存储起来。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		2.服务器把 e（固定为 16 进制的 10001）、n（16 进制表示的 256 位公钥）、rkey 发回给浏览器。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		3.用户输入密码并点击登录时，浏览器把密码用公钥 n 和指数 e 加密，得到 password（16 进制表示的 256 位），连同 rkey 发送给服务器。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		4.服务器根据 rkey 取出私钥，解密 password 得到明文密码，然后就是常规的密码检查流程了。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		看到 “RSA” 这个字眼，很多人也许认为破解无望了；而我分析到这里，就仿佛看到了胜利的曙光。
+	</p>
+<h2 style="margin:1.71rem 0px;padding:0px;color:#444444;font-family:'Open Sans', Helvetica, Arial, sans-serif;font-size:1.28rem;white-space:normal;border:0px currentcolor;line-height:1.6;clear:both;vertical-align:baseline;background-color:#FFFFFF;">
+		RSA 为什么需要长密钥
+	</h2>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		1976 年，Diffie 和 Hellman 发表了世界上第一个基于公开密钥的公共秘密生成协议，掀开了密码学史上新的一页。在此之前，人们一直认为在双方事先没有共同秘密的情况下，不可能在被监听的信道上实现安全通信，而 Diffie-Hellman 协议正是在被监听的信道上安全地生成共同秘密的算法。一年后的 1977 年，Rivest，Shamir 和 Adleman 发表了 RSA 公开密钥加密算法。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		公开密钥密码学本质上是基于一些历史悠久的数学难题，如背包问题、离散对数问题、因子分解问题。Diffie-Hellman 算法是基于离散对数问题，而 RSA 算法是基于因子分解问题。每个公钥都是一道数学难题，只要攻击者设法解出了这道难题，就能得到私钥、解密信息。这跟我们通常说的 “用密码加密”（学名对称加密）完全是两回事。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		对称加密的安全性依赖于密码的保密性，对理想的对称加密算法，只能穷举所有密码来解密，因此 16 位大小写字母加数字的随机密码大致相当于 96 位二进制，也就是平均要试验四万亿亿亿次才能猜出密码，有生之年是试不出来的。而 96 位（二进制）规模的数学难题在计算机面前根本算不上什么难题，分解这么大的合数，1 秒钟足够了。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		我们常见 RSA 的密钥长达 2048 位、4096 位，而对称密钥 128 位、256 位就足够了，公开密钥往往比对称密钥长很多，就是这个道理。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		让我们具体看看 RSA 是如何工作的。首先找两个位数相同的大质数 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">p</i> 和 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">q</i>，计算它们的乘积 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">pq</i> 作为公钥 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">n</i>。计算 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">φ(n)</i> = <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">φ(p)φ(q)</i> = (p − 1)(q − 1)。选取与 φ(n) 互质的 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">e</i> 作为指数（exponent）。欲加密信息（message）设为 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">m</i>，<i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">m<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">e</span></i> mod <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">n</i> 就是密文（cipher-text）。为了快速加密，在实际中这个 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">e</i> 一般取定值，例如 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">e</i> = hex 10001 = 65537，这样加密只需要 17 次乘法。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		解密的时候，找 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">d</i> 使得 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">de</i> mod <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">φ(n)</i> = 1，这可以用辗转相除法快速求得，不再赘述。只需计算密文的 d 次幂 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">c<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">d</span></i> mod <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">n</i> 即可还原出明文 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">m</i>。这里 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">d</i> 就是私钥。这里的数学原理是 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">m<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">ed – 1</span></i> mod <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">n</i> = 1，这又是由于欧拉函数 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">φ(n)</i> 的性质，感兴趣的可以查阅 Wikipedia。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		我们已经知道，RSA 公钥 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">n</i> 就是两个大质数 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">p</i> 和 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">q</i> 的乘积。只要把这两个质数因子求出来，就可以得到私钥 <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">d</i>，进而解密信息。人人网用了 256 位的 RSA 公钥，也就是一个 77 位的十进制整数，在个人 PC 上两三分钟就可以分解，这就是短公开密钥的可怕之处。
+	</p>
+<h2 style="margin:1.71rem 0px;padding:0px;color:#444444;font-family:'Open Sans', Helvetica, Arial, sans-serif;font-size:1.28rem;white-space:normal;border:0px currentcolor;line-height:1.6;clear:both;vertical-align:baseline;background-color:#FFFFFF;">
+		分解质因数
+	</h2>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		我们都学过的分解质因数做法，是试除法，从 1 到根号 n 一个个试一遍。对 77 位的十进制整数，需要试除 10<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">38</span> 次，这显然是不可接受的。
+	</p>
+<h3 style="margin:1.71rem 0px;padding:0px;color:#444444;font-family:'Open Sans', Helvetica, Arial, sans-serif;font-size:1.14rem;white-space:normal;border:0px currentcolor;line-height:1.8461;clear:both;vertical-align:baseline;background-color:#FFFFFF;">
+		费马的平方差公式
+	</h3>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		费马的质因数分解算法是在试除法和筛法之后的第一次重大改进。这个算法的出发点是平方差公式 (a-b)(a+b) = a<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> – b<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span>。如果我们找到两个小于 n 的正整数 u 和 v，u + v ≠ n，且 (u<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> – v<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span>) 能被 n 整除，则 (u+v)(u-v) 能被 n 整除。由于 n 是两个质数 p 和 q 的乘积，u+v 和 u-v 都不能被 n 整除，那么 p 和 q 两个因子只好分居 u+v 和 u-v 中了。u-v 与 n 的最大公约数就是 p 或者 q。计算 u-v 与 n 的最大公约数是个很快的过程，与把它们相乘的时间复杂度是相当的。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		例如，n = 2041，u = 1416，v = 311，可以验证 (u<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> – v<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span>) 能被 n 整除，则取 u-v 与 n 的最大公约数 (1416-311, 2041) = 13，13 必为 n 的一个质因数。事实上 2041 = 13 × 157。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		问题是，去哪里寻找这样的 u 和 v 呢？一种方法是令 u = sqrt(n)（根号 n 上取整，即 u 是不小于根号 n 的最小正整数），看 (u<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> – n) 是否平方数，如果是则 u<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> – n = v<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span>。如果不是则递增测试更大的 n。例如，n = 2041，sqrt(n) = 46，试验过程如下：
+	</p>
+<ul style="margin:0px 41px 15px 26px;padding:0px;list-style:none outside none;color:#2A2A2A;font-family:Tahoma, Helvetica, Arial, sans-serif;font-size:14px;line-height:25px;white-space:normal;background-color:#FFFFFF;">
+<li style="margin:0px;padding:0px 0px 0px 16px;list-style:none;background-image:url(http://www.91ri.org/wp-content/themes/dedecms/images/li.gif);background-position:0% 2px;background-repeat:no-repeat no-repeat;">
+<div style="margin:0px 0px 0px 2.57rem;padding:0px;border:0px currentcolor;vertical-align:baseline;">
+				46*46 – 2041 = 75
+			</div>
+</li>
+<li style="margin:0px;padding:0px 0px 0px 16px;list-style:none;background-image:url(http://www.91ri.org/wp-content/themes/dedecms/images/li.gif);background-position:0% 2px;background-repeat:no-repeat no-repeat;">
+<div style="margin:0px 0px 0px 2.57rem;padding:0px;border:0px currentcolor;vertical-align:baseline;">
+				47*47 – 2041 = 168
+			</div>
+</li>
+<li style="margin:0px;padding:0px 0px 0px 16px;list-style:none;background-image:url(http://www.91ri.org/wp-content/themes/dedecms/images/li.gif);background-position:0% 2px;background-repeat:no-repeat no-repeat;">
+<div style="margin:0px 0px 0px 2.57rem;padding:0px;border:0px currentcolor;vertical-align:baseline;">
+				48*48 – 2041 = 263
+			</div>
+</li>
+<li style="margin:0px;padding:0px 0px 0px 16px;list-style:none;background-image:url(http://www.91ri.org/wp-content/themes/dedecms/images/li.gif);background-position:0% 2px;background-repeat:no-repeat no-repeat;">
+<div style="margin:0px 0px 0px 2.57rem;padding:0px;border:0px currentcolor;vertical-align:baseline;">
+				49*49 – 2041 = 360
+			</div>
+</li>
+<li style="margin:0px;padding:0px 0px 0px 16px;list-style:none;background-image:url(http://www.91ri.org/wp-content/themes/dedecms/images/li.gif);background-position:0% 2px;background-repeat:no-repeat no-repeat;">
+<div style="margin:0px 0px 0px 2.57rem;padding:0px;border:0px currentcolor;vertical-align:baseline;">
+				50*50 – 2041 = 459
+			</div>
+</li>
+<li style="margin:0px;padding:0px 0px 0px 16px;list-style:none;background-image:url(http://www.91ri.org/wp-content/themes/dedecms/images/li.gif);background-position:0% 2px;background-repeat:no-repeat no-repeat;">
+<div style="margin:0px 0px 0px 2.57rem;padding:0px;border:0px currentcolor;vertical-align:baseline;">
+				51*51 – 2041 = 560
+			</div>
+</li>
+<li style="margin:0px;padding:0px 0px 0px 16px;list-style:none;background-image:url(http://www.91ri.org/wp-content/themes/dedecms/images/li.gif);background-position:0% 2px;background-repeat:no-repeat no-repeat;">
+<div style="margin:0px 0px 0px 2.57rem;padding:0px;border:0px currentcolor;vertical-align:baseline;">
+				……
+			</div>
+</li>
+</ul>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		显然，这条路走不远。
+	</p>
+<h3 style="margin:1.71rem 0px;padding:0px;color:#444444;font-family:'Open Sans', Helvetica, Arial, sans-serif;font-size:1.14rem;white-space:normal;border:0px currentcolor;line-height:1.8461;clear:both;vertical-align:baseline;background-color:#FFFFFF;">
+		乘积是平方数也行
+	</h3>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		在上述 (u<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> – n) 中，如果其中的某几个的乘积是平方数，那么也行。在上面的例子中，假如我们突然发现 75 * 168 * 360 * 560 是平方数，那么 (46<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> – 2041) * (47<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> – 2041) * (49<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> – 2041) * (51<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> – 2041) = 75 * 168 * 360 * 560 = 50400<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span>。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		注意到我们想找的平方关系是 mod n 的，那么就有 46<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> * 47<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> * 49<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> * 51<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> mod 2041 = 50400<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> mod 2041，也就是 (46*47*49*51)<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> mod 2041 = 50400<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> mod 2041。u = 46*47*49*51 mod 2041 = 311，v = 50400 mod 2041 = 1416，这就是我们要找的 u 和 v。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		问题又来了：怎么找到 75, 168, 263, 360, 459, 560… 中哪些的乘积是平方数呢？聪明的读者也许会想到，对这些数进行质因数分解，然后只要找到若干个数，使得它们质因子分解式中每个质数的幂次之和为偶数，这些数的乘积就是平方数。例如
+	</p>
+<ul style="margin:0px 41px 15px 26px;padding:0px;list-style:none outside none;color:#2A2A2A;font-family:Tahoma, Helvetica, Arial, sans-serif;font-size:14px;line-height:25px;white-space:normal;background-color:#FFFFFF;">
+<li style="margin:0px;padding:0px 0px 0px 16px;list-style:none;background-image:url(http://www.91ri.org/wp-content/themes/dedecms/images/li.gif);background-position:0% 2px;background-repeat:no-repeat no-repeat;">
+<div style="margin:0px 0px 0px 2.57rem;padding:0px;border:0px currentcolor;vertical-align:baseline;">
+				75 = 3 * 5<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span>
+</div>
+</li>
+<li style="margin:0px;padding:0px 0px 0px 16px;list-style:none;background-image:url(http://www.91ri.org/wp-content/themes/dedecms/images/li.gif);background-position:0% 2px;background-repeat:no-repeat no-repeat;">
+<div style="margin:0px 0px 0px 2.57rem;padding:0px;border:0px currentcolor;vertical-align:baseline;">
+				168 = 2<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">3</span> * 3 * 7
+			</div>
+</li>
+<li style="margin:0px;padding:0px 0px 0px 16px;list-style:none;background-image:url(http://www.91ri.org/wp-content/themes/dedecms/images/li.gif);background-position:0% 2px;background-repeat:no-repeat no-repeat;">
+<div style="margin:0px 0px 0px 2.57rem;padding:0px;border:0px currentcolor;vertical-align:baseline;">
+				360 = 2<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">3</span> * 3<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> * 5
+			</div>
+</li>
+<li style="margin:0px;padding:0px 0px 0px 16px;list-style:none;background-image:url(http://www.91ri.org/wp-content/themes/dedecms/images/li.gif);background-position:0% 2px;background-repeat:no-repeat no-repeat;">
+<div style="margin:0px 0px 0px 2.57rem;padding:0px;border:0px currentcolor;vertical-align:baseline;">
+				560 = 2<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">4</span> * 5 * 7
+			</div>
+</li>
+</ul>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		上述四个数对 2、3、5、7 的质因子的幂次加起来，分别是 10、4、4、2，都是偶数，因此它们的乘积 = (2<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">5</span> * 3<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> * 5<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> * 7<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">1</span>)<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> 是平方数。
+	</p>
+<h3 style="margin:1.71rem 0px;padding:0px;color:#444444;font-family:'Open Sans', Helvetica, Arial, sans-serif;font-size:1.14rem;white-space:normal;border:0px currentcolor;line-height:1.8461;clear:both;vertical-align:baseline;background-color:#FFFFFF;">
+		筛出“容易分解”的数
+	</h3>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		分解质因数并不容易，即使对 (u<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> – n) 这样比较接近 n 的数，仍然是相当费时间的。不过我们已经接近终点了！我们可以只考虑能被比较小的质数整除的数。如果要求 1~N 的范围内能被小于 B 的素数整除的数，最常用的就是筛法，我们在求 1~N 的质数时都使用过。首先划掉所有 2 的倍数，接着划掉所有 3 的倍数……划掉所有质数的倍数后，剩下的就都是质数了。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		现在我们要求的是 u=0,1,2… 构成的 (u<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> – n) 序列中的质数。筛法在稍微修改之后仍然能用。在筛掉 p 的倍数时，我们不需要一个个试除 p。如果 (u<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> – n) 能被 p 整除，那么 u<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> mod p = n mod p。由于 p 是质数，这样的小于 p 的 u 最多有两个（当然也可能没有）。用某个比较快的算法求出一个 u 后，(n – u)<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> mod p = n mod p，就找到了另一个 u，在 mod p 的意义下可以称为 -u。在 ±u 的基础上加 p 的倍数，其平方 mod p 仍然与 n 同余。因此我们只要划去数组下标为 u, u+p, u+2p, u+3p… 和 -u+p, -u+2p, -u+3p… 的元素，就能筛掉所有 p 的倍数。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		由于我们是要做质因数分解，不能把这些 p 的倍数删掉，而是要不断除以 p，直到不能除尽为止，这样就得到了这个元素中 p 的幂次。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		例如，对 n = 2041，取 B = 10，也就是只找小于 10 的质数，即 2、3、5、7。如果一个 (X<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> – n) 在经过筛子后变成了 1，则说明这个数是可以被完全分解为 2、3、5、7 的乘积的；否则，这个数不被考虑。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+<img alt="Capture" class="alignnone wp-image-708" src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/Capture6.png" style="border-style:none;margin:0px;padding:0px;" width="600"/>
+</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		把上表中能被完全分解的数取出来，记录它们对 2、3、5、7 的幂次：
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+<a class="cboxElement" href="https://boj.blog.ustc.edu.cn/wp-content/uploads/2014/05/Capture11.png" rel="lightbox[8928]" style="color:#9F9F9F;text-decoration:none;border:0px currentcolor;margin:0px;padding:0px;vertical-align:baseline;" title="解开人人网登录密码的 RSA 加密"><img alt="Capture1" class="alignnone size-full wp-image-709" height="158" src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/Capture11.png" style="border-style:none;margin:0px;padding:0px;" width="248"/></a>
+</p>
+<h3 style="margin:1.71rem 0px;padding:0px;color:#444444;font-family:'Open Sans', Helvetica, Arial, sans-serif;font-size:1.14rem;white-space:normal;border:0px currentcolor;line-height:1.8461;clear:both;vertical-align:baseline;background-color:#FFFFFF;">
+		找出平方数乘积
+	</h3>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		由于我们的目标是找出若干个数的乘积是平方数，也就是幂次之和为偶数，我们只对幂次的奇偶性感兴趣，因此全部 mod 2 得到下表：
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+<a class="cboxElement" href="https://boj.blog.ustc.edu.cn/wp-content/uploads/2014/05/Capture21.png" rel="lightbox[8928]" style="color:#9F9F9F;text-decoration:none;border:0px currentcolor;margin:0px;padding:0px;vertical-align:baseline;" title="解开人人网登录密码的 RSA 加密"><img alt="Capture2" class="alignnone size-full wp-image-710" height="156" src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/Capture21.png" style="border-style:none;margin:0px;padding:0px;" width="245"/></a>
+</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		我们要找出若干列，使得这些列之和为偶数，或者说这些列 mod 2 之和为零向量。这不是标准的线性方程组吗？是的，高斯消元法可以派上用场了（事实上可以采用更高效的 Lanczos 算法）。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		我们得到三组非平凡解：(46, 47, 49, 51)，(51, 54)，(46, 53)，事实上得到一组解就足够了。这三组解都分别对应一组 (u, v)，进而得到 n = 2041 的质因数：
+	</p>
+<ul style="margin:0px 41px 15px 26px;padding:0px;list-style:none outside none;color:#2A2A2A;font-family:Tahoma, Helvetica, Arial, sans-serif;font-size:14px;line-height:25px;white-space:normal;background-color:#FFFFFF;">
+<li style="margin:0px;padding:0px 0px 0px 16px;list-style:none;background-image:url(http://www.91ri.org/wp-content/themes/dedecms/images/li.gif);background-position:0% 2px;background-repeat:no-repeat no-repeat;">
+<div style="margin:0px 0px 0px 2.57rem;padding:0px;border:0px currentcolor;vertical-align:baseline;">
+				(46, 47, 49, 51): 46*47*49*51 mod 2041 = 311，2<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">3</span> * 3<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> * 5<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> * 7 mod 2041 = 1416，(1416 – 311, 2041) = 13
+			</div>
+</li>
+<li style="margin:0px;padding:0px 0px 0px 16px;list-style:none;background-image:url(http://www.91ri.org/wp-content/themes/dedecms/images/li.gif);background-position:0% 2px;background-repeat:no-repeat no-repeat;">
+<div style="margin:0px 0px 0px 2.57rem;padding:0px;border:0px currentcolor;vertical-align:baseline;">
+				(51, 54): 51*54 mod 2041 = 713，2<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> * 5<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">2</span> * 7 mod 2041 = 700，(713 – 700, 2041) = 13
+			</div>
+</li>
+<li style="margin:0px;padding:0px 0px 0px 16px;list-style:none;background-image:url(http://www.91ri.org/wp-content/themes/dedecms/images/li.gif);background-position:0% 2px;background-repeat:no-repeat no-repeat;">
+<div style="margin:0px 0px 0px 2.57rem;padding:0px;border:0px currentcolor;vertical-align:baseline;">
+				(46, 53): 46*53 mod 2041 = 397，2<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">4</span> * 3 * 5 mod 2041 = 240，(397 – 240, 2041) = 157
+			</div>
+</li>
+</ul>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		在实际计算的时候，像 459 = 3<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">3</span> * 17 这样的分解未必要扔掉，最后剩下的 17 可以保存在临时表里，如果恰好有另一个数也分解出了 17，例如 u = 52 时 663 = 3 * 13 * 17（假定用于筛法的质数集合包含 2、3、5、7、11、13），这个 17 就配上了对，仍然是可以用的。如果找不到配对，不能完全分解的数就只能扔掉了。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		上述算法基本上是基于初等数论的，也不算复杂，但这个被称为二次筛法（quadratic sieve）的算法至今仍是小于 100 位十进制数质因数分解的最快算法。
+	</p>
+<h2 style="margin:1.71rem 0px;padding:0px;color:#444444;font-family:'Open Sans', Helvetica, Arial, sans-serif;font-size:1.28rem;white-space:normal;border:0px currentcolor;line-height:1.6;clear:both;vertical-align:baseline;background-color:#FFFFFF;">
+		实战 RSA 分解
+	</h2>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		很多科学计算软件都已经内置了大数分解功能，并不需要自己实现高精度计算。这里我用了一个小巧的开源工具 msieve，实现了包括二次筛法在内的质因数分解算法。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		把前面给的人人网公钥拿进来分解：
+	</p>
+<pre class="wp-code-highlight prettyprint prettyprinted" style="margin-top:6px;margin-bottom:6px;padding:2px 7px;line-height:16px;font-family:Consolas, Monaco, 'Lucida Console', monospace;border:1px solid #CCCCCC;width:612.48px;color:#666666;overflow:auto;vertical-align:baseline;background-color:#FFFFFF;"><span class="pln" style="margin:0px;padding:0px;border:0px currentcolor;color:#000000;vertical-align:baseline;">$ </span><span class="pun" style="margin:0px;padding:0px;border:0px currentcolor;color:#666600;vertical-align:baseline;">./</span><span class="pln" style="margin:0px;padding:0px;border:0px currentcolor;color:#000000;vertical-align:baseline;">msieve </span><span class="lit" style="margin:0px;padding:0px;border:0px currentcolor;color:#006666;vertical-align:baseline;">0x8ca2ddaf2a8da3c3c6ed795b87eca0d33827c82b31b6282a5045bc75e9b83153</span></pre>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		在 Core i7 的个人 PC 上（msieve 是单线程的），用时 2 分 55 秒（换用不同的 256 位 RSA key 试验，分解用时在 2 到 4 分钟之间），完整的输出如下。<br/>
+<a class="cboxElement" href="https://boj.blog.ustc.edu.cn/wp-content/uploads/2014/05/Capture7.png" rel="lightbox[8928]" style="color:#9F9F9F;text-decoration:none;border:0px currentcolor;margin:0px;padding:0px;vertical-align:baseline;" title="解开人人网登录密码的 RSA 加密"><img alt="Capture" class="alignnone size-full wp-image-711" src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/Capture7.png" style="border-style:none;margin:0px;padding:0px;" width="600"/></a>
+</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		其中，前面 170 秒用来筛出“容易分解”的数，后面 4 秒用来解线性方程组。从这段输出中我们看到，为了分解这个 77 位的整数，选取 B = 919223，也就是用 B 以下的 36471 个质数进行筛选。而被筛选的 u 的范围则是 12 * 32768 = 393216。在这些 u 中，找到了 19614 个能在 B 的范围内被完全分解的数；还有 188575 个数不能被完全分解，但它们除掉 B 以下所有质数后的“尾巴”能够配对，形成了 16981 个能够配对的“尾巴”。经过一些优化之后，得到一个大约 2 万阶的矩阵，求出了 n 的质因数分解：220575968563521666214098235031226805271 和 288388433467298454747300239713114570277（十进制），它们都是 39 位的整数。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		见证奇迹的时刻就要到了。首先，计算 φ(n) = (p-1)(q-1)，然后计算 e = 65537 在 mod <i style="margin:0px;padding:0px;border:0px currentcolor;vertical-align:baseline;">φ(n)</i> 意义下的乘法逆元 d：
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+<a class="cboxElement" href="https://boj.blog.ustc.edu.cn/wp-content/uploads/2014/05/Capture8.png" rel="lightbox[8928]" style="color:#9F9F9F;text-decoration:none;border:0px currentcolor;margin:0px;padding:0px;vertical-align:baseline;" title="解开人人网登录密码的 RSA 加密"><img alt="Capture" class="alignnone size-full wp-image-712" height="224" src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/Capture8.png" style="border-style:none;margin:0px;padding:0px;" width="461"/></a>
+</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		然后把密文（HTTP POST 请求中的 password）c = 0x8a6a4d053859f6a35b6532fc15062f9b1f08535e9fc238e0c1d13cdf78c72247 传进来，求 c<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">d</span>mod n，就得到了明文密码 0x64726f7773736150656854746f4e734973696854。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+<a class="cboxElement" href="https://boj.blog.ustc.edu.cn/wp-content/uploads/2014/05/Capture12.png" rel="lightbox[8928]" style="color:#9F9F9F;text-decoration:none;border:0px currentcolor;margin:0px;padding:0px;vertical-align:baseline;" title="解开人人网登录密码的 RSA 加密"><img alt="Capture1" class="alignnone size-full wp-image-713" height="192" src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/Capture12.png" style="border-style:none;margin:0px;padding:0px;" width="543"/></a>
+</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		用 ASCII 字符显示出来，就是 drowssaPehTtoNsIsihT。人人网所用的 RSA 库在将密码字符串转换成整数时，字符串的开头是低位，字符串末尾是高位，因此我们刚才输入的密码是 ThisIsNotThePassword。任务完成！
+	</p>
+<h2 style="margin:1.71rem 0px;padding:0px;color:#444444;font-family:'Open Sans', Helvetica, Arial, sans-serif;font-size:1.28rem;white-space:normal;border:0px currentcolor;line-height:1.6;clear:both;vertical-align:baseline;background-color:#FFFFFF;">
+		漏洞还没完
+	</h2>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		如果人人网的程序员把 RSA 密钥改成 2048 位就去睡大觉了，那么这个加密还是不堪一击。我们假定用户的密码是 ruby1111（扯一句，很多人都在用四位字母加四位数字的密码吧），按照人人网所用 RSA 库的方法，字符串长度不足时末尾补零，变成整数后就是高位补零。也就是用于加密的消息 m = 0×3131313179627572。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		我们对 m = 0×3131313179627572 进行因子分解：m = 2 * 17 * 397 * 193679 * 1355887523。这些因子可以组合成两个相近的整数：m = 2614279142 * 1355887523，这两个整数都是 2<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">32</span> 以内的，设 a = 1355887523，b = 2614279142。由于 c = m<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">e</span> mod n = (a<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">e</span> mod n) * (b<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">e</span> mod n) mod n，我们有 (c / (a<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">e</span> mod n)) mod n = b<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">e</span> mod n。也就是，我们只要在 2<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">32</span> 范围内找到 a 和 b 满足上式，就能还原出 m。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		有了公开的 n（2048 位）和 e = 0×10001，对 b = 1,2,… 2<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">32</span>，分别计算 b<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">e</span> mod n，并保存在一张大 hash 表里。然后对 a = 1,2,… 2<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">32</span>，分别计算 (c / (a<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">e</span> mod n)) mod n，其中除法可以用前面提到的求乘法逆元来实现。一旦发现结果在大 hash 表里，则找到了一组满足条件的 a 和 b，乘起来就得到明文 m。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		为什么说这样的攻击是有效的呢？首先，相当比例的大整数可以分解成两个相差不大的整数之积，这使得上述“打表”攻击成为可能；其次，上述攻击恢复长度为 L 的明文，只需要 O(2<span style="margin:0px;padding:0px;border:0px currentcolor;line-height:0;font-size:11px;vertical-align:baseline;">L/2</span>) 的时间和空间复杂度，也就是密码的有效长度减小了一半。
+	</p>
+<h3 style="margin:1.71rem 0px;padding:0px;color:#444444;font-family:'Open Sans', Helvetica, Arial, sans-serif;font-size:1.14rem;white-space:normal;border:0px currentcolor;line-height:1.8461;clear:both;vertical-align:baseline;background-color:#FFFFFF;">
+		不要把明文直接传入 RSA 算法
+	</h3>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		密码学教材和 Wikipedia 上似乎都把明文直接作为 m，直接乘上 e 次幂 mod n 作为密文。而在广泛使用的 PKCS 等加密标准中，要么是把明文用随机填充字节补齐到 n 的位数，要么是生成另一个随机字符串作为 m，再用 m 作为对称密钥来加密明文。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		人人网所使用的 RSA 库要防御上述攻击，最简单的修改方法是模仿 PKCS 最初版本，不要在明文密码前补零，而是先补一个 0xFF 字节，再用非 0xFF 的随机字节填充到 n 的位数（如 2048 位公钥，补齐到 256 字节）。这里的伪随机数生成器一定要使用比较好的种子，千万不能搞成确定的序列。服务器端解密后，从高位开始找到第一个 0xFF，这个 0xFF 后面的就是原始明文密码。当然，这种做法在寻找 0xFF 的过程中是存在时间攻击（timing attack）的，只是利用这个信息恢复明文需要发送相当大量的请求，在 Internet 上并不现实。
+	</p>
+<h2 style="margin:1.71rem 0px;padding:0px;color:#444444;font-family:'Open Sans', Helvetica, Arial, sans-serif;font-size:1.28rem;white-space:normal;border:0px currentcolor;line-height:1.6;clear:both;vertical-align:baseline;background-color:#FFFFFF;">
+		结语
+	</h2>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		我不希望这篇文章给人人网的程序员带来任何麻烦，能想到用公开密钥密码学对密码加密传输，已经是不错的主意了。不过密码学实在是一个专业的领域，密钥长度、消息填充等问题需要理解算法背后的数学原理才能想到。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		大公司创造的弱加密协议的例子比比皆是。我们不是密码学家，千万不要自己设计加密协议，更不要自作聪明地对加密算法进行“优化”，一定要使用久经考验的密码学库，如 OpenSSL、GnuPG。因为浏览器端没有成熟的密码学库，人人网使用一个代码质量看起来还不错的库，实在不能怪罪程序员。
+	</p>
+<p style="margin-top:0px;margin-bottom:1.71rem;padding:0px;font-size:14px;white-space:normal;line-height:24px;font-family:'Open Sans', Helvetica, Arial, sans-serif;border:0px currentcolor;color:#444444;vertical-align:baseline;background-color:#FFFFFF;">
+		最后给大家一个用来装 X 的东西：本文所介绍的二次筛法的时间复杂度是 exp(sqrt(log N * log log N) / 2)，其中 N 是欲分解的数。它高于任何多项式算法，而低于指数复杂度。下次有人问 “有没有一种算法，比多项式算法慢，又比 NP 完全问题的已知最好算法快” 时，就可以用这个来装 X 了。事实上，因子分解问题渐进意义上目前已知的最好算法（数域筛法）的时间复杂度也是高于任何多项式算法，而低于指数的。因子分解问题的时间复杂度是一个开放问题。
+	</p>
+<h2 style="margin:1.71rem 0px;padding:0px;color:#444444;font-family:'Open Sans', Helvetica, Arial, sans-serif;font-size:1.28rem;white-space:normal;border:0px currentcolor;line-height:1.6;clear:both;vertical-align:baseline;background-color:#FFFFFF;">
+		参考文献
+	</h2>
+<ul style="margin:0px 41px 15px 26px;padding:0px;list-style:none outside none;color:#2A2A2A;font-family:Tahoma, Helvetica, Arial, sans-serif;font-size:14px;line-height:25px;white-space:normal;background-color:#FFFFFF;">
+<li style="margin:0px;padding:0px 0px 0px 16px;list-style:none;background-image:url(http://www.91ri.org/wp-content/themes/dedecms/images/li.gif);background-position:0% 2px;background-repeat:no-repeat no-repeat;">
+<div style="margin:0px 0px 0px 2.57rem;padding:0px;border:0px currentcolor;vertical-align:baseline;">
+				msieve, sourceforge project: <a href="http://sourceforge.net/projects/msieve/" style="color:#9F9F9F;text-decoration:none;border:0px currentcolor;margin:0px;padding:0px;vertical-align:baseline;" target="_blank">http://sourceforge.net/projects/msieve/</a>
+</div>
+</li>
+</ul>
+<ul reply-list"="" style="margin:0px 41px 15px 26px;padding:0px;list-style:none outside none;color:#2A2A2A;font-family:Tahoma, Helvetica, Arial, sans-serif;font-size:14px;line-height:25px;white-space
+    &lt;/div&gt;
+    &lt;/article&gt;
+
+    &lt;div id=">
+<h1>评论</h1>
+<div class="row" id="comment-1737">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/4a5b288054322a7008144e0a186c8712.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">听风的小孩</a>
+<time datetime="2014年7月24日 11:54" itemprop="datePublished">
+                            2014 七月 24 11:54
+                        </time>
+<a href="javascript:reply_to('1737', '听风的小孩')">回复</a>
+</p>
+<p class="comment-meta">可不可以帮我个忙，我在系统变量里面添加了python但是在dos下测试总是说出错。麻烦你帮我一下谢谢你了</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1741">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年7月26日 13:09" itemprop="datePublished">
+                            2014 七月 26 13:09
+                        </time>
+<a href="javascript:reply_to('1741', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@听风的小孩：重启一下就好了</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1722">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/487f87505f619bf9ea08f26bb34f8118.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.iruo.tk" target="_blank">若</a>
+<time datetime="2014年7月17日 21:49" itemprop="datePublished">
+                            2014 七月 17 21:49
+                        </time>
+<a href="javascript:reply_to('1722', '若')">回复</a>
+</p>
+<p class="comment-meta">这篇文章真不错</p>
+</div>
+</div>
+</ul></p></div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="0c57715e6f25e2080501386d9b861659e38a64a9"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/0c57715e6f25e2080501386d9b861659e38a64a9"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="220">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="D6AbJcWrGBD3NQ8VtyB8x92D1afIrlFxbqVHxG8G7oxsNvwahP5S6N4IaeIQaPuH"/>
+</input></form>
+</article></div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./[ 转载 ] 解开人人网登录密码的 RSA 加密  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

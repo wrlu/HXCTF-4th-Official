@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+
+<html lang="zh">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=Edge" http-equiv="X-UA-Compatible"/>
+<title>Module.exports和exports的区别</title>
+<meta content="" name="description"/>
+<meta content="Ghost, blog, Ghost博客, Ghost主题, Ghost theme" name="keywords"/>
+<meta content="True" name="HandheldFriendly">
+<meta content="telephone=no" name="format-detection"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<meta content="QOxhTJqHj1" name="baidu-site-verification">
+<meta content="2a8f8f0ee32eadeb2f7c600df62f7273" name="baidu_union_verify"/>
+<link href="./Module.exports和exports的区别/favicon.pngv=c4691e5d94" rel="shortcut icon" type="image/png"/>
+<link href="./Module.exports和exports的区别/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Module.exports和exports的区别/materialize.min.cssv=c4691e5d94" rel="stylesheet" type="text/css">
+<link href="./Module.exports和exports的区别/prism.cssv=c4691e5d94" rel="stylesheet" type="text/css">
+<link href="./Module.exports和exports的区别/screen.cssv=c4691e5d94" rel="stylesheet" type="text/css"/>
+<link href="./Module.exports和exports的区别/module-exportshe-exportsde-qu-bie" rel="canonical"/>
+<meta content="origin" name="referrer">
+<meta content="信鑫-King's Blog" property="og:site_name">
+<meta content="article" property="og:type">
+<meta content="Module.exports和exports的区别" property="og:title">
+<meta content="学习Seajs时，看到了exports.doSomething和module.exports，想对这两者的区别一探究竟。 一、官方解释 因为SeaJs和Nodejs都是基于CommonJS,所以直接看的Node的官方文档解释 Module.exports   The module.exports object is created by the Module system. Sometimes this is not acceptable; many want their module to be an instance of some class. To do this,..." property="og:description">
+<meta content="http://www.ycjcl.cc/2017/02/10/module-exportshe-exportsde-qu-bie/" property="og:url">
+<meta content="2017-02-10T08:05:35.964Z" property="article:published_time">
+<meta content="2017-02-13T04:07:14.754Z" property="article:modified_time"/>
+<meta content="前端" property="article:tag"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="Module.exports和exports的区别" name="twitter:title"/>
+<meta content="学习Seajs时，看到了exports.doSomething和module.exports，想对这两者的区别一探究竟。 一、官方解释 因为SeaJs和Nodejs都是基于CommonJS,所以直接看的Node的官方文档解释 Module.exports   The module.exports object is created by the Module system. Sometimes this is not acceptable; many want their module to be an instance of some class. To do this,..." name="twitter:description"/>
+<meta content="http://www.ycjcl.cc/2017/02/10/module-exportshe-exportsde-qu-bie/" name="twitter:url"/>
+<script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "Article",
+    "publisher": "信鑫-King's Blog",
+    "author": {
+        "@type": "Person",
+        "name": "Kylin King",
+        "image": "http://www.ycjcl.cc/content/images/2016/12/IMG_0026.PNG",
+        "url": "http://www.ycjcl.cc/author/kylin",
+        "sameAs": "http://ycjcl.cc",
+        "description": "问题总是有方法去解决，只要你愿意想！"
+    },
+    "headline": "Module.exports和exports的区别",
+    "url": "http://www.ycjcl.cc/2017/02/10/module-exportshe-exportsde-qu-bie/",
+    "datePublished": "2017-02-10T08:05:35.964Z",
+    "dateModified": "2017-02-13T04:07:14.754Z",
+    "keywords": "前端",
+    "description": "学习Seajs时，看到了exports.doSomething和module.exports，想对这两者的区别一探究竟。 一、官方解释 因为SeaJs和Nodejs都是基于CommonJS,所以直接看的Node的官方文档解释 Module.exports   The module.exports object is created by the Module system. Sometimes this is not acceptable; many want their module to be an instance of some class. To do this,..."
+}
+    </script>
+<meta content="Ghost 0.7" name="generator"/>
+<link href="./Module.exports和exports的区别/rss" rel="alternate" title="信鑫-King's Blog" type="application/rss+xml"/>
+</meta></meta></meta></meta></meta></meta></meta></link></link></meta></meta></head>
+<body>
+<div class="navbar" id="topScroll">
+<nav class="b-green scrollSpy" role="navigation">
+<div class="container">
+<div class="nav-wrapper">
+<div class="brand-logo">
+<a class="waves-effect waves-light" href="http://www.ycjcl.cc">
+<img alt="信鑫-King's Blog" class="logo-img hide-on-med-and-down static-img" src="./Module.exports和exports的区别/avatar.png"/>
+<span class="logo-span">信鑫-King's Blog</span>
+</a>
+</div>
+<a class="button-collapse" data-activates="mobile-nav" href="#"><i class="fa fa-bars"></i></a>
+<ul class="right hide-on-med-and-down">
+<li><a class="li-menu waves-effect waves-light" href="http://www.ycjcl.cc/tag/life">生活</a></li>
+<li><a class="li-menu waves-effect waves-light" href="http://www.ycjcl.cc/tag/front">前端</a></li>
+<li><a class="li-menu waves-effect waves-light" href="http://www.ycjcl.cc/tag/note">笔记</a></li>
+<li><a class="li-menu waves-effect waves-light" href="http://www.ycjcl.cc/tag/ctf">CTF</a></li>
+<li><a class="li-menu waves-effect waves-light" href="http://www.ycjcl.cc/tag/service">服务器</a></li>
+<li><a class="li-menu waves-effect waves-light" href="http://www.ycjcl.cc/tag/ari">算法</a></li>
+<li class="">
+<a class="toggle-search waves-effect waves-light" href="#!" id="toggle-search">
+<i class="mdi-action-search"></i>
+</a>
+</li>
+</ul>
+<ul class="side-nav" id="mobile-nav">
+<li class="b-green">
+<img class="logo-img static-img" src="./Module.exports和exports的区别/avatar.png"/>
+<span class="logo-span">信鑫-King's Blog</span>
+</li>
+<li><a class="waves-effect waves-light" href="http://www.ycjcl.cc/tag/life">生活</a></li>
+<li><a class="waves-effect waves-light" href="http://www.ycjcl.cc/tag/front">前端</a></li>
+<li><a class="waves-effect waves-light" href="http://www.ycjcl.cc/tag/note">笔记</a></li>
+<li><a class="waves-effect waves-light" href="http://www.ycjcl.cc/tag/ctf">CTF</a></li>
+<li><a class="waves-effect waves-light" href="http://www.ycjcl.cc/tag/service">服务器</a></li>
+<li><a class="waves-effect waves-light" href="http://www.ycjcl.cc/tag/ari">算法</a></li>
+</ul>
+<a class="toggle-search right waves-effect waves-light hide-on-large-only" href="#!">
+<i class="mdi-action-search"></i>
+</a>
+</div>
+</div>
+</nav>
+</div>
+<div class="container row white-text grey darken-3" id="search">
+<form>
+<input class="search-input form-control" id="searchInput" placeholder=" 搜 索 ..." type="text"/>
+</form>
+</div>
+<div class="container section">
+<div class="row">
+<div class="notice col s12 m12">
+<div class="card grey lighten-5">
+<div class="card-content">
+<i class="fa fa-cog fa-spin fa-fw b-text-green fa-lg"></i>
+                合作，共赢，together and stronger.
+            </div>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="main-side col s12 m12 l8">
+<div class="article" id="article-detail">
+<div class="detail-card card">
+<div class="card-content">
+<div class="article-title card-title b-title b-text-green">Module.exports和exports的区别</div>
+<ul class="list-inline">
+<li>
+<a class="b-text-gray" href="#" target="_blank">
+<i class="fa fa-user"></i> Kylin King
+                                </a>
+</li>
+<li>
+<a class="b-text-gray">
+<i class="fa fa-calendar"></i> 二月 10 2017
+                                </a>
+</li>
+<li class="detail-card-tag hide-on-small-only">
+<a><i class="fa fa-tag b-text-gray"></i></a>
+<span class="chip">前端</span>
+</li>
+</ul>
+</div>
+<div class="article-action card-action"></div>
+<div class="card-content" id="article-content">
+<blockquote>
+<p>学习<code>Seajs</code>时，看到了<code>exports.doSomething</code>和<code>module.exports</code>，想对这两者的区别一探究竟。</p>
+</blockquote>
+<p><img alt="" src="./Module.exports和exports的区别/97116137-file_1486708942813_1278d.png"/></p>
+<h4 id="">一、官方解释</h4>
+<p>因为<code>SeaJs</code>和<code>Nodejs</code>都是基于<code>CommonJS</code>,所以直接看的<code>Node</code>的官方文档解释</p>
+<h5 id="moduleexports">Module.exports</h5>
+<blockquote>
+<p>The <strong>module.exports</strong> object is created by the Module system. Sometimes this is not acceptable; many want their module to be an instance of some class. To do this, assign the desired export object to <strong>module.exports</strong>. Note that assigning the desired object to <strong>exports</strong> will simply rebind the local <strong>exports</strong> variable, which is probably not what you want to do. </p>
+<p>译文：<strong>module.exports</strong>对象是由模块系统创建的。 有时这是难以接受的；许多人希望他们的模块成为某个类的实例。 为了实现这个，需要将期望导出的对象赋值给<strong>module.exports</strong>。 注意，将期望的对象赋值给<strong>exports</strong>会简单地重新绑定到本地<strong>exports</strong>变量上，这可能不是你想要的。</p>
+</blockquote>
+<h5 id="exports">exports</h5>
+<blockquote>
+<p>The <strong>exports</strong> variable is available within a module's file-level scope, and is assigned the value of <strong>module.exports</strong> before the module is evaluated. It allows a shortcut, so that <strong>module.exports.f = ...</strong> can be written more succinctly as <strong>exports.f = ....</strong> However, be aware that like any variable, if a new value is assigned to <strong>exports</strong>, it is no longer bound to <strong>module.exports</strong>:</p>
+<p>译文：<strong>exports</strong>变量是在模块的文件级别作用域内有效的，它在模块被执行前被赋于 <strong>module.exports</strong> 的值。它有一个快捷方式，以便 <strong>module.exports.f = ...</strong> 可以被更简洁地写成<strong>exports.f = ...</strong>。 注意，就像任何变量，如果一个新的值被赋值给<strong>exports</strong>，它就不再绑定到<strong>module.exports</strong>(其实是<strong>exports.属性</strong>会自动挂载到没有命名冲突的<strong>module.exports.属性</strong>)</p>
+</blockquote>
+<h5 id="require">require</h5>
+<p>从require导入方式去理解，关键有两个变量(全局变量<code>module.exports</code>，局部变量<code>exports</code>)、一个返回值(<code>module.exports</code>)</p>
+<pre><code class="language-js">function require(...) {  
+  var module = { exports: {} };
+  ((module, exports) =&gt; {
+    // 你的被引入代码 Start
+    // var exports = module.exports = {}; (默认都有的)
+    function some_func() {};
+    exports = some_func;
+    // 此时，exports不再挂载到module.exports，
+    // export将导出{}默认对象
+    module.exports = some_func;
+    // 此时，这个模块将导出some_func对象，覆盖exports上的some_func    
+     // 你的被引入代码 End
+  })(module, module.exports);
+ // 不管是exports还是module.exports，最后返回的还是module.exports 
+  return module.exports;
+}
+</code></pre>
+<h4 id="demo">二、Demo事例</h4>
+<h5 id="1js">事例一：<code>1.js</code></h5>
+<pre><code class="language-js">console.log(exports); // {}  
+console.log(module.exports);  // {}  
+console.log(exports === module.exports);    // true  
+console.log(exports == module.exports);        // true  
+/**
+ Module {
+  id: '.',
+  exports: {},
+  parent: null,
+  filename: '/1.js',
+  loaded: false,
+  children: [],
+  paths:
+   [ 
+     '/node_modules' ] 
+ }
+ */
+console.log(module);
+</code></pre>
+<h6 id="">从事例一中，可以看出来</h6>
+<ul>
+<li>1.每个<code>js</code>文件一创建，都有一个<code>var exports = module.exports = {};</code>，使<code>exports</code>和<code>module.exports</code>都指向一个空对象。</li>
+<li>2.<code>module</code>是全局内置对象，<code>exports</code>是被<code>var</code>创建的局部对象。</li>
+<li>3.<code>module.exports</code>和<code>exports</code>所指向的内存地址相同</li>
+</ul>
+<h5 id="2js3js">事例二：<code>2.js</code>、<code>3.js</code></h5>
+<pre><code class="language-js">// 2.js
+exports.id = 'exports的id';  
+exports.id2 = 'exports的id2';  
+exports.func = function(){  
+    console.log('exports的函数');
+};
+exports.func2 = function() {  
+    console.log('exports的函数2');
+};
+module.exports = {  
+    id: 'module.exports的id',
+    func:function(){
+        console.log('module.exports的函数');
+    }
+
+};
+</code></pre>
+<pre><code class="language-js">// 3.js
+var a = require('./2.js');  
+// 当属性和函数在module.exports都有定义时：
+console.log(a.id);  // module.exports的id  
+console.log(a.func()); // module.exports的函数
+
+// 当属性在module.exports没有定义，函数在module.exports有定义
+console.log(a.id2);  // undefined  
+console.log(a.func());  // module.exports的函数
+
+// 当函数在module.exports没有定义，属性在module.exports有定义
+console.log(a.id);        // module.exports的id  
+console.log(a.func2());    // 报错了 TypeError: a.func2 is not a function  
+</code></pre>
+<h6 id="">由例二可以知道：</h6>
+<ul>
+<li>1.<code>module.exports</code>像是<code>exports</code>的大哥，当<code>module.exports</code>以<code>{}</code>整体导出时会覆盖<code>exports</code>的属性和方法，</li>
+<li>2.注意，若只是将属性/方法挂载在<code>module.exports.</code>/<code>exports.</code>上时，<code>exports.id=1</code>和<code>module.exports.id=100</code>，<code>module.exports.id=function(){}</code>和<code>exports.id=function(){}</code>，最后id的值取决于<code>exports.id</code>和<code>module.exports.id</code>的顺序，谁在后，就是最后的值</li>
+</ul>
+<p><img alt="" src="./Module.exports和exports的区别/3342799-file_1486777354466_11a75.png"/></p>
+<ul>
+<li>3.若<code>exports</code>和<code>module.exports</code>同时赋值时，<code>exports</code>所使用的属性和方法必须出现在<code>module.exports</code>，若属性没有在<code>module.exports</code>中定义的话，出现<code>undefined</code>，若方法没有在<code>module.exports</code>中定义，会抛出<code>TypeError</code>错误。</li>
+</ul>
+<h5 id="4js5js">例三 <code>4.js</code>、<code>5.js</code></h5>
+<p><code>module.exports</code>的对象、<code>prototype</code>、<code>构造函数</code>使用</p>
+<pre><code class="language-js">// 4.js
+var a = require('./5.js');  
+// 若传的是类，new一个对象
+var person = new a('Kylin',20);  
+console.log(person.speak()); // my name is Kylin ,my age is 20
+
+// 若不需要在构造函数时初始化参数，直接调用方法/属性
+// a.speak();  // my name is kylin ,my age is 20
+</code></pre>
+<pre><code class="language-js">// 5.js
+// Person类
+function Person(name,age){  
+    this.name = name;
+    this.age = age;
+}
+// 为类添加方法
+Person.prototype.speak = function(){  
+    console.log('my name is '+this.name+' ,my age is '+this.age);
+};
+
+// 返回类
+module.exports = Person;
+
+// 若构造函数没有传入参数(name,age)，直接传入对象
+// module.exports = new Person('kylin',20);
+</code></pre>
+<h6 id="exportsprototypemoduleexports">说了这么多，其实建议就是，如果只是单一属性或方法的话，就使用<code>exports.属性/方法</code>。要是导出多个属性或方法或使用<code>对象构造方法</code>，结合<code>prototype</code>等，就建议使用<code>module.exports = {}</code>。文章有很多地方描述的可能不是很准确，提到的点也不够全面，如果有不对的地方，还望斧正！</h6>
+<blockquote>
+<p>参考资料：<a href="http://nodejs.cn/api/modules.html#modules_module_exports">Nodejs官方文档(中文)</a>、<a href="http://www.hacksparrow.com/node-js-exports-vs-module-exports.html">Node.js Module – exports vs module.exports</a>、<a href="https://www.sitepoint.com/understanding-module-exports-exports-node-js/">Understanding module.exports and exports in Node.js</a>、<a href="https://cnodejs.org/topic/5231a630101e574521e45ef8">exports 和 module.exports 的区别</a></p>
+</blockquote>
+</div>
+<div class="article-action card-action"></div>
+<div class="card-content">
+<p>转载请注明：<a class="b-text-green" href="http://ycjcl.cc" target="_blank">信鑫-King's Blog</a>
+                             » <a class="b-text-green" href="/2017/02/10/module-exportshe-exportsde-qu-bie/" target="_blank">Module.exports和exports的区别</a>
+</p>
+<div class="article-share">
+    分享到：
+<div class="bdsharebuttonbox"><a class="bds_more" data-cmd="more" href="#"></a><a class="bds_qzone" data-cmd="qzone" href="#" title="分享到QQ空间"></a><a class="bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a><a class="bds_tqq" data-cmd="tqq" href="#" title="分享到腾讯微博"></a><a class="bds_renren" data-cmd="renren" href="#" title="分享到人人网"></a><a class="bds_weixin" data-cmd="weixin" href="#" title="分享到微信"></a><a class="bds_sqq" data-cmd="sqq" href="#" title="分享到QQ好友"></a><a class="bds_tieba" data-cmd="tieba" href="#" title="分享到百度贴吧"></a></div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"32"},"share":{},"image":{"viewList":["qzone","tsina","tqq","renren","weixin","sqq","tieba"],"viewText":"分享到：","viewSize":"16"},"selectShare":{"bdContainerClass":null,"bdSelectMiniList":["qzone","tsina","tqq","renren","weixin","sqq","tieba"]}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+</div>
+<div class="article-action card-action"></div>
+<div class="card-content reward-wrapper">
+<div class="reward" id="reward">
+<a class="btn_donate" href="javascript:;" id="btn_donate" target="_self" title="Donate 打赏"></a>
+<span class="donate_txt">↑<br/>If you enjoy the article,please feel free to<span class="bold">donate~</span>Thx.<br/>若本文对您有帮助，<span class="bold">求打赏~</span>谢谢您的鼓励。</span>
+</div>
+<div class="reward-qcode" id="reward-qcode">
+<img alt="" src="./Module.exports和exports的区别/pay.jpg"/>
+</div>
+</div>
+</div>
+<section class="post-comment card">
+<div class="ds-thread" data-thread-key="module-exportshe-exportsde-qu-bie" data-title="Module.exports和exports的区别" data-url="http://www.ycjcl.cc/2017/02/10/module-exportshe-exportsde-qu-bie/"></div>
+</section>
+<div class="prenext-card card">
+<div class="prenext-row row">
+<div class="prenext col s12 m6 l6">
+<p class="pn-title">上一篇</p>
+<div>
+<a class="b-link" href="/2017/02/06/jie-jue-macos-sierrazhu-ce-ji-wu-fa-shi-yong-yi-rightfontwei-li/">解决MacOS Sierra注册机无法使用(以RightFont为例)</a>
+</div>
+</div>
+<div class="prenext col s12 m6 l6">
+<p class="pn-title">下一篇</p>
+<div>
+<a class="b-link" href="/2017/02/15/shen-ru-qian-chu-ajax/">深入学习下AJAX</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="col s12 m12 l4 hide-on-med-and-down">
+<div class="sidebar">
+<div class="card-user card">
+<div class="card-image waves-effect waves-block waves-light">
+<img class="head-pic activator responsive-img static-img" src="./Module.exports和exports的区别/avatar.jpgv=c4691e5d94"/>
+</div>
+<div class="card-action">
+<div class="user-info center-align">
+<span class="card-title activator b-title b-text-green">信鑫-King's Blog</span>
+<p class="socail-link center-align">
+<a class="tooltipped" data-delay="5" data-position="top" data-tooltip="访问我的GitHub" href="https://github.com/ycjcl868" target="_blank">
+<i class="fa fa-github fa-lg"></i>
+</a>
+<a class="tooltipped" data-delay="5" data-position="top" data-tooltip="邮件联系我:chaolinjin@gmail.com" href="mailto:chaolinjin@gmail.com" target="_blank">
+<i class="fa fa-envelope fa-lg"></i>
+</a>
+<a class="tooltipped" data-delay="5" data-position="top" data-tooltip="QQ号：45808948" href="#!">
+<i class="fa fa-qq fa-lg"></i>
+</a>
+<a class="tooltipped" data-delay="5" data-position="top" data-tooltip="新浪微博" href="http://weibo.com/ycjcl" target="_blank">
+<i class="fa fa-weibo fa-lg"></i>
+</a>
+<a class="tooltipped" data-delay="5" data-position="top" data-tooltip="微信号：kylinJCL" href="#!">
+<i class="fa fa-weixin fa-lg"></i>
+</a>
+<!--    <a href="http://www.ycjcl.cc/rss/" class="tooltipped" data-tooltip="RSS" data-position="top"
+                    data-delay="5" target="_blank">
+                    <i class="fa fa-rss fa-lg"></i>
+                </a>  -->
+</p>
+<h6 class="desc">
+                    简单，可依赖！
+            </h6>
+</div>
+</div>
+<div class="card-reveal">
+<span class="card-title b-text-green">信鑫-King's Blog<i class="fa fa-close right"></i></span>
+<p class="b-text-gray">不妨用手机扫描下面的二维码访问本网站：</p>
+<div class="card-image waves-effect waves-block waves-light">
+<img class="qrcode activator responsive-img static-img" src="./Module.exports和exports的区别/qcode.pngv=c4691e5d94"/>
+</div>
+</div>
+</div>
+<div class="card-tags card">
+<div class="card-custom-title">
+<i class="fa fa-tags fa-lg green-text text-darken-2"></i> 
+		<span class="card-title green-text text-darken-2">标签云</span>
+</div>
+<div class="card-action">
+<div class="tags">
+<a class="chip waves-effect waves-red" href="/tag/ari/" target="_blank">算法</a>
+<a class="chip waves-effect waves-red" href="/tag/tag-tag/" target="_blank">tag</a>
+<a class="chip waves-effect waves-red" href="/tag/ctf/" target="_blank">ctf</a>
+<a class="chip waves-effect waves-red" href="/tag/ide/" target="_blank">ide</a>
+<a class="chip waves-effect waves-red" href="/tag/service/" target="_blank">服务器</a>
+<a class="chip waves-effect waves-red" href="/tag/front/" target="_blank">前端</a>
+<a class="chip waves-effect waves-red" href="/tag/note/" target="_blank">笔记</a>
+<a class="chip waves-effect waves-red" href="/tag/life/" target="_blank">生活</a>
+<a class="chip waves-effect waves-red" href="/tag/index/" target="_blank">首页</a>
+</div>
+</div>
+</div>
+<div class="card-friend card">
+<div class="card-custom-title">
+<i class="fa fa-link fa-lg green-text text-darken-2"></i> 
+        <span class="card-title green-text text-darken-2">友情链接</span>
+</div>
+<div class="card-action friend-url">
+<ul>
+<li><a href="http://xferris.me/" target="_blank">大哥Ferris_Blog</a></li>
+<li><a href="http://bestwing.me/" target="_blank">学弟Swing_Blog</a></li>
+<li><a href="http://mxny.org" target="_blank">麦香师傅_Blog</a></li>
+<li><a href="http://ring3.xyz/" target="_blank">龙哥_Blog</a></li>
+<li><a href="http://hackersb.cn" target="_blank">王松_Striker_Blog</a></li>
+<li><a href="http://momomoxiaoxi.com" target="_blank">默小西_Blog</a></li>
+<li><a href="http://www.bystudent.com" target="_blank">ByStudent_Blog</a></li>
+<li><a href="http://www.bodkin.ren/" target="_blank">老锥_Blog</a></li>
+<li><a href="https://www.hackfun.org" target="_blank">4ido10n's Blog</a></li>
+<li><a href="http://sh3ll.me/" target="_blank">Chu's BLoG</a></li>
+<li><a href="https://www.sco4x0.com" target="_blank">sco4x0's BLoG</a></li>
+<li><a href="https://www.jarviswang.me" target="_blank">Jarvis's Blog</a></li>
+<li><a href="http://www.bendawang.site" target="_blank">Bendawang师傅_Blog</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<script>
+            var duoshuoQuery = {short_name:"ycjcl"};
+            var oBtn = document.getElementById('btn_donate');
+            var qcode = document.getElementById('reward-qcode');
+            var reward = document.getElementById('reward');
+            (function() {
+                // 多说
+                var ds = document.createElement('script');
+                ds.type = 'text/javascript';ds.async = true;
+                ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+                ds.charset = 'UTF-8';
+                (document.getElementsByTagName('head')[0] 
+                 || document.getElementsByTagName('body')[0]).appendChild(ds);
+
+                
+                // 打赏
+                oBtn.onclick = function(){
+                    reward.className = 'reward payhide';
+                    qcode.className = 'reward-qcode payshow';
+                }
+            })();
+        </script>
+</div>
+</div>
+<footer class="page-footer b-green">
+<div class="b-foot footer-copyright b-black">
+<div class="container row center-align">
+<div class="col s12 m12 l12">
+<span class="copyright">
+                    本站由©<a href="http://ycjcl.cc" target="_blank">Kylin</a>
+                    陕ICP备16007407号
+                </span>
+</div>
+</div>
+</div>
+</footer>
+<!-- scroll top -->
+<div class="top-scroll" id="topScroll-btn">
+<a class="btn-floating btn-large waves-effect waves-light red accent-3" href="javascript:;">
+<i class="fa fa-arrow-up"></i>
+</a>
+</div>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?17735748da6b3a0d62ed6daff6a6d061";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./Module.exports和exports的区别/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="/assets/plugins/jquery/jquery-2.1.4.min.js?v=c4691e5d94"><\/script>')</script>
+<script src="./Module.exports和exports的区别/materialize.min.jsv=c4691e5d94" type="text/javascript"></script>
+<script src="./Module.exports和exports的区别/prism.jsv=c4691e5d94" type="text/javascript"></script>
+<script src="./Module.exports和exports的区别/index.jsv=c4691e5d94" type="text/javascript"></script>
+</body>
+</html>

@@ -1,0 +1,346 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>php遍历目录&amp;删除指定文件中指定内容 | 离别歌</title>
+<link href="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/styles.css" rel="stylesheet"/>
+<link href="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/style.css" rel="stylesheet"/>
+<link href="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/jquery.min.js"></script>
+<link href="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/code.css" rel="stylesheet"/>
+<link href="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/button.css" rel="stylesheet"/>
+<link href="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PHP/phpdelfile.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PHP/phpdelfile.html&amp;text=php%E9%81%8D%E5%8E%86%E7%9B%AE%E5%BD%95%26%E5%88%A0%E9%99%A4%E6%8C%87%E5%AE%9A%E6%96%87%E4%BB%B6%E4%B8%AD%E6%8C%87%E5%AE%9A%E5%86%85%E5%AE%B9"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PHP/phpdelfile.html&amp;title=php%E9%81%8D%E5%8E%86%E7%9B%AE%E5%BD%95%26%E5%88%A0%E9%99%A4%E6%8C%87%E5%AE%9A%E6%96%87%E4%BB%B6%E4%B8%AD%E6%8C%87%E5%AE%9A%E5%86%85%E5%AE%B9"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PHP/phpdelfile.html&amp;is_video=false&amp;description=php%E9%81%8D%E5%8E%86%E7%9B%AE%E5%BD%95%26%E5%88%A0%E9%99%A4%E6%8C%87%E5%AE%9A%E6%96%87%E4%BB%B6%E4%B8%AD%E6%8C%87%E5%AE%9A%E5%86%85%E5%AE%B9"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=php%E9%81%8D%E5%8E%86%E7%9B%AE%E5%BD%95%26%E5%88%A0%E9%99%A4%E6%8C%87%E5%AE%9A%E6%96%87%E4%BB%B6%E4%B8%AD%E6%8C%87%E5%AE%9A%E5%86%85%E5%AE%B9&amp;body=Check out this article: https%3A//www.leavesongs.com/PHP/phpdelfile.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PHP/phpdelfile.html&amp;title=php%E9%81%8D%E5%8E%86%E7%9B%AE%E5%BD%95%26%E5%88%A0%E9%99%A4%E6%8C%87%E5%AE%9A%E6%96%87%E4%BB%B6%E4%B8%AD%E6%8C%87%E5%AE%9A%E5%86%85%E5%AE%B9"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PHP/phpdelfile.html&amp;title=php%E9%81%8D%E5%8E%86%E7%9B%AE%E5%BD%95%26%E5%88%A0%E9%99%A4%E6%8C%87%E5%AE%9A%E6%96%87%E4%BB%B6%E4%B8%AD%E6%8C%87%E5%AE%9A%E5%86%85%E5%AE%B9"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PHP/phpdelfile.html&amp;title=php%E9%81%8D%E5%8E%86%E7%9B%AE%E5%BD%95%26%E5%88%A0%E9%99%A4%E6%8C%87%E5%AE%9A%E6%96%87%E4%BB%B6%E4%B8%AD%E6%8C%87%E5%AE%9A%E5%86%85%E5%AE%B9"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PHP/phpdelfile.html&amp;title=php%E9%81%8D%E5%8E%86%E7%9B%AE%E5%BD%95%26%E5%88%A0%E9%99%A4%E6%8C%87%E5%AE%9A%E6%96%87%E4%BB%B6%E4%B8%AD%E6%8C%87%E5%AE%9A%E5%86%85%E5%AE%B9"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PHP/phpdelfile.html&amp;name=php%E9%81%8D%E5%8E%86%E7%9B%AE%E5%BD%95%26%E5%88%A0%E9%99%A4%E6%8C%87%E5%AE%9A%E6%96%87%E4%BB%B6%E4%B8%AD%E6%8C%87%E5%AE%9A%E5%86%85%E5%AE%B9&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">php遍历目录&amp;删除指定文件中指定内容</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年2月26日 16:44" itemprop="datePublished">
+                    2013 二月 26 16:44
+                </time>
+</div>
+<div class="article-tag">
+            阅读：72958
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PHP">PHP</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/php">php</a>,
+                
+                <a class="tag-link" href="/tag/%E9%81%8D%E5%8E%86%E7%9B%AE%E5%BD%95">遍历目录</a>,
+                
+                <a class="tag-link" href="/tag/%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C">文件操作</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+<span style="font-size:14px;">    现在正坐在安静的寝室里，寒假俨然已经离我而去了……今天发的是我寒假里搞的最后一次学习，之后的时间就一直在看海贼王了。</span>
+</p>
+<p>
+<span style="font-size:14px;">    以前写过一个<a href="https://www.leavesongs.com/API/File.html" target="_blank">C语言的遍历目录+复制文件的程序</a>，很长很复杂，现在用PHP一样可以实现遍历目录，而代码就短了不少。这个程序目的是遍历目录，找到所有指定文件名的文件，并删除其中指定的字符串。</span>
+</p>
+<pre class="brush:php;">&lt;?php
+	//功能：删除指定目录(包括子目录)下所有指定文件中指定字符串
+
+	$tmpfiledir = $_SERVER["DOCUMENT_ROOT"].'tmp.txt';
+	function del($getstr)
+	{
+		$isbak = true; //是否备份原文件，true为备份，false不备份
+		global $tmpfiledir;
+		$fr = fopen($tmpfiledir,"r") or die('未能打开临时文件');
+		while($row = fgets($fr))
+		{
+			if(empty($row)) break;
+			$row = trim($row);
+			$opp = fopen($row,"r") or die("未能打开$row");
+			$str = fread($opp,filesize($row)) or die("不能读$row");
+			$str = str_replace($getstr,"",$str);
+			fclose($opp);
+			if($isbak){
+				copy($row,$row.'.bak') or die("备份文件失败");
+				}
+			$ref = fopen($row,"w") or die("重新打开文件失败");
+			fwrite($ref,$str) or die("重新写入文件失败");
+		}
+	}
+	
+	 function traverse($path) {
+	 		global $name,$tmpfiledir;
+		 $current_dir = opendir($path);    //opendir()返回一个目录句柄,失败返回false
+		 if($current_dir == false) 
+		 	return false;
+		 while(($file = readdir($current_dir)) !== false) {    //readdir()返回打开目录句柄中的一个条目
+			 $sub_dir = $path . DIRECTORY_SEPARATOR . $file;    //构建子目录路径
+			 if($file == '.' || $file == '..') {
+				 continue;
+			 } else if(is_dir($sub_dir)) {    //如果是目录,进行递归
+				 traverse($sub_dir);
+			 } else {    //如果是文件,再做比较
+				 $fileinfo = pathinfo($sub_dir);
+				 if($fileinfo['basename'] == $name)
+				 {
+				 		$fopen = fopen($tmpfiledir,"a");
+				 		fwrite($fopen,$sub_dir."\r\n");
+				 		fclose($fopen);
+				 	}
+			 }
+		 }
+		 return true;
+	 }
+	 
+	 if(isset($_POST["name"]) &amp;&amp; isset($_POST["dir"]) &amp;&amp; isset($_POST["str"]))
+	 {
+	 		$name = $_POST["name"];
+	 		traverse($_POST["dir"]) or die("未能创建临时文件，请检查网站根目录是否可写");
+	 		del($_POST["str"]);
+             echo "成功";
+	 		unlink($tmpfiledir);
+	 	}
+	 	else 
+	 	{
+	 			echo "&lt;p&gt;输入相关信息&lt;/p&gt;";
+	 		}
+?&gt;
+&lt;form name="input" action="" method="post"&gt;
+输入目标文件夹:&lt;input type="text" name="dir"/&gt;
+输入目标文件名:&lt;input type="text" name="name"/&gt;
+输入需要删除的字符串:&lt;input type="text" name="str" /&gt;
+&lt;input type="submit" value="提交" /&gt;
+&lt;/form&gt;
+</pre>
+<p>
+<a href="https://www.leavesongs.com/content/uploadfile/201302/d9b61361870362.png" id="ematt:72" target="_blank"><img alt="点击查看原图" border="0" src="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/thum-d9b61361870362.png"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    你们可以看到我写了两个函数，函数traverse将查找到的指定文件路径写在一个临时文件里，函数del删除这些文件里的指定字符串。其实我也觉得很鸡肋，直接在遍历的时候删除就可以了，根本不用生成什么临时文件。</span>
+</p>
+<p>
+<span style="font-size:14px;">    其实我一开始是用C语言写好的遍历，因为C语言不好对文件操作所以才用php写删除的部分，所以一开始只写了一个del函数，后来干脆把遍历文件也用php写了(似乎比C简单的多)，所以又写了一个函数traverse。大家只管看遍历的部分就成，也可以和我之前用C写的遍历的代码对比（我发了源代码的），看看有什么不同。</span>
+</p>
+<p>
+<span style="font-size:14px;">    不过这个版本不支持通配符，所以文件名必须要指定。作用嘛(也是我写这个的理由)，可以批量删除我们挂在服务器上的一句话木马。</span>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1484">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/c0e9265504a0dfd42b9362350b9d80f1.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">网球拍品牌</a>
+<time datetime="2013年11月3日 22:30" itemprop="datePublished">
+                            2013 十一月 03 22:30
+                        </time>
+<a href="javascript:reply_to('1484', '网球拍品牌')">回复</a>
+</p>
+<p class="comment-meta">图文并茂，很喜欢。</p>
+</div>
+</div>
+<div class="row" id="comment-1465">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/281da1524801b6fa0164096560a291db.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.kreweofcork.com/gallery1/en.php" target="_blank">该昵称已屏蔽</a>
+<time datetime="2013年10月27日 03:43" itemprop="datePublished">
+                            2013 十月 27 03:43
+                        </time>
+<a href="javascript:reply_to('1465', '该昵称已屏蔽')">回复</a>
+</p>
+<p class="comment-meta">该评论已屏蔽</p>
+</div>
+</div>
+<div class="row" id="comment-1369">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/e334a5ab2690803b4bb04bfcb6f901ff.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">该昵称已屏蔽</a>
+<time datetime="2013年7月28日 06:18" itemprop="datePublished">
+                            2013 七月 28 06:18
+                        </time>
+<a href="javascript:reply_to('1369', '该昵称已屏蔽')">回复</a>
+</p>
+<p class="comment-meta">该评论已屏蔽</p>
+</div>
+</div>
+<div class="row" id="comment-1353">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/98a7bed1724ce96a828f1182490c6ad5.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">该昵称已屏蔽</a>
+<time datetime="2013年7月2日 06:33" itemprop="datePublished">
+                            2013 七月 02 06:33
+                        </time>
+<a href="javascript:reply_to('1353', '该昵称已屏蔽')">回复</a>
+</p>
+<p class="comment-meta">该评论已屏蔽</p>
+</div>
+</div>
+<div class="row" id="comment-1324">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/7d1a446ab6ba7a66dede073d5aefe8ff.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">乔治公子</a>
+<time datetime="2013年4月12日 21:22" itemprop="datePublished">
+                            2013 四月 12 21:22
+                        </time>
+<a href="javascript:reply_to('1324', '乔治公子')">回复</a>
+</p>
+<p class="comment-meta">乔治公子到此围观，您的文章写的真是太惊天地，泣鬼神了，佩服万分，发此评论以感涕零，三拜！！</p>
+</div>
+</div>
+<div class="row" id="comment-1301">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/9d66608925b813d8843c6f1be6461cfc.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">卫生杀虫剂</a>
+<time datetime="2013年3月9日 08:29" itemprop="datePublished">
+                            2013 三月 09 08:29
+                        </time>
+<a href="javascript:reply_to('1301', '卫生杀虫剂')">回复</a>
+</p>
+<p class="comment-meta">对php不了解啊</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="6a8028a5e972bb2e801c6a3a329a52c22b1986f4"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/6a8028a5e972bb2e801c6a3a329a52c22b1986f4"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="237">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="pIABlYNGEtLwIROncQ90ZybfkJz9dQGQX2V79sZV5gFVIwcC07DKycdktN2hWkv0"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./php遍历目录&amp;amp;删除指定文件中指定内容  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

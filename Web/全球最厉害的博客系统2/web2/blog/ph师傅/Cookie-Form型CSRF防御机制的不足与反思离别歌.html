@@ -1,0 +1,286 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>Cookie-Form型CSRF防御机制的不足与反思 | 离别歌</title>
+<link href="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/styles.css" rel="stylesheet"/>
+<link href="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/style.css" rel="stylesheet"/>
+<link href="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/jquery.min.js"></script>
+<link href="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/code.css" rel="stylesheet"/>
+<link href="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/button.css" rel="stylesheet"/>
+<link href="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/think-about-cookie-form-csrf-protected.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/think-about-cookie-form-csrf-protected.html&amp;text=Cookie-Form%E5%9E%8BCSRF%E9%98%B2%E5%BE%A1%E6%9C%BA%E5%88%B6%E7%9A%84%E4%B8%8D%E8%B6%B3%E4%B8%8E%E5%8F%8D%E6%80%9D"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/think-about-cookie-form-csrf-protected.html&amp;title=Cookie-Form%E5%9E%8BCSRF%E9%98%B2%E5%BE%A1%E6%9C%BA%E5%88%B6%E7%9A%84%E4%B8%8D%E8%B6%B3%E4%B8%8E%E5%8F%8D%E6%80%9D"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/think-about-cookie-form-csrf-protected.html&amp;is_video=false&amp;description=Cookie-Form%E5%9E%8BCSRF%E9%98%B2%E5%BE%A1%E6%9C%BA%E5%88%B6%E7%9A%84%E4%B8%8D%E8%B6%B3%E4%B8%8E%E5%8F%8D%E6%80%9D"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=Cookie-Form%E5%9E%8BCSRF%E9%98%B2%E5%BE%A1%E6%9C%BA%E5%88%B6%E7%9A%84%E4%B8%8D%E8%B6%B3%E4%B8%8E%E5%8F%8D%E6%80%9D&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/think-about-cookie-form-csrf-protected.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/think-about-cookie-form-csrf-protected.html&amp;title=Cookie-Form%E5%9E%8BCSRF%E9%98%B2%E5%BE%A1%E6%9C%BA%E5%88%B6%E7%9A%84%E4%B8%8D%E8%B6%B3%E4%B8%8E%E5%8F%8D%E6%80%9D"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/think-about-cookie-form-csrf-protected.html&amp;title=Cookie-Form%E5%9E%8BCSRF%E9%98%B2%E5%BE%A1%E6%9C%BA%E5%88%B6%E7%9A%84%E4%B8%8D%E8%B6%B3%E4%B8%8E%E5%8F%8D%E6%80%9D"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/think-about-cookie-form-csrf-protected.html&amp;title=Cookie-Form%E5%9E%8BCSRF%E9%98%B2%E5%BE%A1%E6%9C%BA%E5%88%B6%E7%9A%84%E4%B8%8D%E8%B6%B3%E4%B8%8E%E5%8F%8D%E6%80%9D"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/think-about-cookie-form-csrf-protected.html&amp;title=Cookie-Form%E5%9E%8BCSRF%E9%98%B2%E5%BE%A1%E6%9C%BA%E5%88%B6%E7%9A%84%E4%B8%8D%E8%B6%B3%E4%B8%8E%E5%8F%8D%E6%80%9D"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/think-about-cookie-form-csrf-protected.html&amp;name=Cookie-Form%E5%9E%8BCSRF%E9%98%B2%E5%BE%A1%E6%9C%BA%E5%88%B6%E7%9A%84%E4%B8%8D%E8%B6%B3%E4%B8%8E%E5%8F%8D%E6%80%9D&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">Cookie-Form型CSRF防御机制的不足与反思</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2016年9月27日 06:23" itemprop="datePublished">
+                    2016 九月 27 06:23
+                </time>
+</div>
+<div class="article-tag">
+            阅读：1902
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/python%E5%AE%89%E5%85%A8">python安全</a>,
+                
+                <a class="tag-link" href="/tag/CSRF%E6%BC%8F%E6%B4%9E">CSRF漏洞</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>今天看了 <a href="https://hackerone.com/reports/26647"><a href="https://hackerone.com/reports/26647">https://hackerone.com/reports/26647</a></a> 有感。这个漏洞很漂亮，另外让我联想到很多之前自己挖过的漏洞和写过的程序，有感而发。</p>
+<p>Django已经在昨天修复了该漏洞 <a href="https://www.djangoproject.com/weblog/2016/sep/26/security-releases/"><a href="https://www.djangoproject.com/weblog/2016/sep/26/security-releases/">https://www.djangoproject.com/weblog/2016/sep/26/security-releases/</a></a></p>
+<h2 id="0x01-sessioncsrf"><a class="toclink" href="#0x01-sessioncsrf">0x01 借助Session防御CSRF漏洞</a></h2>
+<p>我最早接触Web安全的时候（大概大一暑假），写过一个站点。当时边看道哥的《白帽子讲Web安全》，边在写站点的过程中熟悉每种漏洞，并编写尽量安全的代码。</p>
+<p>初识CSRF漏洞的我使用了一种中规中矩的方法来防御CSRF漏洞：</p>
+<ol>
+<li>后端生成随机字符串Token，储存在SESSION中。</li>
+<li>每当有表单时，从SESSION中取出Token，写入一个隐藏框中，放在表单最底部。</li>
+<li>接受POST数据时，先验证<code>$_POST['token'] === $_SESSION['token']</code>，再执行其他逻辑。</li>
+</ol>
+<p>这是一个很标准的CSRF防御方法，也很难找出其破绽。但这个方法有个致命的弱点：Session。原因有二：</p>
+<ol>
+<li>所有用户，不论是否会提交表单，不论是否会用到这些功能，都将生成一个Session，这将是很大的资源浪费。举个例子，Sec-News的Session储存在redis里，每天会生成数千到数万的Session，自动化脚本每天夜里会遍历并清理没有使用的Session，以避免过度消耗资源。</li>
+<li>除了PHP的很多开发语言中，Session是可选项，很多网站根本没有Server Session。开发框架不能强迫开发者使用Session，所以在设计防御机制的时候也不会使用Session。</li>
+</ol>
+<p>所以，像Django之类的Python框架，会选择基于Cookie的CSRF防御方式。</p>
+<h2 id="0x02-cookie-formcsrf"><a class="toclink" href="#0x02-cookie-formcsrf">0x02 Cookie-Form型CSRF防御机制</a></h2>
+<p>顾名思义，Cookie-Form型CSRF防御机制，是和Cookie和Form有关。它确切的名字我还不太清楚，暂且这样称之。</p>
+<p>Sec-News曾经分享过一篇文章 《<a href="http://wiki.ioin.in/url/ojY">前后端分离架构下的CSRF防御机制</a>》，当时 @neargle 就提出过疑问。</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201609/edb41475045224.png"><img alt="sp160927_044048.png" src="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/thum-edb41475045224.png" title="点击查看原图"/></a></p>
+<p>其实借助Cookie来防御CSRF的方法是一个通用的防御方法，单纯应对CSRF漏洞是绝对可行的。该文章的解决方案是，后端生成一个token和一个散列，均储存于Cookie中，在提交表单时将token附带在表单中提交给后端，后端即可根据表单中的token和cookie中的散列来验证是否存在CSRF攻击。</p>
+<p>实际上散列这一步是没有必要的，后端只需要生成好一个随机token储存于Cookie中，前端提交表单时提交该Cookie基本就万无一失了。</p>
+<p>我第一次接触这种防御方法是在学习CodeIgniter的过程中（这里提一下，CI框架默认的CSRF防御方法就是本文说的这个方法），当时认为这种防御方法很不可理喻。因为Cookie是可以控制的，如果攻击者将Cookie控制地和Form中相同，不就可以绕过这个防御了么？</p>
+<p>但是细想来，立马打脸了：攻击者如何修改受害者的Cookie？</p>
+<p>既然是CSRF漏洞，也就不能控制目标域的脚本，当然就无法获取Cookie（如果能获取Cookie就不叫CSRF漏洞了）。</p>
+<p>总结一下，基于Cookie的CSRF防御方法，较基于Session的方法有如下优点：</p>
+<ol>
+<li>无需使用Session，适用面更广，适合“Secure By Default“原则。</li>
+<li>Token储存于客户端中，不会给服务器带来压力。</li>
+<li>没有其他漏洞的情况下，黑客无法接触Cookie，所以保证了Token的机密性，也就可以防御CSRF漏洞。</li>
+</ol>
+<h2 id="0x03-cookie-formcsrf"><a class="toclink" href="#0x03-cookie-formcsrf">0x03 破解Cookie-Form型CSRF防御</a></h2>
+<p>那么，基于Cookie的CSRF防御机制，有什么弊端？</p>
+<p>弊端也很明显：一旦有其他漏洞（即使是看起来很鸡肋的漏洞）的存在，很容易就能破坏这种防御手法。</p>
+<p>我曾经分享过知乎的一个漏洞《<a href="https://www.leavesongs.com/HTML/zhihu-xss-worm.html">知乎某处XSS+刷粉超详细漏洞技术分析</a>》，很经典的一个案例。攻击者获得了一个”看似十分鸡肋“的XSS漏洞（domain是子域名，而且关键cookie都有httponly），无法做一些正常XSS漏洞可以做的攻击，但却可以写入Cookie。</p>
+<p>攻击者通过写入一个新的"CSRF_TOKEN"，将原有的无法获取的Token覆盖掉，就成功绕过了0x02中描述的防御手法。</p>
+<p>这种绕过方法的核心就是：利用其它漏洞写入Cookie，覆盖原有Cookie，来达到<code>Form[token]===Cookie[token]</code>的目的。</p>
+<p>那么，寻找此类绕过漏洞的核心就是寻找注入新Cookie的方法，看过一些案例，我归纳出来几种：</p>
+<ol>
+<li>某些单纯而不做作的前端编写的页面可以写入Cookie</li>
+<li>鸡肋XSS漏洞</li>
+<li>利用CRLF漏洞注入Cookie</li>
+<li>利用畸形字符使后端解析Cookie出错，注入Cookie</li>
+</ol>
+<p>第一种，很久以前我在QQ空间的不止一处看到过，某些页面从location.search中获取参数并设置为Cookie。但找这种地方比较难，没有什么特别的方法，可遇而不可求。</p>
+<p>第二种，就看知乎那个案例吧。</p>
+<p>第三种，@/fd 曾用一个Twitter的overflow漏洞演示了Cookie的注入：《<a href="http://blog.innerht.ml/page/7/">Overflow Trilogy</a>》。这个漏洞原本是可以用来绕过Twitter的CSRF检测的，不过后来Twitter把CSRF防御方式从0x02换成0x01了，有点可惜：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201609/ad0b1475045224.png"><img alt="sp160927_055401.png" src="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/thum-ad0b1475045224.png" title="点击查看原图"/></a></p>
+<h2 id="0x04-web-servercookie"><a class="toclink" href="#0x04-web-servercookie">0x04 Web Server解析Cookie的特性</a></h2>
+<p>第四种，就是利用Google Analytics来绕过Django的CSRF防御方式。这个方法其实作者早在 <a href="https://hackerone.com/reports/14883">2015年</a> 就已经提出来了（当时是作为Twitter的一个漏洞提交的）。</p>
+<p>Google Analytics会将网站的path写入Cookie中，而没有进行编码，导致攻击者可以输入一些“特殊”的字符。</p>
+<p>当时使用的是逗号“,”，有些Web Server在解析Cookie时，逗号也会成为分隔符。这样就导致了<code>Cookie: param1=1111,param2=2222;</code>这样的Cookie被解析成<code>Cookie[param1]=1111</code>和<code>Cookie[param2]=2222</code>，成功注入了一个新Cookie，Param2 。</p>
+<p>这次Django的Cookie注入也类似。其实原因来自于Python原生的cookielib库，在分割Cookie头的时候，将“]”也作为了分隔符，导致<code>Cookie: param1=value1]param2=value2</code>被解析成<code>Cookie[param1]=value1</code>和<code>Cookie[param2]=value2</code>，成功注入了一个新Cookie，Param2。</p>
+<p>关于畸形Cookie注入的一些姿势，可以看看 <a href="https://habrahabr.ru/post/272187/"><a href="https://habrahabr.ru/post/272187/">https://habrahabr.ru/post/272187/</a></a> 。</p>
+<p>成功注入Cookie后，后续“CSRF攻击”流程就和0x03中讲的一样了，不再赘述。思路很不错，所以写文章说说，和大家分享一下自己的一些看法。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2451">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">红尘</a>
+<time datetime="2016年10月16日 09:56" itemprop="datePublished">
+                            2016 十月 16 09:56
+                        </time>
+<a href="javascript:reply_to('2451', '红尘')">回复</a>
+</p>
+<p class="comment-meta">彼此彼此我还提交了个css跨域漏洞今天，就是道哥那本书上的css跨域漏洞，还好没过，否则贻笑大方了。。</p>
+</div>
+</div>
+<div class="row" id="comment-2444">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/bc1b8a97f5941c89d69ef85c21a27607.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://blog.neargle.com" target="_blank">neargle</a>
+<time datetime="2016年9月28日 17:02" itemprop="datePublished">
+                            2016 九月 28 17:02
+                        </time>
+<a href="javascript:reply_to('2444', 'neargle')">回复</a>
+</p>
+<p class="comment-meta">当时遇到这个问题的时候，总觉得自己想的不对，但又不知道错在哪里...想了很久，决定写了一个demo试看看，就用python实现了一遍把token的校验值放在cookie里面的做法，然后自己去攻击。<br>伪造表单的时候才发现，哦，cookie在这个时候我是动不了的......诶有时候脑子转不过弯真可怕...</br></p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2445">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年9月28日 19:29" itemprop="datePublished">
+                            2016 九月 28 19:29
+                        </time>
+<a href="javascript:reply_to('2445', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@neargle：你已经不错了，我大一学的那会把这东西当漏洞提交了，辛亏没过，要不然就贻笑大方了……</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2447">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/945b4ef584f0297607937bd9dd5619f1.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">xbtsec</a>
+<time datetime="2016年10月4日 17:57" itemprop="datePublished">
+                            2016 十月 04 17:57
+                        </time>
+<a href="javascript:reply_to('2447', 'xbtsec')">回复</a>
+</p>
+<p class="comment-meta">@phithon：说起贻笑大方，又一次把一个cms下载来  自己搭建   然后没设置  就 目录遍历了    然后  我竟然提交补天了  辛亏没过，要不然就贻笑大方了……</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="2a33325f2c877e1dbd0ddd7c40b0e1cdfe244a93"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/2a33325f2c877e1dbd0ddd7c40b0e1cdfe244a93"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="394">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="uC6zLHz0mPtwTqwsFNHIkn3ch58AkD8g2Wr5zbLfNCnVT5UHt4bsT15hq9BI37Xq"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./Cookie-Form型CSRF防御机制的不足与反思  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

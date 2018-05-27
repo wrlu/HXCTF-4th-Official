@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+
+<html lang="zh">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=Edge" http-equiv="X-UA-Compatible"/>
+<title>Express+Gulp配置高效率开发环境</title>
+<meta content="" name="description"/>
+<meta content="Ghost, blog, Ghost博客, Ghost主题, Ghost theme" name="keywords"/>
+<meta content="True" name="HandheldFriendly">
+<meta content="telephone=no" name="format-detection"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<meta content="QOxhTJqHj1" name="baidu-site-verification">
+<meta content="2a8f8f0ee32eadeb2f7c600df62f7273" name="baidu_union_verify"/>
+<link href="./Express+Gulp配置高效率开发环境/favicon.pngv=c4691e5d94" rel="shortcut icon" type="image/png"/>
+<link href="./Express+Gulp配置高效率开发环境/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Express+Gulp配置高效率开发环境/materialize.min.cssv=c4691e5d94" rel="stylesheet" type="text/css">
+<link href="./Express+Gulp配置高效率开发环境/prism.cssv=c4691e5d94" rel="stylesheet" type="text/css">
+<link href="./Express+Gulp配置高效率开发环境/screen.cssv=c4691e5d94" rel="stylesheet" type="text/css"/>
+<link href="./Express+Gulp配置高效率开发环境/express-gulppei-zhi-gao-xiao-lu-kai-fa-huan-jing" rel="canonical"/>
+<meta content="origin" name="referrer">
+<meta content="信鑫-King's Blog" property="og:site_name">
+<meta content="article" property="og:type">
+<meta content="Express+Gulp配置高效率开发环境" property="og:title">
+<meta content="原来用的React+Webpack时，那种同步压缩修改、实时动态刷新页面的感觉真的太棒了。但如果使用Express+ejs+less的话，配置webpack非常繁琐，所以，一番折腾后，于是有了Express+Less+Gulp的配置方案，效果见下图，项目地址：https://github.com/ycjcl868/Express_Gulp 目的 我使用Express+Ejs+Less开发，想开发时对所有资源进行压缩并同步到浏览器端，Google搜索一遍，都不是太符合我的项目要求。于是看着Gulp文档结合npmjs.com终于折腾完毕。 配置 下面说下我的配置方法： 我的目录结构： ├── app.js   # Express Server ├── bin │   └── www  # 启动Server..." property="og:description">
+<meta content="http://www.ycjcl.cc/2017/01/08/express-gulppei-zhi-gao-xiao-lu-kai-fa-huan-jing/" property="og:url">
+<meta content="2017-01-08T01:40:16.976Z" property="article:published_time">
+<meta content="2017-02-08T03:00:27.196Z" property="article:modified_time"/>
+<meta content="前端" property="article:tag"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="Express+Gulp配置高效率开发环境" name="twitter:title"/>
+<meta content="原来用的React+Webpack时，那种同步压缩修改、实时动态刷新页面的感觉真的太棒了。但如果使用Express+ejs+less的话，配置webpack非常繁琐，所以，一番折腾后，于是有了Express+Less+Gulp的配置方案，效果见下图，项目地址：https://github.com/ycjcl868/Express_Gulp 目的 我使用Express+Ejs+Less开发，想开发时对所有资源进行压缩并同步到浏览器端，Google搜索一遍，都不是太符合我的项目要求。于是看着Gulp文档结合npmjs.com终于折腾完毕。 配置 下面说下我的配置方法： 我的目录结构： ├── app.js   # Express Server ├── bin │   └── www  # 启动Server..." name="twitter:description"/>
+<meta content="http://www.ycjcl.cc/2017/01/08/express-gulppei-zhi-gao-xiao-lu-kai-fa-huan-jing/" name="twitter:url"/>
+<script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "Article",
+    "publisher": "信鑫-King's Blog",
+    "author": {
+        "@type": "Person",
+        "name": "Kylin King",
+        "image": "http://www.ycjcl.cc/content/images/2016/12/IMG_0026.PNG",
+        "url": "http://www.ycjcl.cc/author/kylin",
+        "sameAs": "http://ycjcl.cc",
+        "description": "问题总是有方法去解决，只要你愿意想！"
+    },
+    "headline": "Express+Gulp配置高效率开发环境",
+    "url": "http://www.ycjcl.cc/2017/01/08/express-gulppei-zhi-gao-xiao-lu-kai-fa-huan-jing/",
+    "datePublished": "2017-01-08T01:40:16.976Z",
+    "dateModified": "2017-02-08T03:00:27.196Z",
+    "keywords": "前端",
+    "description": "原来用的React+Webpack时，那种同步压缩修改、实时动态刷新页面的感觉真的太棒了。但如果使用Express+ejs+less的话，配置webpack非常繁琐，所以，一番折腾后，于是有了Express+Less+Gulp的配置方案，效果见下图，项目地址：https://github.com/ycjcl868/Express_Gulp 目的 我使用Express+Ejs+Less开发，想开发时对所有资源进行压缩并同步到浏览器端，Google搜索一遍，都不是太符合我的项目要求。于是看着Gulp文档结合npmjs.com终于折腾完毕。 配置 下面说下我的配置方法： 我的目录结构： ├── app.js   # Express Server ├── bin │   └── www  # 启动Server..."
+}
+    </script>
+<meta content="Ghost 0.7" name="generator"/>
+<link href="./Express+Gulp配置高效率开发环境/rss" rel="alternate" title="信鑫-King's Blog" type="application/rss+xml"/>
+</meta></meta></meta></meta></meta></meta></meta></link></link></meta></meta></head>
+<body>
+<div class="navbar" id="topScroll">
+<nav class="b-green scrollSpy" role="navigation">
+<div class="container">
+<div class="nav-wrapper">
+<div class="brand-logo">
+<a class="waves-effect waves-light" href="http://www.ycjcl.cc">
+<img alt="信鑫-King's Blog" class="logo-img hide-on-med-and-down static-img" src="./Express+Gulp配置高效率开发环境/avatar.png"/>
+<span class="logo-span">信鑫-King's Blog</span>
+</a>
+</div>
+<a class="button-collapse" data-activates="mobile-nav" href="#"><i class="fa fa-bars"></i></a>
+<ul class="right hide-on-med-and-down">
+<li><a class="li-menu waves-effect waves-light" href="http://www.ycjcl.cc/tag/life">生活</a></li>
+<li><a class="li-menu waves-effect waves-light" href="http://www.ycjcl.cc/tag/front">前端</a></li>
+<li><a class="li-menu waves-effect waves-light" href="http://www.ycjcl.cc/tag/note">笔记</a></li>
+<li><a class="li-menu waves-effect waves-light" href="http://www.ycjcl.cc/tag/ctf">CTF</a></li>
+<li><a class="li-menu waves-effect waves-light" href="http://www.ycjcl.cc/tag/service">服务器</a></li>
+<li><a class="li-menu waves-effect waves-light" href="http://www.ycjcl.cc/tag/ari">算法</a></li>
+<li class="">
+<a class="toggle-search waves-effect waves-light" href="#!" id="toggle-search">
+<i class="mdi-action-search"></i>
+</a>
+</li>
+</ul>
+<ul class="side-nav" id="mobile-nav">
+<li class="b-green">
+<img class="logo-img static-img" src="./Express+Gulp配置高效率开发环境/avatar.png"/>
+<span class="logo-span">信鑫-King's Blog</span>
+</li>
+<li><a class="waves-effect waves-light" href="http://www.ycjcl.cc/tag/life">生活</a></li>
+<li><a class="waves-effect waves-light" href="http://www.ycjcl.cc/tag/front">前端</a></li>
+<li><a class="waves-effect waves-light" href="http://www.ycjcl.cc/tag/note">笔记</a></li>
+<li><a class="waves-effect waves-light" href="http://www.ycjcl.cc/tag/ctf">CTF</a></li>
+<li><a class="waves-effect waves-light" href="http://www.ycjcl.cc/tag/service">服务器</a></li>
+<li><a class="waves-effect waves-light" href="http://www.ycjcl.cc/tag/ari">算法</a></li>
+</ul>
+<a class="toggle-search right waves-effect waves-light hide-on-large-only" href="#!">
+<i class="mdi-action-search"></i>
+</a>
+</div>
+</div>
+</nav>
+</div>
+<div class="container row white-text grey darken-3" id="search">
+<form>
+<input class="search-input form-control" id="searchInput" placeholder=" 搜 索 ..." type="text"/>
+</form>
+</div>
+<div class="container section">
+<div class="row">
+<div class="notice col s12 m12">
+<div class="card grey lighten-5">
+<div class="card-content">
+<i class="fa fa-cog fa-spin fa-fw b-text-green fa-lg"></i>
+                合作，共赢，together and stronger.
+            </div>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="main-side col s12 m12 l8">
+<div class="article" id="article-detail">
+<div class="detail-card card">
+<div class="card-content">
+<div class="article-title card-title b-title b-text-green">Express+Gulp配置高效率开发环境</div>
+<ul class="list-inline">
+<li>
+<a class="b-text-gray" href="#" target="_blank">
+<i class="fa fa-user"></i> Kylin King
+                                </a>
+</li>
+<li>
+<a class="b-text-gray">
+<i class="fa fa-calendar"></i> 一月 08 2017
+                                </a>
+</li>
+<li class="detail-card-tag hide-on-small-only">
+<a><i class="fa fa-tag b-text-gray"></i></a>
+<span class="chip">前端</span>
+</li>
+</ul>
+</div>
+<div class="article-action card-action"></div>
+<div class="card-content" id="article-content">
+<blockquote>
+<p>原来用的<code>React</code>+<code>Webpack</code>时，那种同步压缩修改、实时动态刷新页面的感觉真的太棒了。但如果使用<code>Express</code>+<code>ejs</code>+<code>less</code>的话，配置<code>webpack</code>非常繁琐，所以，一番折腾后，于是有了<code>Express</code>+<code>Less</code>+<code>Gulp</code>的配置方案，效果见下图，项目地址：<a href="https://github.com/ycjcl868/Express_Gulp">https://github.com/ycjcl868/Express_Gulp</a></p>
+</blockquote>
+<p><img alt="" src="./Express+Gulp配置高效率开发环境/123182932189.gif"/></p>
+<h3 id="">目的</h3>
+<p>我使用<code>Express</code>+<code>Ejs</code>+<code>Less</code>开发，想开发时对所有资源进行<code>压缩</code>并<code>同步</code>到浏览器端，Google搜索一遍，都不是太符合我的项目要求。于是看着<code>Gulp文档</code>结合<code>npmjs.com</code>终于折腾完毕。</p>
+<h3 id="">配置</h3>
+<p>下面说下我的配置方法：</p>
+<h4 id="">我的目录结构：</h4>
+<pre><code>├── app.js   # Express Server
+├── bin
+│   └── www  # 启动Server
+├── dist     # 编译压缩目录(部署目录)
+│   ├── css
+│   ├── img
+│   ├── js
+│   ├── views
+│   └── lib  # 第三方库目录(bower安装)
+├── .bowerrc # bower前端安装库
+├── gulpfile.js  # Gulp配置文件
+├── package.json
+├── public       # 开发目录 
+│   ├── img
+│   ├── js
+│   └── less     
+├── routes
+│   ├── index.js
+│   └── users.js
+└── views      # html
+    ├── error.ejs
+    └── index.ejs
+</code></pre>
+<h4 id="packagejson">package.json文件内容：</h4>
+<pre><code class="language-json">{
+  "name": "voteapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "body-parser": "~1.13.2",
+    "cookie-parser": "~1.3.5",
+    "debug": "~2.2.0",
+    "ejs": "~2.3.3",
+    "express": "~4.13.1",
+    "morgan": "~1.6.1",
+    "serve-favicon": "~2.3.0"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.18.6",
+    "del": "^2.2.2",
+    "gulp": "^3.9.1",
+    "gulp-cache": "^0.4.5",
+    "gulp-clean-css": "^2.3.2",
+    "gulp-concat": "^2.6.1",
+    "gulp-ejs": "^2.3.0",
+    "gulp-htmlmin": "^3.0.0",
+    "gulp-imagemin": "^3.1.1",
+    "gulp-less": "^3.3.0",
+    "gulp-livereload": "^3.8.1",
+    "gulp-nodemon": "^2.2.1",
+    "gulp-uglify": "^2.0.0",
+    "gulp-watch": "^4.3.11"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" &amp;&amp; exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
+</code></pre>
+<h4 id="gulpfilejs">gulpfile.js文件</h4>
+<pre><code class="language-js">'use strict';  
+var gulp = require('gulp');  
+var minify = require('gulp-clean-css');  
+var browserSync = require('browser-sync');  
+var nodemon = require('gulp-nodemon');  
+var cache = require('gulp-cache');  
+var uglify = require('gulp-uglify');  
+var htmlmin = require('gulp-htmlmin');  
+var imagemin = require('gulp-imagemin');  
+var less = require('gulp-less');  
+var path = require('path');  
+var livereload = require('gulp-livereload');  
+var concat = require('gulp-concat');  
+var jshint = require('gulp-jshint');  
+var cssBase64 = require('gulp-base64');  
+var del = require('del');
+
+// 删除文件
+gulp.task('clean', function(cb) {  
+    del(['dist/css/*', 'dist/js/*', 'dist/img/*','dist/views/*'], cb)
+});
+
+// 压缩ejs
+gulp.task('ejs', function() {  
+  return gulp.src('views/**/*.ejs')
+      .pipe(htmlmin({collapseWhitespace: true}))
+      .pipe(gulp.dest('dist/views/'));
+});
+
+// 压缩less
+gulp.task('less', function () {  
+  return gulp.src('public/less/**/*.less')
+      .pipe(less({
+          paths: [ path.join(__dirname, 'less', 'includes') ]
+      }))
+      .pipe(cssBase64())
+      .pipe(minify())
+      .pipe(gulp.dest('dist/css/'));
+});
+
+
+// 压缩js
+gulp.task('js', function () {  
+    return gulp.src('public/js/**/*.js')
+        .pipe(jshint())
+        .pipe(jshint.reporter('default'))
+        .pipe(uglify({ compress: true }))
+        .pipe(gulp.dest('dist/js/'))
+});
+
+
+// 压缩img
+gulp.task('img', function() {  
+  return gulp.src('public/img/**/*')        //引入所有需处理的Img
+    .pipe(imagemin({ optimizationLevel: 3, progressive: true, interlaced: true }))      //压缩图片
+    // 如果想对变动过的文件进行压缩，则使用下面一句代码
+    // .pipe(cache(imagemin({ optimizationLevel: 3, progressive: true, interlaced: true }))) 
+    .pipe(gulp.dest('dist/img/'))
+    // .pipe(notify({ message: '图片处理完成' }));
+});
+
+
+// 浏览器同步，用7000端口去代理Express的3008端口
+gulp.task('browser-sync', ['nodemon'], function() {  
+  browserSync.init(null, {
+    proxy: "http://localhost:3008",
+        files: ["dist/views/*.*","dist/css/*.*","dist/js/*.*","dist/img/*.*"],
+        browser: "google chrome",
+        port: 7000
+  });
+});
+
+// 开启Express服务
+gulp.task('nodemon', function (cb) {
+
+  var started = false;
+
+  return nodemon({
+    script: 'bin/www'
+  }).on('start', function () {
+    // to avoid nodemon being started multiple times
+    // thanks @matthisk
+    if (!started) {
+      cb();
+      started = true; 
+    } 
+  });
+}); 
+
+gulp.task('build',['clean','less','ejs','js','img'],function () {
+
+});
+
+gulp.task('default',['browser-sync'],function(){  
+  // 将你的默认的任务代码放这
+
+    // 监听所有css文档
+    gulp.watch('public/less/*.less', ['less']);
+
+    // 监听所有.js档
+    gulp.watch('public/js/*.js', ['js']);
+
+    // 监听所有图片档
+    gulp.watch('public/img/**/*', ['img']);
+    // 监听ejs
+    gulp.watch('views/**/*.ejs', ['ejs']);
+
+   // 创建实时调整服务器 -- 在项目中未使用注释掉
+  var server = livereload();
+   // 监听 dist/ 目录下所有文档，有更新时强制浏览器刷新（需要浏览器插件配合或按前文介绍在页面增加JS监听代码）
+  gulp.watch(['public/dist/**']).on('change', function(file) {
+    server.changed(file.path);
+  });
+});
+</code></pre>
+<h4 id="appjs">app.js文件</h4>
+<pre><code class="language-js">var express = require('express');  
+var path = require('path');  
+var favicon = require('serve-favicon');  
+var logger = require('morgan');  
+var cookieParser = require('cookie-parser');  
+var bodyParser = require('body-parser');
+
+var routes = require('./routes/index');  
+var users = require('./routes/users');
+
+var app = express();
+
+// view engine setup
+app.set('views', path.join(__dirname, 'dist/views'));  
+app.set('view engine', 'ejs');
+
+// uncomment after placing your favicon in /public
+//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(logger('dev'));  
+app.use(bodyParser.json());  
+app.use(bodyParser.urlencoded({ extended: false }));  
+app.use(cookieParser());  
+app.use(express.static(path.join(__dirname, 'dist')));
+
+app.use('/', routes);  
+app.use('/users', users);
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {  
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
+
+// error handlers
+
+// development error handler
+// will print stacktrace
+if (app.get('env') === 'development') {  
+  app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+      message: err.message,
+      error: err
+    });
+  });
+}
+
+// production error handler
+// no stacktraces leaked to user
+app.use(function(err, req, res, next) {  
+  res.status(err.status || 500);
+  res.render('error', {
+    message: err.message,
+    error: {}
+  });
+});
+
+
+module.exports = app;
+</code></pre>
+<p>然后先在根目录下执行安装：
+<code>npm install</code>，使用时先运行<code>gulp build</code>将文件压缩、打包、编译，然后再执行<code>gulp</code>开启自动更新服务器。</p>
+<p><img alt="" src="./Express+Gulp配置高效率开发环境/0D5D88BF-DEC3-43D2-B1CB-0D13CF4947DD.png"/></p>
+</div>
+<div class="article-action card-action"></div>
+<div class="card-content">
+<p>转载请注明：<a class="b-text-green" href="http://ycjcl.cc" target="_blank">信鑫-King's Blog</a>
+                             » <a class="b-text-green" href="/2017/01/08/express-gulppei-zhi-gao-xiao-lu-kai-fa-huan-jing/" target="_blank">Express+Gulp配置高效率开发环境</a>
+</p>
+<div class="article-share">
+    分享到：
+<div class="bdsharebuttonbox"><a class="bds_more" data-cmd="more" href="#"></a><a class="bds_qzone" data-cmd="qzone" href="#" title="分享到QQ空间"></a><a class="bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a><a class="bds_tqq" data-cmd="tqq" href="#" title="分享到腾讯微博"></a><a class="bds_renren" data-cmd="renren" href="#" title="分享到人人网"></a><a class="bds_weixin" data-cmd="weixin" href="#" title="分享到微信"></a><a class="bds_sqq" data-cmd="sqq" href="#" title="分享到QQ好友"></a><a class="bds_tieba" data-cmd="tieba" href="#" title="分享到百度贴吧"></a></div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"32"},"share":{},"image":{"viewList":["qzone","tsina","tqq","renren","weixin","sqq","tieba"],"viewText":"分享到：","viewSize":"16"},"selectShare":{"bdContainerClass":null,"bdSelectMiniList":["qzone","tsina","tqq","renren","weixin","sqq","tieba"]}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+</div>
+<div class="article-action card-action"></div>
+<div class="card-content reward-wrapper">
+<div class="reward" id="reward">
+<a class="btn_donate" href="javascript:;" id="btn_donate" target="_self" title="Donate 打赏"></a>
+<span class="donate_txt">↑<br/>If you enjoy the article,please feel free to<span class="bold">donate~</span>Thx.<br/>若本文对您有帮助，<span class="bold">求打赏~</span>谢谢您的鼓励。</span>
+</div>
+<div class="reward-qcode" id="reward-qcode">
+<img alt="" src="./Express+Gulp配置高效率开发环境/pay.jpg"/>
+</div>
+</div>
+</div>
+<section class="post-comment card">
+<div class="ds-thread" data-thread-key="express-gulppei-zhi-gao-xiao-lu-kai-fa-huan-jing" data-title="Express+Gulp配置高效率开发环境" data-url="http://www.ycjcl.cc/2017/01/08/express-gulppei-zhi-gao-xiao-lu-kai-fa-huan-jing/"></div>
+</section>
+<div class="prenext-card card">
+<div class="prenext-row row">
+<div class="prenext col s12 m6 l6">
+<p class="pn-title">上一篇</p>
+<div>
+<a class="b-link" href="/2016/12/25/subl-macxia-jie-jue-terminalcha-jian-zhong-wu-fa-da-kai-iterm2de-wen-ti/">解决Mac Subl下Terminal插件中打开iTerm2</a>
+</div>
+</div>
+<div class="prenext col s12 m6 l6">
+<p class="pn-title">下一篇</p>
+<div>
+<a class="b-link" href="/2017/01/11/ke-she-zhi-dian-ying-tou-piao-xi-tong/">前后分离之"电影投票系统"</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="col s12 m12 l4 hide-on-med-and-down">
+<div class="sidebar">
+<div class="card-user card">
+<div class="card-image waves-effect waves-block waves-light">
+<img class="head-pic activator responsive-img static-img" src="./Express+Gulp配置高效率开发环境/avatar.jpgv=c4691e5d94"/>
+</div>
+<div class="card-action">
+<div class="user-info center-align">
+<span class="card-title activator b-title b-text-green">信鑫-King's Blog</span>
+<p class="socail-link center-align">
+<a class="tooltipped" data-delay="5" data-position="top" data-tooltip="访问我的GitHub" href="https://github.com/ycjcl868" target="_blank">
+<i class="fa fa-github fa-lg"></i>
+</a>
+<a class="tooltipped" data-delay="5" data-position="top" data-tooltip="邮件联系我:chaolinjin@gmail.com" href="mailto:chaolinjin@gmail.com" target="_blank">
+<i class="fa fa-envelope fa-lg"></i>
+</a>
+<a class="tooltipped" data-delay="5" data-position="top" data-tooltip="QQ号：45808948" href="#!">
+<i class="fa fa-qq fa-lg"></i>
+</a>
+<a class="tooltipped" data-delay="5" data-position="top" data-tooltip="新浪微博" href="http://weibo.com/ycjcl" target="_blank">
+<i class="fa fa-weibo fa-lg"></i>
+</a>
+<a class="tooltipped" data-delay="5" data-position="top" data-tooltip="微信号：kylinJCL" href="#!">
+<i class="fa fa-weixin fa-lg"></i>
+</a>
+<!--    <a href="http://www.ycjcl.cc/rss/" class="tooltipped" data-tooltip="RSS" data-position="top"
+                    data-delay="5" target="_blank">
+                    <i class="fa fa-rss fa-lg"></i>
+                </a>  -->
+</p>
+<h6 class="desc">
+                    简单，可依赖！
+            </h6>
+</div>
+</div>
+<div class="card-reveal">
+<span class="card-title b-text-green">信鑫-King's Blog<i class="fa fa-close right"></i></span>
+<p class="b-text-gray">不妨用手机扫描下面的二维码访问本网站：</p>
+<div class="card-image waves-effect waves-block waves-light">
+<img class="qrcode activator responsive-img static-img" src="./Express+Gulp配置高效率开发环境/qcode.pngv=c4691e5d94"/>
+</div>
+</div>
+</div>
+<div class="card-tags card">
+<div class="card-custom-title">
+<i class="fa fa-tags fa-lg green-text text-darken-2"></i> 
+		<span class="card-title green-text text-darken-2">标签云</span>
+</div>
+<div class="card-action">
+<div class="tags">
+<a class="chip waves-effect waves-red" href="/tag/ari/" target="_blank">算法</a>
+<a class="chip waves-effect waves-red" href="/tag/tag-tag/" target="_blank">tag</a>
+<a class="chip waves-effect waves-red" href="/tag/ctf/" target="_blank">ctf</a>
+<a class="chip waves-effect waves-red" href="/tag/ide/" target="_blank">ide</a>
+<a class="chip waves-effect waves-red" href="/tag/service/" target="_blank">服务器</a>
+<a class="chip waves-effect waves-red" href="/tag/front/" target="_blank">前端</a>
+<a class="chip waves-effect waves-red" href="/tag/note/" target="_blank">笔记</a>
+<a class="chip waves-effect waves-red" href="/tag/life/" target="_blank">生活</a>
+<a class="chip waves-effect waves-red" href="/tag/index/" target="_blank">首页</a>
+</div>
+</div>
+</div>
+<div class="card-friend card">
+<div class="card-custom-title">
+<i class="fa fa-link fa-lg green-text text-darken-2"></i> 
+        <span class="card-title green-text text-darken-2">友情链接</span>
+</div>
+<div class="card-action friend-url">
+<ul>
+<li><a href="http://xferris.me/" target="_blank">大哥Ferris_Blog</a></li>
+<li><a href="http://bestwing.me/" target="_blank">学弟Swing_Blog</a></li>
+<li><a href="http://mxny.org" target="_blank">麦香师傅_Blog</a></li>
+<li><a href="http://ring3.xyz/" target="_blank">龙哥_Blog</a></li>
+<li><a href="http://hackersb.cn" target="_blank">王松_Striker_Blog</a></li>
+<li><a href="http://momomoxiaoxi.com" target="_blank">默小西_Blog</a></li>
+<li><a href="http://www.bystudent.com" target="_blank">ByStudent_Blog</a></li>
+<li><a href="http://www.bodkin.ren/" target="_blank">老锥_Blog</a></li>
+<li><a href="https://www.hackfun.org" target="_blank">4ido10n's Blog</a></li>
+<li><a href="http://sh3ll.me/" target="_blank">Chu's BLoG</a></li>
+<li><a href="https://www.sco4x0.com" target="_blank">sco4x0's BLoG</a></li>
+<li><a href="https://www.jarviswang.me" target="_blank">Jarvis's Blog</a></li>
+<li><a href="http://www.bendawang.site" target="_blank">Bendawang师傅_Blog</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<script>
+            var duoshuoQuery = {short_name:"ycjcl"};
+            var oBtn = document.getElementById('btn_donate');
+            var qcode = document.getElementById('reward-qcode');
+            var reward = document.getElementById('reward');
+            (function() {
+                // 多说
+                var ds = document.createElement('script');
+                ds.type = 'text/javascript';ds.async = true;
+                ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+                ds.charset = 'UTF-8';
+                (document.getElementsByTagName('head')[0] 
+                 || document.getElementsByTagName('body')[0]).appendChild(ds);
+
+                
+                // 打赏
+                oBtn.onclick = function(){
+                    reward.className = 'reward payhide';
+                    qcode.className = 'reward-qcode payshow';
+                }
+            })();
+        </script>
+</div>
+</div>
+<footer class="page-footer b-green">
+<div class="b-foot footer-copyright b-black">
+<div class="container row center-align">
+<div class="col s12 m12 l12">
+<span class="copyright">
+                    本站由©<a href="http://ycjcl.cc" target="_blank">Kylin</a>
+                    陕ICP备16007407号
+                </span>
+</div>
+</div>
+</div>
+</footer>
+<!-- scroll top -->
+<div class="top-scroll" id="topScroll-btn">
+<a class="btn-floating btn-large waves-effect waves-light red accent-3" href="javascript:;">
+<i class="fa fa-arrow-up"></i>
+</a>
+</div>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?17735748da6b3a0d62ed6daff6a6d061";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./Express+Gulp配置高效率开发环境/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="/assets/plugins/jquery/jquery-2.1.4.min.js?v=c4691e5d94"><\/script>')</script>
+<script src="./Express+Gulp配置高效率开发环境/materialize.min.jsv=c4691e5d94" type="text/javascript"></script>
+<script src="./Express+Gulp配置高效率开发环境/prism.jsv=c4691e5d94" type="text/javascript"></script>
+<script src="./Express+Gulp配置高效率开发环境/index.jsv=c4691e5d94" type="text/javascript"></script>
+</body>
+</html>

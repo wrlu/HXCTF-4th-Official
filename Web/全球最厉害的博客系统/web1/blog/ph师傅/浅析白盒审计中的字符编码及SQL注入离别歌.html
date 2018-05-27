@@ -1,0 +1,440 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./浅析白盒审计中的字符编码及SQL注入  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./浅析白盒审计中的字符编码及SQL注入  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./浅析白盒审计中的字符编码及SQL注入  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>浅析白盒审计中的字符编码及SQL注入 | 离别歌</title>
+<link href="./浅析白盒审计中的字符编码及SQL注入  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./浅析白盒审计中的字符编码及SQL注入  离别歌/styles.css" rel="stylesheet"/>
+<link href="./浅析白盒审计中的字符编码及SQL注入  离别歌/style.css" rel="stylesheet"/>
+<link href="//cdn.bootcss.com/flexboxgrid/6.3.1/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./浅析白盒审计中的字符编码及SQL注入  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./浅析白盒审计中的字符编码及SQL注入  离别歌/jquery.min.js"></script>
+<link href="./浅析白盒审计中的字符编码及SQL注入  离别歌/code.css" rel="stylesheet"/>
+<link href="./浅析白盒审计中的字符编码及SQL注入  离别歌/button.css" rel="stylesheet"/>
+<link href="./浅析白盒审计中的字符编码及SQL注入  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./浅析白盒审计中的字符编码及SQL注入  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/mutibyte-sql-inject.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/mutibyte-sql-inject.html&amp;text=%E6%B5%85%E6%9E%90%E7%99%BD%E7%9B%92%E5%AE%A1%E8%AE%A1%E4%B8%AD%E7%9A%84%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E5%8F%8ASQL%E6%B3%A8%E5%85%A5"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/mutibyte-sql-inject.html&amp;title=%E6%B5%85%E6%9E%90%E7%99%BD%E7%9B%92%E5%AE%A1%E8%AE%A1%E4%B8%AD%E7%9A%84%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E5%8F%8ASQL%E6%B3%A8%E5%85%A5"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/mutibyte-sql-inject.html&amp;is_video=false&amp;description=%E6%B5%85%E6%9E%90%E7%99%BD%E7%9B%92%E5%AE%A1%E8%AE%A1%E4%B8%AD%E7%9A%84%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E5%8F%8ASQL%E6%B3%A8%E5%85%A5"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E6%B5%85%E6%9E%90%E7%99%BD%E7%9B%92%E5%AE%A1%E8%AE%A1%E4%B8%AD%E7%9A%84%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E5%8F%8ASQL%E6%B3%A8%E5%85%A5&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/mutibyte-sql-inject.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/mutibyte-sql-inject.html&amp;title=%E6%B5%85%E6%9E%90%E7%99%BD%E7%9B%92%E5%AE%A1%E8%AE%A1%E4%B8%AD%E7%9A%84%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E5%8F%8ASQL%E6%B3%A8%E5%85%A5"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/mutibyte-sql-inject.html&amp;title=%E6%B5%85%E6%9E%90%E7%99%BD%E7%9B%92%E5%AE%A1%E8%AE%A1%E4%B8%AD%E7%9A%84%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E5%8F%8ASQL%E6%B3%A8%E5%85%A5"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/mutibyte-sql-inject.html&amp;title=%E6%B5%85%E6%9E%90%E7%99%BD%E7%9B%92%E5%AE%A1%E8%AE%A1%E4%B8%AD%E7%9A%84%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E5%8F%8ASQL%E6%B3%A8%E5%85%A5"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/mutibyte-sql-inject.html&amp;title=%E6%B5%85%E6%9E%90%E7%99%BD%E7%9B%92%E5%AE%A1%E8%AE%A1%E4%B8%AD%E7%9A%84%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E5%8F%8ASQL%E6%B3%A8%E5%85%A5"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/mutibyte-sql-inject.html&amp;name=%E6%B5%85%E6%9E%90%E7%99%BD%E7%9B%92%E5%AE%A1%E8%AE%A1%E4%B8%AD%E7%9A%84%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E5%8F%8ASQL%E6%B3%A8%E5%85%A5&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">浅析白盒审计中的字符编码及SQL注入</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年4月19日 17:43" itemprop="datePublished">
+                    2014 四月 19 17:43
+                </time>
+</div>
+<div class="article-tag">
+            阅读：8849
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E5%AE%BD%E5%AD%97%E7%AC%A6">宽字符</a>,
+                
+                <a class="tag-link" href="/tag/%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E">注入漏洞</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>在freebuf上莫名地被喷，可能是因为被喷让人气上来了，最后得到的金币比前一篇文章更多。塞翁失马，焉知非福？</p>
+<p><strong>尽管现在呼吁所有的程序都使用unicode编码，所有的网站都使用utf-8编码，来一个统一的国际规范。但仍然有很多，包括国内及国外（特别是非英语国家）的一些cms，仍然使用着自己国家的一套编码，比如gbk，作为自己默认的编码类型。</strong>也有一些cms为了考虑老用户，所以出了gbk和utf-8两个版本。</p>
+<p>我们就以gbk字符编码为示范，拉开帷幕。gbk是一种多字符编码，具体定义自行百度。但有一个地方尤其要注意：</p>
+<p>通常来说，一个gbk编码汉字，占用2个字节。一个utf-8编码的汉字，占用3个字节。在php中，我们可以通过输出</p>
+<div class="codehilite"><pre><span></span>echo strlen("和");
+</pre></div>
+<p>来测试。当将页面编码保存为gbk时输出2，utf-8时输出3。</p>
+<p>除了gbk以外，所有ANSI编码都是2个字节。ansi只是一个标准，在不用的电脑上它代表的编码可能不相同，比如简体中文系统中ANSI就代表是GBK。</p>
+<p>以上是一点关于多字节编码的小知识，只有我们足够了解它的组成及特性以后，才能更好地去分析它身上存在的问题。</p>
+<p>说了这么多废话，现在来研究一下在SQL注入中，字符编码带来的各种问题。</p>
+<h2 id="001-mysql"><a class="toclink" href="#001-mysql">0×01 MYSQL中的宽字符注入</a></h2>
+<p>这是一个老话题了，也被人玩过无数遍。但作为我们这篇文章的序幕，也是基础，是必须要提的。</p>
+<p>我们先搭建一个实验环境。暂且称之为phithon内容管理系统v1.0，首先先新建一个数据库，把如下压缩包中的sql文件导入：</p>
+<p>测试代码及数据库：<a href="http://pan.baidu.com/s/1eQmUArw"><a href="http://pan.baidu.com/s/1eQmUArw">http://pan.baidu.com/s/1eQmUArw</a></a> 提取密码:75tu</p>
+<p>之后的phithon内容管理系统会逐步完善，但会一直使用这个数据表。</p>
+<p>源码很简单（注意先关闭自己php环境的magic_quotes_gpc）：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="c1">//连接数据库部分，注意使用了gbk编码，把数据库信息填写进去</span>
+<span class="nv">$conn</span> <span class="o">=</span> <span class="nb">mysql_connect</span><span class="p">(</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="s1">'root'</span><span class="p">,</span> <span class="s1">'toor!@#$'</span><span class="p">)</span> <span class="k">or</span> <span class="k">die</span><span class="p">(</span><span class="s1">'bad!'</span><span class="p">);</span>
+<span class="nb">mysql_query</span><span class="p">(</span><span class="s2">"SET NAMES 'gbk'"</span><span class="p">);</span>
+<span class="nb">mysql_select_db</span><span class="p">(</span><span class="s1">'test'</span><span class="p">,</span> <span class="nv">$conn</span><span class="p">)</span> <span class="k">OR</span> <span class="nx">emMsg</span><span class="p">(</span><span class="s2">"连接数据库失败，未找到您填写的数据库"</span><span class="p">);</span>
+<span class="c1">//执行sql语句</span>
+<span class="nv">$id</span> <span class="o">=</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">'id'</span><span class="p">])</span> <span class="o">?</span> <span class="nb">addslashes</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">'id'</span><span class="p">])</span> <span class="o">:</span> <span class="mi">1</span><span class="p">;</span>
+<span class="nv">$sql</span> <span class="o">=</span> <span class="s2">"SELECT * FROM news WHERE tid='</span><span class="si">{</span><span class="nv">$id</span><span class="si">}</span><span class="s2">'"</span><span class="p">;</span>
+<span class="nv">$result</span> <span class="o">=</span> <span class="nb">mysql_query</span><span class="p">(</span><span class="nv">$sql</span><span class="p">,</span> <span class="nv">$conn</span><span class="p">)</span> <span class="k">or</span> <span class="k">die</span><span class="p">(</span><span class="nb">mysql_error</span><span class="p">());</span> <span class="c1">//sql出错会报错，方便观察</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+<span class="x">&lt;!DOCTYPE html&gt;</span>
+<span class="x">&lt;html&gt;</span>
+<span class="x">&lt;head&gt;</span>
+<span class="x">&lt;meta charset="gbk" /&gt;</span>
+<span class="x">&lt;title&gt;新闻&lt;/title&gt;</span>
+<span class="x">&lt;/head&gt;</span>
+<span class="x">&lt;body&gt;</span>
+<span class="cp">&lt;?php</span>
+<span class="nv">$row</span> <span class="o">=</span> <span class="nb">mysql_fetch_array</span><span class="p">(</span><span class="nv">$result</span><span class="p">,</span> <span class="nx">MYSQL_ASSOC</span><span class="p">);</span>
+<span class="k">echo</span> <span class="s2">"&lt;h2&gt;</span><span class="si">{</span><span class="nv">$row</span><span class="p">[</span><span class="s1">'title'</span><span class="p">]</span><span class="si">}</span><span class="s2">&lt;/h2&gt;&lt;p&gt;</span><span class="si">{</span><span class="nv">$row</span><span class="p">[</span><span class="s1">'content'</span><span class="p">]</span><span class="si">}</span><span class="s2">&lt;p&gt;</span><span class="se">\n</span><span class="s2">"</span><span class="p">;</span>
+<span class="nb">mysql_free_result</span><span class="p">(</span><span class="nv">$result</span><span class="p">);</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+<span class="x">&lt;/body&gt;</span>
+<span class="x">&lt;/html&gt;</span>
+</pre></div>
+<p>SQL语句是<code>SELECT * FROM news WHERE tid='{$id}'</code>，就是根据文章的id把文章从news表中取出来。</p>
+<p>在这个sql语句前面，我们使用了一个addslashes函数，将<code>$id</code>的值转义。这是通常cms中对sql注入进行的操作，只要我们的输入参数在单引号中，就逃逸不出单引号的限制，无法注入，如下图：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/a0171397900779.jpg"><img alt="001.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/a0171397900779.jpg"/></a></p>
+<p>那么怎么逃过addslashes的限制？众所周知addslashes函数产生的效果就是，让<code>'</code>变成<code>\'</code>，让引号变得不再是“单引号”，只是一撇而已。一般绕过方式就是，想办法处理<code>\'</code>前面的<code>\</code>：</p>
+<p>1.想办法给<code>\</code>前面再加一个<code>\</code>（或单数个即可），变成<code>\\'</code>，这样<code>\</code>被转义了，<code>'</code>逃出了限制<br>
+2.想办法把<code>\</code>弄没有。</br></p>
+<p>我们这里的宽字节注入是利用mysql的一个特性，mysql在使用GBK编码的时候，会认为两个字符是一个汉字（前一个ascii码要大于128，才到汉字的范围）。如果我们输入<code>%df'</code>看会怎样：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/9c3c1397900781.jpg"><img alt="003.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/thum-9c3c1397900781.jpg"/></a></p>
+<p>我们可以看到，已经报错了。我们看到报错，说明sql语句出错，看到出错说明可以注入了。</p>
+<p>为什么从刚才到现在，只是在<code>'</code>也就是%27前面加了一个%df就报错了？而且从图中可以看到，报错的原因就是多了一个单引号，而单引号前面的反斜杠不见了。</p>
+<p>这就是mysql的特性，因为gbk是多字节编码，他认为两个字节代表一个汉字，所以%df和后面的<code>\</code>也就是%5c变成了一个汉字“運”，而<code>'</code>逃逸了出来。</p>
+<p>因为两个字节代表一个汉字，所以我们可以试试%df%df%27：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/c0501397900781.jpg"><img alt="004.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/c0501397900781.jpg"/></a></p>
+<p>不报错了。因为%df%df是一个汉字，%5c%27不是汉字，仍然是<code>\'</code>。</p>
+<p>那么mysql怎么判断一个字符是不是汉字，根据gbk编码，第一个字节ascii码大于128，基本上就可以了。比如我们不用%df，用%a1也可以：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/664a1397900782.jpg"><img alt="005.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/664a1397900782.jpg"/></a></p>
+<p>%a1%5c他可能不是汉字，但一定会被mysql认为是一个宽字符，就能够让后面的%27逃逸了出来。</p>
+<p>于是我可以构造一个exp出来，查询管理员账号密码：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/6bc21397900782.jpg"><img alt="006.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/thum-6bc21397900782.jpg"/></a></p>
+<h2 id="002-gb2312gbk"><a class="toclink" href="#002-gb2312gbk">0×02 GB2312与GBK的不同</a></h2>
+<p>曾经有一个问题一直困扰我很久。</p>
+<p>gb2312和gbk应该都是宽字节家族的一员。但我们来做个小实验。把phithon内容管理系统中set names修改成gb2312:</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/10671397900783.jpg"><img alt="007.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/thum-10671397900783.jpg"/></a></p>
+<p>结果就是不能注入了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/39551397900784.jpg"><img alt="008.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/39551397900784.jpg"/></a></p>
+<p>有些同学不信的话，也可以把数据库编码也改成gb2312，也是不成功的。</p>
+<p>为什么，这归结于gb2312编码的取值范围。它的高位范围是<code>0xA1~0xF7</code>，低位范围是<code>0xA1~0xFE</code>，而<code>\</code>是0x5c，是不在低位范围中的。所以，<code>0x5c</code>根本不是gb2312中的编码，所以自然也是不会被吃掉的。</p>
+<p>所以，把这个思路扩展到世界上所有多字节编码，我们可以这样认为：只要低位的范围中含有<code>0x5c</code>的编码，就可以进行宽字符注入。</p>
+<h2 id="003-mysql_real_escape_string"><a class="toclink" href="#003-mysql_real_escape_string">0×03 mysql_real_escape_string解决问题？</a></h2>
+<p>部分cms对宽字节注入有所了解，于是寻求解决方案。在php文档中，大家会发现一个函数，mysql_real_escape_string，文档里说了，考虑到连接的当前字符集。</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/c2f51397900784.jpg"><img alt="009.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/thum-c2f51397900784.jpg"/></a></p>
+<p>于是，有的cms就把addslashes替换成mysql_real_escape_string，来抵御宽字符注入。我们继续做试验，phithon内容管理系统v1.2:，就用mysql_real_escape_string来过滤输入：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/55a21397900786.jpg"><img alt="0010.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/thum-55a21397900786.jpg"/></a></p>
+<p>我们来试试能不能注入：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/bd221397900787.jpg"><img alt="0011.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/thum-bd221397900787.jpg"/></a></p>
+<p>一样没压力注入。为什么，明明我用了mysql_real_escape_string，但却仍然不能抵御宽字符注入。</p>
+<p>原因就是，你没有指定php连接mysql的字符集。我们需要在执行sql语句之前调用一下mysql_set_charset函数，设置当前连接的字符集为gbk。</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/dda61397900788.jpg"><img alt="0012.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/thum-dda61397900788.jpg"/></a></p>
+<p>就可以避免这个问题了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/4eb51397900788.jpg"><img alt="0013.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/4eb51397900788.jpg"/></a></p>
+<h2 id="004"><a class="toclink" href="#004">0×04 宽字符注入的修复</a></h2>
+<p>在3中我们说到了一种修复方法，就是先调用mysql_set_charset函数设置连接所使用的字符集为gbk，再调用mysql_real_escape_string来过滤用户输入。</p>
+<p>这个方式是可行的，但有部分老的cms，在多处使用addslashes来过滤字符串，我们不可能去一个一个把addslashes都修改成mysql_real_escape_string。我们第二个解决方案就是，将character_set_client设置为binary（二进制）。</p>
+<p>只需在所有sql语句前指定一下连接的形式是二进制：</p>
+<div class="codehilite"><pre><span></span><span class="k">SET</span> <span class="n">character_set_connection</span><span class="o">=</span><span class="n">gbk</span><span class="p">,</span> <span class="n">character_set_results</span><span class="o">=</span><span class="n">gbk</span><span class="p">,</span><span class="n">character_set_client</span><span class="o">=</span><span class="nb">binary</span>
+</pre></div>
+<p>这几个变量是什么意思？</p>
+<p>当我们的mysql接受到客户端的数据后，会认为他的编码是character_set_client，然后会将之将换成character_set_connection的编码，然后进入具体表和字段后，再转换成字段对应的编码。</p>
+<p>然后，当查询结果产生后，会从表和字段的编码，转换成character_set_results编码，返回给客户端。</p>
+<p>所以，我们将character_set_client设置成binary，就不存在宽字节或多字节的问题了，所有数据以二进制的形式传递，就能有效避免宽字符注入。</p>
+<p>比如，我们的phithon内容管理系统v2.0版本更新如下：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/47391397900789.jpg"><img alt="0014.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/thum-47391397900789.jpg"/></a></p>
+<p>已经不能够注入了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/38691397900790.jpg"><img alt="0015.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/38691397900790.jpg"/></a></p>
+<p>在我审计过的代码中，大部分cms是以这样的方式来避免宽字符注入的。这个方法可以说是有效的，但如果开发者画蛇添足地增加一些东西，会让之前的努力前功尽弃。</p>
+<h2 id="005-iconv"><a class="toclink" href="#005-iconv">0×05 iconv导致的致命后果</a></h2>
+<p>很多cms，不止一个，我就不提名字了，他们的gbk版本都存在因为字符编码造成的注入。但有的同学说，自己测试了这些cms的宽字符注入，没有效果呢，难道是自己姿势不对？</p>
+<p>当然不是。实际上，这一章说的已经不再是宽字符注入了，因为问题并不是出在mysql上，而是出在php中了。</p>
+<p>很多cms（真的很多哦，不信大家自己网上找找）会将接收到数据，调用这样一个函数，转换其编码：</p>
+<div class="codehilite"><pre><span></span>iconv('utf-8', 'gbk', $_GET['word']);
+</pre></div>
+<p>目的一般是为了避免乱码，特别是在搜索框的位置。</p>
+<p>比如我们的phithon内容管理系统v3.0</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/617b1397900791.jpg"><img alt="0016.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/thum-617b1397900791.jpg"/></a></p>
+<p>我们可以看到，它在sql语句执行前，将character_set_client设置成了binary，所以可以避免宽字符注入的问题。但之后其调用了iconv将已经过滤过的参数$id给转换了一下。</p>
+<p>那我们来试试此时能不能注入：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/92f71397900794.jpg"><img alt="0017.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/thum-92f71397900794.jpg"/></a></p>
+<p>居然报错了。说明可以注入。而我只是输入了一个<code>錦'</code>。这是什么原因？</p>
+<p>我们来分析一下。“錦“这个字，它的utf-8编码是<code>0xe98ca6</code>，它的gbk编码是<code>0xe55c</code>。</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/d8d51397900797.jpg"><img alt="0018.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/d8d51397900797.jpg"/></a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/a2c91397900800.jpg"><img alt="0019.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/a2c91397900800.jpg"/></a></p>
+<p>有的同学可能就领悟了。<code>\</code>的ascii码正是5c。那么，当我们的錦被iconv从utf-8转换成gbk后，变成了%e5%5c，而后面的<code>'</code>被addslashes变成了%5c%27，这样组合起来就是%e5%5c%5c%27，两个%5c就是\，正好把反斜杠转义了，导致’逃逸出单引号，产生注入。</p>
+<p>这正利用了我之前说的，绕过addslashes的两种方式的第一种：将<code>\</code>转义掉。</p>
+<p>那么，如果我是用iconv将gbk转换成utf-8呢？</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/49da1397900803.jpg"><img alt="0020.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/thum-49da1397900803.jpg"/></a></p>
+<p>我们来试试：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/89921397900806.jpg"><img alt="0021.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/89921397900806.jpg"/></a></p>
+<p>果然又成功了。这次直接用宽字符注入的姿势来的，但实际上问题出在php而不是mysql。我们知道一个gbk汉字2字节，utf-8汉字3字节，如果我们把gbk转换成utf-8，则php会每两个字节一转换。所以，如果<code>\'</code>前面的字符是奇数的话，势必会吞掉<code>\</code>，<code>'</code>逃出限制。</p>
+<p>那么为什么之前utf-8转换成gbk的时候，没有使用这个姿势？</p>
+<p>这跟utf-8的规则有关，UTF-8的编码规则很简单，只有二条：</p>
+<div class="codehilite"><pre><span></span>1）对于单字节的符号，字节的第一位设为0，后面7位为这个符号的unicode码。因此对于英语字母，UTF-8编码和ASCII码是相同的。
+2）对于n字节的符号（n&gt;1），第一个字节的前n位都设为1，第n+1位设为0，后面字节的前两位一律设为10。剩下的没有提及的二进制位，全部为这个符号的unicode码。
+</pre></div>
+<p>从2我们可以看到，对于多字节的符号，其第2、3、4字节的前两位都是10，也就是说，<code>\</code>（0x0000005c）不会出现在utf-8编码中，所以utf-8转换成gbk时，如果有<code>\</code>则php会报错：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201404/961e1397900810.jpg"><img alt="0022.jpg" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/thum-961e1397900810.jpg"/></a></p>
+<p>但因为gbk编码中包含了<code>\</code>，所以仍然可以利用，只是利用方式不同罢了。</p>
+<p>总而言之，在我们处理了mysql的宽字符注入以后，也别认为就可以高枕无忧了。调用iconv时千万要小心，避免出现不必要的麻烦。 </p>
+<h2 id="006"><a class="toclink" href="#006">0×06 总结</a></h2>
+<p>在逐渐国际化的今天，推行utf-8编码是大趋势。如果就安全性来说的话，我也觉得使用utf-8编码能够避免很多多字节造成的问题。</p>
+<p>不光是gbk，我只是习惯性地把gbk作为一个典型的例子在文中与大家说明。世界上的多字节编码有很多，特别是韩国、日本及一些非英语国家的cms，都可能存在由字符编码造成的安全问题，大家应该有扩展性的思维。</p>
+<p>总结一下全文中提到的由字符编码引发的安全问题及其解决方案：</p>
+<ol>
+<li>gbk编码造成的宽字符注入问题，解决方法是设置character_set_client=binary。</li>
+<li>矫正人们对于mysql_real_escape_string的误解，单独调用<code>set names gbk</code>和mysql_real_escape_string是无法避免宽字符注入问题的。还得调用mysql_set_charset来设置一下字符集。</li>
+<li>谨慎使用iconv来转换字符串编码，很容易出现问题。只要我们把前端html/js/css所有编码设置成gbk，mysql/php编码设置成gbk，就不会出现乱码问题。不用画蛇添足地去调用iconv转换编码，造成不必要的麻烦。</li>
+</ol>
+<p>这篇文章是我对于自己白盒审计经验的一点小总结，但自己确实在很多方面存在欠缺，文中所提到的姿势难免存在纰漏和错误，希望有相同爱好的同学能与我指出，共同进步。</p>
+<p>这篇文章不像上篇xss的，能够举出很多0day实例来论证宽字符造成的危害。原因有二：</p>
+<ol>
+<li>宽字符问题确实不如富文本xss那么普遍，gbk编码的cms所占的比例也比较小，怪我才疏学浅，并不能每一章都找到相应的实例。</li>
+<li>注入的危害比xss大得多，如果作为0day发出来，影响很坏。但我确实在写文章以及以前的审计过程中找到不少cms存在的编码问题。</li>
+</ol>
+<p>所以我用实验的形式，自己写了的php小文件，给大家作为例子，希望不会因为例证的不足，影响大家学习的效果。</p>
+<p>例子php文件和sql文件打包下载：</p>
+<p>链接:<a href="http://pan.baidu.com/s/1eQmUArw"><a href="http://pan.baidu.com/s/1eQmUArw">http://pan.baidu.com/s/1eQmUArw</a></a> 提取密码:75tu</p>
+<p>本文PDF版本：链接: <a href="http://pan.baidu.com/s/1eprLs"><a href="http://pan.baidu.com/s/1eprLs">http://pan.baidu.com/s/1eprLs</a></a> 密码: yoyw</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2573">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/a582b9e72fe44dd14f7cee1ffaec0e0d.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">judger</a>
+<time datetime="2017年3月1日 18:43" itemprop="datePublished">
+                            2017 三月 01 18:43
+                        </time>
+<a href="javascript:reply_to('2573', 'judger')">回复</a>
+</p>
+<p class="comment-meta">如果没用mysql_set_charset来设置字符集,但是使用了mysql_real_escape_string来过滤输入,这时候mysql_real_escape_string使用的字符集是哪个?</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2574">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com" target="_blank">phithon</a>
+<time datetime="2017年3月1日 19:25" itemprop="datePublished">
+                            2017 三月 01 19:25
+                        </time>
+<a href="javascript:reply_to('2574', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@judger 不知道，自行研究，可能和php或Mysql的默认配置有关。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2313">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/36ac6b57766ce28f4e2f46a0f483530a.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">ko</a>
+<time datetime="2016年3月22日 22:40" itemprop="datePublished">
+                            2016 三月 22 22:40
+                        </time>
+<a href="javascript:reply_to('2313', 'ko')">回复</a>
+</p>
+<p class="comment-meta">支持LZ分享精神</p>
+</div>
+</div>
+<div class="row" id="comment-2121">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">路人甲</a>
+<time datetime="2015年6月8日 23:53" itemprop="datePublished">
+                            2015 六月 08 23:53
+                        </time>
+<a href="javascript:reply_to('2121', '路人甲')">回复</a>
+</p>
+<p class="comment-meta">P牛，这儿问个问题，%df%5c注入后，传入到mysql中的sql语句查询id='1運'，这和 id='1'查询结果是一样的，那么Mysql对于那个運是怎么处理的？直接无视了吗？</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2122">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年6月8日 23:54" itemprop="datePublished">
+                            2015 六月 08 23:54
+                        </time>
+<a href="javascript:reply_to('2122', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@路人甲：这个点可以看我另一篇文章 https://www.leavesongs.com/PENETRATION/findpwd-funny-logic-vul.html</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2123">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">路人甲</a>
+<time datetime="2015年6月8日 23:59" itemprop="datePublished">
+                            2015 六月 08 23:59
+                        </time>
+<a href="javascript:reply_to('2123', '路人甲')">回复</a>
+</p>
+<p class="comment-meta">@phithon：原来在这儿还有一个步骤啊，真是学习了，很感谢啊</p>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1802">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/e6ba90aae41f7ae5381b6396450babe3.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">helen</a>
+<time datetime="2014年10月17日 12:03" itemprop="datePublished">
+                            2014 十月 17 12:03
+                        </time>
+<a href="javascript:reply_to('1802', 'helen')">回复</a>
+</p>
+<p class="comment-meta">不错，学习下。感谢博主无私奉献精神</p>
+</div>
+</div>
+<div class="row" id="comment-1617">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/838ed0f87990a752b7638a5b535144ec.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.renwuyi.com/" target="_blank">任务易</a>
+<time datetime="2014年4月26日 13:16" itemprop="datePublished">
+                            2014 四月 26 13:16
+                        </time>
+<a href="javascript:reply_to('1617', '任务易')">回复</a>
+</p>
+<p class="comment-meta">支持博主</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="390cd15074babaf110ffb193a1eb0893315b1225"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./浅析白盒审计中的字符编码及SQL注入  离别歌/390cd15074babaf110ffb193a1eb0893315b1225"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="312">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="X97EzmgDGqkjvBCaBDLTYX8AV2uFYClUvtsanQsS7deIvg0ppUfDxBaF46XNH6a4"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./浅析白盒审计中的字符编码及SQL注入  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./浅析白盒审计中的字符编码及SQL注入  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

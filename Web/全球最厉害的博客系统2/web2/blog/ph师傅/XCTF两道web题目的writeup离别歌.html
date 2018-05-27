@@ -1,0 +1,443 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./XCTF两道web题目的writeup  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./XCTF两道web题目的writeup  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./XCTF两道web题目的writeup  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>XCTF两道web题目的writeup | 离别歌</title>
+<link href="./XCTF两道web题目的writeup  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./XCTF两道web题目的writeup  离别歌/styles.css" rel="stylesheet"/>
+<link href="./XCTF两道web题目的writeup  离别歌/style.css" rel="stylesheet"/>
+<link href="./XCTF两道web题目的writeup  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./XCTF两道web题目的writeup  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./XCTF两道web题目的writeup  离别歌/jquery.min.js"></script>
+<link href="./XCTF两道web题目的writeup  离别歌/code.css" rel="stylesheet"/>
+<link href="./XCTF两道web题目的writeup  离别歌/button.css" rel="stylesheet"/>
+<link href="./XCTF两道web题目的writeup  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./XCTF两道web题目的writeup  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/Mini-XCTF-Writeup.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/Mini-XCTF-Writeup.html&amp;text=XCTF%E4%B8%A4%E9%81%93web%E9%A2%98%E7%9B%AE%E7%9A%84writeup"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/Mini-XCTF-Writeup.html&amp;title=XCTF%E4%B8%A4%E9%81%93web%E9%A2%98%E7%9B%AE%E7%9A%84writeup"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/Mini-XCTF-Writeup.html&amp;is_video=false&amp;description=XCTF%E4%B8%A4%E9%81%93web%E9%A2%98%E7%9B%AE%E7%9A%84writeup"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=XCTF%E4%B8%A4%E9%81%93web%E9%A2%98%E7%9B%AE%E7%9A%84writeup&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/Mini-XCTF-Writeup.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/Mini-XCTF-Writeup.html&amp;title=XCTF%E4%B8%A4%E9%81%93web%E9%A2%98%E7%9B%AE%E7%9A%84writeup"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/Mini-XCTF-Writeup.html&amp;title=XCTF%E4%B8%A4%E9%81%93web%E9%A2%98%E7%9B%AE%E7%9A%84writeup"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/Mini-XCTF-Writeup.html&amp;title=XCTF%E4%B8%A4%E9%81%93web%E9%A2%98%E7%9B%AE%E7%9A%84writeup"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/Mini-XCTF-Writeup.html&amp;title=XCTF%E4%B8%A4%E9%81%93web%E9%A2%98%E7%9B%AE%E7%9A%84writeup"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/Mini-XCTF-Writeup.html&amp;name=XCTF%E4%B8%A4%E9%81%93web%E9%A2%98%E7%9B%AE%E7%9A%84writeup&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">XCTF两道web题目的writeup</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年10月25日 14:59" itemprop="datePublished">
+                    2014 十月 25 14:59
+                </time>
+</div>
+<div class="article-tag">
+            阅读：11790
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/xctf">xctf</a>,
+                
+                <a class="tag-link" href="/tag/writeup">writeup</a>,
+                
+                <a class="tag-link" href="/tag/ctf">ctf</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>只会web正好又是php的审计题目，于是就把两道题都做了。大牛们都忙着破各种路由器，破各种设备去了，我也侥幸得了个第一：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201410/9db31414223678.png"><img alt="QQ图片20141024184200.png" src="./XCTF两道web题目的writeup  离别歌/thum-9db31414223678.png"/></a></p>
+<p>第一题，没怎么截图，查看代码如下：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201410/8e6f1414221095.jpg"><img alt="QQ图片20141025151017.jpg" src="./XCTF两道web题目的writeup  离别歌/thum-8e6f1414221095.jpg"/></a></p>
+<p>主要是考mysql的一个trick。就是查询出来的$row['id']和$id的区别。这么说可能有点不明白，我们用一下代码fuzz一下mysql：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nb">mysql_connect</span><span class="p">(</span><span class="s2">"localhost"</span><span class="p">,</span><span class="s2">"root"</span><span class="p">,</span><span class="s2">"root"</span><span class="p">);</span>
+<span class="nb">mysql_select_db</span> <span class="p">(</span><span class="s2">"test"</span><span class="p">);</span>
+<span class="nb">mysql_query</span><span class="p">(</span><span class="s2">"set names utf8"</span><span class="p">);</span>
+<span class="k">for</span><span class="p">(</span><span class="nv">$i</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span> <span class="nv">$i</span> <span class="o">&lt;</span> <span class="mi">256</span> <span class="p">;</span> <span class="nv">$i</span><span class="o">++</span><span class="p">){</span>
+    <span class="nv">$c</span> <span class="o">=</span> <span class="nb">chr</span><span class="p">(</span><span class="nv">$i</span><span class="p">);</span>
+    <span class="nv">$name</span> <span class="o">=</span> <span class="nb">mysql_real_escape_string</span><span class="p">(</span><span class="s1">'hehe'</span> <span class="o">.</span> <span class="nv">$c</span><span class="p">);</span>
+    <span class="nv">$sql</span> <span class="o">=</span> <span class="s2">"SELECT * FROM `name` WHERE `name` = '</span><span class="si">{</span><span class="nv">$name</span><span class="si">}</span><span class="s2">'"</span><span class="p">;</span>
+    <span class="nv">$row</span> <span class="o">=</span> <span class="nb">mysql_fetch_array</span><span class="p">(</span><span class="nb">mysql_query</span><span class="p">(</span><span class="nv">$sql</span><span class="p">));</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nv">$row</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'hehe'</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">echo</span> <span class="s2">"</span><span class="si">{</span><span class="nv">$c</span><span class="si">}</span><span class="s2"> &lt;br/&gt;"</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<p>如果在name后面加上一个字符，在mysql里查询，如果查到的和不加这个字符查出来的行相同，则输出。</p>
+<p>得到了如下结果：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201410/a0171414221406.jpg"><img alt="001.jpg" src="./XCTF两道web题目的writeup  离别歌/thum-a0171414221406.jpg"/></a></p>
+<p>我们随便挑一个跟在adog后面提交就能得到flag了。如下：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201410/11f51414222966.jpg"><img alt="002.jpg" src="./XCTF两道web题目的writeup  离别歌/thum-11f51414222966.jpg"/></a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201410/9c3c1414222967.jpg"><img alt="003.jpg" src="./XCTF两道web题目的writeup  离别歌/thum-9c3c1414222967.jpg"/></a></p>
+<p>第二题，访问pwnme.php得到如下提示：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201410/f10a1414220999.png"><img alt="XCTF22.png" src="./XCTF两道web题目的writeup  离别歌/f10a1414220999.png"/></a></p>
+<p>很快就明白了是要说明在php里<code>===</code>和<code>==</code>的意义不同。我记得之前一个php的trick，我猜这里的代码是这样：<code>strcmp($_POST[password], 'xxxx')==0</code>。看一下php的strcmp文档就能知道：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201410/c0371414221002.png"><img alt="XCTF142.png" src="./XCTF两道web题目的writeup  离别歌/c0371414221002.png"/></a></p>
+<p>所以传一个<code>password[]=xxx</code>即可得到如下页面：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201410/afb31414221002.png"><img alt="XCTF175.png" src="./XCTF两道web题目的writeup  离别歌/afb31414221002.png"/></a></p>
+<p>访问可得到一段源码，yeah碰上我最爱的审计题了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201410/2a851414221004.png"><img alt="XCTF205.png" src="./XCTF两道web题目的writeup  离别歌/2a851414221004.png"/></a></p>
+<p>源码其实很简单，就是写入一个webshell，但文件名是跟当前秒数有关，所以大部分人想到要跑一下文件名。<br>
+当然，我这个人比较懒，能不能想个方法，不要跑这该死的文件名。</br></p>
+<p>这道题没有过滤/和../，我可以直接做跳转，将时间作为目录名，再用../跳转到上个目录，这样我的文件就不带时间前缀了。<br>
+当然还要让php不出错，试了几次，数据包如下即可：</br></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201410/db5e1414221006.png"><img alt="XCTF378.png" src="./XCTF两道web题目的writeup  离别歌/db5e1414221006.png"/></a></p>
+<p>这样我的shell就为：<code>http://106.120.92.162:5000/backup/".eval($_REQUEST[a]).php</code></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201410/17ea1414221010.png"><img alt="XCTF453.png" src="./XCTF两道web题目的writeup  离别歌/17ea1414221010.png"/></a></p>
+<p>不需要跑用户名。拿到shell了就读flag即可。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2021">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XCTF两道web题目的writeup  离别歌/6f3621fb7ec20c8f4b59e199119e786e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">该昵称已屏蔽</a>
+<time datetime="2015年4月14日 14:43" itemprop="datePublished">
+                            2015 四月 14 14:43
+                        </time>
+<a href="javascript:reply_to('2021', '该昵称已屏蔽')">回复</a>
+</p>
+<p class="comment-meta">好文章，内容惟妙惟肖.禁止此消息：nolinkok@163.com</p>
+</div>
+</div>
+<div class="row" id="comment-1831">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XCTF两道web题目的writeup  离别歌/a8b8e5c15da5db11f68b1f2e0f03b110.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">东吃</a>
+<time datetime="2014年11月1日 12:51" itemprop="datePublished">
+                            2014 十一月 01 12:51
+                        </time>
+<a href="javascript:reply_to('1831', '东吃')">回复</a>
+</p>
+<p class="comment-meta">看P牛博客涨姿势l</p>
+</div>
+</div>
+<div class="row" id="comment-1830">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XCTF两道web题目的writeup  离别歌/d5b234984190822adf2f31a4d5a371bb.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://joychou.org" target="_blank">JoyChou</a>
+<time datetime="2014年10月30日 11:22" itemprop="datePublished">
+                            2014 十月 30 11:22
+                        </time>
+<a href="javascript:reply_to('1830', 'JoyChou')">回复</a>
+</p>
+<p class="comment-meta">围观菊苣</p>
+</div>
+</div>
+<div class="row" id="comment-1829">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XCTF两道web题目的writeup  离别歌/7fffeefc87f82e785e28472b3ac129ae.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://hang333.pw" target="_blank">hang333</a>
+<time datetime="2014年10月29日 21:05" itemprop="datePublished">
+                            2014 十月 29 21:05
+                        </time>
+<a href="javascript:reply_to('1829', 'hang333')">回复</a>
+</p>
+<p class="comment-meta">如果没有mysql_query("set names utf8");的话就不能够了吗?</p>
+</div>
+</div>
+<div class="row" id="comment-1819">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XCTF两道web题目的writeup  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">aaa</a>
+<time datetime="2014年10月27日 11:54" itemprop="datePublished">
+                            2014 十月 27 11:54
+                        </time>
+<a href="javascript:reply_to('1819', 'aaa')">回复</a>
+</p>
+<p class="comment-meta">唉，还是不明白为什么PHP可以这样写，灵活的同时（应该说过于灵活了）导致了太多安全问题了（应该说太容易导致安全问题了）</p>
+</div>
+</div>
+<div class="row" id="comment-1818">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XCTF两道web题目的writeup  离别歌/ff082f335227ee8eb93d7e82f7b0570f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://stayliv3.github.io/" target="_blank">xd</a>
+<time datetime="2014年10月27日 11:35" itemprop="datePublished">
+                            2014 十月 27 11:35
+                        </time>
+<a href="javascript:reply_to('1818', 'xd')">回复</a>
+</p>
+<p class="comment-meta">第一个mysql的trick有详细的paper分享么，找了一下没有发现专门分析这个的。虽然fuzz一下可以得到结果，还是想 从更深的维度了解一下。</p>
+</div>
+</div>
+<div class="row" id="comment-1814">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XCTF两道web题目的writeup  离别歌/ff082f335227ee8eb93d7e82f7b0570f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">xd</a>
+<time datetime="2014年10月25日 21:27" itemprop="datePublished">
+                            2014 十月 25 21:27
+                        </time>
+<a href="javascript:reply_to('1814', 'xd')">回复</a>
+</p>
+<p class="comment-meta">能请教一下php里”===”和”==”的意义不同 。是因为都是这两个符号都是比较相关所以联想到strcmp  的么？。一开始一直在纠结===和==的 区别。。。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1815">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XCTF两道web题目的writeup  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年10月25日 21:47" itemprop="datePublished">
+                            2014 十月 25 21:47
+                        </time>
+<a href="javascript:reply_to('1815', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@xd：比较字符串除了==/===就是strcmp</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1817">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XCTF两道web题目的writeup  离别歌/ff082f335227ee8eb93d7e82f7b0570f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://stayliv3.github.io/" target="_blank">xd</a>
+<time datetime="2014年10月27日 10:49" itemprop="datePublished">
+                            2014 十月 27 10:49
+                        </time>
+<a href="javascript:reply_to('1817', 'xd')">回复</a>
+</p>
+<p class="comment-meta">@phithon：thanks !!get it .所以才说find another dog......</p>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1812">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XCTF两道web题目的writeup  离别歌/d1469c9484ed5a73c598b88777a79f16.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Rai</a>
+<time datetime="2014年10月25日 19:20" itemprop="datePublished">
+                            2014 十月 25 19:20
+                        </time>
+<a href="javascript:reply_to('1812', 'Rai')">回复</a>
+</p>
+<p class="comment-meta">菊苣,第一个有版本限制吗,为啥我输出不了那些字符啊.</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1816">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XCTF两道web题目的writeup  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年10月25日 21:48" itemprop="datePublished">
+                            2014 十月 25 21:48
+                        </time>
+<a href="javascript:reply_to('1816', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@Rai：版本倒是没详细测试过，你可以自己fuzz一下</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1811">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XCTF两道web题目的writeup  离别歌/c55be243bb9ea33219fe33c9bf6a5c61.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">晴天小铸</a>
+<time datetime="2014年10月25日 18:02" itemprop="datePublished">
+                            2014 十月 25 18:02
+                        </time>
+<a href="javascript:reply_to('1811', '晴天小铸')">回复</a>
+</p>
+<p class="comment-meta">关注博主好久了,很赞你这种分享与研究的精神;有什么可以和我Email一起讨论讨论</p>
+</div>
+</div>
+<div class="row" id="comment-1809">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XCTF两道web题目的writeup  离别歌/c32e506424196b70243badad4ee2d98c.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://appleu0.sinaapp.com" target="_blank">AppLeU0</a>
+<time datetime="2014年10月25日 16:28" itemprop="datePublished">
+                            2014 十月 25 16:28
+                        </time>
+<a href="javascript:reply_to('1809', 'AppLeU0')">回复</a>
+</p>
+<p class="comment-meta">p神威武  第二题  我只是想到了用那个写一个文件fopen的方式来另外写 可惜也要访问到才能执行命令 你这样子就更加直接了 可惜不是win win下就简单了 短文件名也可以破 最后还没跑出来 404</p>
+</div>
+</div>
+<div class="row" id="comment-1808">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XCTF两道web题目的writeup  离别歌/71eadc4dcb2ad0e0633a682c7ff80ced.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://ricter.me" target="_blank">Ricter</a>
+<time datetime="2014年10月25日 16:27" itemprop="datePublished">
+                            2014 十月 25 16:27
+                        </time>
+<a href="javascript:reply_to('1808', 'Ricter')">回复</a>
+</p>
+<p class="comment-meta">爷爷就是屌</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1810">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XCTF两道web题目的writeup  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年10月25日 17:01" itemprop="datePublished">
+                            2014 十月 25 17:01
+                        </time>
+<a href="javascript:reply_to('1810', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@Ricter：Ricter大触能去现场就是幸福</p>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="79027880c53b9edf7603adfa94d12eaa342cc178"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./XCTF两道web题目的writeup  离别歌/79027880c53b9edf7603adfa94d12eaa342cc178"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="330">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="sXMsk3MAAf7erkuGlJRl5XEgcE4gq9ZX0h7Y8xYP121DrZSV90l5EBGllIxo9DO7"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./XCTF两道web题目的writeup  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./XCTF两道web题目的writeup  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

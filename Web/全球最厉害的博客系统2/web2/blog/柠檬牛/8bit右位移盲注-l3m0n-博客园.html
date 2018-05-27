@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>8bit右位移盲注 - l3m0n - 博客园</title>
+<link href="./8bit右位移盲注 - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./8bit右位移盲注 - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./8bit右位移盲注 - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="./8bit右位移盲注 - l3m0n - 博客园/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./8bit右位移盲注 - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./8bit右位移盲注 - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./8bit右位移盲注 - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./8bit右位移盲注 - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./8bit右位移盲注 - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./8bit右位移盲注 - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./8bit右位移盲注 - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/8bits_sql.html" id="cb_post_title_url">8bit右位移盲注</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><p>[TOC]</p>
+<hr/>
+<h3 id="字节">字节</h3>
+<p>1byte(字节)=8bits(位)<br/>
+两个字节 = 一个汉字</p>
+<hr/>
+<h3 id="利用右位移进行mysql盲注">利用右位移进行mysql盲注</h3>
+<pre class="mysql"><code>select (ascii((substr(user(),1,1))) &gt;&gt; 7)=0;</code></pre>
+<p>r的ascii是114，二进制是01110010，右移7位就是0，然后0=0，mysql会输出1(表示是正确的)</p>
+<pre class="mysql"><code>select (ascii((substr(user(),1,1))) &gt;&gt; 6)=0;</code></pre>
+<p>这个mysql会输出0，因为<code>01 ！= 0</code><br/>
+然后就是猜第三位了，前三位可能是010、011<br/>
+010的10进制是2，011是3</p>
+<pre class="mysql"><code>select (ascii((substr(user(),1,1))) &gt;&gt; 5)=2;</code></pre>
+<p>这个mysql会输出0，所以是011<br/>
+这样循环到最后就可以得到全部的二进制01110010</p>
+<hr/>
+<h3 id="延伸">延伸</h3>
+<p>在t00ls看到anlfi大牛有延伸性的总结：<br/>
+1.是HEX的的方式取值 从原来的8次请求 减为了6次请求<br/>
+具体是a&gt;97&gt;7F&gt;111101&gt;<br/>
+2.是HEX判断位的取值方式 从原来的6次请求 减为了最少3次请求<br/>
+具体是a&gt;61&gt;(1-F(16位的哪一位))&gt;6,1=110,1(0=30=11,0)</p>
+<p>虽然没太看懂，但是感觉大致应该是缩短了2进制的位数，就像我们其实不用去要二进制的第八位，因为可显字符的最大ascii是01111111，只要知道末七位就好。</p>
+<hr/>
+<h3 id="位运算">位运算</h3>
+<p><a href="http://baike.baidu.com/link?url=5xxzl28_o0uWSD4Ah-V-TPnI_A4p7EtXpt2HRVGAEf8g1g7dMjwmcoUluKGDVxswQWP-XmQSmNl3UNGOO_iUvq">参考文献</a></p>
+<p><img src="./8bit右位移盲注 - l3m0n - 博客园/804631-20150901194629200-244662565.png"/></p>
+<ol>
+<li><p>and运算(&amp;)<br/>
+二进制运算，只有11才为1，其他都是0<br/>
+5 &amp; 28<br/>
+00101 &amp; 11100 = 00100<br/>
+结果为4<br/>
+<strong>and 1</strong> 可以用于判断数字的奇偶性，最末尾位0则表示该数是偶数，为1则表示是奇数</p></li>
+<li><p>or运算(|)<br/>
+相同位只要有一个是1就是1<br/>
+5 | 28<br/>
+00101 | 11100 = 11101<br/>
+结果是29<br/>
+<strong>or 1</strong> 可以用于算出最接近的偶数</p></li>
+<li><p>xor运算(^)<br/>
+相同位的数字如果相同则为0，不同则为1<br/>
+00101 ^ 11100 = 11001<br/>
+这样的话<code>(a xor b) xor b = a</code>，其中b常用于密钥<br/>
+还可以用于交换两个变量的值(不需要用temp变量)</p>
+<pre><code>a=a ^ b
+b=a ^ b
+a=a ^ b</code></pre>
+<p>解析：<code>第二步的b=(a ^ b) ^ b=a,第三步的a=(a ^ b) ^ a=b</code><br/>
+但是这样的交换有一个缺陷就是一个数的交换结果为0</p></li>
+<li><p>not运算(~)<br/>
+将0和1全部反取，但是这个需要注意符号的问题</p></li>
+<li><p>左移(&lt;&lt;)<br/>
+a &lt;&lt; b 就是将a二进制后左移b位u(在a后面添加b个0)，实际上也就是a乘以2的b次方</p>
+<pre><code>100 &lt;&lt; 2 = 1100100 00 = 400</code></pre>
+<p>一般认为a &lt;&lt; 1 比 a * 2快，2的幂运算可以用左移来运算</p></li>
+<li><p>右移(&gt;&gt;)<br/>
+a &gt;&gt; b就是二进制右移b位(去掉未b位)，相当于a除以2的b次方(向下取整)</p>
+<pre><code>100 &gt;&gt; 2 = 11001 = 25
+25 &gt;&gt; 1 = 1100 = 12</code></pre>
+<p>二分法<code>100 &gt;&gt; 1</code>、堆的插入</p></li>
+</ol>
+<p><img src="./8bit右位移盲注 - l3m0n - 博客园/804631-20150901194642747-1690751816.png"/></p>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2015-09-01 19:47</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=4776701" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(4776701);return false;">收藏</a></div>
+</div>
+<script src="./8bit右位移盲注 - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=4776701,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2015/9/1 19:47:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./8bit右位移盲注 - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="//img.users.51.la/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./8bit右位移盲注 - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

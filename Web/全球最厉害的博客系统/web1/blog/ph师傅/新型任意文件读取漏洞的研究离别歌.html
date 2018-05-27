@@ -1,0 +1,413 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./新型任意文件读取漏洞的研究  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./新型任意文件读取漏洞的研究  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./新型任意文件读取漏洞的研究  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>新型任意文件读取漏洞的研究 | 离别歌</title>
+<link href="./新型任意文件读取漏洞的研究  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./新型任意文件读取漏洞的研究  离别歌/styles.css" rel="stylesheet"/>
+<link href="./新型任意文件读取漏洞的研究  离别歌/style.css" rel="stylesheet"/>
+<link href="./新型任意文件读取漏洞的研究  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./新型任意文件读取漏洞的研究  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./新型任意文件读取漏洞的研究  离别歌/jquery.min.js"></script>
+<link href="./新型任意文件读取漏洞的研究  离别歌/code.css" rel="stylesheet"/>
+<link href="./新型任意文件读取漏洞的研究  离别歌/button.css" rel="stylesheet"/>
+<link href="./新型任意文件读取漏洞的研究  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./新型任意文件读取漏洞的研究  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/arbitrary-files-read-via-static-requests.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/arbitrary-files-read-via-static-requests.html&amp;text=%E6%96%B0%E5%9E%8B%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/arbitrary-files-read-via-static-requests.html&amp;title=%E6%96%B0%E5%9E%8B%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/arbitrary-files-read-via-static-requests.html&amp;is_video=false&amp;description=%E6%96%B0%E5%9E%8B%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E6%96%B0%E5%9E%8B%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%A0%94%E7%A9%B6&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/arbitrary-files-read-via-static-requests.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/arbitrary-files-read-via-static-requests.html&amp;title=%E6%96%B0%E5%9E%8B%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/arbitrary-files-read-via-static-requests.html&amp;title=%E6%96%B0%E5%9E%8B%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/arbitrary-files-read-via-static-requests.html&amp;title=%E6%96%B0%E5%9E%8B%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/arbitrary-files-read-via-static-requests.html&amp;title=%E6%96%B0%E5%9E%8B%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%A0%94%E7%A9%B6"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/arbitrary-files-read-via-static-requests.html&amp;name=%E6%96%B0%E5%9E%8B%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%A0%94%E7%A9%B6&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">新型任意文件读取漏洞的研究</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年2月28日 23:55" itemprop="datePublished">
+                    2015 二月 28 23:55
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4693
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%BC%8F%E6%B4%9E">任意文件读取漏洞</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>这是我发在乌云drops的一篇文章：<a href="http://drops.wooyun.org/papers/5040"><a href="http://drops.wooyun.org/papers/5040">http://drops.wooyun.org/papers/5040</a></a>。</p>
+<p>早前发现boooom在乌云上发了很多个任意文件读取的漏洞，都是形如http://target/../../../../etc/passwd这样。当时感觉很新奇，因为正常情况下，通常的服务器中间件是不允许直接读取web目录以外的文件的，为什么这样的漏洞却出现在了很多案例中。</p>
+<p>后来在lijiejie的文章给出了解释：<a href="http://www.lijiejie.com/python-django-directory-traversal/"><a href="http://www.lijiejie.com/python-django-directory-traversal/">http://www.lijiejie.com/python-django-directory-traversal/</a></a> ，原来是python这种新型web开发方式造成的问题。然后翻了下我自己以前用web.py、tornado开发的一些应用，果然也存在这样的问题。</p>
+<p>这个问题就像lijiejie说的那样，一方面是低版本django框架自身的一些漏洞，另一方面，就是开发者自身的疏忽造成的问题。</p>
+<p>这不得不提到现今开发框架与以前的一些区别。不管是python还是node、ruby的框架，都是一个可以自定义URL分配的框架，不再是像php或asp中那样根据目录结构来请求文件。所有的请求由用户定义规则，而框架内核部分解析、配发、执行。比如我们请求的“/login/”这个URL，很可能是被配发给一个LoginHandler类去处理了，而不是请求到/login/index.php上。</p>
+<p>这时候造成了一个问题，如果我们就是想去请求一个真实的文件，比如css、js等静态文件，怎么办？</p>
+<p>一般也会有一些区分，一些要求比较高的应用，多是采用了CDN缓存或负载均衡，nginx作为负载分配的处理器。当发现我们请求的url是一个静态文件的话，就直接由CDN或nginx返回相应文件。如下图：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/e2911425230607.png"><img alt="py-static.png" src="./新型任意文件读取漏洞的研究  离别歌/e2911425230607.png"/></a></p>
+<p>那么这之中也存在这一个定义问题，什么请求才说明是要请求“静态文件”？只要以.css、.js结尾就可以吗？当然这也是一种方法，但一般应用会定义一个目录，如<code>/static/</code>，所有请求匹配<code>/static/(.*)</code>的会被认为是静态文件，所以开发者一般将静态文件放在这个目录下，我们用户就能够直接请求到他了。</p>
+<p>如果不存在CDN、nginx等平台，其实类似web.py、tornado这样的框架自己也定义了静态目录，在web.py下，默认的静态目录都是/static/，也就是在这个目录下的请求是不会经过URLPath的。如web.py文档中说到的：<a href="http://webpy.org/cookbook/staticfiles.zh-cn"><a href="http://webpy.org/cookbook/staticfiles.zh-cn">http://webpy.org/cookbook/staticfiles.zh-cn</a></a></p>
+<p>这时候，我就会有这个思考，框架内部如果是以<code>/static/(.*)</code>来匹配请求的话，如果我们请求<code>/static/../../../../../etc/passwd</code>，是不是就可以读取到/etc/passwd文件？</p>
+<h2 id="0x01-webpy"><a class="toclink" href="#0x01-webpy">0x01 web.py下可能的任意文件读取漏洞研究</a></h2>
+<p>我们先来看看web.py是怎样处理这种请求的：/static/../../../../../etc/passwd</p>
+<p>我们在web/httpserver.py中可以看到这样的代码：</p>
+<div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">do_GET</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'/static/'</span><span class="p">):</span>
+        <span class="n">SimpleHTTPServer</span><span class="o">.</span><span class="n">SimpleHTTPRequestHandler</span><span class="o">.</span><span class="n">do_GET</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_wsgi_app</span><span class="p">()</span>
+</pre></div>
+<p>当请求以/static/开头的话，就直接交给SimpleHTTPServer处理了。SimpleHTTPServer是python自带的一个简单的HTTP Server，我们在任意一个目录下执行python -m SimpleHTTPServer都会启动一个web服务器，可以直接通过HTTP协议访问目录下的文件。</p>
+<p>web.py的Server其实就是对SimpleHTTPServer的一个继承与重写，这里它简单的把这个请求交给父类SimpleHTTPServer处理，而这个HTTP Server当然不会允许请求到web目录（也就是./static/）以外的地方去，所以得到的回复是404：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/7f431425230692.png"><img alt="QQ20150301-1@2x.png" src="./新型任意文件读取漏洞的研究  离别歌/thum-7f431425230692.png"/></a></p>
+<p>框架本身保证了静态文件不会造成任意文件读取。但复杂的逻辑关系应用中，开发者往往不满足于/static/一种静态目录。比如，网站允许用户上传、下载文件，可能我们会新建一个uploadfile目录，按日期、时间专门保存上传的文件。</p>
+<p>那么，开发者为了让/uploadfile目录下的文件也能被直接访问，往往会这样写：</p>
+<div class="codehilite"><pre><span></span><span class="ch">#!/usr/bin/python</span>
+<span class="kn">import</span> <span class="nn">web</span>
+
+<span class="n">urls</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s1">'/uploadfile/(.*)'</span><span class="p">,</span> <span class="s1">'download'</span><span class="p">,</span>
+    <span class="s1">'/'</span><span class="p">,</span> <span class="s1">'hello'</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">web</span><span class="o">.</span><span class="n">application</span><span class="p">(</span><span class="n">urls</span><span class="p">,</span> <span class="nb">globals</span><span class="p">())</span>
+
+<span class="k">class</span> <span class="nc">hello</span><span class="p">:</span>        
+    <span class="k">def</span> <span class="nf">GET</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span> 
+            <span class="n">name</span> <span class="o">=</span> <span class="s1">'World'</span>
+        <span class="k">return</span> <span class="s1">'Hello, '</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">'!'</span>
+
+<span class="k">class</span> <span class="nc">download</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">GET</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"./uploadfile/</span><span class="si">%s</span><span class="s2">"</span> <span class="o">%</span> <span class="n">filepath</span><span class="p">,</span> <span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">content</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">web</span><span class="o">.</span><span class="n">notfound</span><span class="p">(</span><span class="s2">"Sorry, the file you were looking for was not found."</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+<p>有个download类专门解析这类请求，直接在GET方法中读取文件，并作为response写入HTTP数据包。</p>
+<p>我们请求一个正常的文件/uploadfile/01.txt，是可以得到它的内容的：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/536a1425230696.png"><img alt="QQ20150301-2@2x.png" src="./新型任意文件读取漏洞的研究  离别歌/thum-536a1425230696.png"/></a></p>
+<p>但我们请求一个非uploadfile目录下的文件，却发现也能读取，导致了一个任意文件读取漏洞：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/ea871425230700.png"><img alt="QQ20150301-3@2x.png" src="./新型任意文件读取漏洞的研究  离别歌/thum-ea871425230700.png"/></a></p>
+<p>这就是由于开发者的失误，并没有检查我们传入的path是否合法而导致，与框架无关。</p>
+<h2 id="0x02-tornado"><a class="toclink" href="#0x02-tornado">0x02 Tornado下可能的任意文件读取漏洞研究</a></h2>
+<p>tornado是一个全异步的web框架，它允许我们在配置中定义静态目录static_path。在tornado中，专门给出了一个方法来验证我们的请求是否在允许的目录内：</p>
+<div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">validate_absolute_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">absolute_path</span><span class="p">):</span>
+    <span class="sd">"""Validate and return the absolute path.</span>
+
+<span class="sd">    ``root`` is the configured path for the `StaticFileHandler`,</span>
+<span class="sd">    and ``path`` is the result of `get_absolute_path`</span>
+
+<span class="sd">    This is an instance method called during request processing,</span>
+<span class="sd">    so it may raise `HTTPError` or use methods like</span>
+<span class="sd">    `RequestHandler.redirect` (return None after redirecting to</span>
+<span class="sd">    halt further processing).  This is where 404 errors for missing files</span>
+<span class="sd">    are generated.</span>
+
+<span class="sd">    This method may modify the path before returning it, but note that</span>
+<span class="sd">    any such modifications will not be understood by `make_static_url`.</span>
+
+<span class="sd">    In instance methods, this method's result is available as</span>
+<span class="sd">    ``self.absolute_path``.</span>
+
+<span class="sd">    .. versionadded:: 3.1</span>
+<span class="sd">    """</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+    <span class="c1"># os.path.abspath strips a trailing /</span>
+    <span class="c1"># it needs to be temporarily added back for requests to root/</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">absolute_path</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">HTTPError</span><span class="p">(</span><span class="mi">403</span><span class="p">,</span> <span class="s2">"</span><span class="si">%s</span><span class="s2"> is not in root static directory"</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">absolute_path</span><span class="p">)</span> <span class="ow">and</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">default_filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="c1"># need to look at the request.path here for when path is empty</span>
+        <span class="c1"># but there is some prefix to the path that was already</span>
+        <span class="c1"># trimmed by the routing</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"/"</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="s2">"/"</span><span class="p">,</span> <span class="n">permanent</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">absolute_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">absolute_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">absolute_path</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">HTTPError</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">absolute_path</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">HTTPError</span><span class="p">(</span><span class="mi">403</span><span class="p">,</span> <span class="s2">"</span><span class="si">%s</span><span class="s2"> is not a file"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">absolute_path</span>
+</pre></div>
+<p>这样，一旦请求不在我们定义的静态目录下，就会抛出“is not in root static directory”错误：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/8d851425230703.png"><img alt="QQ20150301-4@2x.png" src="./新型任意文件读取漏洞的研究  离别歌/thum-8d851425230703.png"/></a></p>
+<p>那么如果tornado中，也需要定义一个"/uploadfile/"作为用户上传目录，那么我们怎么做？</p>
+<p>文档中也提到了，我们只需要自定义一个URLPath即可，tornado内部有专门处理静态文件的控制器web.StaticFileHandler：</p>
+<div class="codehilite"><pre><span></span><span class="n">application</span> <span class="o">=</span> <span class="n">web</span><span class="o">.</span><span class="n">Application</span><span class="p">([</span>
+    <span class="p">(</span><span class="sa">r</span><span class="s2">"/uploadfile/(.*)"</span><span class="p">,</span> <span class="n">web</span><span class="o">.</span><span class="n">StaticFileHandler</span><span class="p">,</span> <span class="p">{</span><span class="s2">"path"</span><span class="p">:</span> <span class="s2">"/var/www"</span><span class="p">}),</span>
+<span class="p">])</span>
+</pre></div>
+<p>就算不考虑安全问题，作为一个异步的框架，如果我们还用同步的read、write这些IO函数自己去处理静态文件，也是不可取的。</p>
+<p>不过，在后面的研究中，我也发现了tornado的处理方式并不算完美，更多详情可以等这个洞公开后查看：<a href="http://wooyun.org/bugs/wooyun-2015-098978"><a href="http://wooyun.org/bugs/wooyun-2015-098978">http://wooyun.org/bugs/wooyun-2015-098978</a></a></p>
+<h2 id="0x03-django"><a class="toclink" href="#0x03-django">0x03 Django中的问题</a></h2>
+<p>Django低版本自身存在的漏洞导致的任意文件读取，实际上就是犯了我之前说的静态文件未检查的问题，如这个09年的BUG：<a href="https://bugzilla.redhat.com/show_bug.cgi?id=CVE-2009-2659"><a href="https://bugzilla.redhat.com/show_bug.cgi?id=CVE-2009-2659">https://bugzilla.redhat.com/show_bug.cgi?id=CVE-2009-2659</a></a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/7fee1425230838.png"><img alt="QQ20150301-6@2x.png" src="./新型任意文件读取漏洞的研究  离别歌/thum-7fee1425230838.png"/></a></p>
+<p>正如我在web.py中说到的，如果django也单纯使用open、read来读取文件，而不检查PATH的合法性，同样能够造出任意文件读取。</p>
+<p>比如我们django的view如此写：</p>
+<div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponse</span>
+
+<span class="c1"># Create your views here.</span>
+
+<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+</pre></div>
+<p>没有验证path的合法性，依旧可以出现任意文件读取的现象：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/95db1425230869.png"><img alt="QQ20150301-7@2x.png" src="./新型任意文件读取漏洞的研究  离别歌/thum-95db1425230869.png"/></a></p>
+<p>如上图，直接读取了sqlite数据库内容，拿下管理员账号密码。</p>
+<p>那么我们怎么在这样的应用中防御任意文件读取？我们简单修改django的view防御这个漏洞：</p>
+<div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponse</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">Http404</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># Create your views here.</span>
+
+<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="n">static</span> <span class="o">=</span> <span class="s2">"uploadfile"</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">static</span><span class="p">)</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">root</span> <span class="o">+</span> <span class="n">path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">Http404</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+</pre></div>
+<p>其实有些框架都有自己检查静态文件的方式，django自身应该也有的。像web.py这样的轻型框架没有自带函数检查的情况下，可以考虑用我上面写的这个方法来剔除不合法的静态文件路径。</p>
+<h2 id="0x04-php"><a class="toclink" href="#0x04-php">0x04 PHP等语言会不会出现这个问题？</a></h2>
+<p>这个问题其实是有思考价值的。</p>
+<p>最开始我就提到了，现代的python/node/ruby等web开发框架与老式的php、asp等语言的区别，也是造成这个漏洞的原因之一就是因为URL的分配导致静态文件不能被直接访问到，所以需要自定义静态文件的访问方式。但一旦访问参数未检查，就造成任意文件读取问题。</p>
+<p>但传统php应用就是一个以目录形式访问的，静态文件访问应该不会经过php的，这确实是一个很大的区别。</p>
+<p>先不论我们的请求会不会经过php，看到zblog最新版中一个实际的案例。/zb_system/function/c_system_event.php，大概415行：</p>
+<div class="codehilite"><pre><span></span>if (isset($_SERVER['SERVER_SOFTWARE']) &amp;&amp; (strpos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS') !== false) &amp;&amp; (isset($_GET['rewrite']) == true)){
+    //iis+httpd.ini下如果存在真实文件
+    $realurl = $zbp-&gt;path . urldecode($url);
+    if(is_readable($realurl)&amp;&amp;is_file($realurl)){
+        die(file_get_contents($realurl));
+    }
+    unset($realurl);
+}
+</pre></div>
+<p>这里判断了<code>$_SERVER['SERVER_SOFTWARE']</code>是否包含Microsoft-IIS，当服务器中间件是IIS，而且<code>$_GET['rewrite']</code>的话，就进入这个if语句。再判断$url指向的文件是否存在，存在就把它使用file_get_contents读取并显示出来。</p>
+<p>实际上这段代码所做的工作和我们之前看到的python代码是一样的。为什么php也需要这样的工作，我们url请求的文件不应该就直接由webserver返回给用户了吗？</p>
+<p>实际上，这里开发者也考虑了url重写造成的问题。zblog重写的规则是将所有请求都指向index.php去处理，最后由index.php去处理，有可能我们的静态文件就被rewrite到index.php去了，这里的工作就是把被重写到php里的这个静态文件直接显示出来。</p>
+<p>可惜我还是才疏学浅，不知道怎么写rewrite规则才能让静态文件请求被重写到index.php里，所以也做不到任意文件读取了。</p>
+<p>但我们这里很明显的可以发现，zblog的开发者也没有检查这个$url是否在网站目录内，或是否在静态文件目录内，也是直接读取显示了。导致我们请求 <a href="http://10.211.55.3/zblog/index.php?action=&amp;rewrite=1">http://10.211.55.3/zblog/index.php?action=&amp;rewrite=1</a> 是可以读取index.php的源码的（因为我没有IIS环境，我手工将SERVER_SOFTWARE改成IIS了~）：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/039c1425230706.png"><img alt="QQ20150301-5@2x.png" src="./新型任意文件读取漏洞的研究  离别歌/thum-039c1425230706.png"/></a></p>
+<p>所以，传统PHP应用下是否可能存在这样的安全漏洞，这个问题还是有待继续研究的。理论上，我们如果写出一个这样的rewrite规则：将所有请求都交给index.php处理。那么，index.php的功能实际上就和之前的python框架主文件功能类似了。</p>
+<p>最后，自己也只是浅显得研究和讨论了几种python框架、php某个特殊情况的漏洞，但现代的开发技术，包括企业级的一些环境我并不熟悉也没怎么接触过，所以有什么欠考虑和不完善的地方，也需要各位去补充与纠正。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2503">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./新型任意文件读取漏洞的研究  离别歌/f2733dd6d293582f1e142f4c053adbab.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.evalshell.com" target="_blank">fengxuan</a>
+<time datetime="2017年1月4日 20:50" itemprop="datePublished">
+                            2017 一月 04 20:50
+                        </time>
+<a href="javascript:reply_to('2503', 'fengxuan')">回复</a>
+</p>
+<p class="comment-meta">`root + path`  <br><br>建议字符串拼接不要用"+"号，用"{0}".format(root)等格式化字符串比较好，前者是不断的申请内存空间。</br></br></p>
+</div>
+</div>
+<div class="row" id="comment-2041">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./新型任意文件读取漏洞的研究  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">xsser</a>
+<time datetime="2015年4月28日 14:19" itemprop="datePublished">
+                            2015 四月 28 14:19
+                        </time>
+<a href="javascript:reply_to('2041', 'xsser')">回复</a>
+</p>
+<p class="comment-meta">大牛好叼</p>
+</div>
+</div>
+<div class="row" id="comment-1965">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./新型任意文件读取漏洞的研究  离别歌/b2d7d2d13aed54c2ed7feb538b382b42.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">早期症状</a>
+<time datetime="2015年3月12日 21:51" itemprop="datePublished">
+                            2015 三月 12 21:51
+                        </time>
+<a href="javascript:reply_to('1965', '早期症状')">回复</a>
+</p>
+<p class="comment-meta">路过支持一下，加油！</p>
+</div>
+</div>
+<div class="row" id="comment-1962">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./新型任意文件读取漏洞的研究  离别歌/01f909843adb0a391d49d6b7d5d1b767.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://quan.renwuyi.com/" target="_blank">威客圈子</a>
+<time datetime="2015年3月12日 11:54" itemprop="datePublished">
+                            2015 三月 12 11:54
+                        </time>
+<a href="javascript:reply_to('1962', '威客圈子')">回复</a>
+</p>
+<p class="comment-meta">博主的博客很不错，不知道能不能交换友链呢？如果博主有意向的话，可以加我的QQ293459572详谈</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1967">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./新型任意文件读取漏洞的研究  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年3月12日 22:24" itemprop="datePublished">
+                            2015 三月 12 22:24
+                        </time>
+<a href="javascript:reply_to('1967', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@威客圈子：抱歉，暂时只和朋友的博客做友链哦。</p>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="51682a7313a3fae06939460bc5a3f727004a574e"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./新型任意文件读取漏洞的研究  离别歌/51682a7313a3fae06939460bc5a3f727004a574e"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="348">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="qkBxRRB49O27tYg2fCAFtoa4iSlrv2hSYEW3FlNjABWwtDEh3T4p22c9rWOzew62"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./新型任意文件读取漏洞的研究  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./新型任意文件读取漏洞的研究  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

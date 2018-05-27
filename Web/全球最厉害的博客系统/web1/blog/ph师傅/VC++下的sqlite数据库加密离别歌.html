@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./VC++下的sqlite数据库加密  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./VC++下的sqlite数据库加密  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./VC++下的sqlite数据库加密  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>VC++下的sqlite数据库加密 | 离别歌</title>
+<link href="./VC++下的sqlite数据库加密  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./VC++下的sqlite数据库加密  离别歌/styles.css" rel="stylesheet"/>
+<link href="./VC++下的sqlite数据库加密  离别歌/style.css" rel="stylesheet"/>
+<link href="./VC++下的sqlite数据库加密  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./VC++下的sqlite数据库加密  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./VC++下的sqlite数据库加密  离别歌/jquery.min.js"></script>
+<link href="./VC++下的sqlite数据库加密  离别歌/code.css" rel="stylesheet"/>
+<link href="./VC++下的sqlite数据库加密  离别歌/button.css" rel="stylesheet"/>
+<link href="./VC++下的sqlite数据库加密  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./VC++下的sqlite数据库加密  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/C/EncryptSqlite.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/C/EncryptSqlite.html&amp;text=VC%2B%2B%E4%B8%8B%E7%9A%84sqlite%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/C/EncryptSqlite.html&amp;title=VC%2B%2B%E4%B8%8B%E7%9A%84sqlite%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/C/EncryptSqlite.html&amp;is_video=false&amp;description=VC%2B%2B%E4%B8%8B%E7%9A%84sqlite%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=VC%2B%2B%E4%B8%8B%E7%9A%84sqlite%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8A%A0%E5%AF%86&amp;body=Check out this article: https%3A//www.leavesongs.com/C/EncryptSqlite.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/C/EncryptSqlite.html&amp;title=VC%2B%2B%E4%B8%8B%E7%9A%84sqlite%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/C/EncryptSqlite.html&amp;title=VC%2B%2B%E4%B8%8B%E7%9A%84sqlite%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/C/EncryptSqlite.html&amp;title=VC%2B%2B%E4%B8%8B%E7%9A%84sqlite%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/C/EncryptSqlite.html&amp;title=VC%2B%2B%E4%B8%8B%E7%9A%84sqlite%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8A%A0%E5%AF%86"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/C/EncryptSqlite.html&amp;name=VC%2B%2B%E4%B8%8B%E7%9A%84sqlite%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8A%A0%E5%AF%86&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">VC++下的sqlite数据库加密</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年5月2日 19:04" itemprop="datePublished">
+                    2013 五月 02 19:04
+                </time>
+</div>
+<div class="article-tag">
+            阅读：11088
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/C">C/C++</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93">数据库</a>,
+                
+                <a class="tag-link" href="/tag/sqlite">sqlite</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p><span style="font-size:14px;">    SQLite数据库的C/C++使用请参阅 <a href="https://www.leavesongs.com/tag/sqlite" target="_blank">https://www.leavesongs.com/tag/sqlite</a></span></p>
+<hr/>
+<p><span style="font-size:14px;">    我发现我的报告和其他人比略显低端……这里使用AES加密sqlite数据库，但加密的代码看不懂，只知道怎么用……</span></p>
+<p><span style="font-size:14px;">    SQLite开源的代码里没有实现加密的功能，但是在头文件中声明了sqlite3_key和sqlite3_rekey两个函数，实现这两个函数即可加密数据库。直接让数据暴露在notepad下让我一直耿耿于怀。但鉴于水平太臭，没得法，又找了个开源的项目，它把sqlite的加密实现了。<br>
+<a href="http://sourceforge.net/projects/wxcode/files/Components/" target="_blank">http://sourceforge.net/projects/wxcode/files/Components/</a><br>
+    下面有个wxSQLITE3,这就是实现了加密的sqlite的源码。下载下来在sqlite3\secure里面有AES256和128位加密的版本。我直接取出AES256版本中的sqlite3.dll和sqlite3.lib。<br/>
+    拷贝到我使用sqlite的工程目录下，动态链接库怎么用这个就怎么用。</br></br></span></p>
+<p><span style="font-size:14px;">    使用加密功能前先定义一下SQLITE_HAS_CODEC，大家读sqlite3.h就知道为什么了。定义如下(请放在所有代码的最前面，至少放在#include "sqlite3.h"前面)：</span></p>
+<p><strong><span style="font-size:14px;">    #ifndef SQLITE_HAS_CODEC</span></strong></p>
+<p><strong><span style="font-size:14px;">    #define SQLITE_HAS_CODEC</span></strong></p>
+<p><strong><span style="font-size:14px;">    #endif</span></strong></p>
+<hr/>
+<p><span style="font-size:14px;">    只具体讲一下加密的函数：<br/>
+<strong>      SQLITE_API int sqlite3_key(<br/>
+          sqlite3 *db,                   /* Database to be rekeyed */<br/>
+          const void *pKey, int nKey     /* The key */<br/>
+        );</strong><br/>
+    第一个参数是数据库句柄，第二个参数是密码，第三个参数是密码的长度。在sqlite3_open函数后调用，也就是打开数据库以后调用。<br/>
+    1.如果原数据库没有加密，调用此函数则加密数据库。<br/>
+    2.如果原数据库已加密，此函数相当于一个“钥匙”，打开数据库后，不调用此函数或密码不正确就不能操作数据库。</span></p>
+<p><span style="font-size:14px;">    这里说一下，实践证明，欲加密数据库，在建立表之前请调用此函数。也就是说最好把该语句就放在sqlite3_open后面。否则可能加密不成。</span></p>
+<p><span style="font-size:14px;">    还要说明一下，如果已调用sqlite3_close关闭了数据库，再次打开时，还是要调用sqlite3_key，此时相当于功能2.</span></p>
+<p><span style="font-size:14px;">    最后说明一下，加了密的数据库操作和没加密一样。也就是说你只需要把sqlite3_key函数加到代码里，其他的什么都不用改。</span></p>
+<p><span style="font-size:14px;">    </span></p>
+<p><span style="font-size:14px;">    另一个函数：</span></p>
+<p><strong><span style="font-size:14px;">        SQLITE_API int sqlite3_rekey(<br/>
+          sqlite3 *db,                   /* Database to be rekeyed */<br/>
+          const void *pKey, int nKey     /* The new key */<br/>
+        );</span></strong></p>
+<p><span style="font-size:14px;">    参数说明和刚才一样，作用是更改密码。很简单就不多说了。不过打开一个加密的数据库，先要调用sqlite3_key，再才能用sqlite3_rekey改密码。相当于要输入原密码才能修改密码，否则不会成功。</span></p>
+<p><span style="font-size:14px;">    还有，如果第二个参数或第三个参数为NULL(0)，则是删除密码，也就是解密。</span></p>
+<hr/>
+<p><span style="font-size:14px;">    演示：</span></p>
+<p><span style="font-size:14px;">    一个数据库文件不加密前，用Notepad++打开，可以看到数据和sql语句：</span></p>
+<p><span style="font-size:14px;">    <a href="https://www.leavesongs.com/content/uploadfile/201305/4efd1367493689.jpg" id="ematt:95" target="_blank"><img alt="点击查看原图" border="0" src="./VC++下的sqlite数据库加密  离别歌/thum-4efd1367493689.jpg"/></a></span></p>
+<p><span style="font-size:14px;">    加密后，乱码了：</span></p>
+<p><span style="font-size:14px;">    <a href="https://www.leavesongs.com/content/uploadfile/201305/3fb51367493690.jpg" id="ematt:96" target="_blank"><img alt="点击查看原图" border="0" src="./VC++下的sqlite数据库加密  离别歌/thum-3fb51367493690.jpg"/></a></span></p>
+<p><span style="font-size:14px;">    其他一切使用正常：</span></p>
+<p><span style="font-size:14px;">    <a href="https://www.leavesongs.com/content/uploadfile/201305/f9961367493919.jpg" id="ematt:97" target="_blank"><img alt="点击查看原图" border="0" src="./VC++下的sqlite数据库加密  离别歌/thum-f9961367493919.jpg"/></a></span></p>
+<hr/>
+<p><span style="font-size:14px;">    如果大家有心，可以去读读代码，看看加密的过程具体是怎么实现。</span></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="ede258163e4d32750c12ff02f7376cd54dd27284"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./VC++下的sqlite数据库加密  离别歌/ede258163e4d32750c12ff02f7376cd54dd27284"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="253">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="uLK9aF6x7PHvajnNs1nx7x6XTYZkcdtj255FY9iMyCBUaYL2giRhGb8222ssVHit"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./VC++下的sqlite数据库加密  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./VC++下的sqlite数据库加密  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

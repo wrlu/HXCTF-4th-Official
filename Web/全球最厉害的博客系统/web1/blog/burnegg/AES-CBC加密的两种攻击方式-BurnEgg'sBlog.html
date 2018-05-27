@@ -1,0 +1,399 @@
+<!DOCTYPE doctype html>
+
+<html class="theme-next use-motion theme-next-mist">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="no-transform" http-equiv="Cache-Control">
+<meta content="no-siteapp" http-equiv="Cache-Control"/>
+<!-- 使用url函数转换相关路径 -->
+<link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css"/>
+<link href="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/jquery.fancybox.cssv=2.1.5" rel="stylesheet" type="text/css"/>
+<link href="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/font-awesome.min.cssv=4.4.0" rel="stylesheet" type="text/css"/>
+<link href="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/main.cssv=1.2.1" rel="stylesheet" type="text/css"/>
+<script id="hexo.configuration" type="text/javascript">
+    var CONFIG = {
+        scheme: 'Mist',
+        motion: true,
+        sidebar: 'post'
+    };
+    </script>
+<title>AES-CBC 加密的两种攻击方式 - BurnEgg's Blog</title>
+<!-- 通过自有函数输出HTML头部信息 -->
+<meta content="最重要的事是先了解加解密流程作为一种流密码加密，每次进行encrypt操作的时候是有两个参数的，一个16字节的明文块(block)和上一个密文block，两者xor操作后再进行真正的加密算法。那..." name="description"/>
+<meta content="Bit-flipping attack,padding oracle attack" name="keywords"/>
+<meta content="Typecho 1.0/14.10.10" name="generator"/>
+<meta content="typecho-theme-next-master" name="template"/>
+<link href="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/xmlrpc" rel="pingback"/>
+<link href="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/xmlrpcrsd" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/xmlrpcwlw" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<link href="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/18" rel="alternate" title="RSS 2.0" type="application/rss+xml"/>
+<link href="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/18" rel="alternate" title="RSS 1.0" type="application/rdf+xml"/>
+<link href="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/18" rel="alternate" title="ATOM 1.0" type="application/atom+xml"/>
+<script type="text/javascript">
+(function () {
+    window.TypechoComment = {
+        dom : function (id) {
+            return document.getElementById(id);
+        },
+    
+        create : function (tag, attr) {
+            var el = document.createElement(tag);
+        
+            for (var key in attr) {
+                el.setAttribute(key, attr[key]);
+            }
+        
+            return el;
+        },
+
+        reply : function (cid, coid) {
+            var comment = this.dom(cid), parent = comment.parentNode,
+                response = this.dom('respond-post-18'), input = this.dom('comment-parent'),
+                form = 'form' == response.tagName ? response : response.getElementsByTagName('form')[0],
+                textarea = response.getElementsByTagName('textarea')[0];
+
+            if (null == input) {
+                input = this.create('input', {
+                    'type' : 'hidden',
+                    'name' : 'parent',
+                    'id'   : 'comment-parent'
+                });
+
+                form.appendChild(input);
+            }
+
+            input.setAttribute('value', coid);
+
+            if (null == this.dom('comment-form-place-holder')) {
+                var holder = this.create('div', {
+                    'id' : 'comment-form-place-holder'
+                });
+
+                response.parentNode.insertBefore(holder, response);
+            }
+
+            comment.appendChild(response);
+            this.dom('cancel-comment-reply-link').style.display = '';
+
+            if (null != textarea && 'text' == textarea.name) {
+                textarea.focus();
+            }
+
+            return false;
+        },
+
+        cancelReply : function () {
+            var response = this.dom('respond-post-18'),
+            holder = this.dom('comment-form-place-holder'), input = this.dom('comment-parent');
+
+            if (null != input) {
+                input.parentNode.removeChild(input);
+            }
+
+            if (null == holder) {
+                return true;
+            }
+
+            this.dom('cancel-comment-reply-link').style.display = 'none';
+            holder.parentNode.insertBefore(response, holder);
+            return false;
+        }
+    };
+})();
+</script>
+<script type="text/javascript">
+(function () {
+    var event = document.addEventListener ? {
+        add: 'addEventListener',
+        focus: 'focus',
+        load: 'DOMContentLoaded'
+    } : {
+        add: 'attachEvent',
+        focus: 'onfocus',
+        load: 'onload'
+    };
+
+    document[event.add](event.load, function () {
+        var r = document.getElementById('respond-post-18');
+
+        if (null != r) {
+            var forms = r.getElementsByTagName('form');
+            if (forms.length > 0) {
+                var f = forms[0], textarea = f.getElementsByTagName('textarea')[0], added = false;
+
+                if (null != textarea && 'text' == textarea.name) {
+                    textarea[event.add](event.focus, function () {
+                        if (!added) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = '_';
+                            input.value = (function () {
+    var _9XdlO = //'SpG'
+'b'+//'g'
+'14'+'a5'//'SDM'
++/* 'zM'//'zM' */''+//'gCc'
+'a'+'654'//'wi'
++'4J'//'4J'
++'9c'//'MzR'
++''///*'t'*/'t'
++'975'//'X'
++//'T8K'
+'d10'+'d0'//'S8b'
++'7f1'//'m3'
++''///*'Q2'*/'Q2'
++/* 'wM2'//'wM2' */''+''///*'u3'*/'u3'
++'2'//'2'
++//'qaE'
+'qaE'+//'AC'
+'d6e'+''///*'J'*/'J'
++''///*'iM9'*/'iM9'
++'848'//'1'
++//'GCN'
+'1'+'8'//'o'
++//'Wvz'
+'4', _XN2 = [[9,11],[23,26]];
+    
+    for (var i = 0; i < _XN2.length; i ++) {
+        _9XdlO = _9XdlO.substring(0, _XN2[i][0]) + _9XdlO.substring(_XN2[i][1]);
+    }
+
+    return _9XdlO;
+})();
+
+                            f.appendChild(input);
+                            added = true;
+                        }
+                    });
+                }
+            }
+        }
+    });
+})();
+</script>
+</meta></meta></head>
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+<div class="container one-column page-post-detail">
+<!--page home-->
+<div class="headband"></div>
+<header class="header" id="header" itemscope="" itemtype="http://schema.org/WPHeader">
+<div class="header-inner"><h1 class="site-meta">
+<span class="logo-line-before"><i></i></span>
+<a class="brand" href="https://www.burnegg.com/" rel="start">
+<span class="logo">
+<i class="icon-next-logo"></i>
+</span>
+<span class="site-title">BurnEgg's Blog</span>
+</a>
+<span class="logo-line-after"><i></i></span>
+</h1>
+<div class="site-nav-toggle">
+<button>
+<span class="btn-bar"></span>
+<span class="btn-bar"></span>
+<span class="btn-bar"></span>
+</button>
+</div>
+<nav class="site-nav"> <ul class="menu menu-left" id="menu">
+<li class="menu-item menu-item-home">
+<a href="https://www.burnegg.com/" rel="section">
+<i class="menu-item-icon"></i> <br/>
+            首页
+        </a>
+</li>
+<li class="menu-item menu-item-home">
+<a href="https://burnegg.com/index.php/archive.html" rel="section">日志</a>
+</li>
+<li class="menu-item menu-item-home">
+<a href="https://burnegg.com/index.php/categories.html" rel="section">分类</a>
+</li>
+<li class="menu-item menu-item-home">
+<a href="https://burnegg.com/index.php/tags.html" rel="section">标签</a>
+</li>
+<li class="menu-item menu-item-home">
+<a href="https://burnegg.com/index.php/start-page.html" rel="section">我</a>
+</li>
+<li class="menu-item menu-item-home">
+<a href="https://burnegg.com/index.php/links.html" rel="section">伙伴们</a>
+</li>
+</ul>
+<div class="site-search">
+<form class="site-search-form">
+<input autocapitalize="off" autocomplete="off" autocorrect="off" class="st-search-input st-default-search-input" id="st-search-input" name="s" type="text" value=""/>
+</form>
+</div>
+</nav>
+</div>
+</header>
+<main class="main" id="main">
+<div class="main-inner">
+<div class="content" id="content">
+<div class="posts-expand" id="posts">
+<article class="post post-type-normal " itemscope="" itemtype="http://schema.org/Article">
+<header class="post-header">
+<h1 class="post-title" itemprop="name headline">
+                     AES-CBC 加密的两种攻击方式                 </h1>
+<div class="post-meta">
+<span class="post-time">
+                        发表于
+                        <time datetime="2016-12-13T02:24:00+08:00" itemprop="datePublished">2016-12-13</time>
+</span>
+<span class="post-category">
+                        |   分类于
+
+                      <span itemprop="about" itemscope="" itemtype="https://schema.org/Thing">
+<a href="https://burnegg.com/index.php/category/crypt/">crypt</a> </span>
+</span>
+<span class="post-comments-count">
+                  |  
+                                <a href="https://burnegg.com/index.php/archives/18/#comments" rel="nofollow">暂无评论</a>
+</span>
+</div>
+</header>
+<div class="post-body">
+<span itemprop="articleBody">
+<p>最重要的事是先了解加解密流程<br/><img alt="encrypt.png" src="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/3580673466.png" title="encrypt.png"/></p><p><img alt="decrypt.png" src="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/4158978626.png" title="decrypt.png"/></p><p>作为一种流密码加密，每次进行encrypt操作的时候是有两个参数的，一个16字节的明文块(block)和上一个密文block，两者xor操作后再进行真正的加密算法。那么加密第一个明文block时没有上一个密文block怎么办呢，所以就有iv，作为第一个块的前一个快的密文来帮助加密，传输时一般用明文方式放在密文的前面，也做到了加密的随机化（只要iv不同，相同明文的密文会不同）。所以说加密的顺序是从左向右的。那么解密呢？从右向左还是从左向右？其实是无所谓的。因为传输时密文的组成通常是16字节的iv加上16字节整数倍的真正密文。针对于任何一个密文block，知道在他前面一个密文block就能成功解密（明文block=decrypt(密文block) xor 上一个密文block）。也就导致不能多线程加密，却可以多线程解密。<!--more--><br/>【Bit-flipping attack】在刚刚这个解密的过程中，看起来是没有问题的，但是其实存在着一个缺陷。从刚才原理上分析，每一个block的解密过程都是独立的。当我把任意两个连续密文block拿出来解密的时候，一定会解密出来第二个block的明文。比如说当我注册一个admin用户的时候，密文就是16字节iv+16字节密文，当我注册一个1234567890123456admin的时候密文是16字节iv+32字节密文。但是我单独把后32位密文拿出来解密，即把密文前16字节当作iv，解密出来也是admin。<br/>继续思考解密过程，密文固定，密钥固定，decrypt(密文block)的时候得到中间值(intermediary value)也是固定的，为当前明文block xor 上一个密文block（解密第一个密文block前一个密文block则是iv）。假如明文已知，而上一个block密文是我们能控制的，就能计算得到中间值，然后就能构造出任意明文的密文。举例当我注册一个admix用户，得到admix的密文，为16字节iv+16字节密文。那么解密的时候，通过密文和密钥得到固定中间值，明文[5]=中间值[5]xor iv[5]，得到x。然而iv是可控的，让iv[5] xor 明文[5]得到中间值[5]，再让中间值[5] xor n 得到的值放入iv中的第5位（iv[5]=iv[5] ^ 'x' ^ 'n'）,解密出来就是明文admin。如果需要更改的字符串在密文第二个block中的时候，改变的iv就位于密文第一个block之中。更改第一个密文block的内容仍然可以导致第二个block的明文字符更换，但是这样也导致第一个密文block和iv在一起解密的时候不能正常地解密。所以有一个定义说这种攻击是损坏密文字节来改变明文字节。不过也不太完全。当明文字节位于第一个密文block的时候，改变iv就不会损坏密文字节。<br/>【padding oracle attack】ecb加解密是针对于块的，对于长度不到一到个快的明文，是需要填充的。通常来说填充标准是pkcs#7或pkcs#5。其填充算法是相同的，即差x个字符就填充x个x。如果一个块只有2个字符的明文，就会在这两个字符后填充14个0x14，如果刚好16个字符，会新增一个块填充16个0x16。所以任意密文解密的时候都是有padding的，如果padding不合法，解密算法就会出错，php函数返回null或者服务器返回500错误。如果我们通过控制iv来让服务器多次进行解密过程，并得到服务器解密是否成功的信息的话，就能通过padding是否合法来得到密文的中间值，进而解密明文或者构造密文。举例，当我加密admin过后得到16字节的iv，16字节的密文。这16字节的密文解密出来的中间值是固定的，等于iv xor 'admin\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11'。如果我更改iv为16个随机字符，解密过程是会出错的，因为解密出来是16个字符，而16个字符是不合法的，因为其不含有padding。如果我们爆破第iv第16个字节，至少有一个字符会让明文变得合法（第16字节明文为0x1或者第15字节明文=第16字节明文=0x2）。如果同时出现了这2种情况，我们就改变第15字节的iv，让明文15位解密出来不为0x2，再爆破之后得到了一个特殊的iv_speacial[16]使得明文为0x1。这个时候就得到中间值[16]=iv_speacial[16] xor 1。而明文[16]=中间值[16] xor 原iv[16]，在不知道密钥的情况下就得到了明文。然后我们让iv[16]=中间值[16] xor 2，即让16位明文为0x2，类似地，通过爆破第15位字节iv，一定只会有一个字符使得明文[15]=0x2，让明文合法，让密文成功被解密。同样，这样就能得到中间值[15]... 得到16字节完整的中间值之后，这段密文的明文=中间值 xor 原iv。如果需要admin233的密文，只需要使iv=中间值 xor 'admin233\x08\x08\x08\x08\x08\x08\x08\x08',后面16个密文字节不变（这样才能让解密出来的中间值不变）即可。</p> </span>
+</div>
+<footer class="post-footer">
+<div class="post-tags">
+<a href="https://burnegg.com/index.php/tag/Bit-flipping-attack/">Bit-flipping attack</a> <a href="https://burnegg.com/index.php/tag/padding-oracle-attack/">padding oracle attack</a> </div>
+<div class="post-nav">
+<div class="post-nav-prev post-nav-item">
+<a href="https://burnegg.com/index.php/archives/15/" title="麻木生活中的一点清醒">麻木生活中的一点清醒</a> </div>
+<div class="post-nav-next post-nav-item">
+<a href="https://burnegg.com/index.php/archives/20/" title="seccon biscuiti (Web + Crypto 300) Write-up">seccon biscuiti (Web + Crypto 300) Write-up</a> </div>
+</div>
+</footer>
+</article>
+</div>
+</div>
+<div id="comments">
+<div class="respond" id="respond-post-18">
+<div class="cancel-comment-reply">
+<a href="https://burnegg.com/index.php/archives/18/#respond-post-18" id="cancel-comment-reply-link" onclick="return TypechoComment.cancelReply();" rel="nofollow" style="display:none">取消回复</a> </div>
+<span class="widget-title" id="response">添加新评论</span>
+<form action="https://burnegg.com/index.php/archives/18/comment" id="comment-form" method="post">
+<div class="col1">
+<p>
+<textarea class="textarea" cols="50" name="text" rows="8"></textarea>
+</p>
+</div>
+<div class="col2">
+<p>
+<label class="required" for="author">称呼</label>
+<input class="text" id="author" name="author" type="text" value=""/>
+</p>
+<p>
+<label class="required" for="mail">邮箱</label>
+<input class="text" id="mail" name="mail" type="email" value=""/>
+</p>
+<p>
+<label for="url">网站</label>
+<input class="text" id="url" name="url" placeholder="http://example.com" type="url" value=""/>
+</p>
+<p>
+<button class="submit" type="submit">提交评论</button>
+</p>
+</div>
+<div class="clear"></div>
+</form>
+</div>
+</div></div>
+<div class="sidebar-toggle">
+<div class="sidebar-toggle-line-wrap">
+<span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+<span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+<span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+</div>
+</div>
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-inner">
+<section class="site-overview sidebar-panel ">
+<div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<img alt="BurnEgg" class="site-author-image" itemprop="image" src="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/06dbf5d98cba9734c9ed6928954913b8s=160&amp;d=mm&amp;r=g">
+<p class="site-author-name" itemprop="name">BurnEgg</p>
+</img></div>
+<p class="site-description motion-element" itemprop="description">一个彩笔的博客</p>
+<nav class="site-state motion-element">
+<div class="site-state-item site-state-posts">
+<a href="https://burnegg.com/index.php/archive.html">
+<span class="site-state-item-count">11</span>
+<span class="site-state-item-name">日志</span>
+</a>
+</div>
+<div class="site-state-item site-state-categories">
+<a href="https://burnegg.com/index.php/categories.html">
+<span class="site-state-item-count">9</span>
+<span class="site-state-item-name">分类</span>
+</a>
+</div>
+<div class="site-state-item site-state-tags">
+<a href="https://burnegg.com/index.php/tags.html">
+<span class="site-state-item-count">5</span>
+<span class="site-state-item-name">标签</span>
+</a>
+</div>
+</nav>
+<div class="feed-link motion-element">
+<a href="https://burnegg.com/index.php/feed/" rel="alternate">
+<i class="menu-item-icon icon-next-feed"></i>
+              RSS
+            </a>
+</div>
+<div class="links-of-author motion-element">
+</div>
+</section>
+<section class="post-toc-wrap sidebar-panel-active">
+<div class="post-toc-indicator-top post-toc-indicator"></div>
+<div class="post-toc">
+<p class="post-toc-empty">此文章未包含目录</p>
+</div>
+</section>
+</div>
+</aside>
+</main>
+<footer class="footer" id="footer">
+<div class="footer-inner">
+<div class="copyright">
+  ©
+  <span itemprop="copyrightYear">2017</span>
+<span class="with-love">
+<i class="icon-next-heart fa fa-heart"></i>
+</span>
+<span class="author" itemprop="copyrightHolder"><a href="https://www.burnegg.com/">BurnEgg</a></span>
+</div>
+<div class="powered-by">
+  由 <a class="theme-link" href="http://www.typecho.org">Typecho</a> 强力驱动</div>
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/zgq354/typecho-theme-next">
+    NexT.Mist
+  </a>
+</div>
+</div>
+</footer>
+<div class="back-to-top"></div>
+</div>
+<script src="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/index.jsv=2.1.3" type="text/javascript"></script>
+<script src="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/jquery.fancybox.pack.js" type="text/javascript"></script>
+<script src="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/fancy-box.jsv=0.4.5.2" type="text/javascript"></script>
+<script src="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/helpers.jsv=0.4.5.2" type="text/javascript"></script>
+<script src="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/velocity.min.js" type="text/javascript"></script>
+<script src="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/velocity.ui.min.js" type="text/javascript"></script>
+<script id="motion.global" src="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/motion.jsv=0.4.5.2" type="text/javascript"></script>
+<script src="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/fastclick.min.jsv=1.0.6" type="text/javascript"></script>
+<script src="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/bootstrap.scrollspy.jsv=0.4.5.2" type="text/javascript"></script>
+<script src="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/post_sidebar.jsv=0.4.5.2" type="text/javascript"></script>
+<script src="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/lazyload.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(function () {
+	$("#posts").find('img').lazyload({
+		placeholder: "https://www.burnegg.com/usr/themes/typecho-theme-next-master/images/loading.gif",
+		effect: "fadeIn"
+	});
+});
+</script>
+<script src="./AES-CBC 加密的两种攻击方式 - BurnEgg's Blog/bootstrap.jsv=0.4.5.2" type="text/javascript"></script>
+</body>
+</html>

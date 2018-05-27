@@ -1,0 +1,322 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./将二进制文件加入VC资源后释放执行  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./将二进制文件加入VC资源后释放执行  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./将二进制文件加入VC资源后释放执行  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>将二进制文件加入VC资源后释放执行 | 离别歌</title>
+<link href="./将二进制文件加入VC资源后释放执行  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./将二进制文件加入VC资源后释放执行  离别歌/styles.css" rel="stylesheet"/>
+<link href="./将二进制文件加入VC资源后释放执行  离别歌/style.css" rel="stylesheet"/>
+<link href="./将二进制文件加入VC资源后释放执行  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./将二进制文件加入VC资源后释放执行  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./将二进制文件加入VC资源后释放执行  离别歌/jquery.min.js"></script>
+<link href="./将二进制文件加入VC资源后释放执行  离别歌/code.css" rel="stylesheet"/>
+<link href="./将二进制文件加入VC资源后释放执行  离别歌/button.css" rel="stylesheet"/>
+<link href="./将二进制文件加入VC资源后释放执行  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./将二进制文件加入VC资源后释放执行  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/C/vc-resource-exe.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/C/vc-resource-exe.html&amp;text=%E5%B0%86%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6%E5%8A%A0%E5%85%A5VC%E8%B5%84%E6%BA%90%E5%90%8E%E9%87%8A%E6%94%BE%E6%89%A7%E8%A1%8C"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/C/vc-resource-exe.html&amp;title=%E5%B0%86%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6%E5%8A%A0%E5%85%A5VC%E8%B5%84%E6%BA%90%E5%90%8E%E9%87%8A%E6%94%BE%E6%89%A7%E8%A1%8C"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/C/vc-resource-exe.html&amp;is_video=false&amp;description=%E5%B0%86%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6%E5%8A%A0%E5%85%A5VC%E8%B5%84%E6%BA%90%E5%90%8E%E9%87%8A%E6%94%BE%E6%89%A7%E8%A1%8C"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E5%B0%86%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6%E5%8A%A0%E5%85%A5VC%E8%B5%84%E6%BA%90%E5%90%8E%E9%87%8A%E6%94%BE%E6%89%A7%E8%A1%8C&amp;body=Check out this article: https%3A//www.leavesongs.com/C/vc-resource-exe.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/C/vc-resource-exe.html&amp;title=%E5%B0%86%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6%E5%8A%A0%E5%85%A5VC%E8%B5%84%E6%BA%90%E5%90%8E%E9%87%8A%E6%94%BE%E6%89%A7%E8%A1%8C"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/C/vc-resource-exe.html&amp;title=%E5%B0%86%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6%E5%8A%A0%E5%85%A5VC%E8%B5%84%E6%BA%90%E5%90%8E%E9%87%8A%E6%94%BE%E6%89%A7%E8%A1%8C"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/C/vc-resource-exe.html&amp;title=%E5%B0%86%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6%E5%8A%A0%E5%85%A5VC%E8%B5%84%E6%BA%90%E5%90%8E%E9%87%8A%E6%94%BE%E6%89%A7%E8%A1%8C"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/C/vc-resource-exe.html&amp;title=%E5%B0%86%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6%E5%8A%A0%E5%85%A5VC%E8%B5%84%E6%BA%90%E5%90%8E%E9%87%8A%E6%94%BE%E6%89%A7%E8%A1%8C"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/C/vc-resource-exe.html&amp;name=%E5%B0%86%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6%E5%8A%A0%E5%85%A5VC%E8%B5%84%E6%BA%90%E5%90%8E%E9%87%8A%E6%94%BE%E6%89%A7%E8%A1%8C&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">将二进制文件加入VC资源后释放执行</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年11月28日 16:45" itemprop="datePublished">
+                    2013 十一月 28 16:45
+                </time>
+</div>
+<div class="article-tag">
+            阅读：9988
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/C">C/C++</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/VC++">VC++</a>,
+                
+                <a class="tag-link" href="/tag/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%B5%84%E6%BA%90">自定义资源</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    标题不知道这么说好不好，感觉很乱。
+</p>
+<p>
+	    我以前就很纳闷，为什么我一个木马的客户端，能配置好各种选项以后生成一个服务端。一个exe文件怎么生出另一个exe文件？
+</p>
+<p>
+	    一般的木马生成、木马释放都使用的这个方法，dll也可以加到资源中，这样我们的程序就可以免去包含很多乱七八糟的二进制文件，一个exe就够了，执行的时候再释放。
+</p>
+<p>
+	    其实原理很简单，把二进制文件导入到资源中。我们就以vs2010为例：
+</p>
+<p>
+	    0x01    在VC的资源视图中选择添加资源 - 导入，选择你要包含的exe
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201311/a0171385628875.jpg" id="ematt:258" target="_blank"><img alt="001.jpg" border="0" height="184" src="./将二进制文件加入VC资源后释放执行  离别歌/thum-a0171385628875.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<br>
+</br></p>
+<p>
+	    0x02    包含以后，会看到你选择的文件已经以二进制的形式展现在你面前：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201311/11f51385628877.jpg" id="ematt:260" target="_blank"><img alt="002.jpg" border="0" height="233" src="./将二进制文件加入VC资源后释放执行  离别歌/thum-11f51385628877.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<br>
+</br></p>
+<p>
+	    0x03    来到代码编辑区，我们在需要使用这个exe文件的时候，从资源里拿出这段二进制代码，写入内存或一个磁盘文件就行了。首先定位我们的资源文件，其中IDR_RCEXE即为资源文件的ID：
+<pre class="brush: cpp;auto-links: false;">HRSRC hRsrc = FindResource(NULL, MAKEINTRESOURCEA(IDR_RCEXE), TEXT("RCEXE"));</pre>
+    0x04    获得资源文件大小，这个大小之后我们如果要提取出来会用到的：
+<pre class="brush: cpp;auto-links: false;">DWORD dwSize = SizeofResource(NULL, hRsrc); </pre>
+    0x05    加载资源，使用之前获得的资源文件句柄hRsrc：
+<pre class="brush: cpp;auto-links: false;">HGLOBAL hGlobal = LoadResource(NULL, hRsrc); </pre>
+    0x06    在内存中锁定资源，其返回值即为一个指向资源第一个字节的指针：
+<pre class="brush: cpp;auto-links: false;">LPVOID pBuffer = LockResource(hGlobal); </pre>
+    0x07    已经获得了指针了，再怎么做就看你自己的了。比如我这里就是简单地将这个exe文件释放到硬盘的临时目录下 <span>C:\Users\Phtih0n\AppData\Local\Temp，其中dwSize就是之前获得的资源文件大小：
+<pre class="brush: cpp;auto-links: false;">FILE* fp = fopen("C:\Users\Phtih0n\AppData\Local\Temp\tmp100.exe", "wb");
+		if (fp != NULL)
+		{
+			fwrite(pBuffer, sizeof(char), dwSize, fp)
+			fclose(fp);
+		}</pre>
+    这样，下次就能直接调用<span>C:\Users\Phtih0n\AppData\Local\Temp\tmp100.exe了。</span></span>
+</p>
+<p>
+<span>    如果是dll，也是一样的，释放出来以后就能LoadLibrary调用它了。</span>
+</p>
+<p>
+<br/>
+</p>
+<p>
+	    0x08    总结
+</p>
+<p>
+	    其实这一套过程和代码基本上就是固定的，<strong>获得资源句柄 - 获得资源文件大小 - 加载资源文件 - 锁定资源并获得其指针。</strong>
+</p>
+<p>
+<strong>    </strong>以后写代码的时候就直接复制这一端，改一下就能为己用。
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2403">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./将二进制文件加入VC资源后释放执行  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">xiaopo</a>
+<time datetime="2016年8月2日 16:27" itemprop="datePublished">
+                            2016 八月 02 16:27
+                        </time>
+<a href="javascript:reply_to('2403', 'xiaopo')">回复</a>
+</p>
+<p class="comment-meta">1L观察仔细</p>
+</div>
+</div>
+<div class="row" id="comment-1771">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./将二进制文件加入VC资源后释放执行  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://luom.net" target="_blank">luom</a>
+<time datetime="2014年9月20日 02:13" itemprop="datePublished">
+                            2014 九月 20 02:13
+                        </time>
+<a href="javascript:reply_to('1771', 'luom')">回复</a>
+</p>
+<p class="comment-meta">两处错误  <br/>fopen("C:\Users\Phtih0n\AppData\Local\Temp\tmp100.exe", "w<br/>转义<br/>fwrite(pBuffer, sizeof(char), dwSize, fp)<br/>分号</p>
+</div>
+</div>
+<div class="row" id="comment-1517">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./将二进制文件加入VC资源后释放执行  离别歌/d2087df718e2f72e35af94efca1512a5.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://wusunyinyue.cn" target="_blank">whirlwind</a>
+<time datetime="2013年12月4日 01:24" itemprop="datePublished">
+                            2013 十二月 04 01:24
+                        </time>
+<a href="javascript:reply_to('1517', 'whirlwind')">回复</a>
+</p>
+<p class="comment-meta">能否加下QQ493633628？？认识下吧，我也西安的。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1570">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./将二进制文件加入VC资源后释放执行  离别歌/ee2aad6c8eecccbd0e6721e1fd50c4ae.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://baidu.com" target="_blank">fsd</a>
+<time datetime="2014年3月13日 14:58" itemprop="datePublished">
+                            2014 三月 13 14:58
+                        </time>
+<a href="javascript:reply_to('1570', 'fsd')">回复</a>
+</p>
+<p class="comment-meta">@whirlwind：你很机智啊</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1516">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./将二进制文件加入VC资源后释放执行  离别歌/3769822d454c835d1818798707dd32f1.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">体育设施</a>
+<time datetime="2013年12月2日 14:38" itemprop="datePublished">
+                            2013 十二月 02 14:38
+                        </time>
+<a href="javascript:reply_to('1516', '体育设施')">回复</a>
+</p>
+<p class="comment-meta">留言是友谊的风帆，欣赏是网络的风度，与朋友网络相遇，交流感情是一种缘分，欢迎回访!</p>
+</div>
+</div>
+<div class="row" id="comment-1510">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./将二进制文件加入VC资源后释放执行  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.777gou.com" target="_blank">趣购网</a>
+<time datetime="2013年11月28日 19:32" itemprop="datePublished">
+                            2013 十一月 28 19:32
+                        </time>
+<a href="javascript:reply_to('1510', '趣购网')">回复</a>
+</p>
+<p class="comment-meta">不错，学习了，</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="377faed756f6acb417410737ad7aeb737444bcfd"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./将二进制文件加入VC资源后释放执行  离别歌/377faed756f6acb417410737ad7aeb737444bcfd"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="238">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="MpuXRKfiIBHIbSgnUBv2erfayXkyS1DbkJPtFerx9oB7bxECISZMN5hfH1NGBvsl"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./将二进制文件加入VC资源后释放执行  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./将二进制文件加入VC资源后释放执行  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

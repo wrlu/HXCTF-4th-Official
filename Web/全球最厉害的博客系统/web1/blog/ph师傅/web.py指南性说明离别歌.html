@@ -1,0 +1,577 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./web.py指南性说明  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./web.py指南性说明  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./web.py指南性说明  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>web.py指南性说明 | 离别歌</title>
+<link href="./web.py指南性说明  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./web.py指南性说明  离别歌/styles.css" rel="stylesheet"/>
+<link href="./web.py指南性说明  离别歌/style.css" rel="stylesheet"/>
+<link href="./web.py指南性说明  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./web.py指南性说明  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./web.py指南性说明  离别歌/jquery.min.js"></script>
+<link href="./web.py指南性说明  离别歌/code.css" rel="stylesheet"/>
+<link href="./web.py指南性说明  离别歌/button.css" rel="stylesheet"/>
+<link href="./web.py指南性说明  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./web.py指南性说明  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PYTHON/webpy-readme.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PYTHON/webpy-readme.html&amp;text=web.py%E6%8C%87%E5%8D%97%E6%80%A7%E8%AF%B4%E6%98%8E"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PYTHON/webpy-readme.html&amp;title=web.py%E6%8C%87%E5%8D%97%E6%80%A7%E8%AF%B4%E6%98%8E"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PYTHON/webpy-readme.html&amp;is_video=false&amp;description=web.py%E6%8C%87%E5%8D%97%E6%80%A7%E8%AF%B4%E6%98%8E"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=web.py%E6%8C%87%E5%8D%97%E6%80%A7%E8%AF%B4%E6%98%8E&amp;body=Check out this article: https%3A//www.leavesongs.com/PYTHON/webpy-readme.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PYTHON/webpy-readme.html&amp;title=web.py%E6%8C%87%E5%8D%97%E6%80%A7%E8%AF%B4%E6%98%8E"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PYTHON/webpy-readme.html&amp;title=web.py%E6%8C%87%E5%8D%97%E6%80%A7%E8%AF%B4%E6%98%8E"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PYTHON/webpy-readme.html&amp;title=web.py%E6%8C%87%E5%8D%97%E6%80%A7%E8%AF%B4%E6%98%8E"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PYTHON/webpy-readme.html&amp;title=web.py%E6%8C%87%E5%8D%97%E6%80%A7%E8%AF%B4%E6%98%8E"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PYTHON/webpy-readme.html&amp;name=web.py%E6%8C%87%E5%8D%97%E6%80%A7%E8%AF%B4%E6%98%8E&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">web.py指南性说明</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年5月30日 10:51" itemprop="datePublished">
+                    2014 五月 30 10:51
+                </time>
+</div>
+<div class="article-tag">
+            阅读：12825
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PYTHON">Python</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/web.py">web.py</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    整理一下这些天研究web.py的一些经验，写一篇具有划时代意义的指南性说明~哈哈，开个玩笑，谨以此文献给所有学习web.py的同学以及Aaron Swart.
+</p>
+<p>
+	    web.py是一个开发web应用的python框架，相比于著名的Django与TurboGears，web.py更加让人感觉是用python在写网站。没有复杂的语法规则，简单的一个实现http协议的框架，不依赖其他packet，不依赖操作系统。当然也是有弊端的，框架只实现了基础的web功能，很多功能需要自己动手写，不像php那样一两个函数就搞定任务。
+</p>
+<p>
+	    正如我上句话说的，web.py十分简单，安装只需要sudo easy_install web.py即可，不到2秒中，框架已经躺在服务器里了。如果你没有安装easy_install（比如windows环境），也可以手工安装。github上下载源码，直接安装：
+</p>
+<pre class="brush: bash;auto-links: false;">python ./setup.py install</pre>
+    装好以后试一下,import web，没有抛错说明安装成功了。
+<p>
+<br>
+</br></p>
+<p>
+	    关于web.py的基础使用方式，一个事例文件hello world即可说明一切：
+</p>
+<pre class="brush: python;auto-links: false;">import web
+        
+urls = (
+    '/(.*)', 'hello'
+)
+app = web.application(urls, globals())
+
+class hello:        
+    def GET(self, name):
+        if not name: 
+            name = 'World'
+        return 'Hello, ' + name + '!'
+
+if __name__ == "__main__":
+    app.run()</pre>
+    以上代码保存为app.py，然后运行：python ./app.py
+<p>
+<br>
+</br></p>
+<p>
+	    默认会监听8080端口作为web服务运行的端口，访问http://127.0.0.1:8080/即可看到Hello world。
+</p>
+<p>
+	    看到事例程序，urls是全局的url规则，'/(.*)'是一个正则，匹配用户访问时的url，'hello'就是处理的类名字。也就是说获得url以后与(.*)匹配，匹配上了就调用hello类处理请求。这里的正则是.*，匹配所有字符，所以用户的一切请求都会交给hello类来处理。
+</p>
+<p>
+	    根据MVC架构的思路来想，一般把这个hello类叫做控制器，controller。如果请求很多的时候，不要把所有的控制器类都放在一个文件里。我们可以使用python包，比如每个处理类一个文件，读放在action文件夹下，那么我们的urls就这么写：
+</p>
+<pre class="brush: python;auto-links: false;">urls = (
+    '/msg/?', 'action.msg.msg',
+    '/login(/quit|/)?', 'action.login.login',
+    '/log/?', 'action.log.log',
+    '/file/?', 'action.upload.upload',
+    '.*', 'action.show.show'
+)</pre>
+    action是包名字，msg是文件名，后一个msg是类名。
+<p>
+<br/>
+</p>
+<p>
+	    接下来，处理好了url规则，事例文件调用了web.application创建了一个app对象，第一个参数就是urls，第二个参数是globals()的返回值。
+</p>
+<p>
+	    然后就可以app.run()了，一切从此时开始。
+</p>
+<p>
+	    不过刚才把请求交给hello类来处理，那么我们看看hello类。所有的控制器类，都可以定义两个函数，GET和POST，顾名思义，这两个函数就用来处理get和post请求。也就是说，用户对app的get请求会交给hello类的GET函数，post请求交给POST函数。
+</p>
+<p>
+	    GET（POST）函数的参数是urls中正则部分的匹配到的值。例子里的name就是(.*)的值。你访问http://localhost:8080/phithon，就能看到输出了Hello, phithon.
+</p>
+<p>
+	    再深一点，在写网站的时候，哪几个部分最重要？无非是数据库增删改查、访问控制(session)、前端(模板)。那么我一个一个来说。
+</p>
+<p>
+	    先说说SESSION吧，session是安全区分访问者的唯一的方法，其他方式用户都能够伪造，只有session是用户不能够修改的。所以，我一般会把一些重要信息记录在session中，比如用户是否登录、用户id、用户权限等。php中session就是一个全局的数组$_SESSION，在web.py中，session是web.ctx中的一个对象（关于web.ctx，请查看cookbook）。
+</p>
+<p>
+	    我们在应用运行前首先需要获得一个SESSION对象赋值给web.ctx.session：
+</p>
+<pre class="brush: python;auto-links: false;">    web.config.session_parameters['cookie_name'] = 'py_pytalk_sid'
+    web.config.session_parameters['cookie_domain'] = None
+    web.config.session_parameters['timeout'] = 3600
+    web.config.session_parameters['ignore_expiry'] = True
+    web.config.session_parameters['ignore_change_ip'] = True
+    web.config.session_parameters['secret_key'] = '3u12m8xXo0is'
+    web.config.session_parameters['expired_message'] = 'Session expired'
+    session = web.session.Session(app, web.session.DiskStore('data/sessions'), initializer={'login': False})
+    def session_hook():
+        web.ctx.session = session
+    app.add_processor(web.loadhook(session_hook))</pre>
+<p>
+	    众所周知session是用cookie来传递的，所以cookie_name指这个cookie的名字。timeout指session过期时间，秒为单位。secret_key是salt，加密session id。其他一些设置的意义如下：
+</p>
+<p>
+	cookie_name - name of the cookie used to store the session id<br/>
+cookie_domain - domain for the cookie used to store the session id<br/>
+timeout - number of second of inactivity that is allowed before the session expires<br/>
+ignore_expiry - if True, the session timeout is ignored<br/>
+ignore_change_ip - if False, the session is only valid when it is accessed from the same ip address that created the session<br/>
+secret_key - salt used in session id hash generation<br/>
+expired_message - message displayed when the session expires<br/>
+    
+</p>
+<p>
+	    我就不再赘述了。通过web.session.Session初始化一个session对象，DiskStore是储存session文件的地址，initializer是session对象初始化内容。最后将新建的这个session对象赋值给web.ctx.session，以后就能够直接调用web.ctx.session来访问session了。
+</p>
+<p>
+	    注意，这些设置请在app.run()函数调用前设置好，然后调用app.run()执行程序。以后我们的web.ctx.session的使用就和php中的$_SESSION数组一样了。比如用户登录以后，设置web.ctx.session.uname = '用户名'。访客访问时，判断web.ctx.session.login == True。
+</p>
+<p>
+	    关于访问控制，还有一个小技巧。通常一个网站有后台，后台的页面也不止一个，这时候访问控制就是一个大麻烦。
+</p>
+<p>
+	    如果后台页面很多，我们不可能在每个页面对应的类中判断<span style="white-space:normal;">web.ctx.session.login是否为真，来判断管理员是否登录。所以我们可以让所有后台页面对应的类</span>都继承一个admin类，然后在admin类的构造函数里加入判断代码：
+</p>
+<pre class="brush: python;auto-links: false;">class admin:
+    def __init__(self):
+        if not web.ctx.session.login:
+            raise web.seeother('/login')</pre>
+    如果web.ctx.session.login的值非真，就用raise语句抛出一个错误，并跳转到/login页面去登录。如果不停止运行的话，即使调用seeother，但后面的内容还是会被执行，造成了安全隐患。但这里不能用return，return没任何效果，也不能用sys.exit，否则就直接退出整个网站的运行了。raise是一个好方法，可以完美保证后面的代码不被执行。
+<p>
+<br/>
+</p>
+<p>
+<br/>
+</p>
+<p>
+	    然后说到数据库。数据库是一个比较容易出漏洞的操作（sql注入），但解决sql注入的方法又是极为简单的（可以说是所有漏洞里最好解决的），那就是参数化查询。web.py提供了一个类似参数化查询的方式，基本可以满足我们日常使用数据库。
+</p>
+<p>
+	    首先我们创建一个数据库对象，并连接数据库：
+</p>
+<pre class="brush: python;auto-links: false;">database = 'db/pytalk.db3'
+db = web.database(dbn = 'sqlite', db = database)</pre>
+    我使用的sqlite数据库，如果是mysql，方法类似具体看文档。
+<p>
+<br/>
+</p>
+<p>
+	    这个db就是sql对象，我们以后就调用db.query来执行sql语句：
+</p>
+<pre class="brush: python;auto-links: false;">res = db.query("SELECT * FROM `log` WHERE `sort` = $i AND `keyword` = $search", vars = {
+    'i': 100,
+    'search': 'test'
+})</pre>
+    用$xxx来占位，然后用一个字典对象来传入数据。这样web.py内部会自动将相应的占位符用具体的数据替代。不知道大家注意没有，$search外面是没打引号的，也就是说web.py会自动帮我加入引号，这也是为什么它能够防范sql注入，因为它能自动处理引号和转义字符。
+<p>
+<br/>
+</p>
+<p>
+	    这样执行sql语句以后，我就再也不用担心注入的问题了，从用户那里获取的数据我直接像这样插入数据库，不用过滤，不用像PHP一样调用addslashes处理了。
+</p>
+<p>
+	    query返回值是一个iterbetter对象，这个对象是一个迭代器，但不像列表，它内部维护着一个指向当前元素的指针，这个指针只会往后走。也就是说我调用了一次res[0]，下次就必须调用res[1]，再访问res[0]就会抛出错误。
+</p>
+<p>
+	    所以我们可以简单地将这个值转换成一个列表，之后就方便多了：
+</p>
+<pre class="brush: python;auto-links: false;">res = list(db.query("SELECT * FROM `log` WHERE `sort` = $i AND `keyword` = $search", vars = {
+    'i': 100,
+    'search': 'test'
+}))</pre>
+    这个列表就是sql语句执行结果，len(res)就是行数，列表中的元素是字典，字典的键是列名，字典的值是列值。
+<p>
+<br/>
+</p>
+<p>
+<br/>
+</p>
+<p>
+	    最后说一下模板引擎，也就是关于前端的各种问题。
+</p>
+<pre class="brush: python;auto-links: false;">$def with (data)
+Hello $data['name']!</pre>
+    $def定义一个变量。一般这个变量是一个字典，这样我们把所有模板中可能用到的值都放进字典中，作为一个变量传入。
+<p>
+<br/>
+</p>
+<p>
+	    我在这里定义了两个函数，很大程度上简略了模板操作：
+</p>
+<pre class="brush: python;auto-links: false;">    def assign(self,key,value = ''):
+        if type(key) == dict:
+            self.tplData = dict(self.tplData,**key)
+        else:
+            self.tplData[key] = value
+
+    def display(self, tplName):
+        self.tplData['render'] = web.template.render('templates', globals = self.globalsTplFuncs)
+        return getattr(self.tplData['render'], tplName)(self.tplData)</pre>
+    self.tplData是包含所有变量的字典。我们使用assign来定义模板变量，定义完所有模板变量以后，调用display显示模板。tplName就是模板的名字（模板文件后缀是html），templates是模板文件地址。
+<p>
+<br/>
+</p>
+<p>
+	    globalsTplFuncs是模板函数，比较简单的模板是用不上的。
+</p>
+<p>
+	    关于安全性，我强调一点。在模板引擎中，web.py是默认会转义&lt;&gt;"'&amp;等xss字符的，也就是说输出$data['name']的时候会转换这个值再输出。如果你不想自动转义，就在$后面加个冒号，$:data['name']就不会转义了。
+</p>
+<p>
+	    什么情况下不想转义，就是模板存在包含的时候（如果转义的话你包含的文件就不是html了）。比如我写一个网站，网站的header一般是不会变的，所以我们最好在模板中创建一个header.html，然后其他模板文件包含之。这就就不用每写一个页面都写html头了。
+</p>
+<p>
+	    那么怎么实现包含？看到我之前那个display函数的第一行，就是将web.template.render方法赋值给了tplData['render']变量。然后我们在模板中就能够直接调用$:tplData['render'].header(tplData)来包含header.html，并将tplData传入。
+</p>
+<p>
+	    具体代码可以参考我后面给的一个app。
+</p>
+<p>
+<br/>
+</p>
+<p>
+	    说了这么多，可能有的同学还有不少疑惑。其实千万文字不如几行代码，我把我自己做的一个项目开源出来，相信有什么疑惑的方面，在代码中也能迅速找到解答。如果涉及到代码以外的东西，我们可以私下交流。
+</p>
+<p>
+	    已在在线IRC聊天室的小程序。
+</p>
+<p>
+	    项目地址：<a href="http://phith0n.github.io/Pytalk_Irc" target="_blank">http://phith0n.github.io/Pytalk_Irc</a>
+</p>
+<p>
+	    演示地址：<a href="http://p1ng.pw:81/" target="_blank">http://p1ng.pw:81/</a>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2137">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./web.py指南性说明  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">wish</a>
+<time datetime="2015年6月16日 18:19" itemprop="datePublished">
+                            2015 六月 16 18:19
+                        </time>
+<a href="javascript:reply_to('2137', 'wish')">回复</a>
+</p>
+<p class="comment-meta">麻烦问下想这样的网站源码哪找的？是你博主自己开发的吗</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2139">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./web.py指南性说明  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年6月16日 22:00" itemprop="datePublished">
+                            2015 六月 16 22:00
+                        </time>
+<a href="javascript:reply_to('2139', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@wish：自己开发。你可以上github找开源代码。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2149">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./web.py指南性说明  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">wish</a>
+<time datetime="2015年6月19日 10:54" itemprop="datePublished">
+                            2015 六月 19 10:54
+                        </time>
+<a href="javascript:reply_to('2149', 'wish')">回复</a>
+</p>
+<p class="comment-meta">@phithon：好的谢谢了</p>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1995">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./web.py指南性说明  离别歌/e0bacbaec0ce74e216148aeaf92cdd09.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.jackhome.cn/" target="_blank">jack</a>
+<time datetime="2015年3月27日 14:10" itemprop="datePublished">
+                            2015 三月 27 14:10
+                        </time>
+<a href="javascript:reply_to('1995', 'jack')">回复</a>
+</p>
+<p class="comment-meta">项目地打不开了，麻烦邮箱联系下我 <br/>1539475111@qq.com</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1996">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./web.py指南性说明  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年3月27日 14:12" itemprop="datePublished">
+                            2015 三月 27 14:12
+                        </time>
+<a href="javascript:reply_to('1996', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@jack：啥项目打不开了。。。我的么？</p>
+</div>
+</div>
+<div class="row" id="comment-1997">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./web.py指南性说明  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年3月27日 14:20" itemprop="datePublished">
+                            2015 三月 27 14:20
+                        </time>
+<a href="javascript:reply_to('1997', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@jack：改好了，感谢提醒，再点链接就OK了。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1998">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./web.py指南性说明  离别歌/e0bacbaec0ce74e216148aeaf92cdd09.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.jackhome.cn/" target="_blank">jack</a>
+<time datetime="2015年3月27日 14:24" itemprop="datePublished">
+                            2015 三月 27 14:24
+                        </time>
+<a href="javascript:reply_to('1998', 'jack')">回复</a>
+</p>
+<p class="comment-meta">@phithon：en 方便加下我微信交流吗？就刚才邮箱的这个地址,最近也在用这个框架写东西</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1999">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./web.py指南性说明  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年3月27日 14:46" itemprop="datePublished">
+                            2015 三月 27 14:46
+                        </time>
+<a href="javascript:reply_to('1999', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@jack：不怎么用微信。邮箱即可~</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1680">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./web.py指南性说明  离别歌/530777ddf6c92e2dd5c3b46d9ef18ef0.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://boke.tulongteam.com" target="_blank">屠龙</a>
+<time datetime="2014年6月9日 01:14" itemprop="datePublished">
+                            2014 六月 09 01:14
+                        </time>
+<a href="javascript:reply_to('1680', '屠龙')">回复</a>
+</p>
+<p class="comment-meta">学习了，不错。</p>
+</div>
+</div>
+<div class="row" id="comment-1676">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./web.py指南性说明  离别歌/332676fe859fce01782110dcd60e1ce0.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://imlonghao.com" target="_blank">imlonghao</a>
+<time datetime="2014年6月6日 16:13" itemprop="datePublished">
+                            2014 六月 06 16:13
+                        </time>
+<a href="javascript:reply_to('1676', 'imlonghao')">回复</a>
+</p>
+<p class="comment-meta">还是喜欢Django</p>
+</div>
+</div>
+<div class="row" id="comment-1671">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./web.py指南性说明  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.wanzaila.com" target="_blank">万载</a>
+<time datetime="2014年6月4日 05:36" itemprop="datePublished">
+                            2014 六月 04 05:36
+                        </time>
+<a href="javascript:reply_to('1671', '万载')">回复</a>
+</p>
+<p class="comment-meta">还不错，</p>
+</div>
+</div>
+<div class="row" id="comment-1668">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./web.py指南性说明  离别歌/13ec24073eb64504274a0600c5719038.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://seo.ifukua.com/" target="_blank">网站评估</a>
+<time datetime="2014年6月3日 03:13" itemprop="datePublished">
+                            2014 六月 03 03:13
+                        </time>
+<a href="javascript:reply_to('1668', '网站评估')">回复</a>
+</p>
+<p class="comment-meta">端午节好。。。。</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="1aea36c49cdf859c502a08254fe7c5c0f7de3db4"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./web.py指南性说明  离别歌/1aea36c49cdf859c502a08254fe7c5c0f7de3db4"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="315">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="3l2UgScpEqRIVRv5HH37kcbtReIU1VeDBFnq4moE5dL7VwTkvYxRTQdy0ib2Kp3N"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./web.py指南性说明  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./web.py指南性说明  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

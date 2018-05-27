@@ -1,0 +1,352 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./OpenSSL的VC编程 - MD5  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./OpenSSL的VC编程 - MD5  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./OpenSSL的VC编程 - MD5  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>OpenSSL的VC编程 - MD5 | 离别歌</title>
+<link href="./OpenSSL的VC编程 - MD5  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./OpenSSL的VC编程 - MD5  离别歌/styles.css" rel="stylesheet"/>
+<link href="./OpenSSL的VC编程 - MD5  离别歌/style.css" rel="stylesheet"/>
+<link href="./OpenSSL的VC编程 - MD5  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./OpenSSL的VC编程 - MD5  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./OpenSSL的VC编程 - MD5  离别歌/jquery.min.js"></script>
+<link href="./OpenSSL的VC编程 - MD5  离别歌/code.css" rel="stylesheet"/>
+<link href="./OpenSSL的VC编程 - MD5  离别歌/button.css" rel="stylesheet"/>
+<link href="./OpenSSL的VC编程 - MD5  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./OpenSSL的VC编程 - MD5  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/C/OpenSSL4MD5.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/C/OpenSSL4MD5.html&amp;text=OpenSSL%E7%9A%84VC%E7%BC%96%E7%A8%8B%20-%20MD5"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/C/OpenSSL4MD5.html&amp;title=OpenSSL%E7%9A%84VC%E7%BC%96%E7%A8%8B%20-%20MD5"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/C/OpenSSL4MD5.html&amp;is_video=false&amp;description=OpenSSL%E7%9A%84VC%E7%BC%96%E7%A8%8B%20-%20MD5"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=OpenSSL%E7%9A%84VC%E7%BC%96%E7%A8%8B%20-%20MD5&amp;body=Check out this article: https%3A//www.leavesongs.com/C/OpenSSL4MD5.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/C/OpenSSL4MD5.html&amp;title=OpenSSL%E7%9A%84VC%E7%BC%96%E7%A8%8B%20-%20MD5"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/C/OpenSSL4MD5.html&amp;title=OpenSSL%E7%9A%84VC%E7%BC%96%E7%A8%8B%20-%20MD5"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/C/OpenSSL4MD5.html&amp;title=OpenSSL%E7%9A%84VC%E7%BC%96%E7%A8%8B%20-%20MD5"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/C/OpenSSL4MD5.html&amp;title=OpenSSL%E7%9A%84VC%E7%BC%96%E7%A8%8B%20-%20MD5"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/C/OpenSSL4MD5.html&amp;name=OpenSSL%E7%9A%84VC%E7%BC%96%E7%A8%8B%20-%20MD5&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">OpenSSL的VC编程 - MD5</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年6月14日 12:31" itemprop="datePublished">
+                    2013 六月 14 12:31
+                </time>
+</div>
+<div class="article-tag">
+            阅读：11164
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/C">C/C++</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/md5">md5</a>,
+                
+                <a class="tag-link" href="/tag/%E5%8A%A0%E5%AF%86">加密</a>,
+                
+                <a class="tag-link" href="/tag/OpenSSL">OpenSSL</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+<span style="font-size:14px;">    由于诸多原因，前几天抽了点时间在网上找了一些OpenSSL的资料。网上的资料鱼龙混杂，我看原创的并不多。部分资料是讲OpenSSL命令行的操作，另一部分(基本上转载的那样一两篇)是Linux下的OpenSSL的API。</span>
+</p>
+<p>
+<span style="font-size:14px;">    忍不住吐槽几句了。我见的90%的文章，都在说怎么怎么编译安装OpenSSL,然后使用的话就没下文了。难道你们的水平就仅限于安装它？安装软件不是小学初中就应该知道的东西吗？我看大部分人根本就是转载，就是充斥着转载的垃圾站。转载就算了，转载完了也不看看是否完整，是否可行。源码缺胳膊少腿，你特么这就是在祸害下一代。</span>
+</p>
+<p>
+<span style="font-size:14px;">    好吧，回到正题。OpenSSL是一个开源的库，封装了常用的(基本上是所有的)加密、解密的算法，让使用者不再苦恼于算法的编写(不是每个人都有数学家的大脑)，直接运用库里的函数，就能简单地对数据进行加密、解密。</span>
+</p>
+<p>
+<span style="font-size:14px;">    我一直是喜欢Windows系统的，最重要的原因就是Visual Studio。它让程序的编写变的直观，容易百倍。OpenSSL的编译网上文章比较多，不过我今天用到的是一个叫“</span><a href="http://slproweb.com/products/Win32OpenSSL.html" target="_blank"><span style="font-size:14px;">Win32 OpenSSL</span></a><span style="font-size:14px;">”的第三方版本。它就是一个编译好的OpenSSL（无命令行功能）,而且其中有专为VC编译的库（Lib以及Dll），省去了我们很多麻烦。</span>
+</p>
+<p>
+<span style="font-size:14px;">    于是结合他们，我们将可以在5分钟的时间里，写出一个MD5加密的程序。</span>
+</p>
+<hr/>
+<p>
+<span style="font-size:14px;">    1.下载并安装Win32 OpenSSL。安装目录中有以下几个文件夹：bin、exp、include、lib，大家应该不陌生，猜都知道该怎么用。不过还是先看看文档，打开目录下的“OpenSSLhelp.chm”。</span>
+</p>
+<p>
+<span style="font-size:14px;">    其中有这么一段可以参考：</span>
+</p>
+<p>
+<table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+<tbody>
+<tr>
+<td>
+<span class="BoxBasicText"><span style="font-size:14px;">    OpenSSL is designed to build easily under Microsoft 
+Visual C++. However, the requirement that you go and obtain the 25MB Win98 DDK 
+and have the latest service pack (SP5 is 120MB) installed can prove to be a 
+hinderance to some people (particularly those with modems).</span><br>
+<span style="font-size:14px;">     So, the 
+installation of the Win32 OpenSSL binaries is a fairly simple process (similar 
+to the Borland C++ Builder process).</span><br>
+<span style="font-size:14px;"> The first thing to do (assuming a 
+default installation of 'C:\OpenSSL') is to go to 'C:\OpenSSL\lib\VC' and copy 
+all of the files to your Visual C++ 'lib' directory. This directory is sometimes 
+located in a somewhat cryptic location such as 'C:\Program Files\Microsoft 
+Visual Studio\VC98\lib' or 'C:\Program Files\Microsoft Visual 
+C++\lib'.</span><br/>
+<span style="font-size:14px;">     Next, copy everything in the 'C:\OpenSSL\include' directory to 
+your Visual C++ 'include' directory.</span><br/>
+<span style="font-size:14px;">     That's it! You are ready to go write 
+OpenSSL-capable code! </span></br></br></span><br/>
+</td>
+</tr>
+</tbody>
+</table>
+<span style="font-size:14px;">    不过我没按它的来做。</span>
+</p>
+<p>
+<span style="font-size:14px;">    2.新建工程，选择工程 - 属性 - 配置属性 - VC++目录：</span>
+</p>
+<p>
+<br/>
+</p>
+<p>
+<a href="https://www.leavesongs.com/content/uploadfile/201306/4efd1371186336.jpg" id="ematt:118" target="_blank"><img alt="01.jpg" border="0" height="297" src="./OpenSSL的VC编程 - MD5  离别歌/thum-4efd1371186336.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    3.开始写代码。首先</span>
+</p>
+<pre class="brush: cpp;auto-links: false;">#include &lt;openssl/md5.h&gt;
+
+#pragma comment(lib, "ssleay32MDd.lib")
+#pragma comment(lib, "libeay32MDd.lib")</pre>
+<p>
+<span style="font-size:14px;">    md5的头文件，以及OpenSSL的静态库。这里说明一下，什么编译模式包含什么静态库。比如默认的“多线程调试DLL”，就是ssleay32MDd.lib。写过Windows程序的都应该清楚。编译模式在这里改：</span>
+</p>
+<p>
+<a href="https://www.leavesongs.com/content/uploadfile/201306/3fb51371187308.jpg" id="ematt:120" target="_blank"><img alt="02.jpg" border="0" height="297" src="./OpenSSL的VC编程 - MD5  离别歌/thum-3fb51371187308.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    4.封装函数：</span>
+</p>
+<pre class="brush: cpp;auto-links: false;">int MD5(const char * data, char * buf)
+{
+	MD5_CTX ctx;
+	unsigned char md[16];
+	char tmp[3]={'\0'};
+	int i;
+
+	MD5_Init(&amp;ctx);
+	MD5_Update(&amp;ctx,data,strlen(data));
+	MD5_Final(md,&amp;ctx);
+
+	for( i=0; i&lt;16; i++ ){
+		sprintf(tmp,"%02x",md[i]);
+		strcat(buf,tmp);
+	}
+	return 0;
+}</pre>
+<span style="font-size:14px;">    简单的不行。其中用到3个OpenSSL中的API，MD5_Init初始化一个MD5_CTX结构。MD5_Update开始加密，第一个参数是MD5_CTX结构，第二个参数是待加密的字符串，第三个参数它的长度。（注意是长度，不是缓冲区大小，用strlen取</span><span style="font-size:14px;">）</span>
+<p>
+<br/>
+</p>
+<p>
+<span style="font-size:14px;">    MD5_Final函数，用来取加密好的MD5散列。第一个参数是散列存放的缓冲区，第二个参数是MD5_CTX结构。取到MD5散列以后，最后一个for循环将它转换成十六进制字符串，这里就不多说了。</span>
+</p>
+<p>
+<span style="font-size:14px;">    最后得到一个长度为32的字符串，保存在buf中。</span>
+</p>
+<p>
+<br/>
+</p>
+<p>
+<span style="font-size:14px;">    5.写一个main函数测试结果：</span>
+</p>
+<pre class="brush: cpp;auto-links: false;">int _tmain(int argc, _TCHAR* argv[])
+{
+	char szBuf[1024] = {0}, szMd5[50] = {0};
+	gets_s(szBuf, _countof(szBuf));
+	MD5(szBuf, szMd5);
+	printf("%s\n",szMd5);
+	return 0;
+}</pre>
+<span style="font-size:14px;">    结果如下图：</span>
+<p>
+<br/>
+</p>
+<p>
+<a href="https://www.leavesongs.com/content/uploadfile/201306/f9961371187916.jpg" id="ematt:122" target="_blank"><img alt="03.jpg" border="0" height="83" src="./OpenSSL的VC编程 - MD5  离别歌/f9961371187916.jpg" title="点击查看原图" width="308"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    成功将https://www.leavesongs.com转换成了MD5散列。</span>
+</p>
+<p>
+<br/>
+</p>
+<p>
+<br/>
+</p>
+<hr/>
+<p>
+<span style="font-size:14px;">    今天给大家看的这个运用OpenSSL加密md5散列的例子还只是OpenSSL的冰山一角，OpenSSL可以进行对称加密、非对称加密、数字签名、交换密钥……你能想到的几乎都有。而且——依旧是这样简单。</span>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1505">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./OpenSSL的VC编程 - MD5  离别歌/01609740bd3d085d936c2e14d578118b.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">swy</a>
+<time datetime="2013年11月19日 15:00" itemprop="datePublished">
+                            2013 十一月 19 15:00
+                        </time>
+<a href="javascript:reply_to('1505', 'swy')">回复</a>
+</p>
+<p class="comment-meta">{smile:13}  看了你写的代码，非常不错，就是有一点不足的是，这样加密出来的结果和  linux系统中加密出来的结果不一样啊</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1506">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./OpenSSL的VC编程 - MD5  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2013年11月19日 16:23" itemprop="datePublished">
+                            2013 十一月 19 16:23
+                        </time>
+<a href="javascript:reply_to('1506', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@swy：你说的是md5么，和网上算出来的一致呀：<br/>查询结果：  <br/>md5(http://www.leavesongs.com,32) = 7341e4f92bb24e4daa9faee9343867b7</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1345">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./OpenSSL的VC编程 - MD5  离别歌/9ea2c80feebbe690f6cfb5c06d2ee420.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">该昵称已屏蔽</a>
+<time datetime="2013年6月19日 18:58" itemprop="datePublished">
+                            2013 六月 19 18:58
+                        </time>
+<a href="javascript:reply_to('1345', '该昵称已屏蔽')">回复</a>
+</p>
+<p class="comment-meta">该评论已屏蔽</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="3981396fe0023bd732bbe470d47dec833ffc0e8f"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./OpenSSL的VC编程 - MD5  离别歌/3981396fe0023bd732bbe470d47dec833ffc0e8f"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="260">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="mgE2yN1t432mK5Va7DfR4n4OggP6o2lfUAZymhdIvQWLKKjpVUJBD16Tpkie7wap"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./OpenSSL的VC编程 - MD5  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./OpenSSL的VC编程 - MD5  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

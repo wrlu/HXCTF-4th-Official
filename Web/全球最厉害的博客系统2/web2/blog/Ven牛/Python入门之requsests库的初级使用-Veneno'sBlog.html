@@ -1,0 +1,369 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable">
+<title>Python入门之requsests库的初级使用 - Veneno's Blog</title>
+<link href="./Python入门之requsests库的初级使用 - Veneno's Blog/highslide.css" rel="stylesheet" type="text/css"/>
+<!--[if lt IE 7]>
+<link rel="stylesheet" type="text/css" href="http://www.venenof.com/usr/plugins/HighSlide/css/highslide-ie6.css" />
+<![endif]-->
+<meta content="最近一段时间给社团新入社的成员们布置了一个简单的小任务，在这给他们写下思路任务：利用requests库将实验吧的一道编程题目解决。题目链接首先，简单说一下requests库，因为不是py原带的，..." name="description">
+<meta content="python" name="keywords"/>
+<script type="text/javascript">
+(function () {
+    window.TypechoComment = {
+        dom : function (id) {
+            return document.getElementById(id);
+        },
+    
+        create : function (tag, attr) {
+            var el = document.createElement(tag);
+        
+            for (var key in attr) {
+                el.setAttribute(key, attr[key]);
+            }
+        
+            return el;
+        },
+
+        reply : function (cid, coid) {
+            var comment = this.dom(cid), parent = comment.parentNode,
+                response = this.dom('respond-post-14'), input = this.dom('comment-parent'),
+                form = 'form' == response.tagName ? response : response.getElementsByTagName('form')[0],
+                textarea = response.getElementsByTagName('textarea')[0];
+
+            if (null == input) {
+                input = this.create('input', {
+                    'type' : 'hidden',
+                    'name' : 'parent',
+                    'id'   : 'comment-parent'
+                });
+
+                form.appendChild(input);
+            }
+
+            input.setAttribute('value', coid);
+
+            if (null == this.dom('comment-form-place-holder')) {
+                var holder = this.create('div', {
+                    'id' : 'comment-form-place-holder'
+                });
+
+                response.parentNode.insertBefore(holder, response);
+            }
+
+            comment.appendChild(response);
+            this.dom('cancel-comment-reply-link').style.display = '';
+
+            if (null != textarea && 'text' == textarea.name) {
+                textarea.focus();
+            }
+
+            return false;
+        },
+
+        cancelReply : function () {
+            var response = this.dom('respond-post-14'),
+            holder = this.dom('comment-form-place-holder'), input = this.dom('comment-parent');
+
+            if (null != input) {
+                input.parentNode.removeChild(input);
+            }
+
+            if (null == holder) {
+                return true;
+            }
+
+            this.dom('cancel-comment-reply-link').style.display = 'none';
+            holder.parentNode.insertBefore(response, holder);
+            return false;
+        }
+    };
+})();
+</script>
+<script type="text/javascript">
+(function () {
+    var event = document.addEventListener ? {
+        add: 'addEventListener',
+        focus: 'focus',
+        load: 'DOMContentLoaded'
+    } : {
+        add: 'attachEvent',
+        focus: 'onfocus',
+        load: 'onload'
+    };
+
+    document[event.add](event.load, function () {
+        var r = document.getElementById('respond-post-14');
+
+        if (null != r) {
+            var forms = r.getElementsByTagName('form');
+            if (forms.length > 0) {
+                var f = forms[0], textarea = f.getElementsByTagName('textarea')[0], added = false;
+
+                if (null != textarea && 'text' == textarea.name) {
+                    textarea[event.add](event.focus, function () {
+                        if (!added) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = '_';
+                            input.value = (function () {
+    var _BdYNwO = '8d'//'ZA1'
++'f3'//'A1'
++//'8zY'
+'699'+//'ta'
+'c9'+//'Q'
+'b4'+'743'//'Q53'
++'6be'//'VXZ'
++//'u'
+'d'+''///*'O'*/'O'
++//'w'
+'f'+//'p'
+'p'+/* 'R'//'R' */''+'2c'//'l'
++'a2f'//'iss'
++'d6'//'KTL'
++'1d'//'u'
++//'db'
+'81e'+'8'//'l'
+, _F654I2 = [[19,20]];
+    
+    for (var i = 0; i < _F654I2.length; i ++) {
+        _BdYNwO = _BdYNwO.substring(0, _F654I2[i][0]) + _BdYNwO.substring(_F654I2[i][1]);
+    }
+
+    return _BdYNwO;
+})();
+
+                            f.appendChild(input);
+                            added = true;
+                        }
+                    });
+                }
+            }
+        }
+    });
+})();
+</script><link href="./Python入门之requsests库的初级使用 - Veneno's Blog/style.css" rel="stylesheet"/>
+<link href="./Python入门之requsests库的初级使用 - Veneno's Blog/prism.css" rel="stylesheet"/>
+<link href="./Python入门之requsests库的初级使用 - Veneno's Blog/iconfont.css" rel="stylesheet"/>
+<link href="./Python入门之requsests库的初级使用 - Veneno's Blog/player.css" rel="stylesheet"/>
+<link href="" rel="shortcut icon"/>
+</meta></meta></head>
+<body>
+<header>
+<div class="main">
+<div class="intro"> <img class="intro-logo" src="./Python入门之requsests库的初级使用 - Veneno's Blog/veneno.jpeg"/> <span class="intro-sitename"><a href="http://www.venenof.com/">
+      Veneno's Blog      </a></span> <span class="intro-siteinfo">
+      The harder you struggle today,the more glorious you will be tomorrow.      </span> <span class="social"> <a href="" target="_blank"><i class="iconfont icon-qq"></i></a> <a href="" target="_blank"><i class="iconfont icon-mail"></i></a> <a href="" target="_blank"><i class="iconfont icon-weibo"></i></a> <a href="" target="_blank"><i class="iconfont icon-github"></i></a> </span> </div>
+<nav>
+<div class="collapse">
+<i class="iconfont icon-menu"></i></div>
+<ul class="bar">
+<li><a href="http://www.venenof.com/">首页</a></li>
+<li><a href="http://www.venenof.com/index.php/archive.html">
+          时间          </a></li>
+<li><a href="http://www.venenof.com/index.php/link.html">
+          友链          </a></li>
+<li><a href="http://www.venenof.com/index.php/Veneno.html">
+          About Me          </a></li>
+</ul>
+</nav>
+<a class="icon-search" id="btnChange" onclick="searchbox();"></a>
+<div id="search" style="display:none">
+<div class="icon-close" onclick="searchbox();"></div>
+<form action="/index.php" class="search" id="searchform" method="get" name="form">
+<input autofocus="autofocus" id="searchText" name="s" placeholder="输入关键字查找" style="margin-top:25%" type="search"/>
+</form>
+</div>
+</div></header><content>
+<div class="main">
+<div class="article">
+<div class="article-title">Python入门之requsests库的初级使用</div>
+<small class="article-time">发表于： <time datetime="2016-01-02T17:02:00+00:00" itemprop="datePublished">2016-01-02</time> | 分类： <a href="http://www.venenof.com/index.php/category/Py/">Python</a> | <a href="http://www.venenof.com/index.php/archives/14/#comments" itemprop="discussionUrl">评论：0 </a> | 阅读：218</small>
+<div class="article-content">
+<h2>最近一段时间给社团新入社的成员们布置了一个简单的小任务，在这给他们写下思路</h2>
+<p>任务：利用requests库将实验吧的一道编程题目解决。<a href="http://ctf8.shiyanbar.com/jia/">题目链接</a></p>
+<hr/>
+<p>首先，简单说一下requests库，因为不是py原带的，怎么安装我就不赘述了：<br/>
+Requests 是用Python语言编写，基于 urllib，采用 Apache2 Licensed 开源协议的 HTTP 库。它但比 urllib 更加方便，可以节约我们大量的工作，完全满足 HTTP 测试需求。用的多了，就知道它为什么比urllib，urllib2这些好了:)</p>
+<!--more-->
+<p>通过刷新我们发现每次的数字都会变化，应该是mt_rand()这一类的函数。于是我们就利用py来编一个小脚本。<br/>
+看源码我们会发现，提交的名字是pass_key，POST方式。所以我们的思路就是：<br/>
+<img alt="1.jpg" src="./Python入门之requsests库的初级使用 - Veneno's Blog/3700193590.jpg"/></p>
+<ol>
+<li>把源码读下来。</li>
+<li>利用re库筛选出那段数学表达式，并将X替换为*</li>
+<li>然后POST提交得到返回的KEY</li>
+</ol>
+<hr/>
+<p>在放脚本之前，先普及一个知识，何谓Session：</p>
+<pre><code>session对象也是一个非常常用的对象，这个对象代表一次用户会话。一次用户会话的含义是：从客户端浏览器连接服务器开始，到客户端浏览器与服务器断开为止，这个过程就是一次会话。
+</code></pre>
+<p>所以，在这里我们也可以明白，因为每次的数字都是随机产生的，所以我们需要将一次的请求保证在一个session中：</p>
+<pre><code>#!/usr/bin/Ven python
+import re
+import requests
+a = requests.session()
+r = a.get('http://ctf8.simplexue.com/jia/index.php')
+key = re.search("\(.*\d",r.text).group().replace('x','*')
+#当然不可能执行成功，因为缺了一个执行的函数
+body = {'pass_key' : key}
+f = a.post('http://ctf8.simplexue.com/jia/index.php?action=check_pass',data=body)
+print f.text
+</code></pre>
+<hr/>
+<p>最后默默说一句Py大法好,hhhhhhhhhh~</p>
+<pre><code>re.compile("&lt;div name='my_expr'&gt;(.*)&lt;/div&gt;")更直观一些~
+</code></pre>
+</div>
+<div class="post-footer">
+<div class=" post-tags">
+<div class="tag"> 标签: <a href="http://www.venenof.com/index.php/tag/python/">python</a></div>
+<div class="post-nav">
+<li class="prev"><a href="http://www.venenof.com/index.php/archives/12/" title="15已走，16已来">15已走，16已来</a></li>
+<li class="next">
+<a href="http://www.venenof.com/index.php/archives/15/" title="AES CBC字节翻转">AES CBC字节翻转</a></li>
+</div>
+</div>
+</div>
+</div></div></content>
+<div id="comments">
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-author-key="1" data-thread-key="14" data-title="Python入门之requsests库的初级使用" data-url=""></div>
+<script type="text/javascript">
+	var duoshuoQuery = {short_name:"veneno1",theme:"dark"};
+	(function() {
+		var ds = document.createElement("script");
+		ds.type = "text/javascript";ds.async = true;
+		ds.src = "http://static.duoshuo.com/embed.js";
+		ds.charset = "UTF-8";
+		(document.getElementsByTagName("head")[0] 
+		|| document.getElementsByTagName("body")[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->
+</div>
+</body></html>
+﻿<div class="willerce">
+<div> </div>
+<!--播放器 -->
+<div id="QPlayer">
+<div id="pContent">
+<div id="player"> <span class="cover"></span>
+<div class="ctrl">
+<div class="musicTag marquee"> <strong>Title</strong> <span> - </span> <span class="artist">Artist</span> </div>
+<div class="progress">
+<div class="timer left">0:00</div>
+<div class="contr">
+<div class="rewind icon"></div>
+<div class="playback icon"></div>
+<div class="fastforward icon"></div>
+</div>
+<div class="right">
+<div class="liebiao icon"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="ssBtn">
+<div class="adf"></div>
+</div>
+</div>
+<ol id="playlist">
+</ol>
+</div>
+<script src="./Python入门之requsests库的初级使用 - Veneno's Blog/jquery.min.js"></script>
+<script src="./Python入门之requsests库的初级使用 - Veneno's Blog/jquery.marquee.min.js"></script>
+<script>
+	var	playlist = [	
+];
+  var isRotate = 1;
+  var autoplay = ;  
+</script>
+<script src="./Python入门之requsests库的初级使用 - Veneno's Blog/player.js"></script>
+<script>
+function bgChange(){
+	var lis= $('.lib');
+	for(var i=0; i<lis.length; i+=2)
+	lis[i].style.background = 'rgba(246, 246, 246, 0.5)';
+}
+window.onload = bgChange;
+</script>
+<!--<div class="qrcode">
+  <img src="" width="126" height="136" alt=""> </div>-->
+<footer>
+<p> <a href="" target="_blank">网站地图</a><br/>
+Copyright © 2015-2017 <a href="http://www.venenof.com/">
+    Veneno's Blog    
+<script src="./Python入门之requsests库的初级使用 - Veneno's Blog/highslide.packed.js" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+hs.graphicsDir = "http://www.venenof.com/usr/plugins/HighSlide/css/graphics/";
+hs.fadeInOut = true;
+hs.transitions = ["expand","crossfade"];
+hs.lang.creditsText = "&copy; www.venenof.com";
+hs.lang.creditsTitle = "&copy; www.venenof.com";
+hs.creditsHref = "http://www.venenof.com/index.php";
+hs.creditsPosition = "top left";
+hs.lang={
+loadingText : "载入中...",
+loadingTitle : "取消",
+closeText : "关闭",
+closeTitle : "关闭 (Esc)",
+previousText : "上一张",
+previousTitle : "上一张 (←键)",
+nextText : "下一张",
+nextTitle : "下一张 (→键)",
+moveTitle : "移动",
+moveText : "移动",
+playText : "播放",
+playTitle : "幻灯播放 (空格键)",
+pauseText : "暂停",
+pauseTitle : "幻灯暂停 (空格键)",
+number : "第%1张 共%2张",
+restoreTitle :	"点击关闭或拖动. 左右方向键切换图片. ",
+fullExpandTitle : "完整尺寸",
+fullExpandText :  "原大"
+};
+//]]>
+</script>
+<script>
+document.body.addEventListener('copy', function (e) {
+    if (window.getSelection().toString() && window.getSelection().toString().length > 10) {
+        setClipboardText(e);
+    }
+}); 
+function setClipboardText(event) {
+    var clipboardData = event.clipboardData || window.clipboardData;
+    if (clipboardData) {
+        event.preventDefault();
+        var htmlData = ''
+            + '著作权归作者所有。<br>'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。<br>'
+            + '作者：Veneno<br>'
+            + '链接：' + window.location.href + '<br>'
+            + '来源：http://www.venenof.com/<br><br>'
+            + window.getSelection().toString();
+        var textData = ''
+            + '著作权归作者所有。\n'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。\n'
+            + '作者：Veneno\n'
+            + '链接：' + window.location.href + '\n'
+            + '来源：http://www.venenof.com/\n\n'
+            + window.getSelection().toString();
+        clipboardData.setData('text/html', htmlData);
+        clipboardData.setData('text/plain',textData);
+    }
+}
+</script>
+</a></p></footer>
+<div class="toTop">TOP</div>
+<script src="./Python入门之requsests库的初级使用 - Veneno's Blog/all.js"></script>
+<script src="./Python入门之requsests库的初级使用 - Veneno's Blog/jquery.js"></script>
+<script src="./Python入门之requsests库的初级使用 - Veneno's Blog/prism.js"></script>
+<script src="./Python入门之requsests库的初级使用 - Veneno's Blog/search.js"></script>
+</div>
+

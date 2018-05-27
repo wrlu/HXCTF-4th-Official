@@ -1,0 +1,392 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./重构Sec-News之路  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./重构Sec-News之路  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./重构Sec-News之路  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>重构Sec-News之路 | 离别歌</title>
+<link href="./重构Sec-News之路  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./重构Sec-News之路  离别歌/styles.css" rel="stylesheet"/>
+<link href="./重构Sec-News之路  离别歌/style.css" rel="stylesheet"/>
+<link href="./重构Sec-News之路  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./重构Sec-News之路  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./重构Sec-News之路  离别歌/jquery.min.js"></script>
+<link href="./重构Sec-News之路  离别歌/code.css" rel="stylesheet"/>
+<link href="./重构Sec-News之路  离别歌/button.css" rel="stylesheet"/>
+<link href="./重构Sec-News之路  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./重构Sec-News之路  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PYTHON/rewrite-sec-news.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PYTHON/rewrite-sec-news.html&amp;text=%E9%87%8D%E6%9E%84Sec-News%E4%B9%8B%E8%B7%AF"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PYTHON/rewrite-sec-news.html&amp;title=%E9%87%8D%E6%9E%84Sec-News%E4%B9%8B%E8%B7%AF"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PYTHON/rewrite-sec-news.html&amp;is_video=false&amp;description=%E9%87%8D%E6%9E%84Sec-News%E4%B9%8B%E8%B7%AF"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E9%87%8D%E6%9E%84Sec-News%E4%B9%8B%E8%B7%AF&amp;body=Check out this article: https%3A//www.leavesongs.com/PYTHON/rewrite-sec-news.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PYTHON/rewrite-sec-news.html&amp;title=%E9%87%8D%E6%9E%84Sec-News%E4%B9%8B%E8%B7%AF"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PYTHON/rewrite-sec-news.html&amp;title=%E9%87%8D%E6%9E%84Sec-News%E4%B9%8B%E8%B7%AF"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PYTHON/rewrite-sec-news.html&amp;title=%E9%87%8D%E6%9E%84Sec-News%E4%B9%8B%E8%B7%AF"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PYTHON/rewrite-sec-news.html&amp;title=%E9%87%8D%E6%9E%84Sec-News%E4%B9%8B%E8%B7%AF"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PYTHON/rewrite-sec-news.html&amp;name=%E9%87%8D%E6%9E%84Sec-News%E4%B9%8B%E8%B7%AF&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">重构Sec-News之路</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2016年1月12日 16:12" itemprop="datePublished">
+                    2016 一月 12 16:12
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3067
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PYTHON">Python</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/sec-news">sec-news</a>,
+                
+                <a class="tag-link" href="/tag/python">python</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>不知道什么时候突然发现我已经稳定运行了近半年的sec-news（<a href="http://wiki.ioin.in"><a href="http://wiki.ioin.in">http://wiki.ioin.in</a></a>）突然变得特别慢，为跳转效率我也是尝试了很多方法，比如加缓存。我使用了一个叫flask-cache的缓存: <a href="https://pythonhosted.org/Flask-Cache/">https://pythonhosted.org/Flask-Cache/</a> ，很好用的cache。</p>
+<p>特别喜欢python的一点就是，修饰器（@Decorator）的存在，让很多功能变得简单。flask-cache里有一种cache方式叫Memoization，它可以简单地用Decorator的方式放在任意函数上。根据函数参数的值，来缓存函数的结果。</p>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Person</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="nd">@cache.memoize</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">has_membership</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">role_id</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Group</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">role_id</span><span class="o">=</span><span class="n">role_id</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">1</span>
+</pre></div>
+<p>上面是文档里给出的一个example，其缓存了has_membership函数，当我们调用has_membership(1)的时候，就缓存下50秒这个函数的返回值。那么下次再调用has_membership(1)的时候，就会直接返回缓存的结果，但如果你调用has_membership(2)，就是另一个缓存了。</p>
+<p>我将flask-cache加到flask的view里，这样就可以缓存整个页面了。</p>
+<p>但是，缓存永远不是解决效率问题的根本方法，解决问题是找到根本原因。我仔细分析了我的sec-news，我认为以前使用的mongodb数据库，是导致整个网站运行慢的原因。</p>
+<p>也的确，我设计mongodb的概念和以前设计mysql的概念完全不同，我设计了这样一个集合： </p>
+<p>Rss </p>
+<ul>
+<li>
+<p>id </p>
+</li>
+<li>
+<p>url </p>
+</li>
+<li>
+<p>title </p>
+</li>
+<li>
+<p>posts (array) </p>
+</li>
+</ul>
+<p>这个集合用来存储Rss数据，比如 <a href="http://www.leavesongs.com/rss.php">http://www.leavesongs.com/rss.php</a> ，这是一个订阅Rss。这个订阅的内容，其实就是它的文章（posts），我的订阅列表中有几个Rss，其中包含的文章已经超过1000篇，也就是posts数组大小已经超过1000，且数组中每篇文章我都保存了文章的标题和内容。</p>
+<p>所以其实当我们没有设计好ORM的情况下，提取出这个Rss集合，将占用大量内存，导致Sec-news整体速度变慢。</p>
+<p>这是我觉得影响网站效率的最大原因。备份数据后，我删掉了所有文章的内容，再次测试，结果也一样，速度并没有变快。</p>
+<p>我开始怀疑架构问题，我开始怀疑是mongodb哪里有坑被我踩中了。这种问题对于半吊子开发我来说，实在是难以发现，难以解决。但在电脑维修界，有著名的『万金油定律』——重启、重装、换电脑。既然解决不了问题，不如用简单点的办法规避问题。</p>
+<p>我现在的位置可能位于重启到重装这条路上，在替换一些数据（重启）的情况下并不能解决效率问题，那么我就需要思考『重装』的问题了。所谓的重装，也就是换掉mongodb。</p>
+<p>sec-news在开发的时候就已经做到了MVR（Model - View - Route），代码耦合性也比较低，但实际上替换数据库的过程还是需要重构大量代码，主要原因就是mongodb-&gt;mysql是一场Nosql到Sql的转变，基础架构需要调整。</p>
+<p>不过总代码量也不大，整个view + model也只有700行代码左右，需要改动的部分不超过200行。重构过程还改进了很多功能、用户体验方面的问题（主要是后台）。</p>
+<p>重构后的sec-news还是用ORM，我在peewee和sqlalchemy中选择了后者，因为flask-sqlalchemy是一个比较成熟的搭配，在实际开发中我比较看重稳定性，虽然个人感觉peewee更『酷』。</p>
+<p>除了替换数据库。细节上还有一处改进：我将flask原生的client-side-session换成了一个叫"flask-session"的server-side-session的插件，以规避前段时间自己发现的『验证码绕过漏洞』。flask-session储存在redis中，我喜欢redis胜过memcache，原因是memcache所拥有的功能redis都有，但redis所拥有的功能memcache并不一定有，所以我一般都不用memcache。</p>
+<p>另外，我实现了后台多用户权限控制，其实说起来也比较简单：</p>
+<div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">check_role</span><span class="p">(</span><span class="n">request_role</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">do_check</span><span class="p">(</span><span class="n">role_array</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+            <span class="nd">@functools.wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+            <span class="k">def</span> <span class="nf">do_function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">flask</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"user_id"</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">flask</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"role"</span><span class="p">)</span> <span class="ow">in</span> <span class="n">role_array</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">permission_deny</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s2">"login"</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">do_function</span>
+        <span class="k">return</span> <span class="n">check</span>
+
+    <span class="k">return</span> <span class="n">do_check</span><span class="p">(</span><span class="n">request_role</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">'/admin'</span><span class="p">)</span>
+<span class="nd">@check_role</span><span class="p">([</span><span class="s2">"admin"</span><span class="p">,</span> <span class="s2">"user"</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">admin</span><span class="p">():</span>
+    <span class="c1">#show administrator index page</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">'/admin/add'</span><span class="p">)</span>
+<span class="nd">@check_role</span><span class="p">([</span><span class="s2">"admin"</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">add</span><span class="p">():</span>
+    <span class="c1">#add a new administrator</span>
+</pre></div>
+<p>再次感谢python的Decorator，我用一个简单的check_role函数即可实现权限控制。比如admin函数，可以允许user、admin两个角色访问，而add函数就只允许admin角色访问，假设既不是user也不是admin，就直接跳到login页面。</p>
+<p>Decorator也是我迟迟放不下python的原因，假设php里也加入这个语法糖，那我保准不会用python写网站了，很多方面还是php更方便。</p>
+<p>在Route方面，我也做了一些改进。因为mongodb的默认索引_id是一个24位hash值，不容易被用户猜到，而mysql的主键通常是一个AUTO_INCREMENT的数字，好事者只需要编写一个脚本即可遍历我的所有文章，我不喜欢这样。</p>
+<p>我用了hashids这个库，将int类型的id转换成了一个hashids，好事者猜不到这个字符串，也就无法遍历我的文章了。（当然可以写爬虫爬取，但这和遍历有本质区别） </p>
+<p>重构用了大概一天半，传到原来的服务器上，发现……这TM还是一样慢啊……我真是错怪mongodb了，我给你赔罪！</p>
+<p>那么现在，『重装』这条路也死了，并没有解决问题。</p>
+<p>最后也就只剩『换电脑』了，我一咬牙一跺脚买了一台阿里云青岛的服务器（按流量计费，算下来还是不贵的，一个月50RMB左右）。这时候我基本上已经心力交瘁了，只想尽快把问题解决我好干别的。</p>
+<p>我用最快的速度部署好服务器：</p>
+<div class="codehilite"><pre><span></span>apt-get update
+apt-get install nginx mysql-server mysql-client redis-server libjpeg-dev
+git clone xxx
+pip install -r requirements.txt
+pip install gunicorn supervisor
+</pre></div>
+<p>直接安默认的，能用就行。因为服务器带的ubuntu14没有systemd，我就选择用supervisor管理我的gunicorn服务，nginx简单配了一下就了好了，mysql最开始也直接用root账号。</p>
+<p>服务器移到国内，还有一个问题就是域名，我的leavesongs.com是没有备案的，所以新的sec-news域名不能再用这个子域名了。还好自己手上刚备案了一个新域名，我就直接用新域名下的子域名作为sec-news的域名。</p>
+<p>那么老域名的"遗产"怎么办？</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201601/c8fe1452752173.png"><img alt="QQ20160114-0@2x.png" src="./重构Sec-News之路  离别歌/thum-c8fe1452752173.png"/></a></p>
+<p>如上图，有些网站还保留着我的老域名下的链接，我想尽量保持一切不变。于是我从老数据库导出了一个json格式的对象：_id : url，在老vps上做了个简单的转发：</p>
+<div class="codehilite"><pre><span></span><span class="nt">location</span> <span class="o">^~</span> <span class="o">/</span><span class="nt">url</span><span class="o">/</span> <span class="p">{</span>
+        <span class="err">rewrite</span> <span class="err">^/url/(.*)$</span> <span class="err">/old.php?hash=$1</span> <span class="err">last</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nt">location</span> <span class="o">=</span> <span class="o">/</span><span class="nt">old</span><span class="p">.</span><span class="nc">php</span> <span class="p">{</span>
+        <span class="err">fastcgi_pass</span>  <span class="n">unix</span><span class="p">:</span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">php5-fpm</span><span class="o">.</span><span class="n">sock</span><span class="p">;</span>
+        <span class="err">fastcgi_index</span> <span class="err">index.php</span><span class="p">;</span>
+        <span class="err">include</span> <span class="err">fastcgi.conf</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nt">location</span> <span class="o">/</span> <span class="p">{</span>
+        <span class="err">rewrite</span> <span class="err">^/(.*)</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">wiki</span><span class="o">.</span><span class="n">ioin</span><span class="o">.</span><span class="n">in</span><span class="o">/</span><span class="err">$</span><span class="mi">1</span> <span class="n">permanent</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>将所有/url/开头的链接转发到old.php里处理，其他链接就直接301到新域名下。那么old.php就专门处理以前_id是24位hash的链接：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nv">$old_data</span> <span class="o">=</span> <span class="nb">json_decode</span><span class="p">(</span><span class="nb">file_get_contents</span><span class="p">(</span><span class="s1">'olddata.txt'</span><span class="p">),</span> <span class="k">TRUE</span><span class="p">);</span>
+<span class="nv">$hash</span> <span class="o">=</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">'hash'</span><span class="p">])</span> <span class="o">?</span> <span class="nv">$_GET</span><span class="p">[</span><span class="s1">'hash'</span><span class="p">]</span> <span class="o">:</span> <span class="s2">""</span><span class="p">;</span>
+<span class="k">if</span><span class="p">(</span><span class="nv">$hash</span> <span class="o">&amp;&amp;</span> <span class="nb">array_key_exists</span><span class="p">(</span><span class="nv">$hash</span><span class="p">,</span> <span class="nv">$old_data</span><span class="p">))</span> <span class="p">{</span>
+        <span class="nb">header</span><span class="p">(</span><span class="s1">'Location: '</span> <span class="o">.</span> <span class="nv">$old_data</span><span class="p">[</span><span class="nv">$hash</span><span class="p">]);</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nb">header</span><span class="p">(</span><span class="s1">'Location: http://wiki.ioin.in/url/'</span> <span class="o">.</span> <span class="nv">$hash</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>这样就能保证以前的链接全部能够访问，新链接直接跳转到新域名。</p>
+<p>后面有空闲时间又慢慢优化了许多地方，找到几个小伙伴一起更新一些好文章，sec-news正式复活了。</p>
+<p>希望我这次重构之路对大家的开发有启发，也欢迎大家订阅Sec-News的RSS，主页： <a href="http://wiki.ioin.in"><a href="http://wiki.ioin.in">http://wiki.ioin.in</a></a> ，订阅： <a href="http://wiki.ioin.in/atom"><a href="http://wiki.ioin.in/atom">http://wiki.ioin.in/atom</a></a></p>
+<p>分享几张重构后后台的截图：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201601/bf0a1452712256.png"><img alt="Sec-News_安全文摘_后台管理页面.png" src="./重构Sec-News之路  离别歌/thum-bf0a1452712256.png"/></a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201601/35811452712249.png"><img alt="Sec-News_安全文摘_后台管理页面 2.png" src="./重构Sec-News之路  离别歌/thum-35811452712249.png"/></a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201601/2ce11452712250.png"><img alt="Sec-News_安全文摘_后台管理页面 3.png" src="./重构Sec-News之路  离别歌/thum-2ce11452712250.png"/></a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201601/92621452712251.png"><img alt="Sec-News_安全文摘_后台管理页面 4.png" src="./重构Sec-News之路  离别歌/thum-92621452712251.png"/></a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201601/acaf1452712253.png"><img alt="Sec-News_安全文摘_后台管理页面 5.png" src="./重构Sec-News之路  离别歌/thum-acaf1452712253.png"/></a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201601/5d3f1452712255.png"><img alt="Sec-News_安全文摘_后台管理页面 6.png" src="./重构Sec-News之路  离别歌/thum-5d3f1452712255.png"/></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2365">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./重构Sec-News之路  离别歌/90f29c3e5c71cfc97a04c45a645be5f9.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">f0cu3</a>
+<time datetime="2016年6月20日 17:06" itemprop="datePublished">
+                            2016 六月 20 17:06
+                        </time>
+<a href="javascript:reply_to('2365', 'f0cu3')">回复</a>
+</p>
+<p class="comment-meta">以后就跟师兄混了。才发现是校友呐</p>
+</div>
+</div>
+<div class="row" id="comment-2289">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./重构Sec-News之路  离别歌/a984cb1428bed8a9134e64d014a40ae7.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">te</a>
+<time datetime="2016年1月19日 11:48" itemprop="datePublished">
+                            2016 一月 19 11:48
+                        </time>
+<a href="javascript:reply_to('2289', 'te')">回复</a>
+</p>
+<p class="comment-meta">可以通过chrome控制台 timeline功能看下访问时，是哪一步花费的时间最长，连接到站点前还是后</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2290">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./重构Sec-News之路  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年1月19日 21:13" itemprop="datePublished">
+                            2016 一月 19 21:13
+                        </time>
+<a href="javascript:reply_to('2290', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@te：谢谢，我看了，就是第一步的时间，静态文件全部是本地的走nginx，并不会经过python处理，对速度没影响。感觉要分析真正问题原因，还是需要后端的一些调试，可是问题在本地没法复现，远程调试起来太麻烦，就放弃了。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2285">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./重构Sec-News之路  离别歌/9031cd3764f464a2c4dec7e0f71b14a5.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">DeshuaiZ</a>
+<time datetime="2016年1月14日 18:43" itemprop="datePublished">
+                            2016 一月 14 18:43
+                        </time>
+<a href="javascript:reply_to('2285', 'DeshuaiZ')">回复</a>
+</p>
+<p class="comment-meta">因为最后是靠换机器解决的，所以白重构了咯？</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2286">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./重构Sec-News之路  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年1月14日 19:35" itemprop="datePublished">
+                            2016 一月 14 19:35
+                        </time>
+<a href="javascript:reply_to('2286', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@DeshuaiZ：嗯，就解决问题来说白重构了，不过把我自己忧虑的问题都改进了。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2284">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./重构Sec-News之路  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://xdxd.love" target="_blank">xdxd</a>
+<time datetime="2016年1月14日 11:01" itemprop="datePublished">
+                            2016 一月 14 11:01
+                        </time>
+<a href="javascript:reply_to('2284', 'xdxd')">回复</a>
+</p>
+<p class="comment-meta">client-session  server-session 这种概念有详细的描述么。最近考虑了下可能是类似的东西。http://xdxd.love/2016/01/07/%E6%97%A0%E7%8A%B6%E6%80%81%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%AE%A4%E8%AF%81%E7%8A%B6%E6%80%81%E4%BF%9D%E6%8C%81%E6%96%B9%E6%A1%88%E7%9A%84%E4%B8%80%E4%BA%9B%E6%80%9D%E8%80%83/</p>
+</div>
+</div>
+<div class="row" id="comment-2283">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./重构Sec-News之路  离别歌/81206b7be1d0bc1e238342791ffbdb41.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">文雨</a>
+<time datetime="2016年1月14日 09:53" itemprop="datePublished">
+                            2016 一月 14 09:53
+                        </time>
+<a href="javascript:reply_to('2283', '文雨')">回复</a>
+</p>
+<p class="comment-meta">加油做得更好</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="73548b8346f8e9c2d49b3b80c0376ba007a7721d"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./重构Sec-News之路  离别歌/73548b8346f8e9c2d49b3b80c0376ba007a7721d"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="375">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="tY3XZsEakqZUUpsFmXZa56mbainmtGMo1iotNWQpLdTjU4QUaetUEKogjmQucaBy"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./重构Sec-News之路  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./重构Sec-News之路  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

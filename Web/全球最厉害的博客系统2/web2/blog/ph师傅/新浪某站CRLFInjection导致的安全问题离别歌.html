@@ -1,0 +1,334 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./新浪某站CRLF Injection导致的安全问题  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./新浪某站CRLF Injection导致的安全问题  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./新浪某站CRLF Injection导致的安全问题  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>新浪某站CRLF Injection导致的安全问题 | 离别歌</title>
+<link href="./新浪某站CRLF Injection导致的安全问题  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./新浪某站CRLF Injection导致的安全问题  离别歌/styles.css" rel="stylesheet"/>
+<link href="./新浪某站CRLF Injection导致的安全问题  离别歌/style.css" rel="stylesheet"/>
+<link href="./新浪某站CRLF Injection导致的安全问题  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./新浪某站CRLF Injection导致的安全问题  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./新浪某站CRLF Injection导致的安全问题  离别歌/jquery.min.js"></script>
+<link href="./新浪某站CRLF Injection导致的安全问题  离别歌/code.css" rel="stylesheet"/>
+<link href="./新浪某站CRLF Injection导致的安全问题  离别歌/button.css" rel="stylesheet"/>
+<link href="./新浪某站CRLF Injection导致的安全问题  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./新浪某站CRLF Injection导致的安全问题  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/Sina-CRLF-Injection.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/Sina-CRLF-Injection.html&amp;text=%E6%96%B0%E6%B5%AA%E6%9F%90%E7%AB%99CRLF%20Injection%E5%AF%BC%E8%87%B4%E7%9A%84%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/Sina-CRLF-Injection.html&amp;title=%E6%96%B0%E6%B5%AA%E6%9F%90%E7%AB%99CRLF%20Injection%E5%AF%BC%E8%87%B4%E7%9A%84%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/Sina-CRLF-Injection.html&amp;is_video=false&amp;description=%E6%96%B0%E6%B5%AA%E6%9F%90%E7%AB%99CRLF%20Injection%E5%AF%BC%E8%87%B4%E7%9A%84%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E6%96%B0%E6%B5%AA%E6%9F%90%E7%AB%99CRLF%20Injection%E5%AF%BC%E8%87%B4%E7%9A%84%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/Sina-CRLF-Injection.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/Sina-CRLF-Injection.html&amp;title=%E6%96%B0%E6%B5%AA%E6%9F%90%E7%AB%99CRLF%20Injection%E5%AF%BC%E8%87%B4%E7%9A%84%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/Sina-CRLF-Injection.html&amp;title=%E6%96%B0%E6%B5%AA%E6%9F%90%E7%AB%99CRLF%20Injection%E5%AF%BC%E8%87%B4%E7%9A%84%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/Sina-CRLF-Injection.html&amp;title=%E6%96%B0%E6%B5%AA%E6%9F%90%E7%AB%99CRLF%20Injection%E5%AF%BC%E8%87%B4%E7%9A%84%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/Sina-CRLF-Injection.html&amp;title=%E6%96%B0%E6%B5%AA%E6%9F%90%E7%AB%99CRLF%20Injection%E5%AF%BC%E8%87%B4%E7%9A%84%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/Sina-CRLF-Injection.html&amp;name=%E6%96%B0%E6%B5%AA%E6%9F%90%E7%AB%99CRLF%20Injection%E5%AF%BC%E8%87%B4%E7%9A%84%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">新浪某站CRLF Injection导致的安全问题</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年6月30日 06:45" itemprop="datePublished">
+                    2014 六月 30 06:45
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3438
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/HRS">HRS</a>,
+                
+                <a class="tag-link" href="/tag/CRLF">CRLF</a>,
+                
+                <a class="tag-link" href="/tag/xss">xss</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	CRLF Injection<span style="font-family:宋体;">很少遇见，这次被我逮住了。</span>我看<span style="font-family:'Times New Roman';">zone</span><span style="font-family:宋体;">中（</span><span style="font-family:'Times New Roman';"><a href="http://zone.wooyun.org/content/13323" target="_blank">http://zone.wooyun.org/content/13323</a></span><span style="font-family:宋体;">）还有一些同学对于这个漏洞不甚了解，甚至分不清它与</span><span style="font-family:'Times New Roman';">CSRF</span><span style="font-family:宋体;">，我</span>详细说一下吧。<o:p></o:p>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	CRLF<span style="font-family:宋体;">是</span>”回车 <span style="font-family:'Times New Roman';">+ </span><span style="font-family:宋体;">换行</span>”（<span style="font-family:'Times New Roman';">\r\n</span><span style="font-family:宋体;">）的简称。在</span><span style="font-family:'Times New Roman';">HTTP</span><span style="font-family:宋体;">协议中，</span><span style="font-family:'Times New Roman';">HTTP Header</span><span style="font-family:宋体;">与</span><span style="font-family:'Times New Roman';">HTTP Body</span><span style="font-family:宋体;">是用两个</span><span style="font-family:'Times New Roman';">CRLF</span><span style="font-family:宋体;">分隔的，浏览器就是根据这两个</span><span style="font-family:'Times New Roman';">CRLF</span><span style="font-family:宋体;">来取出</span><span style="font-family:'Times New Roman';">HTTP </span><span style="font-family:宋体;">内容并显示出来。所以，一旦我们能够控制</span><span style="font-family:'Times New Roman';">HTTP </span><span style="font-family:宋体;">消息头中的字符，注入一些恶意的换行，这样我们就能注入一些会话</span><span style="font-family:'Times New Roman';">Cookie</span><span style="font-family:宋体;">或者</span><span style="font-family:'Times New Roman';">HTML</span><span style="font-family:宋体;">代码，所以</span><span style="font-family:'Times New Roman';">CRLF Injection</span><span style="font-family:宋体;">又叫</span><span style="font-family:'Times New Roman';">HTTP Response Splitting</span><span style="font-family:宋体;">，简称</span><span style="font-family:'Times New Roman';">HRS</span><span style="font-family:宋体;">。</span><o:p></o:p>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	HRS<span style="font-family:宋体;">是比</span><span style="font-family:'Times New Roman';">XSS</span><span style="font-family:宋体;">危害更大的安全问题，具体是为什么，我们往下看。</span><o:p></o:p>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	对于<span style="font-family:'Times New Roman';">HRS</span><span style="font-family:宋体;">最简单的利用方式是注入两个</span><span style="font-family:'Times New Roman';">\r\n</span><span style="font-family:宋体;">，之后在写入</span><span style="font-family:'Times New Roman';">XSS</span><span style="font-family:宋体;">代码，来构造一个</span><span style="font-family:'Times New Roman';">xss</span><span style="font-family:宋体;">。</span><o:p></o:p>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	举个例子，一般网站会在<span style="font-family:'Times New Roman';">HTTP</span><span style="font-family:宋体;">头中用</span><span style="font-family:'Times New Roman';">Location: </span>http://baidu.com<span style="font-family:宋体;">这种方式来进行</span><span style="font-family:'Times New Roman';">302</span><span style="font-family:宋体;">跳转，所以我们能控制的内容就是</span><span style="font-family:'Times New Roman';">Location:</span><span style="font-family:宋体;">后面的</span><span style="font-family:'Times New Roman';">XXX</span><span style="font-family:宋体;">某个网址。</span><o:p></o:p>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	所以一个正常的<span style="font-family:'Times New Roman';">302</span><span style="font-family:宋体;">跳转包是这样：</span>
+</p>
+<pre style="margin-top:0px;margin-bottom:8px;padding:8px 16px;font-family:'Courier New', Courier, monospace;white-space:pre-wrap;word-wrap:break-word;background-color:#F8F8F8;border:1px solid #DDDDDD;color:#333333;font-size:14px;line-height:24px;"><code style="margin:0px;padding:0px;font-family:'Courier New', Courier, monospace;word-wrap:break-word;">HTTP/1.1 302 Moved Temporarily 
+Date: Fri, 27 Jun 2014 17:52:17 GMT 
+Content-Type: text/html 
+Content-Length: 154 
+Connection: close 
+Location: http://www.sina.com.cn</code></pre>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	但如果我们输入的是
+</p>
+<pre style="margin-top:0px;margin-bottom:8px;padding:8px 16px;font-family:'Courier New', Courier, monospace;white-space:pre-wrap;word-wrap:break-word;background-color:#F8F8F8;border:1px solid #DDDDDD;color:#333333;font-size:14px;line-height:24px;"><code style="margin:0px;padding:0px;font-family:'Courier New', Courier, monospace;word-wrap:break-word;">http://www.sina.com.cn%0aSet-cookie:JSPSESSID%3Dwooyun</code></pre>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+<span style="font-family:宋体;line-height:1.5;text-indent:21pt;">注入了一个换行，此时的返回包就会变成这样：</span>
+</p>
+<pre style="margin-top:0px;margin-bottom:8px;padding:8px 16px;font-family:'Courier New', Courier, monospace;white-space:pre-wrap;word-wrap:break-word;background-color:#F8F8F8;border:1px solid #DDDDDD;color:#333333;font-size:14px;line-height:24px;"><code style="margin:0px;padding:0px;font-family:'Courier New', Courier, monospace;word-wrap:break-word;">HTTP/1.1 302 Moved Temporarily 
+Date: Fri, 27 Jun 2014 17:52:17 GMT 
+Content-Type: text/html 
+Content-Length: 154 
+Connection: close 
+Location: http://www.sina.com.cn 
+Set-cookie: JSPSESSID=wooyun</code></pre>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	这个时候这样我们就给访问者设置了一个<span style="font-family:'Times New Roman';">SESSION</span><span style="font-family:宋体;">，造成一个“会话固定漏洞”。</span><o:p></o:p>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	当然，<span style="font-family:'Times New Roman';">HRS</span><span style="font-family:宋体;">并不仅限于会话固定，通过注入两个</span><span style="font-family:'Times New Roman';">CRLF</span><span style="font-family:宋体;">就能造成一个无视浏览器</span><span style="font-family:'Times New Roman';">Filter</span><span style="font-family:宋体;">的反射型</span><span style="font-family:'Times New Roman';">XSS</span><span style="font-family:宋体;">。</span><o:p></o:p>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	比如一个网站接受<span style="font-family:'Times New Roman';">url</span><span style="font-family:宋体;">参数</span><span style="font-family:'Times New Roman';">http://test.sina.com.cn/?url=xxx</span><span style="font-family:宋体;">，</span><span style="font-family:'Times New Roman';">xxx</span><span style="font-family:宋体;">放在</span><span style="font-family:'Times New Roman';">Location</span><span style="font-family:宋体;">后面作为一个跳转。如果我们输入的是</span><span style="font-family:'Times New Roman';">：</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+<br>
+</br></p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+<span style="font-family:宋体;"> </span>
+</p>
+<pre style="margin-top:0px;margin-bottom:8px;padding:8px 16px;font-family:'Courier New', Courier, monospace;white-space:pre-wrap;word-wrap:break-word;background-color:#F8F8F8;border:1px solid #DDDDDD;color:#333333;font-size:14px;line-height:24px;"><code style="margin:0px;padding:0px;font-family:'Courier New', Courier, monospace;word-wrap:break-word;">http://test.sina.com.cn/?url=%0d%0a%0d%0a&lt;img src=1 onerror=alert(/xss/)&gt;</code></pre>
+<p>
+	    <span style="font-family:宋体;text-indent:21pt;line-height:1.5;">我们的返回包就会变成这样：</span>
+</p>
+<p>
+<br>
+</br></p>
+<p>
+<span style="font-family:宋体;text-indent:21pt;line-height:1.5;"> </span>
+</p>
+<pre style="margin-top:0px;margin-bottom:8px;padding:8px 16px;font-family:'Courier New', Courier, monospace;white-space:pre-wrap;word-wrap:break-word;background-color:#F8F8F8;border:1px solid #DDDDDD;color:#333333;font-size:14px;line-height:24px;"><code style="margin:0px;padding:0px;font-family:'Courier New', Courier, monospace;word-wrap:break-word;">HTTP/1.1 302 Moved Temporarily 
+Date: Fri, 27 Jun 2014 17:52:17 GMT 
+Content-Type: text/html 
+Content-Length: 154 
+Connection: close 
+Location:
+
+&lt;img src=1 onerror=alert(/xss/)&gt;</code></pre>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	之前说了浏览器会根据第一个<span style="font-family:'Times New Roman';">CRLF</span><span style="font-family:宋体;">把</span><span style="font-family:'Times New Roman';">HTTP</span><span style="font-family:宋体;">包分成头和体，然后将体显示出来。于是我们这里</span><span style="font-family:'Times New Roman';">&lt;img&gt;</span><span style="font-family:宋体;">这个标签就会显示出来，造成一个</span><span style="font-family:'Times New Roman';">XSS</span><span style="font-family:宋体;">。</span><o:p></o:p>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	为什么说是无视浏览器<span style="font-family:'Times New Roman';">filter</span><span style="font-family:宋体;">的，这里涉及到另一个问题。</span><o:p></o:p>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	浏览器的<span style="font-family:'Times New Roman';">Filter</span><span style="font-family:宋体;">是浏览器应对一些反射型</span><span style="font-family:'Times New Roman';">XSS</span><span style="font-family:宋体;">做的保护策略，当</span><span style="font-family:'Times New Roman';">url</span><span style="font-family:宋体;">中含有</span><span style="font-family:'Times New Roman';">XSS</span><span style="font-family:宋体;">相关特征的时候就会过滤掉不显示在页面中，所以不能触发</span><span style="font-family:'Times New Roman';">XSS</span><span style="font-family:宋体;">。</span><o:p></o:p>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	怎样才能关掉<span style="font-family:'Times New Roman';">filter</span><span style="font-family:宋体;">？一般来说用户这边是不行的，只有数据包中</span><span style="font-family:'Times New Roman';">http</span><span style="font-family:宋体;">头含有</span><span style="font-family:'Times New Roman';">X-XSS-Protection</span><span style="font-family:宋体;">并且值为</span><span style="font-family:'Times New Roman';">0</span><span style="font-family:宋体;">的时候，浏览器才不会开启</span><span style="font-family:'Times New Roman';">filter</span><span style="font-family:宋体;">。</span><o:p></o:p>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	说到这里应该就很清楚了，<span style="font-family:'Times New Roman';">HRS</span><span style="font-family:宋体;">不正是注入</span><span style="font-family:'Times New Roman';">HTTP</span><span style="font-family:宋体;">头的一个漏洞吗，我们可以将</span><span style="font-family:'Times New Roman';">X-XSS-Protection:0</span><span style="font-family:宋体;">注入到数据包中，再用两个</span><span style="font-family:'Times New Roman';">CRLF</span><span style="font-family:宋体;">来注入</span><span style="font-family:'Times New Roman';">XSS</span><span style="font-family:宋体;">代码，这样就成功地绕过了浏览器</span><span style="font-family:'Times New Roman';">filter</span><span style="font-family:宋体;">，并且执行我们的反射型</span><span style="font-family:'Times New Roman';">XSS</span><span style="font-family:宋体;">。</span><o:p></o:p>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	所以说<span style="font-family:'Times New Roman';">HRS</span><span style="font-family:宋体;">的危害大于</span><span style="font-family:'Times New Roman';">XSS</span><span style="font-family:宋体;">，因为它能绕过一般</span><span style="font-family:'Times New Roman';">XSS</span><span style="font-family:宋体;">所绕不过的</span><span style="font-family:'Times New Roman';">filter</span><span style="font-family:宋体;">，并能产生会话固定漏洞。</span><o:p></o:p>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	 
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	我们来一个真实案例吧。<o:p></o:p>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	新浪某分站含有一个<span style="font-family:'Times New Roman';">url</span><span style="font-family:宋体;">跳转漏洞，危害并不大，于是我就想到了</span><span style="font-family:'Times New Roman';">CRLF Injection</span><span style="font-family:宋体;">，当我测试</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+<span style="font-family:宋体;"> </span>
+</p>
+<pre style="margin-top:0px;margin-bottom:8px;padding:8px 16px;font-family:'Courier New', Courier, monospace;white-space:pre-wrap;word-wrap:break-word;background-color:#F8F8F8;border:1px solid #DDDDDD;color:#333333;font-size:14px;line-height:24px;"><code style="margin:0px;padding:0px;font-family:'Courier New', Courier, monospace;word-wrap:break-word;">http://xxx.sina.com.cn/?url=%0a%0d%0a%0d%3Cimg%20src=1%3E</code></pre>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+<span style="font-family:宋体;">的时候，发现图片已经输出在页面中了，说明</span><span style="font-family:'Times New Roman';">CRLF</span><span style="font-family:宋体;">注入成功了：</span><o:p></o:p>
+</p>
+<p class="p0" style="margin-bottom:0pt;margin-top:0pt;">
+<a href="https://www.leavesongs.com/content/uploadfile/201406/4efd1404082196.jpg" id="ematt:553" target="_blank"><img alt="01.jpg" border="0" height="245" src="./新浪某站CRLF Injection导致的安全问题  离别歌/thum-4efd1404082196.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	那么我们试试<span style="font-family:'Times New Roman';">XSS</span><span style="font-family:宋体;">看看：</span><o:p></o:p>
+</p>
+<p class="p0" style="margin-bottom:0pt;margin-top:0pt;">
+<a href="https://www.leavesongs.com/content/uploadfile/201406/3fb51404082198.jpg" id="ematt:555" target="_blank"><img alt="02.jpg" border="0" height="265" src="./新浪某站CRLF Injection导致的安全问题  离别歌/thum-3fb51404082198.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	看控制台，果然被<span style="font-family:'Times New Roman';">XSS Filter</span><span style="font-family:宋体;">拦截了。</span><o:p></o:p>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	那么我们就注入一个<span style="font-family:'Times New Roman';">X-XSS-Protection:0</span><span style="font-family:宋体;">到数据包中，看看什么效果：</span><a href="https://www.leavesongs.com/content/uploadfile/201406/f9961404082199.jpg" id="ematt:557" target="_blank"><img alt="03.jpg" border="0" height="236" src="./新浪某站CRLF Injection导致的安全问题  离别歌/thum-f9961404082199.jpg" title="点击查看原图" width="650"/></a><span style="text-indent:21pt;line-height:1.5;"></span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	@mramydnei <span style="font-family:宋体;">还想到了一个利用字符编码来绕过</span><span style="font-family:'Times New Roman';">XSS Filter</span><span style="font-family:宋体;">的方法，当编码是</span><span style="font-family:'Times New Roman';">is-2022-kr</span><span style="font-family:宋体;">时浏览器会忽略</span><span style="font-family:'Times New Roman';">%0f</span><span style="font-family:宋体;">，这样我们在</span><span style="font-family:'Times New Roman';">onerror</span><span style="font-family:宋体;">后面加个</span><span style="font-family:'Times New Roman';">%0f</span><span style="font-family:宋体;">就能绕过</span><span style="font-family:'Times New Roman';">filter</span><span style="font-family:宋体;">，前提是注入一个</span><span style="font-family:'Times New Roman';">&lt;meta charset=ISO-2022-KR&gt;</span><span style="font-family:宋体;">：</span><a href="https://www.leavesongs.com/content/uploadfile/201406/2de41404082200.jpg" id="ematt:559" target="_blank"><img alt="04.jpg" border="0" height="214" src="./新浪某站CRLF Injection导致的安全问题  离别歌/thum-2de41404082200.jpg" title="点击查看原图" width="650"/></a><span style="text-indent:21pt;line-height:1.5;"></span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	 
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	当然，在<span style="font-family:'Times New Roman';">Location:</span><span style="font-family:宋体;">这里注入只有</span><span style="font-family:'Times New Roman';">webkit</span><span style="font-family:宋体;">内核浏览器才能够利用，其他浏览器可能会跳转、出错。不过对于</span><span style="font-family:'Times New Roman';">chrome</span><span style="font-family:宋体;">的使用量来说，危害已经足够了。</span><o:p></o:p>
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	 
+</p>
+<p class="p0" style="text-indent:21.0000pt;margin-bottom:0pt;margin-top:0pt;">
+	如何修复<span style="font-family:'Times New Roman';">HRS</span><span style="font-family:宋体;">漏洞，当然是过滤</span><span style="font-family:'Times New Roman';">\r </span><span style="font-family:宋体;">、</span><span style="font-family:'Times New Roman';">\n</span><span style="font-family:宋体;">之类的换行符，避免输入的数据污染到其他</span><span style="font-family:'Times New Roman';">HTTP</span><span style="font-family:宋体;">头。</span><o:p></o:p>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2506">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./新浪某站CRLF Injection导致的安全问题  离别歌/0761b4298b910023be4c36b39d59628e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">glue</a>
+<time datetime="2017年1月11日 14:42" itemprop="datePublished">
+                            2017 一月 11 14:42
+                        </time>
+<a href="javascript:reply_to('2506', 'glue')">回复</a>
+</p>
+<p class="comment-meta">您好，方便把您的测试代码发我学习一下吗，邮箱是513314538@qq.com,谢谢！</p>
+</div>
+</div>
+<div class="row" id="comment-1709">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./新浪某站CRLF Injection导致的安全问题  离别歌/61098ada92da6202c19898f6807f7a0a.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">BORDER</a>
+<time datetime="2014年7月6日 02:18" itemprop="datePublished">
+                            2014 七月 06 02:18
+                        </time>
+<a href="javascript:reply_to('1709', 'BORDER')">回复</a>
+</p>
+<p class="comment-meta">验证码清晰多了~！！么么哒</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="ddde514803a761846adf87072f757f491b47ccf9"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./新浪某站CRLF Injection导致的安全问题  离别歌/ddde514803a761846adf87072f757f491b47ccf9"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="318">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="BTsa2ZGv3GysnJ3cVZjspiTiHWrwjkcS9dNGQtSKutsRnorrJgNcYWVnQ0UE2O12"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./新浪某站CRLF Injection导致的安全问题  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./新浪某站CRLF Injection导致的安全问题  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

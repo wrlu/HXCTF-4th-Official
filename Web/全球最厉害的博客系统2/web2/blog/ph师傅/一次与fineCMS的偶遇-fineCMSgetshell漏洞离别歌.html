@@ -1,0 +1,230 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>一次与fineCMS的偶遇 - fineCMS getshell漏洞 | 离别歌</title>
+<link href="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/styles.css" rel="stylesheet"/>
+<link href="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/style.css" rel="stylesheet"/>
+<link href="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/jquery.min.js"></script>
+<link href="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/code.css" rel="stylesheet"/>
+<link href="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/button.css" rel="stylesheet"/>
+<link href="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/fineCMS-getshell.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/fineCMS-getshell.html&amp;text=%E4%B8%80%E6%AC%A1%E4%B8%8EfineCMS%E7%9A%84%E5%81%B6%E9%81%87%20-%20fineCMS%20getshell%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/fineCMS-getshell.html&amp;title=%E4%B8%80%E6%AC%A1%E4%B8%8EfineCMS%E7%9A%84%E5%81%B6%E9%81%87%20-%20fineCMS%20getshell%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/fineCMS-getshell.html&amp;is_video=false&amp;description=%E4%B8%80%E6%AC%A1%E4%B8%8EfineCMS%E7%9A%84%E5%81%B6%E9%81%87%20-%20fineCMS%20getshell%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E4%B8%80%E6%AC%A1%E4%B8%8EfineCMS%E7%9A%84%E5%81%B6%E9%81%87%20-%20fineCMS%20getshell%E6%BC%8F%E6%B4%9E&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/fineCMS-getshell.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/fineCMS-getshell.html&amp;title=%E4%B8%80%E6%AC%A1%E4%B8%8EfineCMS%E7%9A%84%E5%81%B6%E9%81%87%20-%20fineCMS%20getshell%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/fineCMS-getshell.html&amp;title=%E4%B8%80%E6%AC%A1%E4%B8%8EfineCMS%E7%9A%84%E5%81%B6%E9%81%87%20-%20fineCMS%20getshell%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/fineCMS-getshell.html&amp;title=%E4%B8%80%E6%AC%A1%E4%B8%8EfineCMS%E7%9A%84%E5%81%B6%E9%81%87%20-%20fineCMS%20getshell%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/fineCMS-getshell.html&amp;title=%E4%B8%80%E6%AC%A1%E4%B8%8EfineCMS%E7%9A%84%E5%81%B6%E9%81%87%20-%20fineCMS%20getshell%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/fineCMS-getshell.html&amp;name=%E4%B8%80%E6%AC%A1%E4%B8%8EfineCMS%E7%9A%84%E5%81%B6%E9%81%87%20-%20fineCMS%20getshell%E6%BC%8F%E6%B4%9E&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">一次与fineCMS的偶遇 - fineCMS getshell漏洞</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年1月4日 00:17" itemprop="datePublished">
+                    2014 一月 04 00:17
+                </time>
+</div>
+<div class="article-tag">
+            阅读：5219
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/fineCMS">fineCMS</a>,
+                
+                <a class="tag-link" href="/tag/getshell">getshell</a>,
+                
+                <a class="tag-link" href="/tag/%E4%B8%8A%E4%BC%A0%E6%BC%8F%E6%B4%9E">上传漏洞</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">这个不是0day，我手里也没0day，算是一个漏洞的二次审计，一篇随便写写的记录文，还请各位大牛多多交流。</span><br>
+<br>
+<span style="font-weight:700;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">0x01 偶遇</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">有一个目标站，扫了一下旁站，用工具没有拿到几个cms的指纹。很奇怪，随手点一个，发现下面有powered by fineCMS。我记得以前也见过这个cms，是用CI框架二次编写的cms，网上搜索搜索“finecms漏洞”，找到的都是1.7.2版本以前的（seay博客里有1.7.2注射： </span><a href="http://www.cnseay.com/tag/finecms%E6%BC%8F%E6%B4%9E/" target="_blank">http://www.cnseay.com/tag/finecms%E6%BC%8F%E6%B4%9E/</a><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">）。但是这个网站是v2.0.12.版本比较新。</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201401/4efd1388766174.jpg" id="ematt:338" target="_blank"><img alt="01.jpg" border="0" height="101" src="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/4efd1388766174.jpg" title="点击查看原图" width="397"/></a><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">倔强的我会选择换一个旁站呢，还是继续深入？</span><br/>
+<br/>
+<span style="font-weight:700;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">0x02 继续深入</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">我们来到finecms的官网：</span><a href="http://www.dayrui.com/" target="_blank">http://www.dayrui.com/</a><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">发现论坛里有这么一个公告，一个补丁。发表日期是12.8，再结合这个“头像上传”，我似乎想到了什么。</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201401/3fb51388766175.jpg" id="ematt:339" target="_blank"><img alt="02.jpg" border="0" height="88" src="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/3fb51388766175.jpg" title="点击查看原图" width="279"/></a><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">于是我把补丁下下来，并在网上找了一个没打补丁的v2.1.0源码。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">补丁包里就两个文件，function_helper.php和Account.php。我们来把这两个文件和补丁之前的文件进行比较看看。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">多了一个删除目录下所有文件的函数：</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201401/f9961388766177.jpg" id="ematt:340" target="_blank"><img alt="03.jpg" border="0" height="165" src="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/thum-f9961388766177.jpg" title="点击查看原图" width="420"/></a><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">判断文件名并删除多余目录。之前的代码之所以有问题就是因为它没有递归删除用户上传的压缩包内的文件夹内的内容。</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201401/2de41388766180.jpg" id="ematt:342" target="_blank"><img alt="04.jpg" border="0" height="171" src="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/thum-2de41388766180.jpg" title="点击查看原图" width="420"/></a><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">这不就是phpcms那个头像上传getshell吗，原来fineCMS中头像上传的地方使用的是phpcms的源码。而且这个开发者也很负责，在phpcms出事以后很快就发布了自己的补丁。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">所以，我们就可以利用头像上传的getshell方法秒拿fineCMSv2.1.0以前版本的shell。</span><br/>
+<br/>
+<span style="font-weight:700;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">0x03 老办法拿shell（这部分不理解的话参考phpcms那个漏洞）</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">注册会员，来到上传头像处，选择一个正常图片点保存：</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201401/13501388766182.jpg" id="ematt:344" target="_blank"><img alt="05.jpg" border="0" height="337" src="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/thum-13501388766182.jpg" title="点击查看原图" width="420"/></a><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">burpsuite抓包改包：</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201401/fac41388766183.jpg" id="ematt:346" target="_blank"><img alt="06.jpg" border="0" height="167" src="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/thum-fac41388766183.jpg" title="点击查看原图" width="420"/></a><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">shell成功上传运行：</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201401/e4bd1388766187.jpg" id="ematt:348" target="_blank"><img alt="07.jpg" border="0" height="178" src="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/thum-e4bd1388766187.jpg" title="点击查看原图" width="420"/></a><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">所以这里给大家一个思路，如果网上找不到现有版本的漏洞，可以去官网看一下补丁包，自己二次审计一下代码，也许有意想不到的收获。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">百度一下powered by fineCMS，也是有很多的，你们懂得！！</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201401/86c31388766190.jpg" id="ematt:350" target="_blank"><img alt="08.jpg" border="0" height="409" src="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/thum-86c31388766190.jpg" title="点击查看原图" width="420"/></a><br/>
+<br/>
+<span style="font-weight:700;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">0x04 后话</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">系统是linux，菜刀连接可以执行命令，用户组是www，内核版本是2.6.32</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201401/10581388766193.jpg" id="ematt:352" target="_blank"><img alt="09.jpg" border="0" height="49" src="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/10581388766193.jpg" title="点击查看原图" width="265"/></a><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">作为一个写代码的，提权什么的其实我不太清楚也不太精通。但因为可以执行命令而且是www用户（不是虚拟主机）所以可以直接往目标写shell（找个目标的有写权限的目录就行了），目标就算拿下了。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">提权算是后话，Linux提权基本上就是靠内核漏洞了。先反弹一个shell到本地（用nc什么的），然后在它服务器上编译好提权exp，运行就可以获得一个root权限的shell了。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">这里给大家推荐一个工具：Linux_Exploit_Suggester</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">地址 </span><a href="https://github.com/PenturaLabs/Linux_Exploit_Suggester" target="_blank">https://github.com/PenturaLabs/Linux_Exploit_Suggester</a><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">只要输入内核版本，它就帮你咨询出来能使用的exp：</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201401/ae561388766195.jpg" id="ematt:353" target="_blank"><img alt="10.jpg" border="0" height="460" src="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/thum-ae561388766195.jpg" title="点击查看原图" width="418"/></a><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">附件里我会提供未修复漏洞的fineCMS，和漏洞补丁，给各位想学习php和代码审计的同学使用。</span>
+</br></br></div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1536">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://WWW.WANZAILA.COM" target="_blank">万载啦</a>
+<time datetime="2014年1月4日 09:51" itemprop="datePublished">
+                            2014 一月 04 09:51
+                        </time>
+<a href="javascript:reply_to('1536', '万载啦')">回复</a>
+</p>
+<p class="comment-meta">漏洞。。。。。</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="372c6a5a27c1dc9b5bbf5d8820f9e2aad1a3dd66"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/372c6a5a27c1dc9b5bbf5d8820f9e2aad1a3dd66"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="295">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="jdlj5S4zqYwkhSfmM0XHAPefKSYT28nhRxGPTmgORLqJhxDBAhrr9tgkTWr1LCcr"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./一次与fineCMS的偶遇 - fineCMS getshell漏洞  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

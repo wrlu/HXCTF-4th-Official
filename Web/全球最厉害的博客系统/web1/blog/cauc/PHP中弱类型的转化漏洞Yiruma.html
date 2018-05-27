@@ -1,0 +1,279 @@
+<!DOCTYPE doctype html>
+
+<html class="theme-next mist use-motion" lang="">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<meta content="no-transform" http-equiv="Cache-Control"/>
+<meta content="no-siteapp" http-equiv="Cache-Control"/>
+<link href="./PHP中弱类型的转化漏洞  Yiruma/jquery.fancybox.cssv=2.1.5" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css"/>
+<link href="./PHP中弱类型的转化漏洞  Yiruma/font-awesome.min.cssv=4.6.2" rel="stylesheet" type="text/css">
+<link href="./PHP中弱类型的转化漏洞  Yiruma/main.cssv=5.1.1" rel="stylesheet" type="text/css"/>
+<meta content="Hexo, NexT" name="keywords"/>
+<link href="/favicon.ico?v=5.1.1" rel="shortcut icon" type="image/x-icon"/>
+<meta content="官方文档中的几句话已经说的很清楚了 在==中，数值和字符串的比较或者比较涉及到数字内容的字符串，则字符串会被转换为数值并且比较按照数值来进行。当用 === 或 !== 进行比较时则不进行类型转换，因为此时类型和数值都要比对对了，这些规则经过测试，在mysql的比较中是一样一样的" name="description"/>
+<meta name="keywords"/>
+<meta content="article" property="og:type"/>
+<meta content="PHP中弱类型的转化漏洞" property="og:title"/>
+<meta content="https://someonesometimes.github.io/2017/04/19/PHP弱类型转化的漏洞/index.html" property="og:url"/>
+<meta content="Yiruma" property="og:site_name"/>
+<meta content="官方文档中的几句话已经说的很清楚了 在==中，数值和字符串的比较或者比较涉及到数字内容的字符串，则字符串会被转换为数值并且比较按照数值来进行。当用 === 或 !== 进行比较时则不进行类型转换，因为此时类型和数值都要比对对了，这些规则经过测试，在mysql的比较中是一样一样的" property="og:description"/>
+<meta content="2017-05-21T07:06:13.517Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="PHP中弱类型的转化漏洞" name="twitter:title"/>
+<meta content="官方文档中的几句话已经说的很清楚了 在==中，数值和字符串的比较或者比较涉及到数字内容的字符串，则字符串会被转换为数值并且比较按照数值来进行。当用 === 或 !== 进行比较时则不进行类型转换，因为此时类型和数值都要比对对了，这些规则经过测试，在mysql的比较中是一样一样的" name="twitter:description"/>
+<script id="hexo.configurations" type="text/javascript">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<link href="https://someonesometimes.github.io/2017/04/19/PHP弱类型转化的漏洞/" rel="canonical"/>
+<title>PHP中弱类型的转化漏洞 | Yiruma</title>
+</link></head>
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="">
+<div class="container sidebar-position-left page-post-detail ">
+<div class="headband"></div>
+<header class="header" id="header" itemscope="" itemtype="http://schema.org/WPHeader">
+<div class="header-inner"><div class="site-brand-wrapper">
+<div class="site-meta ">
+<div class="custom-logo-site-title">
+<a class="brand" href="/" rel="start">
+<span class="logo-line-before"><i></i></span>
+<span class="site-title">Yiruma</span>
+<span class="logo-line-after"><i></i></span>
+</a>
+</div>
+<p class="site-subtitle"></p>
+</div>
+<div class="site-nav-toggle">
+<button>
+<span class="btn-bar"></span>
+<span class="btn-bar"></span>
+<span class="btn-bar"></span>
+</button>
+</div>
+</div>
+<nav class="site-nav">
+<ul class="menu" id="menu">
+<li class="menu-item menu-item-archives">
+<a href="/archives" rel="section">
+<i class="menu-item-icon fa fa-fw fa-archive"></i> <br/>
+            
+            Archiv
+          </a>
+</li>
+<li class="menu-item menu-item-about">
+<a href="/about" rel="section">
+<i class="menu-item-icon fa fa-fw fa-user"></i> <br/>
+            
+            Über
+          </a>
+</li>
+<li class="menu-item menu-item-link">
+<a href="/links" rel="section">
+<i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br/>
+            
+            menu.link
+          </a>
+</li>
+</ul>
+</nav>
+</div>
+</header>
+<main class="main" id="main">
+<div class="main-inner">
+<div class="content-wrap">
+<div class="content" id="content">
+<div class="posts-expand" id="posts">
+<article class="post post-type-normal " itemscope="" itemtype="http://schema.org/Article">
+<link href="https://someonesometimes.github.io/2017/04/19/PHP弱类型转化的漏洞/" itemprop="mainEntityOfPage"/>
+<span hidden="" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<meta content="Yiruma" itemprop="name"/>
+<meta content="" itemprop="description"/>
+<meta content="/images/avatar.gif" itemprop="image"/>
+</span>
+<span hidden="" itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+<meta content="Yiruma" itemprop="name"/>
+</span>
+<header class="post-header">
+<h1 class="post-title" itemprop="name headline">PHP中弱类型的转化漏洞</h1>
+<div class="post-meta">
+<span class="post-time">
+<span class="post-meta-item-icon">
+<i class="fa fa-calendar-o"></i>
+</span>
+<span class="post-meta-item-text">Veröffentlicht am</span>
+<time datetime="2017-04-19T23:15:47+08:00" itemprop="dateCreated datePublished" title="Post created">
+                2017-04-19
+              </time>
+</span>
+</div>
+</header>
+<div class="post-body" itemprop="articleBody">
+<h2 id="官方文档中的几句话已经说的很清楚了"><a class="headerlink" href="#官方文档中的几句话已经说的很清楚了" title="官方文档中的几句话已经说的很清楚了"></a>官方文档中的几句话已经说的很清楚了</h2><blockquote>
+<p><strong>在==中，<code>数值和字符串的比较</code>或者<code>比较涉及到数字内容的字符串</code>，则字符串会被转换为数值并且比较按照数值来进行。</strong><br/><strong>当用 === 或 !== 进行比较时则不进行类型转换，因为此时类型和数值都要比对</strong><br/><strong>对了，这些规则经过测试，在mysql的比较中是一样一样的</strong><br/><a id="more"></a></p>
+</blockquote>
+<p><br/></p>
+<h2 id="从几个例子中学习字符型是如何转换为数值的："><a class="headerlink" href="#从几个例子中学习字符型是如何转换为数值的：" title="从几个例子中学习字符型是如何转换为数值的："></a>从几个例子中学习字符型是如何转换为数值的：</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">其中0代表转化失败，转化成功即为对应的数值</div><div class="line">	&amp;apos;xie&amp;apos;=&gt;0</div><div class="line">	&amp;apos;0xff&amp;apos;=&gt;0xff</div><div class="line">	&amp;apos;0xfz&amp;apos;=&gt;0xf</div><div class="line">	&amp;apos;0xzf&amp;apos;=&gt;0  这个比较有趣，0是转化成功的结果，而不是转化失败的意思</div><div class="line">	&amp;apos;x1&amp;apos;=&gt;0</div><div class="line">	&amp;apos;1x&amp;apos;=&gt;1</div><div class="line">	&amp;apos;0e123456&amp;apos;=&gt;0 很神奇，0e123这种数值代表幂写法，已经好几次碰到了</div></pre></td></tr></table></figure>
+<p><br/></p>
+<h2 id="php弱类型漏洞的应用场景"><a class="headerlink" href="#php弱类型漏洞的应用场景" title="php弱类型漏洞的应用场景"></a>php弱类型漏洞的应用场景</h2><ul>
+<li>在使用==时，php会对不同类型进行转化后再比较</li>
+<li><p>类型的运算的结果都是数值型的，如果参数有字符型的话，就按照上述的转换方式来转换</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&amp;apos;flagpig&amp;apos;+1 = 1</div><div class="line">&amp;apos;11zip&amp;apos;+1=12</div><div class="line">&amp;apos;0&amp;apos;+&amp;apos;1&amp;apos;+&amp;apos;0&amp;apos;=1</div><div class="line">&amp;apos;xie&amp;apos;+&amp;apos;fei&amp;apos;=0</div></pre></td></tr></table></figure>
+</li>
+<li><p>判断中即使两端都是字符型的，但一些情况下仍然做出数值型的比较，将因数值型的比较特性导致某些判断被绕过，测试如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">数值型的比较特性：</div><div class="line">0e0 == 0       基于科学计数法的转换</div><div class="line">0x80 == 128    基于进制转换</div><div class="line"></div><div class="line">那么如下比较将成立</div><div class="line">&amp;apos;0e0&amp;apos; == &amp;apos;0&amp;apos;</div><div class="line">&amp;apos;0x80&amp;apos; == &amp;apos;128&amp;apos;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<h2 id="记录比赛中关于判断的一些例子"><a class="headerlink" href="#记录比赛中关于判断的一些例子" title="记录比赛中关于判断的一些例子"></a>记录比赛中关于判断的一些例子</h2><ul>
+<li>md5(password)==md5(username)<br/>基于转后后是十六进制数值，利用两个数值的幂写法进行了绕过。。。</li>
+<li>使用<code>strcmp</code>进行比较的判断中，文档中给出：<code>int strcmp ( string $str1 , string $str2 )</code>，其实如果是字符串与数组类型，也不会导致报错，而且会判定相等通过的</li>
+<li>使用一个很有意思的逻辑：<code>任意字符串+0 = 任意字符串</code>,这样就可以把字符串转化为0而通过所有与字符串比较的弱类型判断</li>
+<li>记得有一道数据库的题目，可以使用where “xie”=”meng”=”fei”来实现判断</li>
+<li>两个数值的相等判断，可以使用幂的表示方法：<code>0e123==0e456</code></li>
+<li>返回结果==false时，因为0==false，除0外的所有数字==true，这样可能实现绕过。但如果是使用返回结果===false时，就没法伪造返回结果为数字，因为此时要求比较的类型也是相同的，只有真正的返回结果可以做到</li>
+<li><strong>利用’0’+’1’的结果是数值型,这种利用可以用在mysql注入中，这样可以把预定的sex=’xx’转化为sex=数值型对象，接下来就是判断中类型转化的原理了</strong><br/>应用：sex=’0’+’1’+’0’ 第一个0用于闭合句式中的前引号，最后一个0用于闭合句式中的后引号，中间的将用于盲注，是0是1将影响输出结果  本题将有两个结果：sex=0 or sex=1 产生两种不同情况以作为盲注判断条件</li>
+<li>使用这样一种判断：<code>$req['number']==strval(intval($req['number']))</code>,之前一直担心先intval再strval会把进制与科学记数法的姿势限制住，测试后才意识到两边都是字符型的数值下，会进行转换的，因此req[‘number’]=0e00是没有问题的，可以通过比较</li>
+</ul>
+</div>
+<div>
+</div>
+<div>
+</div>
+<div>
+</div>
+<footer class="post-footer">
+<div class="post-nav">
+<div class="post-nav-next post-nav-item">
+<a href="/2017/04/26/密码学结课后的一些想法以及总结(下)/" rel="next" title="密码学结课后的一些想法以及总结（下）">
+<i class="fa fa-chevron-left"></i> 密码学结课后的一些想法以及总结（下）
+              </a>
+</div>
+<span class="post-nav-divider"></span>
+<div class="post-nav-prev post-nav-item">
+<a href="/2017/04/14/js的DOM操作/" rel="prev" title="js的DOM操作">
+                js的DOM操作 <i class="fa fa-chevron-right"></i>
+</a>
+</div>
+</div>
+</footer>
+</article>
+<div class="post-spread">
+</div>
+</div>
+</div>
+<div class="comments" id="comments">
+</div>
+</div>
+<div class="sidebar-toggle">
+<div class="sidebar-toggle-line-wrap">
+<span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+<span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+<span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+</div>
+</div>
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-inner">
+<ul class="sidebar-nav motion-element">
+<li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+<li class="sidebar-nav-overview" data-target="site-overview">
+            Übersicht
+          </li>
+</ul>
+<section class="site-overview sidebar-panel">
+<div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<img alt="Yiruma" class="site-author-image" itemprop="image" src="./PHP中弱类型的转化漏洞  Yiruma/avatar.gif"/>
+<p class="site-author-name" itemprop="name">Yiruma</p>
+<p class="site-description motion-element" itemprop="description"></p>
+</div>
+<nav class="site-state motion-element">
+<div class="site-state-item site-state-posts">
+<a href="/archives">
+<span class="site-state-item-count">9</span>
+<span class="site-state-item-name">Artikel</span>
+</a>
+</div>
+<div class="site-state-item site-state-tags">
+<span class="site-state-item-count">1</span>
+<span class="site-state-item-name">Tags</span>
+</div>
+</nav>
+<div class="links-of-author motion-element">
+</div>
+</section>
+<!--noindex-->
+<section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+<div class="post-toc">
+<div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#官方文档中的几句话已经说的很清楚了"><span class="nav-number">1.</span> <span class="nav-text">官方文档中的几句话已经说的很清楚了</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#从几个例子中学习字符型是如何转换为数值的："><span class="nav-number">2.</span> <span class="nav-text">从几个例子中学习字符型是如何转换为数值的：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#php弱类型漏洞的应用场景"><span class="nav-number">3.</span> <span class="nav-text">php弱类型漏洞的应用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#记录比赛中关于判断的一些例子"><span class="nav-number">4.</span> <span class="nav-text">记录比赛中关于判断的一些例子</span></a></li></ol></div>
+</div>
+</section>
+<!--/noindex-->
+</div>
+</aside>
+</div>
+</main>
+<footer class="footer" id="footer">
+<div class="footer-inner">
+<div class="copyright">
+  
+  © 
+  <span itemprop="copyrightYear">2017</span>
+<span class="with-love">
+<i class="fa fa-heart"></i>
+</span>
+<span class="author" itemprop="copyrightHolder">Yiruma</span>
+</div>
+<div class="powered-by">
+  Erstellt mit  <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+</div>
+</footer>
+<div class="back-to-top">
+<i class="fa fa-arrow-up"></i>
+</div>
+</div>
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+<script src="./PHP中弱类型的转化漏洞  Yiruma/index.jsv=2.1.3" type="text/javascript"></script>
+<script src="./PHP中弱类型的转化漏洞  Yiruma/fastclick.min.jsv=1.0.6" type="text/javascript"></script>
+<script src="./PHP中弱类型的转化漏洞  Yiruma/jquery.lazyload.jsv=1.9.7" type="text/javascript"></script>
+<script src="./PHP中弱类型的转化漏洞  Yiruma/velocity.min.jsv=1.2.1" type="text/javascript"></script>
+<script src="./PHP中弱类型的转化漏洞  Yiruma/velocity.ui.min.jsv=1.2.1" type="text/javascript"></script>
+<script src="./PHP中弱类型的转化漏洞  Yiruma/jquery.fancybox.pack.jsv=2.1.5" type="text/javascript"></script>
+<script src="./PHP中弱类型的转化漏洞  Yiruma/utils.jsv=5.1.1" type="text/javascript"></script>
+<script src="./PHP中弱类型的转化漏洞  Yiruma/motion.jsv=5.1.1" type="text/javascript"></script>
+<script src="./PHP中弱类型的转化漏洞  Yiruma/scrollspy.jsv=5.1.1" type="text/javascript"></script>
+<script src="./PHP中弱类型的转化漏洞  Yiruma/post-details.jsv=5.1.1" type="text/javascript"></script>
+<script src="./PHP中弱类型的转化漏洞  Yiruma/bootstrap.jsv=5.1.1" type="text/javascript"></script>
+</body>
+</html>

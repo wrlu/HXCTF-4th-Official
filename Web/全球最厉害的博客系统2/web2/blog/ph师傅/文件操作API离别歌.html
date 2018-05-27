@@ -1,0 +1,338 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./文件操作API  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./文件操作API  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./文件操作API  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>文件操作API | 离别歌</title>
+<link href="./文件操作API  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./文件操作API  离别歌/styles.css" rel="stylesheet"/>
+<link href="./文件操作API  离别歌/style.css" rel="stylesheet"/>
+<link href="./文件操作API  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./文件操作API  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./文件操作API  离别歌/jquery.min.js"></script>
+<link href="./文件操作API  离别歌/code.css" rel="stylesheet"/>
+<link href="./文件操作API  离别歌/button.css" rel="stylesheet"/>
+<link href="./文件操作API  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./文件操作API  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/C/File.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/C/File.html&amp;text=%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9CAPI"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/C/File.html&amp;title=%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9CAPI"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/C/File.html&amp;is_video=false&amp;description=%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9CAPI"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9CAPI&amp;body=Check out this article: https%3A//www.leavesongs.com/C/File.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/C/File.html&amp;title=%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9CAPI"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/C/File.html&amp;title=%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9CAPI"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/C/File.html&amp;title=%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9CAPI"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/C/File.html&amp;title=%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9CAPI"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/C/File.html&amp;name=%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9CAPI&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">文件操作API</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年1月9日 22:12" itemprop="datePublished">
+                    2013 一月 09 22:12
+                </time>
+</div>
+<div class="article-tag">
+            阅读：17927
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/C">C/C++</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C">文件操作</a>,
+                
+                <a class="tag-link" href="/tag/API%E5%87%BD%E6%95%B0">API函数</a>,
+                
+                <a class="tag-link" href="/tag/C-FREE">C-FREE</a>,
+                
+                <a class="tag-link" href="/tag/%E5%87%BD%E6%95%B0">函数</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p><span style="font-size:14px;">    最近遇到了一个困难。下的一部视频</span><span style="font-size:14px;">，有100来集，但每一集都放在单独的文件夹里。我现在</span><span style="font-size:14px;">想把他们移到一起，莫非要一个一个手工移？</span></p>
+<p><span style="font-size:14px;">    </span><span style="font-size:14px;">正好以前看过一篇文章写的是遍历文件夹中指定文件，于是我可以利用它来解决我的问题。</span></p>
+<p><span style="font-size:14px;">    遍历那个部分我就不讲了……涉及的东西太多(又是链表又是递归的</span><span style="font-size:14px;">)。先讲讲几个简单的API。</span></p>
+<p></p>
+<pre class="brush: cpp;">BOOL WINAPI CreateDirectory(
+  __in      LPCTSTR lpPathName,
+  __in_opt  LPSECURITY_ATTRIBUTES lpSecurityAttributes
+);</pre> <p>    作用：新建一个文件夹。我们要把所有视频移到一起，最好新建一个文件夹来保存。lpPathName 参数是文件夹的地址。比如在D:\abc 下建立 def 文件夹，这个lpPathName 字符串就应该是_T("d:\\abc\\def").</p>
+<p>    _T是一个宏，表示字符串是TCHAR类型。关于字符串类型和字符编码这些问题我以后会说。API中的字符串一般用这个宏包着就好。</p>
+<p>    lpSecurityAttributes 参数是文件夹的安全属性，填NULL就可以。</p>
+<p>    这个函数返回值是BOOL类型。通过GetLastError 函数能得到出错的原因。( 关于出错原因那几个函数我做过一个PPT大家可以去看看 <a href="http://wenku.baidu.com/view/889e85270066f5335a81214b?fr=prin" target="_blank">http://wenku.baidu.com/view/889e85270066f5335a81214b?fr=prin</a> ) 如果文件夹已存在CreateDirectory函数就会出错，而且通过GetLastError 函数得到的错误代码为0x50.所以我们可以这样写一个判断句:</p>
+<pre class="brush: cpp;">if( !CreateDirectory(lpPathName,NULL) )
+{
+    DWORD err = GetLastError();
+    if( 0x50 == err )
+    {
+        MessageBox(NULL,_T("文件夹已存在"),_T("出错"),MB_OK);
+    }
+}</pre> <p>    通知我们的用户，因为什么原因出错了。</p>
+<p>    </p>
+<pre class="brush: cpp;">BOOL WINAPI CopyFile(
+  __in  LPCTSTR lpExistingFileName,
+  __in  LPCTSTR lpNewFileName,
+  __in  BOOL bFailIfExists
+);</pre> <p><br>
+    作用：复制文件到指定文件夹。第一个参数是待复制文件的文件名，第二个参数是新文件名。注意，一般第一个参数我们不会填错，知道是填要复制的文件。但是第二个参数就容易弄错了，很容易就只写一个文件夹。比如要把文件移动到D:\abc文件夹底下，第二个参数就填D:\\abc. 这就会出错。</br></p>
+<p>    我一开始也是犯了这个错误。英文不好也没仔细看MSDN，结果程序写出来能运行却不能复制文件，后来调试以后发现是这个函数的问题。再仔细一查MSDN，才知道第二个参数应该填的是目标文件名。也就是说把x.txt移动到D:\\abc文件夹底下，就应该填写_T("d:\\abc\\x.txt"). </p>
+<p>    第三个参数是个BOOL型，填TRUE 代表：若目标文件已存在，不覆盖文件，函数返回错误。填FALSE代表：若目标文件已存在，覆盖文件。</p>
+<p>    函数返回值也是BOOL，可以通过GetLastError函数判断出错原因。如果你第三个参数填的TRUE，出错估计就是因为文件已存在。</p>
+<p>    两个我的程序里用到的API讲过了，再说几个简单的API：</p>
+<pre class="brush: cpp;">BOOL WINAPI DeleteFile(
+  __in  LPCTSTR lpFileName
+);</pre> <p><br>
+    作用：删除文件。</br></p>
+<p>    lpFileName ：文件名。</p>
+<pre class="brush: cpp;">BOOL WINAPI MoveFile(
+  __in  LPCTSTR lpExistingFileName,
+  __in  LPCTSTR lpNewFileName
+);</pre> <p><br/>
+    作用：移动文件(剪切)。</p>
+<p>    两个参数和copy里面的前两个参数相似。这个函数我没用过，具体参阅MSDN。</p>
+<p> </p>
+<p>    其实还有一个功能强大的函数CreatFile 我没提到，因为它有点麻烦，涉及的参数比较多，以后可以单独讲讲。这里我已经完成我最开始说的那个程序的编写，有点简陋，作用是把你选择的目录中的所有wmv格式的文件移动到新建的一个目录里。</p>
+<p>    <a href="https://www.leavesongs.com/content/uploadfile/201301/92da1357745818.jpg" id="ematt:18" target="_blank"><img alt="CopyOutFile - 软件截图" border="0" height="149" src="./文件操作API  离别歌/92da1357745818.jpg" title="CopyOutFile - 软件截图" width="349"/></a></p>
+<p>    源代码发在附件里，工程用C-FREE建的。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1568">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./文件操作API  离别歌/4f29ed62ceced98137c503809f20ecbb.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">tianzitian</a>
+<time datetime="2014年3月13日 10:55" itemprop="datePublished">
+                            2014 三月 13 10:55
+                        </time>
+<a href="javascript:reply_to('1568', 'tianzitian')">回复</a>
+</p>
+<p class="comment-meta">其实Windows提供了这个功能，在总文件夹下搜索*.mkv，然后复制-&gt;移动……</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1569">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./文件操作API  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年3月13日 11:22" itemprop="datePublished">
+                            2014 三月 13 11:22
+                        </time>
+<a href="javascript:reply_to('1569', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@tianzitian：年少无知莫怪。。当年第一次写windows程序。。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1447">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./文件操作API  离别歌/569c95db81183a84d9d8f7664a6298f8.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">该昵称已屏蔽</a>
+<time datetime="2013年10月10日 14:36" itemprop="datePublished">
+                            2013 十月 10 14:36
+                        </time>
+<a href="javascript:reply_to('1447', '该昵称已屏蔽')">回复</a>
+</p>
+<p class="comment-meta">该评论已屏蔽</p>
+</div>
+</div>
+<div class="row" id="comment-1290">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./文件操作API  离别歌/62ab81a0fefac563acbbb2c232e4d64a.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">苦逼男</a>
+<time datetime="2013年1月24日 10:36" itemprop="datePublished">
+                            2013 一月 24 10:36
+                        </time>
+<a href="javascript:reply_to('1290', '苦逼男')">回复</a>
+</p>
+<p class="comment-meta">多谢分享，收了！</p>
+</div>
+</div>
+<div class="row" id="comment-1285">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./文件操作API  离别歌/474d6c8551c5115d0d3c5f60ba5ed841.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">肤质诊断</a>
+<time datetime="2013年1月16日 11:31" itemprop="datePublished">
+                            2013 一月 16 11:31
+                        </time>
+<a href="javascript:reply_to('1285', '肤质诊断')">回复</a>
+</p>
+<p class="comment-meta">感觉瞬间被科普了！</p>
+</div>
+</div>
+<div class="row" id="comment-1283">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./文件操作API  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">姿美堂</a>
+<time datetime="2013年1月15日 18:42" itemprop="datePublished">
+                            2013 一月 15 18:42
+                        </time>
+<a href="javascript:reply_to('1283', '姿美堂')">回复</a>
+</p>
+<p class="comment-meta">也许不错吧。</p>
+</div>
+</div>
+<div class="row" id="comment-1279">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./文件操作API  离别歌/3c5d73ddba62059eb354fb4039daea41.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">北京婚纱摄影</a>
+<time datetime="2013年1月11日 16:14" itemprop="datePublished">
+                            2013 一月 11 16:14
+                        </time>
+<a href="javascript:reply_to('1279', '北京婚纱摄影')">回复</a>
+</p>
+<p class="comment-meta">也许还可以吧</p>
+</div>
+</div>
+<div class="row" id="comment-1278">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./文件操作API  离别歌/c751f71702947b0806569b47353f1d01.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">苏州婚纱摄影</a>
+<time datetime="2013年1月10日 14:28" itemprop="datePublished">
+                            2013 一月 10 14:28
+                        </time>
+<a href="javascript:reply_to('1278', '苏州婚纱摄影')">回复</a>
+</p>
+<p class="comment-meta">这样，挺好的。方便很多了。</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="1e5465ceacd5ff9f05544a33b6e5552626f71c78"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./文件操作API  离别歌/1e5465ceacd5ff9f05544a33b6e5552626f71c78"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="218">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="Kr06mso6KnCSs73ga7WkvD8ojVoXGKeMiLlCaWAlbawhsMrvYoq44hatsZR5pe3W"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./文件操作API  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./文件操作API  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

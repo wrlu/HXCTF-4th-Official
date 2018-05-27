@@ -1,0 +1,274 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>discuz7.2 faq.php 最新注入漏洞分析 | 离别歌</title>
+<link href="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/styles.css" rel="stylesheet"/>
+<link href="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/style.css" rel="stylesheet"/>
+<link href="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/jquery.min.js"></script>
+<link href="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/code.css" rel="stylesheet"/>
+<link href="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/button.css" rel="stylesheet"/>
+<link href="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/discuz72-sql-injection.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/discuz72-sql-injection.html&amp;text=discuz7.2%20faq.php%20%E6%9C%80%E6%96%B0%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/discuz72-sql-injection.html&amp;title=discuz7.2%20faq.php%20%E6%9C%80%E6%96%B0%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/discuz72-sql-injection.html&amp;is_video=false&amp;description=discuz7.2%20faq.php%20%E6%9C%80%E6%96%B0%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=discuz7.2%20faq.php%20%E6%9C%80%E6%96%B0%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/discuz72-sql-injection.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/discuz72-sql-injection.html&amp;title=discuz7.2%20faq.php%20%E6%9C%80%E6%96%B0%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/discuz72-sql-injection.html&amp;title=discuz7.2%20faq.php%20%E6%9C%80%E6%96%B0%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/discuz72-sql-injection.html&amp;title=discuz7.2%20faq.php%20%E6%9C%80%E6%96%B0%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/discuz72-sql-injection.html&amp;title=discuz7.2%20faq.php%20%E6%9C%80%E6%96%B0%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/discuz72-sql-injection.html&amp;name=discuz7.2%20faq.php%20%E6%9C%80%E6%96%B0%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">discuz7.2 faq.php 最新注入漏洞分析</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年7月3日 04:49" itemprop="datePublished">
+                    2014 七月 03 04:49
+                </time>
+</div>
+<div class="article-tag">
+            阅读：8596
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/discuz">discuz</a>,
+                
+                <a class="tag-link" href="/tag/%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E">注入漏洞</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    之前乌云上被提交的漏洞，今天突然被人发出来了，然后就各种中枪。奈何各种考试马上就来了，我也没工夫去写exp或脚本什么的，趁点休息时间把代码看看就好。实话说我很讨厌这种情况，一大堆人会的不会的拿着别人发的exp刷漏洞，刷分刷钱。不如静下心来分析一下漏洞产生的原因，也算是我吃不到葡萄在说葡萄酸吧，笑。
+</p>
+<p>
+	    因为有同学给出POC了，POC如下：
+</p>
+<p>
+	    http://www.xxx.com/faq.php?action=grouppermission&amp;gids[99]='&amp;gids[100][0]=) and (select 1 from (select count(*),concat(version(),floor(rand(0)*2))x from information_schema<br>
+.tables group by x)a)%23
+</br></p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201407/b06c1404334952.jpg" id="ematt:563" target="_blank"><img alt="QQ图片20140703092618.jpg" border="0" height="277" src="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/thum-b06c1404334952.jpg" title="点击查看原图" width="650"/></a><br>
+    
+</br></p>
+<p>
+	    那么我把discuz7.2下载好，看到faq.php，找到action=grouppermission的代码（148行开始）：
+</p>
+<pre class="brush: php;auto-links: false;">} elseif($action == 'grouppermission') {
+
+...
+...
+	ksort($gids);
+	$groupids = array();
+	foreach($gids as $row) {
+		$groupids[] = $row[0];
+	}
+
+	$query = $db-&gt;query("SELECT * FROM {$tablepre}usergroups u LEFT JOIN {$tablepre}admingroups a ON u.groupid=a.admingid WHERE u.groupid IN (".implodeids($groupids).")");</pre>
+<span style="line-height:1.5;">    看到，图中报错的注入语句就是上面这句话。所以特别看看这句话前面的代码，也就是我列出来的。</span>
+<p>
+<br/>
+</p>
+<p>
+<span style="line-height:1.5;">    首先定义一个数组groupids，然后遍历$gids（这也是个数组，就是$_GET[gids]），将数组中的所有值的第一位取出来放在groupids中。<br/>
+</span>
+</p>
+<p>
+<span style="line-height:1.5;">    为什么这个操作就造成了注入？<br/>
+</span>
+</p>
+<p>
+<span style="line-height:1.5;">    discuz在全局会对GET数组进行addslashes转义，也就是说会将'转义成\'，所以，如果我们的传入的参数是：gids[1]='的话，会被转义成$gids[1]=\'，而这个赋值语句$groupids[] = $row[0]就相当于取了字符串的第一个字符，也就是\，把转义符号取出来了。<br/>
+</span>
+</p>
+<p>
+<span style="line-height:1.5;">    再看后面，在将数据放入sql语句前，他用implodeids处理了一遍。我们看到implodeids函数： </span>
+</p>
+<pre class="brush: php;auto-links: false;">function implodeids($array) {
+	if(!empty($array)) {
+		return "'".implode("','", is_array($array) ? $array : array($array))."'";
+	} else {
+		return '';
+	}
+}</pre>
+    很简单一个函数，就是将刚才的$groupids数组用','分割开，组成一个类似于'1','2','3','4'的字符串返回。<br/>
+<p>
+<br/>
+</p>
+<p>
+<span style="line-height:1.5;">    但是我们的数组刚取出来一个转义符，它会将这里一个正常的'转义掉，比如这样：<br/>
+</span>
+</p>
+<p>
+<span style="line-height:1.5;">    '1','\','3','4'<br/>
+</span>
+</p>
+<p>
+<span style="line-height:1.5;">    有没有看出有点不同，第4个单引号被转义了，也就是说第5个单引号和第3个单引号闭合。这样3这个位置就等于逃逸出了单引号，也就是产生的注入。我们把报错语句放在3这个位置，就能报错：<br/>
+</span>
+</p>
+<p>
+<span style="line-height:1.5;">    <a href="https://www.leavesongs.com/content/uploadfile/201407/f3cc1404336063.jpg" id="ematt:565" target="_blank"><img alt="1.jpg" border="0" height="143" src="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/thum-f3cc1404336063.jpg" title="点击查看原图" width="650"/></a><br/>
+</span>
+</p>
+<p>
+	    EXP我就不给了，省的更多人刷洞。复习去了。
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1757">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/2b89da071fe19b6e42d82e8981ca42f1.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.jiqingmall.com/" target="_blank">肌情</a>
+<time datetime="2014年8月15日 16:11" itemprop="datePublished">
+                            2014 八月 15 16:11
+                        </time>
+<a href="javascript:reply_to('1757', '肌情')">回复</a>
+</p>
+<p class="comment-meta">解析的很不错</p>
+</div>
+</div>
+<div class="row" id="comment-1710">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/530777ddf6c92e2dd5c3b46d9ef18ef0.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://boke.tulongteam.com" target="_blank">屠龙</a>
+<time datetime="2014年7月6日 05:46" itemprop="datePublished">
+                            2014 七月 06 05:46
+                        </time>
+<a href="javascript:reply_to('1710', '屠龙')">回复</a>
+</p>
+<p class="comment-meta">文章分析的很详细。</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="29ac2ac540195b0145117424fb8a0c330d95a7bb"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/29ac2ac540195b0145117424fb8a0c330d95a7bb"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="320">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="hmmtaH21a4mTQ3ibnuw7TCjuMGJ34cw1PGHZYbegBRgiQIGqbL0RsglzVKcbNGlb"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./discuz7.2 faq.php 最新注入漏洞分析  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

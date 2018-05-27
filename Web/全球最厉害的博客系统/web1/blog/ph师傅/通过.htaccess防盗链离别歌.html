@@ -1,0 +1,299 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./通过.htaccess防盗链  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./通过.htaccess防盗链  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./通过.htaccess防盗链  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>通过.htaccess防盗链 | 离别歌</title>
+<link href="./通过.htaccess防盗链  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./通过.htaccess防盗链  离别歌/styles.css" rel="stylesheet"/>
+<link href="./通过.htaccess防盗链  离别歌/style.css" rel="stylesheet"/>
+<link href="./通过.htaccess防盗链  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./通过.htaccess防盗链  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./通过.htaccess防盗链  离别歌/jquery.min.js"></script>
+<link href="./通过.htaccess防盗链  离别歌/code.css" rel="stylesheet"/>
+<link href="./通过.htaccess防盗链  离别歌/button.css" rel="stylesheet"/>
+<link href="./通过.htaccess防盗链  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./通过.htaccess防盗链  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/htaccess.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/htaccess.html&amp;text=%E9%80%9A%E8%BF%87.htaccess%E9%98%B2%E7%9B%97%E9%93%BE"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/htaccess.html&amp;title=%E9%80%9A%E8%BF%87.htaccess%E9%98%B2%E7%9B%97%E9%93%BE"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/htaccess.html&amp;is_video=false&amp;description=%E9%80%9A%E8%BF%87.htaccess%E9%98%B2%E7%9B%97%E9%93%BE"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E9%80%9A%E8%BF%87.htaccess%E9%98%B2%E7%9B%97%E9%93%BE&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/htaccess.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/htaccess.html&amp;title=%E9%80%9A%E8%BF%87.htaccess%E9%98%B2%E7%9B%97%E9%93%BE"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/htaccess.html&amp;title=%E9%80%9A%E8%BF%87.htaccess%E9%98%B2%E7%9B%97%E9%93%BE"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/htaccess.html&amp;title=%E9%80%9A%E8%BF%87.htaccess%E9%98%B2%E7%9B%97%E9%93%BE"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/htaccess.html&amp;title=%E9%80%9A%E8%BF%87.htaccess%E9%98%B2%E7%9B%97%E9%93%BE"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/htaccess.html&amp;name=%E9%80%9A%E8%BF%87.htaccess%E9%98%B2%E7%9B%97%E9%93%BE&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">通过.htaccess防盗链</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2012年12月16日 22:38" itemprop="datePublished">
+                    2012 十二月 16 22:38
+                </time>
+</div>
+<div class="article-tag">
+            阅读：7958
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E9%98%B2%E7%9B%97%E9%93%BE">防盗链</a>,
+                
+                <a class="tag-link" href="/tag/htaccess">htaccess</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p><span style="font-size:14px;">    </span><span style="font-size:14px;">最近网上有人抱怨10G的流量莫名其妙就没了，因为没有防止图片盗链。我也在想，我的这个小站流量每个月也不过十多G，要是盗链的话也不能撑多久。而且我</span><span style="font-size:14px;">用的是</span><span style="font-size:14px;">DA面板，没有防盗链的设置。但因为服务器</span><span style="font-size:14px;">用的是Apache服务器，所以我可以方便地用.htaccess文件设置我的防盗链功能。</span></p>
+<p><span style="font-size:14px;">    下面的内容不是我的原创，</span><span style="font-size:14px;">希望也能帮助大家解决一些问题。</span></p>
+<h3><span style="font-size:14px;">Apache中的.htaccess文件</span></h3>
+<p><span style="font-size:14px;">    .htaccess文件是Apache中相当重要的配置文件，其格式为纯文本，它提供了针对目录改变配置的方法，通过在一个特定的文档目录中放置一个包含一个或多个指令的文件，以作用于此目录及其所有子目录。</span></p>
+<p><span style="font-size:14px;">    通过.htaccess文件，可以实现简单地很多在IIS中很繁琐甚至无法实现的功能，如密码保护、禁止显示目录列表、阻止/允许特定的IP地址、实现网址的301 重定向等等。</span></p>
+<p><span style="font-size:14px;">    正如上面所说，.htaccess文件将影响其所在的目录及其子目录，因此，如果我们要保护的内容（此处以防止图片盗链为例，即图片）位于网站内多个目录下，可以考虑将其放在根目录下；而如果图片有单独的子目录如“/images/”，则只需将其放置在该目录下（当然也可以放到根目录中）。</span></p>
+<p><span style="font-size:14px;">    需要注意的是，如果通过FTP方式将创建好的.htaccess上传到服务器上，传输模式应为ASCII而非Binary。上传到服务器后，应将其属性通过 CHMOD修改为644 或“RW-R–R–”，这样，可以保证服务器能够使用同时无法通过浏览器修改，当然，.htaccess的可读属性也存在一定的风险：攻击者可通过它找出您要保护的对象或认证文件位置——解决办法是将认证文件.htpasswd放到网站根目录之外，这样，便无法通过网络找到它了。</span></p>
+<h3><span style="font-size:14px;">使用.htaccess禁止盗链</span></h3>
+<p><span style="font-size:14px;">    通过.htaccess来防止网站的图片、压缩文件、或视频等非Html文件被盗链的方法相当简单，通过在该文件中加入几句命令即可保护我们宝贵的带宽。举个例子</span><span style="font-size:14px;">：</span></p>
+<div class="source" style="background-color:#c3d9ff;font-family:'[object HTMLOptionElement]', 'Consolas', 'Lucida Console', 'Courier New';color:#000000;"><span style="color:#007020;"><span style="font-size:14px;">RewriteEngine</span></span><span style="font-size:14px;"> </span><span style="color:#008000;font-weight:bold;"><span style="font-size:14px;">on</span></span><br>
+<span style="color:#007020;"><span style="font-size:14px;">RewriteCond</span></span><span style="font-size:14px;"> %{HTTP_REFERER} !^$ [NC]</span><br>
+<span style="color:#007020;"><span style="font-size:14px;">RewriteCond</span></span><span style="font-size:14px;"> %{HTTP_REFERER} !libiege.info [NC]</span><br/>
+<span style="color:#007020;"><span style="font-size:14px;">RewriteCond</span></span><span style="font-size:14px;"> %{HTTP_REFERER} !leavesongs.com [NC]</span><br/>
+<span style="color:#007020;"><span style="font-size:14px;">RewriteCond</span></span><span style="font-size:14px;"> %{HTTP_REFERER} !leavesongs.info [NC]</span><br/>
+<span style="color:#007020;"><span style="font-size:14px;">RewriteCond</span></span><span style="font-size:14px;"> %{HTTP_REFERER} !baidu.com [NC]</span><br/>
+<span style="color:#007020;"><span style="font-size:14px;">RewriteCond</span></span><span style="font-size:14px;"> %{HTTP_REFERER} !google.com.hk [NC]</span><br/>
+<span style="color:#007020;"><span style="font-size:14px;">RewriteCond</span></span><span style="font-size:14px;"> %{HTTP_REFERER} !google.com [NC]</span><br/>
+<span style="color:#007020;"><span style="font-size:14px;">RewriteRule</span></span><span style="font-size:14px;"> .*.(gif|jpg|png|bmp)$ http://leavesongs.com/other/no.jpg [R,NC,L]</span><br/>
+</br></br></div>
+<p></p>
+<p><span style="font-size:14px;">    简单的解释一下上述语句：</span></p>
+<p><strong><span style="font-size:14px;">1、RewriteCond %{HTTP_REFERER} !^$ [NC]</span></strong></p>
+<p><span style="font-size:14px;">    允许空“HTTP_REFERER”的访问，即允许用户在浏览器地址栏中直接输入图片地址时图片文件的显示。一般而言，这是可选的，不过，建议这么设置，如果强迫必须具有“HTTP_REFERER”才能访问，可能会带来某些问题，比如说在用户通过代理服务器访问时。</span></p>
+<p><strong><span style="font-size:14px;">2、RewriteCond %{HTTP_REFERER} !domain.com [NC]</span></strong></p>
+<p><span style="font-size:14px;">    设置允许访问的HTTP来源，包括我们的站点自身、Google、Baidu、Bloglines、Feedburner等。</span></p>
+<p><strong><span style="font-size:14px;">3、RewriteRule .*.(gif|jpg|png)$ </span></strong><strong><span style="font-size:14px;">http://leavesongs.com/no.png</span></strong><strong><span style="font-size:14px;"> [R,NC,L]</span></strong></p>
+<p><span style="font-size:14px;">    定义被盗链时替代的图片，让所有盗链 jpg、gif、png 等文件的网页，显示根目录下的 no.png 文件。注意：替换显示的图片不要放在设置防盗链的目录中，并且该图片文件体积越小越好。当然你也可以不设置替换图片，而是使用下面的语句即可：</span></p>
+<blockquote dir="ltr" style="margin-right:0px;">
+<p><span style="font-size:14px;">RewriteRule .*.(gif|jpg|png)$ - [F]</span></p>
+</blockquote>
+<p><strong><span style="font-size:14px;">4、说明一下其中的R、NC 和 L</span></strong><br/>
+<br/>
+<span style="font-size:14px;">    R 就是转向的意思</span><br/>
+<span style="font-size:14px;">    NC 指的是不区分大小写</span><br/>
+<span style="font-size:14px;">    L 的作用是指明本次转向到此结束，后续的转向不受先前判断语句的影响</span></p>
+<p><strong><span style="font-size:14px;">5、防止盗链的文件类型</span></strong></p>
+<p><span style="font-size:14px;">    上例中是 gif、jpg、png，而根据需要，可更改或添加其他文件类型，如rar、mov等，不同文件扩展名间使用“|”分割。</span></p>
+<p><span style="font-size:14px;">    这样的话，就可以基本做到简单的防止被盗链情况的发生，而且可以尽最大可能的减少服务器流量的无畏消耗，当然了，如果你不在意这点流量的话，那么可以不用考虑上述设置啦！</span></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1266">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./通过.htaccess防盗链  离别歌/ff042d9f1716c89d0620f4880c1c0925.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://we2.name" target="_blank">朵未</a>
+<time datetime="2012年12月22日 17:32" itemprop="datePublished">
+                            2012 十二月 22 17:32
+                        </time>
+<a href="javascript:reply_to('1266', '朵未')">回复</a>
+</p>
+<p class="comment-meta">防盗链后保险点，虽然小博客流量不大。<br/>不过订阅器阅读器那些就放行吧。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1268">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./通过.htaccess防盗链  离别歌/9f767c3f96e1bf3c8adf3290c23bce2f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">落沐萧萧</a>
+<time datetime="2012年12月24日 16:42" itemprop="datePublished">
+                            2012 十二月 24 16:42
+                        </time>
+<a href="javascript:reply_to('1268', '落沐萧萧')">回复</a>
+</p>
+<p class="comment-meta">@朵未：怎么放行呢</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1263">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./通过.htaccess防盗链  离别歌/11b4a1bac728c892d751e66081b6a60c.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">河南政府招商</a>
+<time datetime="2012年12月22日 14:21" itemprop="datePublished">
+                            2012 十二月 22 14:21
+                        </time>
+<a href="javascript:reply_to('1263', '河南政府招商')">回复</a>
+</p>
+<p class="comment-meta">嗯，必须防盗，再多的流量也不够他盗走的。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1265">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./通过.htaccess防盗链  离别歌/9f767c3f96e1bf3c8adf3290c23bce2f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">落沐萧萧</a>
+<time datetime="2012年12月22日 14:51" itemprop="datePublished">
+                            2012 十二月 22 14:51
+                        </time>
+<a href="javascript:reply_to('1265', '落沐萧萧')">回复</a>
+</p>
+<p class="comment-meta">@河南政府招商：嗯。没品的人太多。喜欢直接拿走别人的东西。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1260">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./通过.htaccess防盗链  离别歌/1a8085e79e49461c2e6474d8754e9b33.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">xinchen</a>
+<time datetime="2012年12月20日 12:56" itemprop="datePublished">
+                            2012 十二月 20 12:56
+                        </time>
+<a href="javascript:reply_to('1260', 'xinchen')">回复</a>
+</p>
+<p class="comment-meta">很好很强大，，，</p>
+</div>
+</div>
+<div class="row" id="comment-1259">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./通过.htaccess防盗链  离别歌/4e6513d931360211529fedfc9f63a5ea.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">万载县</a>
+<time datetime="2012年12月17日 13:00" itemprop="datePublished">
+                            2012 十二月 17 13:00
+                        </time>
+<a href="javascript:reply_to('1259', '万载县')">回复</a>
+</p>
+<p class="comment-meta">学习了</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="5646bd38c02f6d25262ef9f6d1e7bcd4ae7f6bc3"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./通过.htaccess防盗链  离别歌/5646bd38c02f6d25262ef9f6d1e7bcd4ae7f6bc3"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="210">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="5aHOrRBHotByudmsyfYANOJKkBiDAbk1Du2kflNWPgvXuSKHmwskmsLPtFLLjF9b"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./通过.htaccess防盗链  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./通过.htaccess防盗链  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

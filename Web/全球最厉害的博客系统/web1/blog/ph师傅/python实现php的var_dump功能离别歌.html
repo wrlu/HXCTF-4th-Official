@@ -1,0 +1,265 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./python 实现 php 的 var_dump 功能  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./python 实现 php 的 var_dump 功能  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./python 实现 php 的 var_dump 功能  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>python 实现 php 的 var_dump 功能 | 离别歌</title>
+<link href="./python 实现 php 的 var_dump 功能  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./python 实现 php 的 var_dump 功能  离别歌/styles.css" rel="stylesheet"/>
+<link href="./python 实现 php 的 var_dump 功能  离别歌/style.css" rel="stylesheet"/>
+<link href="./python 实现 php 的 var_dump 功能  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./python 实现 php 的 var_dump 功能  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./python 实现 php 的 var_dump 功能  离别歌/jquery.min.js"></script>
+<link href="./python 实现 php 的 var_dump 功能  离别歌/code.css" rel="stylesheet"/>
+<link href="./python 实现 php 的 var_dump 功能  离别歌/button.css" rel="stylesheet"/>
+<link href="./python 实现 php 的 var_dump 功能  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./python 实现 php 的 var_dump 功能  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PYTHON/python-var-dump.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PYTHON/python-var-dump.html&amp;text=python%20%E5%AE%9E%E7%8E%B0%20php%20%E7%9A%84%20var_dump%20%E5%8A%9F%E8%83%BD"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PYTHON/python-var-dump.html&amp;title=python%20%E5%AE%9E%E7%8E%B0%20php%20%E7%9A%84%20var_dump%20%E5%8A%9F%E8%83%BD"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PYTHON/python-var-dump.html&amp;is_video=false&amp;description=python%20%E5%AE%9E%E7%8E%B0%20php%20%E7%9A%84%20var_dump%20%E5%8A%9F%E8%83%BD"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=python%20%E5%AE%9E%E7%8E%B0%20php%20%E7%9A%84%20var_dump%20%E5%8A%9F%E8%83%BD&amp;body=Check out this article: https%3A//www.leavesongs.com/PYTHON/python-var-dump.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PYTHON/python-var-dump.html&amp;title=python%20%E5%AE%9E%E7%8E%B0%20php%20%E7%9A%84%20var_dump%20%E5%8A%9F%E8%83%BD"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PYTHON/python-var-dump.html&amp;title=python%20%E5%AE%9E%E7%8E%B0%20php%20%E7%9A%84%20var_dump%20%E5%8A%9F%E8%83%BD"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PYTHON/python-var-dump.html&amp;title=python%20%E5%AE%9E%E7%8E%B0%20php%20%E7%9A%84%20var_dump%20%E5%8A%9F%E8%83%BD"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PYTHON/python-var-dump.html&amp;title=python%20%E5%AE%9E%E7%8E%B0%20php%20%E7%9A%84%20var_dump%20%E5%8A%9F%E8%83%BD"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PYTHON/python-var-dump.html&amp;name=python%20%E5%AE%9E%E7%8E%B0%20php%20%E7%9A%84%20var_dump%20%E5%8A%9F%E8%83%BD&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">python 实现 php 的 var_dump 功能</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年5月20日 01:28" itemprop="datePublished">
+                    2014 五月 20 01:28
+                </time>
+</div>
+<div class="article-tag">
+            阅读：5231
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PYTHON">Python</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/var_dump">var_dump</a>,
+                
+                <a class="tag-link" href="/tag/python">python</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    最近在做python的web开发（原谅我的多变，好东西总想都学着。。。node.js也是），不过过程中总遇到些问题，不管是web.py还是django，开发起来确实没用php方便，毕竟存在的时间比较短，很多不完善的地方。
+</p>
+<p>
+	    比如我在调试php中最常用的函数，var_dump，在python里找不到合适的替代函数。php中var_dump是一个特别有用的函数，它可以输出任何变量的值，不管你是一个对象还是一个数组，或者只是一个数。它总能用友好的方式输出，我调试的时候经常会需要看某位置的变量信息，调用它就很方便：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201405/85b61400521167.jpg" id="ematt:531" target="_blank"><img alt="16.jpg" border="0" height="104" src="./python 实现 php 的 var_dump 功能  离别歌/85b61400521167.jpg" title="点击查看原图" width="365"/></a>
+</p>
+<p>
+	    但是开发python的时候就没有太好的替代方案。
+</p>
+<p>
+	    之前想到repr，但这个函数只是调用了对象中的__str__，和直接print obj没啥区别。print是打印它，而repr是将其作为值返回。如果对象所属的类没有定义__str__这个函数，那么返回的就会是难看的一串字符。
+</p>
+<p>
+	    后来又想到了vars 函数，vars函数是python的内建函数，专门用来输出一个对象的内部信息。但这个对象所属的类中必须有__dict__函数。一般的类都有这个dict，但像[]和{}等对象就不存在这个dict，这样调用vars函数就会抛出一个异常：
+</p>
+<p>
+<br>
+</br></p>
+<pre class="brush: bash;auto-links: false;">Traceback (most recent call last):
+  File "&lt;stdin&gt;", line 1, in &lt;module&gt;
+TypeError: vars() argument must have __dict__ attribute</pre>
+    所以后来几经寻找，找到一个个比较好，功能能够与var_dump类似的函数如下：
+<pre class="brush: python;auto-links: false;">def dump(obj):
+  '''return a printable representation of an object for debugging'''
+  newobj=obj
+  if '__dict__' in dir(obj):
+    newobj=obj.__dict__
+    if ' object at ' in str(obj) and not newobj.has_key('__type__'):
+      newobj['__type__']=str(obj)
+    for attr in newobj:
+      newobj[attr]=dump(newobj[attr])
+  return newobj</pre>
+    这是使用方式：
+<pre class="brush: python;auto-links: false;">class stdClass(object): pass
+obj=stdClass()
+obj.int=1
+obj.tup=(1,2,3,4)
+obj.dict={'a':1,'b':2, 'c':3, 'more':{'z':26,'y':25}}
+obj.list=[1,2,3,'a','b','c',[1,2,3,4]]
+obj.subObj=stdClass()
+obj.subObj.value='foobar'
+
+from pprint import pprint
+pprint(dump(obj))</pre>
+<p>
+	    最后输出是：
+</p>
+<p>
+	{'__type__': '&lt;__main__.stdClass object at 0x2b126000b890&gt;',<br>
+ 'dict': {'a': 1, 'c': 3, 'b': 2, 'more': {'y': 25, 'z': 26}},<br/>
+ 'int': 1,<br/>
+ 'list': [1, 2, 3, 'a', 'b', 'c', [1, 2, 3, 4]],<br/>
+ 'subObj': {'__type__': '&lt;__main__.stdClass object at 0x2b126000b8d0&gt;',<br/>
+            'value': 'foobar'},<br/>
+ 'tup': (1, 2, 3, 4)}    
+</br></p>
+<p>
+	    然后github有个开源的module，可以参考：<a href="https://github.com/sha256/python-var-dump" target="_blank">https://github.com/sha256/python-var-dump</a>
+</p>
+<p>
+	    说一下pprint这个函数，他是一个人性化输出的函数，会将要输出的内容用程序员喜欢的方式输出在屏幕上。参阅这篇文章比较好理解：<a href="http://www.crifan.com/python_module_pprint/" target="_blank">http://www.crifan.com/python_module_pprint/</a>
+</p>
+<p>
+<br/>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1734">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python 实现 php 的 var_dump 功能  离别歌/ecf0ec0abb53bd201dbf46e59c130b17.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://weisuo.org" target="_blank">c4bbage</a>
+<time datetime="2014年7月22日 09:13" itemprop="datePublished">
+                            2014 七月 22 09:13
+                        </time>
+<a href="javascript:reply_to('1734', 'c4bbage')">回复</a>
+</p>
+<p class="comment-meta">这个赞</p>
+</div>
+</div>
+<div class="row" id="comment-1637">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python 实现 php 的 var_dump 功能  离别歌/cc2827ec51c772de854813414416e971.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.yptk.cn/" target="_blank">云破天开</a>
+<time datetime="2014年5月25日 00:33" itemprop="datePublished">
+                            2014 五月 25 00:33
+                        </time>
+<a href="javascript:reply_to('1637', '云破天开')">回复</a>
+</p>
+<p class="comment-meta">技术宅还是文艺青年。</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="253264b08115adb85b6d27dc136ed6373cb5999b"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./python 实现 php 的 var_dump 功能  离别歌/253264b08115adb85b6d27dc136ed6373cb5999b"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="313">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="4zY4QIPZFOup8wZvH3CXbTsppBoFN5dZCTjAEc1e6BoO8bnKvk6HKxuuyFRNwz29"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./python 实现 php 的 var_dump 功能  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./python 实现 php 的 var_dump 功能  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,355 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./Pwnhub Web题Classroom题解与分析  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./Pwnhub Web题Classroom题解与分析  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./Pwnhub Web题Classroom题解与分析  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>Pwnhub Web题Classroom题解与分析 | 离别歌</title>
+<link href="./Pwnhub Web题Classroom题解与分析  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Pwnhub Web题Classroom题解与分析  离别歌/styles.css" rel="stylesheet"/>
+<link href="./Pwnhub Web题Classroom题解与分析  离别歌/style.css" rel="stylesheet"/>
+<link href="./Pwnhub Web题Classroom题解与分析  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./Pwnhub Web题Classroom题解与分析  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./Pwnhub Web题Classroom题解与分析  离别歌/jquery.min.js"></script>
+<link href="./Pwnhub Web题Classroom题解与分析  离别歌/code.css" rel="stylesheet"/>
+<link href="./Pwnhub Web题Classroom题解与分析  离别歌/button.css" rel="stylesheet"/>
+<link href="./Pwnhub Web题Classroom题解与分析  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./Pwnhub Web题Classroom题解与分析  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/pwnhub-web-classroom-django-sql-injection.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/pwnhub-web-classroom-django-sql-injection.html&amp;text=Pwnhub%20Web%E9%A2%98Classroom%E9%A2%98%E8%A7%A3%E4%B8%8E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/pwnhub-web-classroom-django-sql-injection.html&amp;title=Pwnhub%20Web%E9%A2%98Classroom%E9%A2%98%E8%A7%A3%E4%B8%8E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/pwnhub-web-classroom-django-sql-injection.html&amp;is_video=false&amp;description=Pwnhub%20Web%E9%A2%98Classroom%E9%A2%98%E8%A7%A3%E4%B8%8E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=Pwnhub%20Web%E9%A2%98Classroom%E9%A2%98%E8%A7%A3%E4%B8%8E%E5%88%86%E6%9E%90&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/pwnhub-web-classroom-django-sql-injection.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/pwnhub-web-classroom-django-sql-injection.html&amp;title=Pwnhub%20Web%E9%A2%98Classroom%E9%A2%98%E8%A7%A3%E4%B8%8E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/pwnhub-web-classroom-django-sql-injection.html&amp;title=Pwnhub%20Web%E9%A2%98Classroom%E9%A2%98%E8%A7%A3%E4%B8%8E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/pwnhub-web-classroom-django-sql-injection.html&amp;title=Pwnhub%20Web%E9%A2%98Classroom%E9%A2%98%E8%A7%A3%E4%B8%8E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/pwnhub-web-classroom-django-sql-injection.html&amp;title=Pwnhub%20Web%E9%A2%98Classroom%E9%A2%98%E8%A7%A3%E4%B8%8E%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/pwnhub-web-classroom-django-sql-injection.html&amp;name=Pwnhub%20Web%E9%A2%98Classroom%E9%A2%98%E8%A7%A3%E4%B8%8E%E5%88%86%E6%9E%90&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">Pwnhub Web题Classroom题解与分析</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2016年12月6日 00:53" itemprop="datePublished">
+                    2016 十二月 06 00:53
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4689
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/pwnhub">pwnhub</a>,
+                
+                <a class="tag-link" href="/tag/django">django</a>,
+                
+                <a class="tag-link" href="/tag/ctf">ctf</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>Pwnhub 是一个面向安全研究人员的CTF对战平台，更官方一点的解释就是一个以各种安全技术为内容的竞赛平台。经过我们团队数个月的酝酿终于上线了。上线伊始，我出了一道Web题目，名字叫Classroom。</p>
+<h2 id="0x01"><a class="toclink" href="#0x01">0x01 寻找源码</a></h2>
+<p>打开目标（ <a href="http://54.223.46.206:8003/">http://54.223.46.206:8003/</a> ）可以看到，一个登录页面。据我长期观察，50%的CTF题目打开都是一个登陆页面，而其中又有60%的可以用各种方式拿到源码。</p>
+<p>虽然上面两个百分比是我编的，但这种题目找到源码的概率比较大。先打开burp看看数据包：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/95191480964092.jpg"><img alt="14809540240989.jpg" src="./Pwnhub Web题Classroom题解与分析  离别歌/thum-95191480964092.jpg" title="点击查看原图"/></a></p>
+<p>一共四个包，第一个包是一个302跳转，跳转到第二个包，也就是登录页面；第二个包就是登录页面，其中包含了一个ico（图标）和一个js；第三个包是js；第四个包是ico。</p>
+<p>上图是js的数据包，观察一下，发现了两个信息：</p>
+<ol>
+<li>Server: gunicorn/19.6.0 Django/1.10.3 CPython/3.5.2</li>
+<li>Content-Type: text/plain</li>
+</ol>
+<p>第一个Server头表明了这个网站是用Python 3.5.2开发，基于Django 1.10.3框架，使用gunicorn 19.6.0部署。</p>
+<p>第二个Content-Type头很不一般，值为text/plain表明了它并不是一个js文件。</p>
+<p>可他明明就是js文件呀？</p>
+<p>在正常环境下（nginx或apache等中间件），js的Content-Type应该是application/javascript，再不济也应该是text/javascript，怎么会是text/plain？</p>
+<p>可以猜测这里的静态文件并非自动分发的静态文件，可能是用户自己编写的静态文件逻辑。参考一下这个漏洞 <a href="https://www.leavesongs.com/PENETRATION/arbitrary-files-read-via-static-requests.html">https://www.leavesongs.com/PENETRATION/arbitrary-files-read-via-static-requests.html</a> 再想到Django自身也出现过的漏洞 <a href="https://bugzilla.redhat.com/show_bug.cgi?id=CVE-2009-2659">https://bugzilla.redhat.com/show_bug.cgi?id=CVE-2009-2659</a> ，于是测试一下：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/0e801480964097.jpg"><img alt="14809549122078.jpg" src="./Pwnhub Web题Classroom题解与分析  离别歌/thum-0e801480964097.jpg" title="点击查看原图"/></a></p>
+<p>果然是存在任意文件读取漏洞的。</p>
+<h2 id="_1"><a class="toclink" href="#_1">文件读取能做什么事</a></h2>
+<p>Linux系统中，一切都是文件。所以说，文件读取漏洞将能发挥很大作用。</p>
+<p>如../../proc/self/fd/5 请求发现是log日志的文件描述符：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/a5ec1480964105.jpg"><img alt="14809599777259.jpg" src="./Pwnhub Web题Classroom题解与分析  离别歌/thum-a5ec1480964105.jpg" title="点击查看原图"/></a></p>
+<p>而正常情况下日志文件是不可读的（我将其权限设置为root:700），所以这也是一个读取日志文件的方法。如果你后续思路断了，可以尝试读读日志文件，看看别人的思路。</p>
+<p>不过这不是正解。这里找到文件读取漏洞，很显然下一步就是看看敏感文件和源代码，中间步骤我就不多说了，读取源代码的时候发现不能读取.py等后缀的文件。</p>
+<p>这里自然会想到.pyc文件，.pyc是python的字节码文件，python3.5.2的字节码文件在<code>__pycache__/*.cpython-35.pyc</code>中。然后看一下Django的文件结构：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/54dd1480964107.jpg"><img alt="14809612445787.jpg" src="./Pwnhub Web题Classroom题解与分析  离别歌/thum-54dd1480964107.jpg" title="点击查看原图"/></a></p>
+<p>其中，Django的逻辑代码全部在views.py里，数据库模型在models.py里。那么，下载这两个文件的字节码文件即可：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/4ae81480964110.jpg"><img alt="14809613059891.jpg" src="./Pwnhub Web题Classroom题解与分析  离别歌/thum-4ae81480964110.jpg" title="点击查看原图"/></a></p>
+<p>在burp里选中那一大段二进制内容，右键save to file即可保存到文件。</p>
+<p>使用 <a href="https://github.com/rocky/python-uncompyle6">https://github.com/rocky/python-uncompyle6</a> 可以反编译python3的字节码文件，得到如下结果：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/a4ba1480964114.jpg"><img alt="14809617099099.jpg" src="./Pwnhub Web题Classroom题解与分析  离别歌/thum-a4ba1480964114.jpg" title="点击查看原图"/></a></p>
+<h2 id="python"><a class="toclink" href="#python">Python代码审计</a></h2>
+<p>views.py代码不多，大概看一下最关键的登录位置的源码：</p>
+<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">LoginView</span><span class="p">(</span><span class="n">JsonResponseMixin</span><span class="p">,</span> <span class="n">generic</span><span class="o">.</span><span class="n">TemplateView</span><span class="p">):</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s1">'login.html'</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+        <span class="n">stu</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Student</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">stu</span> <span class="ow">or</span> <span class="n">stu</span><span class="o">.</span><span class="n">passkey</span> <span class="o">!=</span> <span class="n">data</span><span class="p">[</span><span class="s1">'passkey'</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jsondata</span><span class="p">(</span><span class="s1">'账号或密码错误'</span><span class="p">,</span> <span class="mi">403</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">'is_login'</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jsondata</span><span class="p">(</span><span class="s1">'登录成功'</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</pre></div>
+<p>可见，这里将从POST Body中获取的内容用json解码以后，直接传给了django orm的filter方法：<code>models.Student.objects.filter(**data).first()</code></p>
+<p>这里造成一个Django ORM的注入，这个注入和ThinkPHP的《<a href="http://bugs.leavesongs.com/PHP/ThinkPHP%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E4%B8%8D%E5%90%88%E7%90%86%E6%9E%81%E6%98%93%E5%AF%BC%E8%87%B4SQL%E6%B3%A8%E5%85%A5/">ThinkPHP架构设计不合理极易导致SQL注入</a>》类似，也和Mongodb的注入《<a href="http://cb.drops.wiki/wooyun/drops/tips-3939.html">Mongodb注入攻击</a>》类似。</p>
+<p>（关于ORM注入，我在我的小密圈“代码审计”中有文章详细说明，感兴趣的可以去我的圈子转转，圈子二维码附在文章后）</p>
+<p>这个注入的核心就是，我们可以控制filter方法的参数名，而Django中，SQL语句的符号全部是通过参数名后面的一些关键词实现的。举个最简单的例子，查询“在User表里查询age大于30的所有用户”，这里可以写作<code>User.objects.filter(age__gt=30).all()</code>。</p>
+<p>所以，这里我们控制了参数名，就等于可以控制一些SQL语句的符号了。本题中，主要可以用到如下一些符号：</p>
+<div class="codehilite"><pre><span></span>name__contains='abc' -&gt; name LIKE '%abc%' -&gt; 包含关键词abc的name
+name__startswith='abc' -&gt; name LIKE 'abc%' -&gt; 以关键词abc开头的name
+name__regex='abc' -&gt; name REGEXP '^abc$' -&gt; 匹配正则表达式^abc$的name
+</pre></div>
+<p>这里，我们可以传入<code>{"passkey__contains":"a"}</code>，只要密码里包含‘a’这个字母就可以匹配成功，造成注入。</p>
+<p>但我们看到后面，后面还有一个判断<code>stu.passkey != data['passkey']</code>，这个比较自然是绕不过去的，怎么办？</p>
+<p>虽然绕不过去，但考虑一下，如果数据包中不含有“passkey”这个键的时候，此时Python是会抛出一个KeyError异常的，在HTTP中就体现为status_code==500：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/69f71480964116.jpg"><img alt="14809629196681.jpg" src="./Pwnhub Web题Classroom题解与分析  离别歌/thum-69f71480964116.jpg" title="点击查看原图"/></a></p>
+<p>而如果密码中不包含c这个字符，那么语句<code>stu = models.Student.objects.filter(**data).first()</code>是查询不到任何结果的，下面的if语句<code>if not stu or stu.passkey != data['passkey']:</code>也就不会再执行到<code>data['passkey']</code>的位置，此时返回403：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/2e3e1480964117.jpg"><img alt="14809629427606.jpg" src="./Pwnhub Web题Classroom题解与分析  离别歌/thum-2e3e1480964117.jpg" title="点击查看原图"/></a></p>
+<p>所以，我们可以通过contains语句，一个字符一个字符将我们需要的字段跑出来。通过判断状态码，我们就可以构造一个具有“盲注”特点的POC。</p>
+<h2 id="flag"><a class="toclink" href="#flag">Flag藏在哪里？</a></h2>
+<p>这个题最开始其实是有个小坑的。熟悉SQLite的同学应该知道，SQLite数据库的like查询是大小写不敏感的。而上述的contains语句，实际上最后执行的是<code>passkey like '%xxx%'</code>，此时如果flag中混搭大小写字母，contains操作符是分辨不了的。</p>
+<p>所以，这里最建议使用的方法是<a href="https://docs.djangoproject.com/en/1.10/ref/models/querysets/#regex">regex操作符</a>，使用方法和contains类似。通过regex正则操作符，甚至还可以判断出目标的长度、字符范围，但实际上本题中是不太需要的。</p>
+<p>通过一番折腾，很多选手发现注入出来的三个passkey并没有什么卵用，登录进去以后也没有任何可疑信息。</p>
+<p>此时就应该再读读源码了，看看models.py内容：</p>
+<div class="codehilite"><pre><span></span><span class="c1"># uncompyle6 version 2.9.7</span>
+<span class="c1"># Python bytecode 3.5 (3350)</span>
+<span class="c1"># Decompiled from: Python 3.5.2 (default, Oct 11 2016, 05:05:28)</span>
+<span class="c1"># [GCC 4.2.1 Compatible Apple LLVM 8.0.0 (clang-800.0.38)]</span>
+<span class="c1"># Embedded file name: /www/students/models.py</span>
+<span class="c1"># Compiled at: 2016-11-26 03:04:46</span>
+<span class="c1"># Size of source mod 2**32: 1033 bytes</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">Student</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="s1">'姓名'</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">no</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="s1">'学号'</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">passkey</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="s1">'密码'</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+    <span class="n">group</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s1">'Group'</span><span class="p">,</span> <span class="n">verbose_name</span><span class="o">=</span><span class="s1">'所属班级'</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="s1">'学生'</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="n">verbose_name</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+<span class="k">class</span> <span class="nc">Group</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="s1">'班级名'</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+    <span class="n">information</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="s1">'介绍'</span><span class="p">)</span>
+    <span class="n">secret</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="s1">'内部信息'</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>
+    <span class="n">created_time</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="s1">'创建时间'</span><span class="p">,</span> <span class="n">auto_now_add</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="s1">'班级'</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="n">verbose_name</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+<span class="c1"># okay decompiling /Users/shiyu/tmp/models.pyc</span>
+</pre></div>
+<p>也比较简单，只有两个表。其中，Group表有一个secret字段非常可疑，所以我们可以试试通过注入来查查这个字段中的信息。</p>
+<p>这里就涉及到Django的另一个知识：关联表查询。我们看到Student表中有一个ForeignKey字段，指向的就是Group表。</p>
+<p>其实和操作符非常类似，关联表查询也是使用两个下划线来分隔字段：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/8faf1480964118.jpg"><img alt="14809638179069.jpg" src="./Pwnhub Web题Classroom题解与分析  离别歌/thum-8faf1480964118.jpg" title="点击查看原图"/></a></p>
+<p>上述请求返回500，说明Group表的secret字段中包含c这个字符。剩下的就和之前的操作一样了，不多说。</p>
+<p>因为知道flag的格式是pwnhub{flag:xxx}，所以只需要简单写个脚本，使用<code>{"group__secret__regex":"pwnhub{flag:.*}"}</code>一个个字符将<code>.*</code>的内容跑出来即可：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/d14a1480964427.jpg"><img alt="14809639399168.jpg" src="./Pwnhub Web题Classroom题解与分析  离别歌/thum-d14a1480964427.jpg" title="点击查看原图"/></a></p>
+<p>“代码审计”圈子二维码（微信）：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/74381480991909.jpeg"><img alt="WechatIMG8.jpeg" src="./Pwnhub Web题Classroom题解与分析  离别歌/thum-74381480991909.jpeg" title="点击查看原图"/></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2490">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Pwnhub Web题Classroom题解与分析  离别歌/a7b1d43674843bde55167072e0781197.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.mtzxgf.com/consult.html" target="_blank">企业咨询</a>
+<time datetime="2016年12月13日 15:38" itemprop="datePublished">
+                            2016 十二月 13 15:38
+                        </time>
+<a href="javascript:reply_to('2490', '企业咨询')">回复</a>
+</p>
+<p class="comment-meta">感觉懂技术的都好牛掰，只能粗浅的看懂一些</p>
+</div>
+</div>
+<div class="row" id="comment-2487">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Pwnhub Web题Classroom题解与分析  离别歌/4807729285a0280215f28825f1eb8bee.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.wupco.cn" target="_blank">wupco</a>
+<time datetime="2016年12月6日 14:20" itemprop="datePublished">
+                            2016 十二月 06 14:20
+                        </time>
+<a href="javascript:reply_to('2487', 'wupco')">回复</a>
+</p>
+<p class="comment-meta">不得不膜一波，思路很清新，之前只知道Django的authorkey泄露的洞，所以根本想不到可以跨目录读取文件。很期待下一次，打开思路。</p>
+</div>
+</div>
+<div class="row" id="comment-2486">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Pwnhub Web题Classroom题解与分析  离别歌/bc1b8a97f5941c89d69ef85c21a27607.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://blog.neargle.com" target="_blank">neargle</a>
+<time datetime="2016年12月6日 10:09" itemprop="datePublished">
+                            2016 十二月 06 10:09
+                        </time>
+<a href="javascript:reply_to('2486', 'neargle')">回复</a>
+</p>
+<p class="comment-meta">这道题我也琢磨了一段时间，想到师傅出的题，应该是有洞能搞到源码的。虽然很在意Django/1.10.3 CPython/3.5.2这个头，但实在知识储备不足。<br>在没有得到源码的情况下，看到Vuejs的post包是json，倒是大概猜到有这个注入。但是还是没弄出来。<br>后来把太多时间花在看vuejs的文档上了。<br/>学到了很多姿势。感谢。</br></br></p>
+</div>
+</div>
+<div class="row" id="comment-2485">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Pwnhub Web题Classroom题解与分析  离别歌/246aff44096dd0f3d361a2d97d236c47.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://x.x" target="_blank">FH</a>
+<time datetime="2016年12月6日 09:37" itemprop="datePublished">
+                            2016 十二月 06 09:37
+                        </time>
+<a href="javascript:reply_to('2485', 'FH')">回复</a>
+</p>
+<p class="comment-meta">那你这个概率蒙的好啊</p>
+</div>
+</div>
+<div class="row" id="comment-2484">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Pwnhub Web题Classroom题解与分析  离别歌/3126418b0ea61ef36cda3c4d1f05a445.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">baiyi</a>
+<time datetime="2016年12月6日 09:17" itemprop="datePublished">
+                            2016 十二月 06 09:17
+                        </time>
+<a href="javascript:reply_to('2484', 'baiyi')">回复</a>
+</p>
+<p class="comment-meta">圈子二维码呢....</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="61dd6c8da6b4990e12ac1de595820fb4e40a53ee"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./Pwnhub Web题Classroom题解与分析  离别歌/61dd6c8da6b4990e12ac1de595820fb4e40a53ee"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="398">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="ZR7smV7jYlTvL0aYUAZbiKXmPNb3buNbxbsYapjyp8NULFydIRtVRoZrYREbUYCl"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./Pwnhub Web题Classroom题解与分析  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./Pwnhub Web题Classroom题解与分析  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

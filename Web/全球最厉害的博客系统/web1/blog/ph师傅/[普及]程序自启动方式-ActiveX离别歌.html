@@ -1,0 +1,395 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./[普及]程序自启动方式 - ActiveX  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./[普及]程序自启动方式 - ActiveX  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./[普及]程序自启动方式 - ActiveX  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>[普及]程序自启动方式 - ActiveX | 离别歌</title>
+<link href="./[普及]程序自启动方式 - ActiveX  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./[普及]程序自启动方式 - ActiveX  离别歌/styles.css" rel="stylesheet"/>
+<link href="./[普及]程序自启动方式 - ActiveX  离别歌/style.css" rel="stylesheet"/>
+<link href="./[普及]程序自启动方式 - ActiveX  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./[普及]程序自启动方式 - ActiveX  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./[普及]程序自启动方式 - ActiveX  离别歌/jquery.min.js"></script>
+<link href="./[普及]程序自启动方式 - ActiveX  离别歌/code.css" rel="stylesheet"/>
+<link href="./[普及]程序自启动方式 - ActiveX  离别歌/button.css" rel="stylesheet"/>
+<link href="./[普及]程序自启动方式 - ActiveX  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./[普及]程序自启动方式 - ActiveX  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/C/ActiveX-Auto-Start.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/C/ActiveX-Auto-Start.html&amp;text=%5B%E6%99%AE%E5%8F%8A%5D%E7%A8%8B%E5%BA%8F%E8%87%AA%E5%90%AF%E5%8A%A8%E6%96%B9%E5%BC%8F%20-%20ActiveX"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/C/ActiveX-Auto-Start.html&amp;title=%5B%E6%99%AE%E5%8F%8A%5D%E7%A8%8B%E5%BA%8F%E8%87%AA%E5%90%AF%E5%8A%A8%E6%96%B9%E5%BC%8F%20-%20ActiveX"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/C/ActiveX-Auto-Start.html&amp;is_video=false&amp;description=%5B%E6%99%AE%E5%8F%8A%5D%E7%A8%8B%E5%BA%8F%E8%87%AA%E5%90%AF%E5%8A%A8%E6%96%B9%E5%BC%8F%20-%20ActiveX"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%5B%E6%99%AE%E5%8F%8A%5D%E7%A8%8B%E5%BA%8F%E8%87%AA%E5%90%AF%E5%8A%A8%E6%96%B9%E5%BC%8F%20-%20ActiveX&amp;body=Check out this article: https%3A//www.leavesongs.com/C/ActiveX-Auto-Start.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/C/ActiveX-Auto-Start.html&amp;title=%5B%E6%99%AE%E5%8F%8A%5D%E7%A8%8B%E5%BA%8F%E8%87%AA%E5%90%AF%E5%8A%A8%E6%96%B9%E5%BC%8F%20-%20ActiveX"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/C/ActiveX-Auto-Start.html&amp;title=%5B%E6%99%AE%E5%8F%8A%5D%E7%A8%8B%E5%BA%8F%E8%87%AA%E5%90%AF%E5%8A%A8%E6%96%B9%E5%BC%8F%20-%20ActiveX"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/C/ActiveX-Auto-Start.html&amp;title=%5B%E6%99%AE%E5%8F%8A%5D%E7%A8%8B%E5%BA%8F%E8%87%AA%E5%90%AF%E5%8A%A8%E6%96%B9%E5%BC%8F%20-%20ActiveX"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/C/ActiveX-Auto-Start.html&amp;title=%5B%E6%99%AE%E5%8F%8A%5D%E7%A8%8B%E5%BA%8F%E8%87%AA%E5%90%AF%E5%8A%A8%E6%96%B9%E5%BC%8F%20-%20ActiveX"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/C/ActiveX-Auto-Start.html&amp;name=%5B%E6%99%AE%E5%8F%8A%5D%E7%A8%8B%E5%BA%8F%E8%87%AA%E5%90%AF%E5%8A%A8%E6%96%B9%E5%BC%8F%20-%20ActiveX&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">[普及]程序自启动方式 - ActiveX</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年8月30日 23:45" itemprop="datePublished">
+                    2013 八月 30 23:45
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4502
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/C">C/C++</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/ActiveX">ActiveX</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    每次都是一个假期不开VC，可能都是在学校做的多了，回家了要换个口味。
+</p>
+<p>
+	    已经在学校呆了好几天，明天还要补考，想着想着就泪流满面了。正逢着大一新生到来的时间，我也想到了去年自己刚坐在这所学校的课堂里时，那份激动与不安。也是那时候，我写了我人生第一个Widnows程序，也就此跟VC结下了不解之缘。
+</p>
+<p>
+	    当时写的东西是“编程实现自启动”。当时还是懵懂初开，查了不少资料，写了一个基于修改注册表实现的自启动。实现自启动的方式还有很多，当时<span>再就没有继续深入了</span>。
+</p>
+<p>
+	    于是，在这一周年之际，我来继续完成我当年没有完成的任务。    
+</p>
+<hr/>
+<p>
+	    这次先来个低烈度的，ActiveX自启动，基本也是通过修改注册表某个键值来达到自启动的效果。
+</p>
+<p>
+	    拿来开刀的是类似这个键：HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Active Setup\\Installed Components\\{C9B4C1CD-B018-4511-B0A1-5476DBF70821}
+</p>
+<p>
+	    我们win+R 输入regedit启动注册表，找到该键。
+</p>
+<p>
+	    呵呵，当你找的时候可能就发现，你注册表中并没有这个键。其实<span>{C9B4C1CD-B018-4511-B0A1-5476DBF70821}这串字符串是可以更改的，随便更换几个字符，只要是16进制允许的字符都可以。（格式xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx）</span>
+</p>
+<p>
+	    在该键下增加一个子键，键名为“StubPath”，键值为我们待启动的程序。
+</p>
+<p>
+	    还有一点要注意的，我们系统在第一次ActiveX自启动完成后，会生成一个键：HKEY_CURRENT_USER<span>\\SOFTWARE\\Microsoft\\Active Setup\\Installed Components\\{C9B4C1CD-B018-4511-B0A1-5476DBF70821}</span>
+</p>
+<p>
+<span>    注意哟，它在根节点<span>HKEY_CURRENT_USER下，名字和之前那个相同。当该键存在时，下次自启动就不会加载这个ActiveX了。</span><br>
+</br></span>
+</p>
+<p>
+<span>    所以我们编程时候要注意，每次启动起来后，删除掉该键，这样下次才能继续自启动。<br>
+</br></span>
+</p>
+<p>
+<span>    废话不多说，我写了一个小小的示例代码。 </span>
+</p>
+<pre class="brush: cpp;auto-links: false;">int WINAPI WinMain(
+  HINSTANCE hInstance,      // handle to current instance
+  HINSTANCE hPrevInstance,  // handle to previous instance
+  LPSTR lpCmdLine,          // command line
+  int nCmdShow              // show state
+)
+{
+	HKEY hKey;
+	DWORD dwDpt = REG_OPENED_EXISTING_KEY;
+	long lRet = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Active Setup\\Installed Components\\{C9B4C1CD-B018-4511-B0A1-5476DBF70821}",
+		REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, &amp;hKey);
+	if (ERROR_SUCCESS != lRet)
+	{
+		char SelfFile[MAX_PATH];
+		char SystemPath[MAX_PATH + 20];
+		GetSystemDirectory(SystemPath, sizeof(SystemPath));
+		strcat(SystemPath, "\\activexrun.exe");
+		GetModuleFileName(NULL, SelfFile, MAX_PATH);
+		CopyFile(SelfFile, SystemPath, FALSE);
+		CreateStringReg(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Active Setup\\Installed Components\\{C9B4C1CD-B018-4511-B0A1-5476DBF70821}",
+			"StubPath", SystemPath);
+		return 0;		
+	}
+	MyCode();
+	return 0;
+}</pre>
+<p>
+<br/>
+</p>
+<p>
+	    首先使用RegOpenKeyEx函数打开HKEY_LOCAL_MACHINE下的键，如果打开成功，返回ERROR_SUCCESS。
+</p>
+<p>
+	    这里判断其打开成功或失败的原因是，如果打开成功，说明有该键不存在，进一步说明这个程序是第一次自启动，这时我们就执行if语句中的内容。
+</p>
+<p>
+	    if中代码作用，就是把本程序拷贝进系统目录，并新建该键，以备下次启动。
+</p>
+<p>
+	    其中有一个函数，CreateStringReg是我自己定义的。这个函数在这里就是创建一个键名为StubPath的子键，其值是我们需要自启动的程序的绝对地址。
+</p>
+<pre class="brush: cpp;auto-links: false;">//修改或创建字符串类型的键值
+void CreateStringReg(HKEY hRoot, char *szSubkey, char * ValueName, char *Data)
+{
+	HKEY hKey; 
+	long lRet = RegCreateKeyEx(hRoot, szSubkey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &amp;hKey, NULL);
+	if (ERROR_SUCCESS != lRet)
+	{
+		//TRACE("error on RegCreateKeyEx: %s\n", szSubkey);
+		return ;
+	}
+	//修改或创建注册表键值
+	lRet = RegSetValueEx(hKey, ValueName, 0, REG_SZ, (BYTE *)Data, strlen(Data));
+	if (ERROR_SUCCESS != lRet)
+	{
+		//TRACE("error on RegSetValueEx: %s\n", ValueName);
+		return ;
+	}
+	RegCloseKey(hKey);
+}</pre>
+<p>
+<br/>
+</p>
+<p>
+	    最后，我们的代码在MyCode函数中。这个其实都可以扩展了，我们可以开启一个线程，或者把代码注入到其他进程中。
+</p>
+<p>
+	    我的MyCode()函数很简单：
+</p>
+<pre class="brush: cpp;auto-links: false;">void MyCode(){
+	WinExec("C:\\windows\\system32\\calc.exe", SW_SHOWDEFAULT);
+	WinExec("C:\\windows\\system32\\start.bat", SW_HIDE);
+}</pre>
+    第一行是打开一个计算器。
+<p>
+<br/>
+</p>
+<p>
+	    第二行很重要，是我写的一个批处理。我之前说到了，第一次ActiveX自启动成功后，会在<span><span>HKEY_CURRENT_USER生成一个键：</span><span>\\SOFTWARE\\Microsoft\\Active Setup\\Installed Components\\{C9B4C1CD-B018-4511-B0A1-5476DBF70821}。这个键直接导致下次不会再次自启动，所以我们每次自启动的时候要删除该键。</span></span>
+</p>
+<p>
+<span><span>    start.bat: </span></span>
+</p>
+<pre class="brush: bash;auto-links: false;">reg delete "HKEY_CURRENT_USER\Software\Microsoft\Active Setup\Installed Components\{C9B4C1CD-B018-4511-B0A1-5476DBF70821}" /f</pre>
+<p>
+<br/>
+</p>
+<p>
+<span><span>    原本我是预备在这个程序中删除该键的，但是试了很多次都没有成功。我估计原因是这样，第一次程序自启动成功后，在程序结束运行的时候系统才新建这个键。所以我程序中删除该键的时候，该键其实并不存在。所以，我只好调用一个外部程序(.bat)，来删除这个讨厌的键。<br/>
+</span></span>
+</p>
+<p>
+<span><span>    这只是一个简单的例子，可以删除这个键的方法还有很多，比如我们把代码注入explorer进程中，利用explorer来删除这个键。</span></span>
+</p>
+<hr/>
+<p>
+<span><span>    <span>最后说一个小技巧，如何缩小可执行程序的体积。</span></span></span>
+</p>
+<p>
+<span><span>    以前我一直抵触用VC6写程序，过了很久我才明白很多木马用VC6的原因：缩小体积。<br/>
+</span></span>
+</p>
+<p>
+<span><span>    VS2010中，在编译的时候会加入很多乱七八糟的编译选项，导致生成物体积庞大。而VC6顾虑没有这么多，所以生成的可执行文件体积小。gh0st为什么把客户端和服务端分开编写的原因我也顿悟了，被控端放在VC6下编译，而主控端没有大小要求就放在VS2010下编译。<br/>
+</span></span>
+</p>
+<p>
+<span><span>    还有一个小文件Tiny.h，大家把他include进你的程序最上面，它能极大地减小编译完成后的体积： </span></span>
+</p>
+<pre class="brush: cpp;auto-links: false;">/***************
+* Leavesongs.com
+* By phith0n
+****************/
+#ifdef NDEBUG 
+#pragma optimize("gsy", on)
+
+#pragma comment(linker, "/RELEASE")
+#ifdef _MERGE_RDATA_
+#pragma comment(linker, "/merge:.rdata=.data")
+#endif
+#pragma comment(linker, "/merge:.text=.data")
+#pragma comment(linker, "/merge:.reloc=.data")
+#if _MSC_VER &gt;= 1000
+#endif
+#endif
+
+#pragma comment(linker, "/ENTRY:WinMain")
+#pragma comment(linker, "/MERGE:.rdata=.data")
+#pragma comment(linker, "/MERGE:.text=.data")
+#pragma comment(lib, "msvcrt.lib")
+#if (_MSC_VER &lt; 1300)
+	#pragma comment(linker, "/IGNORE:4078")
+	#pragma comment(linker, "/OPT:NOWIN98")
+#endif
+#define WIN32_LEAN_AND_MEAN</pre>
+    可能有些地方还需要根据情况修改，倒数第9行的WinMain是入口点函数，大家要酌情修改。<br/>
+<p>
+<br/>
+</p>
+<p>
+<span><span>    在没有include&lt;tiny.h&gt;时，编译好的程序有16k左右，而包含了该头后，程序只有1.50k了。<br/>
+</span></span>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1428">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[普及]程序自启动方式 - ActiveX  离别歌/cde36bb720b5c7f69c7f27750b5632d7.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">该昵称已屏蔽</a>
+<time datetime="2013年9月17日 22:53" itemprop="datePublished">
+                            2013 九月 17 22:53
+                        </time>
+<a href="javascript:reply_to('1428', '该昵称已屏蔽')">回复</a>
+</p>
+<p class="comment-meta">该评论已屏蔽</p>
+</div>
+</div>
+<div class="row" id="comment-1421">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[普及]程序自启动方式 - ActiveX  离别歌/e09e8a9d15932044c44d9711363f75ab.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://127.0.0.1" target="_blank">该昵称已屏蔽</a>
+<time datetime="2013年9月6日 14:26" itemprop="datePublished">
+                            2013 九月 06 14:26
+                        </time>
+<a href="javascript:reply_to('1421', '该昵称已屏蔽')">回复</a>
+</p>
+<p class="comment-meta">该评论已屏蔽1</p>
+</div>
+</div>
+<div class="row" id="comment-1420">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./[普及]程序自启动方式 - ActiveX  离别歌/9e9fcadcc6af7d0f045d43ce323fe620.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">该昵称已屏蔽</a>
+<time datetime="2013年9月5日 02:49" itemprop="datePublished">
+                            2013 九月 05 02:49
+                        </time>
+<a href="javascript:reply_to('1420', '该昵称已屏蔽')">回复</a>
+</p>
+<p class="comment-meta">该评论已屏蔽</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="feb7233378ddc29c53bdaaf7e862d09fce52263e"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./[普及]程序自启动方式 - ActiveX  离别歌/feb7233378ddc29c53bdaaf7e862d09fce52263e"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="278">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="LRTVny1UoY8l56E7ERdRue0fDR8ZZ9ftjberb2d9PL2K5L2ms8HB3S2kMVB7ID4D"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./[普及]程序自启动方式 - ActiveX  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./[普及]程序自启动方式 - ActiveX  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

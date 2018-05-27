@@ -1,0 +1,304 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./【重要】emlog防御CSRF小插件  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./【重要】emlog防御CSRF小插件  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./【重要】emlog防御CSRF小插件  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>【重要】emlog防御CSRF小插件 | 离别歌</title>
+<link href="./【重要】emlog防御CSRF小插件  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./【重要】emlog防御CSRF小插件  离别歌/styles.css" rel="stylesheet"/>
+<link href="./【重要】emlog防御CSRF小插件  离别歌/style.css" rel="stylesheet"/>
+<link href="./【重要】emlog防御CSRF小插件  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./【重要】emlog防御CSRF小插件  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./【重要】emlog防御CSRF小插件  离别歌/jquery.min.js"></script>
+<link href="./【重要】emlog防御CSRF小插件  离别歌/code.css" rel="stylesheet"/>
+<link href="./【重要】emlog防御CSRF小插件  离别歌/button.css" rel="stylesheet"/>
+<link href="./【重要】emlog防御CSRF小插件  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./【重要】emlog防御CSRF小插件  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/SHARE/emlog-defence-csrf-plugin.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/SHARE/emlog-defence-csrf-plugin.html&amp;text=%E3%80%90%E9%87%8D%E8%A6%81%E3%80%91emlog%E9%98%B2%E5%BE%A1CSRF%E5%B0%8F%E6%8F%92%E4%BB%B6"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/SHARE/emlog-defence-csrf-plugin.html&amp;title=%E3%80%90%E9%87%8D%E8%A6%81%E3%80%91emlog%E9%98%B2%E5%BE%A1CSRF%E5%B0%8F%E6%8F%92%E4%BB%B6"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/SHARE/emlog-defence-csrf-plugin.html&amp;is_video=false&amp;description=%E3%80%90%E9%87%8D%E8%A6%81%E3%80%91emlog%E9%98%B2%E5%BE%A1CSRF%E5%B0%8F%E6%8F%92%E4%BB%B6"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E3%80%90%E9%87%8D%E8%A6%81%E3%80%91emlog%E9%98%B2%E5%BE%A1CSRF%E5%B0%8F%E6%8F%92%E4%BB%B6&amp;body=Check out this article: https%3A//www.leavesongs.com/SHARE/emlog-defence-csrf-plugin.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/SHARE/emlog-defence-csrf-plugin.html&amp;title=%E3%80%90%E9%87%8D%E8%A6%81%E3%80%91emlog%E9%98%B2%E5%BE%A1CSRF%E5%B0%8F%E6%8F%92%E4%BB%B6"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/SHARE/emlog-defence-csrf-plugin.html&amp;title=%E3%80%90%E9%87%8D%E8%A6%81%E3%80%91emlog%E9%98%B2%E5%BE%A1CSRF%E5%B0%8F%E6%8F%92%E4%BB%B6"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/SHARE/emlog-defence-csrf-plugin.html&amp;title=%E3%80%90%E9%87%8D%E8%A6%81%E3%80%91emlog%E9%98%B2%E5%BE%A1CSRF%E5%B0%8F%E6%8F%92%E4%BB%B6"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/SHARE/emlog-defence-csrf-plugin.html&amp;title=%E3%80%90%E9%87%8D%E8%A6%81%E3%80%91emlog%E9%98%B2%E5%BE%A1CSRF%E5%B0%8F%E6%8F%92%E4%BB%B6"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/SHARE/emlog-defence-csrf-plugin.html&amp;name=%E3%80%90%E9%87%8D%E8%A6%81%E3%80%91emlog%E9%98%B2%E5%BE%A1CSRF%E5%B0%8F%E6%8F%92%E4%BB%B6&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">【重要】emlog防御CSRF小插件</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年2月16日 21:06" itemprop="datePublished">
+                    2014 二月 16 21:06
+                </time>
+</div>
+<div class="article-tag">
+            阅读：5617
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/SHARE">资源分享</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/CSRF%E6%BC%8F%E6%B4%9E">CSRF漏洞</a>,
+                
+                <a class="tag-link" href="/tag/emlog%E6%8F%92%E4%BB%B6">emlog插件</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+<span style="font-size:14px;">    emlog始终有个致命的问题，后台基本没有防御CSRF的措施，导致很简单的一个CSRF即可秒杀整个博客。</span>
+</p>
+<p>
+<span style="font-size:14px;">    在此环境下我决定自己开发一个能防御部分csrf攻击的小插件，当然要真正杜绝CSRF的话还是的修改后台的内核代码。在我们用户不能修改或不会修改内核代码的情况下，使用本插件还是能起到一定的防御作用。</span>
+</p>
+<p>
+<span style="font-size:14px;">    界面借用了智者牛的站点安全保护插件：</span><span style="font-size:14px;">http://zhizhe8.net/?post=85730。</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><span style="font-size:14px;">哈哈，不要吐槽我：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201402/664a1392559030.jpg" id="ematt:456" target="_blank"><img alt="005.jpg" border="0" height="348" src="./【重要】emlog防御CSRF小插件  离别歌/thum-664a1392559030.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    插件原理比较简单，敏感页面（GET方式传值的）与含有POST数据的页面，判断referer。如果referer中的host和blog的host相同，则放行。</span>
+</p>
+<p>
+<span style="font-size:14px;">    插件有几个小tip：</span>
+</p>
+<p>
+<span style="font-size:14px;">    1.有的同学说referer可以伪造，确实可以伪造，但在CSRF中我们是没法伪造的（除非有浏览器漏洞？）</span>
+</p>
+<p>
+<span style="font-size:14px;">    2.emlog后台插件也可以通过CSRF漏洞来禁用，所以本插件考虑到这个情况对GET中的敏感操作进行了特殊防御</span>
+</p>
+<p>
+<span style="font-size:14px;">    3.插件只防御了一些敏感操作和POST传值的操作，不能保证万无一失，还是希望开发组重视该问题，在内核代码中使用token才是比较保险的方法</span>
+</p>
+<p>
+<span style="font-size:14px;">    4.如果你的网站还存在分站或子目录放有其他网站，攻击者可以在子目录下上传html来进行CSRF攻击，该种方式无法使用referer防御</span>
+</p>
+<p>
+<br>
+</br></p>
+<p>
+<span style="font-size:14px;">    插件下载在附件中。</span>
+</p>
+<p>
+<span style="font-size:14px;">    附件：<span class="attachment"><a href="https://www.leavesongs.com/content/uploadfile/201405/8f1a1400574199.zip" target="_blank">csrf_defence.zip</a></span><br>
+</br></span>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1729">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./【重要】emlog防御CSRF小插件  离别歌/0f9f0b3a34902bb09c5286aba3cbc6ee.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://beikeit.com" target="_blank">贝壳iT</a>
+<time datetime="2014年7月21日 07:44" itemprop="datePublished">
+                            2014 七月 21 07:44
+                        </time>
+<a href="javascript:reply_to('1729', '贝壳iT')">回复</a>
+</p>
+<p class="comment-meta">这个插件开启后无法使用附件批量上传，也无法使用EM相册上传！<br/>感谢作者!</p>
+</div>
+</div>
+<div class="row" id="comment-1714">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./【重要】emlog防御CSRF小插件  离别歌/9f9f47246fb5e0cde72ff1c879e629c6.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://zhizhe8.net" target="_blank">无名智者</a>
+<time datetime="2014年7月10日 03:39" itemprop="datePublished">
+                            2014 七月 10 03:39
+                        </time>
+<a href="javascript:reply_to('1714', '无名智者')">回复</a>
+</p>
+<p class="comment-meta">前排围观大神博客</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1716">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./【重要】emlog防御CSRF小插件  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年7月10日 06:36" itemprop="datePublished">
+                            2014 七月 10 06:36
+                        </time>
+<a href="javascript:reply_to('1716', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@无名智者：别跟他们一般见识，圈子太乱，洁身自好</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1631">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./【重要】emlog防御CSRF小插件  离别歌/e3e347cfe78a55ce9b0de3766cb12d28.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">狂想写作本</a>
+<time datetime="2014年5月20日 09:53" itemprop="datePublished">
+                            2014 五月 20 09:53
+                        </time>
+<a href="javascript:reply_to('1631', '狂想写作本')">回复</a>
+</p>
+<p class="comment-meta">楼主，链接之后：附件不存在啊！</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1632">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./【重要】emlog防御CSRF小插件  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年5月20日 16:18" itemprop="datePublished">
+                            2014 五月 20 16:18
+                        </time>
+<a href="javascript:reply_to('1632', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@狂想写作本：百度网盘最近失效了，我改一下吧。不过现在emlog5.3以后就自带防范CSRF机制了，不需要再使用插件~</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1546">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./【重要】emlog防御CSRF小插件  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">趣购网</a>
+<time datetime="2014年2月17日 12:01" itemprop="datePublished">
+                            2014 二月 17 12:01
+                        </time>
+<a href="javascript:reply_to('1546', '趣购网')">回复</a>
+</p>
+<p class="comment-meta">插件不错，挺实用的</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="5023d80f6c4cf8f54ff100f45a14fb470f61b19b"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./【重要】emlog防御CSRF小插件  离别歌/5023d80f6c4cf8f54ff100f45a14fb470f61b19b"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="290">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="pYw5oFlCrajr1Br986LdaSB3nIfxb2dNXiRBc9xRSXdQ1gPoWnfXJwD8wMIFUw2X"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./【重要】emlog防御CSRF小插件  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./【重要】emlog防御CSRF小插件  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

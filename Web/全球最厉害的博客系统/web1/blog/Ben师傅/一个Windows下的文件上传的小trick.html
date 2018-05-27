@@ -1,0 +1,650 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./一个Windows下的文件上传的小trick/font-awesome.min.css" rel="stylesheet"/>
+<link href="./一个Windows下的文件上传的小trick/screen.css" rel="stylesheet"/>
+<link href="./一个Windows下的文件上传的小trick/prism_okaidia.css" rel="stylesheet"/>
+<link href="./一个Windows下的文件上传的小trick/bendawang.css" rel="stylesheet"/>
+<script src="./一个Windows下的文件上传的小trick/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./一个Windows下的文件上传的小trick/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./一个Windows下的文件上传的小trick/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="windowstrick">一个Windows下的文件上传的小trick</h1>
+<h2 id="trick">小trick</h2>
+<p style="max-width:100%;height:auto;">发现这个的起因是昨天在重命名毕设的时候摁错了键发现了这个。</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./一个Windows下的文件上传的小trick/591b97eeab64414ab60007e9.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">虽然确实是常识性的问题，但是突然想到如果上传的时候，服务器就用我们上传的文件名的话,其中包含这几个特殊符号会怎么办呢？</p>
+<p style="max-width:100%;height:auto;">事不宜迟直接写个测试看看呢：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+if(isset($_POST[&amp;apos;submit&amp;apos;]) &amp;&amp; !empty($_FILES[&amp;apos;file&amp;apos;][&amp;apos;tmp_name&amp;apos;]))
+{
+    $tmp_name = $_FILES[&amp;apos;file&amp;apos;][&amp;apos;tmp_name&amp;apos;];
+    $name=$_FILES["file"]["name"];
+    if(!is_uploaded_file($tmp_name))
+    {
+        echo "GET OUT!";
+        exit;
+    }
+    @move_uploaded_file($tmp_name, "upload/".$name);
+    echo "&lt;script&gt;alert(&amp;apos;success!&amp;apos;);&lt;/script&gt;";
+}
+?&gt;
+
+&lt;form action="" method="POST" enctype="multipart/form-data"&gt;
+    &lt;input type="file" name="file"&gt;
+    &lt;input type="submit" name="submit" value="submit"&gt;
+&lt;/form&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后测试：
+<br/><img alt="" data-action="zoom" src="./一个Windows下的文件上传的小trick/591b99d9ab64414d2200082d.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">把上述红框之内的反斜杠依次替换成了这几个特殊符号。</p>
+<p style="max-width:100%;height:auto;">发现正反斜杠上传之后能够成功并且得到的文件名是bdw2，而冒号也能能成功，得到的文件名是bdw1，也就是说冒号达成了截断的效果，我们再修改一下服务端代码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+if(isset($_POST[&amp;apos;submit&amp;apos;]) &amp;&amp; !empty($_FILES[&amp;apos;file&amp;apos;][&amp;apos;tmp_name&amp;apos;]))
+{
+    $tmp_name = $_FILES[&amp;apos;file&amp;apos;][&amp;apos;tmp_name&amp;apos;];
+    $name=$_FILES["file"]["name"];
+    if(!is_uploaded_file($tmp_name))
+    {
+        echo "GET OUT!";
+        exit;
+    }
+    @move_uploaded_file($tmp_name, "upload/".$name.".txt"); //常见的防止上传恶意文件的手段
+    echo "&lt;script&gt;alert(&amp;apos;success!&amp;apos;);&lt;/script&gt;";
+}
+?&gt;
+
+&lt;form action="" method="POST" enctype="multipart/form-data"&gt;
+    &lt;input type="file" name="file"&gt;
+    &lt;input type="submit" name="submit" value="submit"&gt;
+&lt;/form&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">再上传一次：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./一个Windows下的文件上传的小trick/591bb309ab64414d22000c13.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">成功截断了后面的txt，本来很高兴来着，但是后来仔细一看这个上传成功的php文件发现什么都没有。。。</p>
+<p style="max-width:100%;height:auto;">里面是空的。。。</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./一个Windows下的文件上传的小trick/591bb309ab64414d22000c12.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">所以说其实并没有什么大的鸟用。。不过也说不定能和别的东西结合起来利用。。。比如某个地方可以修改传的文件内容什么的。。。</p>
+<h2 id="">成因分析</h2>
+<p style="max-width:100%;height:auto;">为了让这篇文章显得不那么单调，所以我打算看看源码找找问题所在。
+首先用<code style="max-width:100%;height:auto;">grep</code>定位到<code style="max-width:100%;height:auto;">move_uploaded_file</code>的位置在<code style="max-width:100%;height:auto;">ext/standard/basic_functions.c</code>的5790行，这里我在代码里面加上注释帮助理解，代码如下：</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">PHP_FUNCTION(move_uploaded_file)
+{
+    char *path, *new_path;
+    size_t path_len, new_path_len;
+    zend_bool successful = 0;
+
+#ifndef PHP_WIN32
+    int oldmask; int ret;
+#endif
+
+    if (!SG(rfc1867_uploaded_files)) { 
+        RETURN_FALSE;
+    }
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "sp", &amp;path, &amp;path_len, &amp;new_path, &amp;new_path_len) == FAILURE) {
+        return;
+    }
+
+    if (!zend_hash_str_exists(SG(rfc1867_uploaded_files), path, path_len)) {
+        RETURN_FALSE;
+    }
+
+    if (php_check_open_basedir(new_path)) {
+        RETURN_FALSE;
+    }
+
+    if (VCWD_RENAME(path, new_path) == 0) {
+        successful = 1;
+#ifndef PHP_WIN32
+        oldmask = umask(077);
+        umask(oldmask);
+
+        ret = VCWD_CHMOD(new_path, 0666 &amp; ~oldmask);
+
+        if (ret == -1) {
+            php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+        }
+#endif
+    } else if (php_copy_file_ex(path, new_path, STREAM_DISABLE_OPEN_BASEDIR) == SUCCESS) {
+        VCWD_UNLINK(path);
+        successful = 1;
+    }
+
+    if (successful) {
+        zend_hash_str_del(SG(rfc1867_uploaded_files), path, path_len);
+    } else {
+        php_error_docref(NULL, E_WARNING, "Unable to move &amp;apos;%s&amp;apos; to &amp;apos;%s&amp;apos;", path, new_path);
+    }
+
+    RETURN_BOOL(successful);
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">逐个来看，先看第一个</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">    if (!SG(rfc1867_uploaded_files)) { 
+        RETURN_FALSE;
+    }
+</code></pre>
+<p style="max-width:100%;height:auto;">SG宏的作用是从全局的<code style="max-width:100%;height:auto;">_sapi_globals_struct</code>中获取属性值，这个结构体是PHP中最关键的几个结构体之一，定义了会使用到的 HTTP Request 属性，<code style="max-width:100%;height:auto;">SG(rfc1867_uploaded_files)</code>的意思就是从这个结构体中获取其中的<code style="max-width:100%;height:auto;">rfc1867_uploaded_files</code>属性的值，而该属性保存了当前PHP脚本运行过程中由系统和PHP产生的有关文件上传的变量和内容。如果存在，就说明指定的文件名的确是本次上传的，否则为否。</p>
+<p style="max-width:100%;height:auto;">再往下看：</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">if (zend_parse_parameters(ZEND_NUM_ARGS(), "sp", &amp;path, &amp;path_len, &amp;new_path, &amp;new_path_len) == FAILURE) {
+        return;
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">这个<code style="max-width:100%;height:auto;">zend_parse_parameters</code>函数在php内核里面是个出现频率相当高的函数，尤其是几乎所有的php内置函数都要用到这个函数，因为它主要负责读取用户从参数堆栈传递来参数，并将其适当地转换后放入局部C语言变量。如果用户传递的参数个数有误或类型不可被转换，函数会发出一个错误信息，并返回 FAILURE。简单的说就是一个参数转换传递的中间函数。</p>
+<p style="max-width:100%;height:auto;">继续往下：</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">if (!zend_hash_str_exists(SG(rfc1867_uploaded_files), path, path_len)) {
+        RETURN_FALSE;
+    }
+</code></pre>
+<p style="max-width:100%;height:auto;">这个就是判断path是否在<code style="max-width:100%;height:auto;">rfc1867_uploaded_files</code>之中，如果存在说明指定的文件名的确是本次上传的，否则返回失败。</p>
+<p style="max-width:100%;height:auto;">继续往下：</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">    if (php_check_open_basedir(new_path)) {
+        RETURN_FALSE;
+    }
+</code></pre>
+<p style="max-width:100%;height:auto;">判断新的路径是否存在，不存在就返回失败。</p>
+<p style="max-width:100%;height:auto;">最关键的地方：</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">if (VCWD_RENAME(path, new_path) == 0) {
+    ...
+    ...
+    ...
+    ...
+    ...
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">这就是关键的重命名加移动函数，至于后面的一堆善后操作大家可以自己去看。这个<code style="max-width:100%;height:auto;">VCWD_RENAME</code>函数在WIN32下是被定义为如下：</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">#define VCWD_RENAME(oldname, newname) php_win32_ioutil_rename(oldname, newname)
+</code></pre>
+<p style="max-width:100%;height:auto;">再继续往下深入<code style="max-width:100%;height:auto;">php_win32_ioutil_rename</code>函数：</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">__forceinline static int php_win32_ioutil_rename(const char *oldnamea, const char *newnamea)
+{/*{{{*/
+    wchar_t *oldnamew;
+    wchar_t *newnamew;
+    int ret;
+    DWORD err = 0;
+
+    oldnamew = php_win32_ioutil_any_to_w(oldnamea);
+    if (!oldnamew) {
+        SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+        return -1;
+    }
+    PHP_WIN32_IOUTIL_CHECK_PATH_W(oldnamew, -1, 1)
+
+    newnamew = php_win32_ioutil_any_to_w(newnamea);
+    if (!newnamew) {
+        free(oldnamew);
+        SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+        return -1;
+    } else if (!PHP_WIN32_IOUTIL_PATH_IS_OK_W(newnamew, wcslen(newnamew))) {
+        free(oldnamew);
+        free(newnamew);
+        SET_ERRNO_FROM_WIN32_CODE(ERROR_ACCESS_DENIED);
+        return -1;
+    }
+
+    ret = php_win32_ioutil_rename_w(oldnamew, newnamew);
+    err = GetLastError();
+
+    free(oldnamew);
+    free(newnamew);
+
+    if (0 &gt; ret) {
+        SET_ERRNO_FROM_WIN32_CODE(err);
+    }
+
+    return ret;
+}/*}}}*/
+</code></pre>
+<p style="max-width:100%;height:auto;">首先是</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">oldnamew = php_win32_ioutil_any_to_w(oldnamea);
+</code></pre>
+<p style="max-width:100%;height:auto;">这个主要功能是把字符型的oldname转换成宽字节型，下面的newnamew一样的，就不多说，然后加了一些错误处理和判断，这里跳过，我们直接往下看到最关键的重命名加移动函数<code style="max-width:100%;height:auto;">php_win32_ioutil_rename_w</code>，
+在继续跟进：</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname)
+{/*{{{*/
+    int ret = 0;
+    DWORD err = 0;
+
+    PHP_WIN32_IOUTIL_CHECK_PATH_W(oldname, -1, 0)
+    PHP_WIN32_IOUTIL_CHECK_PATH_W(newname, -1, 0)
+
+
+    if (!MoveFileExW(oldname, newname, MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED)) {
+        err = GetLastError();
+        ret = -1;
+        SET_ERRNO_FROM_WIN32_CODE(err);
+    }
+
+    return ret;
+}/*}}}*/
+</code></pre>
+<p style="max-width:100%;height:auto;">先判断下两个是不是都是宽字节型的，因为之前的转换如果没出错的话这里就没有问题，然后看到调用了的关键函数<code style="max-width:100%;height:auto;">MoveFileExW</code>，这是win的一个API函数，于是我就没有深入分析了，应该就是这个函数的产生的问题了。有兴趣大家可以自己写来试试，这个函数应该是在<code style="max-width:100%;height:auto;">windows.h</code>里面被定义的。</p>
+<h2 id="-1">后续补充</h2>
+<p style="max-width:100%;height:auto;">后来我又在windows下试了其他几个文件操作的函数，首先是<code style="max-width:100%;height:auto;">file_put_contents</code>，发现这个也存在冒号截断问题，因而同理，<code style="max-width:100%;height:auto;">fopen,fwrite,fclose</code>同样具备有截断效果。
+但是由于无法直接写入内容的原因，还是没有太大实际的用途，不过如果对于CTF比赛的话也可以和其他地方结合作为一个点来出题吧。。。大概 。。。。XD。。。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./一个Windows下的文件上传的小trick/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="windowstrick">一个Windows下的文件上传的小trick</h1>
+<h2 id="trick">小trick</h2>
+<p style="max-width:100%;height:auto;">发现这个的起因是昨天在重命名毕设的时候摁错了键发现了这个。</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./一个Windows下的文件上传的小trick/591b97eeab64414ab60007e9.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">虽然确实是常识性的问题，但是突然想到如果上传的时候，服务器就用我们上传的文件名的话,其中包含这几个特殊符号会怎么办呢？</p>
+<p style="max-width:100%;height:auto;">事不宜迟直接写个测试看看呢：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+if(isset($_POST[&amp;apos;submit&amp;apos;]) &amp;&amp; !empty($_FILES[&amp;apos;file&amp;apos;][&amp;apos;tmp_name&amp;apos;]))
+{
+    $tmp_name = $_FILES[&amp;apos;file&amp;apos;][&amp;apos;tmp_name&amp;apos;];
+    $name=$_FILES["file"]["name"];
+    if(!is_uploaded_file($tmp_name))
+    {
+        echo "GET OUT!";
+        exit;
+    }
+    @move_uploaded_file($tmp_name, "upload/".$name);
+    echo "&lt;script&gt;alert(&amp;apos;success!&amp;apos;);&lt;/script&gt;";
+}
+?&gt;
+
+&lt;form action="" method="POST" enctype="multipart/form-data"&gt;
+    &lt;input type="file" name="file"&gt;
+    &lt;input type="submit" name="submit" value="submit"&gt;
+&lt;/form&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后测试：
+<br/><img alt="" data-action="zoom" src="./一个Windows下的文件上传的小trick/591b99d9ab64414d2200082d.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">把上述红框之内的反斜杠依次替换成了这几个特殊符号。</p>
+<p style="max-width:100%;height:auto;">发现正反斜杠上传之后能够成功并且得到的文件名是bdw2，而冒号也能能成功，得到的文件名是bdw1，也就是说冒号达成了截断的效果，我们再修改一下服务端代码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+if(isset($_POST[&amp;apos;submit&amp;apos;]) &amp;&amp; !empty($_FILES[&amp;apos;file&amp;apos;][&amp;apos;tmp_name&amp;apos;]))
+{
+    $tmp_name = $_FILES[&amp;apos;file&amp;apos;][&amp;apos;tmp_name&amp;apos;];
+    $name=$_FILES["file"]["name"];
+    if(!is_uploaded_file($tmp_name))
+    {
+        echo "GET OUT!";
+        exit;
+    }
+    @move_uploaded_file($tmp_name, "upload/".$name.".txt"); //常见的防止上传恶意文件的手段
+    echo "&lt;script&gt;alert(&amp;apos;success!&amp;apos;);&lt;/script&gt;";
+}
+?&gt;
+
+&lt;form action="" method="POST" enctype="multipart/form-data"&gt;
+    &lt;input type="file" name="file"&gt;
+    &lt;input type="submit" name="submit" value="submit"&gt;
+&lt;/form&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">再上传一次：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./uploads/./一个Windows下的文件上传的小trick_files/591bb309ab64414d22000c13.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">成功截断了后面的txt，本来很高兴来着，但是后来仔细一看这个上传成功的php文件发现什么都没有。。。</p>
+<p style="max-width:100%;height:auto;">里面是空的。。。</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./一个Windows下的文件上传的小trick/591bb309ab64414d22000c12.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">所以说其实并没有什么大的鸟用。。不过也说不定能和别的东西结合起来利用。。。比如某个地方可以修改传的文件内容什么的。。。</p>
+<h2 id="">成因分析</h2>
+<p style="max-width:100%;height:auto;">为了让这篇文章显得不那么单调，所以我打算看看源码找找问题所在。
+首先用<code style="max-width:100%;height:auto;">grep</code>定位到<code style="max-width:100%;height:auto;">move_uploaded_file</code>的位置在<code style="max-width:100%;height:auto;">ext/standard/basic_functions.c</code>的5790行，这里我在代码里面加上注释帮助理解，代码如下：</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">PHP_FUNCTION(move_uploaded_file)
+{
+    char *path, *new_path;
+    size_t path_len, new_path_len;
+    zend_bool successful = 0;
+
+#ifndef PHP_WIN32
+    int oldmask; int ret;
+#endif
+
+    if (!SG(rfc1867_uploaded_files)) { 
+        RETURN_FALSE;
+    }
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "sp", &amp;path, &amp;path_len, &amp;new_path, &amp;new_path_len) == FAILURE) {
+        return;
+    }
+
+    if (!zend_hash_str_exists(SG(rfc1867_uploaded_files), path, path_len)) {
+        RETURN_FALSE;
+    }
+
+    if (php_check_open_basedir(new_path)) {
+        RETURN_FALSE;
+    }
+
+    if (VCWD_RENAME(path, new_path) == 0) {
+        successful = 1;
+#ifndef PHP_WIN32
+        oldmask = umask(077);
+        umask(oldmask);
+
+        ret = VCWD_CHMOD(new_path, 0666 &amp; ~oldmask);
+
+        if (ret == -1) {
+            php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+        }
+#endif
+    } else if (php_copy_file_ex(path, new_path, STREAM_DISABLE_OPEN_BASEDIR) == SUCCESS) {
+        VCWD_UNLINK(path);
+        successful = 1;
+    }
+
+    if (successful) {
+        zend_hash_str_del(SG(rfc1867_uploaded_files), path, path_len);
+    } else {
+        php_error_docref(NULL, E_WARNING, "Unable to move &amp;apos;%s&amp;apos; to &amp;apos;%s&amp;apos;", path, new_path);
+    }
+
+    RETURN_BOOL(successful);
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">逐个来看，先看第一个</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">    if (!SG(rfc1867_uploaded_files)) { 
+        RETURN_FALSE;
+    }
+</code></pre>
+<p style="max-width:100%;height:auto;">SG宏的作用是从全局的<code style="max-width:100%;height:auto;">_sapi_globals_struct</code>中获取属性值，这个结构体是PHP中最关键的几个结构体之一，定义了会使用到的 HTTP Request 属性，<code style="max-width:100%;height:auto;">SG(rfc1867_uploaded_files)</code>的意思就是从这个结构体中获取其中的<code style="max-width:100%;height:auto;">rfc1867_uploaded_files</code>属性的值，而该属性保存了当前PHP脚本运行过程中由系统和PHP产生的有关文件上传的变量和内容。如果存在，就说明指定的文件名的确是本次上传的，否则为否。</p>
+<p style="max-width:100%;height:auto;">再往下看：</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">if (zend_parse_parameters(ZEND_NUM_ARGS(), "sp", &amp;path, &amp;path_len, &amp;new_path, &amp;new_path_len) == FAILURE) {
+        return;
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">这个<code style="max-width:100%;height:auto;">zend_parse_parameters</code>函数在php内核里面是个出现频率相当高的函数，尤其是几乎所有的php内置函数都要用到这个函数，因为它主要负责读取用户从参数堆栈传递来参数，并将其适当地转换后放入局部C语言变量。如果用户传递的参数个数有误或类型不可被转换，函数会发出一个错误信息，并返回 FAILURE。简单的说就是一个参数转换传递的中间函数。</p>
+<p style="max-width:100%;height:auto;">继续往下：</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">if (!zend_hash_str_exists(SG(rfc1867_uploaded_files), path, path_len)) {
+        RETURN_FALSE;
+    }
+</code></pre>
+<p style="max-width:100%;height:auto;">这个就是判断path是否在<code style="max-width:100%;height:auto;">rfc1867_uploaded_files</code>之中，如果存在说明指定的文件名的确是本次上传的，否则返回失败。</p>
+<p style="max-width:100%;height:auto;">继续往下：</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">    if (php_check_open_basedir(new_path)) {
+        RETURN_FALSE;
+    }
+</code></pre>
+<p style="max-width:100%;height:auto;">判断新的路径是否存在，不存在就返回失败。</p>
+<p style="max-width:100%;height:auto;">最关键的地方：</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">if (VCWD_RENAME(path, new_path) == 0) {
+    ...
+    ...
+    ...
+    ...
+    ...
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">这就是关键的重命名加移动函数，至于后面的一堆善后操作大家可以自己去看。这个<code style="max-width:100%;height:auto;">VCWD_RENAME</code>函数在WIN32下是被定义为如下：</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">#define VCWD_RENAME(oldname, newname) php_win32_ioutil_rename(oldname, newname)
+</code></pre>
+<p style="max-width:100%;height:auto;">再继续往下深入<code style="max-width:100%;height:auto;">php_win32_ioutil_rename</code>函数：</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">__forceinline static int php_win32_ioutil_rename(const char *oldnamea, const char *newnamea)
+{/*{{{*/
+    wchar_t *oldnamew;
+    wchar_t *newnamew;
+    int ret;
+    DWORD err = 0;
+
+    oldnamew = php_win32_ioutil_any_to_w(oldnamea);
+    if (!oldnamew) {
+        SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+        return -1;
+    }
+    PHP_WIN32_IOUTIL_CHECK_PATH_W(oldnamew, -1, 1)
+
+    newnamew = php_win32_ioutil_any_to_w(newnamea);
+    if (!newnamew) {
+        free(oldnamew);
+        SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+        return -1;
+    } else if (!PHP_WIN32_IOUTIL_PATH_IS_OK_W(newnamew, wcslen(newnamew))) {
+        free(oldnamew);
+        free(newnamew);
+        SET_ERRNO_FROM_WIN32_CODE(ERROR_ACCESS_DENIED);
+        return -1;
+    }
+
+    ret = php_win32_ioutil_rename_w(oldnamew, newnamew);
+    err = GetLastError();
+
+    free(oldnamew);
+    free(newnamew);
+
+    if (0 &gt; ret) {
+        SET_ERRNO_FROM_WIN32_CODE(err);
+    }
+
+    return ret;
+}/*}}}*/
+</code></pre>
+<p style="max-width:100%;height:auto;">首先是</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">oldnamew = php_win32_ioutil_any_to_w(oldnamea);
+</code></pre>
+<p style="max-width:100%;height:auto;">这个主要功能是把字符型的oldname转换成宽字节型，下面的newnamew一样的，就不多说，然后加了一些错误处理和判断，这里跳过，我们直接往下看到最关键的重命名加移动函数<code style="max-width:100%;height:auto;">php_win32_ioutil_rename_w</code>，
+在继续跟进：</p>
+<pre><code class="c language-c" style="max-width:100%;height:auto;">PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname)
+{/*{{{*/
+    int ret = 0;
+    DWORD err = 0;
+
+    PHP_WIN32_IOUTIL_CHECK_PATH_W(oldname, -1, 0)
+    PHP_WIN32_IOUTIL_CHECK_PATH_W(newname, -1, 0)
+
+
+    if (!MoveFileExW(oldname, newname, MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED)) {
+        err = GetLastError();
+        ret = -1;
+        SET_ERRNO_FROM_WIN32_CODE(err);
+    }
+
+    return ret;
+}/*}}}*/
+</code></pre>
+<p style="max-width:100%;height:auto;">先判断下两个是不是都是宽字节型的，因为之前的转换如果没出错的话这里就没有问题，然后看到调用了的关键函数<code style="max-width:100%;height:auto;">MoveFileExW</code>，这是win的一个API函数，于是我就没有深入分析了，应该就是这个函数的产生的问题了。有兴趣大家可以自己写来试试，这个函数应该是在<code style="max-width:100%;height:auto;">windows.h</code>里面被定义的。</p>
+<h2 id="-1">后续补充</h2>
+<p style="max-width:100%;height:auto;">后来我又在windows下试了其他几个文件操作的函数，首先是<code style="max-width:100%;height:auto;">file_put_contents</code>，发现这个也存在冒号截断问题，因而同理，<code style="max-width:100%;height:auto;">fopen,fwrite,fclose</code>同样具备有截断效果。
+但是由于无法直接写入内容的原因，还是没有太大实际的用途，不过如果对于CTF比赛的话也可以和其他地方结合作为一个点来出题吧。。。大概 。。。。XD。。。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./一个Windows下的文件上传的小trick/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./一个Windows下的文件上传的小trick/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./一个Windows下的文件上传的小trick/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./一个Windows下的文件上传的小trick/prism.js"></script>
+<script src="./一个Windows下的文件上传的小trick/zooming.js"></script>
+<script src="./一个Windows下的文件上传的小trick/Bendawang.js"></script>
+
+

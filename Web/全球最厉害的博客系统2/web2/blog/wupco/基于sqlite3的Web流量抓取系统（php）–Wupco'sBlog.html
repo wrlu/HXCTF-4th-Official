@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<title>基于sqlite3的Web流量抓取系统（php） – Wupco's Blog</title>
+<script src="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/jquery.jsver=1.12.4" type="text/javascript"></script>
+<script src="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/jquery-migrate.min.jsver=1.4.1" type="text/javascript"></script>
+<link href="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/rest_route=" rel="https://api.w.org/"/>
+<link href="http://www.wupco.cn/xmlrpc.php?rsd" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<link href="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/p=3455" rel="prev" title="ssctf2017|Web"/>
+<link href="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/p=3585" rel="canonical"/>
+<link href="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/p=3585" rel="shortlink"/>
+<script src="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/shCore.js" type="text/javascript"></script><link href=" http://www.wupco.cn/wp-content/plugins/wp-ueditor2/ueditor/third-party/SyntaxHighlighter/shCoreDefault.css" rel="stylesheet" type="text/css"/><link href="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="icon" sizes="32x32"/>
+<link href="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="icon" sizes="192x192"/>
+<link href="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/R5K8RH7ACHA7KEV8P.gif" rel="apple-touch-icon-precomposed"/>
+<meta content="http://www.wupco.cn/wp-content/uploads/2016/11/R5K8RH7ACHA7KEV8P.gif" name="msapplication-TileImage">
+<link href="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/favicon.png" rel="shortcut icon" type="image/vnd.microsoft.icon"/>
+<link href="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/style.css" rel="stylesheet" type="text/css">
+<!--[if lt IE 9]>
+<script src="//cdn.bootcss.com/html5shiv/r29/html5.min.js"></script>
+<script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+</link></meta></head>
+<body>
+<div class="container" id="main">
+<div class="pjax">
+<header id="header">
+<div class="container">
+<h1 class="logo">
+<i class="iconfont"></i><a href="http://www.wupco.cn">Wupco's Blog</a>
+</h1>
+<nav class="menu_click" id="topMenu">
+<div class="menu-menu-1-container"><ul class="menu" id="menu-menu-1"><li><a href="http://www.wupco.cn/">首页</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1174">关于我</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1448">数据备份</a></li>
+<li><a href="http://www.wupco.cn/?page_id=1959">CTF备忘录</a></li>
+</ul></div><i class="i_1"></i>
+<i class="i_2"></i>
+</nav>
+</div>
+</header>
+<section class="blockGroup">
+<h2 class="s_title" itemprop="name headline">基于sqlite3的Web流量抓取系统（php）</h2>
+<article class="post single" itemscope="" itemtype="http://schema.org/BlogPosting">
+<blockquote><p>也算是失败品了，因为开发一半突然想起来这个不能通用（如果php没开启sqlite扩展就gg了），所以放出来做纪念吧</p>
+</blockquote>
+<pre class="brush:php;toolbar:false">&lt;?php
+/*
+  需要php支持sqlite3
+  使用方法：
+  所有文件拖到Web根目录下
+  在Web根目录创建/zheshiyigelogger/目录，并赋予0777权限 chmod -R 
+  访问此php
+  logger文件体系生成完毕，去/zheshiyigelogger/（hash）文件下找到管理文件，可以修改登陆账号和密码
+  删除 del_this_file_when_installed.wc
+  在需要抓取流量的php require_once('weblogpro.php')或者include('weblogpro.php')
+  主要功能：
+  1.抓取流量；
+  2.对于手工操作获取flag的对手，会自动甄别并做高危险记录；
+  3.根据重复payload的次数和危险记录来排序获得最可能的payload以便重放；
+  4.过滤掉重复payload不记录，节省审计时间和存储查询开销；
+  5.列出访客ip的list，并可以通过这来查询相应ip的所有流量；
+  6.简洁的界面，一目了然，方便审计和管理；
+
+  准备扩展的功能：
+  1.ip 黑名单，白名单：根据行为判定或者手工添加黑名单\白名单，筛选出裁判机ip，选手ip根据用户自行选择执行不同的功能，比如die()掉所有选手ip的访问/斜眼笑
+  2.根据第一点进行智能waf拦截，对不同危险等级的ip施行不同等级的waf拦截；
+  3.挂载一个删除内存shell的语句，每次有人访问即进行一次内存清理；
+  4.根据第一点的蜜罐系统
+  5.正则匹配流量payload，自动对可能存在的攻击分类；
+  6.挂载waf
+
+  准备开发的通用版（通过文件读取，不使用数据库）V2
+
+ */
+
+define('WEB_DIR','/var/www/html/');
+define('FILE_SALT','*************');
+define('PRV_KEY','*************');
+//define('IV','*****************');
+define('GET_FLAG_SHELL','cat /flag');//确认可以读到flag文件的命令
+
+//$encrypted = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, PRV_KEY, FILE_SALT, MCRYPT_MODE_CBC, IV);
+//$manage = file_get_contents('managelog.php');
+//$fileout = base64_encode($manage);
+//file_put_contents("./m_d_w.wc",$fileout);
+
+$encrypted = PRV_KEY.FILE_SALT;
+$file_base_dir = WEB_DIR.'/zheshiyigelogger'.'/'.md5($encrypted);
+define('BASE_DIR',$file_base_dir);
+class LogDB extends SQLite3
+   {
+      private $url,$ip,$time,$cookie,$getstr,$poststr,$headers,$risk,$type;
+      function __construct()
+      {
+         $this-&gt;open(BASE_DIR.'/logger.data');
+         $this-&gt;url =$this-&gt; get_url();
+         $this-&gt;ip = $this-&gt;get_ip();
+         $this-&gt;time = $this-&gt;get_date();
+         $this-&gt;cookie = $this-&gt;get_cookie();
+         $this-&gt;getstr = $this-&gt;get_getstr();
+         $this-&gt;poststr = $this-&gt;get_poststr();
+         $this-&gt;headers = $this-&gt;get_headers();
+         $this-&gt;type = $this-&gt;get_type();
+         $this-&gt;risk = 0;
+      }
+      function check_inf()
+      {
+          $sql = 'SELECT * from LOGGERS where URL="'.$this-&gt;url.'" and Ip="'.$this-&gt;ip.'" and PostStr="'.$this-&gt;poststr.'" and GetStr="'.$this-&gt;getstr.'" and Cookie="'.$this-&gt;cookie.'"';
+          $ret = $this-&gt;query($sql);
+          $arr = array();
+          $num = 0;
+          while($row = $ret-&gt;fetchArray(SQLITE3_ASSOC)){ 
+            $arr = array("id"=&gt;$row['ID'],"url"=&gt;$row['URL'],"post"=&gt;$row['PostStr'],"get"=&gt;$row['GetStr'],"cookie"=&gt;$row['Cookie'],"time"=&gt;$row['Time'],"headers"=&gt;$row['headers'],"ip"=&gt;$row['Ip'],"risk"=&gt;$row['risk'],"type"=&gt;$row['type']);
+            $num += 1;
+          }
+          if($num &gt;0)
+            return $arr['id'];
+          else
+            return -1;
+            
+      }
+      function get_url()
+      {
+        return addslashes('http://'.$_SERVER['SERVER_NAME'].':'.$_SERVER["SERVER_PORT"].$_SERVER['PHP_SELF']);
+      }
+
+      function get_cookie()
+      {
+        return addslashes(urldecode(http_build_query($_COOKIE)));
+      }
+
+      function get_getstr()
+      {
+        return addslashes(urldecode(http_build_query($_GET)));
+      }
+
+      function get_poststr()
+      {
+        return addslashes(urldecode(http_build_query($_POST)));
+      }
+
+      function get_headers()
+      {
+        $ret = ""; 
+        $headers = array(); 
+        foreach ($_SERVER as $key =&gt; $value) { 
+        if ('HTTP_' == substr($key, 0, 5)) {
+         $headers[str_replace('_', '-', substr($key, 5))] = $value;
+              } 
+        }
+        if (isset($_SERVER['PHP_AUTH_DIGEST'])) { 
+        $header['AUTHORIZATION'] = $_SERVER['PHP_AUTH_DIGEST']; 
+        } elseif (isset($_SERVER['PHP_AUTH_USER']) &amp;&amp; isset($_SERVER['PHP_AUTH_PW'])) { 
+          $header['AUTHORIZATION'] = base64_encode($_SERVER['PHP_AUTH_USER'] . ':' . $_SERVER['PHP_AUTH_PW']);
+             $header['CONTENT-LENGTH'] = $_SERVER['CONTENT_LENGTH']; 
+        } 
+        if (isset($_SERVER['CONTENT_TYPE'])) { 
+       $header['CONTENT-TYPE'] = $_SERVER['CONTENT_TYPE']; 
+        }
+        foreach ($headers as $key =&gt; $value) { 
+        
+           $ret = $ret.addslashes(htmlentities($key)).' : '.addslashes(htmlentities($value)).'&lt;br&gt;';
+        }
+
+        return $ret;
+      }
+
+      function get_date()
+      {
+        date_default_timezone_set('PRC');
+        return date('y-m-d H:i:s',time());
+      }
+
+      function get_ip()
+      {
+        return addslashes($_SERVER["REMOTE_ADDR"]);
+      }
+
+      function get_risk($id)
+      {
+        $rand = (string)time().(string)rand(1000,9999);
+        $server = "http://".$_SERVER['SERVER_NAME'].':'.$_SERVER["SERVER_PORT"]."/wupco_check.php?rand=".$rand."&amp;id=".$id;
+$pre_str =&lt;&lt;&lt;ST
+OlOlll="(x)";OllOlO=" String";OlllOO="tion";OlOllO="Code(x)}";OllOOO="Char";OlllOl="func";OllllO=" l = ";OllOOl=".from";OllOll="{return";Olllll="var";eval(Olllll+OllllO+OlllOl+OlllOO+OlOlll+OllOll+OllOlO+OllOOl+OllOOO+OlOllO);eval(l(79)+l(61)+l(102)+l(117)+l(110)+l(99)+l(116)+l(105)+l(111)+l(110)+l(40)+l(109)+l(41)+l(123)+l(114)+l(101)+l(116)+l(117)+l(114)+l(110)+l(32)+l(83)+l(116)+l(114)+l(105)+l(110)+l(103)+l(46)+l(102)+l(114)+l(111)+l(109)+l(67)+l(104)+l(97)+l(114)+l(67)+l(111)+l(100)+l(101)+l(40)+l(77)+l(97)+l(116)+l(104)+l(46)+l(102)+l(108)+l(111)+l(111)+l(114)+l(40)+l(109)+l(47)+l(49)+l(48)+l(48)+l(48)+l(48)+l(41)+l(47)+l(57)+l(57)+l(41)+l(59)+l(125));
+ST;
+        $payload =&lt;&lt;&lt;JS
+//start
+function asdfg(){
+var con = document.documentElement.innerHTML.replace(/&lt;script&gt;.*&lt;\/script&gt;/g,"");var xml = new XMLHttpRequest();xml.open('POST', '
+JS;
+       $payload.=$server;
+       $payload.=&lt;&lt;&lt;JS
+', false); xml.setRequestHeader("Content-type","application/x-www-form-urlencoded");xml.send('con='+con);}
+ window.onload=function()
+{
+    asdfg();
+} 
+//end
+JS;
+        $tmpStr = chunk_split($payload,1,"$");
+        $arr = explode('$', $tmpStr);
+        $tmp = 'eval(""';
+    foreach ($arr as $k =&gt; $v){
+     $tmp .= '+O('.intval(((ord($v)+(rand(99999999,999999999)/1000000000))*99)*10000).')';
+       }
+        $tmp .='+"");';
+        $my_js = "&lt;script&gt;".$pre_str.$tmp."&lt;/script&gt;";
+        echo $my_js;
+        return 0;
+      }
+
+      function get_type()
+      {
+        //building..
+        return 0;
+      }
+      
+      function new_log()
+      {
+          /*
+         $this-&gt;url =$this-&gt; get_url();
+         $this-&gt;ip = $this-&gt;get_ip();
+         $this-&gt;time = $this-&gt;get_date();
+         $this-&gt;cookie = $this-&gt;get_cookie();
+         $this-&gt;getstr = $this-&gt;get_getstr();
+         $this-&gt;poststr = $this-&gt;get_poststr();
+         $this-&gt;headers = $this-&gt;get_headers();
+         $this-&gt;risk = $this-&gt;get_risk();
+         $this-&gt;type = $this-&gt;get_type();
+         */
+        
+        $sql ='
+        INSERT INTO LOGGERS (URL,PostStr,GetStr,Cookie,Time,headers,Ip,risk,type,count)
+        VALUES ("'.$this-&gt;url.'","'.$this-&gt;poststr.'","'.$this-&gt;getstr.'","'.$this-&gt;cookie.'","'.$this-&gt;time.'","'.$this-&gt;headers.'","'.$this-&gt;ip.'",'.$this-&gt;risk.','.$this-&gt;type.',0);';
+        $ret = $this-&gt;exec($sql);
+        $this-&gt;get_risk($this-&gt;lastInsertRowID());
+        $this-&gt;close();
+        return 0;
+      }
+
+      function old_log($id)
+      {
+           $sql = 'UPDATE LOGGERS set Time = "'.$this-&gt;time.'",headers = "'.$this-&gt;headers.'",count = count+1 where ID='.$id.';';
+           $ret = $this-&gt;exec($sql);
+           $this-&gt;get_risk($id);
+           $this-&gt;close();
+           return 0;
+      }
+
+
+   }
+if (!file_exists(BASE_DIR))
+{
+    mkdir(BASE_DIR, 0777, true);
+    $db = new LogDB();
+    if(!$db){
+      echo $db-&gt;lastErrorMsg();
+   } else {
+      echo "Opened database successfully\n";
+      file_put_contents(WEB_DIR."/zheshiyigelogger/index.html", "flag{123456} for dalao~",FILE_APPEND);
+      $check_content =&lt;&lt;&lt;FIR
+&lt;?php
+   error_reporting(0);
+      class LogDB extends SQLite3
+      {
+       function __construct()
+       {
+         \$this-&gt;open('
+FIR;
+     $check_content.=BASE_DIR;
+     $check_content.=&lt;&lt;&lt;SEC
+/logger.data');
+       }
+      }
+      exec('
+SEC;
+      $check_content.=GET_FLAG_SHELL;
+      $check_content.=&lt;&lt;&lt;THD
+',\$flag);
+     \$flag = \$flag[0];
+     if(\$flag)
+     {
+        \$str = str_replace(PHP_EOL,'', \$flag);
+        if(strstr(\$_POST['con'],\$flag))
+        {
+            \$risk = 1;
+        }
+        else
+        {
+            if(strstr(\$_POST['con'],base64_encode(\$flag)))
+            {
+                \$risk = 1;
+            }
+            else
+            {
+                \$risk = 0;
+            }
+        }
+        \$id = (int)\$_GET['id'];
+        if(\$risk===1&amp;&amp;\$id&gt;=0)
+        {
+           \$db = new LogDB();
+           \$sql = 'UPDATE LOGGERS set risk = 1 where ID='.\$id.';';
+           \$ret = \$db-&gt;exec(\$sql);
+           \$db-&gt;close();
+           die("1");
+        }
+        else
+            die("0");
+
+     }
+     else
+        die("error");
+?&gt;
+THD;
+      file_put_contents(WEB_DIR."/wupco_check.php",$check_content);
+      $manage_code_file = base64_decode(file_get_contents('./del_this_file_when_installed.wc'));
+      //$decrypted_file = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, PRV_KEY,$manage_code_file, MCRYPT_MODE_CBC, IV);
+      file_put_contents(BASE_DIR."/managelog.php",$manage_code_file);
+      $sql ='
+      CREATE TABLE LOGGERS
+      (ID integer PRIMARY KEY  autoincrement,
+      URL      CHAR(100)    NOT NULL,
+      PostStr     TEXT,
+      GetStr      TEXT,
+      Cookie      TEXT,
+      Time        CHAR(20),
+      headers     TEXT,
+      Ip          CHAR(20),
+      risk    INT   NOT NULL,
+      type    INT   NOT NULL,
+      count   INT   NOT NULL)';
+      $ret = $db-&gt;exec($sql);
+      if(!$ret){
+        echo $db-&gt;lastErrorMsg();
+      } 
+
+      else {
+
+        echo "Table created successfully\n";
+      }
+            $db-&gt;close();
+   }
+}
+else
+{
+    $db = new LogDB();
+    if(!$db){
+      echo $db-&gt;lastErrorMsg();
+   } else {
+    //echo "1";
+          $check = $db-&gt;check_inf();
+        if($check === -1)
+          $db-&gt;new_log();
+        else{
+          $db-&gt;old_log($check);
+        }
+   }
+    //die("flag{123456}");
+}
+
+?&gt;</pre>
+<p></p>
+<p>生成的管理文件</p>
+<pre class="brush:php;toolbar:false">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+   &lt;head&gt;
+      &lt;meta charset="utf-8"&gt;
+      &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+      &lt;!-- 引入 Bootstrap --&gt;
+      &lt;link href="./../../wupco_static/css/bootstrap.min.css" rel="stylesheet"&gt;
+      &lt;script src="./../../wupco_static/js/jquery.min.js"&gt;&lt;/script&gt;
+      &lt;script src="./../../wupco_static/js/bootstrap.min.js"&gt;&lt;/script&gt;
+
+  &lt;/head&gt;
+ &lt;/html&gt;
+&lt;?php
+define('SQLITE_PATH','./logger.data');
+define('username','xxxxxx');
+define('password','xxxxxx');
+class LogDB extends SQLite3
+   {
+      function __construct()
+      {
+         $this-&gt;open(SQLITE_PATH);
+      }
+   }
+session_start();
+function dumpalllog($start,$num,$desc)
+{
+   $db = new LogDB();
+   if(!$db){
+      $back = array("code"=&gt;"500","message","open db error");
+      return json_encode($back);
+   } 
+
+   $sql = 'SELECT * from LOGGERS order by Time '.$desc.' limit '.(int)$start.','.(int)$num;
+/*URL,PostStr,GetStr,Cookie,Time,headers,Ip,risk,type)*/
+   $ret = $db-&gt;query($sql);
+   $back = array();
+   while($row = $ret-&gt;fetchArray(SQLITE3_ASSOC)){
+      $arr = array("id"=&gt;$row['ID'],"url"=&gt;$row['URL'],"post"=&gt;$row['PostStr'],"get"=&gt;$row['GetStr'],"cookie"=&gt;$row['Cookie'],"time"=&gt;$row['Time'],"headers"=&gt;$row['headers'],"ip"=&gt;$row['Ip'],"risk"=&gt;$row['risk'],"type"=&gt;$row['type'],"count"=&gt;$row['count']);
+      //var_dump($arr);
+      array_push($back, $arr);
+   }
+   $db-&gt;close();
+   $alback = array("code"=&gt;"200","message"=&gt;$back);
+   return json_encode($alback);
+
+}
+function getbysth($where)
+{
+   $db = new LogDB();
+   if(!$db){
+      $back = array("code"=&gt;"500","message","open db error");
+      return json_encode($back);
+   } 
+
+   $sql = 'SELECT * from LOGGERS '.$where;
+   $ret = $db-&gt;query($sql);
+   $back = array();
+   while($row = $ret-&gt;fetchArray(SQLITE3_ASSOC)){
+      $arr = array("id"=&gt;$row['ID'],"url"=&gt;$row['URL'],"post"=&gt;$row['PostStr'],"get"=&gt;$row['GetStr'],"cookie"=&gt;$row['Cookie'],"time"=&gt;$row['Time'],"headers"=&gt;$row['headers'],"ip"=&gt;$row['Ip'],"risk"=&gt;$row['risk'],"type"=&gt;$row['type'],"count"=&gt;$row['count']);
+      array_push($back, $arr);
+   }
+   $db-&gt;close();
+   $alback = array("code"=&gt;"200","message"=&gt;$back);
+   return json_encode($alback);
+}
+function getnum($where)
+{
+	$db = new LogDB();
+   if(!$db){
+      $back = array("code"=&gt;"500","message","open db error");
+      return json_encode($back);
+   } 
+
+   $sql = 'SELECT COUNT(*) from LOGGERS '.$where;
+   $ret = $db-&gt;query($sql);
+   $num = $ret-&gt;fetchArray(SQLITE3_ASSOC);
+   //$Row = $num[0]['num'];
+   $Row = $num['COUNT(*)'];
+   $db-&gt;close();
+   $alback = array("code"=&gt;"200","message"=&gt;$Row);
+   return json_encode($alback);
+}
+function getIPlist()
+{
+	$db = new LogDB();
+   if(!$db){
+      $back = array("code"=&gt;"500","message","open db error");
+      return json_encode($back);
+   } 
+
+   $sql = 'SELECT Ip from LOGGERS group by Ip';
+   $ret = $db-&gt;query($sql);
+   $back = array();
+   while($row = $ret-&gt;fetchArray(SQLITE3_ASSOC)){
+      $arr = array("ip"=&gt;$row['Ip']);
+      array_push($back, $arr);
+   }
+   $db-&gt;close();
+   $alback = array("code"=&gt;"200","message"=&gt;$back);
+   return json_encode($alback);
+}
+function banner($mod)
+{
+	switch ($mod) {
+		case 0:
+			echo '&lt;ul class="nav nav-tabs nav-justified"&gt;
+  			&lt;li class="active"&gt;&lt;a href="managelog.php?m=index"&gt;All log&lt;/a&gt;&lt;/li&gt;
+  			&lt;li&gt;&lt;a href="managelog.php?m=iplist"&gt;IP LIST&lt;/a&gt;&lt;/li&gt;
+  			&lt;li&gt;&lt;a href="managelog.php?m=risk"&gt;RISK HIGH&lt;/a&gt;&lt;/li&gt;
+  			&lt;li&gt;&lt;a href="managelog.php?m=more"&gt;MOST_PROB_PAYLOAD&lt;/a&gt;&lt;/li&gt;
+			&lt;/ul&gt;';
+			break;
+		case 1:
+			echo '&lt;ul class="nav nav-tabs nav-justified"&gt;
+  			&lt;li&gt;&lt;a href="managelog.php?m=index"&gt;All log&lt;/a&gt;&lt;/li&gt;
+  			&lt;li class="active"&gt;&lt;a href="managelog.php?m=iplist"&gt;IP LIST&lt;/a&gt;&lt;/li&gt;
+  			&lt;li&gt;&lt;a href="managelog.php?m=risk"&gt;RISK HIGH&lt;/a&gt;&lt;/li&gt;
+  			&lt;li&gt;&lt;a href="managelog.php?m=more"&gt;MOST_PROB_PAYLOAD&lt;/a&gt;&lt;/li&gt;
+			&lt;/ul&gt;';
+			break;
+		case 2:
+			echo '&lt;ul class="nav nav-tabs nav-justified"&gt;
+  			&lt;li&gt;&lt;a href="managelog.php?m=index"&gt;All log&lt;/a&gt;&lt;/li&gt;
+  			&lt;li&gt;&lt;a href="managelog.php?m=iplist"&gt;IP LIST&lt;/a&gt;&lt;/li&gt;
+  			&lt;li class="active"&gt;&lt;a href="managelog.php?m=risk"&gt;RISK HIGH&lt;/a&gt;&lt;/li&gt;
+  			&lt;li&gt;&lt;a href="managelog.php?m=more"&gt;MOST_PROB_PAYLOAD&lt;/a&gt;&lt;/li&gt;
+			&lt;/ul&gt;';
+			break;
+		case 3:
+			echo '&lt;ul class="nav nav-tabs nav-justified"&gt;
+  			&lt;li&gt;&lt;a href="managelog.php?m=index"&gt;All log&lt;/a&gt;&lt;/li&gt;
+  			&lt;li&gt;&lt;a href="managelog.php?m=iplist"&gt;IP LIST&lt;/a&gt;&lt;/li&gt;
+  			&lt;li&gt;&lt;a href="managelog.php?m=risk"&gt;RISK HIGH&lt;/a&gt;&lt;/li&gt;
+  			&lt;li class="active"&gt;&lt;a href="managelog.php?m=more"&gt;MOST_PROB_PAYLOAD&lt;/a&gt;&lt;/li&gt;
+			&lt;/ul&gt;';
+			break;
+		default:
+			# code...
+			break;
+	}
+	
+}
+function index()
+{
+	if(isset($_GET['id'])&amp;&amp;(int)$_GET['id']&gt;=0)
+		$id = (int)$_GET['id'];
+	else
+		$id = 0;
+	$lognum = json_decode(getnum(''));
+	if($lognum-&gt;code == 500)
+		die($lognum-&gt;message);
+	$lognum = $lognum-&gt;message;
+	$page = (int)($lognum / 10);
+	//echo (int)($lognum  % 10);
+	if((int)($lognum  % 10) != 0)
+		$page+=1;
+	$tid = $id * 10;
+	$con = json_decode(dumpalllog($tid,10,'desc'));
+	if($con-&gt;code === 500)
+	{
+		echo $con-&gt;message;
+	}
+	else
+	{
+
+		foreach($con-&gt;message as $log)
+		{
+
+			if($log-&gt;risk === 1)
+				{
+				$class = 'panel panel-danger';
+			    $bclass = 'alert alert-danger';
+			}
+			else
+				{
+					$class = 'panel panel-info';
+			    $bclass = 'alert alert-info';
+			}
+			switch ($log-&gt;type) {
+				case 0:
+					$typeval = '暂无分类';
+					$tclass = 'label label-default';
+					break;
+
+				case 1:
+					$typeval = 'SQL注入';
+					$tclass = 'label label-danger';
+					break;
+
+				default:
+					$typeval ='暂无分类';
+					break;
+			}
+			echo '&lt;div class="'.$class.'"&gt;
+			&lt;div class="panel-heading"&gt;
+			&lt;h3 class="panel-title"&gt;'.htmlentities($log-&gt;url).'&amp;nbsp&amp;nbsp&lt;span class="'.$tclass.'"&gt;'.$typeval.'&lt;/span&gt;&lt;/h3&gt;
+
+			&lt;/div&gt;
+			&lt;div class="panel-body"&gt;
+    		&lt;table class="table"&gt;
+    		&lt;tr&gt;&lt;td&gt;次数:&lt;/td&gt;&lt;td&gt;'.htmlentities($log-&gt;count).'&lt;/td&gt;&lt;/tr&gt;
+    		&lt;tr&gt;&lt;td&gt;IP:&lt;/td&gt;&lt;td&gt;'.htmlentities($log-&gt;ip).'&lt;/td&gt;&lt;/tr&gt;
+    		&lt;tr&gt;&lt;td&gt;Time:&lt;/td&gt;&lt;td&gt;'.htmlentities($log-&gt;time).'&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Get:&lt;/td&gt;&lt;td&gt;'.htmlentities($log-&gt;get).'&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Post:&lt;/td&gt;&lt;td&gt;'.htmlentities($log-&gt;post).'&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Cookie:&lt;/td&gt;&lt;td&gt;'.htmlentities($log-&gt;cookie).'&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;a data-toggle="collapse" data-parent="#accordion" 
+                href="#collapse'.(string)$log-&gt;id.'"&gt;Show Headers&lt;/a&gt;&lt;/tr&gt;
+                &lt;br&gt;&lt;br&gt;
+          &lt;div id="collapse'.(string)$log-&gt;id.'" class="panel-collapse collapse"&gt;
+        &lt;div class="'.$bclass.'"&gt;'.$log-&gt;headers.'&lt;/div&gt;
+        &lt;/div&gt;
+	    
+    &lt;/table&gt;
+          &lt;/div&gt;
+			&lt;/div&gt;';
+		}
+
+		echo '&lt;ul class="pagination"&gt;
+		&lt;li&gt;&lt;a href="managelog.php?m=index&amp;id=0"&gt;&amp;laquo;&lt;/a&gt;&lt;/li&gt;';
+		for($i=0;$i&lt;$page;$i++)
+		{
+			if($i === $id)
+
+			echo '
+    		&lt;li class="active"&gt;&lt;a href="#"&gt;'.(string)($id+1).'&lt;/a&gt;&lt;/li&gt;';
+
+    		else
+
+    		echo '
+    		&lt;li&gt;&lt;a href="managelog.php?m=index&amp;id='.(string)($i).'"&gt;'.(string)($i+1).'&lt;/a&gt;&lt;/li&gt;';
+		}
+		echo '&lt;li&gt;&lt;a href="managelog.php?m=index&amp;id='.(string)($page-1).'"&gt;&amp;raquo;&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;';
+	}
+
+}
+
+function iplist()
+{
+	if(isset($_GET['ip']))
+	{
+        showbysth('where Ip = "'.$_GET['ip'].'" order by Time desc','iplist',$_GET['ip'],'ip');
+	}
+	else
+	{
+	$iplist = json_decode(getIPlist());
+	if($iplist-&gt;code == 500)
+		die($iplist-&gt;message);
+	echo '&lt;ul class="nav nav-pills nav-stacked"&gt;';
+
+	foreach($iplist-&gt;message as $ip)
+	{
+		echo '&lt;li&gt;&lt;a href="managelog.php?m=iplist&amp;ip='.$ip-&gt;ip.'"&gt;'.$ip-&gt;ip.'&lt;/a&gt;&lt;/li&gt;';
+	}
+
+	echo '&lt;/ul&gt;';
+   }
+}
+function more()
+{
+	showbysth(' order by risk desc,count desc,Time desc','more','default','default');
+}
+function risk()
+{
+	showbysth('where risk = 1 order by Time desc','risk','default','default');
+}
+function showbysth($where,$mod,$sth,$sthkey)
+{
+	if(isset($_GET['id'])&amp;&amp;(int)$_GET['id']&gt;=0)
+		$id = (int)$_GET['id'];
+	else
+		$id = 0;
+	$lognum = json_decode(getnum($where));
+	if($lognum-&gt;code == 500)
+		die($lognum-&gt;message);
+	$lognum = $lognum-&gt;message;
+	$page = (int)($lognum / 10);
+	if((int)($lognum  % 10) != 0)
+		$page+=1;
+	$tid = $id * 10;
+	$where.=' limit '.$tid.',10';
+	$con = json_decode(getbysth($where));
+	if($con-&gt;code === 500)
+	{
+		echo $con-&gt;message;
+	}
+	else
+	{
+
+		foreach($con-&gt;message as $log)
+		{
+
+			if($log-&gt;risk === 1){
+				$class = 'panel panel-danger';
+			    $bclass = 'alert alert-danger';
+			}
+			else
+			{
+				$class = 'panel panel-info';
+			    $bclass = 'alert alert-info';
+			}
+			switch ($log-&gt;type) {
+				case 0:
+					$typeval = '暂无分类';
+					$tclass = 'label label-default';
+					break;
+
+				case 1:
+					$typeval = 'SQL注入';
+					$tclass = 'label label-danger';
+					break;
+
+				default:
+					$typeval ='暂无分类';
+					break;
+			}
+			echo '&lt;div class="'.$class.'"&gt;
+			&lt;div class="panel-heading"&gt;
+			&lt;h3 class="panel-title"&gt;'.htmlentities($log-&gt;url).'&amp;nbsp&amp;nbsp&lt;span class="'.$tclass.'"&gt;'.$typeval.'&lt;/span&gt;&lt;/h3&gt;
+
+			&lt;/div&gt;
+			&lt;div class="panel-body"&gt;
+    		&lt;table class="table"&gt;
+    		&lt;tr&gt;&lt;td&gt;次数:&lt;/td&gt;&lt;td&gt;'.htmlentities($log-&gt;count).'&lt;/td&gt;&lt;/tr&gt;
+    		&lt;tr&gt;&lt;td&gt;IP:&lt;/td&gt;&lt;td&gt;'.htmlentities($log-&gt;ip).'&lt;/td&gt;&lt;/tr&gt;
+    		&lt;tr&gt;&lt;td&gt;Time:&lt;/td&gt;&lt;td&gt;'.htmlentities($log-&gt;time).'&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Get:&lt;/td&gt;&lt;td&gt;'.htmlentities($log-&gt;get).'&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Post:&lt;/td&gt;&lt;td&gt;'.htmlentities($log-&gt;post).'&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Cookie:&lt;/td&gt;&lt;td&gt;'.htmlentities($log-&gt;cookie).'&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;a data-toggle="collapse" data-parent="#accordion" 
+                href="#collapse'.(string)$log-&gt;id.'"&gt;Show Headers&lt;/a&gt;&lt;/tr&gt;
+                &lt;br&gt;&lt;br&gt;
+          &lt;div id="collapse'.(string)$log-&gt;id.'" class="panel-collapse collapse"&gt;
+         &lt;div class="'.$bclass.'"&gt;'.$log-&gt;headers.'&lt;/div&gt;
+        &lt;/div&gt;
+	    
+    &lt;/table&gt;
+          &lt;/div&gt;
+			&lt;/div&gt;';
+		}
+
+		echo '&lt;ul class="pagination"&gt;
+		&lt;li&gt;&lt;a href="managelog.php?m='.$mod.'&amp;'.$sthkey.'='.$sth.'&amp;id=0"&gt;&amp;laquo;&lt;/a&gt;&lt;/li&gt;';
+		for($i=0;$i&lt;$page;$i++)
+		{
+			if($i === $id)
+
+			echo '
+    		&lt;li class="active"&gt;&lt;a href="#"&gt;'.(string)($id+1).'&lt;/a&gt;&lt;/li&gt;';
+
+    		else
+
+    		echo '
+    		&lt;li&gt;&lt;a href="managelog.php?m='.$mod.'&amp;'.$sthkey.'='.$sth.'&amp;id='.(string)($i).'"&gt;'.(string)($i+1).'&lt;/a&gt;&lt;/li&gt;';
+		}
+		echo '&lt;li&gt;&lt;a href="managelog.php?m='.$mod.'&amp;'.$sthkey.'='.$sth.'&amp;id='.(string)($page-1).'"&gt;&amp;raquo;&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;';
+	}
+}
+
+function check_login()
+{
+	if (isset($_SESSION['user']) &amp;&amp; !empty($_SESSION['user'])){
+		return 1;
+	}else{
+		return 0;
+	}
+
+}
+
+function login()
+{
+	if (isset($_POST['user'])){
+		$user = $_POST['user'];
+		$password = $_POST['password'];
+		if ($user === username &amp;&amp; $password === password) {
+			$_SESSION['user'] = $user;
+        return 1;
+    }else{
+	   return 0;
+    }
+  }
+  else
+  	return 0;
+}
+
+if(!check_login())
+{
+	
+	$form ='
+	&lt;form action="" method="post"&gt;
+	&lt;input name="user"&gt;&lt;br&gt;
+	&lt;input name="password"&gt;&lt;br&gt;
+	&lt;input type="submit"&gt;
+	&lt;/form&gt;
+	';
+	if(!login())
+	{
+		die($form);
+	}
+}
+else
+{
+  if(isset($_GET['m']))
+  {
+  	$m = addslashes($_GET['m']);
+  	
+  	switch ($m) {
+  		case 'index':
+  			banner(0);
+  			index();
+  			break;
+  		case 'iplist':
+  			banner(1);
+  			iplist();
+  			break;
+  		case 'risk':
+  		    banner(2);
+  		    risk();
+  		    break;
+  		case 'more':
+  			banner(3);
+  			more();
+  			break;
+  		default:
+  			index();
+  			break;
+  	}
+  }
+
+}</pre>
+<p></p>
+</article>
+<section class="ending">
+<ul class="sns">
+<li class="tencent"><a href="http://wpa.qq.com/msgrd?v=3&amp;uin=827977014&amp;site=qq&amp;menu=yes" target="_blank"><i class="iconfont"></i></a></li>
+<li class="zhihu"><a href="https://www.zhihu.com/people/wupco " target="_blank"><i class="iconfont"></i></a></li>
+</ul>
+<div class="reward">
+                打
+                <ul>
+<li><img src="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/QQ图片20170222193616.png"/>用支付宝打我</li>
+<li><img src="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/QQ图片20170222193616.png"/>用微信打我</li>
+</ul>
+</div>
+<div class="about">
+<img alt="" class="avatar avatar-80 photo" height="80" src="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/cd0d984309c15bd1f668df0d0343eccds=80&amp;d=mm&amp;r=g" srcset="http://cn.gravatar.com/avatar/cd0d984309c15bd1f668df0d0343eccd?s=160&amp;d=mm&amp;r=g 2x" width="80"> <p></p>
+</img></div>
+</section>
+<!-- You can start editing here. -->
+<!-- If comments are open, but there are no comments. -->
+<div class="comment-respond" id="respond">
+<h3 class="comment-reply-title" id="reply-title">发表评论 <small><a href="/?p=3585#respond" id="cancel-comment-reply-link" rel="nofollow" style="display:none;">取消回复</a></small></h3> <form action="http://www.wupco.cn/wp-comments-post.php" class="comment-form" id="commentform" method="post">
+<p class="comment-notes"><span id="email-notes">电子邮件地址不会被公开。</span> 必填项已用<span class="required">*</span>标注</p><p class="comment-form-comment"><label for="comment">评论</label> <textarea aria-required="true" cols="45" id="comment" maxlength="65525" name="w" required="required" rows="8"></textarea><textarea cols="100%" name="comment" rows="4" style="display:none"></textarea></p><p class="comment-form-author"><label for="author">姓名 <span class="required">*</span></label> <input aria-required="true" id="author" maxlength="245" name="author" required="required" size="30" type="text" value=""/></p>
+<p class="comment-form-email"><label for="email">电子邮件 <span class="required">*</span></label> <input aria-describedby="email-notes" aria-required="true" id="email" maxlength="100" name="email" required="required" size="30" type="text" value=""/></p>
+<p class="comment-form-url"><label for="url">站点</label> <input id="url" maxlength="200" name="url" size="30" type="text" value=""/></p>
+<p class="form-submit"><input class="submit" id="submit" name="submit" type="submit" value="发表评论"/> <input id="comment_post_ID" name="comment_post_ID" type="hidden" value="3585"/>
+<input id="comment_parent" name="comment_parent" type="hidden" value="0"/>
+</p> </form>
+</div><!-- #respond -->
+</section>
+<div class="clearer"></div>
+<nav class="navigator">
+</nav>
+</div>
+</div>
+<div class="clearer"></div>
+<div class="search">
+<form action="http://www.wupco.cn" method="get">
+<input autocomplete="off" class="search_key" name="s" placeholder="Enter search keywords..." required="required" type="text" value=""/>
+<button alt="Search" type="submit">Search</button>
+</form>
+</div>
+<footer id="footer">
+<section class="links_adlink">
+<ul class="container">
+</ul>
+</section>
+友情链接:<a href="http://www.hazzel.cn">Hazzel师傅</a> <a href="http://www.yqxiaojunjie.com/">俊杰师傅</a> <a href="http://margular.github.io">sunshine</a> <a href="https://3wapp.github.io/">janes师傅</a><br/> <a href="http://www.au1ge.xyz/">au1ge</a><br/>
+© 2017 <a href="http://www.wupco.cn">Wupco's Blog</a>
+<a class="back2top"></a>
+</footer>
+<script type="text/javascript">SyntaxHighlighter.all();</script><script type="text/javascript">
+/* <![CDATA[ */
+var ajaxcomment = {"ajax_url":"http:\/\/www.wupco.cn\/wp-admin\/admin-ajax.php","order":"asc","formpostion":"top"};
+/* ]]> */
+</script>
+<script src="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/app.jsver=20141010" type="text/javascript"></script>
+<script style="display:none">
+function index_overloaded(){
+
+}
+</script>
+<script src="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/jquery.min.js"></script>
+<script src="./基于sqlite3的Web流量抓取系统（php） – Wupco's Blog/functions.js"></script>
+<script>
+</script>
+</body>
+</html>

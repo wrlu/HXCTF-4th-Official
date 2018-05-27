@@ -1,0 +1,337 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>Wordpress &lt; 4.1.2 存储型XSS分析与稳定POC | 离别歌</title>
+<link href="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/styles.css" rel="stylesheet"/>
+<link href="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/style.css" rel="stylesheet"/>
+<link href="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/jquery.min.js"></script>
+<link href="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/code.css" rel="stylesheet"/>
+<link href="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/button.css" rel="stylesheet"/>
+<link href="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/HTML/wordpress-4-1-stored-xss.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/HTML/wordpress-4-1-stored-xss.html&amp;text=Wordpress%20%3C%204.1.2%20%E5%AD%98%E5%82%A8%E5%9E%8BXSS%E5%88%86%E6%9E%90%E4%B8%8E%E7%A8%B3%E5%AE%9APOC"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/HTML/wordpress-4-1-stored-xss.html&amp;title=Wordpress%20%3C%204.1.2%20%E5%AD%98%E5%82%A8%E5%9E%8BXSS%E5%88%86%E6%9E%90%E4%B8%8E%E7%A8%B3%E5%AE%9APOC"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/HTML/wordpress-4-1-stored-xss.html&amp;is_video=false&amp;description=Wordpress%20%3C%204.1.2%20%E5%AD%98%E5%82%A8%E5%9E%8BXSS%E5%88%86%E6%9E%90%E4%B8%8E%E7%A8%B3%E5%AE%9APOC"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=Wordpress%20%3C%204.1.2%20%E5%AD%98%E5%82%A8%E5%9E%8BXSS%E5%88%86%E6%9E%90%E4%B8%8E%E7%A8%B3%E5%AE%9APOC&amp;body=Check out this article: https%3A//www.leavesongs.com/HTML/wordpress-4-1-stored-xss.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/HTML/wordpress-4-1-stored-xss.html&amp;title=Wordpress%20%3C%204.1.2%20%E5%AD%98%E5%82%A8%E5%9E%8BXSS%E5%88%86%E6%9E%90%E4%B8%8E%E7%A8%B3%E5%AE%9APOC"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/HTML/wordpress-4-1-stored-xss.html&amp;title=Wordpress%20%3C%204.1.2%20%E5%AD%98%E5%82%A8%E5%9E%8BXSS%E5%88%86%E6%9E%90%E4%B8%8E%E7%A8%B3%E5%AE%9APOC"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/HTML/wordpress-4-1-stored-xss.html&amp;title=Wordpress%20%3C%204.1.2%20%E5%AD%98%E5%82%A8%E5%9E%8BXSS%E5%88%86%E6%9E%90%E4%B8%8E%E7%A8%B3%E5%AE%9APOC"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/HTML/wordpress-4-1-stored-xss.html&amp;title=Wordpress%20%3C%204.1.2%20%E5%AD%98%E5%82%A8%E5%9E%8BXSS%E5%88%86%E6%9E%90%E4%B8%8E%E7%A8%B3%E5%AE%9APOC"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/HTML/wordpress-4-1-stored-xss.html&amp;name=Wordpress%20%3C%204.1.2%20%E5%AD%98%E5%82%A8%E5%9E%8BXSS%E5%88%86%E6%9E%90%E4%B8%8E%E7%A8%B3%E5%AE%9APOC&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">Wordpress &lt; 4.1.2 存储型XSS分析与稳定POC</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年4月27日 22:59" itemprop="datePublished">
+                    2015 四月 27 22:59
+                </time>
+</div>
+<div class="article-tag">
+            阅读：13797
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/HTML">web前端</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/xss">xss</a>,
+                
+                <a class="tag-link" href="/tag/%E5%AF%8C%E6%96%87%E6%9C%AC">富文本</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>Wordpress这个XSS实际上是很好用的，匿名用户即可发表并触发，这里给出简单的分析与稳定的好触发的POC。</p>
+<p>其实漏洞的作者已经在文章（<a href="https://cedricvb.be/post/wordpress-stored-xss-vulnerability-4-1-2/"><a href="https://cedricvb.be/post/wordpress-stored-xss-vulnerability-4-1-2/">https://cedricvb.be/post/wordpress-stored-xss-vulnerability-4-1-2/</a></a>）里说明了，但文章给的Payload不知道为何在我的测试wp中不能触发。</p>
+<p>这个漏洞的原理很有意思，由MYSQL的一个特性导致，当我们将一个4字节的UTF8字符插入mysql时，mysql将会视之为utf8mb4编码，当将utf8mb4编码的字符插入到UTF8编码的列中，在非strict mode下就会造成一个截断。</p>
+<p>截断的话，就能绕过很多富文本过滤器了。比如，插入两个评论<code>&lt;img src=1</code>，和<code>onerror=alert(1)//</code>，这二者都不会触发某些富文本过滤器（因为前者并不含有白名单外的属性，后者并不是一个标签），但两个评论如果存在于同一个页面，就会拼接成一个完整的HTML标签，触发onerror事件。</p>
+<p>虽然wordpress并不是适用上述的方法，但研究者很快找到了新方法。在截断后，wordpress会将单引号转换成<code>&amp;#8220;</code>，于是如果我们提交的评论是这样的话：</p>
+<div class="codehilite"><pre><span></span>sometext
+&lt;blockquote cite='x onmouseover=alert(1) 𝌆'&gt;
+</pre></div>
+<p>将会被转换成这样：</p>
+<div class="codehilite"><pre><span></span>&lt;blockquote cite=“x onmouseover=alert(1) ...&gt;
+</pre></div>
+<p>这个时候，等于说onmouseover=越出了cite这个属性范围，成为一个新的属性，也就能够触发javascript了。</p>
+<p>但这个payload有点问题，因为标签从中间被截断了，所以后面将没有任何内容，也就是说它的宽度为0，这样的话onmouseover没有触发的载体。现在有几个办法：</p>
+<ol>
+<li>使用style，将这个标签区域放大，适合触发。</li>
+<li>使用其他事件，最好能直接触发。</li>
+</ol>
+<p>那么按照这两个思路来构造payload。首先，原文中是用的第1个思路，类似原文，我构造了一个比较好用的payload：</p>
+<div class="codehilite"><pre><span></span><span class="o">&lt;</span><span class="nt">abbr</span> <span class="nt">title</span><span class="o">=</span><span class="s2">"qweqw style=display:block;position:fixed;width:100%;height:100%;top:0; onmouseover=alert(1)// 𝌆"</span><span class="o">&gt;</span>
+</pre></div>
+<p>匿名用户直接留以上payload，访问者打开页面，只要鼠标移动到文章区域即可触发：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201504/17d81430151622.png"><img alt="QQ20150428-1@2x.png" src="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/thum-17d81430151622.png"/></a></p>
+<p>再来看第二种构造方法，如果完全无需用户交互，直接触发？</p>
+<p>当然也有这样的方法，任意标签无需交互触发的payload来一个：</p>
+<div class="codehilite"><pre><span></span>&lt;abbr title="aassx id=a tabindex=0 onfocus=alert(1)// 𝌆"&gt;
+</pre></div>
+<p>利用了之前积累的一个方法：在任意标签上加tabindex即可让这个标签可以被TAB选中，于是就有了onfocus事件。然后用类似于锚的方式来替代按键TAB，访问#id（以上payload中id=a，所以是#a）即可触发：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201504/cf791430152002.png"><img alt="QQ20150428-2@2x.png" src="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/thum-cf791430152002.png"/></a></p>
+<p>利用这个POC，让用户直接访问http://10.211.55.3/wordpress/?p=1#a，就能吃屎一样玩命地触发alert(1)。但可惜的是，firefox并不支持。</p>
+<p>然后说下测试的事，众所周知的是wordpress在某个版本以后，就增加了自动升级小版本的功能。像4.1.1这样的版本，默认情况下是会被直接升级到4.1.2的，所以测试的时候可能有些不方便。</p>
+<p>所以安装好wp以后，需要手工在wp-config.php中加个<code>define('AUTOMATIC_UPDATER_DISABLED',true);</code>，禁止其自动更新即可。</p>
+<p>这里奉上wordpress 4.1.1版本的源代码，方便各位测试：<a href="http://vdisk.weibo.com/s/u9oF-vwN_YzEu"><a href="http://vdisk.weibo.com/s/u9oF-vwN_YzEu">http://vdisk.weibo.com/s/u9oF-vwN_YzEu</a></a></p>
+<p>写这篇文章的时候我就在想，我的博客也是utf-8的mysql，说不定也会被截断掉。于是机智地把原文复制保存了（差点白写了），妈蛋发出去果然被截断了。处理了一下，应该能够正常阅读了。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2271">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/27f5e2e770b5ea0460130cd5e1e1ddab.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.moonsec.com" target="_blank">暗月</a>
+<time datetime="2015年12月19日 16:30" itemprop="datePublished">
+                            2015 十二月 19 16:30
+                        </time>
+<a href="javascript:reply_to('2271', '暗月')">回复</a>
+</p>
+<p class="comment-meta">路过记录一下 学习一下 收藏了 么么哒</p>
+</div>
+</div>
+<div class="row" id="comment-2083">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/cf013b80c826bcc01a2ae6cc054ac68b.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">friday</a>
+<time datetime="2015年5月22日 17:28" itemprop="datePublished">
+                            2015 五月 22 17:28
+                        </time>
+<a href="javascript:reply_to('2083', 'friday')">回复</a>
+</p>
+<p class="comment-meta">文档里给的exp不能触发的原因，可能是触发点的高度或者宽度为0<br><br>Phithon男神嗷嗷嗷嗷！</br></br></p>
+</div>
+</div>
+<div class="row" id="comment-2076">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/1149df666bb709be9e4dbe43ad788a23.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://blog.chrics.cn" target="_blank">Usual</a>
+<time datetime="2015年5月20日 16:17" itemprop="datePublished">
+                            2015 五月 20 16:17
+                        </time>
+<a href="javascript:reply_to('2076', 'Usual')">回复</a>
+</p>
+<p class="comment-meta">本机做测试的时候发现自己的MySQL是开了strict mode的，所以提示 评论未被保存，请稍候再试。</p>
+</div>
+</div>
+<div class="row" id="comment-2051">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">pierre</a>
+<time datetime="2015年5月7日 00:07" itemprop="datePublished">
+                            2015 五月 07 00:07
+                        </time>
+<a href="javascript:reply_to('2051', 'pierre')">回复</a>
+</p>
+<p class="comment-meta">p牛换电脑了？</p>
+</div>
+</div>
+<div class="row" id="comment-2046">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">ice</a>
+<time datetime="2015年5月2日 22:05" itemprop="datePublished">
+                            2015 五月 02 22:05
+                        </time>
+<a href="javascript:reply_to('2046', 'ice')">回复</a>
+</p>
+<p class="comment-meta">表哥  图片怎么不能显示了</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2047">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年5月2日 22:06" itemprop="datePublished">
+                            2015 五月 02 22:06
+                        </time>
+<a href="javascript:reply_to('2047', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@ice：能的呀，刷新一下试</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2044">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/b642b4217b34b1e8d3bd915fc65c4452.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://test.com" target="_blank">qwerty</a>
+<time datetime="2015年4月29日 11:05" itemprop="datePublished">
+                            2015 四月 29 11:05
+                        </time>
+<a href="javascript:reply_to('2044', 'qwerty')">回复</a>
+</p>
+<p class="comment-meta">WP截断后还帮忙转义，人性化。 = =</p>
+</div>
+</div>
+<div class="row" id="comment-2042">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/43759dfaff882fe7d88089f750479104.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">lazynms</a>
+<time datetime="2015年4月28日 18:12" itemprop="datePublished">
+                            2015 四月 28 18:12
+                        </time>
+<a href="javascript:reply_to('2042', 'lazynms')">回复</a>
+</p>
+<p class="comment-meta">有点转换后闭合标签的味道= =</p>
+</div>
+</div>
+<div class="row" id="comment-2040">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/16e95396d3f2fd817779fb318a3ea99a.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.03sec.com" target="_blank">sky</a>
+<time datetime="2015年4月28日 14:09" itemprop="datePublished">
+                            2015 四月 28 14:09
+                        </time>
+<a href="javascript:reply_to('2040', 'sky')">回复</a>
+</p>
+<p class="comment-meta">表哥大法好</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="05ed15273bf050934011cf412c5dc16f19cef175"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/05ed15273bf050934011cf412c5dc16f19cef175"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="356">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="sMNALyCQuV1FyoGkaO4vg730RiaGs3pb0686z2O5VIV4y34zY5yfPL550mDObxel"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./Wordpress &amp;lt; 4.1.2 存储型XSS分析与稳定POC  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

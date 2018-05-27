@@ -1,0 +1,295 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./利用redis写webshell  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./利用redis写webshell  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./利用redis写webshell  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>利用redis写webshell | 离别歌</title>
+<link href="./利用redis写webshell  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./利用redis写webshell  离别歌/styles.css" rel="stylesheet"/>
+<link href="./利用redis写webshell  离别歌/style.css" rel="stylesheet"/>
+<link href="./利用redis写webshell  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./利用redis写webshell  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./利用redis写webshell  离别歌/jquery.min.js"></script>
+<link href="./利用redis写webshell  离别歌/code.css" rel="stylesheet"/>
+<link href="./利用redis写webshell  离别歌/button.css" rel="stylesheet"/>
+<link href="./利用redis写webshell  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./利用redis写webshell  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/write-webshell-via-redis-server.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/write-webshell-via-redis-server.html&amp;text=%E5%88%A9%E7%94%A8redis%E5%86%99webshell"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/write-webshell-via-redis-server.html&amp;title=%E5%88%A9%E7%94%A8redis%E5%86%99webshell"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/write-webshell-via-redis-server.html&amp;is_video=false&amp;description=%E5%88%A9%E7%94%A8redis%E5%86%99webshell"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E5%88%A9%E7%94%A8redis%E5%86%99webshell&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/write-webshell-via-redis-server.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/write-webshell-via-redis-server.html&amp;title=%E5%88%A9%E7%94%A8redis%E5%86%99webshell"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/write-webshell-via-redis-server.html&amp;title=%E5%88%A9%E7%94%A8redis%E5%86%99webshell"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/write-webshell-via-redis-server.html&amp;title=%E5%88%A9%E7%94%A8redis%E5%86%99webshell"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/write-webshell-via-redis-server.html&amp;title=%E5%88%A9%E7%94%A8redis%E5%86%99webshell"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/write-webshell-via-redis-server.html&amp;name=%E5%88%A9%E7%94%A8redis%E5%86%99webshell&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">利用redis写webshell</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年3月13日 01:16" itemprop="datePublished">
+                    2015 三月 13 01:16
+                </time>
+</div>
+<div class="article-tag">
+            阅读：6899
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/redis">redis</a>,
+                
+                <a class="tag-link" href="/tag/getshell">getshell</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>我发在安全脉搏的一篇文章，废话有点多见谅：<a href="http://www.secpulse.com/archives/5357.html"><a href="http://www.secpulse.com/archives/5357.html">http://www.secpulse.com/archives/5357.html</a></a></p>
+<p>最近自己在做一些个人的小创作、小项目，其中用到了mongodb和redis，最初可能对这二者没有深入的认识。都是所谓的“非关系型数据库”，有什么区别么？实际上，在我看来，redis的角色更接近于memcache，而mongodb是一个真正的数据库。redis是一个key-value型数据库，信息以键对应值的关系存储在内存中，比memcache较大的优势就在于其数据结构的多样性。</p>
+<p>说它不算一个真正意义上的数据库，因为redis是主要把数据存储在内存中（当然可以把其存储至硬盘上，这也是写shell的必要条件之一），其“缓存”的性质远大于其“数据存储”的性质，其中数据的增删改查也只是像变量操作一样简单。而mongodb却是一个“存储数据”的系统，增删改查数据的时候有“与或非”条件，查询数据的方式也能像SQL数据库一样灵活，这是redis所不具备的。</p>
+<p>所以在我的项目中，redis作为session、任务队列的存储器，而mongodb作为数据（包括用户信息等）的存储器。</p>
+<p>进入正题，昨天看到freebuf上已经说了redis可能造成的安全问题，提到了写文件，那么我在这里把方法说明一下吧。</p>
+<p>redis安装完成以后有自己的命令行，也就是redis-cli，其中包含的命令可以在：<a href="http://redis.io/commands"><a href="http://redis.io/commands">http://redis.io/commands</a></a> 进行查阅。各个客户端基本也就是依照这个命令去增删改查。</p>
+<p>之前说了redis的数据主要保存在内存中，当与memcache不同之处在于，我们可以随时执行“save”命令将当前redis的数据保存到硬盘上，另外redis也会根据配置自动存储数据到硬盘上。</p>
+<p>这不得不说到redis的持久化运作方案 <a href="http://redis.io/topics/persistence"><a href="http://redis.io/topics/persistence">http://redis.io/topics/persistence</a></a> ，其中说到的一个RDB，一个AOF。RDB更像一个数据库备份文件，而AOF是一个log日志文件。我们可以设置让redis再指定时间、指定更改次数时进行备份，生成RDB文件；而设置AOF，可以在操作或时间过程后将“日志”写入一个文件的最末，当操作越来越多，则AOF文件越来越大。</p>
+<p>二者是相辅相成的，通过二者的配合我们能够稳定地持久地将数据存储于服务器上。</p>
+<p>而我们就是利用这些储存数据的操作，来进行任意文件写入。redis的配置中，有几个关键项目：</p>
+<ul>
+<li>dir 指定的是redis的“工作路径”，之后生成的RDB和AOF文件都会存储在这里。</li>
+<li>dbfilename RDB文件名，默认为“dump.rdb”</li>
+<li>appendonly 是否开启AOF</li>
+<li>appendfilename AOF文件名，默认为“appendonly.aof”</li>
+<li>appendfsync AOF备份方式：always、everysec、no</li>
+</ul>
+<p>经过我的研究发现，我们可以将dir设置为一个目录a，而dbfilename为文件名b，再执行save或bgsave，则我们就可以写入一个路径为a/b的任意文件：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/29981426183589.png"><img alt="QQ20150313-1@2x.png" src="./利用redis写webshell  离别歌/thum-29981426183589.png"/></a></p>
+<p>当我们获得了一个redis控制台，我们可以调用config set/get等命令对redis的部分配置进行修改。而恰好的是，我们可以通过config set来更改dir和dbfilename。也就是说我们可以不用修改redis.conf，也不用重启redis服务就可以写入任意文件：</p>
+<div class="codehilite"><pre><span></span><span class="nx">config</span> <span class="nx">set</span> <span class="nx">dir</span> <span class="o">/</span><span class="nx">home</span><span class="o">/</span><span class="nx">wwwroot</span><span class="o">/</span><span class="k">default</span><span class="err">/</span>
+<span class="nx">config</span> <span class="nx">set</span> <span class="nx">dbfilename</span> <span class="nx">redis</span><span class="p">.</span><span class="nx">php</span>
+<span class="nx">set</span> <span class="nx">webshell</span> <span class="s2">"</span><span class="cp">&lt;?php</span> <span class="nb">phpinfo</span><span class="p">();</span> <span class="cp">?&gt;</span><span class="s2">"</span>
+<span class="nx">save</span>
+</pre></div>
+<p>当我们随便set一个变量webshell的值为"&lt;?php phpinfo(); ?&gt;"后，即可对服务器进行getshell。可见已写入：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/341d1426184324.png"><img alt="QQ20150313-3@2x.png" src="./利用redis写webshell  离别歌/thum-341d1426184324.png"/></a></p>
+<p>导出的RDB实际上是一个二进制文件，但因为其中包含&lt;?php phpinfo(); ?&gt;，所以被解析了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/1e401426184542.png"><img alt="QQ20150313-2@2x.png" src="./利用redis写webshell  离别歌/thum-1e401426184542.png"/></a></p>
+<p>在前图中，我们可以看到其实还生成了一个appendonly.aof，这个文件名能不能自定义呢？可惜的是，appendfilename的值并不能使用config set命令定义：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201503/ef921426184701.png"><img alt="QQ20150313-4@2x.png" src="./利用redis写webshell  离别歌/thum-ef921426184701.png"/></a></p>
+<p>但仅有的一个dbfilename已经足够了。所以，以后如果扫到redis未授权访问，先别急着提交乌云。看看服务器有没有web服务，如果有，不妨试试能不能拿下webshell。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2001">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用redis写webshell  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Stone</a>
+<time datetime="2015年3月29日 14:00" itemprop="datePublished">
+                            2015 三月 29 14:00
+                        </time>
+<a href="javascript:reply_to('2001', 'Stone')">回复</a>
+</p>
+<p class="comment-meta">在实际操作中可能会有问题<br>redis在生产环境里面数据量经常是十分庞大的<br>save到php文件里会超过php的允许文件大小，导致无法解析<br/>而且save也不支持仅写入某个数据库，而是只能保存整个redis的实例<br/>所以select到某个空数据库来写入shell也是无法试验的</br></br></p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2002">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用redis写webshell  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年3月29日 14:01" itemprop="datePublished">
+                            2015 三月 29 14:01
+                        </time>
+<a href="javascript:reply_to('2002', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@Stone：这个我已经在zone里说过了，技术上是完全没问题的，直接flushall全删掉即可。或者先备份再删，之后再进行恢复。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2003">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用redis写webshell  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Stone</a>
+<time datetime="2015年3月29日 14:07" itemprop="datePublished">
+                            2015 三月 29 14:07
+                        </time>
+<a href="javascript:reply_to('2003', 'Stone')">回复</a>
+</p>
+<p class="comment-meta">@phithon：666 学习了</p>
+</div>
+</div>
+<div class="row" id="comment-2004">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用redis写webshell  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Stone</a>
+<time datetime="2015年3月29日 14:48" itemprop="datePublished">
+                            2015 三月 29 14:48
+                        </time>
+<a href="javascript:reply_to('2004', 'Stone')">回复</a>
+</p>
+<p class="comment-meta">@phithon：可惜就是没胆量2333</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2005">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用redis写webshell  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年3月29日 14:56" itemprop="datePublished">
+                            2015 三月 29 14:56
+                        </time>
+<a href="javascript:reply_to('2005', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@Stone：因为你得到回报的不值得你冒险。。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1971">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用redis写webshell  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">helen</a>
+<time datetime="2015年3月14日 20:12" itemprop="datePublished">
+                            2015 三月 14 20:12
+                        </time>
+<a href="javascript:reply_to('1971', 'helen')">回复</a>
+</p>
+<p class="comment-meta">囧囧囧，早发现可以写shell就爽了。。。</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="125e274e531f4dd1c49490823c58c8bc89a3658f"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./利用redis写webshell  离别歌/125e274e531f4dd1c49490823c58c8bc89a3658f"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="350">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="faQOFSCeatjj7DY5xDEkBF9NgnimAjfCNubktmOtBgdI7imklU84ajbSprLujN4M"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./利用redis写webshell  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./利用redis写webshell  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

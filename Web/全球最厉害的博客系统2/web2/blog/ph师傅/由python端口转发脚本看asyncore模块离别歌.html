@@ -1,0 +1,329 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./由python端口转发脚本看asyncore模块  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./由python端口转发脚本看asyncore模块  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./由python端口转发脚本看asyncore模块  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>由python端口转发脚本看asyncore模块 | 离别歌</title>
+<link href="./由python端口转发脚本看asyncore模块  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./由python端口转发脚本看asyncore模块  离别歌/styles.css" rel="stylesheet"/>
+<link href="./由python端口转发脚本看asyncore模块  离别歌/style.css" rel="stylesheet"/>
+<link href="./由python端口转发脚本看asyncore模块  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./由python端口转发脚本看asyncore模块  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./由python端口转发脚本看asyncore模块  离别歌/jquery.min.js"></script>
+<link href="./由python端口转发脚本看asyncore模块  离别歌/code.css" rel="stylesheet"/>
+<link href="./由python端口转发脚本看asyncore模块  离别歌/button.css" rel="stylesheet"/>
+<link href="./由python端口转发脚本看asyncore模块  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./由python端口转发脚本看asyncore模块  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PYTHON/Python-asyncore-port-traffic.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PYTHON/Python-asyncore-port-traffic.html&amp;text=%E7%94%B1python%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E8%84%9A%E6%9C%AC%E7%9C%8Basyncore%E6%A8%A1%E5%9D%97"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PYTHON/Python-asyncore-port-traffic.html&amp;title=%E7%94%B1python%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E8%84%9A%E6%9C%AC%E7%9C%8Basyncore%E6%A8%A1%E5%9D%97"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PYTHON/Python-asyncore-port-traffic.html&amp;is_video=false&amp;description=%E7%94%B1python%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E8%84%9A%E6%9C%AC%E7%9C%8Basyncore%E6%A8%A1%E5%9D%97"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E7%94%B1python%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E8%84%9A%E6%9C%AC%E7%9C%8Basyncore%E6%A8%A1%E5%9D%97&amp;body=Check out this article: https%3A//www.leavesongs.com/PYTHON/Python-asyncore-port-traffic.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PYTHON/Python-asyncore-port-traffic.html&amp;title=%E7%94%B1python%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E8%84%9A%E6%9C%AC%E7%9C%8Basyncore%E6%A8%A1%E5%9D%97"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PYTHON/Python-asyncore-port-traffic.html&amp;title=%E7%94%B1python%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E8%84%9A%E6%9C%AC%E7%9C%8Basyncore%E6%A8%A1%E5%9D%97"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PYTHON/Python-asyncore-port-traffic.html&amp;title=%E7%94%B1python%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E8%84%9A%E6%9C%AC%E7%9C%8Basyncore%E6%A8%A1%E5%9D%97"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PYTHON/Python-asyncore-port-traffic.html&amp;title=%E7%94%B1python%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E8%84%9A%E6%9C%AC%E7%9C%8Basyncore%E6%A8%A1%E5%9D%97"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PYTHON/Python-asyncore-port-traffic.html&amp;name=%E7%94%B1python%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E8%84%9A%E6%9C%AC%E7%9C%8Basyncore%E6%A8%A1%E5%9D%97&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">由python端口转发脚本看asyncore模块</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年12月5日 21:18" itemprop="datePublished">
+                    2013 十二月 05 21:18
+                </time>
+</div>
+<div class="article-tag">
+            阅读：5650
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PYTHON">Python</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/asyncore">asyncore</a>,
+                
+                <a class="tag-link" href="/tag/%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91">端口转发</a>,
+                
+                <a class="tag-link" href="/tag/socket">socket</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    asyncore模块是封装过的处理socket事件的模块，在文档中搜索可以看到这样的说明：
+</p>
+<blockquote>
+	Basic infrastructure for asynchronous socket service clients and servers.
+There are only two ways to have a program on a single processor do "more
+than one thing at a time".  Multi-threaded programming is the simplest and
+most popular way to do it, but there is another very different technique,
+that lets you have nearly all the advantages of multi-threading, without
+actually using multiple threads. it's really only practical if your program
+is largely I/O bound. If your program is CPU bound, then pre-emptive
+scheduled threads are probably what you really need. Network servers are
+rarely CPU-bound, however.
+If your operating system supports the select() system call in its I/O
+library (and nearly all do), then you can use it to juggle multiple
+communication channels at once; doing other work while your I/O is taking
+place in the "background."  Although this strategy can seem strange and
+complex, especially at first, it is in many ways easier to understand and
+control than multi-threaded programming. The module documented here solves
+many of the difficult problems for you, making the task of building
+sophisticated high-performance network servers and clients a snap.
+</blockquote>
+<p>
+	    大概意思是，如果你的程序想在同一时间做一件一上的事情，多线程是最快也最普遍的方式，但还有一个方式，在I/O流量很大的时候特别实用。如果你的操作系统支持select函数，你就可以让I/O在后台读写。这个模块听起来很复杂，但实际上有很多方式可以理解它，这个文档帮你解决了这些问题。
+</p>
+<p>
+	    我感觉这个模块应该是一个以事件驱动的异步I/O，跟C++的事件选择模型类似。每当发生了读、写事件后，会交由我们重写的事件函数进行处理。
+</p>
+<p>
+	    我这里有一个使用<span>asyncore模块编写</span>端口转发脚本，从这个脚本可以大概了解<span>asyncore的基本使用。</span>
+</p>
+<p>
+<span>    在文章中，所说的客户端就是我们的电脑，服务端是转发到的地址。也就是客户端发送到这个脚本的信息，这个脚本转发到服务端上。<br>
+</br></span>
+</p>
+<p>
+	    首先，定义一个forwarder类：
+</p>
+<pre class="brush: python;auto-links: false;">class forwarder(asyncore.dispatcher):
+    def __init__(self, ip, port, remoteip,remoteport,backlog=5):
+        asyncore.dispatcher.__init__(self)
+        self.remoteip=remoteip
+        self.remoteport=remoteport
+        self.create_socket(socket.AF_INET,socket.SOCK_STREAM)
+        self.set_reuse_addr()
+        self.bind((ip,port))
+        self.listen(backlog)
+
+    def handle_accept(self):
+        conn, addr = self.accept()
+        # print '--- Connect --- '
+        sender(receiver(conn),self.remoteip,self.remoteport)</pre>
+    这个类继承自asyncore模块的dispatcher类（它就是我们的主要的类，其中包括了一些之后要重载的函数），构造函数获得5个参数，第1、2个参数是脚本监听的本地IP和端口，第3、4个参数是服务端的IP和端口。第5个参数是listen函数的参数，等待队列最大长度。
+<p>
+<br>
+</br></p>
+<p>
+	    如何使用这个类，只需要如下新建一个对象，把相应IP和端口传入，再进入loop即可：
+<pre class="brush: python;auto-links: false;">    forwarder(options.local_ip,options.local_port,options.remote_ip,options.remote_port)
+    asyncore.loop()</pre>
+    进入loop后相当于开启了一个守护线程，在后台一直运行着，等待socket事件的发生。
+</p>
+<p>
+	    因为我们这个脚本是端口转发工具，所以实际上运行的过程是：客户端连接这个脚本的端口，让后发送给这个端口的数据脚本自动转发到服务端地址和端口。所以，首先接收到的应该是连接消息（accept事件）。
+</p>
+<p>
+	    那么，当accept事件发生后，就进入了handle_accept函数中。所以我们看到，handle_accept函数实际上就是调用了accept函数接收了客户端连接对象和地址。获得了之后又新建了一个sender类对象，这个对象定义如下：
+<pre class="brush: python;auto-links: false;">class sender(asyncore.dispatcher):
+    def __init__(self, receiver, remoteaddr,remoteport):
+        asyncore.dispatcher.__init__(self)
+        self.receiver=receiver
+        receiver.sender=self
+        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.connect((remoteaddr, remoteport))
+
+    def handle_connect(self):
+        pass
+
+    def handle_read(self):
+        read = self.recv(4096)
+        # print '&lt;-- %04i'%len(read)
+        self.receiver.to_remote_buffer += read
+
+    def writable(self):
+        return (len(self.receiver.from_remote_buffer) &gt; 0)
+
+    def handle_write(self):
+        sent = self.send(self.receiver.from_remote_buffer)
+        # print '--&gt; %04i'%sent
+        self.receiver.from_remote_buffer = self.receiver.from_remote_buffer[sent:]
+
+    def handle_close(self):
+        self.close()
+        self.receiver.close()</pre>
+    这个类也是继承自asyncore.dispatcher，它的构造函数接收3个参数，分别是recv对象（这个之后说到），远端地址，对应端口。
+</p>
+<p>
+	    函数中又新建了一个socket，这个socket就是和服务端端口通信的socket，然后调用connect连接这个端口。
+</p>
+<p>
+	    之后其实也是进入了一个等待消息的过程，因为我们发送了一个connect，所以下一次接收到的消息应该是connect，而handle_connect是一个pass掉的函数。没有执行任何内容。
+</p>
+<p>
+	    在连接完成后，我们就相当于建立好了一个端口转发的通道。当客户端向这个脚本监听的端口发送数据包时，它就会自动转发到服务端端口上。服务端端口返回的数据包，会自动转发到客户端上。
+</p>
+<p>
+	    回到构造函数的第1个参数，我们在forwarder类函数中可以看到，传入的是一个receiver(conn)对象，receiver也是一个类，我们来看看这个类的定义：
+<pre class="brush: python;auto-links: false;">class receiver(asyncore.dispatcher):
+    def __init__(self,conn):
+        asyncore.dispatcher.__init__(self,conn)
+        self.from_remote_buffer=''
+        self.to_remote_buffer=''
+        self.sender=None
+
+    def handle_connect(self):
+        pass
+
+    def handle_read(self):
+        read = self.recv(4096)
+        # print '%04i --&gt;'%len(read)
+        self.from_remote_buffer += read
+
+    def writable(self):
+        return (len(self.to_remote_buffer) &gt; 0)
+
+    def handle_write(self):
+        sent = self.send(self.to_remote_buffer)
+        # print '%04i &lt;--'%sent
+        self.to_remote_buffer = self.to_remote_buffer[sent:]
+
+    def handle_close(self):
+        self.close()
+        if self.sender:
+            self.sender.close()</pre>
+    它也是继承了asyncore.dispatcher，构造函数只接收一个参数，就是connect的返回值，一个连接对象。
+</p>
+<p>
+	    实际上这个对象它就是监听、处理与客户端的通信，而之前说的sender对象是监听、处理与服务端的通信。
+</p>
+<p>
+	    大家可以查看处理这些socket消息的函数，来深入理解整个转发的过程，我这里就不多说了。
+</p>
+<p>
+	    文档在<a href="http://docs.python.org/2/library/asyncore.html" target="_blank">http://docs.python.org/2/library/asyncore.html</a> 大家可以参考。
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1520">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./由python端口转发脚本看asyncore模块  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.777gou.com" target="_blank">趣购网</a>
+<time datetime="2013年12月6日 11:57" itemprop="datePublished">
+                            2013 十二月 06 11:57
+                        </time>
+<a href="javascript:reply_to('1520', '趣购网')">回复</a>
+</p>
+<p class="comment-meta">还不错，支持一下哈</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="46d62a3f2180535885e8c37f6ecf632daccea971"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./由python端口转发脚本看asyncore模块  离别歌/46d62a3f2180535885e8c37f6ecf632daccea971"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="293">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="KAzxRRxsPtsBLOzntszk5rpErIxq3FUmiUU3FlJHggm0LtXChJ34E5rJAM0yM9Jw"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./由python端口转发脚本看asyncore模块  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./由python端口转发脚本看asyncore模块  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

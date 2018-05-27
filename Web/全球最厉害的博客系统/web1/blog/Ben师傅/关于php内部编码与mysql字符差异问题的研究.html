@@ -1,0 +1,520 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./关于php内部编码与mysql字符差异问题的研究/font-awesome.min.css" rel="stylesheet"/>
+<link href="./关于php内部编码与mysql字符差异问题的研究/screen.css" rel="stylesheet"/>
+<link href="./关于php内部编码与mysql字符差异问题的研究/prism_okaidia.css" rel="stylesheet"/>
+<link href="./关于php内部编码与mysql字符差异问题的研究/bendawang.css" rel="stylesheet"/>
+<script src="./关于php内部编码与mysql字符差异问题的研究/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./关于php内部编码与mysql字符差异问题的研究/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./关于php内部编码与mysql字符差异问题的研究/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="phpmysql">关于php内部编码与mysql字符差异问题的研究</h1>
+<h2 id="0x01">0x01 引入</h2>
+<p style="max-width:100%;height:auto;">最近稍稍研究了下关于PHP的内部编码的问题，以及mysql的字符差异的问题，分享下心得，如果有误请大家及时指正。
+至于为什么要介绍mysql字符差异问题，是因为普遍将其原因归纳于PHP编码与mysql的UTF-8编码不统一，但实际上这个只是mysql单方面的原因而与PHP的编码方式无关。
+另外本文不涉及编码的具体方式。</p>
+<p style="max-width:100%;height:auto;">先引入如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$m="可";
+echo strlen($m);  
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">问这里输入几？2还是3呢？
+不多废话直接开始测试下就知道了，截图如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./关于php内部编码与mysql字符差异问题的研究/20161123184857082" style="max-width:100%;height:auto;"/><br/></p>
+<blockquote>
+<p style="max-width:100%;height:auto;">PS:enca是linux下一款用于探测和修改文件编码方式的软件</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">可以看到，在文件的编码方式为<code style="max-width:100%;height:auto;">UTF-8</code>的时候，代码输出为3，而文件编码为<code style="max-width:100%;height:auto;">GB2312</code>的时候，代码输入为2。
+也就是说，这里这个该文件的编码类型决定了文件中那个 "<strong>可</strong>" 字的长度。那么原因是什么呢？</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">PS:平时linux和windows下文本文件默认都是以UTF-8的形式保存</p>
+</blockquote>
+<h2 id="0x02php">0x02 关于PHP的编码问题</h2>
+<h4 id="21php">2.1 PHP内部编码</h4>
+<p style="max-width:100%;height:auto;">这里需要说明一下，首先PHP内部的字符串只是一个字节序列，并不会保留任何的编码信息，所以可以说说PHP是不关心编码的，即PHP里一个字符就是一字节。
+所以你的字符串啊，各种来源的输入啊之类的PHP都是可以识别的，至于能不能显示，能不能处理又是另一回事了。因为无论你在文本编辑器中保存了什么、或是从数据库中得到它，它已经被编码了，就是说已经被决定了占用了几个字节了，在传递给PHP的时候就已经是以字节的形式传递过去了。
+所以说对于PHP来说，一个字符及对应一个字节，换言之，我们可以通过控制数据指针访问到字符串的每一个字节。</p>
+<p style="max-width:100%;height:auto;">而PHP对编码的唯一要求就是它要能够保存为ascii的形式，因为它需要从中获取指令。但是这一点我们并不需要担心，因为大部分编码方式都向下兼容ascii。但是也有例外，比如<code style="max-width:100%;height:auto;">UTF-16</code>就不兼容<code style="max-width:100%;height:auto;">ascii</code>，所以我们不能用<code style="max-width:100%;height:auto;">UTF-16</code>来保存PHP源代码。</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">PS:UTF即 Unicode Translation Format ，即把Unicode转作某种格式的意思。标准的UNICODE编码又称UTF-16。所以UTF-16也就可以理解为通常意义上说的UNicode编码。非要说二者区别的话，也就是UTF-16的本质算是一种存储方式吧。</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">如下图做个测试，我们以<code style="max-width:100%;height:auto;">UNICODE</code>保存PHP源码，然后访问如下图：
+    <br/><img alt="这里写图片描述" data-action="zoom" src="./关于php内部编码与mysql字符差异问题的研究/20161123185239899" style="max-width:100%;height:auto;"/><br/>
+发现PHP都没有被解析直接返回了源码。即PHP源文件已经无法被正常解析了。也就是说我们可以将PHP源代码保存为任何ASCII兼容的编码，因为如果编码的前128个代码点与ASCII相同，那么就意味着PHP可以解析它。或是说PHP支持该编码方式。</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">PS:一个语言支持某个编码方式是什么意思？例如，Javascript支持Unicode，事实上，Javascript中的任何字符串都是Unicode编码的，即不能在Javascript中有一个不是Unicode编码的字符串。其他语言只是编码感知。在内部，它们以特定的编码，通常是Unicode存储字符串。反过来，他们需要被告知或尝试检测与文本有关的一切的编码。他们需要知道保存源代码的编码，他们应该读取的文件的编码，要输出文本的编码，并且它们根据需要转换编码，其中一些表现形式是作为中间人的Unicode，很显然的代表就是python。</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">那么到这儿我们就可以理解引入部分那个例子了。
+因为对于PHP来说，每一个字符就是一个字节，所以<code style="max-width:100%;height:auto;">strlen</code>和内部编码无关，因此它将计算字节数，而不是字符数。所以该文件的编码类型决定了文件中那个 "<strong>可</strong>" 字所占用的字节数，从而决定了<code style="max-width:100%;height:auto;">strlen</code>计算的数目。
+所以这些“可读的字符”的东西是我们人自己的事情，但是PHP语言其实并不在乎。</p>
+<h4 id="22php">2.2 关于PHP的乱码问题</h4>
+<p style="max-width:100%;height:auto;">有了上面的知识，那么我们可以发现其实PHP内部的编码方式是什么并不是问题关键，问题的关键在于内外内外编码方式的差异。因为PHP不试图解释，转换，编码或以其他方式干扰获取到的字节序列。 该文件甚至可以包含二进制数据或是PHP内部编码并不支持的<code style="max-width:100%;height:auto;">UNICODE</code>编码的文件，PHP不在乎这些。
+但内部和外部编码必须匹配，譬如我们的汉字要想输入在html页面上，需要设置<code style="max-width:100%;height:auto;">meta</code>或是用<code style="max-width:100%;height:auto;">header</code>，将输出的编码方式设置位支持汉字的编码方式。
+所以乱码问题总结就是一个，<strong>内部编码与外部编码差异</strong>。</p>
+<p style="max-width:100%;height:auto;">所以最简单的解决方案是啥？如果是正常情况下使用时：</p>
+<ul>
+<li>将PHP的内部编码设置为UTF-8。</li>
+<li>将所有源文件保存为UTF-8。</li>
+<li>使用UTF-8作为输出编码（不要忘记发送合适的内容类型头）。</li>
+<li>将数据库连接设置为使用UTF-8（在MySQL中为SET NAMES UTF8）。</li>
+<li>如果可能的话配置一切编码为UTF-8。</li>
+</ul>
+<blockquote>
+<p style="max-width:100%;height:auto;">PS:这里为啥是UTF-8而不是别的？因为就我查阅的资料来看，它可以表示所有Unicode字符，因此可以取代所有现有的7位和8位编码，并且因为它与ASCII是二进制兼容的，即每个有效的ASCII字符串也是一个有效的UTF-8字符串。</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">这里再提及一下关于PHP中设置编码的函数，对单个字符串编码的函数就不赘述了，这里只说常用的配置整体环境编码的<code style="max-width:100%;height:auto;">iconv_set_encoding</code>，过去常用这个来配置默认编码方式，</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">bool iconv_set_encoding ( string $type , string $charset )
+type 的值可以是以下其中任意一个：
+    input_encoding
+    output_encoding
+    internal_encoding
+</code></pre>
+<p style="max-width:100%;height:auto;">对应与<code style="max-width:100%;height:auto;">PHP.ini</code>中的<code style="max-width:100%;height:auto;">iconv.input_encoding</code>、<code style="max-width:100%;height:auto;">iconv.output_encoding</code>、<code style="max-width:100%;height:auto;">iconv.internal_encoding</code>。
+但是由于上述三个在<code style="max-width:100%;height:auto;">PHP5.6</code>之后就已经废弃，三者被统一被<code style="max-width:100%;height:auto;">default_charset</code>代替，所以没必要再介绍了，而且现在大部分PHP环境的都是5.6以上了。
+所以就这里说说<code style="max-width:100%;height:auto;">default_charset</code>，即默认编码方式，简单来说就是在<code style="max-width:100%;height:auto;">Content-type：xxxx</code>中输出的默认的字符编码，设置了这个，<code style="max-width:100%;height:auto;">Content-type</code>就会是设置的值。默认情况下是<code style="max-width:100%;height:auto;">ISO8859-1</code>，通常叫做<code style="max-width:100%;height:auto;">Latin-1</code>。但通常我们都会修改为<code style="max-width:100%;height:auto;">UTF-8</code>。</p>
+<h2 id="0x03mysqlutf8">0x03 MYSQL的UTF-8编码与字符差异</h2>
+<h4 id="31mysqlutf8">3.1 MYSQL的UTF-8编码</h4>
+<p style="max-width:100%;height:auto;">为什么这里要单挑出<code style="max-width:100%;height:auto;">UTF-8</code>来讲，因为在MYSQL中除了<code style="max-width:100%;height:auto;">UTF-8</code>编码，其他编码都和普通一样没有赘述的必要。
+MySQL的<code style="max-width:100%;height:auto;">UTF-8</code>实际上是完整的<code style="max-width:100%;height:auto;">UTF-8</code>字符集的大部分实现，而非完整实现。具体来说，MySQL的<code style="max-width:100%;height:auto;">UTF-8</code>数据编码最多使用3个字节，而编码完整的UTF-8字符集需要4个字节。所以如果需要支持例如星形符号等需要四字节编码的字符，MySQL的<code style="max-width:100%;height:auto;">UTF-8</code>就无力了。但是从MySQL 5.5.3起，增加了对<code style="max-width:100%;height:auto;">utf8mb4</code>字符集的支持，每个字符使用最多4个字节，从而支持完整的<code style="max-width:100%;height:auto;">UTF-8</code>字符集。因此，如果使用<code style="max-width:100%;height:auto;">MySQL 5.5.3</code>或更高版本，一般设置编码为<code style="max-width:100%;height:auto;">utf8mb4</code>而不是<code style="max-width:100%;height:auto;">UTF-8</code>。
+以上便是关于MYSQL的UTF-8编码的简介。</p>
+<h4 id="32mysql">3.2 MYSQL的字符差异问题</h4>
+<p style="max-width:100%;height:auto;">实际上这个在<code style="max-width:100%;height:auto;">HITCON 2016</code>的<code style="max-width:100%;height:auto;">babytrick</code>题目最后用到了这个，但是可能相对来说更关注<code style="max-width:100%;height:auto;">__wakeup</code>失效的漏洞了，关于最后的绕过的解释很多WP都把原因归为这里PHP不是UTF-8，而对应的MYSQL执行了<code style="max-width:100%;height:auto;">mysql_query("SET names utf8")</code>操作，所以产生的MYSQL字符差异。
+但是就通过上述关于PHP内部编码的分析，我们可以知道，其实这里和PHP内部编码没有关系的，而且题目并没有明确的地方有说明PHP的编码方式。但是问题关键还是在这个问题上，无论PHP是什么编码，根据之前的分析，都不会影响到MYSQL。这样光说也说不清出，直接看下面的例子：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$con = mysql_connect(&amp;apos;localhost&amp;apos;,&amp;apos;root&amp;apos;,&amp;apos;&amp;apos;);
+mysql_query("set names utf8");
+mysql_select_db("ctf");
+
+if(stripos($_GET[&amp;apos;name&amp;apos;],&amp;apos;bendawang&amp;apos;)!==false){
+    $name = &amp;apos;GET OUT!&amp;apos;;
+}
+else{
+    $name=$_GET[&amp;apos;name&amp;apos;];
+}
+$sql = "select * from admin where username=&amp;apos;$name&amp;apos;";
+$result = mysql_query($sql);
+$num = mysql_num_rows($result);
+if($num&gt;0){
+    echo &amp;apos;&lt;h1&gt;Success!&lt;/h1&gt;&amp;apos;;
+    print_r(mysql_fetch_array($result));
+}
+else{
+    echo "GET OUT!";
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">这是admin的表结构</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./关于php内部编码与mysql字符差异问题的研究/20161123185313853" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">我们通过某种方式提前知道了<code style="max-width:100%;height:auto;">admin</code>表里面有一条记录的<code style="max-width:100%;height:auto;">username</code>字段值为<code style="max-width:100%;height:auto;">Bendawang</code>，但是我们要想办法绕过<code style="max-width:100%;height:auto;">stripos</code>的检测。
+先试一试如下：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./关于php内部编码与mysql字符差异问题的研究/20161123185322734" style="max-width:100%;height:auto;"/><br/>
+果然不行，那么我们试试这个。</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./关于php内部编码与mysql字符差异问题的研究/20161123185330338" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">发现成功绕过并且得到结果了。
+那么这是什么原因呢？真的是因为PHP和MYSQL的编码方式的差异吗？
+此时，我们可以查看下此时执行的mysql日志</p>
+<p style="max-width:100%;height:auto;">能够看出实际上PHP还是把<code style="max-width:100%;height:auto;">À</code>（<code style="max-width:100%;height:auto;">utf-8 byte</code>为<code style="max-width:100%;height:auto;">%C3 %80</code>）传过去了，所以说实际上这里和PHP的编码并没有关系，那么也就是说这个就只是单纯的mysql的内部的问题。</p>
+<p style="max-width:100%;height:auto;">我们再换一种验证方式。
+现在，我们再往表里插上这样两条数据如下：</p>
+<pre><code class="sql language-sql" style="max-width:100%;height:auto;">insert into admin values(unhex(&amp;apos;62656E646177616E67&amp;apos;),&amp;apos;1&amp;apos;),(unhex(&amp;apos;62656E64C38077616E67&amp;apos;),&amp;apos;2&amp;apos;);
+</code></pre>
+<p style="max-width:100%;height:auto;">其中<code style="max-width:100%;height:auto;">unhex(&amp;apos;62656E646177616E67&amp;apos;)=bendawang</code>，<code style="max-width:100%;height:auto;">unhex(&amp;apos;62656E64C38077616E67&amp;apos;)=bendÀwang</code>，插入完成后如下图：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./关于php内部编码与mysql字符差异问题的研究/20161123185342297" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">现在我么来执行这么几条指令来观察下：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./关于php内部编码与mysql字符差异问题的研究/20161123185350078" style="max-width:100%;height:auto;"/><br/>
+不知道大家看出蹊跷来没有，在查询的时候mysql默认<code style="max-width:100%;height:auto;">bendawang</code>和<code style="max-width:100%;height:auto;">bendÀwang</code>是等效的，但是如果真的相比较却又是不同的。
+就好比PHP的弱类型比较一样，也可以理解为MYSQL一种牺牲安全性的人性化设计，考虑到不同国家的编码方式不一样。
+就好比你在浏览器里面输入<code style="max-width:100%;height:auto;">http://www。baidu。com</code>仍然可以访问到<code style="max-width:100%;height:auto;">http://www.baidu.com</code>一样。</p>
+<p style="max-width:100%;height:auto;">所以这里我总结了一下可以这样利用的MYSQL字符。如下（重复就没有整理了）：
+列1|列2
+-|-
+À|a
+Ç|c
+È|e
+Ì|i
+Ñ|n
+Ò|o
+Š|s
+Ù|u
+ý|y
+Ž|z</p>
+<h4 id="33">3.3 补充</h4>
+<p style="max-width:100%;height:auto;">最后还要说明下我们在刚开始插入数据的时候执行的语句是</p>
+<pre><code class="sql language-sql" style="max-width:100%;height:auto;">insert into admin values(unhex(&amp;apos;62656E646177616E67&amp;apos;),&amp;apos;1&amp;apos;),(unhex(&amp;apos;62656E64C38077616E67&amp;apos;),&amp;apos;2&amp;apos;);
+</code></pre>
+<p style="max-width:100%;height:auto;">为什么不执行下面这个语句呢？</p>
+<pre><code class="sql language-sql" style="max-width:100%;height:auto;">insert into admin values(&amp;apos;bendawang&amp;apos;,&amp;apos;1&amp;apos;),(&amp;apos;bendÀwang&amp;apos;,&amp;apos;2&amp;apos;)
+</code></pre>
+<p style="max-width:100%;height:auto;">因为我的演示环境的windows下的mysql的shell环境，对于不识别的字符统统换成问号<code style="max-width:100%;height:auto;">?</code>(0x3F)，也就是说我们所输入的<code style="max-width:100%;height:auto;">À</code>就不再是<code style="max-width:100%;height:auto;">%C3 %80</code>了。如下：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./关于php内部编码与mysql字符差异问题的研究/20161123185424250" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">但是如果换成linux下的mysql的shell环境就可以用第二种插入方式，如下：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./关于php内部编码与mysql字符差异问题的研究/20161123185436480" style="max-width:100%;height:auto;"/><br/>
+这也是编码方式的问题。linux的shell默认是utf-8编码，windows的shell默认编码是windows-1252</p>
+<h2 id="0x04">0x04 参考资料</h2>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://kunststube.net/encoding/
+http://www.i18nqa.com/debug/utf8-debug.html
+http://stackoverflow.com/questions/7861358/strange-characters-in-database-text-%C3%83-%C3%83-%C2%A2-%C3%A2-%E2%82%AC
+https://vigilance.fr/vulnerability/MySQL-SQL-injection-via-multi-byte-characters-5885
+</code></pre>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./关于php内部编码与mysql字符差异问题的研究/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="phpmysql">关于php内部编码与mysql字符差异问题的研究</h1>
+<h2 id="0x01">0x01 引入</h2>
+<p style="max-width:100%;height:auto;">最近稍稍研究了下关于PHP的内部编码的问题，以及mysql的字符差异的问题，分享下心得，如果有误请大家及时指正。
+至于为什么要介绍mysql字符差异问题，是因为普遍将其原因归纳于PHP编码与mysql的UTF-8编码不统一，但实际上这个只是mysql单方面的原因而与PHP的编码方式无关。
+另外本文不涉及编码的具体方式。</p>
+<p style="max-width:100%;height:auto;">先引入如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$m="可";
+echo strlen($m);  
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">问这里输入几？2还是3呢？
+不多废话直接开始测试下就知道了，截图如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./关于php内部编码与mysql字符差异问题的研究/20161123184857082" style="max-width:100%;height:auto;"/><br/></p>
+<blockquote>
+<p style="max-width:100%;height:auto;">PS:enca是linux下一款用于探测和修改文件编码方式的软件</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">可以看到，在文件的编码方式为<code style="max-width:100%;height:auto;">UTF-8</code>的时候，代码输出为3，而文件编码为<code style="max-width:100%;height:auto;">GB2312</code>的时候，代码输入为2。
+也就是说，这里这个该文件的编码类型决定了文件中那个 "<strong>可</strong>" 字的长度。那么原因是什么呢？</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">PS:平时linux和windows下文本文件默认都是以UTF-8的形式保存</p>
+</blockquote>
+<h2 id="0x02php">0x02 关于PHP的编码问题</h2>
+<h4 id="21php">2.1 PHP内部编码</h4>
+<p style="max-width:100%;height:auto;">这里需要说明一下，首先PHP内部的字符串只是一个字节序列，并不会保留任何的编码信息，所以可以说说PHP是不关心编码的，即PHP里一个字符就是一字节。
+所以你的字符串啊，各种来源的输入啊之类的PHP都是可以识别的，至于能不能显示，能不能处理又是另一回事了。因为无论你在文本编辑器中保存了什么、或是从数据库中得到它，它已经被编码了，就是说已经被决定了占用了几个字节了，在传递给PHP的时候就已经是以字节的形式传递过去了。
+所以说对于PHP来说，一个字符及对应一个字节，换言之，我们可以通过控制数据指针访问到字符串的每一个字节。</p>
+<p style="max-width:100%;height:auto;">而PHP对编码的唯一要求就是它要能够保存为ascii的形式，因为它需要从中获取指令。但是这一点我们并不需要担心，因为大部分编码方式都向下兼容ascii。但是也有例外，比如<code style="max-width:100%;height:auto;">UTF-16</code>就不兼容<code style="max-width:100%;height:auto;">ascii</code>，所以我们不能用<code style="max-width:100%;height:auto;">UTF-16</code>来保存PHP源代码。</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">PS:UTF即 Unicode Translation Format ，即把Unicode转作某种格式的意思。标准的UNICODE编码又称UTF-16。所以UTF-16也就可以理解为通常意义上说的UNicode编码。非要说二者区别的话，也就是UTF-16的本质算是一种存储方式吧。</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">如下图做个测试，我们以<code style="max-width:100%;height:auto;">UNICODE</code>保存PHP源码，然后访问如下图：
+    <br/><img alt="这里写图片描述" data-action="zoom" src="./关于php内部编码与mysql字符差异问题的研究/20161123185239899" style="max-width:100%;height:auto;"/><br/>
+发现PHP都没有被解析直接返回了源码。即PHP源文件已经无法被正常解析了。也就是说我们可以将PHP源代码保存为任何ASCII兼容的编码，因为如果编码的前128个代码点与ASCII相同，那么就意味着PHP可以解析它。或是说PHP支持该编码方式。</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">PS:一个语言支持某个编码方式是什么意思？例如，Javascript支持Unicode，事实上，Javascript中的任何字符串都是Unicode编码的，即不能在Javascript中有一个不是Unicode编码的字符串。其他语言只是编码感知。在内部，它们以特定的编码，通常是Unicode存储字符串。反过来，他们需要被告知或尝试检测与文本有关的一切的编码。他们需要知道保存源代码的编码，他们应该读取的文件的编码，要输出文本的编码，并且它们根据需要转换编码，其中一些表现形式是作为中间人的Unicode，很显然的代表就是python。</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">那么到这儿我们就可以理解引入部分那个例子了。
+因为对于PHP来说，每一个字符就是一个字节，所以<code style="max-width:100%;height:auto;">strlen</code>和内部编码无关，因此它将计算字节数，而不是字符数。所以该文件的编码类型决定了文件中那个 "<strong>可</strong>" 字所占用的字节数，从而决定了<code style="max-width:100%;height:auto;">strlen</code>计算的数目。
+所以这些“可读的字符”的东西是我们人自己的事情，但是PHP语言其实并不在乎。</p>
+<h4 id="22php">2.2 关于PHP的乱码问题</h4>
+<p style="max-width:100%;height:auto;">有了上面的知识，那么我们可以发现其实PHP内部的编码方式是什么并不是问题关键，问题的关键在于内外内外编码方式的差异。因为PHP不试图解释，转换，编码或以其他方式干扰获取到的字节序列。 该文件甚至可以包含二进制数据或是PHP内部编码并不支持的<code style="max-width:100%;height:auto;">UNICODE</code>编码的文件，PHP不在乎这些。
+但内部和外部编码必须匹配，譬如我们的汉字要想输入在html页面上，需要设置<code style="max-width:100%;height:auto;">meta</code>或是用<code style="max-width:100%;height:auto;">header</code>，将输出的编码方式设置位支持汉字的编码方式。
+所以乱码问题总结就是一个，<strong>内部编码与外部编码差异</strong>。</p>
+<p style="max-width:100%;height:auto;">所以最简单的解决方案是啥？如果是正常情况下使用时：</p>
+<ul>
+<li>将PHP的内部编码设置为UTF-8。</li>
+<li>将所有源文件保存为UTF-8。</li>
+<li>使用UTF-8作为输出编码（不要忘记发送合适的内容类型头）。</li>
+<li>将数据库连接设置为使用UTF-8（在MySQL中为SET NAMES UTF8）。</li>
+<li>如果可能的话配置一切编码为UTF-8。</li>
+</ul>
+<blockquote>
+<p style="max-width:100%;height:auto;">PS:这里为啥是UTF-8而不是别的？因为就我查阅的资料来看，它可以表示所有Unicode字符，因此可以取代所有现有的7位和8位编码，并且因为它与ASCII是二进制兼容的，即每个有效的ASCII字符串也是一个有效的UTF-8字符串。</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">这里再提及一下关于PHP中设置编码的函数，对单个字符串编码的函数就不赘述了，这里只说常用的配置整体环境编码的<code style="max-width:100%;height:auto;">iconv_set_encoding</code>，过去常用这个来配置默认编码方式，</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">bool iconv_set_encoding ( string $type , string $charset )
+type 的值可以是以下其中任意一个：
+    input_encoding
+    output_encoding
+    internal_encoding
+</code></pre>
+<p style="max-width:100%;height:auto;">对应与<code style="max-width:100%;height:auto;">PHP.ini</code>中的<code style="max-width:100%;height:auto;">iconv.input_encoding</code>、<code style="max-width:100%;height:auto;">iconv.output_encoding</code>、<code style="max-width:100%;height:auto;">iconv.internal_encoding</code>。
+但是由于上述三个在<code style="max-width:100%;height:auto;">PHP5.6</code>之后就已经废弃，三者被统一被<code style="max-width:100%;height:auto;">default_charset</code>代替，所以没必要再介绍了，而且现在大部分PHP环境的都是5.6以上了。
+所以就这里说说<code style="max-width:100%;height:auto;">default_charset</code>，即默认编码方式，简单来说就是在<code style="max-width:100%;height:auto;">Content-type：xxxx</code>中输出的默认的字符编码，设置了这个，<code style="max-width:100%;height:auto;">Content-type</code>就会是设置的值。默认情况下是<code style="max-width:100%;height:auto;">ISO8859-1</code>，通常叫做<code style="max-width:100%;height:auto;">Latin-1</code>。但通常我们都会修改为<code style="max-width:100%;height:auto;">UTF-8</code>。</p>
+<h2 id="0x03mysqlutf8">0x03 MYSQL的UTF-8编码与字符差异</h2>
+<h4 id="31mysqlutf8">3.1 MYSQL的UTF-8编码</h4>
+<p style="max-width:100%;height:auto;">为什么这里要单挑出<code style="max-width:100%;height:auto;">UTF-8</code>来讲，因为在MYSQL中除了<code style="max-width:100%;height:auto;">UTF-8</code>编码，其他编码都和普通一样没有赘述的必要。
+MySQL的<code style="max-width:100%;height:auto;">UTF-8</code>实际上是完整的<code style="max-width:100%;height:auto;">UTF-8</code>字符集的大部分实现，而非完整实现。具体来说，MySQL的<code style="max-width:100%;height:auto;">UTF-8</code>数据编码最多使用3个字节，而编码完整的UTF-8字符集需要4个字节。所以如果需要支持例如星形符号等需要四字节编码的字符，MySQL的<code style="max-width:100%;height:auto;">UTF-8</code>就无力了。但是从MySQL 5.5.3起，增加了对<code style="max-width:100%;height:auto;">utf8mb4</code>字符集的支持，每个字符使用最多4个字节，从而支持完整的<code style="max-width:100%;height:auto;">UTF-8</code>字符集。因此，如果使用<code style="max-width:100%;height:auto;">MySQL 5.5.3</code>或更高版本，一般设置编码为<code style="max-width:100%;height:auto;">utf8mb4</code>而不是<code style="max-width:100%;height:auto;">UTF-8</code>。
+以上便是关于MYSQL的UTF-8编码的简介。</p>
+<h4 id="32mysql">3.2 MYSQL的字符差异问题</h4>
+<p style="max-width:100%;height:auto;">实际上这个在<code style="max-width:100%;height:auto;">HITCON 2016</code>的<code style="max-width:100%;height:auto;">babytrick</code>题目最后用到了这个，但是可能相对来说更关注<code style="max-width:100%;height:auto;">__wakeup</code>失效的漏洞了，关于最后的绕过的解释很多WP都把原因归为这里PHP不是UTF-8，而对应的MYSQL执行了<code style="max-width:100%;height:auto;">mysql_query("SET names utf8")</code>操作，所以产生的MYSQL字符差异。
+但是就通过上述关于PHP内部编码的分析，我们可以知道，其实这里和PHP内部编码没有关系的，而且题目并没有明确的地方有说明PHP的编码方式。但是问题关键还是在这个问题上，无论PHP是什么编码，根据之前的分析，都不会影响到MYSQL。这样光说也说不清出，直接看下面的例子：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$con = mysql_connect(&amp;apos;localhost&amp;apos;,&amp;apos;root&amp;apos;,&amp;apos;&amp;apos;);
+mysql_query("set names utf8");
+mysql_select_db("ctf");
+
+if(stripos($_GET[&amp;apos;name&amp;apos;],&amp;apos;bendawang&amp;apos;)!==false){
+    $name = &amp;apos;GET OUT!&amp;apos;;
+}
+else{
+    $name=$_GET[&amp;apos;name&amp;apos;];
+}
+$sql = "select * from admin where username=&amp;apos;$name&amp;apos;";
+$result = mysql_query($sql);
+$num = mysql_num_rows($result);
+if($num&gt;0){
+    echo &amp;apos;&lt;h1&gt;Success!&lt;/h1&gt;&amp;apos;;
+    print_r(mysql_fetch_array($result));
+}
+else{
+    echo "GET OUT!";
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">这是admin的表结构</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./关于php内部编码与mysql字符差异问题的研究/20161123185313853" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">我们通过某种方式提前知道了<code style="max-width:100%;height:auto;">admin</code>表里面有一条记录的<code style="max-width:100%;height:auto;">username</code>字段值为<code style="max-width:100%;height:auto;">Bendawang</code>，但是我们要想办法绕过<code style="max-width:100%;height:auto;">stripos</code>的检测。
+先试一试如下：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./关于php内部编码与mysql字符差异问题的研究/20161123185322734" style="max-width:100%;height:auto;"/><br/>
+果然不行，那么我们试试这个。</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./关于php内部编码与mysql字符差异问题的研究/20161123185330338" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">发现成功绕过并且得到结果了。
+那么这是什么原因呢？真的是因为PHP和MYSQL的编码方式的差异吗？
+此时，我们可以查看下此时执行的mysql日志</p>
+<p style="max-width:100%;height:auto;">能够看出实际上PHP还是把<code style="max-width:100%;height:auto;">À</code>（<code style="max-width:100%;height:auto;">utf-8 byte</code>为<code style="max-width:100%;height:auto;">%C3 %80</code>）传过去了，所以说实际上这里和PHP的编码并没有关系，那么也就是说这个就只是单纯的mysql的内部的问题。</p>
+<p style="max-width:100%;height:auto;">我们再换一种验证方式。
+现在，我们再往表里插上这样两条数据如下：</p>
+<pre><code class="sql language-sql" style="max-width:100%;height:auto;">insert into admin values(unhex(&amp;apos;62656E646177616E67&amp;apos;),&amp;apos;1&amp;apos;),(unhex(&amp;apos;62656E64C38077616E67&amp;apos;),&amp;apos;2&amp;apos;);
+</code></pre>
+<p style="max-width:100%;height:auto;">其中<code style="max-width:100%;height:auto;">unhex(&amp;apos;62656E646177616E67&amp;apos;)=bendawang</code>，<code style="max-width:100%;height:auto;">unhex(&amp;apos;62656E64C38077616E67&amp;apos;)=bendÀwang</code>，插入完成后如下图：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./关于php内部编码与mysql字符差异问题的研究/20161123185342297" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">现在我么来执行这么几条指令来观察下：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./关于php内部编码与mysql字符差异问题的研究/20161123185350078" style="max-width:100%;height:auto;"/><br/>
+不知道大家看出蹊跷来没有，在查询的时候mysql默认<code style="max-width:100%;height:auto;">bendawang</code>和<code style="max-width:100%;height:auto;">bendÀwang</code>是等效的，但是如果真的相比较却又是不同的。
+就好比PHP的弱类型比较一样，也可以理解为MYSQL一种牺牲安全性的人性化设计，考虑到不同国家的编码方式不一样。
+就好比你在浏览器里面输入<code style="max-width:100%;height:auto;">http://www。baidu。com</code>仍然可以访问到<code style="max-width:100%;height:auto;">http://www.baidu.com</code>一样。</p>
+<p style="max-width:100%;height:auto;">所以这里我总结了一下可以这样利用的MYSQL字符。如下（重复就没有整理了）：
+列1|列2
+-|-
+À|a
+Ç|c
+È|e
+Ì|i
+Ñ|n
+Ò|o
+Š|s
+Ù|u
+ý|y
+Ž|z</p>
+<h4 id="33">3.3 补充</h4>
+<p style="max-width:100%;height:auto;">最后还要说明下我们在刚开始插入数据的时候执行的语句是</p>
+<pre><code class="sql language-sql" style="max-width:100%;height:auto;">insert into admin values(unhex(&amp;apos;62656E646177616E67&amp;apos;),&amp;apos;1&amp;apos;),(unhex(&amp;apos;62656E64C38077616E67&amp;apos;),&amp;apos;2&amp;apos;);
+</code></pre>
+<p style="max-width:100%;height:auto;">为什么不执行下面这个语句呢？</p>
+<pre><code class="sql language-sql" style="max-width:100%;height:auto;">insert into admin values(&amp;apos;bendawang&amp;apos;,&amp;apos;1&amp;apos;),(&amp;apos;bendÀwang&amp;apos;,&amp;apos;2&amp;apos;)
+</code></pre>
+<p style="max-width:100%;height:auto;">因为我的演示环境的windows下的mysql的shell环境，对于不识别的字符统统换成问号<code style="max-width:100%;height:auto;">?</code>(0x3F)，也就是说我们所输入的<code style="max-width:100%;height:auto;">À</code>就不再是<code style="max-width:100%;height:auto;">%C3 %80</code>了。如下：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./关于php内部编码与mysql字符差异问题的研究/20161123185424250" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">但是如果换成linux下的mysql的shell环境就可以用第二种插入方式，如下：
+<br/><img alt="这里写图片描述" data-action="zoom" src="./关于php内部编码与mysql字符差异问题的研究/20161123185436480" style="max-width:100%;height:auto;"/><br/>
+这也是编码方式的问题。linux的shell默认是utf-8编码，windows的shell默认编码是windows-1252</p>
+<h2 id="0x04">0x04 参考资料</h2>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://kunststube.net/encoding/
+http://www.i18nqa.com/debug/utf8-debug.html
+http://stackoverflow.com/questions/7861358/strange-characters-in-database-text-%C3%83-%C3%83-%C2%A2-%C3%A2-%E2%82%AC
+https://vigilance.fr/vulnerability/MySQL-SQL-injection-via-multi-byte-characters-5885
+</code></pre>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./关于php内部编码与mysql字符差异问题的研究/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./关于php内部编码与mysql字符差异问题的研究/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./关于php内部编码与mysql字符差异问题的研究/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./关于php内部编码与mysql字符差异问题的研究/prism.js"></script>
+<script src="./关于php内部编码与mysql字符差异问题的研究/zooming.js"></script>
+<script src="./关于php内部编码与mysql字符差异问题的研究/Bendawang.js"></script>
+
+

@@ -1,0 +1,280 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>emlog自动备份插件泄露整站数据库备份漏洞 | 离别歌</title>
+<link href="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/styles.css" rel="stylesheet"/>
+<link href="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/style.css" rel="stylesheet"/>
+<link href="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/jquery.min.js"></script>
+<link href="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/code.css" rel="stylesheet"/>
+<link href="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/button.css" rel="stylesheet"/>
+<link href="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/emlog-auto-backup-plugin-database-download.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/emlog-auto-backup-plugin-database-download.html&amp;text=emlog%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E6%8F%92%E4%BB%B6%E6%B3%84%E9%9C%B2%E6%95%B4%E7%AB%99%E6%95%B0%E6%8D%AE%E5%BA%93%E5%A4%87%E4%BB%BD%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/emlog-auto-backup-plugin-database-download.html&amp;title=emlog%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E6%8F%92%E4%BB%B6%E6%B3%84%E9%9C%B2%E6%95%B4%E7%AB%99%E6%95%B0%E6%8D%AE%E5%BA%93%E5%A4%87%E4%BB%BD%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/emlog-auto-backup-plugin-database-download.html&amp;is_video=false&amp;description=emlog%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E6%8F%92%E4%BB%B6%E6%B3%84%E9%9C%B2%E6%95%B4%E7%AB%99%E6%95%B0%E6%8D%AE%E5%BA%93%E5%A4%87%E4%BB%BD%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=emlog%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E6%8F%92%E4%BB%B6%E6%B3%84%E9%9C%B2%E6%95%B4%E7%AB%99%E6%95%B0%E6%8D%AE%E5%BA%93%E5%A4%87%E4%BB%BD%E6%BC%8F%E6%B4%9E&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/emlog-auto-backup-plugin-database-download.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/emlog-auto-backup-plugin-database-download.html&amp;title=emlog%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E6%8F%92%E4%BB%B6%E6%B3%84%E9%9C%B2%E6%95%B4%E7%AB%99%E6%95%B0%E6%8D%AE%E5%BA%93%E5%A4%87%E4%BB%BD%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/emlog-auto-backup-plugin-database-download.html&amp;title=emlog%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E6%8F%92%E4%BB%B6%E6%B3%84%E9%9C%B2%E6%95%B4%E7%AB%99%E6%95%B0%E6%8D%AE%E5%BA%93%E5%A4%87%E4%BB%BD%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/emlog-auto-backup-plugin-database-download.html&amp;title=emlog%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E6%8F%92%E4%BB%B6%E6%B3%84%E9%9C%B2%E6%95%B4%E7%AB%99%E6%95%B0%E6%8D%AE%E5%BA%93%E5%A4%87%E4%BB%BD%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/emlog-auto-backup-plugin-database-download.html&amp;title=emlog%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E6%8F%92%E4%BB%B6%E6%B3%84%E9%9C%B2%E6%95%B4%E7%AB%99%E6%95%B0%E6%8D%AE%E5%BA%93%E5%A4%87%E4%BB%BD%E6%BC%8F%E6%B4%9E"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/emlog-auto-backup-plugin-database-download.html&amp;name=emlog%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E6%8F%92%E4%BB%B6%E6%B3%84%E9%9C%B2%E6%95%B4%E7%AB%99%E6%95%B0%E6%8D%AE%E5%BA%93%E5%A4%87%E4%BB%BD%E6%BC%8F%E6%B4%9E&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">emlog自动备份插件泄露整站数据库备份漏洞</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年10月27日 00:52" itemprop="datePublished">
+                    2015 十月 27 00:52
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3127
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/emlog">emlog</a>,
+                
+                <a class="tag-link" href="/tag/%E8%84%B1%E8%A3%A4">脱裤</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>这是我第三次在自己博客里找到致命漏洞了。第一次是一个第三方存储，解决方案是删了。第二次是"EMLOG相册"，也就是这篇文章：<a href="https://www.leavesongs.com/PENETRATION/emlog-important-plugin-getshell.html"><a href="https://www.leavesongs.com/PENETRATION/emlog-important-plugin-getshell.html">https://www.leavesongs.com/PENETRATION/emlog-important-plugin-getshell.html</a></a>。第三次就是这次，我写了一个利用脚本，直接把自己博客的整站备份文件下下来了，包括管理员密码。</p>
+<p>导致漏洞的是这个插件：<a href="http://www.emlog.net/plugin/14"><a href="http://www.emlog.net/plugin/14">http://www.emlog.net/plugin/14</a></a> 。其id为14，也是emlog存在较早的插件了，作者是emlog大版主KLLER。</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/e20d1444323596.png"><img alt="emlog插件：自动备份并发送到邮箱_-_emlog个人博客系统_基于php的blog博客程序及CMS建站系统.png" src="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/thum-e20d1444323596.png"/></a></p>
+<p>说说漏洞成因。</p>
+<p>这个插件是自动备份用的。它在前端放一个ajax控件，在每次用户访问时请求一次插件，插件检查一下上次备份的文件时间，如果相隔时间超过一定值，那么就再次进行备份。通过这个方法来达到“自动备份”的效果。</p>
+<p>看代码，kl_auto_backup_and_mail_do.php，这就是ajax请求的文件，是不限制权限的。</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nv">$is_reproduct</span> <span class="o">=</span> <span class="k">false</span><span class="p">;</span>
+<span class="k">echo</span> <span class="nx">KL_AUTO_BACKUP_AND_MAIL_THE_TIME</span><span class="o">.</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">;</span>
+<span class="k">if</span><span class="p">(</span><span class="nx">KL_AUTO_BACKUP_AND_MAIL_LAST_BACKUP_FILE</span> <span class="o">!=</span> <span class="s1">''</span> <span class="o">&amp;&amp;</span> <span class="nb">file_exists</span><span class="p">(</span><span class="nx">KL_AUTO_BACKUP_AND_MAIL_LAST_BACKUP_FILE</span><span class="p">))</span>
+<span class="p">{</span>
+    <span class="nv">$delay_time</span> <span class="o">=</span> <span class="nb">time</span><span class="p">()</span> <span class="o">-</span> <span class="nb">filemtime</span><span class="p">(</span><span class="nx">KL_AUTO_BACKUP_AND_MAIL_LAST_BACKUP_FILE</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="nv">$delay_time</span> <span class="o">&gt;</span> <span class="nb">intval</span><span class="p">(</span><span class="nx">KL_AUTO_BACKUP_AND_MAIL_THE_TIME</span><span class="p">))</span> <span class="nv">$is_reproduct</span> <span class="o">=</span> <span class="k">true</span><span class="p">;</span>
+    <span class="k">echo</span> <span class="nv">$delay_time</span><span class="p">;</span>
+<span class="p">}</span><span class="k">else</span><span class="p">{</span>
+    <span class="nv">$is_reproduct</span> <span class="o">=</span> <span class="k">true</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>$is_reproduct表示是否备份，KL_AUTO_BACKUP_AND_MAIL_THE_TIME是临界时间，KL_AUTO_BACKUP_AND_MAIL_LAST_BACKUP_FILE是上次备份的文件名。</p>
+<p>如果KL_AUTO_BACKUP_AND_MAIL_LAST_BACKUP_FILE存在，进入if语句。判断现在时间和上次备份时间的差是否大于临界时间，如果大于则将$is_reproduct设为true。最后会输出$delay_time。</p>
+<p>$delay_time是个很重要的值，它代表着“当前时间”和上次备份的文件的“创建时间”之差。而“当前时间”我们是知道的，通过这里输出的$delay_time，我们就可以计算出上次备份文件的创建时间。</p>
+<p>这个时间很重要，后面会用到。 </p>
+<p>往后看代码： </p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/72ff1444325012.png"><img alt="kl_auto_backup_and_mail_do_php_—_www.png" src="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/thum-72ff1444325012.png"/></a> </p>
+<p>若$is_reproduct为true则进入if语句，并删除上一次的备份文件（严格来说是上上一次的备份文件，此处不影响后面的漏洞利用过程）。之后，它将此时的时间翻来覆去计算为一个文件名，并将所有数据库data写入了这个文件。</p>
+<p>归根结底，文件名是和时间戳一一对应的。那么反过来，只要知道这个文件的创建时间，那么就可以反推出文件名。</p>
+<p>而通过之前的分析，我们可以得出上一次创建的备份文件的创建时间，那么其实就可以推出他的文件名了。</p>
+<p>那么，这样就造成了一个“备份文件名可被准确计算”的漏洞，造成整站数据库备份泄露。</p>
+<p>但漏洞利用还是有几处不稳定的地方：</p>
+<ol>
+<li>备份文件创建时，计算当前时间和最后文件创建好linux系统里的文件mtime不一定相等，因为中间还执行了sql语句耽误了一些时间，所以文件名的时间不一定能准确预测，但差距不会太大，一两秒而已。</li>
+<li>利用时http传输消耗一些时间，导致我们获得的now time和服务器上获取的time()不一定相等，有一定误差。</li>
+<li>我们的时区和网站服务器的时区不一定相等，而网站所在服务器是怎样设置时区的我们不知道，所以需要一个个尝试。</li>
+</ol>
+<p>这三个不稳定的地方，导致我们的POC需要暴力跑个十几、上百次才能找到最终的备份文件，但跑的成本很低，对攻击者来说压力不大，可以接受。<br>
+KLLER自身不知道为何没有跑出文件，但我手工翻了下emlog论坛，找到了三个受害者：</br></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/7ccb1444325947.png"><img alt="1__phithon_phithon____pro_python_exp_emlog__zsh__和_截图.png" src="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/thum-7ccb1444325947.png"/></a></p>
+<p>工具跑了差不多50次，跑出了最终的备份文件：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/dc3e1444325944.png"><img alt="1__phithon_phithon____pro_python_exp_emlog__zsh__和_管理中心_-_离别歌.png" src="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/thum-dc3e1444325944.png"/></a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/7d6b1444325945.png"><img alt="1__phithon_phithon____pro_python_exp_emlog__zsh__和_截图 2.png" src="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/thum-7d6b1444325945.png"/></a></p>
+<p>这个洞还属于0day漏洞，影响虽说有限，但威力巨大，一下可以拿到整站的数据库，值得关注。</p>
+<p>解决方法：</p>
+<ol>
+<li>暂时删除该插件</li>
+<li>服务器/WAF对于所有后缀为.sql的请求都拦截</li>
+<li>将$defname修改为随机字符串，如：</li>
+</ol>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="cm">/*</span>
+<span class="cm">* getRandStr是emlog自带的随机字符串生成函数，利用随机字符串即可避免此问题</span>
+<span class="cm">*/</span>
+<span class="nv">$defname</span> <span class="o">=</span> <span class="s1">'emlog_'</span><span class="o">.</span> <span class="nb">gmdate</span><span class="p">(</span><span class="s1">'Ymd'</span><span class="p">,</span> <span class="nb">time</span><span class="p">()</span> <span class="o">+</span> <span class="nv">$timezone</span> <span class="o">*</span> <span class="mi">3600</span><span class="p">)</span> <span class="o">.</span> <span class="s1">'_'</span> <span class="o">.</span> <span class="nb">substr</span><span class="p">(</span><span class="nb">md5</span><span class="p">(</span><span class="nx">getRandStr</span><span class="p">()),</span><span class="mi">0</span><span class="p">,</span><span class="mi">18</span><span class="p">);</span>
+</pre></div>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2479">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/189c0a6b85274b909a29c7f702eb1578.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.ohvirus.com" target="_blank">pr0</a>
+<time datetime="2016年11月24日 19:20" itemprop="datePublished">
+                            2016 十一月 24 19:20
+                        </time>
+<a href="javascript:reply_to('2479', 'pr0')">回复</a>
+</p>
+<p class="comment-meta">哈哈哈    看你发了好几篇关于emlog的文章 ,感觉这玩意儿就跟个定时炸弹一样</p>
+</div>
+</div>
+<div class="row" id="comment-2393">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/56b6addc11fc89ccffdbff8f482a0e39.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.test404.com" target="_blank">Test</a>
+<time datetime="2016年7月26日 14:00" itemprop="datePublished">
+                            2016 七月 26 14:00
+                        </time>
+<a href="javascript:reply_to('2393', 'Test')">回复</a>
+</p>
+<p class="comment-meta">表示很少用插件.....在服务器写个shell不好喽</p>
+</div>
+</div>
+<div class="row" id="comment-2251">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/bc67b29817ada89b5fc72559b76f9cfa.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.hacksec.cn" target="_blank">奋斗的小白</a>
+<time datetime="2015年11月13日 02:17" itemprop="datePublished">
+                            2015 十一月 13 02:17
+                        </time>
+<a href="javascript:reply_to('2251', '奋斗的小白')">回复</a>
+</p>
+<p class="comment-meta">exp在那？博主求分享。</p>
+</div>
+</div>
+<div class="row" id="comment-2244">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/e762b2d63651344d2ca3db6bcef8286b.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.renwuyi.com/" target="_blank">天空</a>
+<time datetime="2015年11月2日 10:56" itemprop="datePublished">
+                            2015 十一月 02 10:56
+                        </time>
+<a href="javascript:reply_to('2244', '天空')">回复</a>
+</p>
+<p class="comment-meta">好文章</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="1fcc9581b0ea3ede603dea6f9c81c0b2b885fa22"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/1fcc9581b0ea3ede603dea6f9c81c0b2b885fa22"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="370">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="4SRdjB1gAcfNV5rzE7Jv7wPuzauxPfxlCccJ75dv1Z9cVKPOsodfGaRzIeXFyJmv"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./emlog自动备份插件泄露整站数据库备份漏洞  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

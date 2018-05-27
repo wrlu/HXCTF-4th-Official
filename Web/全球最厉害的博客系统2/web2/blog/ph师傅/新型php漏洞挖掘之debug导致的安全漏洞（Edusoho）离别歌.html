@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>新型php漏洞挖掘之debug导致的安全漏洞（Edusoho） | 离别歌</title>
+<link href="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/styles.css" rel="stylesheet"/>
+<link href="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/style.css" rel="stylesheet"/>
+<link href="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/jquery.min.js"></script>
+<link href="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/code.css" rel="stylesheet"/>
+<link href="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/button.css" rel="stylesheet"/>
+<link href="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/edusoho-debug-user-information-disclose.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/edusoho-debug-user-information-disclose.html&amp;text=%E6%96%B0%E5%9E%8Bphp%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bdebug%E5%AF%BC%E8%87%B4%E7%9A%84%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E%EF%BC%88Edusoho%EF%BC%89"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/edusoho-debug-user-information-disclose.html&amp;title=%E6%96%B0%E5%9E%8Bphp%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bdebug%E5%AF%BC%E8%87%B4%E7%9A%84%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E%EF%BC%88Edusoho%EF%BC%89"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/edusoho-debug-user-information-disclose.html&amp;is_video=false&amp;description=%E6%96%B0%E5%9E%8Bphp%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bdebug%E5%AF%BC%E8%87%B4%E7%9A%84%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E%EF%BC%88Edusoho%EF%BC%89"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E6%96%B0%E5%9E%8Bphp%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bdebug%E5%AF%BC%E8%87%B4%E7%9A%84%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E%EF%BC%88Edusoho%EF%BC%89&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/edusoho-debug-user-information-disclose.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/edusoho-debug-user-information-disclose.html&amp;title=%E6%96%B0%E5%9E%8Bphp%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bdebug%E5%AF%BC%E8%87%B4%E7%9A%84%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E%EF%BC%88Edusoho%EF%BC%89"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/edusoho-debug-user-information-disclose.html&amp;title=%E6%96%B0%E5%9E%8Bphp%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bdebug%E5%AF%BC%E8%87%B4%E7%9A%84%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E%EF%BC%88Edusoho%EF%BC%89"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/edusoho-debug-user-information-disclose.html&amp;title=%E6%96%B0%E5%9E%8Bphp%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bdebug%E5%AF%BC%E8%87%B4%E7%9A%84%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E%EF%BC%88Edusoho%EF%BC%89"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/edusoho-debug-user-information-disclose.html&amp;title=%E6%96%B0%E5%9E%8Bphp%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bdebug%E5%AF%BC%E8%87%B4%E7%9A%84%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E%EF%BC%88Edusoho%EF%BC%89"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/edusoho-debug-user-information-disclose.html&amp;name=%E6%96%B0%E5%9E%8Bphp%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E4%B9%8Bdebug%E5%AF%BC%E8%87%B4%E7%9A%84%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E%EF%BC%88Edusoho%EF%BC%89&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2016年2月10日 01:39" itemprop="datePublished">
+                    2016 二月 10 01:39
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3333
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E4%BF%A1%E6%81%AF%E6%B3%84%E9%9C%B2">信息泄露</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>【过年了，每天发一篇以前的存货，一共七篇。】</p>
+<p>现代cms框架（laraval/symfony/slim）的出现，导致现今的php漏洞出现点、原理、利用方法，发生了一些变化，这个系列希望可以总结一下自己挖掘的此类cms漏洞。</p>
+<p>今天这个漏洞是Edusoho的一个user表dump漏洞。  </p>
+<p>首先，我简要说明一下漏洞原理。  </p>
+<p>【漏洞源码下载： <a href="https://mega.nz/#!4chVWCAB!xBVyC9QqxMCmeuLu3rGx__PwgkLe_a5NWUITLS3QzuM"><a href="https://mega.nz/#!4chVWCAB!xBVyC9QqxMCmeuLu3rGx__PwgkLe_a5NWUITLS3QzuM">https://mega.nz/#!4chVWCAB!xBVyC9QqxMCmeuLu3rGx__PwgkLe_a5NWUITLS3QzuM</a></a> 】</p>
+<h2 id="0x01-debug"><a class="toclink" href="#0x01-debug">0x01 开启DEBUG模式造成的隐患</a></h2>
+<p>Edusoho开启调试模式以后将会在程序出错后输出debug信息，其中包括当前环境中所有变量的值。默认的index.php是不开启debug的，但/api/index.php将会开启debug：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/a1ad1455040067.jpg"><img alt="14512262668078.jpg" src="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/thum-a1ad1455040067.jpg"/></a></p>
+<p>跟进一下框架的异常处理方法。Index.php里注册了异常处理：</p>
+<div class="codehilite"><pre><span></span><span class="nt">ErrorHandler</span><span class="p">::</span><span class="nd">register</span><span class="o">();</span>
+<span class="nt">ExceptionHandler</span><span class="p">::</span><span class="nd">register</span><span class="o">();</span>
+</pre></div>
+<p>这里用的是Symfony框架自带的异常处理类：use Symfony\Component\Debug\ExceptionHandler;  </p>
+<p>跟进：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/fe411455040071.jpg"><img alt="14512262936438.jpg" src="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/thum-fe411455040071.jpg"/></a> </p>
+<p>调用了set_exception_handler注册的异常处理方法。不断跟进，发现该类的getContent方法是输出错误内容的方法：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/e15f1455040195.jpg"><img alt="14512263050908.jpg" src="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/thum-e15f1455040195.jpg"/></a> </p>
+<p>可见，这个异常类，将异常对象的”args”属性输出了。  </p>
+<p>认真学习过php异常处理类的同学应该知道，异常类的getTrace方法（ <a href="http://php.net/manual/zh/exception.gettrace.php"><a href="http://php.net/manual/zh/exception.gettrace.php">http://php.net/manual/zh/exception.gettrace.php</a></a> ）是可以获取到当前上下文中所有变量的。  </p>
+<p>所以，这里这个debug模式，等于说可以将当前函数中定义的所有变量输出。那么试想，假设当前函数在出异常前，从数据库或文件中读取到了一些『敏感』信息，那么输出这个异常是不是就可以dump出这个『敏感变量』了呢？</p>
+<p>明显这个猜想是可行的。</p>
+<p>那么，我只需要在/api下找到一处出错的代码，并且当前函数中有敏感信息的地方，即可触发成一个『大漏洞』。  </p>
+<p>很幸运的是我找到了好几处。最简单的一处，/api/src/user.php:373</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/45791455040319.jpg"><img alt="14512263202009.jpg" src="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/thum-45791455040319.jpg"/></a> </p>
+<p>这个<code>$follwers</code>变量是一个未定义的变量呀，所以一定会触发错误。</p>
+<p>正好，当前函数中有<code>$user</code>、<code>$follwings</code>两个变量，<code>$user</code>变量是指定的用户，<code>$follwings</code>是它关注的用户。</p>
+<p>所以，在报错输出调试信息以后，将会完全打印出这两个变量的值。而这两个变量都是从数据库user表里取出的数据，其中包含用户的所有信息（邮箱、密码hash、交易密码hash、salt、session、IP地址、昵称、登录时间等）。</p>
+<p>另外，<code>$follwings</code>变量里也有这些信息，我只要批量关注所有人，这个漏洞就变成了一个dump数据库user表的漏洞。</p>
+<h2 id="0x02-user"><a class="toclink" href="#0x02-user">0x02 利用方式一，直接获取任意用户user表信息</a></h2>
+<p>访问 <a href="http://demo.edusoho.com/api/users/{用户id}/followings">http://demo.edusoho.com/api/users/{用户id}/followings</a> 即可，如 <a href="http://demo.edusoho.com/api/users/5/followings"><a href="http://demo.edusoho.com/api/users/5/followings">http://demo.edusoho.com/api/users/5/followings</a></a> </p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/3d0a1455040323.jpg"><img alt="14512263531475.jpg" src="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/thum-3d0a1455040323.jpg"/></a> </p>
+<h2 id="0x03"><a class="toclink" href="#0x03">0x03 利用方式二，利用社交属性批量获取信息</a></h2>
+<p>利用方式二，首先关注你想获取密码的人，比如我关注了这四个，分别是Id为1、2、3、4的用户，其中1、4是管理员：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/17b41455040323.jpg"><img alt="14512263722584.jpg" src="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/thum-17b41455040323.jpg"/></a> </p>
+<p>我的id是15670，直接访问 <a href="http://demo.edusoho.com/api/users/15670/followings">http://demo.edusoho.com/api/users/15670/followings</a> ，即可获取我关注的所有人的所有信息，包括密码等：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/f71a1455041710.jpg"><img alt="14512263801766.jpg" src="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/thum-f71a1455041710.jpg"/></a> </p>
+<p>诸如此处的地方还有一个。  </p>
+<p><a href="http://demo.edusoho.com/api/users/1/friendship?toIds%5B%5D=a"><a href="http://demo.edusoho.com/api/users/1/friendship?toIds[]=a">http://demo.edusoho.com/api/users/1/friendship?toIds[]=a</a></a> 通过传入数组制造warning：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/83fc1455041710.jpg"><img alt="14512263922457.jpg" src="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/thum-83fc1455041710.jpg"/></a> </p>
+<p>其他位置肯定不止，还可能泄露其他信息，我就不一一挖掘了，只为证明问题存在。  </p>
+<p>这个漏洞已经私下里报给官方了，所以demo站已经修复。但搜索“powered by edusoho” 还是能找到很多存在漏洞的站，在时间上这个漏洞还是属于一个0day。  </p>
+<p>比如这个站：  </p>
+<p><a href="http://mooc.sinepharm.com/api/users/1/followings"><a href="http://mooc.sinepharm.com/api/users/1/followings">http://mooc.sinepharm.com/api/users/1/followings</a></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="878c767ac24cf92a3b91385c84a8bf507cf9a624"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/878c767ac24cf92a3b91385c84a8bf507cf9a624"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="379">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="W1skSiL3JlS2eQfVjtU7dVHX0SX6iS6culNQGMXia8MrevDa7KoRMzJ29Wqe1mVm"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./新型php漏洞挖掘之debug导致的安全漏洞（Edusoho）  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

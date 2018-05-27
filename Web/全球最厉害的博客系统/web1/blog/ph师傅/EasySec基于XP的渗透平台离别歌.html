@@ -1,0 +1,329 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./EasySec基于XP的渗透平台  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./EasySec基于XP的渗透平台  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./EasySec基于XP的渗透平台  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>EasySec基于XP的渗透平台 | 离别歌</title>
+<link href="./EasySec基于XP的渗透平台  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./EasySec基于XP的渗透平台  离别歌/styles.css" rel="stylesheet"/>
+<link href="./EasySec基于XP的渗透平台  离别歌/style.css" rel="stylesheet"/>
+<link href="./EasySec基于XP的渗透平台  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./EasySec基于XP的渗透平台  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./EasySec基于XP的渗透平台  离别歌/jquery.min.js"></script>
+<link href="./EasySec基于XP的渗透平台  离别歌/code.css" rel="stylesheet"/>
+<link href="./EasySec基于XP的渗透平台  离别歌/button.css" rel="stylesheet"/>
+<link href="./EasySec基于XP的渗透平台  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./EasySec基于XP的渗透平台  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/easysec.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/easysec.html&amp;text=EasySec%E5%9F%BA%E4%BA%8EXP%E7%9A%84%E6%B8%97%E9%80%8F%E5%B9%B3%E5%8F%B0"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/easysec.html&amp;title=EasySec%E5%9F%BA%E4%BA%8EXP%E7%9A%84%E6%B8%97%E9%80%8F%E5%B9%B3%E5%8F%B0"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/easysec.html&amp;is_video=false&amp;description=EasySec%E5%9F%BA%E4%BA%8EXP%E7%9A%84%E6%B8%97%E9%80%8F%E5%B9%B3%E5%8F%B0"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=EasySec%E5%9F%BA%E4%BA%8EXP%E7%9A%84%E6%B8%97%E9%80%8F%E5%B9%B3%E5%8F%B0&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/easysec.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/easysec.html&amp;title=EasySec%E5%9F%BA%E4%BA%8EXP%E7%9A%84%E6%B8%97%E9%80%8F%E5%B9%B3%E5%8F%B0"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/easysec.html&amp;title=EasySec%E5%9F%BA%E4%BA%8EXP%E7%9A%84%E6%B8%97%E9%80%8F%E5%B9%B3%E5%8F%B0"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/easysec.html&amp;title=EasySec%E5%9F%BA%E4%BA%8EXP%E7%9A%84%E6%B8%97%E9%80%8F%E5%B9%B3%E5%8F%B0"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/easysec.html&amp;title=EasySec%E5%9F%BA%E4%BA%8EXP%E7%9A%84%E6%B8%97%E9%80%8F%E5%B9%B3%E5%8F%B0"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/easysec.html&amp;name=EasySec%E5%9F%BA%E4%BA%8EXP%E7%9A%84%E6%B8%97%E9%80%8F%E5%B9%B3%E5%8F%B0&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">EasySec基于XP的渗透平台</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年2月4日 15:08" itemprop="datePublished">
+                    2013 二月 04 15:08
+                </time>
+</div>
+<div class="article-tag">
+            阅读：17703
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/Windows">Windows</a>,
+                
+                <a class="tag-link" href="/tag/XP">XP</a>,
+                
+                <a class="tag-link" href="/tag/%E6%B5%8B%E8%AF%95">测试</a>,
+                
+                <a class="tag-link" href="/tag/%E6%B8%97%E9%80%8F">渗透</a>,
+                
+                <a class="tag-link" href="/tag/%E8%99%9A%E6%8B%9F%E6%9C%BA">虚拟机</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p><span style="font-size:14px;">    这几天一直玩backtrack，不过有时候还是觉得太难。毕竟linux学校里面还没学，以前基本没接触过linux系统，所以感觉一切还是那么陌生。即使我知道这个工具怎么用，但还是不清楚这些命令究竟为什么这样写，它是怎么运行的，可能还是要等学的知识多了才能明白这些吧……</span></p>
+<span style="font-size:14px;"> </span><p><span style="font-size:14px;">    今天在论坛上看到有人转了一个XP的渗透测试平台，算是别人封装的一个XP系统，里面包含了很多windows系统下的渗透软件，我感觉对于新手(想我这样)，还是比较有引导性的。</span></p>
+<span style="font-size:14px;"> </span><p><span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201302/fe1d1359962449.jpg" id="ematt:52" target="_blank"><img alt="装机" border="0" data-pinit="registered" height="248" src="./EasySec基于XP的渗透平台  离别歌/thum-fe1d1359962449.jpg" title="装机" width="420"/></a></p>
+<span style="font-size:14px;"> </span><p><span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201302/c51e1359962436.jpg" id="ematt:48" target="_blank"><img alt="系统说明" border="0" data-pinit="registered" height="236" src="./EasySec基于XP的渗透平台  离别歌/thum-c51e1359962436.jpg" title="系统说明" width="420"/></a></p>
+<span style="font-size:14px;"> </span><p><span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201302/7d9f1359962443.jpg" id="ematt:50" target="_blank"><img alt="部分工具目录" border="0" data-pinit="registered" height="224" src="./EasySec基于XP的渗透平台  离别歌/thum-7d9f1359962443.jpg" title="部分工具目录" width="420"/></a></p>
+<span style="font-size:14px;"> </span><p><span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201302/a6d61359962464.jpg" id="ematt:57" target="_blank"><img alt="部分工具目录" border="0" data-pinit="registered" height="236" src="./EasySec基于XP的渗透平台  离别歌/thum-a6d61359962464.jpg" title="部分工具目录" width="420"/></a></p>
+<span style="font-size:14px;"> </span><p><span style="font-size:14px;">    这是作者给出的部分介绍</span></p>
+<span style="font-size:14px;"> </span><p></p>
+<span style="font-size:14px;"><pre class="brush: xml;">运行库：
+Cv++运行库（VC05+VC08+VC10）
+DirectX 9.0c
+JAVA 1.7.0
+.net (1.0+2.0+3.0+3.5+4.0)
+Python 3.3
+Netbox运行环境
+PHP运行环境
+ 
+OCX运行库如下：
+BSE.ocx           CFControl.ocx           CFControlP.ocx
+CFLabel3D.ocx     CFProcBar.ocx          FlatBtn2.ocx
+FlatBtn2.ocx       PopUpMenu Ctrl.ocx    QQFrom.ocx
+QQFrom.ocx       QQFrom.ocx           QQFrom.ocx
+URLLabel Ctrl.ocx    vbSplitter.ocx          vbSplitter.ocx
+xpbutton.ocx       xpbutton.ocx          XPComboBox.ocx
+XPForm.ocx        XPRadioButton.ocx
+XP菜单.ocx        XP窗体.ocx
+ 
+请在Pe下安装系统。Pe桌面上有安装说明文档
+准备安装时可能会出现蓝屏一串英文  等会就可以了安装过程全自动。
+
+优点：
+@系统基于 Windows XP 专业版 SP3  制作，适合国情，使用方便。
+@内置黑客工具均经官方网站下载筛选，无后门，安全可靠
+@加入了众多知名黑客工具，以及常用工具，免去了寻找工具的痛苦
+@针对虚拟机做了特别优化，精简了与测试无关的所有功能，加固了系统安全。
+@系统PE使用率不到100M，虚拟机下流畅运行。相较于正常的XP，节省2/3的资源
+@修改IE下载连接数限制，修改网络带宽预留数为0%，下载速度更快。
+@自动激活。 -永久激活！无需再上网搜索激活码，现在激活过程全自动，可通过微软正版认证，无需手动操作。
+      正式版将加入 nmap  sqlmap  MSF WVS  Netsparker 等众多国际黑阔必备工具。 即将发布..
+此系统为新手而制作，大神勿喷。谢谢！
+此版仅为测试版，正式版稍后就出，欢迎提交BUG，如果有win下使用很好的hack工具也可以与我们联系</pre></span><p></p>
+<span style="font-size:14px;"> </span><p><span style="font-size:14px;">下载地址(百度网盘)：</span><a href="http://pan.baidu.com/share/link?shareid=272321&amp;uk=403168834" target="_blank"><span style="font-size:14px;">http://pan.baidu.com/share/link?shareid=272321&amp;uk=403168834</span></a></p>
+<span style="font-size:14px;"> </span><p><span style="font-size:14px;">官方地址：</span><a href="http://blog.sina.com.cn/s/blog_c259428901019r4i.html" target="_blank"><span style="font-size:14px;">http://blog.sina.com.cn/s/blog_c259428901019r4i.html</span></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1745">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./EasySec基于XP的渗透平台  离别歌/43caa0202d612582f8446eb6fe38c9ce.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://wooyun.org/whitehats/%E6%B3%A5%E5%9A%8E%E5%9A%8E" target="_blank">Sunnyyoung</a>
+<time datetime="2014年7月27日 13:04" itemprop="datePublished">
+                            2014 七月 27 13:04
+                        </time>
+<a href="javascript:reply_to('1745', 'Sunnyyoung')">回复</a>
+</p>
+<p class="comment-meta">链接: http://pan.baidu.com/s/1dDxPOgL 密码: vsyy<br><br>分享下~~</br></br></p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2088">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./EasySec基于XP的渗透平台  离别歌/1dcbc14644dafcaf18b44143850f1b5d.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">yifenz</a>
+<time datetime="2015年5月26日 22:38" itemprop="datePublished">
+                            2015 五月 26 22:38
+                        </time>
+<a href="javascript:reply_to('2088', 'yifenz')">回复</a>
+</p>
+<p class="comment-meta">@Sunnyyoung：能分享下么，链接失效了。多谢哦</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2089">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./EasySec基于XP的渗透平台  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年5月26日 22:38" itemprop="datePublished">
+                            2015 五月 26 22:38
+                        </time>
+<a href="javascript:reply_to('2089', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@yifenz：这个我也没用了哦，好几年前的东西了。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2096">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./EasySec基于XP的渗透平台  离别歌/1dcbc14644dafcaf18b44143850f1b5d.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">yifenz</a>
+<time datetime="2015年5月30日 23:15" itemprop="datePublished">
+                            2015 五月 30 23:15
+                        </time>
+<a href="javascript:reply_to('2096', 'yifenz')">回复</a>
+</p>
+<p class="comment-meta">@phithon：谢谢哦，感觉kali还是有些不太会用。<br/>ph牛我看你之前有分享的很多学习的资料，能再共享下么，学习学习</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-1669">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./EasySec基于XP的渗透平台  离别歌/7fab93f251ef5df0e3d5e3b24716ca43.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">bend</a>
+<time datetime="2014年6月4日 00:55" itemprop="datePublished">
+                            2014 六月 04 00:55
+                        </time>
+<a href="javascript:reply_to('1669', 'bend')">回复</a>
+</p>
+<p class="comment-meta">我找到了 但是不敢共享出来 这段时间百度网盘查的严</p>
+</div>
+</div>
+<div class="row" id="comment-1665">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./EasySec基于XP的渗透平台  离别歌/bb8417da26c22a6a5f994ff27516aa9c.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">zenm</a>
+<time datetime="2014年6月1日 08:14" itemprop="datePublished">
+                            2014 六月 01 08:14
+                        </time>
+<a href="javascript:reply_to('1665', 'zenm')">回复</a>
+</p>
+<p class="comment-meta">不能下载了怎么办</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1666">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./EasySec基于XP的渗透平台  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年6月1日 08:16" itemprop="datePublished">
+                            2014 六月 01 08:16
+                        </time>
+<a href="javascript:reply_to('1666', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@zenm：官方的没了。。我也没处找了，自己百度谷歌吧</p>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="73acf30df3bb876673656839c5327c0fb225b787"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./EasySec基于XP的渗透平台  离别歌/73acf30df3bb876673656839c5327c0fb225b787"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="228">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="ygz5MQUbIQ2yZPraSGKnxTpHcOGRWa1Z6AUBAk6q9DWXZuPpGXe76xrMlS9ZFEQ9"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./EasySec基于XP的渗透平台  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./EasySec基于XP的渗透平台  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

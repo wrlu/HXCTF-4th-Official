@@ -1,0 +1,582 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./selenium在目标页面执行phantomjs的API并获取返回值/font-awesome.min.css" rel="stylesheet"/>
+<link href="./selenium在目标页面执行phantomjs的API并获取返回值/screen.css" rel="stylesheet"/>
+<link href="./selenium在目标页面执行phantomjs的API并获取返回值/prism_okaidia.css" rel="stylesheet"/>
+<link href="./selenium在目标页面执行phantomjs的API并获取返回值/bendawang.css" rel="stylesheet"/>
+<script src="./selenium在目标页面执行phantomjs的API并获取返回值/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./selenium在目标页面执行phantomjs的API并获取返回值/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./selenium在目标页面执行phantomjs的API并获取返回值/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="seleniumphantomjsapi">selenium在执行phantomjs的API并获取执行结果</h1>
+<h2 id="">前言</h2>
+<p style="max-width:100%;height:auto;">因为最近要写一个抓取sitemap和相应的参数的小脚本，现有的爬虫无论用什么语言写的，几乎都无法抓取参数，所以我思考了一下，先做一个简单的总结。</p>
+<p style="max-width:100%;height:auto;">本来以为写个这种sitemap的爬虫很简单，经过思考之后才发现其中的可怕之处，最关键的是参数的提取，这个太麻烦了。。。这个时候才发现AWVS的无敌和强大之处。。。</p>
+<p style="max-width:100%;height:auto;">如果我们要获取网站的sitemap同时还要抓取对应链接的参数，我大概总结了url的几个来源：</p>
+<ul>
+<li>1、页面上直接现有的<code style="max-width:100%;height:auto;">form</code>表单以及现有的<code style="max-width:100%;height:auto;">href</code>等指向的链接及参数，这个相对比较简单，不过要考虑post和get的问题。</li>
+<li>2、由js生成的DOM中的<code style="max-width:100%;height:auto;">form</code>表单和<code style="max-width:100%;height:auto;">href</code>指向的链接</li>
+<li>3、由js发起的访问请求，例如<code style="max-width:100%;height:auto;">AJAX</code>请求等</li>
+<li>4、通过点击然后调用js发送请求，或是点击生成一个form或是生产一个<code style="max-width:100%;height:auto;">DOM</code>，然后再点击再由js发送请求。例如如下代码</li>
+</ul>
+<pre><code style="max-width:100%;height:auto;">    &lt;div&gt;
+    &lt;input id="searchTitle" name="searchTitle" value="" type="text"&gt;
+    &lt;div class="button" onclick="javascript:searchWeb();"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+</code></pre>
+<ul>
+<li>5、通过<code style="max-width:100%;height:auto;">setTimeout</code>函数延迟触发的js的请求，例如<code style="max-width:100%;height:auto;">setTimeout("request()", 2000);</code>，这一类我暂时还没有太好的办法解决，不过有初步的办法，后面会说到。</li>
+</ul>
+<p style="max-width:100%;height:auto;">目前我大概想到这么五类，肯定还有没考虑到的地方，并且目前实际的代码还没有写出来，我先记录一下我的想法，要是有哪位师傅有兴趣请务必联系我。。。。orz。。</p>
+<p style="max-width:100%;height:auto;">要解决上述的5个问题，因为我的工程的前半部分使用python写的，所以这里我需要用python来解决，那么最佳选择必然是<code style="max-width:100%;height:auto;">selenium</code>和<code style="max-width:100%;height:auto;">phantomjs</code>，其实比起来我更想用原生的<code style="max-width:100%;height:auto;">phantomjs</code>来写。
+用<code style="max-width:100%;height:auto;">phantomjs</code>的话第一个和第二个问题不攻自破，直接正则匹配下来就行了，因为它会帮我们先把页面的<code style="max-width:100%;height:auto;">js</code>执行了。</p>
+<p style="max-width:100%;height:auto;">第三个问题也相对比较好解决，我们通过原生<code style="max-width:100%;height:auto;">phantomjs</code>的API<code style="max-width:100%;height:auto;">onResourceRequested</code>就能够监控所有从页面发出去的请求。</p>
+<p style="max-width:100%;height:auto;">然后再来看第四个问题，我目前的想法应该没有办法彻底解决，我们同样可以用<code style="max-width:100%;height:auto;">phantomjs</code>向页面的所有的dom发送一个<code style="max-width:100%;height:auto;">click</code>事件，但是这样子的话时间是一个很大的问题，所以初步想法向所有具有<code style="max-width:100%;height:auto;">onclick</code>事件的标签发送点击事件</p>
+<p style="max-width:100%;height:auto;">然后再来看第五个问题，这应该是最麻烦的一个，我初步的想法还是用<code style="max-width:100%;height:auto;">onResourceRequested</code>事件，然后设置一个超时时限，让页面执行个几秒钟，但是最后我还是放弃了这个想法，我决定忽视这个问题，因为如果每个页面都等上几秒那时间耗费不堆上天了。</p>
+<p style="max-width:100%;height:auto;">以上就是我目前初步的一些思考，还有很多不成熟之处。</p>
+<h2 id="seleniumphantomjs">selenium与phantomjs联动的问题</h2>
+<p style="max-width:100%;height:auto;">之前一直知道有selenium这个东西，不够因为没有地方需要，也没有可以去学习，不过对phantomjs可能会稍微熟悉一些。</p>
+<p style="max-width:100%;height:auto;">先写个简单的程序</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from selenium import webdriver
+service_args=[]
+service_args.append(&amp;apos;--load-images=no&amp;apos;)  ##关闭图片加载
+service_args.append(&amp;apos;--disk-cache=yes&amp;apos;)  ##开启缓存
+service_args.append(&amp;apos;--ignore-ssl-errors=true&amp;apos;) ##忽略https错误
+
+d=webdriver.PhantomJS("phantomjs",service_args=service_args)
+d.get("http://xxxxxxxxxxxxxxxxxxxxx")
+print d.page_source
+d.quit()
+</code></pre>
+<p style="max-width:100%;height:auto;">这样就可以发送get请求了。</p>
+<h3 id="post">问题一：没有post请求？</h3>
+<p style="max-width:100%;height:auto;">我觉得应该是我还了解的不够。不过翻了API，确实没有找到，希望大家能够指出我的错误，但我真的好像没有找到能够发送post请求的地方，真是蠢爆了。。
+这里我想到了两种方法解决，先说一种，第二种留到后面说。
+就是用<code style="max-width:100%;height:auto;">requests</code>库递交post请求，拿下来的cookie,调用<code style="max-width:100%;height:auto;">add_cookie</code>函数给它，然后让它带着<code style="max-width:100%;height:auto;">cookie</code>发送get请求就好了。
+样例如下</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from selenium import webdriver
+import requests
+r=requests.session()
+
+service_args=[]
+service_args.append(&amp;apos;--load-images=no&amp;apos;)  ##关闭图片加载
+service_args.append(&amp;apos;--disk-cache=yes&amp;apos;)  ##开启缓存
+service_args.append(&amp;apos;--ignore-ssl-errors=true&amp;apos;) ##忽略https错误
+
+d=webdriver.PhantomJS("phantomjs",service_args=service_args)
+
+data={
+        "username":"123",
+        "password":"123",
+        "login":"1"
+    }
+
+result=r.post("http://127.0.0.1:8000/web/login.php",data=data)
+cookies=r.cookies.get_dict()
+for i in cookies:
+    d.add_cookie({
+        &amp;apos;name&amp;apos;: i,
+        &amp;apos;value&amp;apos; :cookies[i],
+        &amp;apos;path&amp;apos;:&amp;apos;/&amp;apos;,
+        &amp;apos;domain&amp;apos;:&amp;apos;127.0.0.1&amp;apos;
+         })
+d.get("http://127.0.0.1:8000/web/index.php")
+print d.page_source
+d.quit()
+</code></pre>
+<p style="max-width:100%;height:auto;">另外这个<code style="max-width:100%;height:auto;">add_cookie</code>函数还比较刁钻，还要把<code style="max-width:100%;height:auto;">path</code>和<code style="max-width:100%;height:auto;">domain</code>都设置好，不然有时会报错。</p>
+<p style="max-width:100%;height:auto;">第二个方法的话，我们知道，如果用原生<code style="max-width:100%;height:auto;">PhantomJS</code>的话，我们可以很容易递交post请求，比如如下：</p>
+<pre><code class="js language-js" style="max-width:100%;height:auto;">var webPage = require(&amp;apos;webpage&amp;apos;);
+var page = webPage.create();
+
+var settings = {
+  operation: "POST",
+  header:{},
+  data: "username=123&amp;password=123&amp;login=1"
+};
+page.open(&amp;apos;http://127.0.0.1:8000/web/login.php&amp;apos;, settings, function(status) {
+  //console.log(page.content);
+  for(var i=0;i&lt;page.cookies.length;i++){
+        console.log(page.cookies[i].name+":"+page.cookies[i].value)
+  }
+});
+</code></pre>
+<p style="max-width:100%;height:auto;">所以我们想办法就是直接在 <code style="max-width:100%;height:auto;">Selenium</code>中让<code style="max-width:100%;height:auto;">PhantomJS</code> 执行它的 API就可以了，这里不贴了，看完下一小节就知道怎么写了。</p>
+<h3 id="seleniumphantomjsapi-1">问题二：在 <code style="max-width:100%;height:auto;">Selenium</code>中获取<code style="max-width:100%;height:auto;">PhantomJS</code> 的API的执行结果？</h3>
+<p style="max-width:100%;height:auto;">还好<code style="max-width:100%;height:auto;">Selenium</code>带了个<code style="max-width:100%;height:auto;">get_log</code>函数，比如我监控&amp;apos;http://127.0.0.1:8000/web/index.php&amp;apos;页面向外发送的所有请求，如果用原生的<code style="max-width:100%;height:auto;">phantomjs</code>，很好办，如下：</p>
+<pre><code class="js language-js" style="max-width:100%;height:auto;">var webPage = require(&amp;apos;webpage&amp;apos;);
+var page = webPage.create();
+
+page.onResourceRequested = function (request) {
+    console.log(&amp;apos;Request &amp;apos; + request.url);
+};
+...........
+...........
+</code></pre>
+<p style="max-width:100%;height:auto;">所以我们直接在<code style="max-width:100%;height:auto;">Selenium</code>中调用<code style="max-width:100%;height:auto;">PhantomJS</code> 的API就好了。如下</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from selenium import webdriver
+import requests
+r=requests.session()
+
+service_args=[]
+service_args.append(&amp;apos;--load-images=no&amp;apos;)  ##关闭图片加载
+service_args.append(&amp;apos;--disk-cache=yes&amp;apos;)  ##开启缓存
+service_args.append(&amp;apos;--ignore-ssl-errors=true&amp;apos;) ##忽略https错误
+
+d=webdriver.PhantomJS("phantomjs",service_args=service_args)
+
+data={
+        "username":"123",
+        "password":"123",
+        "login":"1"
+    }
+
+result=r.post("http://127.0.0.1:8000/web/login.php",data=data)
+cookies=r.cookies.get_dict()
+for i in cookies:
+    d.add_cookie({
+        &amp;apos;name&amp;apos;: i,
+        &amp;apos;value&amp;apos; :cookies[i],
+        &amp;apos;path&amp;apos;:&amp;apos;/&amp;apos;,
+        &amp;apos;domain&amp;apos;:&amp;apos;127.0.0.1&amp;apos;
+         })
+script = "var page=this;page.onResourceRequested = function (request){console.log(request.url);};"
+d.command_executor._commands[&amp;apos;executePhantomScript&amp;apos;] = (&amp;apos;POST&amp;apos;, &amp;apos;/session/$sessionId/phantom/execute&amp;apos;)
+d.execute(&amp;apos;executePhantomScript&amp;apos;, {&amp;apos;script&amp;apos;: script, &amp;apos;args&amp;apos;: []})
+
+d.get("http://127.0.0.1:8000/web/index.php")
+print d.page_source
+d.quit()
+</code></pre>
+<p style="max-width:100%;height:auto;">这里上述代码确实能够实时执行，但是就这样写的话没有办法获取到结果。
+这里需要用到一个<code style="max-width:100%;height:auto;">get_log</code>函数，改进如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from selenium import webdriver
+import requests
+r=requests.session()
+
+service_args=[]
+service_args.append(&amp;apos;--load-images=no&amp;apos;)  ##关闭图片加载
+service_args.append(&amp;apos;--disk-cache=yes&amp;apos;)  ##开启缓存
+service_args.append(&amp;apos;--ignore-ssl-errors=true&amp;apos;) ##忽略https错误
+
+d=webdriver.PhantomJS("phantomjs",service_args=service_args)
+
+data={
+        "username":"123",
+        "password":"123",
+        "login":"1"
+    }
+
+result=r.post("http://127.0.0.1:8000/web/login.php",data=data)
+cookies=r.cookies.get_dict()
+for i in cookies:
+    d.add_cookie({
+        &amp;apos;name&amp;apos;: i,
+        &amp;apos;value&amp;apos; :cookies[i],
+        &amp;apos;path&amp;apos;:&amp;apos;/&amp;apos;,
+        &amp;apos;domain&amp;apos;:&amp;apos;127.0.0.1&amp;apos;
+         })
+script = "var page=this;page.onResourceRequested = function (request){page.browserLog.push(request.url);};"
+d.command_executor._commands[&amp;apos;executePhantomScript&amp;apos;] = (&amp;apos;POST&amp;apos;, &amp;apos;/session/$sessionId/phantom/execute&amp;apos;)
+d.execute(&amp;apos;executePhantomScript&amp;apos;, {&amp;apos;script&amp;apos;: script, &amp;apos;args&amp;apos;: []})
+
+d.get("http://127.0.0.1:8000/web/index.php")
+print d.page_source
+print d.get_log(&amp;apos;browser&amp;apos;)
+d.quit()
+</code></pre>
+<p style="max-width:100%;height:auto;">在js脚本中我们调用<code style="max-width:100%;height:auto;">page.browserLog.push</code>,然后在python脚本中我们<code style="max-width:100%;height:auto;">get_log(&amp;apos;browser&amp;apos;)</code>去获取就可以实现相互沟通，当然肯定还有别的办法，不过我没有找到。。。。僵硬了。。。。</p>
+<h2 id="-1">后记</h2>
+<p style="max-width:100%;height:auto;">再说这个抓取sitemap和请求参数的小脚本，想了想还是觉得非常麻烦，虽然几个问题都有了相应的解决办法，也不管好坏，加上今天稍微研究了一下python调用<code style="max-width:100%;height:auto;">phantom</code>的优化，还是稍微有点信心了，但是感觉要整合到一起来还是会很麻烦，效率问题是一个，能否真正准确抓取完整又是另一个，慢慢来把，没想到最初觉得不是问题的问题最后却成了我最大的麻烦之一。。僵硬。。。最后还要说的是原声的phantomjs真的比selenium去调用舒服得多。。。现在想来要是最开始想把每个环节思考一下就好了，要是思考了大概就不会用python了，大概会用nodejs，对了，最近稍微研究了一下nodejs的一些渗透和攻击方法，后续整理一下分享出来，希望师傅们能够帮忙指点指点。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./selenium在目标页面执行phantomjs的API并获取返回值/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="seleniumphantomjsapi">selenium在执行phantomjs的API并获取执行结果</h1>
+<h2 id="">前言</h2>
+<p style="max-width:100%;height:auto;">因为最近要写一个抓取sitemap和相应的参数的小脚本，现有的爬虫无论用什么语言写的，几乎都无法抓取参数，所以我思考了一下，先做一个简单的总结。</p>
+<p style="max-width:100%;height:auto;">本来以为写个这种sitemap的爬虫很简单，经过思考之后才发现其中的可怕之处，最关键的是参数的提取，这个太麻烦了。。。这个时候才发现AWVS的无敌和强大之处。。。</p>
+<p style="max-width:100%;height:auto;">如果我们要获取网站的sitemap同时还要抓取对应链接的参数，我大概总结了url的几个来源：</p>
+<ul>
+<li>1、页面上直接现有的<code style="max-width:100%;height:auto;">form</code>表单以及现有的<code style="max-width:100%;height:auto;">href</code>等指向的链接及参数，这个相对比较简单，不过要考虑post和get的问题。</li>
+<li>2、由js生成的DOM中的<code style="max-width:100%;height:auto;">form</code>表单和<code style="max-width:100%;height:auto;">href</code>指向的链接</li>
+<li>3、由js发起的访问请求，例如<code style="max-width:100%;height:auto;">AJAX</code>请求等</li>
+<li>4、通过点击然后调用js发送请求，或是点击生成一个form或是生产一个<code style="max-width:100%;height:auto;">DOM</code>，然后再点击再由js发送请求。例如如下代码</li>
+</ul>
+<pre><code style="max-width:100%;height:auto;">    &lt;div&gt;
+    &lt;input id="searchTitle" name="searchTitle" value="" type="text"&gt;
+    &lt;div class="button" onclick="javascript:searchWeb();"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+</code></pre>
+<ul>
+<li>5、通过<code style="max-width:100%;height:auto;">setTimeout</code>函数延迟触发的js的请求，例如<code style="max-width:100%;height:auto;">setTimeout("request()", 2000);</code>，这一类我暂时还没有太好的办法解决，不过有初步的办法，后面会说到。</li>
+</ul>
+<p style="max-width:100%;height:auto;">目前我大概想到这么五类，肯定还有没考虑到的地方，并且目前实际的代码还没有写出来，我先记录一下我的想法，要是有哪位师傅有兴趣请务必联系我。。。。orz。。</p>
+<p style="max-width:100%;height:auto;">要解决上述的5个问题，因为我的工程的前半部分使用python写的，所以这里我需要用python来解决，那么最佳选择必然是<code style="max-width:100%;height:auto;">selenium</code>和<code style="max-width:100%;height:auto;">phantomjs</code>，其实比起来我更想用原生的<code style="max-width:100%;height:auto;">phantomjs</code>来写。
+用<code style="max-width:100%;height:auto;">phantomjs</code>的话第一个和第二个问题不攻自破，直接正则匹配下来就行了，因为它会帮我们先把页面的<code style="max-width:100%;height:auto;">js</code>执行了。</p>
+<p style="max-width:100%;height:auto;">第三个问题也相对比较好解决，我们通过原生<code style="max-width:100%;height:auto;">phantomjs</code>的API<code style="max-width:100%;height:auto;">onResourceRequested</code>就能够监控所有从页面发出去的请求。</p>
+<p style="max-width:100%;height:auto;">然后再来看第四个问题，我目前的想法应该没有办法彻底解决，我们同样可以用<code style="max-width:100%;height:auto;">phantomjs</code>向页面的所有的dom发送一个<code style="max-width:100%;height:auto;">click</code>事件，但是这样子的话时间是一个很大的问题，所以初步想法向所有具有<code style="max-width:100%;height:auto;">onclick</code>事件的标签发送点击事件</p>
+<p style="max-width:100%;height:auto;">然后再来看第五个问题，这应该是最麻烦的一个，我初步的想法还是用<code style="max-width:100%;height:auto;">onResourceRequested</code>事件，然后设置一个超时时限，让页面执行个几秒钟，但是最后我还是放弃了这个想法，我决定忽视这个问题，因为如果每个页面都等上几秒那时间耗费不堆上天了。</p>
+<p style="max-width:100%;height:auto;">以上就是我目前初步的一些思考，还有很多不成熟之处。</p>
+<h2 id="seleniumphantomjs">selenium与phantomjs联动的问题</h2>
+<p style="max-width:100%;height:auto;">之前一直知道有selenium这个东西，不够因为没有地方需要，也没有可以去学习，不过对phantomjs可能会稍微熟悉一些。</p>
+<p style="max-width:100%;height:auto;">先写个简单的程序</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from selenium import webdriver
+service_args=[]
+service_args.append(&amp;apos;--load-images=no&amp;apos;)  ##关闭图片加载
+service_args.append(&amp;apos;--disk-cache=yes&amp;apos;)  ##开启缓存
+service_args.append(&amp;apos;--ignore-ssl-errors=true&amp;apos;) ##忽略https错误
+
+d=webdriver.PhantomJS("phantomjs",service_args=service_args)
+d.get("http://xxxxxxxxxxxxxxxxxxxxx")
+print d.page_source
+d.quit()
+</code></pre>
+<p style="max-width:100%;height:auto;">这样就可以发送get请求了。</p>
+<h3 id="post">问题一：没有post请求？</h3>
+<p style="max-width:100%;height:auto;">我觉得应该是我还了解的不够。不过翻了API，确实没有找到，希望大家能够指出我的错误，但我真的好像没有找到能够发送post请求的地方，真是蠢爆了。。
+这里我想到了两种方法解决，先说一种，第二种留到后面说。
+就是用<code style="max-width:100%;height:auto;">requests</code>库递交post请求，拿下来的cookie,调用<code style="max-width:100%;height:auto;">add_cookie</code>函数给它，然后让它带着<code style="max-width:100%;height:auto;">cookie</code>发送get请求就好了。
+样例如下</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from selenium import webdriver
+import requests
+r=requests.session()
+
+service_args=[]
+service_args.append(&amp;apos;--load-images=no&amp;apos;)  ##关闭图片加载
+service_args.append(&amp;apos;--disk-cache=yes&amp;apos;)  ##开启缓存
+service_args.append(&amp;apos;--ignore-ssl-errors=true&amp;apos;) ##忽略https错误
+
+d=webdriver.PhantomJS("phantomjs",service_args=service_args)
+
+data={
+        "username":"123",
+        "password":"123",
+        "login":"1"
+    }
+
+result=r.post("http://127.0.0.1:8000/web/login.php",data=data)
+cookies=r.cookies.get_dict()
+for i in cookies:
+    d.add_cookie({
+        &amp;apos;name&amp;apos;: i,
+        &amp;apos;value&amp;apos; :cookies[i],
+        &amp;apos;path&amp;apos;:&amp;apos;/&amp;apos;,
+        &amp;apos;domain&amp;apos;:&amp;apos;127.0.0.1&amp;apos;
+         })
+d.get("http://127.0.0.1:8000/web/index.php")
+print d.page_source
+d.quit()
+</code></pre>
+<p style="max-width:100%;height:auto;">另外这个<code style="max-width:100%;height:auto;">add_cookie</code>函数还比较刁钻，还要把<code style="max-width:100%;height:auto;">path</code>和<code style="max-width:100%;height:auto;">domain</code>都设置好，不然有时会报错。</p>
+<p style="max-width:100%;height:auto;">第二个方法的话，我们知道，如果用原生<code style="max-width:100%;height:auto;">PhantomJS</code>的话，我们可以很容易递交post请求，比如如下：</p>
+<pre><code class="js language-js" style="max-width:100%;height:auto;">var webPage = require(&amp;apos;webpage&amp;apos;);
+var page = webPage.create();
+
+var settings = {
+  operation: "POST",
+  header:{},
+  data: "username=123&amp;password=123&amp;login=1"
+};
+page.open(&amp;apos;http://127.0.0.1:8000/web/login.php&amp;apos;, settings, function(status) {
+  //console.log(page.content);
+  for(var i=0;i&lt;page.cookies.length;i++){
+        console.log(page.cookies[i].name+":"+page.cookies[i].value)
+  }
+});
+</code></pre>
+<p style="max-width:100%;height:auto;">所以我们想办法就是直接在 <code style="max-width:100%;height:auto;">Selenium</code>中让<code style="max-width:100%;height:auto;">PhantomJS</code> 执行它的 API就可以了，这里不贴了，看完下一小节就知道怎么写了。</p>
+<h3 id="seleniumphantomjsapi-1">问题二：在 <code style="max-width:100%;height:auto;">Selenium</code>中获取<code style="max-width:100%;height:auto;">PhantomJS</code> 的API的执行结果？</h3>
+<p style="max-width:100%;height:auto;">还好<code style="max-width:100%;height:auto;">Selenium</code>带了个<code style="max-width:100%;height:auto;">get_log</code>函数，比如我监控&amp;apos;http://127.0.0.1:8000/web/index.php&amp;apos;页面向外发送的所有请求，如果用原生的<code style="max-width:100%;height:auto;">phantomjs</code>，很好办，如下：</p>
+<pre><code class="js language-js" style="max-width:100%;height:auto;">var webPage = require(&amp;apos;webpage&amp;apos;);
+var page = webPage.create();
+
+page.onResourceRequested = function (request) {
+    console.log(&amp;apos;Request &amp;apos; + request.url);
+};
+...........
+...........
+</code></pre>
+<p style="max-width:100%;height:auto;">所以我们直接在<code style="max-width:100%;height:auto;">Selenium</code>中调用<code style="max-width:100%;height:auto;">PhantomJS</code> 的API就好了。如下</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from selenium import webdriver
+import requests
+r=requests.session()
+
+service_args=[]
+service_args.append(&amp;apos;--load-images=no&amp;apos;)  ##关闭图片加载
+service_args.append(&amp;apos;--disk-cache=yes&amp;apos;)  ##开启缓存
+service_args.append(&amp;apos;--ignore-ssl-errors=true&amp;apos;) ##忽略https错误
+
+d=webdriver.PhantomJS("phantomjs",service_args=service_args)
+
+data={
+        "username":"123",
+        "password":"123",
+        "login":"1"
+    }
+
+result=r.post("http://127.0.0.1:8000/web/login.php",data=data)
+cookies=r.cookies.get_dict()
+for i in cookies:
+    d.add_cookie({
+        &amp;apos;name&amp;apos;: i,
+        &amp;apos;value&amp;apos; :cookies[i],
+        &amp;apos;path&amp;apos;:&amp;apos;/&amp;apos;,
+        &amp;apos;domain&amp;apos;:&amp;apos;127.0.0.1&amp;apos;
+         })
+script = "var page=this;page.onResourceRequested = function (request){console.log(request.url);};"
+d.command_executor._commands[&amp;apos;executePhantomScript&amp;apos;] = (&amp;apos;POST&amp;apos;, &amp;apos;/session/$sessionId/phantom/execute&amp;apos;)
+d.execute(&amp;apos;executePhantomScript&amp;apos;, {&amp;apos;script&amp;apos;: script, &amp;apos;args&amp;apos;: []})
+
+d.get("http://127.0.0.1:8000/web/index.php")
+print d.page_source
+d.quit()
+</code></pre>
+<p style="max-width:100%;height:auto;">这里上述代码确实能够实时执行，但是就这样写的话没有办法获取到结果。
+这里需要用到一个<code style="max-width:100%;height:auto;">get_log</code>函数，改进如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">from selenium import webdriver
+import requests
+r=requests.session()
+
+service_args=[]
+service_args.append(&amp;apos;--load-images=no&amp;apos;)  ##关闭图片加载
+service_args.append(&amp;apos;--disk-cache=yes&amp;apos;)  ##开启缓存
+service_args.append(&amp;apos;--ignore-ssl-errors=true&amp;apos;) ##忽略https错误
+
+d=webdriver.PhantomJS("phantomjs",service_args=service_args)
+
+data={
+        "username":"123",
+        "password":"123",
+        "login":"1"
+    }
+
+result=r.post("http://127.0.0.1:8000/web/login.php",data=data)
+cookies=r.cookies.get_dict()
+for i in cookies:
+    d.add_cookie({
+        &amp;apos;name&amp;apos;: i,
+        &amp;apos;value&amp;apos; :cookies[i],
+        &amp;apos;path&amp;apos;:&amp;apos;/&amp;apos;,
+        &amp;apos;domain&amp;apos;:&amp;apos;127.0.0.1&amp;apos;
+         })
+script = "var page=this;page.onResourceRequested = function (request){page.browserLog.push(request.url);};"
+d.command_executor._commands[&amp;apos;executePhantomScript&amp;apos;] = (&amp;apos;POST&amp;apos;, &amp;apos;/session/$sessionId/phantom/execute&amp;apos;)
+d.execute(&amp;apos;executePhantomScript&amp;apos;, {&amp;apos;script&amp;apos;: script, &amp;apos;args&amp;apos;: []})
+
+d.get("http://127.0.0.1:8000/web/index.php")
+print d.page_source
+print d.get_log(&amp;apos;browser&amp;apos;)
+d.quit()
+</code></pre>
+<p style="max-width:100%;height:auto;">在js脚本中我们调用<code style="max-width:100%;height:auto;">page.browserLog.push</code>,然后在python脚本中我们<code style="max-width:100%;height:auto;">get_log(&amp;apos;browser&amp;apos;)</code>去获取就可以实现相互沟通，当然肯定还有别的办法，不过我没有找到。。。。僵硬了。。。。</p>
+<h2 id="-1">后记</h2>
+<p style="max-width:100%;height:auto;">再说这个抓取sitemap和请求参数的小脚本，想了想还是觉得非常麻烦，虽然几个问题都有了相应的解决办法，也不管好坏，加上今天稍微研究了一下python调用<code style="max-width:100%;height:auto;">phantom</code>的优化，还是稍微有点信心了，但是感觉要整合到一起来还是会很麻烦，效率问题是一个，能否真正准确抓取完整又是另一个，慢慢来把，没想到最初觉得不是问题的问题最后却成了我最大的麻烦之一。。僵硬。。。最后还要说的是原声的phantomjs真的比selenium去调用舒服得多。。。现在想来要是最开始想把每个环节思考一下就好了，要是思考了大概就不会用python了，大概会用nodejs，对了，最近稍微研究了一下nodejs的一些渗透和攻击方法，后续整理一下分享出来，希望师傅们能够帮忙指点指点。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./selenium在目标页面执行phantomjs的API并获取返回值/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./selenium在目标页面执行phantomjs的API并获取返回值/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./selenium在目标页面执行phantomjs的API并获取返回值/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./selenium在目标页面执行phantomjs的API并获取返回值/prism.js"></script>
+<script src="./selenium在目标页面执行phantomjs的API并获取返回值/zooming.js"></script>
+<script src="./selenium在目标页面执行phantomjs的API并获取返回值/Bendawang.js"></script>
+
+

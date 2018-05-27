@@ -1,0 +1,272 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./绕过安全狗上传asp一句话  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./绕过安全狗上传asp一句话  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./绕过安全狗上传asp一句话  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>绕过安全狗上传asp一句话 | 离别歌</title>
+<link href="./绕过安全狗上传asp一句话  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./绕过安全狗上传asp一句话  离别歌/styles.css" rel="stylesheet"/>
+<link href="./绕过安全狗上传asp一句话  离别歌/style.css" rel="stylesheet"/>
+<link href="./绕过安全狗上传asp一句话  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./绕过安全狗上传asp一句话  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./绕过安全狗上传asp一句话  离别歌/jquery.min.js"></script>
+<link href="./绕过安全狗上传asp一句话  离别歌/code.css" rel="stylesheet"/>
+<link href="./绕过安全狗上传asp一句话  离别歌/button.css" rel="stylesheet"/>
+<link href="./绕过安全狗上传asp一句话  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./绕过安全狗上传asp一句话  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/bypass-safedog-upload.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/bypass-safedog-upload.html&amp;text=%E7%BB%95%E8%BF%87%E5%AE%89%E5%85%A8%E7%8B%97%E4%B8%8A%E4%BC%A0asp%E4%B8%80%E5%8F%A5%E8%AF%9D"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/bypass-safedog-upload.html&amp;title=%E7%BB%95%E8%BF%87%E5%AE%89%E5%85%A8%E7%8B%97%E4%B8%8A%E4%BC%A0asp%E4%B8%80%E5%8F%A5%E8%AF%9D"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/bypass-safedog-upload.html&amp;is_video=false&amp;description=%E7%BB%95%E8%BF%87%E5%AE%89%E5%85%A8%E7%8B%97%E4%B8%8A%E4%BC%A0asp%E4%B8%80%E5%8F%A5%E8%AF%9D"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E7%BB%95%E8%BF%87%E5%AE%89%E5%85%A8%E7%8B%97%E4%B8%8A%E4%BC%A0asp%E4%B8%80%E5%8F%A5%E8%AF%9D&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/bypass-safedog-upload.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/bypass-safedog-upload.html&amp;title=%E7%BB%95%E8%BF%87%E5%AE%89%E5%85%A8%E7%8B%97%E4%B8%8A%E4%BC%A0asp%E4%B8%80%E5%8F%A5%E8%AF%9D"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/bypass-safedog-upload.html&amp;title=%E7%BB%95%E8%BF%87%E5%AE%89%E5%85%A8%E7%8B%97%E4%B8%8A%E4%BC%A0asp%E4%B8%80%E5%8F%A5%E8%AF%9D"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/bypass-safedog-upload.html&amp;title=%E7%BB%95%E8%BF%87%E5%AE%89%E5%85%A8%E7%8B%97%E4%B8%8A%E4%BC%A0asp%E4%B8%80%E5%8F%A5%E8%AF%9D"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/bypass-safedog-upload.html&amp;title=%E7%BB%95%E8%BF%87%E5%AE%89%E5%85%A8%E7%8B%97%E4%B8%8A%E4%BC%A0asp%E4%B8%80%E5%8F%A5%E8%AF%9D"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/bypass-safedog-upload.html&amp;name=%E7%BB%95%E8%BF%87%E5%AE%89%E5%85%A8%E7%8B%97%E4%B8%8A%E4%BC%A0asp%E4%B8%80%E5%8F%A5%E8%AF%9D&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">绕过安全狗上传asp一句话</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年2月9日 15:30" itemprop="datePublished">
+                    2014 二月 09 15:30
+                </time>
+</div>
+<div class="article-tag">
+            阅读：9129
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/WAF%E7%BB%95%E8%BF%87">WAF绕过</a>,
+                
+                <a class="tag-link" href="/tag/%E5%AE%89%E5%85%A8%E7%8B%97">安全狗</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p class="p0">
+<span style="font-size:14px;">绕过安全狗有朋友整理过的，我也读过一些文章，很有收获。所以先在这里把文章给大家分享一下：</span>
+</p>
+<p class="p0">
+<span style="font-size:14px;">90sec</span><span style="font-size:14px;">的</span><span style="font-size:14px;">tigel1986</span><span style="font-size:14px;">同学写到的自制过狗菜刀文章：</span><a href="https://forum.90sec.org/forum.php?mod=viewthread&amp;tid=7238&amp;highlight=%B9%FD%B9%B7" target="_blank"><span style="font-size:14px;">https://forum.90sec.org/forum.php?mod=viewthread&amp;tid=7238&amp;highlight=%B9%FD%B9%B7</span></a>
+</p>
+<p class="p0">
+<span style="font-size:14px;">t00ls</span><span style="font-size:14px;">里鬼哥收集的过狗技巧：</span><a href="https://www.t00ls.net/thread-21566-1-1.html" target="_blank"><span style="font-size:14px;">https://www.t00ls.net/thread-21566-1-1.html</span></a>
+</p>
+<p class="p0">
+<span style="font-size:14px;">t00ls</span><span style="font-size:14px;">里</span><span style="font-size:14px;">Bi99v</span><span style="font-size:14px;">的过安全狗上传拦截，但我是低权限用户看不成，也许它的方法和我的一样：</span><a href="https://www.t00ls.net/thread-25528-1-1.html" target="_blank"><span style="font-size:14px;">https://www.t00ls.net/thread-25528-1-1.html</span></a>
+</p>
+<p class="p0">
+<span style="font-size:14px;">t00ls</span><span style="font-size:14px;">里</span><span style="font-size:14px;">H4xssck3r</span><span style="font-size:14px;">的过安全狗实战总结篇：</span><a href="https://www.t00ls.net/thread-22311-1-1.html" target="_blank"><span style="font-size:14px;">https://www.t00ls.net/thread-22311-1-1.html</span></a>
+</p>
+<p class="p0">
+<span style="font-size:14px;"> </span>
+</p>
+<p class="p0">
+<span style="font-size:14px;">好了，目标是一个装了</span><span style="font-size:14px;">ewebeditor</span><span style="font-size:14px;">的站，而且通过各种手段已经获得了</span><span style="font-size:14px;">eweb</span><span style="font-size:14px;">的后台权限，但一登陆后台就发现了狗：</span>
+</p>
+<p class="p0">
+<a href="https://www.leavesongs.com/content/uploadfile/201402/4efd1391931081.jpg" id="ematt:400" target="_blank"></a><a href="https://www.leavesongs.com/content/uploadfile/201402/4efd1391934573.jpg" id="ematt:421" target="_blank"><img alt="01.jpg" border="0" height="268" src="./绕过安全狗上传asp一句话  离别歌/thum-4efd1391934573.jpg" title="点击查看原图" width="650"/></a><span style="font-size:14px;"></span>
+</p>
+<p class="p0">
+<span style="font-size:14px;"> </span>
+</p>
+<p class="p0">
+<span style="font-size:14px;">有狗我们也不怕，来到设置处增加上传类型</span><span style="font-size:14px;">asp</span><span style="font-size:14px;">：</span>
+</p>
+<p class="p0">
+<a href="https://www.leavesongs.com/content/uploadfile/201402/3fb51391931083.jpg" id="ematt:402" target="_blank"></a><a href="https://www.leavesongs.com/content/uploadfile/201402/3fb51391931083.jpg" id="ematt:402" target="_blank"><img alt="02.jpg" border="0" height="224" src="./绕过安全狗上传asp一句话  离别歌/3fb51391931083.jpg" title="点击查看原图" width="376"/></a>
+</p>
+<p class="p0">
+<span style="font-size:14px;"> </span>
+</p>
+<p class="p0">
+<span style="font-size:14px;">然后返回预览处上传。</span><span style="font-size:14px;">t00ls</span><span style="font-size:14px;">中总结的帖子说到，我们可以利用包含的方法过安全狗的内容检查。</span>
+</p>
+<p class="p0">
+<span style="font-size:14px;">所以，我先上传一个含有一句话的</span><span style="font-size:14px;">gif</span><span style="font-size:14px;">文件，成功上传，没有拦截：</span>
+</p>
+<p class="p0">
+<a href="https://www.leavesongs.com/content/uploadfile/201402/f9961391931084.jpg" id="ematt:403" target="_blank"></a><a href="https://www.leavesongs.com/content/uploadfile/201402/f9961391934577.jpg" id="ematt:423" target="_blank"><img alt="03.jpg" border="0" height="107" src="./绕过安全狗上传asp一句话  离别歌/thum-f9961391934577.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p class="p0">
+<span style="font-size:14px;">然后上传一个</span><span style="font-size:14px;">asp</span><span style="font-size:14px;">文件，包含这个</span><span style="font-size:14px;">gif</span><span style="font-size:14px;">。但上传的过程中发现，点上传界面就一直停留在等待的位置，我估计就是被狗咬了。</span>
+</p>
+<p class="p0">
+<span style="font-size:14px;">burpsuite</span><span style="font-size:14px;">抓包看一下，上传一个</span><span style="font-size:14px;">asp</span><span style="font-size:14px;">文件（我尝试过修改</span><span style="font-size:14px;">content-type</span><span style="font-size:14px;">，但也不行）：</span>
+</p>
+<p class="p0">
+<a href="https://www.leavesongs.com/content/uploadfile/201402/2de41391931085.jpg" id="ematt:405" target="_blank"></a><a href="https://www.leavesongs.com/content/uploadfile/201402/2de41391934593.jpg" id="ematt:425" target="_blank"><img alt="04.jpg" border="0" height="159" src="./绕过安全狗上传asp一句话  离别歌/2de41391934593.jpg" title="点击查看原图" width="613"/></a>
+</p>
+<p class="p0">
+<span style="font-size:14px;">果然被狗咬了，</span><span style="font-size:14px;">403</span><span style="font-size:14px;">错误：</span>
+</p>
+<p class="p0">
+<a href="https://www.leavesongs.com/content/uploadfile/201402/13501391931087.jpg" id="ematt:407" target="_blank"></a><a href="https://www.leavesongs.com/content/uploadfile/201402/13501391934616.jpg" id="ematt:426" target="_blank"><img alt="05.jpg" border="0" height="160" src="./绕过安全狗上传asp一句话  离别歌/thum-13501391934616.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p class="p0">
+<span style="font-size:14px;">那么，狗一定是对上传文件的后缀进行了检查，导致我们不能上传</span><span style="font-size:14px;">asp</span><span style="font-size:14px;">文件。</span>
+</p>
+<p class="p0">
+<span style="font-size:14px;">这里我们有几个思路：</span>
+</p>
+<p class="p0">
+<span style="font-size:14px;">1.IIS6.0</span><span style="font-size:14px;">的话可以用解析漏洞，利用鬼哥文章里那几个过狗的解析漏洞利用方法过狗。但不幸的是这里</span><span style="font-size:14px;">eweb</span><span style="font-size:14px;">会修改文件名，而且这个网站也不是</span><span style="font-size:14px;">IIS6.0</span>
+</p>
+<p class="p0">
+<span style="font-size:14px;">2.利用</span><span style="font-size:14px;">tigel1986</span><span style="font-size:14px;">文章里说到的</span><span style="font-size:14px;">\0</span><span style="font-size:14px;">截断，他是利用截断做了一把菜刀。我们就来利用截断上传。</span>
+</p>
+<p class="p0" style="text-align:justify;">
+<span style="font-size:14px;"> </span>
+</p>
+<p class="p0" style="text-align:justify;">
+<span style="font-size:14px;">上传的时候抓包，把</span><span style="font-size:14px;">.asp</span><span style="font-size:14px;">前面加个</span><span style="font-size:14px;">%00</span><span style="font-size:14px;">，并</span><span style="font-size:14px;">urldecode</span><span style="font-size:14px;">一下：</span>
+</p>
+<p class="p0" style="text-align:justify;">
+<a href="https://www.leavesongs.com/content/uploadfile/201402/fac41391931088.jpg" id="ematt:409" target="_blank"></a><a href="https://www.leavesongs.com/content/uploadfile/201402/fac41391934621.jpg" id="ematt:428" target="_blank"><img alt="06.jpg" border="0" height="157" src="./绕过安全狗上传asp一句话  离别歌/fac41391934621.jpg" title="点击查看原图" width="627"/></a>
+</p>
+<p class="p0" style="text-align:justify;">
+<span style="font-size:14px;">然后再发送。</span>
+</p>
+<p class="p0" style="text-align:justify;">
+<span style="font-size:14px;">很明显地看到返回包已经变了，</span><span style="font-size:14px;">200</span><span style="font-size:14px;">，里面就是我们上传成功的文件：</span>
+</p>
+<p class="p0" style="text-align:justify;">
+<a href="https://www.leavesongs.com/content/uploadfile/201402/e4bd1391931090.jpg" id="ematt:411" target="_blank"></a><a href="https://www.leavesongs.com/content/uploadfile/201402/e4bd1391934637.jpg" id="ematt:429" target="_blank"><img alt="07.jpg" border="0" height="114" src="./绕过安全狗上传asp一句话  离别歌/thum-e4bd1391934637.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p class="p0" style="text-align:justify;">
+<span style="font-size:14px;">我们用菜刀连接，却发现自己的菜刀不是过狗刀……：</span>
+</p>
+<p class="p0" style="text-align:justify;">
+<a href="https://www.leavesongs.com/content/uploadfile/201402/10581391931094.jpg" id="ematt:415" target="_blank"></a><a href="https://www.leavesongs.com/content/uploadfile/201402/10581391934656.jpg" id="ematt:432" target="_blank"><img alt="09.jpg" border="0" height="405" src="./绕过安全狗上传asp一句话  离别歌/thum-10581391934656.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p class="p0" style="text-align:justify;">
+<span style="font-size:14px;">但我们可以换个武器（或者你用过狗刀也行），俺是农村的大牛自制的</span><span style="font-size:14px;">chopper</span><span style="font-size:14px;">，直接连上，没问题：</span>
+</p>
+<p class="p0" style="text-align:justify;">
+<a href="https://www.leavesongs.com/content/uploadfile/201402/86c31391931093.jpg" id="ematt:413" target="_blank"></a><a href="https://www.leavesongs.com/content/uploadfile/201402/86c31391934650.jpg" id="ematt:431" target="_blank"><img alt="08.jpg" border="0" height="338" src="./绕过安全狗上传asp一句话  离别歌/86c31391934650.jpg" title="点击查看原图" width="539"/></a>
+</p>
+<p class="p0" style="text-align:justify;">
+<span style="font-size:14px;">chopper</span><span style="font-size:14px;">下载地址：</span><span><a href="http://pan.baidu.com/share/home?uk=1527144077&amp;view=share#category/type=0" target="_blank"><span style="font-size:14px;">http://pan.baidu.com/share/home?uk=1527144077&amp;view=share#category/type=0</span></a></span>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="d3349ff83a9a25448d507f8384e68f544d7c3f8d"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./绕过安全狗上传asp一句话  离别歌/d3349ff83a9a25448d507f8384e68f544d7c3f8d"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="302">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="w2RjkKFWYZDHhf03FVXEcZ4imV5KhOga4mcP8eRbpMx6hUoitcroLD6nvZyS0i5k"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./绕过安全狗上传asp一句话  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./绕过安全狗上传asp一句话  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

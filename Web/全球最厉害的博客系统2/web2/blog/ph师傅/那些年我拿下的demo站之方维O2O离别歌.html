@@ -1,0 +1,423 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./那些年我拿下的demo站之方维O2O  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./那些年我拿下的demo站之方维O2O  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./那些年我拿下的demo站之方维O2O  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>那些年我拿下的demo站之方维O2O | 离别歌</title>
+<link href="./那些年我拿下的demo站之方维O2O  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./那些年我拿下的demo站之方维O2O  离别歌/styles.css" rel="stylesheet"/>
+<link href="./那些年我拿下的demo站之方维O2O  离别歌/style.css" rel="stylesheet"/>
+<link href="./那些年我拿下的demo站之方维O2O  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./那些年我拿下的demo站之方维O2O  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./那些年我拿下的demo站之方维O2O  离别歌/jquery.min.js"></script>
+<link href="./那些年我拿下的demo站之方维O2O  离别歌/code.css" rel="stylesheet"/>
+<link href="./那些年我拿下的demo站之方维O2O  离别歌/button.css" rel="stylesheet"/>
+<link href="./那些年我拿下的demo站之方维O2O  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./那些年我拿下的demo站之方维O2O  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/fanwe-o2o-demo-website-getshell.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/fanwe-o2o-demo-website-getshell.html&amp;text=%E9%82%A3%E4%BA%9B%E5%B9%B4%E6%88%91%E6%8B%BF%E4%B8%8B%E7%9A%84demo%E7%AB%99%E4%B9%8B%E6%96%B9%E7%BB%B4O2O"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/fanwe-o2o-demo-website-getshell.html&amp;title=%E9%82%A3%E4%BA%9B%E5%B9%B4%E6%88%91%E6%8B%BF%E4%B8%8B%E7%9A%84demo%E7%AB%99%E4%B9%8B%E6%96%B9%E7%BB%B4O2O"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/fanwe-o2o-demo-website-getshell.html&amp;is_video=false&amp;description=%E9%82%A3%E4%BA%9B%E5%B9%B4%E6%88%91%E6%8B%BF%E4%B8%8B%E7%9A%84demo%E7%AB%99%E4%B9%8B%E6%96%B9%E7%BB%B4O2O"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E9%82%A3%E4%BA%9B%E5%B9%B4%E6%88%91%E6%8B%BF%E4%B8%8B%E7%9A%84demo%E7%AB%99%E4%B9%8B%E6%96%B9%E7%BB%B4O2O&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/fanwe-o2o-demo-website-getshell.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/fanwe-o2o-demo-website-getshell.html&amp;title=%E9%82%A3%E4%BA%9B%E5%B9%B4%E6%88%91%E6%8B%BF%E4%B8%8B%E7%9A%84demo%E7%AB%99%E4%B9%8B%E6%96%B9%E7%BB%B4O2O"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/fanwe-o2o-demo-website-getshell.html&amp;title=%E9%82%A3%E4%BA%9B%E5%B9%B4%E6%88%91%E6%8B%BF%E4%B8%8B%E7%9A%84demo%E7%AB%99%E4%B9%8B%E6%96%B9%E7%BB%B4O2O"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/fanwe-o2o-demo-website-getshell.html&amp;title=%E9%82%A3%E4%BA%9B%E5%B9%B4%E6%88%91%E6%8B%BF%E4%B8%8B%E7%9A%84demo%E7%AB%99%E4%B9%8B%E6%96%B9%E7%BB%B4O2O"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/fanwe-o2o-demo-website-getshell.html&amp;title=%E9%82%A3%E4%BA%9B%E5%B9%B4%E6%88%91%E6%8B%BF%E4%B8%8B%E7%9A%84demo%E7%AB%99%E4%B9%8B%E6%96%B9%E7%BB%B4O2O"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/fanwe-o2o-demo-website-getshell.html&amp;name=%E9%82%A3%E4%BA%9B%E5%B9%B4%E6%88%91%E6%8B%BF%E4%B8%8B%E7%9A%84demo%E7%AB%99%E4%B9%8B%E6%96%B9%E7%BB%B4O2O&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">那些年我拿下的demo站之方维O2O</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年8月9日 20:00" itemprop="datePublished">
+                    2015 八月 09 20:00
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4728
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/getshell">getshell</a>,
+                
+                <a class="tag-link" href="/tag/%E4%B8%8A%E4%BC%A0%E6%BC%8F%E6%B4%9E">上传漏洞</a>,
+                
+                <a class="tag-link" href="/tag/%E8%A7%A3%E6%9E%90%E6%BC%8F%E6%B4%9E">解析漏洞</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>早前一个被我捂烂的漏洞，其实不是要捂的，当注入交到乌云，审核比较忙测试的时候没复现，就给打回来了。我一直想写个详细的再交，结果没时间就没写，这两天上去一看鸡毛都没了，全补完了，shell也掉光了，后台也进不去……</p>
+<p>想想算了不挖了。还好我有记笔记的习惯，拿出来分享一下。</p>
+<p>以下是笔记。</p>
+<p>今天挖了一阵子方维O2O的本地生活系统。这个系统是不开源的，偶然拿到了一个版本的源码，于是有了这次挖洞之旅。</p>
+<p>首先翻到了一个注入，拿下了管理员密码。实际上，demo站已经给了一个低权限的管理员账号demo/demo。</p>
+<p>登录后台：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201508/29551439122336.png"><img alt="image001.png" src="./那些年我拿下的demo站之方维O2O  离别歌/thum-29551439122336.png"/></a></p>
+<h2 id="0x01"><a class="toclink" href="#0x01">0x01 鸡肋文件包含漏洞</a></h2>
+<p>大概看了一下功能不多，很多敏感功能（如sql操作）demo管理员没权限。</p>
+<p>后台一般安全做的比较差，最容易出现的是文件包含漏洞。我很快在源码里找到一处鸡肋文件包含。/admin/Lib/Action/ApiLoginAction.class.php</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">public</span> <span class="k">function</span> <span class="nf">install</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="nv">$class_name</span> <span class="o">=</span> <span class="nv">$_REQUEST</span><span class="p">[</span><span class="s1">'class_name'</span><span class="p">];</span>
+    <span class="nv">$directory</span> <span class="o">=</span> <span class="nx">APP_ROOT_PATH</span><span class="o">.</span><span class="s2">"system/api_login/"</span><span class="p">;</span>
+    <span class="nv">$read_modules</span> <span class="o">=</span> <span class="k">true</span><span class="p">;</span>
+
+    <span class="nv">$file</span> <span class="o">=</span> <span class="nv">$directory</span><span class="o">.</span><span class="nv">$class_name</span><span class="o">.</span><span class="s2">"_api.php"</span><span class="p">;</span>
+    <span class="k">if</span><span class="p">(</span><span class="nb">file_exists</span><span class="p">(</span><span class="nv">$file</span><span class="p">))</span>
+    <span class="p">{</span>
+        <span class="nv">$module</span> <span class="o">=</span> <span class="k">require_once</span><span class="p">(</span><span class="nv">$file</span><span class="p">);</span>
+        <span class="nv">$rs</span> <span class="o">=</span> <span class="nx">M</span><span class="p">(</span><span class="s2">"ApiLogin"</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">where</span><span class="p">(</span><span class="s2">"class_name = '"</span><span class="o">.</span><span class="nv">$class_name</span><span class="o">.</span><span class="s2">"'"</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">count</span><span class="p">();</span>
+        <span class="k">if</span><span class="p">(</span><span class="nv">$rs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">error</span><span class="p">(</span><span class="nx">l</span><span class="p">(</span><span class="s2">"API_INSTALLED"</span><span class="p">));</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">error</span><span class="p">(</span><span class="nx">l</span><span class="p">(</span><span class="s2">"INVALID_OPERATION"</span><span class="p">));</span>
+    <span class="p">}</span>
+</pre></div>
+<p>之所以叫鸡肋，因为需要截断：$directory.$class_name."_api.php";</p>
+<p>但我看demo站的php是5.3.3，记得5.3.4以后才解决截断问题。而且fanwe全局并没有addslashes，不影响截断。</p>
+<p>所以简单尝试了一下……结果还真截断不了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201508/25ae1439122339.png"><img alt="image003.png" src="./那些年我拿下的demo站之方维O2O  离别歌/thum-25ae1439122339.png"/></a></p>
+<p>可能是其他什么原因，反正不能截断。这个鸡肋漏洞是用不了了。再继续翻源码。</p>
+<h2 id="0x02"><a class="toclink" href="#0x02">0x02 解压缩造成的鸡肋文件上传漏洞</a></h2>
+<p>/admin/Lib/Action/FileAction.class.php，一个文件管理的controller。（审计的时候嗅觉也比较重要，看到这个文件名FileAction我就感觉这里会出问题，因为是文件操作）</p>
+<p>实际上也没我想的那么糟糕，这里是上传的控制器，上传的地方过滤的比较严，不能直接上传php文件。</p>
+<p>但有个上传压缩包并解压的函数：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="sd">/**</span>
+<span class="sd"> * 图标上传</span>
+<span class="sd"> */</span>
+<span class="k">public</span> <span class="k">function</span> <span class="nf">do_upload_icon</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="k">require_once</span> <span class="nx">APP_ROOT_PATH</span><span class="o">.</span><span class="s2">"system/utils/zip.php"</span><span class="p">;</span>
+    <span class="nv">$archive</span>  <span class="o">=</span> <span class="k">new</span> <span class="nx">PHPZip</span><span class="p">();</span>
+    <span class="nv">$font_dir</span> <span class="o">=</span> <span class="nx">APP_ROOT_PATH</span><span class="o">.</span><span class="s2">"public/iconfont"</span><span class="p">;</span>
+
+    <span class="nv">$result</span> <span class="o">=</span> <span class="nv">$archive</span><span class="o">-&gt;</span><span class="na">unZip</span><span class="p">(</span><span class="nv">$_FILES</span><span class="p">[</span><span class="s1">'file'</span><span class="p">][</span><span class="s1">'tmp_name'</span><span class="p">],</span> <span class="nv">$font_dir</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$result</span><span class="p">)</span><span class="o">||</span><span class="nv">$result</span><span class="o">==-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nx">ajax_return</span><span class="p">(</span><span class="k">array</span><span class="p">(</span><span class="s2">"status"</span><span class="o">=&gt;</span><span class="k">false</span><span class="p">,</span><span class="s2">"info"</span><span class="o">=&gt;</span><span class="s2">"图标库更新失败，请手动解压后上传文件到"</span><span class="o">.</span><span class="nv">$font_dir</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span> <span class="nv">$dir</span> <span class="o">=</span> <span class="nb">opendir</span><span class="p">(</span> <span class="nv">$font_dir</span><span class="o">.</span><span class="s2">"/"</span> <span class="p">)</span> <span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">while</span> <span class="p">(</span> <span class="nv">$file</span> <span class="o">=</span> <span class="nb">readdir</span><span class="p">(</span> <span class="nv">$dir</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="p">{</span>
+            <span class="nv">$check</span> <span class="o">=</span> <span class="nb">is_dir</span><span class="p">(</span> <span class="nv">$font_dir</span><span class="o">.</span><span class="s2">"/"</span><span class="o">.</span> <span class="nv">$file</span> <span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nv">$check</span> <span class="p">)</span>
+            <span class="p">{</span>
+                <span class="o">@</span><span class="nb">unlink</span><span class="p">(</span> <span class="nv">$font_dir</span> <span class="o">.</span><span class="s2">"/"</span><span class="o">.</span> <span class="nv">$file</span> <span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="nv">$result</span> <span class="o">=</span> <span class="nv">$archive</span><span class="o">-&gt;</span><span class="na">unZip</span><span class="p">(</span><span class="nv">$_FILES</span><span class="p">[</span><span class="s1">'file'</span><span class="p">][</span><span class="s1">'tmp_name'</span><span class="p">],</span> <span class="nv">$font_dir</span><span class="p">);</span>      
+    <span class="c1">//清空原文件</span>
+
+    <span class="k">foreach</span><span class="p">(</span><span class="nv">$result</span> <span class="k">as</span> <span class="nv">$k</span><span class="o">=&gt;</span><span class="nv">$v</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$file</span> <span class="o">=</span> <span class="nx">APP_ROOT_PATH</span><span class="o">.</span><span class="s2">"public/iconfont/"</span><span class="o">.</span><span class="nv">$k</span><span class="p">;</span>
+        <span class="nv">$file_arr</span> <span class="o">=</span> <span class="nb">explode</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="nv">$file</span><span class="p">);</span>
+
+        <span class="k">foreach</span><span class="p">(</span><span class="nv">$file_arr</span> <span class="k">as</span> <span class="nv">$f</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">if</span><span class="p">(</span><span class="nv">$f</span><span class="o">==</span><span class="s2">"iconfont.css"</span><span class="o">||</span><span class="nv">$f</span><span class="o">==</span><span class="s2">"iconfont.eot"</span><span class="o">||</span><span class="nv">$f</span><span class="o">==</span><span class="s2">"iconfont.svg"</span><span class="o">||</span><span class="nv">$f</span><span class="o">==</span><span class="s2">"iconfont.ttf"</span><span class="o">||</span><span class="nv">$f</span><span class="o">==</span><span class="s2">"iconfont.woff"</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="c1">//echo APP_ROOT_PATH."public/iconfont/".$f;</span>
+                <span class="o">@</span><span class="nb">rename</span><span class="p">(</span><span class="nv">$file</span><span class="p">,</span><span class="nx">APP_ROOT_PATH</span><span class="o">.</span><span class="s2">"public/iconfont/"</span><span class="o">.</span><span class="nv">$f</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+    <span class="p">}</span>
+
+    <span class="k">foreach</span><span class="p">(</span><span class="nv">$result</span> <span class="k">as</span> <span class="nv">$k</span><span class="o">=&gt;</span><span class="nv">$v</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$file</span> <span class="o">=</span> <span class="nx">APP_ROOT_PATH</span><span class="o">.</span><span class="s2">"public/iconfont/"</span><span class="o">.</span><span class="nv">$k</span><span class="p">;</span>
+        <span class="o">@</span><span class="nb">unlink</span><span class="p">(</span><span class="nv">$file</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">foreach</span><span class="p">(</span><span class="nv">$result</span> <span class="k">as</span> <span class="nv">$k</span><span class="o">=&gt;</span><span class="nv">$v</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$file</span> <span class="o">=</span> <span class="nx">APP_ROOT_PATH</span><span class="o">.</span><span class="s2">"public/iconfont/"</span><span class="o">.</span><span class="nv">$k</span><span class="p">;</span>
+        <span class="o">@</span><span class="nb">rmdir</span><span class="p">(</span><span class="nv">$file</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="nx">ajax_return</span><span class="p">(</span><span class="k">array</span><span class="p">(</span><span class="s2">"status"</span><span class="o">=&gt;</span><span class="k">true</span><span class="p">,</span><span class="s2">"info"</span><span class="o">=&gt;</span><span class="s2">""</span><span class="p">));</span>
+<span class="p">}</span>
+</pre></div>
+<p>看过我去年写的一篇文章：<a href="https://www.leavesongs.com/PENETRATION/after-phpcms-upload-vul.html"><a href="https://www.leavesongs.com/PENETRATION/after-phpcms-upload-vul.html">https://www.leavesongs.com/PENETRATION/after-phpcms-upload-vul.html</a></a> 的同学应该记忆犹新，解压这种操作有很多方法可以传shell。</p>
+<p>这里也一样，虽然解压完成后删除了所有原有文件。但其解压了zip文件后，它判断了是否成功，不成功则直接退出了：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">if</span><span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$result</span><span class="p">)</span><span class="o">||</span><span class="nv">$result</span><span class="o">==-</span><span class="mi">1</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="nx">ajax_return</span><span class="p">(</span><span class="k">array</span><span class="p">(</span><span class="s2">"status"</span><span class="o">=&gt;</span><span class="k">false</span><span class="p">,</span><span class="s2">"info"</span><span class="o">=&gt;</span><span class="s2">"图标库更新失败，请手动解压后上传文件到"</span><span class="o">.</span><span class="nv">$font_dir</span><span class="p">));</span>
+<span class="p">}</span>
+</pre></div>
+<p>那么我可以构造一个“能够解压一半”的压缩包，解压出部分php文件，然后出错。这样就执行不到“删除”的代码了。</p>
+<p>另外一个方法是，我解压的时候修改文件名为“../xxxx.php”，就能把php文件解压到上层目录中，也能避免被删除的命运。</p>
+<p>相对的，第二种方法更简单。</p>
+<p>于是我构造压缩包，先写好一个webshell，名字就叫aaaaaaaaaaaaaaaaaaaaaa.php。压缩后用editplus编辑：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201508/f3c81439122342.png"><img alt="image005.png" src="./那些年我拿下的demo站之方维O2O  离别歌/thum-f3c81439122342.png"/></a></p>
+<p>将前4个a替换成“/../”，这样保证了整个文件的长度不变。</p>
+<p>再构造本地上传单页：</p>
+<div class="codehilite"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">action</span><span class="o">=</span><span class="s">"http://o2odemo.fanwe.net/m.php?m=File&amp;a=do_upload_icon"</span> <span class="na">method</span><span class="o">=</span><span class="s">"post"</span> <span class="na">enctype </span><span class="o">=</span><span class="s">"multipart/form-data"</span><span class="p">&gt;</span> 
+<span class="p">&lt;</span><span class="nt">input</span> <span class="na">name</span><span class="o">=</span><span class="s">"file"</span> <span class="na">type</span><span class="o">=</span><span class="s">"file"</span> <span class="p">/&gt;</span>
+<span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">"submit"</span> <span class="na">value</span><span class="o">=</span><span class="s">"upload"</span> <span class="p">/&gt;</span>
+<span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+</pre></div>
+<p>选择后传上去。结果访问发现403：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201508/46071439122344.png"><img alt="image007.png" src="./那些年我拿下的demo站之方维O2O  离别歌/thum-46071439122344.png"/></a> </p>
+<p>又重新换文件名试了一下，也403。试了一下不存在的.php文件，也403。基本上就是这个规则：public目录下，所有.php文件都是403。</p>
+<p>试了txt文件，是可以上传的，说明public目录有写权限：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201508/7dfd1439122345.png"><img alt="image009.png" src="./那些年我拿下的demo站之方维O2O  离别歌/thum-7dfd1439122345.png"/></a> </p>
+<p>另外尝试了传到其他目录，比如根目录、admin目录，结果404，应该是没写权限。</p>
+<p>所以，现在这个洞也是很悲剧很鸡肋的：只有public目录有写权限，但public目录下不能执行php。</p>
+<h2 id="0x03"><a class="toclink" href="#0x03">0x03 组合漏洞出奇迹</a></h2>
+<p>这是突然想到：之前挖的那个鸡肋文件包含，不就正好排上用场了吗？</p>
+<p>之前的文件包含漏洞，鸡肋就鸡肋在只能包含php文件，一般情况下如果我们能写入php文件其实就已经getshell了。</p>
+<p>但这里不一样，我解压出来一个xxxx_api.php，虽然在public目录下不能执行，但通过文件包含的方法包含之，即可执行我的webshell了。</p>
+<p>于是将文件名改成aaaaaaaaaaaa_api.php</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201508/e1fb1439122347.png"><img alt="image011.png" src="./那些年我拿下的demo站之方维O2O  离别歌/thum-e1fb1439122347.png"/></a></p>
+<p>上传后直接包含，成功：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201508/47c11439122355.png"><img alt="image013.png" src="./那些年我拿下的demo站之方维O2O  离别歌/thum-47c11439122355.png"/></a></p>
+<p>菜刀连接：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201508/4c4f1439122357.png"><img alt="image015.png" src="./那些年我拿下的demo站之方维O2O  离别歌/thum-4c4f1439122357.png"/></a></p>
+<h2 id="0x04-2apache"><a class="toclink" href="#0x04-2apache">0x04 法2：apache解析漏洞的逆袭</a></h2>
+<p>平时用apache用的不多，一直觉得apache的那个解析漏洞是很老的版本才会有的。但这次还真被我碰上了。</p>
+<p>通过上一个漏洞getshell后，再回来思考还有没有别的方法。</p>
+<p>这个时候应该换位思考，如果我是运维，我一般会怎样禁用一个目录中的php文件？</p>
+<p>很可能是一个正则：^/public/.*.php$，只要HTTP请求符合这个正则，就返回403。</p>
+<p>我曾经写过一篇文章：<a href="https://www.leavesongs.com/PENETRATION/nginx-deny-exec-php-file.html"><a href="https://www.leavesongs.com/PENETRATION/nginx-deny-exec-php-file.html">https://www.leavesongs.com/PENETRATION/nginx-deny-exec-php-file.html</a></a>，讲的是nginx如何正确禁用执行。</p>
+<p>文中被绕过的方法实际上就是这个正则：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201508/37991439122358.png"><img alt="image017.png" src="./那些年我拿下的demo站之方维O2O  离别歌/thum-37991439122358.png"/></a></p>
+<p>这样通过后缀去禁止执行的方式是很不可靠的，文中我通过pathinfo的方式（xxx.php/xxx）来绕过了这个正则。</p>
+<p>这里我也试了用pathinfo，可惜还是返回403 。那么针对这个正则：“^/public/.*.php$”，真的没有办法了吗？</p>
+<p>思路就是：有没有其他后缀可以被解析，如果有就能绕过这个正则了。</p>
+<p>试了一下phtml、php3/4/5，都不能解析。这个时候我想到apache的解析漏洞了：当apache不识别最后一个后缀时，会向前寻找直到找到一个能够识别的后缀。</p>
+<p>于是将名字改成xxx.php.phi：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201508/d7151439122360.png"><img alt="image019.png" src="./那些年我拿下的demo站之方维O2O  离别歌/thum-d7151439122360.png"/></a></p>
+<p>上传发现已经可以解析了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201508/b2691439122368.png"><img alt="image021.png" src="./那些年我拿下的demo站之方维O2O  离别歌/thum-b2691439122368.png"/></a></p>
+<p>一个解析漏洞的逆袭。</p>
+<h2 id="0x05-shell"><a class="toclink" href="#0x05-shell">0x05 拿到shell以后的反思</a></h2>
+<p>限制执行这个问题，看了看配置文件。果然和我想的一样，是限制了public目录下几个后缀，不允许执行：</p>
+<div class="codehilite"><pre><span></span><span class="nt">&lt;Directory</span> <span class="err">"/fanwe/www/o2odemo/public"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;FilesMatch</span> <span class="err">".(php|asp|jsp)$"</span><span class="nt">&gt;</span>
+     Deny from all
+    <span class="nt">&lt;/FilesMatch&gt;</span>
+<span class="nt">&lt;/Directory&gt;</span>
+</pre></div>
+<p>并且查看了整个web目录的权限，web目录所有者是root，只有public是777，其他文件全部是755和644，好家伙和我想的一样。看来我自己的直觉现在也是越来越准拉，哈哈~（完）</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2240">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./那些年我拿下的demo站之方维O2O  离别歌/422fb9f5a0b49816ef8ef0433ab987bc.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">您好</a>
+<time datetime="2015年10月26日 09:05" itemprop="datePublished">
+                            2015 十月 26 09:05
+                        </time>
+<a href="javascript:reply_to('2240', '您好')">回复</a>
+</p>
+<p class="comment-meta">WeCenter 3.1.2 后台可以添加附件上传后缀，但是上传相关后缀文件后，文件名并没有后缀，而是随机的命名，类似md5这样的;   上传目录可控，经过测试后也就网站uploads，以及temp目录可上传，但是上传文件文件名这一块一直无法突破，憔悴一比，有劳您百忙之中抽点时间帮忙分析一下，这是最新代码下载地址http://www.wecenter.com/download/WeCenter_3-1-4.zip</p>
+</div>
+</div>
+<div class="row" id="comment-2239">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./那些年我拿下的demo站之方维O2O  离别歌/422fb9f5a0b49816ef8ef0433ab987bc.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">您好</a>
+<time datetime="2015年10月26日 09:00" itemprop="datePublished">
+                            2015 十月 26 09:00
+                        </time>
+<a href="javascript:reply_to('2239', '您好')">回复</a>
+</p>
+<p class="comment-meta">您好，兄弟，可否帮忙分析看下WeCenter 3.1.2   后台getshell的方法，或者文件上传绕过的方法</p>
+</div>
+</div>
+<div class="row" id="comment-2233">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./那些年我拿下的demo站之方维O2O  离别歌/596d96c866a847a44edb8e4a2529e4d0.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">wonderkun</a>
+<time datetime="2015年10月6日 19:19" itemprop="datePublished">
+                            2015 十月 06 19:19
+                        </time>
+<a href="javascript:reply_to('2233', 'wonderkun')">回复</a>
+</p>
+<p class="comment-meta">看大神博客，各种长脑洞啊，解压到一半，然后坏掉，利用zip的特性，真是够淫荡，点个赞</p>
+</div>
+</div>
+<div class="row" id="comment-2224">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./那些年我拿下的demo站之方维O2O  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">vaf</a>
+<time datetime="2015年10月3日 15:35" itemprop="datePublished">
+                            2015 十月 03 15:35
+                        </time>
+<a href="javascript:reply_to('2224', 'vaf')">回复</a>
+</p>
+<p class="comment-meta">文件包含也可以包含不同目录下的文件？受教了！</p>
+</div>
+</div>
+<div class="row" id="comment-2213">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./那些年我拿下的demo站之方维O2O  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">lcc</a>
+<time datetime="2015年9月11日 15:31" itemprop="datePublished">
+                            2015 九月 11 15:31
+                        </time>
+<a href="javascript:reply_to('2213', 'lcc')">回复</a>
+</p>
+<p class="comment-meta">看不懂，不明觉厉！不知道什么时候才能有这种水平啊 ·····</p>
+</div>
+</div>
+<div class="row" id="comment-2193">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./那些年我拿下的demo站之方维O2O  离别歌/888313567634ac18f9c8b253fbcf0b0f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://bigtang.org" target="_blank">糖果</a>
+<time datetime="2015年8月12日 15:50" itemprop="datePublished">
+                            2015 八月 12 15:50
+                        </time>
+<a href="javascript:reply_to('2193', '糖果')">回复</a>
+</p>
+<p class="comment-meta">脑洞好大</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="c1b6213185799f4dede1d5313597bfe389658e93"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./那些年我拿下的demo站之方维O2O  离别歌/c1b6213185799f4dede1d5313597bfe389658e93"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="364">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="FZhJk4NwbIIIfQ926MVMoeHSOg8evGXTdjCf8yZLCvC7fvxhU3pwXSJXXkBmeaM3"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./那些年我拿下的demo站之方维O2O  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./那些年我拿下的demo站之方维O2O  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

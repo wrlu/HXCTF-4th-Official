@@ -1,0 +1,316 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./CRLF-injection-简单总结/font-awesome.min.css" rel="stylesheet"/>
+<link href="./CRLF-injection-简单总结/screen.css" rel="stylesheet"/>
+<link href="./CRLF-injection-简单总结/prism_okaidia.css" rel="stylesheet"/>
+<link href="./CRLF-injection-简单总结/bendawang.css" rel="stylesheet"/>
+<script src="./CRLF-injection-简单总结/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./CRLF-injection-简单总结/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./CRLF-injection-简单总结/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="crlfinjection">CRLF injection 简单总结</h1>
+<h3 id="">简介</h3>
+<p style="max-width:100%;height:auto;">CRLF是”回车 + 换行”（\r\n）的简称，即我们都知道在HTTP协议中，HTTP Header与HTTP Body是用两个CRLF分隔的，浏览器就是根据这两个CRLF来提取HTTP 内容
+一旦我们能够控制http头，通过注入一些CRLF这样就可以控制header和body的分割线，这样我们就可以向body或是header中注入些东西了。所以CRLF Injection又叫HTTP Response Splitting，简称HRS。</p>
+<h3 id="example">Example</h3>
+<p style="max-width:100%;height:auto;">通常来说，网站多数会通过HTTP Header 中的location的方式来实现跳转。
+一般格式就是Location:xxx，简单例子</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">HTTP/1.1 302 Moved Temporarily
+Date: Fri, 27 Jun 2014 17:52:17 GMT
+Content-Type: text/html
+Content-Length: 154
+Connection: close
+Location: http://www.xxx.com
+</code></pre>
+<blockquote>
+<p style="max-width:100%;height:auto;">302跳与301跳的区别
+  http://www.cnblogs.com/fanyong/archive/2013/07/20/3202586.html</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">如果location直接从URL里获得的话， 输入</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">http://www.xxx.com%0aSet-cookie:JSPSESSID%3d12345
+  这样子，Header就变成了</p>
+</blockquote>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">HTTP/1.1 302 Moved Temporarily
+Date: Fri, 27 Jun 2014 17:52:17 GMT
+Content-Type: text/html
+Content-Length: 154
+Connection: close
+Location: http://www.xxx.com
+Set-cookie:JSPSESSID=12345
+</code></pre>
+<p style="max-width:100%;height:auto;">瞬间就设置上了一个session，也就是“会话固定漏洞”
+此外，比较有价值的是很容易造出一个能够轻松绕过filter的XSS，还是刚才那个例子，如果我们输入</p>
+<pre><code style="max-width:100%;height:auto;">http://www.xxx.com%0d%0a%0d%0a&lt;svg/onload=prompt(1)&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">那么Header就变成了</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">HTTP/1.1 302 Moved Temporarily
+Date: Fri, 27 Jun 2014 17:52:17 GMT
+Content-Type: text/html
+Content-Length: 154
+Connection: close
+Location: http://www.xxx.com
+&lt;svg/onload=prompt(1)&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">那么网页的内容中就会有一个反射型的XSS了。</p>
+<h3 id="-1">修复</h3>
+<p style="max-width:100%;height:auto;">只需要对输入进行过滤，过滤掉 &amp;apos;\r&amp;apos; 和 &amp;apos;\n&amp;apos;，从而避免输入的数据污染到其他HTTP头。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./CRLF-injection-简单总结/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="crlfinjection">CRLF injection 简单总结</h1>
+<h3 id="">简介</h3>
+<p style="max-width:100%;height:auto;">CRLF是”回车 + 换行”（\r\n）的简称，即我们都知道在HTTP协议中，HTTP Header与HTTP Body是用两个CRLF分隔的，浏览器就是根据这两个CRLF来提取HTTP 内容
+一旦我们能够控制http头，通过注入一些CRLF这样就可以控制header和body的分割线，这样我们就可以向body或是header中注入些东西了。所以CRLF Injection又叫HTTP Response Splitting，简称HRS。</p>
+<h3 id="example">Example</h3>
+<p style="max-width:100%;height:auto;">通常来说，网站多数会通过HTTP Header 中的location的方式来实现跳转。
+一般格式就是Location:xxx，简单例子</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">HTTP/1.1 302 Moved Temporarily
+Date: Fri, 27 Jun 2014 17:52:17 GMT
+Content-Type: text/html
+Content-Length: 154
+Connection: close
+Location: http://www.xxx.com
+</code></pre>
+<blockquote>
+<p style="max-width:100%;height:auto;">302跳与301跳的区别
+  http://www.cnblogs.com/fanyong/archive/2013/07/20/3202586.html</p>
+</blockquote>
+<p style="max-width:100%;height:auto;">如果location直接从URL里获得的话， 输入</p>
+<blockquote>
+<p style="max-width:100%;height:auto;">http://www.xxx.com%0aSet-cookie:JSPSESSID%3d12345
+  这样子，Header就变成了</p>
+</blockquote>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">HTTP/1.1 302 Moved Temporarily
+Date: Fri, 27 Jun 2014 17:52:17 GMT
+Content-Type: text/html
+Content-Length: 154
+Connection: close
+Location: http://www.xxx.com
+Set-cookie:JSPSESSID=12345
+</code></pre>
+<p style="max-width:100%;height:auto;">瞬间就设置上了一个session，也就是“会话固定漏洞”
+此外，比较有价值的是很容易造出一个能够轻松绕过filter的XSS，还是刚才那个例子，如果我们输入</p>
+<pre><code style="max-width:100%;height:auto;">http://www.xxx.com%0d%0a%0d%0a&lt;svg/onload=prompt(1)&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">那么Header就变成了</p>
+<pre><code class="html language-html" style="max-width:100%;height:auto;">HTTP/1.1 302 Moved Temporarily
+Date: Fri, 27 Jun 2014 17:52:17 GMT
+Content-Type: text/html
+Content-Length: 154
+Connection: close
+Location: http://www.xxx.com
+&lt;svg/onload=prompt(1)&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">那么网页的内容中就会有一个反射型的XSS了。</p>
+<h3 id="-1">修复</h3>
+<p style="max-width:100%;height:auto;">只需要对输入进行过滤，过滤掉 &amp;apos;\r&amp;apos; 和 &amp;apos;\n&amp;apos;，从而避免输入的数据污染到其他HTTP头。</p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./CRLF-injection-简单总结/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./CRLF-injection-简单总结/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./CRLF-injection-简单总结/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./CRLF-injection-简单总结/prism.js"></script>
+<script src="./CRLF-injection-简单总结/zooming.js"></script>
+<script src="./CRLF-injection-简单总结/Bendawang.js"></script>
+
+

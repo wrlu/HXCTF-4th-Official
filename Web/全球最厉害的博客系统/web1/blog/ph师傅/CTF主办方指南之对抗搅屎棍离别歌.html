@@ -1,0 +1,308 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./CTF主办方指南之对抗搅屎棍  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./CTF主办方指南之对抗搅屎棍  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./CTF主办方指南之对抗搅屎棍  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>CTF主办方指南之对抗搅屎棍 | 离别歌</title>
+<link href="./CTF主办方指南之对抗搅屎棍  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./CTF主办方指南之对抗搅屎棍  离别歌/styles.css" rel="stylesheet"/>
+<link href="./CTF主办方指南之对抗搅屎棍  离别歌/style.css" rel="stylesheet"/>
+<link href="./CTF主办方指南之对抗搅屎棍  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./CTF主办方指南之对抗搅屎棍  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./CTF主办方指南之对抗搅屎棍  离别歌/jquery.min.js"></script>
+<link href="./CTF主办方指南之对抗搅屎棍  离别歌/code.css" rel="stylesheet"/>
+<link href="./CTF主办方指南之对抗搅屎棍  离别歌/button.css" rel="stylesheet"/>
+<link href="./CTF主办方指南之对抗搅屎棍  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./CTF主办方指南之对抗搅屎棍  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/defense-ctf-cracker.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/defense-ctf-cracker.html&amp;text=CTF%E4%B8%BB%E5%8A%9E%E6%96%B9%E6%8C%87%E5%8D%97%E4%B9%8B%E5%AF%B9%E6%8A%97%E6%90%85%E5%B1%8E%E6%A3%8D"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/defense-ctf-cracker.html&amp;title=CTF%E4%B8%BB%E5%8A%9E%E6%96%B9%E6%8C%87%E5%8D%97%E4%B9%8B%E5%AF%B9%E6%8A%97%E6%90%85%E5%B1%8E%E6%A3%8D"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/defense-ctf-cracker.html&amp;is_video=false&amp;description=CTF%E4%B8%BB%E5%8A%9E%E6%96%B9%E6%8C%87%E5%8D%97%E4%B9%8B%E5%AF%B9%E6%8A%97%E6%90%85%E5%B1%8E%E6%A3%8D"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=CTF%E4%B8%BB%E5%8A%9E%E6%96%B9%E6%8C%87%E5%8D%97%E4%B9%8B%E5%AF%B9%E6%8A%97%E6%90%85%E5%B1%8E%E6%A3%8D&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/defense-ctf-cracker.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/defense-ctf-cracker.html&amp;title=CTF%E4%B8%BB%E5%8A%9E%E6%96%B9%E6%8C%87%E5%8D%97%E4%B9%8B%E5%AF%B9%E6%8A%97%E6%90%85%E5%B1%8E%E6%A3%8D"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/defense-ctf-cracker.html&amp;title=CTF%E4%B8%BB%E5%8A%9E%E6%96%B9%E6%8C%87%E5%8D%97%E4%B9%8B%E5%AF%B9%E6%8A%97%E6%90%85%E5%B1%8E%E6%A3%8D"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/defense-ctf-cracker.html&amp;title=CTF%E4%B8%BB%E5%8A%9E%E6%96%B9%E6%8C%87%E5%8D%97%E4%B9%8B%E5%AF%B9%E6%8A%97%E6%90%85%E5%B1%8E%E6%A3%8D"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/defense-ctf-cracker.html&amp;title=CTF%E4%B8%BB%E5%8A%9E%E6%96%B9%E6%8C%87%E5%8D%97%E4%B9%8B%E5%AF%B9%E6%8A%97%E6%90%85%E5%B1%8E%E6%A3%8D"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/defense-ctf-cracker.html&amp;name=CTF%E4%B8%BB%E5%8A%9E%E6%96%B9%E6%8C%87%E5%8D%97%E4%B9%8B%E5%AF%B9%E6%8A%97%E6%90%85%E5%B1%8E%E6%A3%8D&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">CTF主办方指南之对抗搅屎棍</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年10月8日 23:17" itemprop="datePublished">
+                    2015 十月 08 23:17
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3424
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/%E8%B5%9B%E6%A3%8D">赛棍</a>,
+                
+                <a class="tag-link" href="/tag/XDCTF">XDCTF</a>,
+                
+                <a class="tag-link" href="/tag/ctf">ctf</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>我发表在drops上的一篇娱乐文章（<a href="http://drops.wooyun.org/tips/9405"><a href="http://drops.wooyun.org/tips/9405">http://drops.wooyun.org/tips/9405</a></a>），大家看过笑笑就好。</p>
+<p>XDCTF2015是我觉得很给力的一次CTF，题目难度适中，也没出什么乱子，圆满结束了。</p>
+<p>向来CTF是很容易出乱子的，有时候乱子来自于自身，比如某年的XDCTF因为学校机房停电导致初赛停顿了几个小时。当然，更多的乱子来自于“黑客”。</p>
+<p>因为CTF是安全相关的竞赛，自然会吸引很多安全研究者的目光。这里的“黑客”就是指通过各种手段让其他选手没法正常做题的人。</p>
+<p>这样的选手一般自称“搅屎棍”~嘿。</p>
+<p>当然我没有谴责他们的意思，比赛就是和他人竞争的过程，通过各种手段阻止对手拿分我觉得也是一种能力。但是作为主办方，我们需要尽量让所有选手正常比赛，以保证一定的公平。所以我写这份文档，记录这次比赛我的处理方法。</p>
+<h2 id="0x01"><a class="toclink" href="#0x01">0x01 保证题目质量</a></h2>
+<p>这是一切防御手段的本源。</p>
+<p>题目需要难度适中。如果太刁钻，容易让人放弃，并产生报复心理，放弃过后余下的时间就是给你捣蛋的时间。也不能太白痴，太白痴的题目被人分分钟秒了，余下的时间也是用来捣蛋的。</p>
+<p>感觉题目难度要让人有这种感觉：这题我会，应该这样做，但好像有个坑，我想想怎么绕过……在一段时间的辛苦后，把题目做出来；或者题目在规定时间没有做出来，看了writeup后恍然大悟。</p>
+<p>这样的题目，才会让大家有成就感、学到东西、感激主办方。这样下来，就能减少很多麻烦，一是大家不愿再给主办方添麻烦，二是做题很累也没工夫想别的。</p>
+<h2 id="0x02"><a class="toclink" href="#0x02">0x02 防御第一招——代码层</a></h2>
+<p>有些权限限制，在代码上防御就可以了。</p>
+<p>比如这次的web2-100，是一个任意用户密码修改的漏洞。选手在挖掘出漏洞并成功修改前台管理员的密码后，登录进去就能看到flag。</p>
+<p>Flag是保存在用户文件中的，正常情况下xdsec-cms允许自己删除自己的文件。那么，如果第一个做出这个题目的同学拿到flag后，随手把文件一删，那就没有第二个了。</p>
+<p>所以我在删除的代码中，加了个判断：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/29551444317702.png"><img alt="image001.png" src="./CTF主办方指南之对抗搅屎棍  离别歌/thum-29551444317702.png"/></a></p>
+<p>如果是管理员用户，就直接返回false，不允许其删除。</p>
+<p>增删改查四个操作，删、改都要加这个判断。</p>
+<p>当然，好事者可以写个脚本，增加999999个假文件，flag样式都类似，谁也不知道哪个是真flag，也很影响接下来的选手做题。所以严格来说，“增”的地方也需要加这个判断。</p>
+<p>搅屎棍还有一个常用的手段，就是“暴力竞争法”。</p>
+<p>比如某个题目需要两个步骤，第一步修改用户名为xxx，第二步触发二次注入获得注入结果。</p>
+<p>那么我写一个脚本，用50个线程不停去修改用户名为一个不相关的名字，这样其他用户就没法正常执行第二个步骤了。（第一个步骤刚完成又被别人改没了）</p>
+<p>这样的情况下，其他参赛者一般会认为是自己的操作方法错了，直接导致做题的方向偏离。即使参赛者发现是有人在搅屎，也只能去同样写一个脚本，用100个线程跑，才有可能继续做题。</p>
+<p>我觉得这样的BUG在出题的时候就可以避免。就拿我举得这个例子来说，我们完全可以出一个多用户的环境，不同用户只能操作自己的用户名，这样就完全避免了上述问题。</p>
+<p>如果这一点做不到，那么我们就应该按照12306对付刷票产业的方法对付“竞争派搅屎棍”——使用验证码。</p>
+<p>这样将给竞争脚本的编写带来很大难度，一般也就可以避免这种问题了。</p>
+<h2 id="0x03"><a class="toclink" href="#0x03">0x03防御第二招——服务权限层</a></h2>
+<p>PWN暂时不说，WEB肯定会涉及一些系统服务：web服务、数据库服务、缓存服务等。</p>
+<p>其中，Web服务又涉及中间件权限和脚本权限。我这里以nginx+php为例，数据库以mysql为例。</p>
+<p>在很多ctf初赛中，web题目因为都比较“小”，所以经常是一台服务器放多个web题目。这种情况下权限设置就极为重要。</p>
+<p>如果一个比赛因为权限没有设置好，导致选手用一个题目的任意文件读取漏洞，或者一个root注入+load_file直接读取到所有题目的源文件。结果好好一个ctf就瞬间变成代码审计比赛了。</p>
+<p>所以沙盒环境是这类ctf必不可少的了，沙盒可以是近几年的docker，前几年的“虚拟主机”，或者只是简陋的open_basedir，有总比没有强。</p>
+<p>Linux沙盒具体怎么布置可以看我的文章：<a href="https://www.leavesongs.com/PENETRATION/nginx-safe-dir.html"><a href="https://www.leavesongs.com/PENETRATION/nginx-safe-dir.html">https://www.leavesongs.com/PENETRATION/nginx-safe-dir.html</a></a>，我就不再赘述了。</p>
+<p>建议就是，一个题目放在一个独立的虚拟主机里。</p>
+<p>在同一个题目中，服务权限设置也是极为重要。</p>
+<p>比如一个题目是将flag藏在后台管理员密码位置，那么你可以用0x02里说的法方法，这样防范搅屎棍： </p>
+<ol>
+<li>管理员不能修改密码</li>
+<li>不能删除管理员</li>
+<li>不能增加管理员</li>
+</ol>
+<p>一旦有忘记的就悲剧了。</p>
+<p>那么，不妨从根本上解决这个问题：直接去除当前数据库用户对于管理员表的“增”、“删”、“改”权限。</p>
+<p>在mysql里就是类似GRANT select ON db.admin TO xxx@localhost，只给予select权限。当然，具体情况具体分析，可以制定出更细致的权限规划。</p>
+<p>在pwn中，也有同样的问题。</p>
+<p>我们遇到了一个需要用户执行命令的题目，在选手成功完成执行命令的目标以后，顺手写了个循环kill，将pwn自己的服务杀掉了，导致其他队伍不能继续做题。</p>
+<p>这确实是个棘手的问题，因为pwn fork出的进程权限正常情况下是和pwn一样的，那么不管你再怎么给pwn降权，你也避免不了用户直接kill掉pwn进程。</p>
+<p>我能想到的有这样三种解决方法：</p>
+<ol>
+<li>重命名或删掉kill、pkill、skill之类的可执行程序</li>
+<li>将/usr/bin、/bin、/usr/local/bin等目录的other权限设置为0</li>
+<li>使用selinux ，设置security context</li>
+</ol>
+<p>法1最简单，但可能考虑不周的，毕竟linux命令那么多。法2比较粗暴，可能导致正常的操作都执行不了。法3应该是最合适的，但配置起来也最麻烦。这个需要看个人能力与ctf的复杂程度、重要性。</p>
+<h2 id="0x04"><a class="toclink" href="#0x04">0x04防御第三招——文件权限层</a></h2>
+<p>如果ctf涉及到文件操作（读取、上传、删除、修改、重命名）的话，就得合理设置文件权限了。</p>
+<p>首先，要先了解自己的题目对于文件的操作具体可以允许到怎样的程度：是读取、还是修改，是否允许getshell。</p>
+<p>这里有个劝告，CTF初赛鱼龙混扎，尽量不要允许选手getshell。Getshell以后，搅屎棍就有无数种方法让你的游戏没法继续进行。</p>
+<p>但有时候，题目的考点就是文件上传漏洞，或者任意文件操作漏洞，不getshell怎么验证选手是否达到要求？</p>
+<p>我这里以此次的web2为例子：web2-400的最终目的是用户getshell，利用的是一个任意文件重命名漏洞，将正常文件重命名为.php后getshell。</p>
+<p>实际上我这题，最终要检测的是“选手是否成功将文件重命名成.php后缀”。所以是可以不允许选手真正getshell的，我的做法是：</p>
+<ul>
+<li>整站，只有指向index.php和th3r315adm1n.php两个文件的请求才会发送给fastcgi执行：</li>
+</ul>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/25ae1444317704.png"><img alt="image003.png" src="./CTF主办方指南之对抗搅屎棍  离别歌/thum-25ae1444317704.png"/></a></p>
+<p>这样就有效的保证了任意其他php文件都无法执行，这一步主要是为了保证服务器的安全。</p>
+<ul>
+<li>所有其他以.php为后缀的请求，如果该文件存在，我就认为用户成功getshell了。这时就将请求rewrite到flag文本文件里，用户得到flag：</li>
+</ul>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/f3c81444317705.png"><img alt="image005.png" src="./CTF主办方指南之对抗搅屎棍  离别歌/thum-f3c81444317705.png"/></a></p>
+<p>因为我这个环境，原本整个web目录只有两个php文件，如果发现存在第三个php文件，那么就肯定是用户的webshell了。</p>
+<ul>
+<li>所有请求为“flag-”开头，以“.txt”结尾的，全部返回403。这是为了防止有人直接猜到flag文件名：</li>
+</ul>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/46071444317706.png"><img alt="image007.png" src="./CTF主办方指南之对抗搅屎棍  离别歌/46071444317706.png"/></a></p>
+<p>这三步下来，就完成了一个“getshell”漏洞的配置，模拟了getshell的情况，却并不真正getshell。</p>
+<p>那么，一个文件操作造成的getshell，除了防止选手真正getshell，还需要防范什么？当然是防范搅屎棍。</p>
+<p>搅屎棍有一千种方式可以让游戏玩不了：删除/覆盖/重命名正常文件、将正常文件mv走，甚至是“帮助”主办方修改flag，或者修改漏洞文件。</p>
+<p>对付起来也很简单，我将所有已存在的文件（正常文件）的权限全部改成755，所有者改成root：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/7dfd1444317707.png"><img alt="image009.png" src="./CTF主办方指南之对抗搅屎棍  离别歌/thum-7dfd1444317707.png"/></a> </p>
+<p>这样即使有任意文件操作漏洞，也没权限修改正常文件了。</p>
+<p>但大多数cms都会涉及缓存、上传目录、备份目录等等需要写的目录，如果也设置成不可写，cms就运行不了了。比如这次题目，后台有个静态文件下载功能，我不得不将css、js、img等目录的所有者设置为www，使静态目录可写。</p>
+<p>熟悉linux权限的同学应该知道，一个文件是否允许被删除，是要看其所在目录的权限。如果我对他所在的目录有写权限，我就可以将其删掉，即使这个文件不属于我。</p>
+<p>所以，通过后台的删除功能，搅屎棍可以将网站静态文件“删光光”，直接影响后面的选手做题体验。</p>
+<p>这种情况怎么办？</p>
+<p>Linux下的文件有一些“隐藏属性”，我们可以通过lsattr来查看，chattr来修改：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/e1fb1444317707.png"><img alt="image011.png" src="./CTF主办方指南之对抗搅屎棍  离别歌/thum-e1fb1444317707.png"/></a> </p>
+<p>如上图，这是我配置的js目录文件的隐藏权限。</p>
+<p>我将所有已存在的js文件全部加上了i标志（chattr +i *），i的意思就是，不允许对文件进行任何修改（包括删除）。</p>
+<p>这时候我们可以试试rm：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/47c11444317709.png"><img alt="image013.png" src="./CTF主办方指南之对抗搅屎棍  离别歌/thum-47c11444317709.png"/></a> </p>
+<p>如图，root用户也没法删除flag文件了。</p>
+<p>这就有效地保证了网站文件的安全，搅屎棍没法破坏网站结构与正常功能。</p>
+<p>巧妙地利用这些系统自带的权限控制能力，就能有效地防范搅屎棍啦！</p>
+<h2 id="0x05"><a class="toclink" href="#0x05">0x05防御第四招——对抗报复社会型搅屎棍</a></h2>
+<p>这类搅屎棍就是真正的“坏人”了，损人不利己，是直接来捣蛋的。</p>
+<p>比如自己拿下了flag，然后就把flag通过官方QQ群、IRC等渠道告诉所有人，直接破坏游戏的可玩性与公平性。还有比赛的时候DDOS比赛服务器的人。（那是跟你有多大仇）</p>
+<p>对于这类人，我觉得也没什么好说，该封号的封号，该拉黑的拉黑，尽量让他无法接触参赛选手。</p>
+<p>同时，服务器的日志要多看看，异常状态可以及时发觉。推荐一个实时日志查看工具——ngxtop：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/4c4f1444317711.png"><img alt="image015.png" src="./CTF主办方指南之对抗搅屎棍  离别歌/thum-4c4f1444317711.png"/></a></p>
+<p>源码和使用方法可以github上搜。</p>
+<p>如果主办方保持一个好的态度，对参赛选手有足够的尊重与耐心，一般是不会出现这类搅屎棍的。</p>
+<p>归根到底，CTF是一个玩耍与学习的活动，不管是主办方还是参赛者，都可以通过比赛学到很多东西。保持一个良好的心态处理问题，慢慢积累经验，收获都会大大的。</p>
+<p>XDCTF2015的一些writeup和资料：</p>
+<p>选手writeup：<a href="http://t.cn/RyleXYm"><a href="http://t.cn/RyleXYm">http://t.cn/RyleXYm</a></a> 密码: imwg</p>
+<p>web2 writeup：<a href="https://github.com/phith0n/XDCTF2015"><a href="https://github.com/phith0n/XDCTF2015">https://github.com/phith0n/XDCTF2015</a></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2438">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./CTF主办方指南之对抗搅屎棍  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Kirito</a>
+<time datetime="2016年9月12日 20:11" itemprop="datePublished">
+                            2016 九月 12 20:11
+                        </time>
+<a href="javascript:reply_to('2438', 'Kirito')">回复</a>
+</p>
+<p class="comment-meta">写得挺好的，受教了，想问下Pwn题需要配置在VPS的docker里边吗</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2439">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./CTF主办方指南之对抗搅屎棍  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年9月16日 22:39" itemprop="datePublished">
+                            2016 九月 16 22:39
+                        </time>
+<a href="javascript:reply_to('2439', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@Kirito：肯定需要的，理论上配置到docker里面就相对安全了，但实际上还需要其他手段进行加固。</p>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="f49bc5fc1d08d53aceae0d95aabe0b25f8e0145d"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./CTF主办方指南之对抗搅屎棍  离别歌/f49bc5fc1d08d53aceae0d95aabe0b25f8e0145d"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="369">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="AEomPedY4MstMvzZUh94vZdo0GnJyivh8YJSDIpdvzmSMaXeIyDO4Dft9KQRhMkr"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./CTF主办方指南之对抗搅屎棍  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./CTF主办方指南之对抗搅屎棍  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

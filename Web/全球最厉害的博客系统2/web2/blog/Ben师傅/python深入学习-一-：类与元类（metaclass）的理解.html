@@ -1,0 +1,544 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<title>Bendawang's Site</title>
+<link href="./python深入学习-一-：类与元类（metaclass）的理解/font-awesome.min.css" rel="stylesheet"/>
+<link href="./python深入学习-一-：类与元类（metaclass）的理解/screen.css" rel="stylesheet"/>
+<link href="./python深入学习-一-：类与元类（metaclass）的理解/prism_okaidia.css" rel="stylesheet"/>
+<link href="./python深入学习-一-：类与元类（metaclass）的理解/bendawang.css" rel="stylesheet"/>
+<script src="./python深入学习-一-：类与元类（metaclass）的理解/jquery.min.js"></script>
+</head>
+<body class="wrap">
+<header>
+<nav class="mobile-nav show-on-mobiles">
+<ul>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+<div class="show-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img src="./python深入学习-一-：类与元类（metaclass）的理解/bendawang.png" style="display:block;width:100%;"/></a>
+</h1>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit test2 hide-on-mobiles">
+<h1>
+<a href="/">
+<span>Bendawang</span>
+<img alt="" height="115" src="./python深入学习-一-：类与元类（metaclass）的理解/bendawang.png" width="449"/></a>
+</h1>
+</div>
+<nav class="main-nav unit test1 hide-on-mobiles">
+<ul>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li></li><li></li><li></li><li></li><li></li>
+<li class="">
+<a href="/index">归档</a></li>
+<li class="">
+<a href="/time">时间</a></li>
+<!--<li class="">
+            <a href="/category">标签</a></li>-->
+<li class="">
+<a href="/friendlink">友链</a></li>
+<li class="">
+<a href="/about">about</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<script>
+$('document').ready(function(){
+    $('li[class]:eq(4)').attr('class','current');
+});
+</script>
+<section class="docs">
+<div class="grid">
+<!--移动端-->
+<div class="show-on-mobiles">
+<div class="article-info profile-block">
+<div class="article-info-block">
+               55
+               <span>文章</span>
+</div>
+<div class="article-info-block">
+               5
+               <span>标签</span>
+</div>
+</div>
+<div class="profile-block social-links">
+<table>
+<tbody><tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i></a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i></a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i></a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="whole show-on-mobiles">
+<article class="bdw_article">
+<div class="Bendawang" id="Bendawang_mobile">
+<b id="Bendawang_toggle_mobile" title="收起">目录[+]</b></div></article></div></div></div></section></body></html>
+<div class="Bendawang_content" id="Bendawang_content_mobile"></div>
+
+<br/>
+<br/>
+<h1 id="metaclass">类与元类（metaclass）的理解</h1>
+<h2 id="0x00">0x00 前言</h2>
+<p style="max-width:100%;height:auto;">最近准备开始着手毕设的东西，所以打算把过程中一些关于python的一些我平时不怎么使用的地方学习并写出来分享下，不过由于有些地方是我个人的理解，所以多少可能会有偏差，希望师傅们看到能帮我指出来。</p>
+<p style="max-width:100%;height:auto;">昨天在看代码的时候遇到了元类(<code style="max-width:100%;height:auto;">metaclass</code>)，相信平时如果大家用python方面的工具用的较多的话也会比较常见到这个，但即便如此却没有去深入研究过这个东西</p>
+<p style="max-width:100%;height:auto;">先分享一个链接：<code style="max-width:100%;height:auto;">http://stackoverflow.com/questions/100003/what-is-a-metaclass-in-python</code></p>
+<h2 id="0x01">0x01 关于类、对象、类的实例</h2>
+<p style="max-width:100%;height:auto;">首先先谈谈python中的类、对象和实例。
+在C++中接触到这些东西，不过我的大部分概念仅仅停留在<code style="max-width:100%;height:auto;">class</code>关键字上面。也经常说道这三个名词，可能平时用着用着也没有深究过，渐渐也就用混淆了这三个词。</p>
+<h3 id="11python">1.1 python中静态与动态创建类</h3>
+<p style="max-width:100%;height:auto;">在这里，一直以来我的理解是类就是通常意义上的<code style="max-width:100%;height:auto;">class</code>，而对象就是类的实例化，换言之，类就是一组用来描述如何生成一个对象的代码段。但是实际上在python里面实例和对象有区别，待会我们会说，先来看个例子。
+例如如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">class test():
+    pass
+mine=test()  #test是类，mine是实例也是对象
+</code></pre>
+<p style="max-width:100%;height:auto;">但是，Python中的类还远不止如此。类同样也是一种对象。因为只要你使用关键字<code style="max-width:100%;height:auto;">class</code>，Python解释器在执行的时候就会创建一个对象。
+即test本身也是一个对象，可以进行任何对象的操作，例如赋值、传参、增加属性等等。</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">&gt;&gt;&gt; class test():
+...     pass
+... 
+&gt;&gt;&gt; print test
+__main__.test
+&gt;&gt;&gt; test.a=&amp;apos;a&amp;apos;
+&gt;&gt;&gt; hasattr(test,&amp;apos;a&amp;apos;)
+&gt;&gt;&gt; print test()
+&lt;__main__.test instance at 0x7f8e5caccea8&gt;
+&gt;&gt;&gt; print test().a
+a
+</code></pre>
+<p style="max-width:100%;height:auto;">另外在python中除了用关键字<code style="max-width:100%;height:auto;">class</code>静态创建类以外还可以用<code style="max-width:100%;height:auto;">type()</code>函数动态创建类，这也是广为人知的<code style="max-width:100%;height:auto;">type</code>函数不广为人知的用法，具体用法如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">type(类名, 父类的元组（针对继承的情况，可以为空），包含属性的字典（名称和值））
+---------------------------------------------------------
+For example1:
+
+&gt;&gt;&gt; Hello = type(&amp;apos;Hello&amp;apos;, (object,), dict(hello="hello world!"))
+&gt;&gt;&gt; h=Hello()
+&gt;&gt;&gt; h.hello
+&amp;apos;hello world!&amp;apos;
+---------------------------------------------------------
+For example2:
+
+&gt;&gt;&gt; def func(self, name=&amp;apos;world&amp;apos;):
+...     print(&amp;apos;Hello, %s.&amp;apos; % name)
+...
+&gt;&gt;&gt; Hello = type(&amp;apos;Hello&amp;apos;, (object,), dict(hello=func))
+&gt;&gt;&gt; h = Hello()
+&gt;&gt;&gt; h.hello()
+Hello, world.
+---------------------------------------------------------
+</code></pre>
+<p style="max-width:100%;height:auto;">通过type的用法我们知道类也是可以动态创建的。</p>
+<h3 id="12python">1.2 python里面的类和实例</h3>
+<p style="max-width:100%;height:auto;">我们分为python2和python3来说，
+在python2中，我们通过下面这个例子来说明</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">class A: #旧式类
+    pass
+class B(object):#新式类
+    pass
+print B.__class__
+print A.__class__
+</code></pre>
+<p style="max-width:100%;height:auto;">得到这个结果</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&lt;type &amp;apos;type&amp;apos;&gt;
+Traceback (most recent call last):
+  File "class.py", line 9, in &lt;module&gt;
+    print A.__class__
+AttributeError: class A has no attribute &amp;apos;__class__&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">第一个print打印了，但是第二个报错了，我们知道<code style="max-width:100%;height:auto;">__class__</code>会告诉我们当前实例是哪个类的实例。这也就意味着，B是一个类也是实例，但A只是一个类，不是实例，这也就是旧式类和新式类的区别。
+再看</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">#encoding:utf-8
+class A:
+    pass
+class B(object):
+    pass
+b = B()
+a = A()
+
+print "---------------------"
+print A
+print B
+print "---------------------"
+print a
+print b
+print "---------------------"
+print type(A)
+print type(B)
+print "---------------------"
+print type(a)
+print type(b)
+print "---------------------"
+</code></pre>
+<p style="max-width:100%;height:auto;">结果</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">---------------------
+__main__.A
+&lt;class &amp;apos;__main__.B&amp;apos;&gt;
+---------------------
+&lt;__main__.A instance at 0x7ff0f37087e8&gt;
+&lt;__main__.B object at 0x7ff0f3713290&gt;
+---------------------
+&lt;type &amp;apos;classobj&amp;apos;&gt;
+&lt;type &amp;apos;type&amp;apos;&gt;
+---------------------
+&lt;type &amp;apos;instance&amp;apos;&gt;
+&lt;class &amp;apos;__main__.B&amp;apos;&gt;
+---------------------
+</code></pre>
+<p style="max-width:100%;height:auto;">多少能够理解了把。尤其是第二组打印结果，a是A的一个实例，b是B的一个对象。
+即总结起来这么说，自建类实例化生成的对象的类型是object，内置类实例化生成的对象的类型是instance。
+尤其是第三组打印结果，也说明自建类和内置类的区别，自建类的类型是<code style="max-width:100%;height:auto;">classobj</code>，而内置类的类型是<code style="max-width:100%;height:auto;">type</code>，这一点在后续会解释的。</p>
+<p style="max-width:100%;height:auto;">大家可能会问，既然自建对象和内置对象不同，但是我们平时使用的时候都是一样的使用啊？
+这个问题就是python官方打算解决的，因为他底层会用大量代码来掩盖二者的差异，从而让我们觉得在使用中二者一样。
+所以在python3里面所有类都是内置类了。如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">class A:
+    pass
+class B(object):
+    pass
+</code></pre>
+<p style="max-width:100%;height:auto;">即上述代码都默认自己懂继承自object类了。从而几乎取缔了实例<code style="max-width:100%;height:auto;">instance</code>的存在。在<code style="max-width:100%;height:auto;">python3</code>中测试如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">&gt;&gt;&gt; class A:
+...     pass
+... 
+&gt;&gt;&gt; class B(object):
+...     pass
+... 
+&gt;&gt;&gt; a=A()
+&gt;&gt;&gt; b=B()
+&gt;&gt;&gt; print(a)
+&lt;__main__.A object at 0x7fbb06f81198&gt;
+&gt;&gt;&gt; print(b)
+&lt;__main__.B object at 0x7fbb0526add8&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">可以看到已经没有区别了。</p>
+<p style="max-width:100%;height:auto;">所以看得出官方的态度就是支持大家更多的使用内置类，而非自建类，即平时我们写代码的时候还是尽量多使用<code style="max-width:100%;height:auto;">B</code>的创建方式，继承<code style="max-width:100%;height:auto;">OBJECT</code>。</p>
+<p style="max-width:100%;height:auto;">好的，接下来还有一个问题就是我们执行<code style="max-width:100%;height:auto;">print type(B)</code>的时候打印的值为什么是<code style="max-width:100%;height:auto;">&lt;type &amp;apos;type&amp;apos;&gt;</code></p>
+<p style="max-width:100%;height:auto;">进入下一个主题。</p>
+<h2 id="0x02metaclass">0x02 关于元类<code style="max-width:100%;height:auto;">metaclass</code></h2>
+<h3 id="21">2.1 元类是什么?</h3>
+<p style="max-width:100%;height:auto;">我们之前说过在python里面的类本身也是一个对象，元类就是创建所有python类的类
+即可以通过这个</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">Anyclass=Metaclass()
+Object=Anyclass()
+</code></pre>
+<p style="max-width:100%;height:auto;">所以大家应该猜到了把，实际上<code style="max-width:100%;height:auto;">type</code>就是这个元类，即python所有的类都是由<code style="max-width:100%;height:auto;">type</code>创建的，这也是为什么type可以用来动态创建类的原因。</p>
+<p style="max-width:100%;height:auto;">换言之，元类type就是创建python类这种对象的东西，即可以称为一个<code style="max-width:100%;height:auto;">类工厂</code>，当然，我们也可以创建自己的元类。</p>
+<h3 id="22__metaclass__">2.2 <code style="max-width:100%;height:auto;">__metaclass__</code>属性</h3>
+<p style="max-width:100%;height:auto;">这个就是用的比较多的地方。
+你可以在写一个类的时候为其添加<code style="max-width:100%;height:auto;">__metaclass__</code>属性</p>
+<pre><code style="max-width:100%;height:auto;">class Foo(object):
+    __metaclass__ = something
+    ......
+    ......
+</code></pre>
+<p style="max-width:100%;height:auto;">你首先写下<code style="max-width:100%;height:auto;">class Foo(object)</code>，但是类对象Foo还没有在内存中创建。Python会在类的定义中寻找<code style="max-width:100%;height:auto;">__metaclass__</code>属性，如果找到了，Python就会用它来创建类Foo，如果没有找到，就会用内建的<code style="max-width:100%;height:auto;">type</code>来创建这个类。</p>
+<p style="max-width:100%;height:auto;">即在python创建类的时候，python会在内存中通过<code style="max-width:100%;height:auto;">__metaclass__</code>创建一个名字为Foo的类对象。如果Python没有找到<code style="max-width:100%;height:auto;">__metaclass__</code>，它会继续在父类中寻找<code style="max-width:100%;height:auto;">__metaclass__</code>属性，并尝试做和前面同样的操作。如果Python在任何父类中都找不到<code style="max-width:100%;height:auto;">__metaclass__</code>，它就会在模块层次中去寻找<code style="max-width:100%;height:auto;">__metaclass__</code>，并尝试做同样的操作。如果还是找不到<code style="max-width:100%;height:auto;">__metaclass__</code>,ython就会用内置的type来创建这个类对象。</p>
+<p style="max-width:100%;height:auto;">这就是<code style="max-width:100%;height:auto;">__metaclass__</code>属性，理解这个一定要区分好与继承的关系。继承是在类已经在内存创建好了之后继承相应的属性和方法，而这个属性的功能比继承更强更大，但是简而言之它的功能其实也很简单
+就是</p>
+<pre><code style="max-width:100%;height:auto;">1)   拦截类的创建
+2)   修改类
+3)   返回修改之后的类
+</code></pre>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+
+
+
+<!--PC端-->
+<div class="unit one-fifth hide-on-mobiles" id="scroll" style="position:absolute;left:30px">
+<div class="inner profile-inner">
+<div class="base-info profile-block">
+<img id="avatar" src="./python深入学习-一-：类与元类（metaclass）的理解/logo.jpg"/>
+<h2 id="name" style="text-align:center">Bendawang</h2>
+<span id="location" style="font-size:18px">
+<i class="fa fa-map-marker"></i>SiChuan, China</span>
+<a href="/about" id="follow">联系我</a></div>
+<div class="article-info profile-block">
+<div class="article-info-block">
+        55
+          <span>文章</span></div>
+<div class="article-info-block">
+        5
+          <span>标签</span></div>
+</div>
+<div class="profile-block social-links hide-on-mobiles">
+<table>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/530393297" target="_blank" title="github">
+<i class="fa fa-github"></i>
+</a>
+</td>
+<td>
+<a href="tencent://message/?uin=1814054026&amp;Site=有事Q我&amp;Menu=yes" target="_blank" title="qq">
+<i class="fa fa-qq"></i>
+</a>
+</td>
+<td>
+<a href="http://weibo.com/2734326455/profile" target="_blank" title="weibo">
+<i class="fa fa-weibo"></i>
+</a>
+</td>
+<td>
+<a href="http://bendawang.site/rss" target="_blank" title="rss">
+<i class="fa fa-rss-square"></i></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="unit three-quarters hide-on-mobiles">
+<article class="bdw_article">
+<h1 id="metaclass">类与元类（metaclass）的理解</h1>
+<h2 id="0x00">0x00 前言</h2>
+<p style="max-width:100%;height:auto;">最近准备开始着手毕设的东西，所以打算把过程中一些关于python的一些我平时不怎么使用的地方学习并写出来分享下，不过由于有些地方是我个人的理解，所以多少可能会有偏差，希望师傅们看到能帮我指出来。</p>
+<p style="max-width:100%;height:auto;">昨天在看代码的时候遇到了元类(<code style="max-width:100%;height:auto;">metaclass</code>)，相信平时如果大家用python方面的工具用的较多的话也会比较常见到这个，但即便如此却没有去深入研究过这个东西</p>
+<p style="max-width:100%;height:auto;">先分享一个链接：<code style="max-width:100%;height:auto;">http://stackoverflow.com/questions/100003/what-is-a-metaclass-in-python</code></p>
+<h2 id="0x01">0x01 关于类、对象、类的实例</h2>
+<p style="max-width:100%;height:auto;">首先先谈谈python中的类、对象和实例。
+在C++中接触到这些东西，不过我的大部分概念仅仅停留在<code style="max-width:100%;height:auto;">class</code>关键字上面。也经常说道这三个名词，可能平时用着用着也没有深究过，渐渐也就用混淆了这三个词。</p>
+<h3 id="11python">1.1 python中静态与动态创建类</h3>
+<p style="max-width:100%;height:auto;">在这里，一直以来我的理解是类就是通常意义上的<code style="max-width:100%;height:auto;">class</code>，而对象就是类的实例化，换言之，类就是一组用来描述如何生成一个对象的代码段。但是实际上在python里面实例和对象有区别，待会我们会说，先来看个例子。
+例如如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">class test():
+    pass
+mine=test()  #test是类，mine是实例也是对象
+</code></pre>
+<p style="max-width:100%;height:auto;">但是，Python中的类还远不止如此。类同样也是一种对象。因为只要你使用关键字<code style="max-width:100%;height:auto;">class</code>，Python解释器在执行的时候就会创建一个对象。
+即test本身也是一个对象，可以进行任何对象的操作，例如赋值、传参、增加属性等等。</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">&gt;&gt;&gt; class test():
+...     pass
+... 
+&gt;&gt;&gt; print test
+__main__.test
+&gt;&gt;&gt; test.a=&amp;apos;a&amp;apos;
+&gt;&gt;&gt; hasattr(test,&amp;apos;a&amp;apos;)
+&gt;&gt;&gt; print test()
+&lt;__main__.test instance at 0x7f8e5caccea8&gt;
+&gt;&gt;&gt; print test().a
+a
+</code></pre>
+<p style="max-width:100%;height:auto;">另外在python中除了用关键字<code style="max-width:100%;height:auto;">class</code>静态创建类以外还可以用<code style="max-width:100%;height:auto;">type()</code>函数动态创建类，这也是广为人知的<code style="max-width:100%;height:auto;">type</code>函数不广为人知的用法，具体用法如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">type(类名, 父类的元组（针对继承的情况，可以为空），包含属性的字典（名称和值））
+---------------------------------------------------------
+For example1:
+
+&gt;&gt;&gt; Hello = type(&amp;apos;Hello&amp;apos;, (object,), dict(hello="hello world!"))
+&gt;&gt;&gt; h=Hello()
+&gt;&gt;&gt; h.hello
+&amp;apos;hello world!&amp;apos;
+---------------------------------------------------------
+For example2:
+
+&gt;&gt;&gt; def func(self, name=&amp;apos;world&amp;apos;):
+...     print(&amp;apos;Hello, %s.&amp;apos; % name)
+...
+&gt;&gt;&gt; Hello = type(&amp;apos;Hello&amp;apos;, (object,), dict(hello=func))
+&gt;&gt;&gt; h = Hello()
+&gt;&gt;&gt; h.hello()
+Hello, world.
+---------------------------------------------------------
+</code></pre>
+<p style="max-width:100%;height:auto;">通过type的用法我们知道类也是可以动态创建的。</p>
+<h3 id="12python">1.2 python里面的类和实例</h3>
+<p style="max-width:100%;height:auto;">我们分为python2和python3来说，
+在python2中，我们通过下面这个例子来说明</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">class A: #旧式类
+    pass
+class B(object):#新式类
+    pass
+print B.__class__
+print A.__class__
+</code></pre>
+<p style="max-width:100%;height:auto;">得到这个结果</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">&lt;type &amp;apos;type&amp;apos;&gt;
+Traceback (most recent call last):
+  File "class.py", line 9, in &lt;module&gt;
+    print A.__class__
+AttributeError: class A has no attribute &amp;apos;__class__&amp;apos;
+</code></pre>
+<p style="max-width:100%;height:auto;">第一个print打印了，但是第二个报错了，我们知道<code style="max-width:100%;height:auto;">__class__</code>会告诉我们当前实例是哪个类的实例。这也就意味着，B是一个类也是实例，但A只是一个类，不是实例，这也就是旧式类和新式类的区别。
+再看</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">#encoding:utf-8
+class A:
+    pass
+class B(object):
+    pass
+b = B()
+a = A()
+
+print "---------------------"
+print A
+print B
+print "---------------------"
+print a
+print b
+print "---------------------"
+print type(A)
+print type(B)
+print "---------------------"
+print type(a)
+print type(b)
+print "---------------------"
+</code></pre>
+<p style="max-width:100%;height:auto;">结果</p>
+<pre><code class="bash language-bash" style="max-width:100%;height:auto;">---------------------
+__main__.A
+&lt;class &amp;apos;__main__.B&amp;apos;&gt;
+---------------------
+&lt;__main__.A instance at 0x7ff0f37087e8&gt;
+&lt;__main__.B object at 0x7ff0f3713290&gt;
+---------------------
+&lt;type &amp;apos;classobj&amp;apos;&gt;
+&lt;type &amp;apos;type&amp;apos;&gt;
+---------------------
+&lt;type &amp;apos;instance&amp;apos;&gt;
+&lt;class &amp;apos;__main__.B&amp;apos;&gt;
+---------------------
+</code></pre>
+<p style="max-width:100%;height:auto;">多少能够理解了把。尤其是第二组打印结果，a是A的一个实例，b是B的一个对象。
+即总结起来这么说，自建类实例化生成的对象的类型是object，内置类实例化生成的对象的类型是instance。
+尤其是第三组打印结果，也说明自建类和内置类的区别，自建类的类型是<code style="max-width:100%;height:auto;">classobj</code>，而内置类的类型是<code style="max-width:100%;height:auto;">type</code>，这一点在后续会解释的。</p>
+<p style="max-width:100%;height:auto;">大家可能会问，既然自建对象和内置对象不同，但是我们平时使用的时候都是一样的使用啊？
+这个问题就是python官方打算解决的，因为他底层会用大量代码来掩盖二者的差异，从而让我们觉得在使用中二者一样。
+所以在python3里面所有类都是内置类了。如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">class A:
+    pass
+class B(object):
+    pass
+</code></pre>
+<p style="max-width:100%;height:auto;">即上述代码都默认自己懂继承自object类了。从而几乎取缔了实例<code style="max-width:100%;height:auto;">instance</code>的存在。在<code style="max-width:100%;height:auto;">python3</code>中测试如下：</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">&gt;&gt;&gt; class A:
+...     pass
+... 
+&gt;&gt;&gt; class B(object):
+...     pass
+... 
+&gt;&gt;&gt; a=A()
+&gt;&gt;&gt; b=B()
+&gt;&gt;&gt; print(a)
+&lt;__main__.A object at 0x7fbb06f81198&gt;
+&gt;&gt;&gt; print(b)
+&lt;__main__.B object at 0x7fbb0526add8&gt;
+</code></pre>
+<p style="max-width:100%;height:auto;">可以看到已经没有区别了。</p>
+<p style="max-width:100%;height:auto;">所以看得出官方的态度就是支持大家更多的使用内置类，而非自建类，即平时我们写代码的时候还是尽量多使用<code style="max-width:100%;height:auto;">B</code>的创建方式，继承<code style="max-width:100%;height:auto;">OBJECT</code>。</p>
+<p style="max-width:100%;height:auto;">好的，接下来还有一个问题就是我们执行<code style="max-width:100%;height:auto;">print type(B)</code>的时候打印的值为什么是<code style="max-width:100%;height:auto;">&lt;type &amp;apos;type&amp;apos;&gt;</code></p>
+<p style="max-width:100%;height:auto;">进入下一个主题。</p>
+<h2 id="0x02metaclass">0x02 关于元类<code style="max-width:100%;height:auto;">metaclass</code></h2>
+<h3 id="21">2.1 元类是什么?</h3>
+<p style="max-width:100%;height:auto;">我们之前说过在python里面的类本身也是一个对象，元类就是创建所有python类的类
+即可以通过这个</p>
+<pre><code class="python language-python" style="max-width:100%;height:auto;">Anyclass=Metaclass()
+Object=Anyclass()
+</code></pre>
+<p style="max-width:100%;height:auto;">所以大家应该猜到了把，实际上<code style="max-width:100%;height:auto;">type</code>就是这个元类，即python所有的类都是由<code style="max-width:100%;height:auto;">type</code>创建的，这也是为什么type可以用来动态创建类的原因。</p>
+<p style="max-width:100%;height:auto;">换言之，元类type就是创建python类这种对象的东西，即可以称为一个<code style="max-width:100%;height:auto;">类工厂</code>，当然，我们也可以创建自己的元类。</p>
+<h3 id="22__metaclass__">2.2 <code style="max-width:100%;height:auto;">__metaclass__</code>属性</h3>
+<p style="max-width:100%;height:auto;">这个就是用的比较多的地方。
+你可以在写一个类的时候为其添加<code style="max-width:100%;height:auto;">__metaclass__</code>属性</p>
+<pre><code style="max-width:100%;height:auto;">class Foo(object):
+    __metaclass__ = something
+    ......
+    ......
+</code></pre>
+<p style="max-width:100%;height:auto;">你首先写下<code style="max-width:100%;height:auto;">class Foo(object)</code>，但是类对象Foo还没有在内存中创建。Python会在类的定义中寻找<code style="max-width:100%;height:auto;">__metaclass__</code>属性，如果找到了，Python就会用它来创建类Foo，如果没有找到，就会用内建的<code style="max-width:100%;height:auto;">type</code>来创建这个类。</p>
+<p style="max-width:100%;height:auto;">即在python创建类的时候，python会在内存中通过<code style="max-width:100%;height:auto;">__metaclass__</code>创建一个名字为Foo的类对象。如果Python没有找到<code style="max-width:100%;height:auto;">__metaclass__</code>，它会继续在父类中寻找<code style="max-width:100%;height:auto;">__metaclass__</code>属性，并尝试做和前面同样的操作。如果Python在任何父类中都找不到<code style="max-width:100%;height:auto;">__metaclass__</code>，它就会在模块层次中去寻找<code style="max-width:100%;height:auto;">__metaclass__</code>，并尝试做同样的操作。如果还是找不到<code style="max-width:100%;height:auto;">__metaclass__</code>,ython就会用内置的type来创建这个类对象。</p>
+<p style="max-width:100%;height:auto;">这就是<code style="max-width:100%;height:auto;">__metaclass__</code>属性，理解这个一定要区分好与继承的关系。继承是在类已经在内存创建好了之后继承相应的属性和方法，而这个属性的功能比继承更强更大，但是简而言之它的功能其实也很简单
+就是</p>
+<pre><code style="max-width:100%;height:auto;">1)   拦截类的创建
+2)   修改类
+3)   返回修改之后的类
+</code></pre>
+<div class="section-nav">
+<div class="left align-right"></div>
+<div class="right align-left"></div>
+<div class="clear"></div>
+</div>
+</article>
+</div>
+<div class="unit one-fifth hide-on-mobiles godness">
+<aside>
+<div class="Bendawang" id="Bendawang" style="position:absolute;">
+<b id="Bendawang_toggle" style="cursor:pointer;" title="收起">目录[+]</b></div></aside></div>
+<div class="Bendawang_content" id="Bendawang_content"></div>
+
+<img class="yukino" id="yukino" src="./python深入学习-一-：类与元类（metaclass）的理解/41.png" style="position:absolute;"/>
+
+
+
+
+<footer>
+<div class="show-on-mobiles">
+<div style="display:inline-block">
+<div style="vertical-align:middle;">
+            Copyright©
+            <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder"><a href="http://bendawang.site/" style="font-size:16px">Bendawang</a></span>
+</div>
+</div>
+<div style="vertical-align:middle;">
+<span>Designed By</span>
+<a href="http://blog.csdn.net/qq_19876131"><img src="./python深入学习-一-：类与元类（metaclass）的理解/bendawang2.png"/></a>
+</div>
+</div>
+<div class="grid hide-on-mobiles">
+<div class="unit one-third center-on-mobiles">
+<div class="copyright">
+          Copyright©
+          <span itemprop="copyrightYear">2017</span>
+<span class="author" itemprop="copyrightHolder">   <a href="http://bendawang.site/">Bendawang</a></span>
+</div>
+</div>
+<div class="unit two-thirds align-right center-on-mobiles">
+<p>Designed By
+          <a href="http://blog.csdn.net/qq_19876131">
+<img src="./python深入学习-一-：类与元类（metaclass）的理解/bendawang2.png"/>
+</a>
+</p>
+</div>
+</div>
+</footer>
+<script src="./python深入学习-一-：类与元类（metaclass）的理解/prism.js"></script>
+<script src="./python深入学习-一-：类与元类（metaclass）的理解/zooming.js"></script>
+<script src="./python深入学习-一-：类与元类（metaclass）的理解/Bendawang.js"></script>
+
+

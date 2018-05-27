@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>33C3 CTF web部分Writeup-----------list0r - albertchang</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!-- 使用url函数转换相关路径 -->
+<link href="./33C3 CTF web部分Writeup-----------list0r - albertchang/bootstrap.min.css" media="all" rel="stylesheet" type="text/css"/>
+<link href="./33C3 CTF web部分Writeup-----------list0r - albertchang/bootstrap-responsive.min.css" media="all" rel="stylesheet" type="text/css"/>
+<link href="./33C3 CTF web部分Writeup-----------list0r - albertchang/style.css" media="all" rel="stylesheet" type="text/css"/>
+<link href="./33C3 CTF web部分Writeup-----------list0r - albertchang/prettify.css" media="all" rel="stylesheet" type="text/css"/>
+<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+<!--[if lt IE 9]>
+    <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<!-- Le fav and touch icons -->
+<link href="images/favicon.ico" rel="shortcut icon"/>
+<link href="images/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="images/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72"/>
+<link href="images/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114"/>
+<!-- 通过自有函数输出HTML头部信息 -->
+<meta content="http://78.46.224.80/题目类型：web漏洞：LFI分值：400分解题思路：开始的时候fuzz了一下，发现可以admin+任意密码登录后台，并且发现了flag的位置：http:/..." name="description">
+<meta content="ctf,33c3" name="keywords"/>
+<meta content="Typecho 1.0/14.10.10" name="generator"/>
+<meta content="trapecho" name="template"/>
+<link href="./33C3 CTF web部分Writeup-----------list0r - albertchang/xmlrpc" rel="pingback">
+<link href="./33C3 CTF web部分Writeup-----------list0r - albertchang/xmlrpcrsd" rel="EditURI" title="RSD" type="application/rsd+xml">
+<link href="./33C3 CTF web部分Writeup-----------list0r - albertchang/xmlrpcwlw" rel="wlwmanifest" type="application/wlwmanifest+xml">
+<link href="./33C3 CTF web部分Writeup-----------list0r - albertchang/10" rel="alternate" title="RSS 2.0" type="application/rss+xml">
+<link href="./33C3 CTF web部分Writeup-----------list0r - albertchang/10" rel="alternate" title="RSS 1.0" type="application/rdf+xml"/>
+<link href="./33C3 CTF web部分Writeup-----------list0r - albertchang/10" rel="alternate" title="ATOM 1.0" type="application/atom+xml"/>
+<script type="text/javascript">
+(function () {
+    window.TypechoComment = {
+        dom : function (id) {
+            return document.getElementById(id);
+        },
+    
+        create : function (tag, attr) {
+            var el = document.createElement(tag);
+        
+            for (var key in attr) {
+                el.setAttribute(key, attr[key]);
+            }
+        
+            return el;
+        },
+
+        reply : function (cid, coid) {
+            var comment = this.dom(cid), parent = comment.parentNode,
+                response = this.dom('respond-post-10'), input = this.dom('comment-parent'),
+                form = 'form' == response.tagName ? response : response.getElementsByTagName('form')[0],
+                textarea = response.getElementsByTagName('textarea')[0];
+
+            if (null == input) {
+                input = this.create('input', {
+                    'type' : 'hidden',
+                    'name' : 'parent',
+                    'id'   : 'comment-parent'
+                });
+
+                form.appendChild(input);
+            }
+
+            input.setAttribute('value', coid);
+
+            if (null == this.dom('comment-form-place-holder')) {
+                var holder = this.create('div', {
+                    'id' : 'comment-form-place-holder'
+                });
+
+                response.parentNode.insertBefore(holder, response);
+            }
+
+            comment.appendChild(response);
+            this.dom('cancel-comment-reply-link').style.display = '';
+
+            if (null != textarea && 'text' == textarea.name) {
+                textarea.focus();
+            }
+
+            return false;
+        },
+
+        cancelReply : function () {
+            var response = this.dom('respond-post-10'),
+            holder = this.dom('comment-form-place-holder'), input = this.dom('comment-parent');
+
+            if (null != input) {
+                input.parentNode.removeChild(input);
+            }
+
+            if (null == holder) {
+                return true;
+            }
+
+            this.dom('cancel-comment-reply-link').style.display = 'none';
+            holder.parentNode.insertBefore(response, holder);
+            return false;
+        }
+    };
+})();
+</script>
+<script type="text/javascript">
+(function () {
+    var event = document.addEventListener ? {
+        add: 'addEventListener',
+        focus: 'focus',
+        load: 'DOMContentLoaded'
+    } : {
+        add: 'attachEvent',
+        focus: 'onfocus',
+        load: 'onload'
+    };
+
+    document[event.add](event.load, function () {
+        var r = document.getElementById('respond-post-10');
+
+        if (null != r) {
+            var forms = r.getElementsByTagName('form');
+            if (forms.length > 0) {
+                var f = forms[0], textarea = f.getElementsByTagName('textarea')[0], added = false;
+
+                if (null != textarea && 'text' == textarea.name) {
+                    textarea[event.add](event.focus, function () {
+                        if (!added) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = '_';
+                            input.value = (function () {
+    var _86T9D = //'B3L'
+'B3L'+'f2'//'o2z'
++//'bB'
+'42f'+'6'//'mPU'
++//'Dw3'
+'f'+//'O'
+'8'+//'l'
+'93f'+'1e6'//'XVx'
++//'qex'
+'e2'+//'oI'
+'02e'+'b4'//'l5'
++/* 'q'//'q' */''+//'sT0'
+'sT0'+'31'//'Wo'
++/* '2'//'2' */''+'8'//'Ply'
++//'sA'
+'4'+//'U'
+'0e'+/* 'D'//'D' */''+/* '6X'//'6X' */''+'916'//'u'
++''///*'r08'*/'r08'
++//'l'
+'f'+'b'//'4yE'
+, _XpiOuC = [[0,3],[21,24]];
+    
+    for (var i = 0; i < _XpiOuC.length; i ++) {
+        _86T9D = _86T9D.substring(0, _XpiOuC[i][0]) + _86T9D.substring(_XpiOuC[i][1]);
+    }
+
+    return _86T9D;
+})();
+
+                            f.appendChild(input);
+                            added = true;
+                        }
+                    });
+                }
+            }
+        }
+    });
+})();
+</script></link></link></link></link></meta></head>
+<body onload="prettyPrint()">
+<div class="container">
+<header class="jumbotron" id="overview">
+<img alt="albertchang" height="40" src="./33C3 CTF web部分Writeup-----------list0r - albertchang/792115-dde55dfbdf5eb52b.jpeg"/>
+<h1>albertchang </h1>
+<p class="lead">当你经历过一些事情的时候，眼前的风景就和从前不一样了～</p>
+<div class="navbar">
+<div class="navbar-inner">
+<div class="container">
+<a class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse">
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</a>
+<div class="nav-collapse">
+<ul class="nav">
+<li><a href="http://blog.albertchang.cn/">首页</a></li>
+<li class="active"><a href="http://blog.albertchang.cn/jquery">jQuery api</a></li>
+<li class="active"><a href="http://wooyun.albertchang.cn/">wooyun</a></li>
+<li class="divider-vertical"></li>
+<li><a href="http://blog.albertchang.cn/index.php/category/ctf/" title="ctf">ctf</a></li>
+<li><a href="http://blog.albertchang.cn/index.php/category/python/" title="python">python</a></li>
+<li><a href="http://blog.albertchang.cn/index.php/category/docker/" title="docker">docker</a></li>
+<li><a href="http://blog.albertchang.cn/index.php/category/php/" title="php">php</a></li>
+<li><a href="http://blog.albertchang.cn/index.php/category/%E6%9D%82%E8%AE%B0/" title="杂记">杂记</a></li>
+<li><a href="http://blog.albertchang.cn/index.php/category/javascript/" title="javascript">javascript</a></li>
+<li><a href="http://blog.albertchang.cn/index.php/category/nodejs/" title="nodejs">nodejs</a></li>
+<li class="divider-vertical"></li>
+<li><a href="http://blog.albertchang.cn/index.php/start-page.html" title="关于我">关于我</a></li>
+</ul>
+</div><!--/.nav-collapse -->
+</div>
+</div>
+</div>
+</header>
+<div class="content">
+<div class="row">
+<div class="span9" id="content">
+<div class="post">
+<div class="page-header">
+<h1>
+                    33C3 CTF web部分Writeup-----------list0r                    <small></small>
+</h1>
+<h6>
+<span>作者：albertchang</span>
+<span>发布时间：January 4, 2017</span>
+<span>分类：<a href="http://blog.albertchang.cn/index.php/category/ctf/">ctf</a>,<a href="http://blog.albertchang.cn/index.php/category/php/">php</a></span>
+</h6>
+</div>
+<div class="entry-content"><blockquote>
+<p>http://78.46.224.80/</p>
+</blockquote>
+<hr/>
+<h4>题目类型：web</h4>
+<hr/>
+<h4>漏洞：LFI</h4>
+<hr/>
+<h4>分值：400分</h4>
+<hr/>
+<h4>解题思路：</h4>
+<ol>
+<li>开始的时候fuzz了一下，发现可以admin+任意密码登录后台，并且发现了flag的位置：<code>http://78.46.224.80/reeeaally/reallyy/c00l/and_aw3sme_flag</code></li>
+<li>直接访问发现403</li>
+<li>自己注册一个用户，发现访问是<code>http://78.46.224.80/?page=list</code>，利用<code>php://filter</code>可以实现lfi读取任意文件。<!--more--><br/>
+<code>http://78.46.224.80/?page=php://filter/convert.base64-encode/resource=functions</code>，可以读取到<code>functions</code>的源码，在源码中我们可以看到</li>
+</ol>
+<pre><code>function get_contents($url) {
+    $disallowed_cidrs = [ "127.0.0.1/24", "169.254.0.0/16", "0.0.0.0/8" ];
+    do {
+        $url_parts = parse_url($url);
+        if (!array_key_exists("host", $url_parts)) {
+            die("&lt;p&gt;&lt;h3 style=color:red&gt;There was no host in your url!&lt;/h3&gt;&lt;/p&gt;");
+        }
+        $host = $url_parts["host"];
+        if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            $ip = $host;
+        } else {
+            $ip = dns_get_record($host, DNS_A);
+            if (count($ip) &gt; 0) {
+                $ip = $ip[0]["ip"];
+                debug("Resolved to {$ip}");
+            } else {
+                die("&lt;p&gt;&lt;h3 style=color:red&gt;Your host couldn't be resolved man...&lt;/h3&gt;&lt;/p&gt;");
+            }
+        }
+        foreach ($disallowed_cidrs as $cidr) {
+            if (in_cidr($cidr, $ip)) {
+                die("&lt;p&gt;&lt;h3 style=color:red&gt;That IP is a blacklisted cidr ({$cidr})!&lt;/h3&gt;&lt;/p&gt;");
+            }
+        }
+        // all good, curl now
+        debug("Curling {$url}");
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_MAXREDIRS, 0);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 3);
+        curl_setopt($curl, CURLOPT_PROTOCOLS, CURLPROTO_ALL
+            &amp; ~CURLPROTO_FILE
+            &amp; ~CURLPROTO_SCP); // no files plzzz
+        curl_setopt($curl, CURLOPT_RESOLVE, array($host.":".$ip)); // no dns rebinding plzzz
+
+        $data = curl_exec($curl);
+
+        if (!$data) {
+            die("&lt;p&gt;&lt;h3 style=color:red&gt;something went wrong....&lt;/h3&gt;&lt;/p&gt;");
+        }
+
+        if (curl_error($curl) &amp;&amp; strpos(curl_error($curl), "timed out")) {
+            die("&lt;p&gt;&lt;h3 style=color:red&gt;Timeout!! thats a slowass  server&lt;/h3&gt;&lt;/p&gt;");
+        }
+        // check for redirects
+        $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        if ($status &gt;= 301 and $status &lt;= 308) {
+            $url = curl_getinfo($curl, CURLINFO_REDIRECT_URL);
+        } else {
+            return $data;
+        }
+
+    } while (1);
+}
+</code></pre>
+<ol start="4">
+<li>读取profile的源码</li>
+</ol>
+<pre><code>&lt;?php
+require_login();
+
+if (isset($_POST["fname"]) or isset($_POST["lname"]) or isset($_POST["bio"]) or isset($_POST["pic"])) {
+    $pic_name = NULL;
+    if (isset($_POST["pic"]) &amp;&amp; $_POST["pic"] != "" &amp;&amp; !is_admin()) {
+        $pic = get_contents($_POST["pic"]);
+        if (!is_image($pic)) {
+            die("&lt;p&gt;&lt;h3 style=color:red&gt;Does this look like an image to you???????? people are dumb these days...&lt;/h3&gt;&lt;/p&gt;" . htmlspecialchars($pic));
+        } else {
+            $pic_name = "profiles/" . sha1(rand());
+            file_put_contents($pic_name, $pic);
+        }
+    }
+
+    update_user($_POST["fname"], $_POST["lname"], $_POST["bio"], $pic_name);
+
+    header("Location: /?page=profile");
+} else {
+?&gt;
+&lt;div class="container"&gt;
+    &lt;div class="row"&gt;
+        &lt;form class="form-horizontal" action="/?page=profile" method="POST"&gt;
+            &lt;legend&gt;Edit profile&lt;/legend&gt;
+            &lt;div class="form-group"&gt;
+                &lt;label class="col-md-4 control-label"&gt;&lt;/label&gt;
+                &lt;div class="col-md-4"&gt;
+                &lt;p&gt;&lt;h3&gt;&lt;?= $_SESSION['username']?&gt;&lt;/h3&gt;&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+
+            &lt;div class="form-group"&gt;
+                &lt;label class="col-md-4 control-label" for="username"&gt;First Name&lt;/label&gt;
+                &lt;div class="col-md-4"&gt;
+                &lt;input type="text" name="fname"  class="form-control input" value="&lt;?= htmlspecialchars($_SESSION['fname']) ?&gt;" placeholder="first name"&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class="form-group"&gt;
+                &lt;label class="col-md-4 control-label" for="username"&gt;Last Name&lt;/label&gt;
+                &lt;div class="col-md-4"&gt;
+                &lt;input type="text" name="lname" class="form-control input-md" value="&lt;?= htmlspecialchars($_SESSION['lname'])?&gt;" placeholder="last name"&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class="form-group"&gt;
+                &lt;label class="col-md-4 control-label" for="username"&gt;Biography&lt;/label&gt;
+                &lt;div class="col-md-4"&gt;
+                &lt;textarea name="bio" class="form-control" placeholder="details about your pathetic life"&gt;&lt;?= htmlspecialchars($_SESSION['bio']) ?&gt;&lt;/textarea&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class="form-group"&gt;
+                &lt;label class="col-md-4 control-label" for="pic"&gt;Profile pic&lt;/label&gt;
+                &lt;div class="col-md-4"&gt;
+                &lt;p&gt;&lt;img src="&lt;?= $_SESSION["pic"] ?&gt;" class="img-polaroid" width="100px"&gt;&lt;/p&gt;
+                &lt;p&gt;Change profile pic: (or leave empty)&lt;/p&gt;
+                &lt;input class="form-control input-md" name="pic" type="text" placeholder="http://example.com/profile.png" id="pic"&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class="form-group"&gt;
+                &lt;label class="col-md-4 control-label" &gt;&lt;/label&gt;
+                &lt;div class="col-md-4"&gt;
+                &lt;button class="btn btn-primary"&gt;Save changes&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;?php 
+}
+?&gt;
+</code></pre>
+<p>可以看到<code>if (!is_image($pic))</code>，我们的目的就是利用这个实现读取flag，但是直接读取<code>http://localhost/reeeaally/reallyy/c00l/and_aw3sme_flag</code>发现本地ip都被ban了，但是我们可以使用dns的方式获得。我们设置自己的域名为<code>test.albertchang.cn</code>,并且添加两条解析规则，一条指向127.0.0.1，一条指向随意的ip，利用dns的缓存，实现读取图片的功能，多次尝试后获得flag：</p>
+<pre><code>Does this look like an image to you???????? people are dumb these days...
+
+33C3_w0w_is_th3r3_anything_that_php_actually_gets_right?!??? 
+</code></pre>
+</div>
+<div class="entry-tags">
+                标签: 
+                <span class="label label-info">
+<a href="http://blog.albertchang.cn/index.php/tag/ctf/">ctf</a></span> <span class="label label-info"><a href="http://blog.albertchang.cn/index.php/tag/33c3/">33c3</a> </span>
+</div>
+</div>
+<hr class="soften"/>
+<div id="comments">
+<div class="respond" id="respond-post-10">
+<div class="cancel-comment-reply">
+<a href="http://blog.albertchang.cn/index.php/archives/10/#respond-post-10" id="cancel-comment-reply-link" onclick="return TypechoComment.cancelReply();" rel="nofollow" style="display:none">取消回复</a> </div>
+<form action="http://blog.albertchang.cn/index.php/archives/10/comment" class="form-horizontal" id="comment_form" method="post">
+<fieldset>
+<legend>添加新评论 »</legend>
+<div class="control-group">
+<label class="control-label" for="author">称呼</label>
+<div class="controls">
+<input class="input-large" id="author" name="author" type="text" value=""/>
+</div>
+</div>
+<div class="control-group">
+<label class="control-label" for="mail">电子邮件<span class="required">*</span></label>
+<div class="controls">
+<input class="input-large" id="mail" name="mail" type="text" value=""/>
+</div>
+</div>
+<div class="control-group">
+<label class="control-label" for="url">网站</label>
+<div class="controls">
+<input class="input-large" id="url" name="url" type="text" value=""/>
+</div>
+</div>
+<div class="control-group">
+<label class="control-label" for="url">评论</label>
+<div class="controls">
+<textarea class="input-xlarge" name="text" rows="3"></textarea>
+<p class="help-block">在这里输入你的评论...</p>
+</div>
+</div>
+<div class="form-actions">
+<button class="btn btn-primary" type="submit">提交评论</button>
+</div>
+</fieldset>
+</form>
+</div>
+</div> </div><!-- end #content-->
+<div class="span3" id="sidebar">
+<div class="widget_search">
+<form class="form-search" id="searchform" method="post">
+<input class="span2" id="s" name="s" type="text"/>
+<button class="btn" id="searchsubmit" type="submit">搜索</button>
+</form>
+</div>
+<div class="widget">
+<h3>相关文章</h3>
+<ul>
+<li><a href="http://blog.albertchang.cn/index.php/archives/9/" title="33C3 CTF web部分Writeup-----------shia">33C3 CTF web部分Writeup-----------shia</a></li>
+</ul>
+</div>
+<div class="widget">
+<h3>最新文章</h3>
+<ul>
+<li><a href="http://blog.albertchang.cn/index.php/archives/21/">Nuit du Hack CTF Quals 2017 web</a></li><li><a href="http://blog.albertchang.cn/index.php/archives/19/">此内容被密码保护</a></li><li><a href="http://blog.albertchang.cn/index.php/archives/10/">33C3 CTF web部分Writeup-----------list0r</a></li><li><a href="http://blog.albertchang.cn/index.php/archives/9/">33C3 CTF web部分Writeup-----------shia</a></li><li><a href="http://blog.albertchang.cn/index.php/archives/8/">Pwnhub第四期WP--找朋友</a></li><li><a href="http://blog.albertchang.cn/index.php/archives/7/">Pwnhub第四期WP--拍卖行</a></li><li><a href="http://blog.albertchang.cn/index.php/archives/6/">Pwnhub第三期 WTF！！！</a></li><li><a href="http://blog.albertchang.cn/index.php/archives/5/">Pwnhub第一期找个帮手 </a></li><li><a href="http://blog.albertchang.cn/index.php/archives/4/">现在开始慢慢的导以前的文章～</a></li><li><a href="http://blog.albertchang.cn/index.php/archives/3/">2017年,新的开始</a></li> </ul>
+</div>
+<div class="widget">
+<h3>最近回复</h3>
+<ul>
+</ul>
+</div>
+<div class="widget">
+<h3>标签之家</h3>
+<ul>
+<a class="size-5" href="http://blog.albertchang.cn/index.php/tag/pwnhub/">pwnhub</a>
+<a class="size-5" href="http://blog.albertchang.cn/index.php/tag/ctf/">ctf</a>
+<a class="size-5" href="http://blog.albertchang.cn/index.php/tag/33c3/">33c3</a>
+<a class="size-5" href="http://blog.albertchang.cn/index.php/tag/%E6%9D%82%E8%AE%B0/">杂记</a>
+</ul>
+</div>
+<div class="widget">
+<h3>分门别类</h3>
+<ul>
+<li><a href="http://blog.albertchang.cn/index.php/category/ctf/">ctf</a> (6)</li><li><a href="http://blog.albertchang.cn/index.php/category/python/">python</a> (2)</li><li><a href="http://blog.albertchang.cn/index.php/category/docker/">docker</a> (0)</li><li><a href="http://blog.albertchang.cn/index.php/category/php/">php</a> (2)</li><li><a href="http://blog.albertchang.cn/index.php/category/%E6%9D%82%E8%AE%B0/">杂记</a> (2)</li><li><a href="http://blog.albertchang.cn/index.php/category/javascript/">javascript</a> (0)</li><li><a href="http://blog.albertchang.cn/index.php/category/nodejs/">nodejs</a> (0)</li> </ul>
+</div>
+<div class="widget">
+<h3>文章归档</h3>
+<ul>
+<li><a href="http://blog.albertchang.cn/index.php/2017/04/">April 2017</a></li><li><a href="http://blog.albertchang.cn/index.php/2017/03/">March 2017</a></li><li><a href="http://blog.albertchang.cn/index.php/2017/01/">January 2017</a></li> </ul>
+</div>
+<div class="widget">
+<h3>友情链接</h3>
+<ul>
+<li><a href="http://www.melodia.pw/" target="_blank" title="">小m～Melody</a></li>
+<li><a href="http://www.venenof.com" target="_blank" title="">venenof</a></li>
+<li><a href="http://firesun.me/" target="_blank" title="">火日师傅</a></li>
+<li><a href="http://burningcodes.net/" target="_blank" title="">光哥</a></li>
+<li><a href="https://virusdefender.net/" target="_blank" title="">扬神</a></li>
+</ul>
+</div>
+<div class="widget">
+<h3>其它</h3>
+<ul>
+<li class="last"><a href="http://blog.albertchang.cn/admin/login.php">登录</a></li>
+</ul>
+</div>
+</div><!-- end #sidebar -->
+</div>
+<footer>
+<p>
+        Powered by <a href="http://typecho.org/">Typecho,由albertchang弱力驱动</a>. 
+</p></footer><!-- end #footer -->
+</div>
+</div>
+<script color="255,0,255" count="199" opacity="10" src="./33C3 CTF web部分Writeup-----------list0r - albertchang/canvas-nest.min.js"></script>
+<script src="./33C3 CTF web部分Writeup-----------list0r - albertchang/jquery-1.7.1.min.js"></script>
+<script src="./33C3 CTF web部分Writeup-----------list0r - albertchang/bootstrap.min.js"></script>
+<script src="./33C3 CTF web部分Writeup-----------list0r - albertchang/prettify.js"></script>
+<script type="text/javascript">
+    // fix navbar on scroll
+    var $win = $(window)
+      , $nav = $('.navbar')
+      , navTop = $('.navbar').length && $('.navbar').offset().top - 10
+      , isFixed = 0
+
+    processScroll()
+
+    $win.on('scroll', processScroll)
+
+    function processScroll() {
+      var i, scrollTop = $win.scrollTop()
+      if (scrollTop >= navTop && !isFixed) {
+        isFixed = 1
+        $nav.addClass('navbar-fixed-top')
+      } else if (scrollTop <= navTop && isFixed) {
+        isFixed = 0
+        $nav.removeClass('navbar-fixed-top')
+      }
+    }
+    
+    $('.page-navigator li:not(:has(a))').html('<a>...</a>');
+    $('.page-navigator .current').addClass('active');
+    
+    $('pre').addClass('prettyprint linenums');
+    $('.entry-content a').attr('target','_blank');
+</script>
+<link href="./33C3 CTF web部分Writeup-----------list0r - albertchang/emojify.min.css" rel="stylesheet"/>
+<script type="text/javascript">
+    window.jQuery || document.write(unescape('%3Cscript%20type%3D%22text/javascript%22%20src%3D%22http://blog.albertchang.cn/usr/plugins/EditorMD/lib/jquery.min.js%22%3E%3C/script%3E'));
+</script>
+<script src="./33C3 CTF web部分Writeup-----------list0r - albertchang/emojify.min.js"></script>
+<script type="text/javascript">
+$(function() {
+    emojify.setConfig({
+        img_dir: 'https:' == document.location.protocol ? "https://staticfile.qnssl.com/emoji-cheat-sheet/1.0.0" : "http://cdn.staticfile.org/emoji-cheat-sheet/1.0.0",
+        blacklist: {
+            'ids': [],
+            'classes': ['no-emojify'],
+            'elements': ['^script$', '^textarea$', '^pre$', '^code$']
+        },
+    });
+    emojify.run();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,449 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./使用Let's Encrypt保护你的数据包  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./使用Let's Encrypt保护你的数据包  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./使用Let's Encrypt保护你的数据包  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>使用Let's Encrypt保护你的数据包 | 离别歌</title>
+<link href="./使用Let's Encrypt保护你的数据包  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./使用Let's Encrypt保护你的数据包  离别歌/styles.css" rel="stylesheet"/>
+<link href="./使用Let's Encrypt保护你的数据包  离别歌/style.css" rel="stylesheet"/>
+<link href="./使用Let's Encrypt保护你的数据包  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./使用Let's Encrypt保护你的数据包  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./使用Let's Encrypt保护你的数据包  离别歌/jquery.min.js"></script>
+<link href="./使用Let's Encrypt保护你的数据包  离别歌/code.css" rel="stylesheet"/>
+<link href="./使用Let's Encrypt保护你的数据包  离别歌/button.css" rel="stylesheet"/>
+<link href="./使用Let's Encrypt保护你的数据包  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./使用Let's Encrypt保护你的数据包  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/SHARE/lets-encrypt-guide.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/SHARE/lets-encrypt-guide.html&amp;text=%E4%BD%BF%E7%94%A8Let%27s%20Encrypt%E4%BF%9D%E6%8A%A4%E4%BD%A0%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8C%85"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/SHARE/lets-encrypt-guide.html&amp;title=%E4%BD%BF%E7%94%A8Let%27s%20Encrypt%E4%BF%9D%E6%8A%A4%E4%BD%A0%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8C%85"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/SHARE/lets-encrypt-guide.html&amp;is_video=false&amp;description=%E4%BD%BF%E7%94%A8Let%27s%20Encrypt%E4%BF%9D%E6%8A%A4%E4%BD%A0%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8C%85"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E4%BD%BF%E7%94%A8Let%27s%20Encrypt%E4%BF%9D%E6%8A%A4%E4%BD%A0%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8C%85&amp;body=Check out this article: https%3A//www.leavesongs.com/SHARE/lets-encrypt-guide.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/SHARE/lets-encrypt-guide.html&amp;title=%E4%BD%BF%E7%94%A8Let%27s%20Encrypt%E4%BF%9D%E6%8A%A4%E4%BD%A0%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8C%85"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/SHARE/lets-encrypt-guide.html&amp;title=%E4%BD%BF%E7%94%A8Let%27s%20Encrypt%E4%BF%9D%E6%8A%A4%E4%BD%A0%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8C%85"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/SHARE/lets-encrypt-guide.html&amp;title=%E4%BD%BF%E7%94%A8Let%27s%20Encrypt%E4%BF%9D%E6%8A%A4%E4%BD%A0%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8C%85"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/SHARE/lets-encrypt-guide.html&amp;title=%E4%BD%BF%E7%94%A8Let%27s%20Encrypt%E4%BF%9D%E6%8A%A4%E4%BD%A0%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8C%85"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/SHARE/lets-encrypt-guide.html&amp;name=%E4%BD%BF%E7%94%A8Let%27s%20Encrypt%E4%BF%9D%E6%8A%A4%E4%BD%A0%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8C%85&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">使用Let's Encrypt保护你的数据包</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2016年2月13日 00:05" itemprop="datePublished">
+                    2016 二月 13 00:05
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4807
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/SHARE">资源分享</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/ssl%E8%AF%81%E4%B9%A6">ssl证书</a>,
+                
+                <a class="tag-link" href="/tag/%E5%85%8D%E8%B4%B9">免费</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>【过年了，每天发一篇以前的存货，一共七篇。】</p>
+<p>Let's Encrypt是去年底推出的一个免费SSL证书，且申请这个证书基本没有任何限制，只要你证明你是域名的所有者，你就可以为你的域名申请一个SSL证书。</p>
+<p>我今天就来为我的 wiki.ioin.in 申请一个时髦的Let's Encrypt证书。</p>
+<p>首先，我利用到的是acme-tiny，这是第三方人士开发的一个扩展。因为Let's Encrypt官方给出的方法比较麻烦，而acme-tiny这个小工具可以让用户敲几条命令即可生成好我们需要的证书。</p>
+<p>下载acme-tiny: <a href="https://github.com/diafygi/acme-tiny"><a href="https://github.com/diafygi/acme-tiny">https://github.com/diafygi/acme-tiny</a></a></p>
+<p>首先，生成一个用户私钥: account.key，acme-tiny通过这个证书来登录Let's Encrypt。再生成一个域名私钥，domain.key</p>
+<div class="codehilite"><pre><span></span>openssl genrsa 4096 &gt; account.key
+openssl genrsa 4096 &gt; domain.key
+</pre></div>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/340e1455293398.jpg"><img alt="14552588259506.jpg" src="./使用Let's Encrypt保护你的数据包  离别歌/thum-340e1455293398.jpg"/></a> </p>
+<p>然后利用ACME协议，将domain.key生成domain.csr。如果你只有一个域名需要ssl，只需执行下面的语句：</p>
+<div class="codehilite"><pre><span></span>openssl req -new -sha256 -key domain.key -subj "/CN=yoursite.com" &gt; domain.csr
+</pre></div>
+<p>如果你有多个域名，比如www.xxx.com和xxx.com，你就执行下面的语句：</p>
+<div class="codehilite"><pre><span></span>openssl req -new -sha256 -key domain.key -subj "/" -reqexts SAN -config &lt;(cat /etc/ssl/openssl.cnf &lt;(printf "[SAN]\nsubjectAltName=DNS:yoursite.com,DNS:www.yoursite.com")) &gt; domain.csr
+</pre></div>
+<p>我的 wiki.ioin.in 是单域名证书，所以执行下面语句即可：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/77fe1455293399.jpg"><img alt="14552588402436.jpg" src="./使用Let's Encrypt保护你的数据包  离别歌/thum-77fe1455293399.jpg"/></a> </p>
+<p>Let's Encrypt有多种方法来验证你是否是域名的所有人，而acme-tiny这个小工具用的是最简单的方法，也就是利用http文件验证。<br>
+简单来说，就是生成一个验证文件，放在<code>http://example.com/.well-known/acme-challenge/</code>下，Let's Encrypt官方验证这个文件是否存在、内容是否正确。如果一切正确，说明域名是你所有。</br></p>
+<p>所以我这里，新建了一个/home/www/challenges/目录，将它别名指向 /.well-known/acme-challenge/ 。这样，我在challenges目录里写入的文件，即可通过 <a href="http://xxxx.com/.well-known/acme-challenge/">http://xxxx.com/.well-known/acme-challenge/</a> 访问了。nginx配置如下：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/b1301455293400.jpg"><img alt="14552588522823.jpg" src="./使用Let's Encrypt保护你的数据包  离别歌/thum-b1301455293400.jpg"/></a> </p>
+<p>然后，运行acme_tiny.py脚本：</p>
+<div class="codehilite"><pre><span></span>python acme_tiny.py --account-key /etc/ssl/letsencrypt/account.key --csr /etc/ssl/letsencrypt/domain.csr --acme-dir /home/www/challenges/ &gt; /etc/ssl/letsencrypt/signed.crt
+</pre></div>
+<p>其中，将--account-key的值改为你生成的account.key的路径；--csr的值改成你生成的domain.csr的路径；--acme-dir的值改为我要写入验证文件的文件夹。<br>
+最后成功生成signed.crt，这就是我的域名证书：</br></p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/e0511455293401.jpg"><img alt="14552589980593.jpg" src="./使用Let's Encrypt保护你的数据包  离别歌/thum-e0511455293401.jpg"/></a> </p>
+<p>在nginx里，还需要将Let's Encrypt的中间证书放到自己的证书后面，构成一个证书链chained.pem：</p>
+<div class="codehilite"><pre><span></span>wget -O - https://letsencrypt.org/certs/lets-encrypt-x1-cross-signed.pem &gt; intermediate.pem
+cat signed.crt intermediate.pem &gt; chained.pem
+</pre></div>
+<p>另外，还需要生成一个较强的dh。(位数不要太多！我生成了一个4096位的dh，半个小时还没生成好)。关于dh的安全性，可以关注这个网站： <a href="https://weakdh.org/"><a href="https://weakdh.org">https://weakdh.org</a></a> ，这篇文章：<a href="https://weakdh.org/sysadmin.html"><a href="https://weakdh.org/sysadmin.html">https://weakdh.org/sysadmin.html</a></a></p>
+<div class="codehilite"><pre><span></span>openssl dhparam -out dhparam.pem 2048
+</pre></div>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/bae31455293402.jpg"><img alt="14552626630232.jpg" src="./使用Let's Encrypt保护你的数据包  离别歌/thum-bae31455293402.jpg"/></a> </p>
+<p>生成好以后，将以上生成的私钥、证书、dh等写入nginx的配置文件：</p>
+<div class="codehilite"><pre><span></span><span class="nt">server</span>
+<span class="p">{</span>
+    <span class="err">listen</span> <span class="err">80</span><span class="p">;</span>
+    <span class="err">listen</span> <span class="err">443</span> <span class="err">ssl</span><span class="p">;</span>
+    <span class="err">#</span><span class="n">listen</span> <span class="cp">[</span><span class="p">::</span><span class="cp">]</span><span class="p">:</span><span class="mi">80</span><span class="p">;</span>
+    <span class="err">server_name</span> <span class="err">wiki.ioin.in</span><span class="p">;</span>
+    <span class="err">index</span> <span class="err">index.html</span> <span class="err">index.htm</span><span class="p">;</span>
+
+    <span class="err">ssl</span> <span class="err">on</span><span class="p">;</span>
+    <span class="err">ssl_certificate</span> <span class="err">/etc/ssl/letsencrypt/chained.pem</span><span class="p">;</span>
+    <span class="err">ssl_certificate_key</span> <span class="err">/etc/ssl/letsencrypt/domain.key</span><span class="p">;</span>
+    <span class="err">ssl_session_timeout</span> <span class="err">5m</span><span class="p">;</span>
+    <span class="err">ssl_protocols</span> <span class="err">TLSv1</span> <span class="err">TLSv1.1</span> <span class="err">TLSv1.2</span><span class="p">;</span>
+    <span class="err">ssl_ciphers</span> <span class="n">ECDHE-RSA-AES256-GCM-SHA384</span><span class="p">:</span><span class="n">ECDHE-RSA-AES128-GCM-SHA256</span><span class="o">:</span><span class="n">DH</span><span class="err">$</span>
+    <span class="n">ssl_session_cache</span> <span class="n">shared</span><span class="o">:</span><span class="n">SSL</span><span class="o">:</span><span class="mi">50</span><span class="n">m</span><span class="p">;</span>
+    <span class="err">ssl_dhparam</span> <span class="err">/etc/ssl/letsencrypt/dhparam.pem</span><span class="p">;</span>
+    <span class="err">ssl_prefer_server_ciphers</span> <span class="err">on</span><span class="p">;</span>
+    <span class="err">...the</span> <span class="err">rest</span> <span class="err">of</span> <span class="err">your</span> <span class="err">config</span>
+<span class="p">}</span>
+</pre></div>
+<p>重启nginx，一切万事大吉： <a href="https://wiki.ioin.in/"><a href="https://wiki.ioin.in">https://wiki.ioin.in</a></a> </p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/d0c11455293404.jpg"><img alt="14552632280629.jpg" src="./使用Let's Encrypt保护你的数据包  离别歌/thum-d0c11455293404.jpg"/></a></p>
+<p>另外，我们看证书的过期日期。算一下这个证书其实只有3个月，也就是一个季度。当证书快要过期的时候，我们还需要重新颁发一下证书。<br/>
+重新颁发证书的过程就比较简单了，只需要重新执行acme_tiny.py即可。</p>
+<p>我们可以将重新颁发的过程写在一个脚本里：</p>
+<div class="codehilite"><pre><span></span><span class="ch">#!/usr/bin/sh</span>
+python /path/to/acme_tiny.py --account-key /path/to/account.key --csr /path/to/domain.csr --acme-dir /var/www/challenges/ &gt; /tmp/signed.crt <span class="o">||</span> <span class="nb">exit</span>
+wget -O - https://letsencrypt.org/certs/lets-encrypt-x1-cross-signed.pem &gt; intermediate.pem
+cat /tmp/signed.crt intermediate.pem &gt; /path/to/chained.pem
+service nginx reload
+</pre></div>
+<p>然后将这个脚本加入cron，每月执行一次：</p>
+<div class="codehilite"><pre><span></span><span class="c1">#example line in your crontab (runs once per month)</span>
+<span class="m">0</span> <span class="m">0</span> <span class="m">1</span> * * /path/to/renew_cert.sh <span class="m">2</span>&gt;&gt; /var/log/acme_tiny.log
+</pre></div>
+<p>就不需要人工操作了~ </p>
+<p>最后，测试一下SSL质量： <a href="https://www.ssllabs.com/ssltest/"><a href="https://www.ssllabs.com/ssltest/">https://www.ssllabs.com/ssltest/</a></a> </p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201602/8d031455293404.jpg"><img alt="14552645362489.jpg" src="./使用Let's Encrypt保护你的数据包  离别歌/thum-8d031455293404.jpg"/></a></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2471">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用Let's Encrypt保护你的数据包  离别歌/d00e76ce9f3bef812199b4202efa0a8a.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Borel</a>
+<time datetime="2016年11月8日 15:52" itemprop="datePublished">
+                            2016 十一月 08 15:52
+                        </time>
+<a href="javascript:reply_to('2471', 'Borel')">回复</a>
+</p>
+<p class="comment-meta">ssllabs评分结果：<br/>This server's certificate chain is incomplete. Grade capped to B.<br/><br/>请教如何解决？</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2472">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用Let's Encrypt保护你的数据包  离别歌/d00e76ce9f3bef812199b4202efa0a8a.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">Borel</a>
+<time datetime="2016年11月8日 15:53" itemprop="datePublished">
+                            2016 十一月 08 15:53
+                        </time>
+<a href="javascript:reply_to('2472', 'Borel')">回复</a>
+</p>
+<p class="comment-meta">@Borel：https://wiki.ioin.in<br/>测试结果也有同样问题</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2366">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用Let's Encrypt保护你的数据包  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">toysweet</a>
+<time datetime="2016年6月22日 14:36" itemprop="datePublished">
+                            2016 六月 22 14:36
+                        </time>
+<a href="javascript:reply_to('2366', 'toysweet')">回复</a>
+</p>
+<p class="comment-meta">国外证书虽然很酷，wosign也有免费的证书，而且更实用，更方便，兼容性更好。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2367">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用Let's Encrypt保护你的数据包  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年6月24日 11:47" itemprop="datePublished">
+                            2016 六月 24 11:47
+                        </time>
+<a href="javascript:reply_to('2367', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@toysweet：据说很多人并不信任这个证书，并从根开始拉黑了。国内证书被谷歌chrome等浏览器拉黑的也不在少数。所以我换了。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2308">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用Let's Encrypt保护你的数据包  离别歌/a6d81783bf7453d84d9d4c404f70f4b0.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">chenkeni</a>
+<time datetime="2016年2月26日 17:19" itemprop="datePublished">
+                            2016 二月 26 17:19
+                        </time>
+<a href="javascript:reply_to('2308', 'chenkeni')">回复</a>
+</p>
+<p class="comment-meta">Token型的CSRF防御绕过<br/><br/>这个PPT求再次分享！！<br/>http://mhz.pw/ppt/csrf/play.html 已经打不开了。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2309">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用Let's Encrypt保护你的数据包  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年2月27日 18:15" itemprop="datePublished">
+                            2016 二月 27 18:15
+                        </time>
+<a href="javascript:reply_to('2309', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@chenkeni：http://phith0n.github.io/Talks/2015%20July%20Tencent%20Xian%20salon/play.html<br/>最新版chrome不兼容，用firefox就可以了</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2301">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用Let's Encrypt保护你的数据包  离别歌/929b43892ddbe6c40261cbdaa9d7d91e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">chenyuan</a>
+<time datetime="2016年2月19日 20:05" itemprop="datePublished">
+                            2016 二月 19 20:05
+                        </time>
+<a href="javascript:reply_to('2301', 'chenyuan')">回复</a>
+</p>
+<p class="comment-meta">感觉你的blog有bug呀，点击本页上部的“5条评论”，就会自动跳转到404<br/>使用Let's Encrypt保护你的数据包<br/>作者:  分类: 资源分享 时间: 2016-2-13 0:05 评论: 5条评论 浏览: 305人看过 标签: 免费	ssl证书</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2306">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用Let's Encrypt保护你的数据包  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年2月24日 00:04" itemprop="datePublished">
+                            2016 二月 24 00:04
+                        </time>
+<a href="javascript:reply_to('2306', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@chenyuan：感谢提出来蛤，已经修复了</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2300">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用Let's Encrypt保护你的数据包  离别歌/4da279cded23858594cf8834bcf50818.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://ymhack.com" target="_blank">沧澜</a>
+<time datetime="2016年2月19日 15:10" itemprop="datePublished">
+                            2016 二月 19 15:10
+                        </time>
+<a href="javascript:reply_to('2300', '沧澜')">回复</a>
+</p>
+<p class="comment-meta">跟随大牛的脚步。。。踏上人生巅峰，早日赢取白富美。</p>
+</div>
+</div>
+<div class="row" id="comment-2296">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用Let's Encrypt保护你的数据包  离别歌/f76d95bf5f9681b0bb0467e096db8a33.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://" target="_blank">burn_egg</a>
+<time datetime="2016年2月14日 17:05" itemprop="datePublished">
+                            2016 二月 14 17:05
+                        </time>
+<a href="javascript:reply_to('2296', 'burn_egg')">回复</a>
+</p>
+<p class="comment-meta">ph牛，，为什么chrome和chorome内核的浏览器访问不了你的blog呢？只有firefox才行。。好像和ssl有关？</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2297">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用Let's Encrypt保护你的数据包  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年2月14日 17:47" itemprop="datePublished">
+                            2016 二月 14 17:47
+                        </time>
+<a href="javascript:reply_to('2297', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@burn_egg：是不是太老了？<br/>你什么系统，chrome什么版本？</p>
+</div>
+</div>
+<div class="row" id="comment-2298">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用Let's Encrypt保护你的数据包  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2016年2月14日 17:57" itemprop="datePublished">
+                            2016 二月 14 17:57
+                        </time>
+<a href="javascript:reply_to('2298', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@burn_egg：Windows XP不支持TLS，已经进入历史的垃圾堆。。建议换win7以上的系统。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2299">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./使用Let's Encrypt保护你的数据包  离别歌/f76d95bf5f9681b0bb0467e096db8a33.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://" target="_blank">burn_egg</a>
+<time datetime="2016年2月14日 18:22" itemprop="datePublished">
+                            2016 二月 14 18:22
+                        </time>
+<a href="javascript:reply_to('2299', 'burn_egg')">回复</a>
+</p>
+<p class="comment-meta">@phithon：嘿嘿~原来是这样，谢谢大牛，，不久就准备换mac了，太懒。。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="b7c379995e216150621ddeed397d42fc82fe29be"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./使用Let's Encrypt保护你的数据包  离别歌/b7c379995e216150621ddeed397d42fc82fe29be"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="382">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="shzY0w1RYXQV8ORLSUcM3ILHTvJmmvKZ0BUuO0d6pKKk8tf0GbGwCmNM2zcu5Zz9"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./使用Let's Encrypt保护你的数据包  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./使用Let's Encrypt保护你的数据包  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

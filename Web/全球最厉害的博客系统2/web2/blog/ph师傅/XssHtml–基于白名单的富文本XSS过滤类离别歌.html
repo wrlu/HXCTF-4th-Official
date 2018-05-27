@@ -1,0 +1,462 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>XssHtml – 基于白名单的富文本XSS过滤类 | 离别歌</title>
+<link href="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/styles.css" rel="stylesheet"/>
+<link href="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/style.css" rel="stylesheet"/>
+<link href="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/jquery.min.js"></script>
+<link href="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/code.css" rel="stylesheet"/>
+<link href="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/button.css" rel="stylesheet"/>
+<link href="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/xsshtml.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/xsshtml.html&amp;text=XssHtml%20%E2%80%93%20%E5%9F%BA%E4%BA%8E%E7%99%BD%E5%90%8D%E5%8D%95%E7%9A%84%E5%AF%8C%E6%96%87%E6%9C%ACXSS%E8%BF%87%E6%BB%A4%E7%B1%BB"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/xsshtml.html&amp;title=XssHtml%20%E2%80%93%20%E5%9F%BA%E4%BA%8E%E7%99%BD%E5%90%8D%E5%8D%95%E7%9A%84%E5%AF%8C%E6%96%87%E6%9C%ACXSS%E8%BF%87%E6%BB%A4%E7%B1%BB"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/xsshtml.html&amp;is_video=false&amp;description=XssHtml%20%E2%80%93%20%E5%9F%BA%E4%BA%8E%E7%99%BD%E5%90%8D%E5%8D%95%E7%9A%84%E5%AF%8C%E6%96%87%E6%9C%ACXSS%E8%BF%87%E6%BB%A4%E7%B1%BB"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=XssHtml%20%E2%80%93%20%E5%9F%BA%E4%BA%8E%E7%99%BD%E5%90%8D%E5%8D%95%E7%9A%84%E5%AF%8C%E6%96%87%E6%9C%ACXSS%E8%BF%87%E6%BB%A4%E7%B1%BB&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/xsshtml.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/xsshtml.html&amp;title=XssHtml%20%E2%80%93%20%E5%9F%BA%E4%BA%8E%E7%99%BD%E5%90%8D%E5%8D%95%E7%9A%84%E5%AF%8C%E6%96%87%E6%9C%ACXSS%E8%BF%87%E6%BB%A4%E7%B1%BB"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/xsshtml.html&amp;title=XssHtml%20%E2%80%93%20%E5%9F%BA%E4%BA%8E%E7%99%BD%E5%90%8D%E5%8D%95%E7%9A%84%E5%AF%8C%E6%96%87%E6%9C%ACXSS%E8%BF%87%E6%BB%A4%E7%B1%BB"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/xsshtml.html&amp;title=XssHtml%20%E2%80%93%20%E5%9F%BA%E4%BA%8E%E7%99%BD%E5%90%8D%E5%8D%95%E7%9A%84%E5%AF%8C%E6%96%87%E6%9C%ACXSS%E8%BF%87%E6%BB%A4%E7%B1%BB"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/xsshtml.html&amp;title=XssHtml%20%E2%80%93%20%E5%9F%BA%E4%BA%8E%E7%99%BD%E5%90%8D%E5%8D%95%E7%9A%84%E5%AF%8C%E6%96%87%E6%9C%ACXSS%E8%BF%87%E6%BB%A4%E7%B1%BB"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/xsshtml.html&amp;name=XssHtml%20%E2%80%93%20%E5%9F%BA%E4%BA%8E%E7%99%BD%E5%90%8D%E5%8D%95%E7%9A%84%E5%AF%8C%E6%96%87%E6%9C%ACXSS%E8%BF%87%E6%BB%A4%E7%B1%BB&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">XssHtml – 基于白名单的富文本XSS过滤类</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年6月26日 23:35" itemprop="datePublished">
+                    2014 六月 26 23:35
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4130
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/fliter">fliter</a>,
+                
+                <a class="tag-link" href="/tag/xss">xss</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p style="margin-top:0px;margin-bottom:0px;padding:6px 0px 4px;overflow:hidden;color:#666666;font-family:微软雅黑, 'Microsoft YaHei', 'WenQuanYi Micro Hei';font-size:13px;line-height:24px;white-space:normal;background-color:#FFFFFF;">
+	    啦啦啦，去了北京参加荣耀6的发布会，真心不错呀这款手机，在这里无耻地推荐一下。与会的同学都获得了一枚荣耀6，说说我的感受吧：CPU真心给力，跑分很高；价格合理，2000是荣耀一贯的高性价比；特权给力，寝室的Chinanet可以免费用了；相机真不错，全景拍照，把整个鸟巢拍得一清二楚，抓拍也很给力，黑屏状态下按两次音量下就能在0.6秒完成一次拍摄；触屏很舒服，滑动没有一丝卡顿。
+</p>
+<p style="margin-top:0px;margin-bottom:0px;padding:6px 0px 4px;overflow:hidden;color:#666666;font-family:微软雅黑, 'Microsoft YaHei', 'WenQuanYi Micro Hei';font-size:13px;line-height:24px;white-space:normal;background-color:#FFFFFF;">
+	    好了，去北京之前freebuf上投了一篇文章，发到博客里吧。
+</p>
+<p style="margin-top:0px;margin-bottom:0px;padding:6px 0px 4px;overflow:hidden;color:#666666;font-family:微软雅黑, 'Microsoft YaHei', 'WenQuanYi Micro Hei';font-size:13px;line-height:24px;white-space:normal;background-color:#FFFFFF;">
+	    关于富文本XSS，我在之前的一篇文章里(<a data_ue_src="http://www.freebuf.com/articles/web/30201.html" href="http://www.freebuf.com/articles/web/30201.html" style="margin:0px;padding:0px;color:#238357;text-decoration:none;" target="_blank" textvalue="http://www.freebuf.com/articles/web/30201.html" title="">http://www.freebuf.com/articles/web/30201.html</a>)已经比较详细地说明了一些开源应用使用的XSS Filter以及绕过方法。之前我也总结了一些filter的缺点，利用白名单机制完成了一个XSS Filter类，希望能更大程度地避免富文本XSS的产生。
+</p>
+<p style="margin-top:0px;margin-bottom:0px;padding:6px 0px 4px;overflow:hidden;color:#666666;font-family:微软雅黑, 'Microsoft YaHei', 'WenQuanYi Micro Hei';font-size:13px;line-height:24px;white-space:normal;background-color:#FFFFFF;">
+	    总结一下现存的一些XSS Filter的缺点，可以归纳成以下几条：
+</p>
+<pre class="prettyprint lang-html prettyprinted" style="margin-top:0px;margin-bottom:0px;padding:8px;background-color:#F7F7F9;border:1px solid #E1E1E8;white-space:pre-wrap;word-break:break-all;word-wrap:break-word;color:#666666;font-size:13px;line-height:24px;"><span class="pln" style="margin:0px;padding:0px;color:#48484C;">    1.黑名单过滤一些标签，但没有考虑全面。比如</span><span class="tag" style="margin:0px;padding:0px;">&lt;svg&gt;</span><span class="pln" style="margin:0px;padding:0px;color:#48484C;">、</span><span class="tag" style="margin:0px;padding:0px;">&lt;object&gt;</span><span class="pln" style="margin:0px;padding:0px;color:#48484C;">、</span><span class="tag" style="margin:0px;padding:0px;">&lt;input&gt;</span><span class="pln" style="margin:0px;padding:0px;color:#48484C;">等
+    2.黑名单过滤一些属性，但没有考虑全面，比如onfocus、onfocusin等
+    3.对伪协议考虑不全面，比如</span><span class="tag" style="margin:0px;padding:0px;">&lt;a</span><span class="pln" style="margin:0px;padding:0px;color:#48484C;"> </span><span class="atn" style="margin:0px;padding:0px;color:teal;">href</span><span class="pun" style="margin:0px;padding:0px;color:#93A1A1;">=</span><span class="atv" style="margin:0px;padding:0px;color:#DD1144;">javascript:alert(1)</span><span class="tag" style="margin:0px;padding:0px;">&gt;</span><span class="pln" style="margin:0px;padding:0px;color:#48484C;">，有时候只是简单过滤script这种关键词，但总能用字符编码绕过
+    4.过滤关键词时过于单纯，比如直接将script过滤为空，导致使用scrscriptipt就能绕过。再比如直接将字符实体转换为原字符，导致使用嵌套的字符实体来绕过。
+    5.对IE的特性了解不深，比如expression，中间可以加\，IE7下可以加/**/来绕过。</span></pre>
+<p style="margin-top:0px;margin-bottom:0px;padding:6px 0px 4px;overflow:hidden;color:#666666;font-family:微软雅黑, 'Microsoft YaHei', 'WenQuanYi Micro Hei';font-size:13px;line-height:24px;white-space:normal;background-color:#FFFFFF;">
+	    而一般提供给一般用户使用的富文本编辑器，都是一些很常见功能，比如图片(表情)、超链接、加粗、加斜、字号、字体、颜色、分隔符等，所以我们完全可以用白名单的思想去写一个富文本过滤器，将编辑器中最常用到的一些功能做相应的过滤，其他标签、属性统统丢弃，来达到过滤XSS的效果。
+</p>
+<p style="margin-top:0px;margin-bottom:0px;padding:6px 0px 4px;overflow:hidden;color:#666666;font-family:微软雅黑, 'Microsoft YaHei', 'WenQuanYi Micro Hei';font-size:13px;line-height:24px;white-space:normal;background-color:#FFFFFF;">
+	    所以我的XssHtml类设计思路是这样：首先用strip_tags清理掉白名单外、不规范的标签，然后用DOMDocument类加载这个HTML进DOM中。遍历DOM，删除白名单外的属性，并强制判断并给非法的href链接前面加入http://。
+</p>
+<p style="margin-top:0px;margin-bottom:0px;padding:6px 0px 4px;overflow:hidden;color:#666666;font-family:微软雅黑, 'Microsoft YaHei', 'WenQuanYi Micro Hei';font-size:13px;line-height:24px;white-space:normal;background-color:#FFFFFF;">
+	    最后再将过滤完的DOM导出成HTML返回。
+</p>
+<p style="margin-top:0px;margin-bottom:0px;padding:6px 0px 4px;overflow:hidden;color:#666666;font-family:微软雅黑, 'Microsoft YaHei', 'WenQuanYi Micro Hei';font-size:13px;line-height:24px;white-space:normal;background-color:#FFFFFF;">
+	    这样做有几个好处：
+</p>
+<pre class="prettyprint lang-html prettyprinted" style="margin-top:0px;margin-bottom:0px;padding:8px;background-color:#F7F7F9;border:1px solid #E1E1E8;white-space:pre-wrap;word-break:break-all;word-wrap:break-word;color:#666666;font-size:13px;line-height:24px;"><span class="pln" style="margin:0px;padding:0px;color:#48484C;">    1.整个类设计简单，只要创建好对象，调用一个方法即可得到过滤结果。
+    2.白名单处理，能考虑到所有情况
+    3.用PHP自带的DOMDocument类处理html，能有效处理一些不规则的内容。
+    4.面向对象类设计，以后想增加其他标签，写针对性的代码可以直接调用之前写好的方法处理。</span></pre>
+<p style="margin-top:0px;margin-bottom:0px;padding:6px 0px 4px;overflow:hidden;color:#666666;font-family:微软雅黑, 'Microsoft YaHei', 'WenQuanYi Micro Hei';font-size:13px;line-height:24px;white-space:normal;background-color:#FFFFFF;">
+	    不过也有一些缺陷，就是过滤XSS不支持IE6及以下浏览器。因为IE6下奇葩特性太多了，会严重影响过滤器的效果与性能，所以我就没有考虑一些IE6的特性。
+</p>
+<p style="margin-top:0px;margin-bottom:0px;padding:6px 0px 4px;overflow:hidden;color:#666666;font-family:微软雅黑, 'Microsoft YaHei', 'WenQuanYi Micro Hei';font-size:13px;line-height:24px;white-space:normal;background-color:#FFFFFF;">
+	    总的来说这应该是很多不了解安全的程序员的福音了。
+</p>
+<p style="margin-top:0px;margin-bottom:0px;padding:6px 0px 4px;overflow:hidden;color:#666666;font-family:微软雅黑, 'Microsoft YaHei', 'WenQuanYi Micro Hei';font-size:13px;line-height:24px;white-space:normal;background-color:#FFFFFF;">
+	    类不长，贴出来吧：
+</p>
+<p style="margin-top:0px;margin-bottom:0px;padding:6px 0px 4px;overflow:hidden;color:#666666;font-family:微软雅黑, 'Microsoft YaHei', 'WenQuanYi Micro Hei';font-size:13px;line-height:24px;white-space:normal;background-color:#FFFFFF;">
+<br>
+</br></p>
+<pre class="brush: php;auto-links: false;">&lt;?php
+/**
+ * PHP 富文本XSS过滤类
+ *
+ * @package XssHtml
+ * @version 1.0.0 
+ * @link http://phith0n.github.io/XssHtml
+ * @since 20140621
+ * @copyright (c) Phithon All Rights Reserved
+ *
+ */
+
+#
+# Written by Phithon &lt;root@leavesongs.com&gt; in 2014 and placed in
+# the public domain.
+#
+# phithon &lt;root@leavesongs.com&gt; 编写于20140621
+# From: XDSEC &lt;www.xdsec.org&gt; &amp; 离别歌 &lt;www.leavesongs.com&gt;
+# Usage: 
+# &lt;?php
+# require('xsshtml.class.php');
+# $html = '&lt;html code&gt;';
+# $xss = new XssHtml($html);
+# $html = $xss-&gt;getHtml();
+# ?\&gt;
+# 
+# 需求：
+# PHP Version &gt; 5.0
+# 浏览器版本：IE7+ 或其他浏览器，无法防御IE6及以下版本浏览器中的XSS
+# 更多使用选项见 http://phith0n.github.io/XssHtml
+
+class XssHtml {
+	private $m_dom;
+	private $m_xss;
+	private $m_ok;
+	private $m_AllowAttr = array('title', 'src', 'href', 'id', 'class', 'style', 'width', 'height', 'alt', 'target', 'align');
+	private $m_AllowTag = array('a', 'img', 'br', 'strong', 'b', 'code', 'pre', 'p', 'div', 'em', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'table', 'ul', 'ol', 'tr', 'th', 'td', 'hr', 'li', 'u');
+	/**
+     * 构造函数
+     *
+     * @param string $html 待过滤的文本
+     * @param string $charset 文本编码，默认utf-8
+     * @param array $AllowTag 允许的标签，如果不清楚请保持默认，默认已涵盖大部分功能，不要增加危险标签
+     */
+	public function __construct($html, $charset = 'utf-8', $AllowTag = array()){
+		$this-&gt;m_AllowTag = empty($AllowTag) ? $this-&gt;m_AllowTag : $AllowTag;
+		$this-&gt;m_xss = strip_tags($html, '&lt;' . implode('&gt;&lt;', $this-&gt;m_AllowTag) . '&gt;');
+		if (empty($this-&gt;m_xss)) {
+			$this-&gt;m_ok = FALSE;
+			return ;
+		}
+		$this-&gt;m_xss = "&lt;meta http-equiv=\"Content-Type\" content=\"text/html;charset={$charset}\"&gt;" . $this-&gt;m_xss;
+		$this-&gt;m_dom = new DOMDocument();
+		$this-&gt;m_dom-&gt;strictErrorChecking = FALSE;
+		$this-&gt;m_ok = @$this-&gt;m_dom-&gt;loadHTML($this-&gt;m_xss);
+	}
+
+	/**
+     * 获得过滤后的内容
+     */
+	public function getHtml()
+	{
+		if (!$this-&gt;m_ok) {
+			return '';
+		}
+		$nodeList = $this-&gt;m_dom-&gt;getElementsByTagName('*');
+		for ($i = 0; $i &lt; $nodeList-&gt;length; $i++){
+			$node = $nodeList-&gt;item($i);
+			if (in_array($node-&gt;nodeName, $this-&gt;m_AllowTag)) {
+				if (method_exists($this, "__node_{$node-&gt;nodeName}")) {
+					call_user_func(array($this, "__node_{$node-&gt;nodeName}"), $node);
+				}else{
+					call_user_func(array($this, '__node_default'), $node);
+				}
+			}
+		}
+		return strip_tags($this-&gt;m_dom-&gt;saveHTML(), '&lt;' . implode('&gt;&lt;', $this-&gt;m_AllowTag) . '&gt;');
+	}
+
+	private function __true_url($url){
+		if (preg_match('#^https?://.+#is', $url)) {
+			return $url;
+		}else{
+			return 'http://' . $url;
+		}
+	}
+
+	private function __get_style($node){
+		if ($node-&gt;attributes-&gt;getNamedItem('style')) {
+			$style = $node-&gt;attributes-&gt;getNamedItem('style')-&gt;nodeValue;
+			$style = str_replace('\\', ' ', $style);
+			$style = str_replace(array('&amp;#', '/*', '*/'), ' ', $style);
+			$style = preg_replace('#e.*x.*p.*r.*e.*s.*s.*i.*o.*n#Uis', ' ', $style);
+			return $style;
+		}else{
+			return '';
+		}
+	}
+
+	private function __get_link($node, $att){
+		$link = $node-&gt;attributes-&gt;getNamedItem($att);
+		if ($link) {
+			return $this-&gt;__true_url($link-&gt;nodeValue);
+		}else{
+			return '';
+		}
+	}
+
+	private function __setAttr($dom, $attr, $val){
+		if (!empty($val)) {
+			$dom-&gt;setAttribute($attr, $val);
+		}
+	}
+
+	private function __set_default_attr($node, $attr, $default = '')
+	{
+		$o = $node-&gt;attributes-&gt;getNamedItem($attr);
+		if ($o) {
+			$this-&gt;__setAttr($node, $attr, $o-&gt;nodeValue);
+		}else{
+			$this-&gt;__setAttr($node, $attr, $default);
+		}
+	}
+
+	private function __common_attr($node)
+	{
+		$list = array();
+		foreach ($node-&gt;attributes as $attr) {
+			if (!in_array($attr-&gt;nodeName, 
+				$this-&gt;m_AllowAttr)) {
+				$list[] = $attr-&gt;nodeName;
+			}
+		}
+		foreach ($list as $attr) {
+			$node-&gt;removeAttribute($attr);
+		}
+		$style = $this-&gt;__get_style($node);
+		$this-&gt;__setAttr($node, 'style', $style);
+		$this-&gt;__set_default_attr($node, 'title');
+		$this-&gt;__set_default_attr($node, 'id');
+		$this-&gt;__set_default_attr($node, 'class');
+	}
+
+	private function __node_img($node){
+		$this-&gt;__common_attr($node);
+
+		$this-&gt;__set_default_attr($node, 'src');
+		$this-&gt;__set_default_attr($node, 'width');
+		$this-&gt;__set_default_attr($node, 'height');
+		$this-&gt;__set_default_attr($node, 'alt');
+		$this-&gt;__set_default_attr($node, 'align');
+
+	}
+
+	private function __node_a($node){
+		$this-&gt;__common_attr($node);
+		$href = $this-&gt;__get_link($node, 'href');
+
+		$this-&gt;__setAttr($node, 'href', $href);
+		$this-&gt;__set_default_attr($node, 'target', '_blank');
+	}
+
+	private function __node_embed($node){
+		$this-&gt;__common_attr($node);
+		$link = $this-&gt;__get_link($node, 'src');
+
+		$this-&gt;__setAttr($node, 'src', $link);
+		$this-&gt;__setAttr($node, 'allowscriptaccess', 'never');
+		$this-&gt;__set_default_attr($node, 'width');
+		$this-&gt;__set_default_attr($node, 'height');
+	}
+
+	private function __node_default($node){
+		$this-&gt;__common_attr($node);
+	}
+}
+
+?&gt;</pre>
+    
+<p style="margin-top:0px;margin-bottom:0px;padding:6px 0px 4px;overflow:hidden;color:#666666;font-family:微软雅黑, 'Microsoft YaHei', 'WenQuanYi Micro Hei';font-size:13px;line-height:24px;white-space:normal;background-color:#FFFFFF;">
+	    具体使用方法可以参阅：<a data_ue_src="http://phith0n.github.io/XssHtml/" href="http://phith0n.github.io/XssHtml/" style="margin:0px;padding:0px;color:#238357;text-decoration:none;" target="_blank" textvalue="http://phith0n.github.io/XssHtml/" title="">http://phith0n.github.io/XssHtml/</a> 这里有详细说明。
+</p>
+<p style="margin-top:0px;margin-bottom:0px;padding:6px 0px 4px;overflow:hidden;color:#666666;font-family:微软雅黑, 'Microsoft YaHei', 'WenQuanYi Micro Hei';font-size:13px;line-height:24px;white-space:normal;background-color:#FFFFFF;">
+	    我还在自己主机上搭建了一个使用该类的一个test，希望有同学能找到BUG，完善过滤类。地址是 <a data_ue_src="http://xsshtml.leavesongs.com/" href="http://xsshtml.leavesongs.com/" style="margin:0px;padding:0px;color:#238357;text-decoration:none;" target="_blank" textvalue="http://xsshtml.leavesongs.com/" title="">http://xsshtml.leavesongs.com/</a> 
+</p>
+<p>
+<br>
+</br></p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2031">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/c8dba6205497dd2ab717f38f9717fdc7.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.weilelt.com" target="_blank">微乐</a>
+<time datetime="2015年4月20日 09:06" itemprop="datePublished">
+                            2015 四月 20 09:06
+                        </time>
+<a href="javascript:reply_to('2031', '微乐')">回复</a>
+</p>
+<p class="comment-meta">不错的博客一定要支持的</p>
+</div>
+</div>
+<div class="row" id="comment-1711">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/1dadfd2aa6b8d371320dd268678c1d29.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.lfqie.com" target="_blank">烂番茄网</a>
+<time datetime="2014年7月6日 20:12" itemprop="datePublished">
+                            2014 七月 06 20:12
+                        </time>
+<a href="javascript:reply_to('1711', '烂番茄网')">回复</a>
+</p>
+<p class="comment-meta">不错,表示很喜欢!</p>
+</div>
+</div>
+<div class="row" id="comment-1702">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/d14329359780aee2c146943b78ca01b0.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">4ng</a>
+<time datetime="2014年6月27日 22:47" itemprop="datePublished">
+                            2014 六月 27 22:47
+                        </time>
+<a href="javascript:reply_to('1702', '4ng')">回复</a>
+</p>
+<p class="comment-meta">过滤器不是 filter吗？<br/>为什么文章中是fliter。 <br/>国外都是用的是filter。<br/>是博主笔误还是 就是fliter。麻烦解答下</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-1703">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2014年6月27日 22:57" itemprop="datePublished">
+                            2014 六月 27 22:57
+                        </time>
+<a href="javascript:reply_to('1703', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@4ng：笔误笔误。。。哭了，不要在意这种细节。。。</p>
+</div>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="01eba5326b931de585efc7ea88840b018e822490"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/01eba5326b931de585efc7ea88840b018e822490"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="297">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="32dnvRMzDGBzo8cZ0q4yufwPMFR2QxOGBmyTjlYO4tvYoNAeOHyi3TyUVJkaz1DQ"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./XssHtml – 基于白名单的富文本XSS过滤类  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

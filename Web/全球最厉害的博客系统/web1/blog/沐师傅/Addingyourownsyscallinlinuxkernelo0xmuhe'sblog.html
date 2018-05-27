@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Adding your own syscall in linux kernel | o0xmuhe's blog</title>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
+<meta content="0x00:主要是一个记录，搞kernel exploit可能会需要。给自己的linux增加一个自定义的系统调用，开始找的资料比较老3.x的内核，然而4.x的源码和3.x源码结构不太一样，所以过程也不太一样，多多参考一些比较官方的文档" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="Adding your own syscall in linux kernel" property="og:title"/>
+<meta content="http://o0xmuhe.me/2017/02/08/Adding-your-own-syscall-in-linux-kernel/index.html" property="og:url"/>
+<meta content="o0xmuhe's blog" property="og:site_name"/>
+<meta content="0x00:主要是一个记录，搞kernel exploit可能会需要。给自己的linux增加一个自定义的系统调用，开始找的资料比较老3.x的内核，然而4.x的源码和3.x源码结构不太一样，所以过程也不太一样，多多参考一些比较官方的文档" property="og:description"/>
+<meta content="http://blogimg-10065924.cos.myqcloud.com/add_syscall/Makefile.png" property="og:image"/>
+<meta content="http://blogimg-10065924.cos.myqcloud.com/add_syscall/compiled.png" property="og:image"/>
+<meta content="http://blogimg-10065924.cos.myqcloud.com/add_syscall/install.png" property="og:image"/>
+<meta content="http://blogimg-10065924.cos.myqcloud.com/add_syscall/run.png" property="og:image"/>
+<meta content="http://blogimg-10065924.cos.myqcloud.com/add_syscall/dmesg.png" property="og:image"/>
+<meta content="2017-02-09T13:48:26.145Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="Adding your own syscall in linux kernel" name="twitter:title"/>
+<meta content="0x00:主要是一个记录，搞kernel exploit可能会需要。给自己的linux增加一个自定义的系统调用，开始找的资料比较老3.x的内核，然而4.x的源码和3.x源码结构不太一样，所以过程也不太一样，多多参考一些比较官方的文档" name="twitter:description"/>
+<meta content="http://blogimg-10065924.cos.myqcloud.com/add_syscall/Makefile.png" name="twitter:image"/>
+<link href="./Adding your own syscall in linux kernel  o0xmuhe's blog/atom.xml" rel="alternative" title="o0xmuhe's blog" type="application/atom+xml"/>
+<link href="./Adding your own syscall in linux kernel  o0xmuhe's blog/favicon.png" rel="icon"/>
+<link href="./Adding your own syscall in linux kernel  o0xmuhe's blog/animate.min.css" rel="stylesheet"/>
+<link href="./Adding your own syscall in linux kernel  o0xmuhe's blog/style.css" rel="stylesheet"/>
+<link href="./Adding your own syscall in linux kernel  o0xmuhe's blog/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Adding your own syscall in linux kernel  o0xmuhe's blog/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./Adding your own syscall in linux kernel  o0xmuhe's blog/jquery.fancybox.css" rel="stylesheet"/>
+<!-- 加载特效 -->
+<script src="./Adding your own syscall in linux kernel  o0xmuhe's blog/pace.js"></script>
+<link href="./Adding your own syscall in linux kernel  o0xmuhe's blog/pace-theme-flash.css" rel="stylesheet">
+<script>
+      var yiliaConfig = {
+          rootUrl: '/',
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</link></head>
+<body>
+<div id="container">
+<div class="left-col">
+<div class="overlay"></div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./Adding your own syscall in linux kernel  o0xmuhe's blog/head.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="Hi Mate">muhe</a></h1>
+</hgroup>
+<p class="header-subtitle">一个有情怀的二进制狗</p>
+<div class="switch-btn" id="switch-btn">
+<div class="icon">
+<div class="icon-ctn">
+<div class="icon-wrap icon-house" data-idx="0">
+<div class="birdhouse"></div>
+<div class="birdhouse_holes"></div>
+</div>
+<div class="icon-wrap icon-ribbon hide" data-idx="1">
+<div class="ribbon"></div>
+</div>
+<div class="icon-wrap icon-link hide" data-idx="2">
+<div class="loopback_l"></div>
+<div class="loopback_r"></div>
+</div>
+<div class="icon-wrap icon-me hide" data-idx="3">
+<div class="user"></div>
+<div class="shoulder"></div>
+</div>
+</div>
+</div>
+<div class="tips-box hide">
+<div class="tips-arrow"></div>
+<ul class="tips-inner">
+<li>菜单</li>
+<li>标签</li>
+<li>友情链接</li>
+<li>关于我</li>
+</ul>
+</div>
+</div>
+<div class="switch-area" id="switch-area">
+<div class="switch-wrap">
+<section class="switch-part switch-part1">
+<nav class="header-menu">
+<ul>
+<li><a href="/">博客首页</a></li>
+<li><a href="/archives">所有文章</a></li>
+<li><a href="/tags">标签</a></li>
+<li><a href="/about">关于我</a></li>
+<li><a href="/Pwnable-Log">Pwnable</a></li>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fl github" href="https://github.com/o0xmuhe" target="_blank" title="github">github</a>
+<a class="fl weibo" href="http://weibo.com/2070174943/" target="_blank" title="weibo">weibo</a>
+<a class="fl twitter" href="https://twitter.com/0xmuhe" target="_blank" title="twitter">twitter</a>
+<a class="fl rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</ul>
+</nav>
+</section>
+<section class="switch-part switch-part2">
+<div class="widget tagcloud" id="js-tagcloud">
+<a href="/tags/C/" style="font-size: 10px;">C</a> <a href="/tags/CTF/" style="font-size: 10px;">CTF</a> <a href="/tags/CTF-Writeup/" style="font-size: 10px;">CTF Writeup</a> <a href="/tags/CVE-analysis/" style="font-size: 10px;">CVE analysis</a> <a href="/tags/LLVM/" style="font-size: 10px;">LLVM</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/angr/" style="font-size: 12px;">angr</a> <a href="/tags/ctf/" style="font-size: 18px;">ctf</a> <a href="/tags/ctf-writeup/" style="font-size: 20px;">ctf writeup</a> <a href="/tags/env-config/" style="font-size: 10px;">env config</a> <a href="/tags/exploit/" style="font-size: 16px;">exploit</a> <a href="/tags/fuzz/" style="font-size: 14px;">fuzz</a> <a href="/tags/gdb/" style="font-size: 10px;">gdb</a> <a href="/tags/glibc内存管理/" style="font-size: 10px;">glibc内存管理</a> <a href="/tags/life/" style="font-size: 12px;">life</a> <a href="/tags/linux-kernel/" style="font-size: 12px;">linux kernel</a> <a href="/tags/peach/" style="font-size: 10px;">peach</a> <a href="/tags/pwn/" style="font-size: 16px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/ret-2-dl-resolve/" style="font-size: 10px;">ret 2 dl-resolve</a> <a href="/tags/wargame/" style="font-size: 12px;">wargame</a> <a href="/tags/winafl/" style="font-size: 10px;">winafl</a> <a href="/tags/windows-kernel/" style="font-size: 14px;">windows kernel</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a>
+</div>
+</section>
+<section class="switch-part switch-part3">
+<div id="js-friends">
+<a class="main-nav-link switch-friends-link" href="http://syclover.sinaapp.com/" target="_blank">Syclover Team</a>
+<a class="main-nav-link switch-friends-link" href="http://www.Ox9A82.com" target="_blank">0x9A82学弟</a>
+<a class="main-nav-link switch-friends-link" href="http://k1n9.me/" target="_blank">K1n9师傅</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/iamstudy" target="_blank">L3mon</a>
+<a class="main-nav-link switch-friends-link" href="http://www.xianyusec.com" target="_blank">咸鱼</a>
+<a class="main-nav-link switch-friends-link" href="http://v1ct0r.com/" target="_blank">V1ct0r</a>
+<a class="main-nav-link switch-friends-link" href="http://godot.win" target="_blank">Godot学弟</a>
+<a class="main-nav-link switch-friends-link" href="http://hebic.me/" target="_blank">Homaebic学弟</a>
+<a class="main-nav-link switch-friends-link" href="https://iqwq.me" target="_blank">两米的sco4x0</a>
+<a class="main-nav-link switch-friends-link" href="https://zmy.im/" target="_blank">JimmyZhou</a>
+<a class="main-nav-link switch-friends-link" href="http://silic.top/" target="_blank">灭亡叔叔</a>
+<a class="main-nav-link switch-friends-link" href="https://dwx.io" target="_blank">Jason</a>
+<a class="main-nav-link switch-friends-link" href="	http://www.0aa.me/" target="_blank">Mosuan</a>
+<a class="main-nav-link switch-friends-link" href="http://whereisk0shl.top" target="_blank">k0sh1</a>
+<a class="main-nav-link switch-friends-link" href="http://winter3un.github.io" target="_blank">WinterSun</a>
+<a class="main-nav-link switch-friends-link" href="http://venenof.com" target="_blank">Venenof</a>
+<a class="main-nav-link switch-friends-link" href="http://r0p.me/" target="_blank">Icemakr</a>
+<a class="main-nav-link switch-friends-link" href="http://bestwing.me/" target="_blank">Swing</a>
+<a class="main-nav-link switch-friends-link" href="https://www.hackfun.org/" target="_blank">4ido10n</a>
+<a class="main-nav-link switch-friends-link" href="http://www.hackersb.cn/" target="_blank">王松_Striker</a>
+<a class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/7top/" target="_blank">7top</a>
+<a class="main-nav-link switch-friends-link" href="http://www.bendawang.site" target="_blank">bendawang</a>
+<a class="main-nav-link switch-friends-link" href="http://ctfrank.org" target="_blank">CTF Rank</a>
+<a class="main-nav-link switch-friends-link" href="http://askook.me/" target="_blank">A酱</a>
+</div>
+</section>
+<section class="switch-part switch-part4">
+<div id="js-aboutme">关注二进制安全. Member of Syclover. CTFer/INTJ.</div>
+</section>
+</div>
+</div>
+</header>
+</div>
+</div>
+<div class="mid-col">
+<nav id="mobile-nav">
+<div class="overlay">
+<div class="slider-trigger"></div>
+<h1 class="header-author js-mobile-header hide"><a href="/" title="Me">muhe</a></h1>
+</div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="js-avatar" lazy-src="./Adding your own syscall in linux kernel  o0xmuhe's blog/head.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="Me">muhe</a></h1>
+</hgroup>
+<p class="header-subtitle">一个有情怀的二进制狗</p>
+<nav class="header-menu">
+<ul>
+<li><a href="/">博客首页</a></li>
+<li><a href="/archives">所有文章</a></li>
+<li><a href="/tags">标签</a></li>
+<li><a href="/about">关于我</a></li>
+<li><a href="/Pwnable-Log">Pwnable</a></li>
+<div class="clearfix"></div>
+</ul>
+</nav>
+<nav class="header-nav">
+<div class="social">
+<a class="github" href="https://github.com/o0xmuhe" target="_blank" title="github">github</a>
+<a class="weibo" href="http://weibo.com/2070174943/" target="_blank" title="weibo">weibo</a>
+<a class="twitter" href="https://twitter.com/0xmuhe" target="_blank" title="twitter">twitter</a>
+<a class="rss" href="/atom.xml" target="_blank" title="rss">rss</a>
+</div>
+</nav>
+</header>
+</div>
+</nav>
+<div class="body-wrap"><article class="article article-type-post" id="post-Adding-your-own-syscall-in-linux-kernel" itemprop="blogPost" itemscope="">
+<div class="article-meta">
+<a class="article-date" href="/2017/02/08/Adding-your-own-syscall-in-linux-kernel/">
+<time datetime="2017-02-08T14:20:52.000Z" itemprop="datePublished">2017-02-08</time>
+</a>
+</div>
+<div class="article-inner">
+<input class="isFancy" type="hidden"/>
+<header class="article-header">
+<h1 class="article-title" itemprop="name">
+      Adding your own syscall in linux kernel
+    </h1>
+</header>
+<div class="article-info article-info-post">
+<div class="article-tag tagcloud">
+<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux-kernel/">linux kernel</a></li></ul>
+</div>
+<div class="clearfix"></div>
+</div>
+<div class="article-entry" itemprop="articleBody">
+<h4 id="0x00"><a class="headerlink" href="#0x00" title="0x00:"></a>0x00:</h4><p>主要是一个记录，搞kernel exploit可能会需要。给自己的linux增加一个自定义的系统调用，开始找的资料比较老3.x的内核，然而4.x的源码和3.x源码结构不太一样，所以过程也不太一样，多多参考一些<a href="http://lxr.free-electrons.com/source/Documentation/adding-syscalls.txt?v=4.3" rel="external" target="_blank">比较官方的文档</a><br/><a id="more"></a><br/>环境准备</p>
+<ul>
+<li>ubuntu 14.04 LTS x86 (4.2.0-42-generic)</li>
+</ul>
+<h4 id="0x01-过程"><a class="headerlink" href="#0x01-过程" title="0x01:过程"></a>0x01:过程</h4><h6 id="1-获取源码"><a class="headerlink" href="#1-获取源码" title="1.获取源码"></a>1.获取源码</h6><p><code>apt-get source linux-image-$(uname -r)</code></p>
+<h6 id="2-编辑源码"><a class="headerlink" href="#2-编辑源码" title="2.编辑源码"></a>2.编辑源码</h6><p>首先创建一个目录放新增系统调用的定义<br/><code>mkdir helloworld &amp;&amp; cd helloworld</code><br/>然后进去<br/><figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># muhe @ ubuntu in ~/linux_kernel_study/linux-lts-wily-4.2.0/helloworld [6:48:05] </span></div><div class="line"><span class="variable">$ </span>ls</div><div class="line">helloworld.c  Makefile</div></pre></td></tr></table></figure></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/kernel.h&gt;</span></span></div><div class="line"><span class="function">asmlinkage <span class="keyword">long</span> <span class="title">sys_helloworld</span><span class="params">(<span class="keyword">void</span>)</span></span>{</div><div class="line"></div><div class="line">    printk(<span class="string">"Hello world\n"</span>);</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Makefile</div><div class="line"><span class="attribute">obj-y</span>=helloworld.o</div></pre></td></tr></table></figure>
+<p>然后修改源码目录下的Makefile，把刚才新建的helloworld目录加进去<br/>如图所示<br/><img alt="" src="./Adding your own syscall in linux kernel  o0xmuhe's blog/Makefile.png"/></p>
+<p>修改<code>include/linux/syscalls.h</code>文件，把helloworld原型加进去<br/><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">...</div><div class="line"><span class="function">asmlinkage <span class="keyword">long</span> <span class="title">sys_bpf</span><span class="params">(<span class="keyword">int</span> cmd, <span class="keyword">union</span> bpf_attr *attr, <span class="keyword">unsigned</span> <span class="keyword">int</span> size)</span></span>;</div><div class="line"></div><div class="line"><span class="function">asmlinkage <span class="keyword">long</span> <span class="title">sys_execveat</span><span class="params">(<span class="keyword">int</span> dfd, <span class="keyword">const</span> <span class="keyword">char</span> __user *filename,</span></span></div><div class="line">444<span class="keyword">const</span> <span class="keyword">char</span> __user *<span class="keyword">const</span> __user *argv,</div><div class="line">444<span class="keyword">const</span> <span class="keyword">char</span> __user *<span class="keyword">const</span> __user *envp, <span class="keyword">int</span> flags);</div><div class="line"><span class="function">asmlinkage <span class="keyword">long</span> <span class="title">sys_helloworld</span><span class="params">(<span class="keyword">void</span>)</span></span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div></pre></td></tr></table></figure></p>
+<p>然后修改<code>arch/x86/entry/syscalls</code>下的<code>syscall_32.tbl</code>文件 添加这个调用的信息<br/><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">...</div><div class="line"><span class="number">355</span>	i386	getrandom		sys_getrandom</div><div class="line"><span class="number">356</span>	i386	memfd_create		sys_memfd_create</div><div class="line"><span class="number">357</span>	i386	bpf			sys_bpf</div><div class="line"><span class="number">358</span>	i386	execveat		sys_execveat			stub32_execveat</div><div class="line"><span class="number">359</span> i386    helloworld      sys_helloworld</div></pre></td></tr></table></figure></p>
+<h6 id="3-编译新内核"><a class="headerlink" href="#3-编译新内核" title="3.编译新内核"></a>3.编译新内核</h6><p>先安装一些需要的工具<br/><figure class="highlight q"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">sudo apt-<span class="built_in">get</span> build-dep linux-image-$(uname -r)</div><div class="line">sudo apt-<span class="built_in">get</span> <span class="keyword">update</span></div><div class="line">sudo apt-<span class="built_in">get</span> install curses-<span class="built_in">dev</span></div></pre></td></tr></table></figure></p>
+<p>然后是配置<br/><figure class="highlight coffeescript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">chmod a+x debian<span class="regexp">/scripts/</span>*</div><div class="line">chmod a+x debian<span class="regexp">/scripts/misc/</span>*</div><div class="line">fakeroot debian/rules clean</div><div class="line">fakeroot debian/rules editconfigs</div></pre></td></tr></table></figure></p>
+<p>编译<br/><figure class="highlight armasm"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="symbol">fakeroot</span> debian/rules clean</div><div class="line"><span class="symbol">fakeroot</span> debian/rules <span class="keyword">binary-headers </span><span class="keyword">binary-generic </span>-j <span class="number">2</span></div></pre></td></tr></table></figure></p>
+<p><img alt="" src="./Adding your own syscall in linux kernel  o0xmuhe's blog/compiled.png"/></p>
+<h6 id="4-安装"><a class="headerlink" href="#4-安装" title="4.安装"></a>4.安装</h6><p>因为这样编译出来的是deb，所以直接dpkg安装就行了。<br/><img alt="" src="./Adding your own syscall in linux kernel  o0xmuhe's blog/install.png"/><br/>安装结束后直接重启就好了。</p>
+<h4 id="0x02：测试"><a class="headerlink" href="#0x02：测试" title="0x02：测试"></a>0x02：测试</h4><p>编写测试程序<br/><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/kernel.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/syscall.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></div><div class="line">{  </div><div class="line">    <span class="built_in">printf</span>(<span class="string">"Invoking 'helloworld' system call"</span>);</div><div class="line">         </div><div class="line">    <span class="keyword">long</span> <span class="keyword">int</span> ret = syscall(<span class="number">359</span>); <span class="comment">// 359 is the syscall number</span></div><div class="line">         </div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure></p>
+<p>编译后运行，然后使用dmesg查看打印的消息。<br/><img alt="" src="./Adding your own syscall in linux kernel  o0xmuhe's blog/run.png"/><br/><img alt="" src="./Adding your own syscall in linux kernel  o0xmuhe's blog/dmesg.png"/><br/>可以看到打印了helloworld的信息，即这个syscall添加成功。</p>
+<h4 id="0x03：参考与引用"><a class="headerlink" href="#0x03：参考与引用" title="0x03：参考与引用"></a>0x03：参考与引用</h4><p><a href="https://medium.com/@ssreehari/implementing-a-system-call-in-linux-kernel-4-7-1-6f98250a8c38#.4v3t86bf4" rel="external" target="_blank">Implementing a system call in Linux Kernel 4.7.1</a><br/><a href="https://study.prl85.com/?p=93" rel="external" target="_blank">[UBUNTU 14.04] BUILDING LINUX KERNEL</a><br/><a href="http://lxr.free-electrons.com/source/Documentation/adding-syscalls.txt?v=4.3" rel="external" target="_blank">Linux/Documentation/adding-syscalls.txt</a><br/><a href="https://arvindsraj.wordpress.com/2012/10/05/adding-hello-world-system-call-to-linux/" rel="external" target="_blank">Adding hello world system call to Linux</a></p>
+</div>
+</div>
+<div class="copyright">
+<p><span>本文标题:</span><a href="/2017/02/08/Adding-your-own-syscall-in-linux-kernel/">Adding your own syscall in linux kernel</a></p>
+<p><span>文章作者:</span><a href="/" title="访问 muhe 的个人博客">muhe</a></p>
+<p><span>发布时间:</span>2017年02月08日 - 22时20分</p>
+<p><span>最后更新:</span>2017年02月09日 - 21时48分</p>
+<p>
+<span>原始链接:</span><a class="post-url" href="/2017/02/08/Adding-your-own-syscall-in-linux-kernel/" title="Adding your own syscall in linux kernel">http://o0xmuhe.me/2017/02/08/Adding-your-own-syscall-in-linux-kernel/</a>
+<span class="copy-path" data-clipboard-text="原文: http://o0xmuhe.me/2017/02/08/Adding-your-own-syscall-in-linux-kernel/　　作者: muhe" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+<script src="./Adding your own syscall in linux kernel  o0xmuhe's blog/clipboard.min.js"></script>
+<script> var clipboard = new Clipboard('.copy-path'); </script>
+</p>
+<p>
+<span>许可协议:</span><i class="fa fa-creative-commons"></i> <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" rel="license" target="_blank" title="中国大陆 (CC BY-NC-SA 3.0 CN)">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+</div>
+<nav id="article-nav">
+<a class="article-nav-link-wrap" href="/2017/02/16/ichunqiu-CTF-2017-2/" id="article-nav-newer">
+<strong class="article-nav-caption">&lt;</strong>
+<div class="article-nav-title">
+        
+          ichunqiu-CTF-2017-2
+        
+      </div>
+</a>
+<a class="article-nav-link-wrap" href="/2017/02/04/Windows-Kernel-Exploit-Study-3/" id="article-nav-older">
+<div class="article-nav-title">Windows-Kernel-Exploit-Study(3)</div>
+<strong class="article-nav-caption">&gt;</strong>
+</a>
+</nav>
+</article>
+<div class="toc-article" id="toc">
+<strong class="toc-title">文章目录</strong>
+<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#0x00"><span class="toc-number">1.</span> <span class="toc-text">0x00:</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#0x01-过程"><span class="toc-number">2.</span> <span class="toc-text">0x01:过程</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#1-获取源码"><span class="toc-number">2.0.1.</span> <span class="toc-text">1.获取源码</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#2-编辑源码"><span class="toc-number">2.0.2.</span> <span class="toc-text">2.编辑源码</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#3-编译新内核"><span class="toc-number">2.0.3.</span> <span class="toc-text">3.编译新内核</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#4-安装"><span class="toc-number">2.0.4.</span> <span class="toc-text">4.安装</span></a></li></ol></li></ol></div></div></div></div></body></html><li class="toc-item toc-level-4"><a class="toc-link" href="#0x02：测试"><span class="toc-number">3.</span> <span class="toc-text">0x02：测试</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#0x03：参考与引用"><span class="toc-number">4.</span> <span class="toc-text">0x03：参考与引用</span></a></li>
+
+<input id="tocButton" title="点击按钮隐藏或者显示文章目录" type="button" value="隐藏目录"/>
+<script src="./Adding your own syscall in linux kernel  o0xmuhe's blog/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+        }
+    })
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+    }
+</script>
+<div class="bdsharebuttonbox">
+<a class="fx fa-weibo bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="fx fa-weixin bds_weixin" data-cmd="weixin" href="#" title="分享到微信"></a>
+<a class="fx fa-qq bds_sqq" data-cmd="sqq" href="#" title="分享到QQ好友"></a>
+<a class="fx fa-facebook-official bds_fbook" data-cmd="fbook" href="#" title="分享到Facebook"></a>
+<a class="fx fa-twitter bds_twi" data-cmd="twi" href="#" title="分享到Twitter"></a>
+<a class="fx fa-linkedin bds_linkedin" data-cmd="linkedin" href="#" title="分享到linkedin"></a>
+<a class="fx fa-files-o bds_copy" data-cmd="copy" href="#" title="分享到复制网址"></a>
+</div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+<div class="duoshuo" id="comments">
+<!-- 多说评论框 start -->
+<div class="ds-thread" data-thread-key="2017/02/08/Adding-your-own-syscall-in-linux-kernel/" data-title="Adding your own syscall in linux kernel" data-url="http://o0xmuhe.me/2017/02/08/Adding-your-own-syscall-in-linux-kernel/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    var duoshuoQuery = {short_name:"o0xmuhe"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = '/js/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- 多说公共JS代码 end -->
+</div>
+<div class="scroll" id="post-nav-button">
+<a href="/2017/02/16/ichunqiu-CTF-2017-2/" title="上一篇: ichunqiu-CTF-2017-2">
+<i class="fa fa-angle-left"></i>
+</a>
+<a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+<a href="/2017/02/04/Windows-Kernel-Exploit-Study-3/" title="下一篇: Windows-Kernel-Exploit-Study(3)">
+<i class="fa fa-angle-right"></i>
+</a>
+</div>
+<ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/08/SSCTF-2017部分Writeup/">SSCTF-2017部分Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/22/360春秋CTF-pwn/">360春秋CTF--pwn</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/06/Linux-Kernel-Exploit-4-beginners/">Linux Kernel Exploit 4 beginners</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/15/NJCTF-2017部分wp/">NJCTF-2017部分wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/06/SECCON-2016-jmper/">SECCON-2016 jmper</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/04/codegate2017-angrybird/">codegate2017-angrybird</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/27/LLVM-Study-Log/">LLVM Study Log</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/16/ichunqiu-CTF-2017-2/">ichunqiu-CTF-2017-2</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/08/Adding-your-own-syscall-in-linux-kernel/">Adding your own syscall in linux kernel</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/04/Windows-Kernel-Exploit-Study-3/">Windows-Kernel-Exploit-Study(3)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/30/Linux socket进程间通信及应用/">Linux socket进程间通信及应用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/28/一点碎碎念/">一点碎碎念</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/22/Have-fun-with-Blind-ROP/">Have fun with Blind ROP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/20/Windows-Kernel-Exploit-Study-2/">Windows Kernel Exploit Study(2)</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/19/Windows-Kernel-Exploit-Study-1/">Windows Kernel Exploit Study(1)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/24/what-DynELF-does-basically/">what DynELF does basically</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/17/fuzzing-with-peach-Just-a-toy/">fuzzing with peach(Just a toy)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/25/PlaidCTF-2016-butterfly/">PlaidCTF 2016 butterfly</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/21/Have-fun-with-glibc内存管理/">Have fun with glibc内存管理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/10/linux-下起shell失败的分析/">linux 下起shell失败的分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/07/Baiudu杯-pwn专场记录/">Baiudu杯 pwn专场记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/29/how-to-compile-WinAFL/">how to compile WinAFL</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/25/yocto-writeup/">yocto writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/HITCON-2016-Quals-SecretHolder/">HITCON-2016-Quals-SecretHolder</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/CVE-2012-4792学习/">CVE-2012-4792学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/06/一点感悟/">一点感悟</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/27/BCTF-cloud/">BCTF--cloud</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/24/一些环境配置遇到的坑-持续更新/">一些环境配置遇到的坑(持续更新)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/16/Malloc-Maleficarum-复盘/">Malloc-Maleficarum-复盘</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/26/初试winafl/">初试winafl</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/14/pwnable-kr-alloca/">pwnable.kr -- alloca</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/01/简单的尝试angr/">简单的尝试angr</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/29/第一个android-cm调试分析/">第一个android cm调试分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/29/install-gef/">install gef</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/30/cctf-pwn350/">cctf pwn350</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/15/heap-vuln-unlink/">heap vuln -- unlink</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/02/format-string-with-stack-frame/">format string with stack frame</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/16/RCTF-PWN200/">RCTF -- PWN200</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/05/dragon/">dragon</a></li></ul>
+<script src="./Adding your own syscall in linux kernel  o0xmuhe's blog/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+            }
+        })
+    </script>
+<script>
+</script>
+
+<footer id="footer">
+<div class="outer">
+<div id="footer-info">
+<div class="footer-left">
+                © 2017 muhe
+            </div>
+<div class="footer-right">
+<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+</div>
+<div class="visit">
+<span id="busuanzi_container_site_pv" style="display:none">
+<span id="site-visit">访客数量: 
+                            <span id="busuanzi_value_site_uv"></span>
+</span>
+</span>
+<span>, </span>
+<span id="busuanzi_container_page_pv" style="display:none">
+<span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+</div>
+</div>
+</footer>
+
+<script src="./Adding your own syscall in linux kernel  o0xmuhe's blog/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="./Adding your own syscall in linux kernel  o0xmuhe's blog/main.js"></script>
+<script>
+        $(document).ready(function() {
+            var backgroundnum = 24;
+            var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+<div class="scroll" id="scroll">
+<a href="#"><i class="fa fa-arrow-up"></i></a>
+<a href="#comments"><i class="fa fa-comments-o"></i></a>
+<a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+<script async="" src="./Adding your own syscall in linux kernel  o0xmuhe's blog/busuanzi.pure.mini.js">
+</script>
+<script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+
+

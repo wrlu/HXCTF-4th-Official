@@ -1,0 +1,368 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./Mysql字符编码利用技巧  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./Mysql字符编码利用技巧  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./Mysql字符编码利用技巧  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>Mysql字符编码利用技巧 | 离别歌</title>
+<link href="./Mysql字符编码利用技巧  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./Mysql字符编码利用技巧  离别歌/styles.css" rel="stylesheet"/>
+<link href="./Mysql字符编码利用技巧  离别歌/style.css" rel="stylesheet"/>
+<link href="./Mysql字符编码利用技巧  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./Mysql字符编码利用技巧  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./Mysql字符编码利用技巧  离别歌/jquery.min.js"></script>
+<link href="./Mysql字符编码利用技巧  离别歌/code.css" rel="stylesheet"/>
+<link href="./Mysql字符编码利用技巧  离别歌/button.css" rel="stylesheet"/>
+<link href="./Mysql字符编码利用技巧  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./Mysql字符编码利用技巧  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/mysql-charset-trick.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/mysql-charset-trick.html&amp;text=Mysql%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E5%88%A9%E7%94%A8%E6%8A%80%E5%B7%A7"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/mysql-charset-trick.html&amp;title=Mysql%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E5%88%A9%E7%94%A8%E6%8A%80%E5%B7%A7"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/mysql-charset-trick.html&amp;is_video=false&amp;description=Mysql%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E5%88%A9%E7%94%A8%E6%8A%80%E5%B7%A7"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=Mysql%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E5%88%A9%E7%94%A8%E6%8A%80%E5%B7%A7&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/mysql-charset-trick.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/mysql-charset-trick.html&amp;title=Mysql%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E5%88%A9%E7%94%A8%E6%8A%80%E5%B7%A7"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/mysql-charset-trick.html&amp;title=Mysql%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E5%88%A9%E7%94%A8%E6%8A%80%E5%B7%A7"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/mysql-charset-trick.html&amp;title=Mysql%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E5%88%A9%E7%94%A8%E6%8A%80%E5%B7%A7"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/mysql-charset-trick.html&amp;title=Mysql%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E5%88%A9%E7%94%A8%E6%8A%80%E5%B7%A7"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/mysql-charset-trick.html&amp;name=Mysql%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E5%88%A9%E7%94%A8%E6%8A%80%E5%B7%A7&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">Mysql字符编码利用技巧</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2017年4月9日 22:17" itemprop="datePublished">
+                    2017 四月 09 22:17
+                </time>
+</div>
+<div class="article-tag">
+            阅读：4020
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/ctf">ctf</a>,
+                
+                <a class="tag-link" href="/tag/Mysql">Mysql</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<h2 id="0x01-ctf"><a class="toclink" href="#0x01-ctf">0x01 由某CTF题解说起</a></h2>
+<p>小密圈里有人提出的问题，大概代码如下：</p>
+<p><a href="/media/attachment/2017/04/09/e25177ac-27e4-4ad7-92a5-3ff6a728718a.jpg"><img alt="14917408262207.jpg" src="./Mysql字符编码利用技巧  离别歌/e25177ac-27e4-4ad7-92a5-3ff6a728718a.6f8fe63f3367.jpg"/></a></p>
+<p>看了一下，明显考点是这几行：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="k">if</span> <span class="p">(</span><span class="nv">$username</span> <span class="o">===</span> <span class="s1">'admin'</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s1">'REMOTE_ADDR'</span><span class="p">]</span> <span class="o">!==</span> <span class="s1">'127.0.0.1'</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">die</span><span class="p">(</span><span class="s1">'Permission denied!'</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="nv">$result</span> <span class="o">=</span> <span class="nv">$mysqli</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="s2">"SELECT * FROM z_users where username = '</span><span class="si">{</span><span class="nv">$username</span><span class="si">}</span><span class="s2">' and password = '</span><span class="si">{</span><span class="nv">$password</span><span class="si">}</span><span class="s2">'"</span><span class="p">);</span>
+</pre></div>
+<p>这个if语句嫌疑很大，大概是考我们怎么登陆<code>admin</code>的账号，请先看这一篇文章 <a href="https://www.leavesongs.com/PENETRATION/Mini-XCTF-Writeup.html">https://www.leavesongs.com/PENETRATION/Mini-XCTF-Writeup.html</a> </p>
+<p>本文中利用<code>Â</code>等latin1字符来绕过php的判断。这个CTF也是用同样的方法来解决：</p>
+<p><a href="/media/attachment/2017/04/09/4d877bf9-6f66-4082-b9b7-b207da16882b.jpg"><img alt="14917408495441.jpg" src="./Mysql字符编码利用技巧  离别歌/4d877bf9-6f66-4082-b9b7-b207da16882b.e2607c30b760.jpg"/></a></p>
+<p>可见，我传入的<code>username=admin%c2</code>，php的检测<code>if ($username === 'admin')</code>自然就可以绕过的，在mysql中可以正常查出<code>username='admin'</code>的结果。</p>
+<h2 id="0x02-trick"><a class="toclink" href="#0x02-trick">0x02 Trick复现</a></h2>
+<p>那么，为什么执行<code>SELECT * FROM user WHERE username='admin\xC2' and password='admin'</code>却可以查出用户名是<code>admin</code>的记录？</p>
+<p>刚好这段时间有人问我为什么在他的计算机上无法复现，我们来深入研究研究。</p>
+<p>编写如下代码：</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?php</span>
+<span class="nv">$mysqli</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">mysqli</span><span class="p">(</span><span class="s2">"localhost"</span><span class="p">,</span> <span class="s2">"root"</span><span class="p">,</span> <span class="s2">"root"</span><span class="p">,</span> <span class="s2">"cat"</span><span class="p">);</span>
+
+<span class="cm">/* check connection */</span>
+<span class="k">if</span> <span class="p">(</span><span class="nv">$mysqli</span><span class="o">-&gt;</span><span class="na">connect_errno</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nb">printf</span><span class="p">(</span><span class="s2">"Connect failed: %s</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="nv">$mysqli</span><span class="o">-&gt;</span><span class="na">connect_error</span><span class="p">);</span>
+    <span class="k">exit</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="nv">$mysqli</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="s2">"set names utf8"</span><span class="p">);</span>
+
+<span class="nv">$username</span> <span class="o">=</span> <span class="nb">addslashes</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">'username'</span><span class="p">]);</span>
+
+<span class="cm">/* Select queries return a resultset */</span>
+<span class="nv">$sql</span> <span class="o">=</span> <span class="s2">"SELECT * FROM `table1` WHERE username='</span><span class="si">{</span><span class="nv">$username</span><span class="si">}</span><span class="s2">'"</span><span class="p">;</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="nv">$result</span> <span class="o">=</span> <span class="nv">$mysqli</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span> <span class="nv">$sql</span> <span class="p">))</span> <span class="p">{</span>
+    <span class="nb">printf</span><span class="p">(</span><span class="s2">"Select returned %d rows.</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="nv">$result</span><span class="o">-&gt;</span><span class="na">num_rows</span><span class="p">);</span>
+
+    <span class="k">while</span> <span class="p">(</span><span class="nv">$row</span> <span class="o">=</span> <span class="nv">$result</span><span class="o">-&gt;</span><span class="na">fetch_array</span><span class="p">(</span><span class="nx">MYSQLI_ASSOC</span><span class="p">))</span>
+    <span class="p">{</span>
+        <span class="nb">var_dump</span><span class="p">(</span><span class="nv">$row</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="cm">/* free result set */</span>
+    <span class="nv">$result</span><span class="o">-&gt;</span><span class="na">close</span><span class="p">();</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="nb">var_dump</span><span class="p">(</span><span class="nv">$mysqli</span><span class="o">-&gt;</span><span class="na">error</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nv">$mysqli</span><span class="o">-&gt;</span><span class="na">close</span><span class="p">();</span>
+</pre></div>
+<p>然后在数据库<code>cat</code>中创建表<code>table1</code>：</p>
+<div class="codehilite"><pre><span></span><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="o">`</span><span class="n">table1</span><span class="o">`</span> <span class="p">(</span>
+  <span class="o">`</span><span class="n">id</span><span class="o">`</span> <span class="nb">int</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="n">unsigned</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="n">AUTO_INCREMENT</span><span class="p">,</span>
+  <span class="o">`</span><span class="n">username</span><span class="o">`</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span> <span class="k">COLLATE</span> <span class="n">latin1_general_ci</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+  <span class="o">`</span><span class="n">password</span><span class="o">`</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span> <span class="k">COLLATE</span> <span class="n">latin1_general_ci</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+  <span class="k">PRIMARY</span> <span class="k">KEY</span> <span class="p">(</span><span class="o">`</span><span class="n">id</span><span class="o">`</span><span class="p">)</span>
+<span class="p">)</span> <span class="n">ENGINE</span><span class="o">=</span><span class="n">MyISAM</span> <span class="n">AUTO_INCREMENT</span><span class="o">=</span><span class="mi">1</span> <span class="k">DEFAULT</span> <span class="n">CHARSET</span><span class="o">=</span><span class="n">latin1</span> <span class="k">COLLATE</span><span class="o">=</span><span class="n">latin1_general_ci</span><span class="p">;</span>
+</pre></div>
+<p>我特地将字符集设置为<code>latin1</code>，其实默认情况下，Mysql的字符集就是<code>latin1</code>，没必要写明。</p>
+<p>插入一个管理员账户：</p>
+<div class="codehilite"><pre><span></span><span class="k">INSERT</span> <span class="o">`</span><span class="n">table1</span><span class="o">`</span> <span class="k">VALUES</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'admin'</span><span class="p">,</span> <span class="s1">'admin'</span><span class="p">);</span>
+</pre></div>
+<p>然后，我们访问<code>http://localhost/test.php?username=admin%c2</code>，即可发现<code>%c2</code>被忽略，Mysql查出了<code>username=admin</code>的结果：</p>
+<p><a href="/media/attachment/2017/04/09/fbb48210-00ee-4c28-9476-f753d03d5585.jpg"><img alt="14917408641502.jpg" src="./Mysql字符编码利用技巧  离别歌/fbb48210-00ee-4c28-9476-f753d03d5585.f90d1f80153e.jpg"/></a></p>
+<p>假设我们将<code>table1</code>表的字符集换成<code>utf8</code>，就得不到结果了。</p>
+<h2 id="0x03-mysql"><a class="toclink" href="#0x03-mysql">0x03 Mysql字符集转换</a></h2>
+<p>经过0x02中对该Mysql Trick的复现，大概也能猜到原理了。</p>
+<p>造成这个Trick的根本原因是，<strong>Mysql字段的字符集和php mysqli客户端设置的字符集不相同</strong>。</p>
+<p><code>set names utf8</code> 的意思是将客户端的字符集设置为utf8。我们打开mysql控制台，依次执行<code>SHOW VARIABLES LIKE 'character_set_%';</code>、<code>set names utf8;</code>、<code>SHOW VARIABLES LIKE 'character_set_%';</code>，即可得到如下结果：</p>
+<p><a href="/media/attachment/2017/04/09/ffb4bf0c-ba58-444e-a056-d75f6ebf8d38.jpg"><img alt="14917422428663.jpg" src="./Mysql字符编码利用技巧  离别歌/ffb4bf0c-ba58-444e-a056-d75f6ebf8d38.9251a10908b4.jpg"/></a></p>
+<p>如上图，在默认情况下，mysql字符集为latin1，而执行了<code>set names utf8;</code>以后，<code>character_set_client</code>、<code>character_set_connection</code>、<code>character_set_results</code>等与客户端相关的配置字符集都变成了utf8，但<code>character_set_database</code>、<code>character_set_server</code>等服务端相关的字符集还是latin1。</p>
+<p>这就是该Trick的核心，因为这一条语句，导致客户端、服务端的字符集出现了差别。既然有差别，Mysql在执行查询的时候，就涉及到字符集的转换。</p>
+<p>2008年鸟哥曾在<a href="http://www.laruence.com/2008/01/05/12.html">博客</a>中讲解了Mysql字符集：</p>
+<blockquote>
+<ol>
+<li>MySQL Server收到请求时将请求数据从character_set_client转换为character_set_connection；</li>
+<li>进行内部操作前将请求数据从character_set_connection转换为内部操作字符集</li>
+</ol>
+</blockquote>
+<p>在我们这个案例中，<code>character_set_client</code>和<code>character_set_connection</code>被设置成了utf8，而<code>内部操作字符集</code>其实也就是<code>username</code>字段的字符集还是默认的latin1。于是，整个操作就有如下字符串转换过程：</p>
+<p><code>utf8 --&gt; utf8 --&gt; latin1</code></p>
+<p>最后执行比较<code>username='admin'</code>的时候，<code>'admin'</code>是一个latin1字符串。</p>
+<h2 id="0x04"><a class="toclink" href="#0x04">0x04 漏洞成因</a></h2>
+<p>那么，字符集转换为什么会导致<code>%c2</code>被忽略呢？</p>
+<p>说一下我的想法，虽然我没有深入研究，但我觉得原因应该是，<strong>Mysql在转换字符集的时候，将不完整的字符给忽略了</strong>。</p>
+<p>举个简单的例子，<code>佬</code>这个汉字的UTF-8编码是<code>\xE4\xBD\xAC</code>，我们可以依次尝试访问下面三个URL：</p>
+<div class="codehilite"><pre><span></span>http://localhost:9090/test.php?username=admin%e4
+http://localhost:9090/test.php?username=admin%e4%bd
+http://localhost:9090/test.php?username=admin%e4%bd%ac
+</pre></div>
+<p>可以发现，前两者都能成功获取到<code>username=admin</code>的结果，而最后一个URL，也就是当我输入<code>佬</code>字完整的编码时，将会被抛出一个错误：</p>
+<p><a href="/media/attachment/2017/04/09/137a7289-ea01-4d32-b11e-638f25c8ee8c.jpg"><img alt="14917436746982.jpg" src="./Mysql字符编码利用技巧  离别歌/137a7289-ea01-4d32-b11e-638f25c8ee8c.6bb3c6d30e29.jpg"/></a></p>
+<p><a href="/media/attachment/2017/04/09/5d50006b-1fb5-435d-928b-9e8652d84025.jpg"><img alt="14917436885556.jpg" src="./Mysql字符编码利用技巧  离别歌/5d50006b-1fb5-435d-928b-9e8652d84025.926c7951adc1.jpg"/></a></p>
+<p><a href="/media/attachment/2017/04/09/4015771c-f706-4425-ae44-cc19a0c6dbc0.jpg"><img alt="14917436998958.jpg" src="./Mysql字符编码利用技巧  离别歌/4015771c-f706-4425-ae44-cc19a0c6dbc0.bf9a2c529106.jpg"/></a></p>
+<p>为什么会抛出错误？原因很简单，因为latin1并不支持汉字，所以utf8汉字转换成latin1时就抛出了错误。</p>
+<p>那前两次为什么没有抛出错误？因为前两次输入的编码并不完整，Mysql在进行编码转换时，就将其忽略了。</p>
+<p>这个特点也导致，我们查询<code>username=admin%e4</code>时，<code>%e4</code>被省略，最后查出了<code>username=admin</code>的结果。</p>
+<h2 id="0x05"><a class="toclink" href="#0x05">0x05 为什么只有部分字符可以使用</a></h2>
+<p>我在测试这个Trick的时候发现，<code>username=admin%c2</code>时可以正确得到结果，但<code>username=admin%c1</code>就不行，这是为什么？</p>
+<p>我简单fuzz了一下，如果在admin后面加上一个字符，有如下结果：</p>
+<ol>
+<li><code>\x00</code>~<code>\x7F</code>： 返回空白结果</li>
+<li><code>\x80</code>~<code>\xC1</code>： 返回错误Illegal mix of collations</li>
+<li><code>\xC2</code>~<code>\xEF</code>： 返回admin的结果</li>
+<li><code>\xF0</code>~<code>\xFF</code>： 返回错误Illegal mix of collations</li>
+</ol>
+<p>这就涉及到Mysql编码相关的知识了，先看看<a href="https://zh.wikipedia.org/wiki/UTF-8">维基百科</a>吧。</p>
+<p>UTF-8编码是变长编码，可能有1~4个字节表示：</p>
+<ol>
+<li>一字节时范围是[00-7F]</li>
+<li>两字节时范围是[C0-DF][80-BF]</li>
+<li>三字节时范围是[E0-EF][80-BF][80-BF]</li>
+<li>四字节时范围是[F0-F7][80-BF][80-BF][80-BF]</li>
+</ol>
+<p>然后根据RFC 3629规范，又有一些字节值是不允许出现在UTF-8编码中的：</p>
+<p><a href="/media/attachment/2017/04/09/db28c7b4-4dc9-4592-9fc7-23f0290c3892.jpg"><img alt="14917445720884.jpg" src="./Mysql字符编码利用技巧  离别歌/db28c7b4-4dc9-4592-9fc7-23f0290c3892.6e734d61aa73.jpg"/></a></p>
+<p>所以最终，UTF-8第一字节的取值范围是：00-7F、C2-F4，这也是我在admin后面加上80-C1、F5-FF等字符时会抛出错误的原因。</p>
+<p>关于所有的UTF-8字符，你可以在这个表中一一看到： <a href="http://utf8-chartable.de/unicode-utf8-table.pl">http://utf8-chartable.de/unicode-utf8-table.pl</a></p>
+<h2 id="0x06-mysql-utf8"><a class="toclink" href="#0x06-mysql-utf8">0x06 Mysql UTF8 特性</a></h2>
+<p>那么，为什么<code>username=admin%F0</code>也不行呢？F0是在C2-F4的范围中呀？</p>
+<p>这又涉及到Mysql中另一个特性：<strong>Mysql的utf8其实是阉割版utf-8编码，Mysql中的utf8字符集最长只支持三个字节</strong>，</p>
+<p>所以，我们回看前文列出的UTF-8编码第一字节的范围，</p>
+<blockquote>
+<p>三字节时范围是[E0-EF][80-BF][80-BF]<br>
+四字节时范围是[F0-F7][80-BF][80-BF][80-BF]</br></p>
+</blockquote>
+<p>F0-F4是四字节才有的，所以我传入<code>username=admin%F0</code>也将抛出错误。</p>
+<p>如果你需要Mysql支持四字节的utf-8，可以使用<code>utf8mb4</code>编码。我将原始代码中的set names改成<code>set names utf8mb4</code>，再看看效果：</p>
+<p><a href="/media/attachment/2017/04/09/e774e309-df2f-4c20-8445-20865afca44f.jpg"><img alt="14917457463556.jpg" src="./Mysql字符编码利用技巧  离别歌/e774e309-df2f-4c20-8445-20865afca44f.ace7483fad1e.jpg"/></a></p>
+<p>已经成功得到结果。</p>
+<h2 id="0x07"><a class="toclink" href="#0x07">0x07 总结</a></h2>
+<p>本文深入研究了Mysql编码的数个特性，相信看完本文，对于第一章中的CTF题目也没有疑问了。</p>
+<p>通过这次研究，我有几个感想：</p>
+<ol>
+<li>研究东西还是需要深入，之前写那篇文章的时候并没有深入研究原理，所以心里总是很迷糊</li>
+<li>维基百科上涵盖了很多知识，有必要的时候也可以多看看</li>
+</ol>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2644">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Mysql字符编码利用技巧  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">盘古科技</a>
+<time datetime="2017年4月23日 20:53" itemprop="datePublished">
+                            2017 四月 23 20:53
+                        </time>
+<a href="javascript:reply_to('2644', '盘古科技')">回复</a>
+</p>
+<p class="comment-meta">盘古打造大格局</p>
+</div>
+</div>
+<div class="row" id="comment-2615">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Mysql字符编码利用技巧  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">admin</a>
+<time datetime="2017年4月10日 22:01" itemprop="datePublished">
+                            2017 四月 10 22:01
+                        </time>
+<a href="javascript:reply_to('2615', 'admin')">回复</a>
+</p>
+<p class="comment-meta">你好，请问"测试"的utf-8编码的为什么表示为\xe6\xb5\x8b\xe8\xaf\x95，而不是\xe6\xb5\x8a\xe8\xaf\x96呢？</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2616">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Mysql字符编码利用技巧  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com" target="_blank">phithon</a>
+<time datetime="2017年4月10日 22:25" itemprop="datePublished">
+                            2017 四月 10 22:25
+                        </time>
+<a href="javascript:reply_to('2616', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@admin 字符集就是一个字节序列和字符的对应关系表，就跟化学元素周期表一样，为什么第一个元素是字母H而不是字母O，这个你得问当初编写这个表的人。</p>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2614">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./Mysql字符编码利用技巧  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">hckmaple</a>
+<time datetime="2017年4月10日 16:15" itemprop="datePublished">
+                            2017 四月 10 16:15
+                        </time>
+<a href="javascript:reply_to('2614', 'hckmaple')">回复</a>
+</p>
+<p class="comment-meta">膜p师傅，刚卡在一个字符集的问题上，看完这篇，柳暗花明</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="49ead47754b92755772c0809b4a7ed5ae087e78d"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./Mysql字符编码利用技巧  离别歌/49ead47754b92755772c0809b4a7ed5ae087e78d"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="414">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="KruinryhPkM5nci3uhOM4DXHEKB2bBpyiLPObVKwg7GunRGiiyiwDhZMNO4aU5eI"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./Mysql字符编码利用技巧  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./Mysql字符编码利用技巧  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

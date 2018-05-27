@@ -1,0 +1,346 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./脱裤小指南  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./脱裤小指南  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./脱裤小指南  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>脱裤小指南 | 离别歌</title>
+<link href="./脱裤小指南  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./脱裤小指南  离别歌/styles.css" rel="stylesheet"/>
+<link href="./脱裤小指南  离别歌/style.css" rel="stylesheet"/>
+<link href="./脱裤小指南  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./脱裤小指南  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./脱裤小指南  离别歌/jquery.min.js"></script>
+<link href="./脱裤小指南  离别歌/code.css" rel="stylesheet"/>
+<link href="./脱裤小指南  离别歌/button.css" rel="stylesheet"/>
+<link href="./脱裤小指南  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./脱裤小指南  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/DumpMysql.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/DumpMysql.html&amp;text=%E8%84%B1%E8%A3%A4%E5%B0%8F%E6%8C%87%E5%8D%97"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/DumpMysql.html&amp;title=%E8%84%B1%E8%A3%A4%E5%B0%8F%E6%8C%87%E5%8D%97"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/DumpMysql.html&amp;is_video=false&amp;description=%E8%84%B1%E8%A3%A4%E5%B0%8F%E6%8C%87%E5%8D%97"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=%E8%84%B1%E8%A3%A4%E5%B0%8F%E6%8C%87%E5%8D%97&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/DumpMysql.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/DumpMysql.html&amp;title=%E8%84%B1%E8%A3%A4%E5%B0%8F%E6%8C%87%E5%8D%97"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/DumpMysql.html&amp;title=%E8%84%B1%E8%A3%A4%E5%B0%8F%E6%8C%87%E5%8D%97"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/DumpMysql.html&amp;title=%E8%84%B1%E8%A3%A4%E5%B0%8F%E6%8C%87%E5%8D%97"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/DumpMysql.html&amp;title=%E8%84%B1%E8%A3%A4%E5%B0%8F%E6%8C%87%E5%8D%97"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/DumpMysql.html&amp;name=%E8%84%B1%E8%A3%A4%E5%B0%8F%E6%8C%87%E5%8D%97&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">脱裤小指南</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2013年7月5日 12:36" itemprop="datePublished">
+                    2013 七月 05 12:36
+                </time>
+</div>
+<div class="article-tag">
+            阅读：8827
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/Mysql">Mysql</a>,
+                
+                <a class="tag-link" href="/tag/%E8%84%B1%E8%A3%A4">脱裤</a>,
+                
+                <a class="tag-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93">数据库</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+<span style="font-size:14px;">最近期末考试，烦死了，考一科挂一科。</span>
+</p>
+<p>
+<span style="font-size:14px;">天气太热了，大家在寝室里还穿衣服么？干脆我们来一起脱衣服脱裤子吧~~(本文内容纯属虚构娱乐，作者不负任何法律责任)</span>
+</p>
+<p>
+<br>
+</br></p>
+<p>
+<span style="font-size:14px;">0.第零步，首先需要知道什么数据库。Access就不说了，直接在shell里就可以下载。今天主要来讲讲mysql牌裤子。</span>
+</p>
+<p>
+<br>
+</br></p>
+<p>
+<span style="font-size:14px;">1.第一步，找到mysql账号密码。</span>
+</p>
+<p>
+<span style="font-size:14px;">    网站要连接mysql，就需要把mysql的账号密码保存在一个php文件中，类似config.php、common.inc.php等，在shell中，读取这些文件，找到其中信息即可：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201307/a0171373005820.jpg" id="ematt:134" target="_blank"><img alt="001.jpg" border="0" height="222" src="./脱裤小指南  离别歌/a0171373005820.jpg" title="点击查看原图" width="306"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    下面是一些常见平台的配置文件：</span>
+</p>
+<p>
+<span style="font-size:14px;">        discuz : config.inc.php</span>
+</p>
+<p>
+<span style="font-size:14px;">        ucenter : data/config.inc.php</span>
+</p>
+<p>
+<span style="font-size:14px;">        phpwind : data/sql_config.php</span>
+</p>
+<p>
+<span style="font-size:14px;">        phpmyadmin : libraries/config.default.php</span>
+</p>
+<p>
+<span style="font-size:14px;">        shopex : config/config.php 或 include/mall_config.php</span>
+</p>
+<p>
+<span style="font-size:14px;">        ecshop : data/config.php</span>
+</p>
+<p>
+<span style="font-size:14px;">        dedecms : data/common.inc.php</span>
+</p>
+<p>
+<span style="font-size:14px;">        ……一般站，自己找找就找到了</span>
+</p>
+<p>
+<br/>
+</p>
+<p>
+<span style="font-size:14px;">2.第二步，使用外部工具连接数据库，看能否成功。我使用这款工具“Navicat for MySQL”。</span>
+</p>
+<p>
+<span style="font-size:14px;">    这里说一下，平时见到，有时候数据库这样写：xxxx@localhost，有时候这样写:xxxx@%，有啥区别。当是“%”的时候，说明任意地址都能对数据库操作，于是我们在外部就能连接别人的数据库，这时候使用外部工具比较方便。</span>
+</p>
+<p>
+<span style="font-size:14px;">    使用这个Navicat，如下图，要导出表直接在表上右键导出即可：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201307/39551373006335.jpg" id="ematt:147" target="_blank"><img alt="008.jpg" border="0" height="275" src="./脱裤小指南  离别歌/thum-39551373006335.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    还可以选择很多导出类型(太多了哈哈，最好导出成文本文件，方便以后读取)：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201307/c0501373006334.jpg" id="ematt:139" target="_blank"><img alt="004.jpg" border="0" height="374" src="./脱裤小指南  离别歌/thum-c0501373006334.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<br/>
+</p>
+<p>
+<span style="font-size:14px;">3.第三步，使用phpmyadmin脱裤子。</span>
+</p>
+<p>
+<span style="font-size:14px;">    不是所有数据库都能外连的（实际上大部分都不行）,所以我们要在它本地脱掉他的裤子，然后再下载下来。最简单的情况，他本地装了PHPMYADMIN，我们就能直接利用它来脱裤了。</span>
+</p>
+<p>
+<span style="font-size:14px;">    首先登陆phpmyadmin，找到要导出的表：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201307/c2f51373006336.jpg" id="ematt:149" target="_blank"><img alt="009.jpg" border="0" height="40" src="./脱裤小指南  离别歌/thum-c2f51373006336.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    选择导出的类型（建议选择csv格式，这样导出的数据就是一条一行，以后方便处理），下面把下载那勾上，导出的数据就能直接下载了：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201307/10671373006335.jpg" id="ematt:145" target="_blank"><img alt="007.jpg" border="0" height="201" src="https://www.leavesongs.com/content/uploadfile/201307/thum-10671373006335.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<br/>
+</p>
+<p>
+<span style="font-size:14px;">4.第四步，使用脱裤脚本脱裤子。</span>
+</p>
+<p>
+<span style="font-size:14px;">    不是所有网站都装了phpmyadmin（有些人说，没事，我给他装一个……），这时候脱裤脚本就派上用处了。</span>
+</p>
+<p>
+<span style="font-size:14px;">    脱裤脚本有很多种，有的脱裤脚本很简单，就是传上去，把mysql账号密码一输，它就把所有表备份成.sql格式。不过我不建议这种方式，这种方式其实备份了一些没用的东西，我只想要用户数据的表，但是它把所有表都备份了。我这有个脱裤脚本不错，图形化操作，十分方便：</span>
+</p>
+<p>
+<span style="font-size:14px;">    登录进入：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201307/664a1373006334.jpg" id="ematt:141" target="_blank"><img alt="005.jpg" border="0" height="189" src="./脱裤小指南  离别歌/thum-664a1373006334.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    选择要导出的表即可：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201307/6bc21373006334.jpg" id="ematt:143" target="_blank"><img alt="006.jpg" border="0" height="189" src="./脱裤小指南  离别歌/thum-6bc21373006334.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<br/>
+</p>
+<p>
+<span style="font-size:14px;">5.第五步，使用sql命令脱裤子。</span>
+</p>
+<p>
+<span style="font-size:14px;">    有人说，</span><span style="font-size:14px;">我懒得再传一个脱裤脚本上去，太麻烦。或者</span><span style="font-size:14px;">如果我没shell怎么办，我只能进网站后台，而有些网站后台有sql语句执行的功能。这时候，我们需要使用sql语句来导出表。</span>
+</p>
+<p>
+<span style="font-size:14px;">    我这里用一个大马演示。这个大马可以执行sql语句：</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201307/11f51373005821.jpg" id="ematt:135" target="_blank"><img alt="002.jpg" border="0" height="29" src="./脱裤小指南  离别歌/thum-11f51373005821.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<span style="font-size:14px;">    </span><a href="https://www.leavesongs.com/content/uploadfile/201307/9c3c1373005821.jpg" id="ematt:137" target="_blank"><img alt="003.jpg" border="0" height="59" src="./脱裤小指南  离别歌/thum-9c3c1373005821.jpg" title="点击查看原图" width="420"/></a>
+</p>
+<p>
+<br/>
+</p>
+<p>
+<span style="font-size:14px;">    sql语句很简单，SELECT * FROM xxxx表 INTO OUTFILE '绝对路径'; 注意我图里不对，应该是绝对路径。当后缀是csv时，导出的文件就是一个文本文件，一个数据一行，很方便以后处理。</span>
+</p>
+<p>
+<span style="font-size:14px;">    </span>
+</p>
+<p>
+<span style="font-size:14px;">大概就是这些了~mysql的裤子拖起来比Access爽得多。有些mdb文件有几百兆，为了脱一个表把整个数据库下载下来，太麻烦了。还是mysql方便，是吧？</span>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-1356">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./脱裤小指南  离别歌/9f767c3f96e1bf3c8adf3290c23bce2f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">落沐萧萧</a>
+<time datetime="2013年7月7日 01:19" itemprop="datePublished">
+                            2013 七月 07 01:19
+                        </time>
+<a href="javascript:reply_to('1356', '落沐萧萧')">回复</a>
+</p>
+<p class="comment-meta">@冷夜：这么晚还不睡呢~~<br/>我那菜刀比较老，能管理数据库，不过没脱裤这一项咧</p>
+</div>
+</div>
+<div class="row" id="comment-1355">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./脱裤小指南  离别歌/9f767c3f96e1bf3c8adf3290c23bce2f.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.leavesongs.com/" target="_blank">落沐萧萧</a>
+<time datetime="2013年7月5日 23:18" itemprop="datePublished">
+                            2013 七月 05 23:18
+                        </time>
+<a href="javascript:reply_to('1355', '落沐萧萧')">回复</a>
+</p>
+<p class="comment-meta">@冷夜：我那个菜刀咋没这功能？……</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="cddf290830b47c2348070650ad80204c8fa03c45"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./脱裤小指南  离别歌/cddf290830b47c2348070650ad80204c8fa03c45"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="264">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="qUNykix9yacUqQ0qxDmfRoimqTDACiDNYe848MJoZX6jqvoFlUQZq2krzX6IlMsX"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./脱裤小指南  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./脱裤小指南  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

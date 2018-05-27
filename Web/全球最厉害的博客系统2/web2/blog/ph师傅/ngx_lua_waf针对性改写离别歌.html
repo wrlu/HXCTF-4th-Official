@@ -1,0 +1,448 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./ngx_lua_waf针对性改写  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./ngx_lua_waf针对性改写  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./ngx_lua_waf针对性改写  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>ngx_lua_waf针对性改写 | 离别歌</title>
+<link href="./ngx_lua_waf针对性改写  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./ngx_lua_waf针对性改写  离别歌/styles.css" rel="stylesheet"/>
+<link href="./ngx_lua_waf针对性改写  离别歌/style.css" rel="stylesheet"/>
+<link href="./ngx_lua_waf针对性改写  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./ngx_lua_waf针对性改写  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./ngx_lua_waf针对性改写  离别歌/jquery.min.js"></script>
+<link href="./ngx_lua_waf针对性改写  离别歌/code.css" rel="stylesheet"/>
+<link href="./ngx_lua_waf针对性改写  离别歌/button.css" rel="stylesheet"/>
+<link href="./ngx_lua_waf针对性改写  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./ngx_lua_waf针对性改写  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/OTHERLAN/diy-my-nginx-lua-waf.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/OTHERLAN/diy-my-nginx-lua-waf.html&amp;text=ngx_lua_waf%E9%92%88%E5%AF%B9%E6%80%A7%E6%94%B9%E5%86%99"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/OTHERLAN/diy-my-nginx-lua-waf.html&amp;title=ngx_lua_waf%E9%92%88%E5%AF%B9%E6%80%A7%E6%94%B9%E5%86%99"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/OTHERLAN/diy-my-nginx-lua-waf.html&amp;is_video=false&amp;description=ngx_lua_waf%E9%92%88%E5%AF%B9%E6%80%A7%E6%94%B9%E5%86%99"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=ngx_lua_waf%E9%92%88%E5%AF%B9%E6%80%A7%E6%94%B9%E5%86%99&amp;body=Check out this article: https%3A//www.leavesongs.com/OTHERLAN/diy-my-nginx-lua-waf.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/OTHERLAN/diy-my-nginx-lua-waf.html&amp;title=ngx_lua_waf%E9%92%88%E5%AF%B9%E6%80%A7%E6%94%B9%E5%86%99"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/OTHERLAN/diy-my-nginx-lua-waf.html&amp;title=ngx_lua_waf%E9%92%88%E5%AF%B9%E6%80%A7%E6%94%B9%E5%86%99"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/OTHERLAN/diy-my-nginx-lua-waf.html&amp;title=ngx_lua_waf%E9%92%88%E5%AF%B9%E6%80%A7%E6%94%B9%E5%86%99"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/OTHERLAN/diy-my-nginx-lua-waf.html&amp;title=ngx_lua_waf%E9%92%88%E5%AF%B9%E6%80%A7%E6%94%B9%E5%86%99"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/OTHERLAN/diy-my-nginx-lua-waf.html&amp;name=ngx_lua_waf%E9%92%88%E5%AF%B9%E6%80%A7%E6%94%B9%E5%86%99&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">ngx_lua_waf针对性改写</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2015年4月6日 19:01" itemprop="datePublished">
+                    2015 四月 06 19:01
+                </time>
+</div>
+<div class="article-tag">
+            阅读：7178
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/OTHERLAN">其他语言</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/lua">lua</a>,
+                
+                <a class="tag-link" href="/tag/WAF">WAF</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>当初选择ngx_lua_waf作为自己的WAF，主要原因就是因为其可扩展性与性能上有一个很好的平衡。</p>
+<p>lua语言的灵活性与效率是很多脚本层WAF无可匹及的。</p>
+<p>ngx_lua_waf自身是比较简单的，而且存在很多误报、漏报、绕过的现象，我整理如下，来改进自己的waf。</p>
+<h2 id="1debug"><a class="toclink" href="#1debug">1.debug函数</a></h2>
+<p>预备一个debug函数，方便以后调试。因为waf运行在后台，所以看不到输出，最好以日志的形式写到文件中。</p>
+<div class="codehilite"><pre><span></span><span class="kr">function</span> <span class="nf">debug</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+  <span class="kd">local</span> <span class="n">file</span> <span class="o">=</span> <span class="nb">io.open</span><span class="p">(</span><span class="s2">"/tmp/debug.log"</span><span class="p">,</span><span class="s2">"a"</span><span class="p">)</span>
+  <span class="n">file</span><span class="p">:</span><span class="n">write</span><span class="p">(</span><span class="n">info</span><span class="o">..</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+  <span class="n">file</span><span class="p">:</span><span class="n">close</span><span class="p">()</span>
+<span class="kr">end</span>
+</pre></div>
+<h2 id="2wafhpp"><a class="toclink" href="#2wafhpp">2.waf可以用hpp进行绕过</a></h2>
+<p>作为作者一处笔误（我认为的），我提交到乌云了：<a href="http://wooyun.org/bugs/wooyun-2010-0104525"><a href="http://wooyun.org/bugs/wooyun-2010-0104525">http://wooyun.org/bugs/wooyun-2010-0104525</a></a></p>
+<p>等公开了，可以用里面的方法修改。</p>
+<h2 id="3"><a class="toclink" href="#3">3.利用白名单绕过</a></h2>
+<p>wafconf/whiteurl中，白名单URL直接是/123/</p>
+<p>然后在函数whiteurl中</p>
+<div class="codehilite"><pre><span></span><span class="kr">function</span> <span class="nf">whiteurl</span><span class="p">()</span>
+    <span class="kr">if</span> <span class="n">WhiteCheck</span> <span class="kr">then</span>
+        <span class="kr">if</span> <span class="n">wturlrules</span> <span class="o">~=</span><span class="kc">nil</span> <span class="kr">then</span>
+            <span class="kr">for</span> <span class="n">_</span><span class="p">,</span><span class="n">rule</span> <span class="kr">in</span> <span class="nb">pairs</span><span class="p">(</span><span class="n">wturlrules</span><span class="p">)</span> <span class="kr">do</span>
+                <span class="kr">if</span> <span class="n">ngxmatch</span><span class="p">(</span><span class="n">ngx</span><span class="p">.</span><span class="n">var</span><span class="p">.</span><span class="n">request_uri</span><span class="p">,</span><span class="n">rule</span><span class="p">,</span><span class="s2">"ijom"</span><span class="p">)</span> <span class="kr">then</span>
+                    <span class="kr">return</span> <span class="kc">true</span>
+                 <span class="kr">end</span>
+            <span class="kr">end</span>
+        <span class="kr">end</span>
+    <span class="kr">end</span>
+    <span class="kr">return</span> <span class="kc">false</span>
+<span class="kr">end</span>
+</pre></div>
+<p>用的是ngx.var.request_uri和这个"/123/"进行比较，只要uri中存在/123/就作为白名单不进行检测，这样我们可以通过/waf.php?a=/123/&amp;b=../etc/passwd 绕过防御规则。<br>
+<br>
+所以，将/123/改成^/123/</br></br></p>
+<p>这样只有以/123/开头的uri才能进入白名单。</p>
+<h2 id="4ms"><a class="toclink" href="#4ms">4.正则是m还是s</a></h2>
+<p>WAF绕的多的人一定知道正则里“.”代表什么意义。</p>
+<p>正常情况下，.匹配的是“不含换行”的所有字符。所以有些WAF用这样的正则：</p>
+<p><code>union.*select</code></p>
+<p>来拦截注入。我们就可以通过union%0aselect，中间一个换行来绕过。</p>
+<p>所以，现在一般的WAF都会用s来修饰正则。s的意思就是single，也就是单行模式。</p>
+<p>说白了，加了s修饰，则“.”就会匹配换行了。</p>
+<p>而我们的ngx_lua_waf中，所有的正则都用的m来修饰的，m的意思是multiple，多行的意思，也就是默认的.不匹配换行。~~ （注：这样理解是错的，详见评论。）</p>
+<p>而我们的ngx_lua_waf中，并没有使用i修饰正则，所以默认.是匹配多行的，也就是默认的.不匹配换行。</p>
+<p>比如对GET变量的拦截：</p>
+<div class="codehilite"><pre><span></span><span class="kr">function</span> <span class="nf">args</span><span class="p">()</span>
+    <span class="kr">for</span> <span class="n">_</span><span class="p">,</span><span class="n">rule</span> <span class="kr">in</span> <span class="nb">pairs</span><span class="p">(</span><span class="n">argsrules</span><span class="p">)</span> <span class="kr">do</span>
+        <span class="kd">local</span> <span class="n">args</span> <span class="o">=</span> <span class="n">ngx</span><span class="p">.</span><span class="n">req</span><span class="p">.</span><span class="n">get_uri_args</span><span class="p">()</span>
+        <span class="kr">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="kr">in</span> <span class="nb">pairs</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="kr">do</span>
+            <span class="kr">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">==</span><span class="s1">'table'</span> <span class="kr">then</span>
+                <span class="kr">if</span> <span class="n">val</span> <span class="o">==</span> <span class="kc">false</span> <span class="kr">then</span>
+                    <span class="n">data</span><span class="o">=</span><span class="nb">table.concat</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="s2">" "</span><span class="p">)</span>
+                <span class="kr">end</span>
+            <span class="kr">else</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">val</span>
+            <span class="kr">end</span>
+            <span class="kr">if</span> <span class="n">data</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">~=</span> <span class="s2">"boolean"</span> <span class="ow">and</span> <span class="n">rule</span> <span class="o">~=</span><span class="s2">""</span> <span class="ow">and</span> <span class="n">ngxmatch</span><span class="p">(</span><span class="n">unescape</span><span class="p">(</span><span class="n">data</span><span class="p">),</span><span class="n">rule</span><span class="p">,</span><span class="s2">"imjo"</span><span class="p">)</span> <span class="kr">then</span>
+                <span class="n">log</span><span class="p">(</span><span class="s1">'GET'</span><span class="p">,</span><span class="n">ngx</span><span class="p">.</span><span class="n">var</span><span class="p">.</span><span class="n">request_uri</span><span class="p">,</span><span class="s2">"-"</span><span class="p">,</span><span class="n">rule</span><span class="p">)</span>
+                <span class="n">say_html</span><span class="p">()</span>
+                <span class="kr">return</span> <span class="kc">true</span>
+            <span class="kr">end</span>
+        <span class="kr">end</span>
+    <span class="kr">end</span>
+    <span class="kr">return</span> <span class="kc">false</span>
+<span class="kr">end</span>
+</pre></div>
+<p>可见ngxmatch(unescape(data),rule,"imjo")，用的是imjo来修饰。我们用union%0aselect就能绕过WAF：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201504/0e961428318337.png"><img alt="QQ20150329-5@2x.png" src="./ngx_lua_waf针对性改写  离别歌/thum-0e961428318337.png"/></a></p>
+<h2 id="5"><a class="toclink" href="#5">5.误杀误杀！上传文件的误杀。</a></h2>
+<p>对HTTP协议了解的同学一定心里清楚，POST的类型是分两种的：application/x-www-form-urlencoded和multipart/form-data<br/>
+前一种是默认POST数据的时候使用的，服务器获取了数据后会进行url解码。后一种一般是上传的时候才会使用，服务器获取数据后不会进行url解码，所以我们能直接上传二进制文件。</p>
+<p>php在上传过程中，上传文件的表单会放进$_FILES变量，其他POST表单会放进$_POST变量，和直接application/x-www-form-urlencoded的效果一样。</p>
+<p>这部分POST变量在lua中需要特殊处理，原ngx_lua_waf的作者也考虑了，具体拦截代码可见waf.lua。<br/>
+但作者处理的太草率，直接把整个数据包，一点一点丢进body函数里检测。这样造成了两个问题：</p>
+<ol>
+<li>数据包一部分一部分发过来，他就一部分一部分丢进body里检测。那么如果union、select两个连在一起的关键词正好从中间某位置分开，比如"unio"和"n select"，这两个包分别检测都是正常的。但实际发送到php里的时候是连在一起的，导致绕过WAF。</li>
+<li>文件里的特殊字符也被拦截了，所谓的误杀。有时候我们要上传一些文件，文件里可能会有html标签，或SQL语句，这里他将上传表单的内容也放入body检测了，导致很多文件上传不了。</li>
+</ol>
+<p>我对上述问题做了修改与处理，不过代码太多我就不写在文章里了。思路就是这样：</p>
+<p>首先将完整的数据包获取下来，并用boundary将他们分割成数组。遍历数组，只对进入POST变量的值进行拦截，不拦截FILE内容。但需要拦截FILE表单中的"filename=xxx"的部分。</p>
+<h2 id="6"><a class="toclink" href="#6">6.人性化提示信息</a></h2>
+<p>虽然我的WAF拦截的80%是攻击者，但也可能有正常访客。这时候我就需要告诉访客，你输入了哪些东西不合理被我拦截（误杀）了，你可以换个方式输入或通知我。</p>
+<p>我在init.lua靠前的位置加入如下代码：</p>
+<div class="codehilite"><pre><span></span><span class="kd">local</span> <span class="n">fd</span> <span class="o">=</span> <span class="nb">io.open</span><span class="p">(</span><span class="n">file403</span><span class="p">,</span><span class="s2">"r"</span><span class="p">)</span>
+<span class="kr">if</span> <span class="n">fd</span> <span class="o">==</span> <span class="kc">nil</span> <span class="kr">then</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="s">[[403 error!!]]</span>
+<span class="kr">else</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">fd</span><span class="p">:</span><span class="n">read</span><span class="p">(</span><span class="s2">"*a"</span><span class="p">)</span>
+    <span class="n">fd</span><span class="p">:</span><span class="n">close</span><span class="p">()</span>
+<span class="kr">end</span>
+</pre></div>
+<p>file403是我自己写的403页面，读取之。并将say_html函数改成这个：</p>
+<div class="codehilite"><pre><span></span><span class="kr">function</span> <span class="nf">say_html</span><span class="p">(</span><span class="n">reason</span><span class="p">)</span>
+    <span class="kr">if</span> <span class="n">Redirect</span> <span class="kr">then</span>
+        <span class="kd">local</span> <span class="n">nowhtml</span> <span class="o">=</span> <span class="n">html</span>
+        <span class="n">ngx</span><span class="p">.</span><span class="n">header</span><span class="p">.</span><span class="n">content_type</span> <span class="o">=</span> <span class="s2">"text/html"</span>
+        <span class="n">nowhtml</span> <span class="o">=</span> <span class="nb">string.gsub</span><span class="p">(</span><span class="n">nowhtml</span><span class="p">,</span> <span class="s2">"{ip}"</span><span class="p">,</span> <span class="n">ngx</span><span class="p">.</span><span class="n">var</span><span class="p">.</span><span class="n">remote_addr</span><span class="p">)</span>
+        <span class="n">nowhtml</span> <span class="o">=</span> <span class="nb">string.gsub</span><span class="p">(</span><span class="n">nowhtml</span><span class="p">,</span> <span class="s2">"{host}"</span><span class="p">,</span> <span class="n">ngx</span><span class="p">.</span><span class="n">var</span><span class="p">.</span><span class="n">host</span><span class="p">)</span>
+        <span class="n">nowhtml</span> <span class="o">=</span> <span class="nb">string.gsub</span><span class="p">(</span><span class="n">nowhtml</span><span class="p">,</span> <span class="s2">"{reason}"</span><span class="p">,</span> <span class="n">reason</span><span class="p">)</span>
+        <span class="n">ngx</span><span class="p">.</span><span class="n">say</span><span class="p">(</span><span class="n">nowhtml</span><span class="p">)</span>
+        <span class="n">ngx</span><span class="p">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+    <span class="kr">end</span>
+<span class="kr">end</span>
+</pre></div>
+<p>将html里的{ip}、{host}、{reason}改成具体的信息。即可在用户被拦截后发出提示：</p>
+<p><a href="https://www.leavesongs.com/content/uploadfile/201504/be7f1428318341.png"><img alt="QQ20150406-1@2x.png" src="./ngx_lua_waf针对性改写  离别歌/thum-be7f1428318341.png"/></a></p>
+<p>如果需要优化SEO，我将ngx.exit(200)改成403，避免搜索引擎收录这个页面。但后来发现status code并没有改变。</p>
+<p>研究了一会，发现如果在ngx.exit之前输出了内容，则这个exit里的参数403就会失效。需要在exit前，先用ngx.status = ngx.HTTP_FORBIDDEN，将status设置成ngx.HTTP_FORBIDDEN，也就是403才可。</p>
+<h2 id="7lua_ngx_waf"><a class="toclink" href="#7lua_ngx_waf">7.利用lua_ngx_waf防御盗链</a></h2>
+<p>以前防盗链都是用nginx自己的模块进行配置，但有时候灵活性不高。<br/>
+有了lua waf，就可以灵活地防御盗链了。</p>
+<p>我大概写了个简陋的雏形，需要更精细化的配置，就得各位日后再慢慢修改了。</p>
+<div class="codehilite"><pre><span></span><span class="kr">function</span> <span class="nf">check_referer</span><span class="p">()</span>
+    <span class="kd">local</span> <span class="n">referer</span> <span class="o">=</span> <span class="n">ngx</span><span class="p">.</span><span class="n">var</span><span class="p">.</span><span class="n">valid_referers</span>
+    <span class="kd">local</span> <span class="n">ua</span> <span class="o">=</span> <span class="nb">string.lower</span><span class="p">(</span><span class="n">ngx</span><span class="p">.</span><span class="n">var</span><span class="p">.</span><span class="n">http_user_agent</span><span class="p">)</span>
+    <span class="kd">local</span> <span class="n">exts</span> <span class="o">=</span> <span class="s">[[\.(gif|jpg|jpeg|png|bmp|js|css|swf)$]]</span>
+    <span class="kd">local</span> <span class="n">http</span> <span class="o">=</span> <span class="s2">"http"</span>
+    <span class="kr">if</span> <span class="n">ngx</span><span class="p">.</span><span class="n">var</span><span class="p">.</span><span class="n">https</span> <span class="o">==</span> <span class="s2">"on"</span> <span class="kr">then</span> <span class="n">http</span> <span class="o">=</span> <span class="s2">"https"</span> <span class="kr">end</span>
+    <span class="kd">local</span> <span class="n">white_referer</span> <span class="o">=</span> <span class="p">{[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s">[[^]]</span><span class="o">..</span><span class="n">http</span><span class="o">..</span><span class="s">[[://[^/]*]]</span><span class="o">..</span><span class="n">ngx</span><span class="p">.</span><span class="n">var</span><span class="p">.</span><span class="n">host</span><span class="o">..</span><span class="s">[[[^/]*/.*]]</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s">[[^https?://[^/]*google\.com[^/]*/.*]]</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="s">[[^https?://[^/]*baidu\.com[^/]*/.*]]</span><span class="p">}</span>
+    <span class="kd">local</span> <span class="n">white_ua</span> <span class="o">=</span> <span class="p">{[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"googlebot"</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"spider"</span><span class="p">}</span>
+    <span class="kr">if</span> <span class="n">referer</span> <span class="o">~=</span> <span class="kc">nil</span> <span class="ow">and</span> <span class="n">ngxmatch</span><span class="p">(</span><span class="n">ngx</span><span class="p">.</span><span class="n">var</span><span class="p">.</span><span class="n">request_filename</span><span class="p">,</span> <span class="n">exts</span><span class="p">,</span><span class="s2">"ijos"</span><span class="p">)</span> <span class="kr">then</span>
+        <span class="kr">for</span> <span class="n">rex</span> <span class="kr">in</span> <span class="n">white_referer</span> <span class="kr">do</span>
+            <span class="kr">if</span> <span class="n">ngxmatch</span><span class="p">(</span><span class="n">referer</span><span class="p">,</span> <span class="n">rex</span><span class="p">,</span> <span class="s2">"ijos"</span><span class="p">)</span> <span class="kr">then</span> <span class="kr">return</span> <span class="kc">true</span> <span class="kr">end</span>
+        <span class="kr">end</span>
+        <span class="kr">for</span> <span class="n">rex</span> <span class="kr">in</span> <span class="n">white_ua</span> <span class="kr">do</span>
+            <span class="kr">if</span> <span class="n">ngxmatch</span><span class="p">(</span><span class="n">ua</span><span class="p">,</span> <span class="n">rex</span><span class="p">,</span> <span class="s2">"ijos"</span><span class="p">)</span> <span class="kr">then</span> <span class="kr">return</span> <span class="kc">true</span> <span class="kr">end</span>
+        <span class="kr">end</span>
+        <span class="n">ngx</span><span class="p">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">403</span><span class="p">)</span>
+    <span class="kr">end</span>
+<span class="kr">end</span>
+</pre></div>
+<h2 id="8"><a class="toclink" href="#8">8.尾声</a></h2>
+<p>通过这几日对ngx_lua_waf的研究，WAF这块的攻击与防御，我也初步接触到了。我也知道有时候我们研究者说绕过WAF，似乎总在指责WAF的开发者，某某没考虑到，某某可以绕过了。实际上做WAF也不容易，往往是因为要考虑到业务效率、兼容性等各种原因，写出来的代码才被绕过去。</p>
+<p>安全有时候不得不为业务让道，有时候明知这么写是不安全的，但某些用户就需要这样的数据包，我们不能抛弃这部分用户，那么只能尽全力改变这些用户的习惯，写出兼容性更好的代码。</p>
+<p>我希望的是，通过自己的研究，让更多人知道WAF都是怎么做出来的，会遇到哪些问题，有哪些绕过方法。</p>
+<p>攻防，也不过就是那句老话：知己知彼，百战不殆。</p>
+<p>整理了这几日写的我从配置安装lua waf，到最后自定义脚本的三篇日记，希望能给同样学习的人帮助：</p>
+<p><a href="http://mp.weixin.qq.com/s?__biz=MzA4MDU0NzY4Ng==&amp;mid=207159087&amp;idx=1&amp;sn=eb914d63344f5cfb4ca1f05049ddb9a3#rd"><a href="http://mp.weixin.qq.com/s?__biz=MzA4MDU0NzY4Ng==&amp;mid=207159087&amp;idx=1&amp;sn=eb914d63344f5cfb4ca1f05049ddb9a3#rd">http://mp.weixin.qq.com/s?__biz=MzA4MDU0NzY4Ng==&amp;mid=207159087&amp;idx=1&amp;sn=eb914d63344f5cfb4ca1f05049ddb9a3#rd</a></a></p>
+<p><a href="http://mp.weixin.qq.com/s?__biz=MzA4MDU0NzY4Ng==&amp;mid=207219219&amp;idx=1&amp;sn=e2183ae2db2ca496bddee4ff8a4ea4bd#rd"><a href="http://mp.weixin.qq.com/s?__biz=MzA4MDU0NzY4Ng==&amp;mid=207219219&amp;idx=1&amp;sn=e2183ae2db2ca496bddee4ff8a4ea4bd#rd">http://mp.weixin.qq.com/s?__biz=MzA4MDU0NzY4Ng==&amp;mid=207219219&amp;idx=1&amp;sn=e2183ae2db2ca496bddee4ff8a4ea4bd#rd</a></a></p>
+<p><a href="http://mp.weixin.qq.com/s?__biz=MzA4MDU0NzY4Ng==&amp;mid=207396212&amp;idx=1&amp;sn=44d649db48c4f33b2e5f33e4d74bde5b#rd"><a href="http://mp.weixin.qq.com/s?__biz=MzA4MDU0NzY4Ng==&amp;mid=207396212&amp;idx=1&amp;sn=44d649db48c4f33b2e5f33e4d74bde5b#rd">http://mp.weixin.qq.com/s?__biz=MzA4MDU0NzY4Ng==&amp;mid=207396212&amp;idx=1&amp;sn=44d649db48c4f33b2e5f33e4d74bde5b#rd</a></a></p>
+<p>也欢迎关注微信公众号《白帽札记》。睡前值得一看的安全笔记。</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2416">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./ngx_lua_waf针对性改写  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">12d</a>
+<time datetime="2016年8月22日 07:58" itemprop="datePublished">
+                            2016 八月 22 07:58
+                        </time>
+<a href="javascript:reply_to('2416', '12d')">回复</a>
+</p>
+<p class="comment-meta">哥们求上传部分代码修改方法。</p>
+</div>
+</div>
+<div class="row" id="comment-2171">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./ngx_lua_waf针对性改写  离别歌/58e73ba0da59d984c17f66f0bd923145.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">good</a>
+<time datetime="2015年7月21日 01:56" itemprop="datePublished">
+                            2015 七月 21 01:56
+                        </time>
+<a href="javascript:reply_to('2171', 'good')">回复</a>
+</p>
+<p class="comment-meta">您好，我认真拜读了您的文章，并在discuz装好了waf防火墙，但发现只要开启postmatch选项，即使把这一项的规则清空，会员也不能成功上传附件。请问是什么原因呢，试了好久没找到答案，感谢指教。</p>
+</div>
+</div>
+<div class="row" id="comment-2127">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./ngx_lua_waf针对性改写  离别歌/3e3c1cb94b9ad3551cd9d43f2e52e105.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://lilydjwg.is-programmer.com/" target="_blank">依云</a>
+<time datetime="2015年6月14日 00:05" itemprop="datePublished">
+                            2015 六月 14 00:05
+                        </time>
+<a href="javascript:reply_to('2127', '依云')">回复</a>
+</p>
+<p class="comment-meta">m 的确是 multline，但意思不是 . 不匹配换行（这是默认行为），而是说 ^ $ 会在换行处匹配才对。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2128">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./ngx_lua_waf针对性改写  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年6月14日 00:10" itemprop="datePublished">
+                            2015 六月 14 00:10
+                        </time>
+<a href="javascript:reply_to('2128', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@依云：这个和^$没关系吧，你可以在php里试一下如下代码：<br/>$re = preg_match('/./m', "\n");<br/>var_dump($re);<br/>和<br/>$re = preg_match('/./s', "\n");<br/>var_dump($re);<br/>前者不能匹配上（输出0），后者可以匹配上（输出1）。m的意思就是我文中说的，这个我搞安全这么久了应该理解无误。</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2129">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./ngx_lua_waf针对性改写  离别歌/3e3c1cb94b9ad3551cd9d43f2e52e105.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://lilydjwg.is-programmer.com/" target="_blank">依云</a>
+<time datetime="2015年6月14日 00:52" itemprop="datePublished">
+                            2015 六月 14 00:52
+                        </time>
+<a href="javascript:reply_to('2129', '依云')">回复</a>
+</p>
+<p class="comment-meta">@phithon：我搞正则也好多年了，这个还是没有搞错的。你看这个：<br/><br/>代码被 WAF 吃掉了啦…………看这里吧： https://cfp.vim-cn.com/cbXp/php<br/><br/>非 s 是默认的，你举的例子并不涉及到 m 的功能，所以结果是那个样子。m 和 s 并不是像它的名字所暗示的那样是互斥的。实际上后来为了避免混淆，s 模式的长名叫 DOTALL 了。<br/><br/>文档见： https://php.net/manual/en/reference.pcre.pattern.modifiers.php</p>
+</div>
+</div>
+<div class="child-node">
+<div class="row" id="comment-2130">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./ngx_lua_waf针对性改写  离别歌/c4267eb6d17276fa31c547ac71611e90.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="https://www.leavesongs.com/" target="_blank">phithon</a>
+<time datetime="2015年6月14日 00:59" itemprop="datePublished">
+                            2015 六月 14 00:59
+                        </time>
+<a href="javascript:reply_to('2130', 'phithon')">回复</a>
+</p>
+<p class="comment-meta">@依云：懂你的意思了，我错了！s和m并不是互斥的，所以有m的时候也可以有s。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="comment-2045">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./ngx_lua_waf针对性改写  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">zhangsan</a>
+<time datetime="2015年4月30日 09:36" itemprop="datePublished">
+                            2015 四月 30 09:36
+                        </time>
+<a href="javascript:reply_to('2045', 'zhangsan')">回复</a>
+</p>
+<p class="comment-meta">好文，最近正在研究这个。好好学学下。</p>
+</div>
+</div>
+<div class="row" id="comment-2029">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./ngx_lua_waf针对性改写  离别歌/6b4dfea3b8de3d7f369de913d2e5ae46.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">aa</a>
+<time datetime="2015年4月17日 18:00" itemprop="datePublished">
+                            2015 四月 17 18:00
+                        </time>
+<a href="javascript:reply_to('2029', 'aa')">回复</a>
+</p>
+<p class="comment-meta">求文件上传部分的代码，现在误杀太严重了。。</p>
+</div>
+</div>
+<div class="row" id="comment-2014">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./ngx_lua_waf针对性改写  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">xx</a>
+<time datetime="2015年4月8日 01:23" itemprop="datePublished">
+                            2015 四月 08 01:23
+                        </time>
+<a href="javascript:reply_to('2014', 'xx')">回复</a>
+</p>
+<p class="comment-meta">刚看作者好像刚刚更新了</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="e9d6903596deacc505f9c98c06115693292026d9"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./ngx_lua_waf针对性改写  离别歌/e9d6903596deacc505f9c98c06115693292026d9"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="354">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="WmQ93abcmeNihKyxLPHSx6Hl4GAj5ubsuGbFREnrN1HHhpWMz6bC6KJqdK3rOY0C"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./ngx_lua_waf针对性改写  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./ngx_lua_waf针对性改写  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>

